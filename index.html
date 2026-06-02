@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inbox Briefing</title>
+<style>
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface2: #eeecea;
+  --border: rgba(0,0,0,0.1);
+  --border-strong: rgba(0,0,0,0.18);
+  --text: #1a1916;
+  --text2: #5a5750;
+  --text3: #9a9590;
+  --red: #c0392b;
+  --red-bg: #fdf0ee;
+  --red-border: rgba(192,57,43,0.2);
+  --amber: #b7600a;
+  --amber-bg: #fdf5e8;
+  --amber-border: rgba(183,96,10,0.2);
+  --blue: #1a5fa8;
+  --blue-bg: #edf4fc;
+  --blue-border: rgba(26,95,168,0.2);
+  --gray-bg: #f2efe8;
+  --gray-border: rgba(0,0,0,0.12);
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --radius: 6px;
+  --radius-lg: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141412; --surface: #1e1d1a; --surface2: #252420;
+    --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15);
+    --text: #f0ede6; --text2: #9a9590; --text3: #5a5750;
+    --red: #e05a4a; --red-bg: #2a1a18; --red-border: rgba(224,90,74,0.25);
+    --amber: #e09050; --amber-bg: #241d12; --amber-border: rgba(224,144,80,0.25);
+    --blue: #5a9de0; --blue-bg: #141e2a; --blue-border: rgba(90,157,224,0.25);
+    --gray-bg: #1e1d1a; --gray-border: rgba(255,255,255,0.08);
+  }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; line-height: 1.6; }
+
+/* Page shell */
+.shell { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+
+/* Header */
+.header { padding: 20px 40px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--bg); }
+.header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+.header .date-line { font-size: 11px; color: var(--text3); letter-spacing: .05em; text-transform: uppercase; margin-top: 2px; }
+.header-right { display: flex; gap: 8px; align-items: center; }
+.btn { font-family: var(--font); font-size: 11px; padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text2); cursor: pointer; transition: background .15s; }
+.btn:hover { background: var(--surface2); color: var(--text); }
+.btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+.btn-primary:hover { opacity: .85; }
+
+/* Two-column body */
+.body { display: flex; overflow: hidden; }
+
+/* Left — scrollable inbox */
+.inbox-col { overflow-y: auto; padding: 28px 36px 60px; flex-shrink: 0; min-width: 320px; }
+
+/* Drag handle */
+.divider { width: 8px; flex-shrink: 0; cursor: col-resize; position: relative; background: transparent; transition: background .15s; }
+.divider:hover { background: var(--border); }
+.divider.dragging { background: var(--border-strong); }
+.divider::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 2px; height: 48px; border-radius: 2px; background: var(--text3); opacity: 0; transition: opacity .15s; }
+.divider:hover::after, .divider.dragging::after { opacity: 1; }
+
+/* Right — sidebar */
+.sidebar { overflow-y: auto; padding: 20px 20px 60px; border-left: 1px solid var(--border); background: var(--bg); flex: 1; min-width: 200px; }
+
+/* Context bar */
+.context-bar { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: var(--radius-lg); padding: 11px 14px; margin-bottom: 24px; font-size: 12px; color: var(--amber); line-height: 1.6; }
+.context-bar strong { font-weight: 600; }
+
+/* Section label */
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin: 24px 0 10px; display: flex; align-items: center; gap: 8px; }
+.section-label:first-child { margin-top: 0; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.section-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-red { background: var(--red); }
+.dot-amber { background: var(--amber); }
+.dot-blue { background: var(--blue); }
+.dot-gray { background: var(--text3); }
+
+/* Inbox items */
+.item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; margin-bottom: 6px; display: flex; gap: 12px; position: relative; overflow: hidden; transition: opacity .2s; }
+.item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.item.urgent::before { background: var(--red); }
+.item.needs::before { background: var(--amber); }
+.item.fyi::before { background: var(--blue); }
+.item.low::before { background: var(--text3); }
+.item.done { opacity: .38; }
+.item.done .item-title { text-decoration: line-through; }
+.cb-wrap { padding-top: 2px; flex-shrink: 0; }
+.cb { width: 15px; height: 15px; border-radius: 4px; border: 1px solid var(--border-strong); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.cb:hover { border-color: var(--text2); }
+.cb.checked { background: var(--text); border-color: var(--text); }
+.cb.checked::after { content: ''; width: 4px; height: 7px; border: 1.5px solid var(--bg); border-top: none; border-left: none; transform: rotate(45deg) translateY(-1px); display: block; }
+.item-body { flex: 1; min-width: 0; }
+.item-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; line-height: 1.4; }
+.item-sub { font-size: 12px; color: var(--text2); line-height: 1.55; }
+.item-sub strong { color: var(--text); font-weight: 600; }
+
+/* Badges */
+.badge { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+.badge-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.badge-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.badge-gray { background: var(--gray-bg); color: var(--text2); border: 1px solid var(--gray-border); }
+
+/* Calendar */
+.cal-day-label { font-size: 11px; font-weight: 700; color: var(--text); letter-spacing: .04em; text-transform: uppercase; margin: 16px 0 6px; }
+.cal-day-label:first-child { margin-top: 0; }
+.cal-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 12px; margin-bottom: 5px; display: flex; gap: 12px; align-items: flex-start; transition: border-color .15s; position: relative; overflow: hidden; } .cal-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--blue); }
+.cal-item:hover { border-color: var(--border-strong); }
+.cal-time { font-size: 10px; font-weight: 600; color: var(--text3); min-width: 58px; padding-top: 2px; flex-shrink: 0; letter-spacing: .02em; }
+.cal-title { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.35; }
+.cal-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.cal-alert { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); border-radius: 4px; padding: 1px 6px; margin-top: 4px; }
+
+/* Absences */
+.abs-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+.abs-pill { font-size: 11px; padding: 4px 9px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); color: var(--text2); font-weight: 500; }
+
+/* Priority list */
+.priority-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 9px 12px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 12px; transition: opacity .2s, border-color .15s; cursor: pointer; position: relative; overflow: hidden; } .priority-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--amber); }
+.priority-row:hover { border-color: var(--border-strong); }
+.priority-row.done { opacity: .35; text-decoration: line-through; }
+.priority-num { font-size: 10px; font-weight: 700; color: var(--text3); width: 14px; flex-shrink: 0; text-align: center; }
+.priority-text { flex: 1; color: var(--text); line-height: 1.4; font-weight: 500; }
+.priority-date { font-size: 10px; font-weight: 700; white-space: nowrap; flex-shrink: 0; padding: 2px 7px; border-radius: 4px; }
+.date-red { color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); }
+.date-amber { color: var(--amber); background: var(--amber-bg); border: 1px solid var(--amber-border); }
+.date-blue { color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); }
+.date-gray { color: var(--text2); background: var(--gray-bg); border: 1px solid var(--gray-border); }
+
+/* Import panel */
+.import-panel { display: none; position: fixed; top: 70px; right: 40px; width: 420px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 100; }
+.import-panel.visible { display: block; }
+.import-panel label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 8px; }
+.import-panel textarea { width: 100%; height: 110px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 11px; padding: 9px; resize: none; outline: none; }
+.import-panel textarea:focus { border-color: var(--border-strong); }
+.import-actions { display: flex; gap: 8px; margin-top: 10px; }
+.import-error { font-size: 11px; color: var(--red); margin-top: 6px; display: none; }
+
+/* Archive panel */
+.archive-panel { display: none; position: fixed; top: 70px; right: 40px; width: 380px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 100; max-height: 60vh; overflow-y: auto; }
+.archive-panel.visible { display: block; }
+.archive-entry { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: border-color .15s; }
+.archive-entry:hover { border-color: var(--border-strong); }
+.archive-date { font-size: 12px; font-weight: 500; }
+.archive-meta { font-size: 11px; color: var(--text3); }
+.archive-load { font-size: 11px; color: var(--blue); }
+.no-items { font-size: 12px; color: var(--text3); font-style: italic; padding: 4px 0; }
+
+.footer { font-size: 10px; color: var(--text3); text-align: center; margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--border); letter-spacing: .04em; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+.item { animation: fadeIn .18s ease both; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>Inbox briefing</h1>
+      <div class="date-line" id="headerDate"></div>
+    </div>
+    <div class="header-right">
+      <button class="btn" onclick="toggleArchive()">Archive</button>
+      <button class="btn" onclick="toggleImport()">Import</button>
+      <button class="btn btn-primary" onclick="clearToday()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <!-- Left: inbox -->
+    <div class="inbox-col" id="inboxCol"></div>
+
+    <!-- Drag handle -->
+    <div class="divider" id="divider"></div>
+
+    <!-- Right: sidebar -->
+    <div class="sidebar" id="sidebar"></div>
+
+  </div>
+</div>
+
+<!-- Import panel (floating) -->
+<div class="import-panel" id="importPanel">
+  <label>Paste JSON briefing and click Load</label>
+  <textarea id="importInput" placeholder='{"date":"Tuesday 2 June 2026","urgent":[...],...}'></textarea>
+  <div class="import-actions">
+    <button class="btn btn-primary" onclick="loadFromImport()">Load briefing</button>
+    <button class="btn" onclick="toggleImport()">Cancel</button>
+  </div>
+  <div class="import-error" id="importError">Invalid JSON — please check and try again.</div>
+</div>
+
+<!-- Archive panel (floating) -->
+<div class="archive-panel" id="archivePanel">
+  <div id="archiveList"></div>
+</div>
+
+<script>
+const STORAGE_KEY='workInbox_briefings_v1', TODAY_KEY='workInbox_today_v1', TICKS_KEY='workInbox_ticks_v1';
+
+const SEED={"date":"Tuesday 2 June 2026","subtitle":"First day back","context":"Surgery ~5 May, signed off four weeks. Simon Burford covered throughout May. Phased return may be recommended. Simon sent an occupational health referral — flag to read directly.","urgent":[{"title":"FlexPoints case #68899229 — bulk delete assignments","sub":"Marie approved proceeding 28 May. Scope confirmed but vague — requirements need tightening before kick-off. <strong>Authorise in the Access Group Support Portal today.</strong> Quote expires 11 June.","badge":"Deadline 11 June","badgeType":"red"},{"title":"DTP1092 — College staff in PXD: Marie sign-off needed","sub":"Marie finalised proposal 29 May and sent to Marie. Must be signed before her leave ends. Conor O'Brien starts test config on return 11 June. Kick-off provisionally <strong>12 June morning.</strong>","badge":"Deadline 5 June","badgeType":"red"},{"title":"DTP1092 — PXD DPIA: still not signed off","sub":"v0.5 shared with Crispin in May. Marie has not reviewed or signed. Blocks the college staff DPIA. Also: OSPS pension rate changes coming — DB employer contributions drop to <strong>11.8%</strong> from 1 Oct 2026. PXD update will be needed.","badge":"Chase Marie ASAP","badgeType":"amber"},{"title":"RSVP — Eploy project run through (Tue 2 June, 11:00–11:30)","sub":"Invite from Idris Kamara (Eploy) via Marie Cooksey. Attendees: Rachel Midgley, Simon, Idris, Kevin. Teams call.","badge":"RSVP today","badgeType":"red"}],"needs":[{"title":"Teams telephony transfer — deadline passed today","sub":"University moving from Chorus to Teams Telephony. Deadline to keep current number was 1 June. You were on leave. Check with Marie or Neil Clarke (L&OD).","badge":"Check with Marie/Neil","badgeType":"amber"},{"title":"EcoOnline/IRIS — funding still pending","sub":"Marie informed Joanne Grant (EcoOnline) funding is pending as of 28 May. New AE is John Grant (Mike left). Check funding approval status when you speak to Marie.","badge":"Check with Marie","badgeType":"amber"},{"title":"GLAM rostering — new workstream","sub":"IT Services (Anna Carter-Windle) handing off Botanic Gardens/Ashmolean rostering rollout. Marie described as \"not ideal\" — needs a discussion when everyone is in.","badge":"Add to team agenda","badgeType":"blue"},{"title":"James annual leave — add Simon as second approver","sub":"James's leave on 22 May was verbally approved by Marie due to approval gap. Simon flagged: add Simon as second approver for FA work group in PXD to prevent recurrence.","badge":"This week","badgeType":"blue"},{"title":"Org structure review — Pay Admin associations","sub":"Michael flagged missing Pay Admin associations in recent org structure changes, including OFFICE OF THE CDIO (E7) — now fixed by Michael. Full review of all recent changes needed to confirm Pay Admin and user access are correct across all new departments.","badge":"This week","badgeType":"blue"},{"title":"Michelle's birthday — circulate card","sub":"Michelle's birthday is Wednesday 3 June.","badge":"By Wed 3 June","badgeType":"red"}],"calToday":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"H&S Roadmap","sub":"Christopher Sanders"},{"time":"2:00 PM","title":"James Salas Guillen 1-1","sub":null}],"calTomorrow":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"Azure Integration Platform Sprint Review","sub":"Erika Braverman — Teams"},{"time":"11:00–11:30 AM","title":"Hold: Eploy run through","sub":"Marie Cooksey — Teams","alert":"RSVP needed"},{"time":"3:00 PM","title":"DTP1092 College staff in PXD","sub":"Crispin Muncaster — Teams"}],"absences":["Simon Burford — A/L Mon 1 June","Michael O'Sullivan — A/L until ~5 June","Sarah Rowles — A/L until 8 June","Marie King — A/L this week","Conor O'Brien — A/L until 10 June"],"priorities":[{"text":"Authorise FlexPoints case #68899229 in Access Group portal","date":"11 June","dateType":"amber"},{"text":"Chase Marie — PXD DPIA sign-off","date":"ASAP / 5 June","dateType":"red"},{"text":"Chase Marie — DTP1092 proposal sign-off","date":"5 June","dateType":"red"},{"text":"RSVP to Eploy hold meeting (Tue 11am)","date":"Today","dateType":"red"},{"text":"Teams telephony deadline — check with Marie/Neil Clarke","date":"Today","dateType":"red"},{"text":"Add Simon as second approver — FA work group in PXD","date":"This week","dateType":"blue"},{"text":"Review all recent org structure changes re: Pay Admin / user access","date":"This week","dateType":"blue"},{"text":"Check EcoOnline/IRIS funding status with Marie","date":"This week","dateType":"blue"},{"text":"Circulate Michelle's birthday card","date":"By Wed 3 June","dateType":"red"}]};
+
+function getStore(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}}}
+function saveStore(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
+function getTicks(){try{return JSON.parse(localStorage.getItem(TICKS_KEY)||'{}')}catch(e){return{}}}
+function saveTicks(t){localStorage.setItem(TICKS_KEY,JSON.stringify(t))}
+
+let currentData=null, currentKey=null;
+
+function toggleImport(){
+  document.getElementById('importPanel').classList.toggle('visible');
+  document.getElementById('archivePanel').classList.remove('visible');
+  document.getElementById('importError').style.display='none';
+}
+function toggleArchive(){
+  const p=document.getElementById('archivePanel');
+  p.classList.toggle('visible');
+  document.getElementById('importPanel').classList.remove('visible');
+  if(p.classList.contains('visible')) renderArchiveList();
+}
+function loadFromImport(){
+  const raw=document.getElementById('importInput').value.trim();
+  const err=document.getElementById('importError'); err.style.display='none';
+  let data; try{data=JSON.parse(raw)}catch(e){err.style.display='block';return;}
+  if(!data.date){err.textContent='Missing "date" field.';err.style.display='block';return;}
+  const key=data.date.replace(/[^a-zA-Z0-9]/g,'_');
+  const store=getStore(); store[key]=data; saveStore(store);
+  localStorage.setItem(TODAY_KEY,key);
+  document.getElementById('importPanel').classList.remove('visible');
+  document.getElementById('importInput').value='';
+  renderBriefing(data,key);
+}
+function clearToday(){
+  if(!confirm('Clear and return to seed data?')) return;
+  localStorage.removeItem(TODAY_KEY);
+  renderBriefing(SEED,'seed');
+}
+function renderArchiveList(){
+  const store=getStore(), keys=Object.keys(store).sort().reverse();
+  const el=document.getElementById('archiveList');
+  if(!keys.length){el.innerHTML='<div class="no-items">No archived briefings yet.</div>';return;}
+  el.innerHTML=keys.map(k=>{const d=store[k];return`<div class="archive-entry" onclick="loadArchive('${k}')"><div><div class="archive-date">${d.date}</div><div class="archive-meta">${(d.urgent||[]).length} urgent · ${(d.needs||[]).length} needs response</div></div><div class="archive-load">Load →</div></div>`;}).join('');
+}
+function loadArchive(key){
+  const store=getStore(); if(!store[key]) return;
+  renderBriefing(store[key],key);
+  document.getElementById('archivePanel').classList.remove('visible');
+}
+function toggleTick(id){
+  const ticks=getTicks(), k=currentKey+'_'+id;
+  ticks[k]=!ticks[k]; saveTicks(ticks);
+  const cb=document.getElementById('cb_'+id);
+  const item=document.getElementById('item_'+id);
+  const prow=document.getElementById('prow_'+id);
+  if(cb) cb.classList.toggle('checked',ticks[k]);
+  if(item) item.classList.toggle('done',ticks[k]);
+  if(prow) prow.classList.toggle('done',ticks[k]);
+}
+function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
+function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
+
+function renderItems(items,cls){
+  if(!items||!items.length) return '<div class="no-items">None today.</div>';
+  return items.map((item,i)=>{
+    const id=cls+'_'+i, ticked=isTicked(id);
+    return`<div class="item ${cls}${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}')"></div></div><div class="item-body"><div class="item-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="item-sub">${item.sub}</div>`:''}</div></div>`;
+  }).join('');
+}
+
+function renderCal(items,label){
+  if(!items||!items.length) return '';
+  const rows=items.map(c=>`<div class="cal-item"><div class="cal-time">${c.time||''}</div><div><div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div></div>`).join('');
+  return`<div class="cal-day-label">${label}</div>${rows}`;
+}
+
+function renderBriefing(data,key){
+  currentData=data; currentKey=key;
+  document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
+
+  // LEFT — inbox
+  let left='';
+  if(data.context) left+=`<div class="context-bar"><strong>Context:</strong> ${data.context}</div>`;
+  left+=`<div class="section-label"><span class="section-dot dot-red"></span>Urgent — action required today</div>${renderItems(data.urgent,'urgent')}`;
+  left+=`<div class="section-label"><span class="section-dot dot-amber"></span>Needs response — within 24–48 hrs</div>${renderItems(data.needs,'needs')}`;
+  if(data.fyi&&data.fyi.length) left+=`<div class="section-label"><span class="section-dot dot-blue"></span>FYI — no action needed</div>${renderItems(data.fyi,'fyi')}`;
+  if(data.low&&data.low.length) left+=`<div class="section-label"><span class="section-dot dot-gray"></span>Low priority / noise</div>${renderItems(data.low,'low')}`;
+  left+=`<div class="footer">All outgoing communication requires Kevin's review and sign-off before sending</div>`;
+  document.getElementById('inboxCol').innerHTML=left;
+
+  // RIGHT — sidebar
+  let right='';
+  if((data.calToday&&data.calToday.length)||(data.calTomorrow&&data.calTomorrow.length)){
+    right+=`<div class="section-label">📅 Calendar</div>`;
+    right+=renderCal(data.calToday,'Today');
+    right+=renderCal(data.calTomorrow,'Tomorrow');
+  }
+  if(data.absences&&data.absences.length){
+    right+=`<div class="section-label">Absences</div><div class="abs-pills">${data.absences.map(a=>`<span class="abs-pill">${a}</span>`).join('')}</div>`;
+  }
+  if(data.priorities&&data.priorities.length){
+    right+=`<div class="section-label">Priority actions</div>`;
+    right+=data.priorities.map((p,i)=>{
+      const id='priority_'+i, ticked=isTicked(id);
+      return`<div class="priority-row${ticked?' done':''}" id="prow_${id}" onclick="toggleTick('${id}')"><span class="priority-num">${i+1}</span><span class="priority-text">${p.text}</span><span class="priority-date date-${p.dateType||'gray'}">${p.date||''}</span></div>`;
+    }).join('');
+  }
+  document.getElementById('sidebar').innerHTML=right;
+}
+
+(function init(){
+  const todayKey=localStorage.getItem(TODAY_KEY);
+  if(todayKey){const store=getStore(); if(store[todayKey]){renderBriefing(store[todayKey],todayKey);return;}}
+  renderBriefing(SEED,'seed');
+
+
+// Resizable columns
+(function(){
+  const divider = document.getElementById('divider');
+  const inboxCol = document.getElementById('inboxCol');
+  const body = divider.parentElement;
+  const PREF_KEY = 'workInbox_colWidth_v1';
+  let dragging = false, startX = 0, startW = 0;
+
+  // Restore saved width
+  const saved = localStorage.getItem(PREF_KEY);
+  if (saved) inboxCol.style.width = saved + 'px';
+  else inboxCol.style.width = Math.floor(window.innerWidth * 0.62) + 'px';
+
+  divider.addEventListener('mousedown', e => {
+    dragging = true;
+    startX = e.clientX;
+    startW = inboxCol.offsetWidth;
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const totalW = body.offsetWidth;
+    const newW = Math.min(Math.max(startW + (e.clientX - startX), 320), totalW - 200);
+    inboxCol.style.width = newW + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    divider.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    localStorage.setItem(PREF_KEY, inboxCol.offsetWidth);
+  });
+})();
+})();
+</script>
+</body>
+</html>
