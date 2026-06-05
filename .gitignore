@@ -1,0 +1,6 @@
+# Token cache — never commit
+msal_token_cache.json
+*.token
+# Raw data output — never commit
+data/inbox_raw.json
+data/
