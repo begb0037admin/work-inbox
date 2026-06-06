@@ -1,4 +1,4 @@
-# work-inbox � Living Handover Document
+# work-inbox â Living Handover Document
 
 **Last updated:** 2026-06-05
 **Status:** Phase 1 complete. Phase 2 not started.
@@ -16,10 +16,10 @@
 | Approach | Reason abandoned |
 |----------|-----------------|
 | Claude in Chrome | Too slow, too many tokens |
-| Microsoft Graph API (Azure CLI client ID) | Oxford blocks � AADSTS65002 |
-| Microsoft Graph API (Graph Explorer client ID) | Oxford blocks � AADSTS1001010 |
-| Microsoft Graph API (Office client ID) | Oxford blocks � AADSTS65002 |
-| Microsoft Graph PowerShell module | Oxford blocks � needs admin consent |
+| Microsoft Graph API (Azure CLI client ID) | Oxford blocks â AADSTS65002 |
+| Microsoft Graph API (Graph Explorer client ID) | Oxford blocks â AADSTS1001010 |
+| Microsoft Graph API (Office client ID) | Oxford blocks â AADSTS65002 |
+| Microsoft Graph PowerShell module | Oxford blocks â needs admin consent |
 
 ## Current approach: Outlook COM
 
@@ -46,5 +46,5 @@ Requires: Anthropic API key stored as environment variable.
 ## Standing rules
 
 - Never commit tokens or raw data
-- Local: C:\Users\admin\work-inbox
+- Local: https://github.com/begb0037admin/work-inbox
 - Repo: github.com/begb0037admin/work-inbox
