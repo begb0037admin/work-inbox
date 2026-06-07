@@ -146,7 +146,7 @@ Rules:
 - absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
 - calendar shows working days only (Monday to Friday)
 - calToday/calTomorrow: if a colleague is known to be absent from OOO replies, handover emails or inbox context — even if no calendar block exists — include them as an All day entry. Use the full name from email context, not abbreviated calendar titles like "Annual Leave - Marie". Cross-reference all data sources to build the most complete and accurate picture.
-- subject field: copy the exact email subject this item relates to (used to match EntryID for opening in Outlook). If not from a specific email, omit the subject field.
+- subject field: you MUST copy the exact email subject verbatim — character for character — from the inbox data provided. Do NOT paraphrase, summarise or invent a subject. The subject field is used to look up the Outlook EntryID and open the exact email. If you change even one character it will fail. If the item does not relate to a single specific email, omit the subject field entirely.
 """
 
 USER = f"""Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.
@@ -190,8 +190,19 @@ def inject_entry_ids(items):
         return items
     for item in items:
         subj = item.get("subject", "")
-        if subj and subj in subject_to_entryid:
+        if not subj:
+            continue
+        # Exact match first
+        if subj in subject_to_entryid:
             item["entry_id"] = subject_to_entryid[subj]
+        else:
+            # Fuzzy fallback — find inbox subject that contains or is contained by card subject
+            subj_lower = subj.lower()
+            for inbox_subj, entry_id in subject_to_entryid.items():
+                inbox_lower = inbox_subj.lower()
+                if subj_lower in inbox_lower or inbox_lower in subj_lower:
+                    item["entry_id"] = entry_id
+                    break
     return items
 
 for section in ["urgent", "needs", "fyi", "low", "priorities"]:
