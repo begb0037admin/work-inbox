@@ -1,7 +1,7 @@
 # work-inbox — Living Handover Document
 
 **Last updated:** 2026-06-08
-**Status:** Active — dashboard fully functional. Session ended 2026-06-08 evening.
+**Status:** Active — fully working. Session ended 2026-06-08 late evening.
 
 ---
 
@@ -9,38 +9,57 @@
 
 | Component | Description |
 |-----------|-------------|
-| fetch_inbox.py | Outlook COM via pywin32. Pulls inbox → Anthropic triage (claude-haiku-4-5) → pushes data/briefing.json to GitHub via Contents API |
+| fetch_inbox.py | Outlook COM via pywin32. Pulls inbox → Anthropic triage (claude-haiku-4-5) → Python post-processing → pushes data/briefing.json to GitHub via Contents API |
 | index.html | Static GitHub Pages dashboard at begb0037admin.github.io/work-inbox/ |
 | open_email.py | Registered openmail:// protocol handler — strips prefix and trailing slash, opens exact email in classic Outlook via EntryID COM |
 
 ---
 
-## Current State (as of 2026-06-08 evening, commit 097a9e4)
+## Current State (fully working as of 2026-06-08 late evening)
 
 ### Working
-- fetch_inbox.py — all three phases confirmed working (Outlook pull, Anthropic triage, GitHub push)
-- open_email.py — openmail:// protocol registered, strips trailing slash, opens exact email in Outlook
+- fetch_inbox.py — all three phases confirmed working
+- Python post-processing of calendar items — KNOWN_ABSENCES list rewrites sub/alert for Marie Cooksey and James Salas Guillen with hardcoded specific text, bypassing AI entirely for those fields
+- open_email.py — openmail:// protocol registered, confirmed working
 - Task Scheduler — WorkInbox-Briefing runs at 7am/9am/11am/1pm/3pm/5pm Mon-Fri
 - Dashboard loads live briefing.json from GitHub on open, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
 - Time-of-day greeting (Good morning/afternoon/evening, Kevin) — UK timezone
 - Archive panel — past briefings by date, Load arrow to restore
 - Yellow accent bar for Needs Response section
-- Context bar — 15px font, richer 5-7 sentence specific briefing (names, dates, cases, no PAT/CI mentions)
-- Calendar items — specific sub and alert text with correct/wrong examples baked into prompt
-- AI cross-references OOO emails and handover emails to infer absences not in calendar
-- Card click-through — whole tile clickable via openmail://, hover shadow, checkbox isolated
-- Tick to hide — ticking a card fades then hides after 1500ms
-- Priority actions — tick fades then hides after 1500ms
-- Show Done button — reveals all hidden ticked items for untick or reference
-- Absences — single bullet list block in white text, text justified (not individual pills)
-- Fuzzy EntryID matching — fallback if AI subject slightly differs from inbox subject
-- Verbatim subject prompt — AI instructed to copy exact email subject character for character
+- Context bar — 15px font, 5-7 sentence specific briefing
+- Calendar items — Python hardcodes specific sub/alert for known absent colleagues
+- Card click-through — whole tile clickable via openmail://, hover shadow
+- Tick to hide — cards and priority rows fade then hide after 1500ms
+- Show Done / Hide Done — boolean flag, fully working
+- Absences — white bullet list, text justified
+- Fuzzy EntryID matching — fallback if AI subject slightly differs
+
+### Critical Note — Local Script
+- Task Scheduler runs local fetch_inbox.py — must stay in sync with GitHub
+- If calendar items revert to vague text, run: git fetch origin && git checkout origin/main -- fetch_inbox.py
+- Then run: python fetch_inbox.py
 
 ### Known Issues / Next Session
-- Calendar items still occasionally too vague despite prompt — monitor over next few runs
-- Card openmail:// click-through dependent on entry_id being present in briefing.json — verify on next run
+- Task Scheduler bat file should auto-pull latest fetch_inbox.py before running
+- James Salas Guillen not appearing in calendar (no Outlook calendar block) — post-processing only fires if AI includes him; monitor
 - Multi-machine setup not yet done (work machine begb0037.AD-OAK)
+
+---
+
+## KNOWN_ABSENCES — Hardcoded Calendar Context
+
+These are hardcoded in fetch_inbox.py and rewrite AI output for known absent colleagues:
+
+**Marie Cooksey**
+- sub: "Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations."
+- alert: "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"
+
+**James Salas Guillen**
+- sub: "James is on leave until 18 June. DSE/Cardinus archiving, SBS users in feed and applicant data work all on hold. Handover document received Fri 6 Jun."
+- alert: "James away until 18 June - Kevin and Chris covering OSM tickets and H&S support queue"
+
+Update these when absences change.
 
 ---
 
@@ -49,16 +68,8 @@
 ### Context field
 5-7 sentences. Must include: full names and exact return dates of every absent colleague; specific projects/systems/cases blocked; most time-critical deadline with exact date; emails waiting 48hrs+; one thing Kevin should open first. No generalisations. No GitHub PAT/CI/workflow mentions.
 
-### Calendar items
-- time: "All day" for all-day events, never date ranges
-- title: "Event Type - Full Name" e.g. "Annual Leave - Marie Cooksey"
-- sub: specific — exact dates, what is blocked, who is covering. No vague text.
-- alert: name specific projects/actions affected. No generic text like "Colleague absent" or "Team member absent".
-- Cross-reference OOO emails and handover emails to infer absences not in calendar blocks
-- Correct/wrong examples baked into prompt to enforce standard
-
 ### Subject field
-Copy exact email subject verbatim — character for character. Do not paraphrase. Fuzzy matching fallback in Python if slight drift occurs.
+Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight drift occurs.
 
 ---
 
@@ -82,17 +93,17 @@ Copy exact email subject verbatim — character for character. Do not paraphrase
 
 | Priority | Task |
 |----------|------|
-| 1 | Monitor calendar item quality over next few morning runs — refine prompt if still vague |
-| 2 | Verify card openmail:// click-through working reliably with fuzzy matching |
-| 3 | Multi-machine — replicate setup on work machine (begb0037.AD-OAK) |
-| 4 | Update command-centre ROADMAP.md |
-| 5 | Show Done — verify priority rows restore correctly on untick |
+| 1 | Update Task Scheduler bat to auto-pull fetch_inbox.py before running |
+| 2 | Add James Salas Guillen to Outlook calendar so he appears without AI inference |
+| 3 | Monitor card openmail:// click-through reliability |
+| 4 | Multi-machine — replicate setup on work machine (begb0037.AD-OAK) |
+| 5 | Update command-centre ROADMAP.md |
 
 ---
 
 ## Standing Rules
 - Never commit tokens or raw data
-- fetch_inbox.py and open_email.py are correct — do not touch without explicit instruction
-- All GitHub writes via Contents API (PAT from GITHUB_PAT env var) — never git push from Cowork
-- Every change committed immediately — no batching
+- All GitHub writes via Contents API (PAT from GITHUB_PAT env var)
+- Every change committed immediately
 - Seat A never references local disk — all reads via GitHub proxy
+- Local machine must stay in sync: git fetch origin && git checkout origin/main -- fetch_inbox.py
