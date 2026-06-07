@@ -262,13 +262,16 @@ function toggleImport(){
 }
 function toggleShowDone(){
   const btn=document.getElementById('btn-show-done');
-  const hidden=document.querySelectorAll('.card-hidden');
   const showing=btn.textContent==='Hide done';
   if(showing){
-    hidden.forEach(el=>el.classList.add('card-hidden'));
+    // Hide done — re-hide all done cards and priority rows
+    document.querySelectorAll('.card.done').forEach(el=>el.classList.add('card-hidden'));
+    document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='none');
     btn.textContent='Show done';
   } else {
+    // Show done — reveal all done cards and priority rows
     document.querySelectorAll('.card.done').forEach(el=>el.classList.remove('card-hidden'));
+    document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='');
     btn.textContent='Hide done';
   }
 }
