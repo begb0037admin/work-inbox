@@ -122,7 +122,7 @@ The JSON must match this exact schema:
 {
   "date": "<Day D Month YYYY>",
   "subtitle": "<one short phrase describing the day, optional>",
-  "context": "<5-7 sentence summary of the current work situation. Cover: who is absent and what that means for coverage, the most pressing outstanding issues, any deadlines this week, key relationships or dependencies affected, and what Kevin should prioritise first thing>",
+  "context": "<A dense, specific 5-7 sentence morning briefing written for Kevin. Must include: full names and exact return dates of every absent colleague; which specific projects, systems or cases are blocked or at risk because of those absences; any emails waiting more than 48 hours without a response; the most time-critical deadline this week with its exact date; and the one thing Kevin should open first. Use real names, real dates, real case numbers and real project names from the inbox data. Every sentence must contain at least one specific proper noun from the data. Do not generalise. Do not use vague phrases like several items require attention. Do not mention GitHub PAT exposure, token revocation, workflow authentication failures, or CI/CD pipeline issues - these are handled separately.",
   "urgent": [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
   "needs":  [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
   "fyi":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
