@@ -152,12 +152,14 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
   <div id="archiveList"></div>
 </div>
 <script>
-const STORAGE_KEY='workInbox_briefings_v1',TODAY_KEY='workInbox_today_v1',TICKS_KEY='workInbox_ticks_v1';
+const STORAGE_KEY='workInbox_briefings_v1',TODAY_KEY='workInbox_today_v1',TICKS_KEY='workInbox_ticks_v1',DONE_KEY='workInbox_done_v1';
 
 function getStore(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}}}
 function saveStore(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
 function getTicks(){try{return JSON.parse(localStorage.getItem(TICKS_KEY)||'{}')}catch(e){return{}}}
 function saveTicks(t){localStorage.setItem(TICKS_KEY,JSON.stringify(t))}
+function getDone(){try{return JSON.parse(localStorage.getItem(DONE_KEY)||'[]')}catch(e){return[]}}
+function saveDone(d){localStorage.setItem(DONE_KEY,JSON.stringify(d))}
 var currentData=null,currentKey=null;
 
 function toggleImport(){
@@ -201,7 +203,7 @@ function loadArchive(key){
   renderBriefing(store[key],key);
   document.getElementById('archivePanel').classList.remove('visible');
 }
-function toggleTick(id){
+function toggleTick(id,subject){
   var ticks=getTicks(),k=currentKey+'_'+id;
   ticks[k]=!ticks[k]; saveTicks(ticks);
   var cb=document.getElementById('cb_'+id);
@@ -210,6 +212,12 @@ function toggleTick(id){
   if(cb) cb.classList.toggle('checked',ticks[k]);
   if(item) item.classList.toggle('done',ticks[k]);
   if(prow) prow.classList.toggle('done',ticks[k]);
+  if(subject){
+    var done=getDone();
+    if(ticks[k]){if(!done.includes(subject)) done.push(subject);}
+    else{done=done.filter(function(s){return s!==subject;});}
+    saveDone(done);
+  }
 }
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badgeHTML(text,type){
@@ -225,13 +233,18 @@ function acClass(cls){
 function openEmail(entryId,ev){ev.preventDefault();ev.stopPropagation();window.location.href='openmail://'+entryId;}
 function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
+  var done=getDone();
   return items.map(function(item,i){
     var id=cls+'_'+i,ticked=isTicked(id);
+    if(!ticked&&item.subject&&done.includes(item.subject)){
+      var ticks=getTicks(),k=currentKey+'_'+id;
+      ticks[k]=true; saveTicks(ticks); ticked=true;
+    }
     var hasLink=item.entry_id&&item.entry_id.length>0;
     var h='';
     if(hasLink) h+='<a class="card-link" href="#" onclick="openEmail(\''+item.entry_id+'\',event)">';
     h+='<div class="card'+(ticked?' done':'')+'" id="item_'+id+'">';
-    h+='<div class="cb-wrap"><div class="cb'+(ticked?' checked':'')+'" id="cb_'+id+'" onclick="toggleTick(\''+id+'\');event.preventDefault();event.stopPropagation()"></div></div>';
+    h+='<div class="cb-wrap"><div class="cb'+(ticked?' checked':'')+'" id="cb_'+id+'" onclick="toggleTick(\''+id+'\'),'+JSON.stringify(item.subject||'')+';event.preventDefault();event.stopPropagation()"></div></div>';
     h+='<div class="card-accent '+acClass(cls)+'"></div>';
     h+='<div class="card-body">';
     h+='<div class="card-title">'+item.title+' '+badgeHTML(item.badge,item.badgeType);
@@ -263,7 +276,7 @@ function renderPriorities(items){
   h+=items.map(function(p,i){
     var id='priority_'+i,ticked=isTicked(id);
     var dtype=p.dateType||'gray';
-    var r='<div class="priority-row'+(ticked?' done':'')+'" id="prow_'+id+'" onclick="toggleTick(\''+id+'\')">';
+    var r='<div class="priority-row'+(ticked?' done':'')+'" id="prow_'+id+'" onclick="toggleTick(\''+id+'\'),'+JSON.stringify(p.text||'')+'">';
     r+='<span class="priority-num">'+(i+1)+'</span>';
     r+='<span class="priority-text">'+p.text+'</span>';
     r+='<span class="priority-date date-'+dtype+'">'+(p.date||'')+'</span>';
