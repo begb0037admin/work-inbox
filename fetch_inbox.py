@@ -145,6 +145,7 @@ Rules:
 - omit alert only if there are genuinely no active dependencies or actions affected
 - absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
 - calendar shows working days only (Monday to Friday)
+- calToday/calTomorrow: if a colleague is known to be absent from OOO replies, handover emails or inbox context — even if no calendar block exists — include them as an All day entry. Use the full name from email context, not abbreviated calendar titles like "Annual Leave - Marie". Cross-reference all data sources to build the most complete and accurate picture.
 - subject field: copy the exact email subject this item relates to (used to match EntryID for opening in Outlook). If not from a specific email, omit the subject field.
 """
 
