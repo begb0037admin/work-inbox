@@ -7,7 +7,6 @@ OUTPUT_RAW      = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data
 OUTPUT_BRIEFING = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "briefing.json")
 DASHBOARD_URL   = "https://begb0037admin.github.io/work-inbox/"
 
-# ── Phase 1: pull from Outlook ───────────────────────────────────────────────
 outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
 cutoff  = datetime.now() - timedelta(days=7)
@@ -83,9 +82,10 @@ with open(OUTPUT_RAW, "w", encoding="utf-8") as f:
 
 print(f"Phase 1 done — inbox:{len(inbox)} sent:{len(sent)} calendar:{len(calendar)}")
 
-# ── Phase 2: triage via Anthropic API ────────────────────────────────────────
-today_str    = datetime.now().strftime("%A %-d %B %Y")
-tomorrow_str = (datetime.now() + timedelta(days=1)).strftime("%A %-d %B %Y")
+now = datetime.now()
+today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
+tomorrow_dt  = now + timedelta(days=1)
+tomorrow_str = tomorrow_dt.strftime("%A") + " " + str(tomorrow_dt.day) + " " + tomorrow_dt.strftime("%B %Y")
 
 cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == today]
 cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
@@ -141,7 +141,6 @@ response = client.messages.create(
 )
 
 raw_text = response.content[0].text.strip()
-# Strip any accidental code fences
 if raw_text.startswith("```"):
     raw_text = "\n".join(raw_text.split("\n")[1:])
 if raw_text.endswith("```"):
@@ -154,7 +153,6 @@ with open(OUTPUT_BRIEFING, "w", encoding="utf-8") as f:
 
 print(f"Phase 2 done — briefing written to {OUTPUT_BRIEFING}")
 
-# ── Phase 3: open dashboard with hash-loaded briefing ────────────────────────
 encoded = base64.urlsafe_b64encode(json.dumps(briefing, ensure_ascii=False).encode()).decode()
 url     = DASHBOARD_URL + "#load=" + encoded
 webbrowser.open(url)
