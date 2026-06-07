@@ -58,6 +58,8 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .dot-r { background: var(--red); } .dot-y { background: #eab308; } .dot-b { background: var(--blue); } .dot-g { background: var(--gray); }
 .sec-lbl { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .sec-rule { flex: 1; height: 1px; background: #d1d9e6; }
+.card-link { text-decoration: none; color: inherit; display: block; cursor: pointer; }
+.card-link:hover .card { border-color: #a0aec0; box-shadow: 0 2px 8px rgba(0,33,71,0.1); }
 .card { background: var(--card-bg); border: 1px solid rgba(0,33,71,0.07); border-radius: 10px; padding: 14px 18px; margin-bottom: 8px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 1px 4px rgba(0,33,71,0.06); transition: opacity .2s; animation: fadeIn .18s ease both; }
 .card.done { opacity: .38; } .card.done .card-title { text-decoration: line-through; }
 .card-accent { width: 3px; border-radius: 2px; flex-shrink: 0; align-self: stretch; min-height: 40px; }
