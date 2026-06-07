@@ -76,7 +76,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .cal-alert { font-size: 12px; color: #fbbf24; margin-top: 4px; font-weight: 600; line-height: 1.4; }
 .abs-wrap { padding: 6px 22px 12px; }
 .abs-list { list-style: none; padding: 0; margin: 0; }
-.abs-list li { font-size: 12px; color: #ffffff; padding: 3px 0; line-height: 1.4; }
+.abs-list li { font-size: 12px; color: #ffffff; padding: 3px 0; line-height: 1.4; padding-left: 14px; text-indent: -14px; }
 .abs-list li::before { content: "\2022"; color: rgba(255,255,255,0.4); margin-right: 7px; }
 
 /* Main */
@@ -323,6 +323,18 @@ function toggleTick(id){
       }
     } else {
       item.classList.remove('done','card-hidden');
+    }
+  }
+  if(prow){
+    if(ticks[k]){
+      prow.classList.add('done');
+      const showingDone=document.getElementById('btn-show-done').textContent==='Hide done';
+      if(!showingDone){
+        setTimeout(()=>{ prow.style.display='none'; },1500);
+      }
+    } else {
+      prow.classList.remove('done');
+      prow.style.display='';
     }
   }
 }
