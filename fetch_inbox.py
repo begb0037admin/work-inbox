@@ -26,17 +26,20 @@ for msg in mapi.GetDefaultFolder(6).Items:
         t = dt(msg.ReceivedTime)
         if t and t >= cutoff:
             inbox.append({
-                "subject":       msg.Subject,
-                "from":          msg.SenderName,
-                "from_email":    msg.SenderEmailAddress,
-                "received":      str(msg.ReceivedTime),
-                "is_read":       not msg.UnRead,
-                "body_preview":  (msg.Body or "")[:500],
+                "subject":         msg.Subject,
+                "from":            msg.SenderName,
+                "from_email":      msg.SenderEmailAddress,
+                "received":        str(msg.ReceivedTime),
+                "is_read":         not msg.UnRead,
+                "body_preview":    (msg.Body or "")[:150],
                 "has_attachments": msg.Attachments.Count > 0,
-                "importance":    msg.Importance
+                "importance":      msg.Importance
             })
     except:
         continue
+
+inbox.sort(key=lambda x: (x["is_read"], x["received"]))
+inbox = inbox[:50]
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
@@ -47,7 +50,7 @@ for msg in mapi.GetDefaultFolder(5).Items:
                 "subject":      msg.Subject,
                 "to":           msg.To,
                 "sent":         str(msg.SentOn),
-                "body_preview": (msg.Body or "")[:200]
+                "body_preview": (msg.Body or "")[:100]
             })
     except:
         continue
@@ -63,7 +66,7 @@ for item in mapi.GetDefaultFolder(9).Items:
                 "end":          str(item.End),
                 "location":     item.Location,
                 "organizer":    item.Organizer,
-                "body_preview": (item.Body or "")[:200],
+                "body_preview": (item.Body or "")[:100],
                 "all_day":      item.AllDayEvent
             })
     except:
@@ -91,7 +94,8 @@ cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date()
 cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
 
 SYSTEM = """You are Kevin's morning inbox triage assistant at Oxford University Personnel Services.
-Analyse the inbox, sent items, and calendar data provided and return ONLY a valid JSON object — no preamble, no markdown, no code fences.
+Analyse the inbox, sent items, and calendar data provided and return ONLY a valid JSON object - no preamble, no markdown, no code fences.
+Use only plain ASCII punctuation: use - instead of dashes, use ' instead of curly quotes, use ... instead of ellipsis.
 
 The JSON must match this exact schema:
 {
@@ -104,7 +108,7 @@ The JSON must match this exact schema:
   "low":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|amber|blue|gray"}],
   "calToday":    [{"time":"...","title":"...","sub":"...","alert":"..."}],
   "calTomorrow": [{"time":"...","title":"...","sub":"...","alert":"..."}],
-  "absences": ["Name — reason"],
+  "absences": ["Name - reason"],
   "priorities": [{"text":"...","date":"...","dateType":"red|amber|blue|gray"}]
 }
 
@@ -119,17 +123,17 @@ Rules:
 
 USER = f"""Today is {today_str}. Tomorrow is {tomorrow_str}.
 
-INBOX ({len(inbox)} emails, last 7 days):
-{json.dumps(inbox, indent=2, ensure_ascii=False)}
+INBOX (top 50 by urgency, last 7 days):
+{json.dumps(inbox, indent=2, ensure_ascii=True)}
 
 SENT ({len(sent)} items, last 7 days):
-{json.dumps(sent, indent=2, ensure_ascii=False)}
+{json.dumps(sent, indent=2, ensure_ascii=True)}
 
 CALENDAR TODAY:
-{json.dumps(cal_today, indent=2, ensure_ascii=False)}
+{json.dumps(cal_today, indent=2, ensure_ascii=True)}
 
 CALENDAR TOMORROW:
-{json.dumps(cal_tomorrow, indent=2, ensure_ascii=False)}
+{json.dumps(cal_tomorrow, indent=2, ensure_ascii=True)}
 """
 
 client   = anthropic.Anthropic()
@@ -151,9 +155,9 @@ briefing = json.loads(raw_text)
 with open(OUTPUT_BRIEFING, "w", encoding="utf-8") as f:
     json.dump(briefing, f, indent=2, ensure_ascii=False)
 
-print(f"Phase 2 done — briefing written to {OUTPUT_BRIEFING}")
+print(f"Phase 2 done - briefing written to {OUTPUT_BRIEFING}")
 
-encoded = base64.urlsafe_b64encode(json.dumps(briefing, ensure_ascii=False).encode()).decode()
+encoded = base64.urlsafe_b64encode(json.dumps(briefing, ensure_ascii=False).encode("utf-8")).decode("ascii")
 url     = DASHBOARD_URL + "#load=" + encoded
 webbrowser.open(url)
 print(f"Dashboard opened.")
