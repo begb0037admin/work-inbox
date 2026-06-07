@@ -75,7 +75,9 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 .cal-alert { font-size: 12px; color: #fbbf24; margin-top: 4px; font-weight: 600; line-height: 1.4; }
 .abs-wrap { padding: 6px 22px 12px; }
-.abs-pill { display: inline-block; font-size: 12px; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1); border-radius: 4px; padding: 4px 8px; margin: 3px 3px 0 0; }
+.abs-list { list-style: none; padding: 0; margin: 0; }
+.abs-list li { font-size: 12px; color: rgba(255,255,255,0.75); padding: 3px 0; line-height: 1.4; }
+.abs-list li::before { content: "\2022"; color: rgba(255,255,255,0.4); margin-right: 7px; }
 
 /* Main */
 .main { margin-left: var(--sidebar-width); flex: 1; padding: 28px 36px 60px; }
@@ -363,7 +365,7 @@ function renderBriefing(data,key){
   // Absences
   const absEl=document.getElementById('absencesSidebar');
   if(data.absences&&data.absences.length){
-    absEl.innerHTML=data.absences.map(a=>`<span class="abs-pill">${a}</span>`).join('');
+    absEl.innerHTML='<ul class="abs-list">'+data.absences.map(a=>`<li>${a}</li>`).join('')+'</ul>';
   } else {
     absEl.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None recorded</span>';
   }
