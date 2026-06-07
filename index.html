@@ -107,10 +107,6 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .archive-load { font-size: 12px; color: var(--blue); }
 .footer { font-size: 12px; color: var(--text-very-muted); text-align: center; margin-top: 48px; padding-top: 16px; border-top: 1px solid #e2e8f0; letter-spacing: .04em; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-@keyframes fadeOut { from { opacity:1; max-height:200px; margin-bottom:8px; } to { opacity:0; max-height:0; margin-bottom:0; padding:0; } }
-.hiding { animation: fadeOut 0.5s ease forwards; pointer-events:none; overflow:hidden; }
-.item-hidden { display:none; }
-.item-hidden.show-done { display:flex; opacity:0.35; }
 </style>
 </head>
 <body>
@@ -145,7 +141,6 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
       </div>
       <div class="header-actions">
         <button class="btn btn-green" onclick="toggleArchive()" title="View previous briefings">Archive</button>
-        <button class="btn" id="showDoneBtn" onclick="toggleShowDone()" title="Show or hide completed items">Show done</button>
       </div>
     </div>
     <div id="contextBar"></div>
@@ -165,14 +160,7 @@ function getTicks(){try{return JSON.parse(localStorage.getItem(TICKS_KEY)||'{}')
 function saveTicks(t){localStorage.setItem(TICKS_KEY,JSON.stringify(t))}
 function getDone(){try{return JSON.parse(localStorage.getItem(DONE_KEY)||'[]')}catch(e){return[]}}
 function saveDone(d){localStorage.setItem(DONE_KEY,JSON.stringify(d))}
-var currentData=null,currentKey=null,showingDone=false;
-function toggleShowDone(){
-  showingDone=!showingDone;
-  var btn=document.getElementById('showDoneBtn');
-  if(btn) btn.textContent=showingDone?'Hide done':'Show done';
-  var hidden=document.querySelectorAll('.item-hidden');
-  hidden.forEach(function(el){ if(showingDone) el.classList.add('show-done'); else el.classList.remove('show-done'); });
-}
+var currentData=null,currentKey=null;
 
 function toggleImport(){
   document.getElementById('importPanel').classList.toggle('visible');
@@ -224,19 +212,6 @@ function toggleTick(id,subject){
   if(cb) cb.classList.toggle('checked',ticks[k]);
   if(item) item.classList.toggle('done',ticks[k]);
   if(prow) prow.classList.toggle('done',ticks[k]);
-  var el=item||prow;
-  if(ticks[k]&&el){
-    setTimeout(function(){
-      el.classList.add('hiding');
-      setTimeout(function(){
-        el.classList.remove('hiding');
-        el.classList.add('item-hidden');
-        if(showingDone) el.classList.add('show-done');
-      },500);
-    },1500);
-  } else if(!ticks[k]&&el){
-    el.classList.remove('item-hidden','show-done','hiding');
-  }
   if(subject){
     var done=getDone();
     if(ticks[k]){if(!done.includes(subject)) done.push(subject);}
@@ -260,17 +235,15 @@ function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   var done=getDone();
   return items.map(function(item,i){
-    var skipHide=false;
     var id=cls+'_'+i,ticked=isTicked(id);
     if(!ticked&&item.subject&&done.includes(item.subject)){
       var ticks=getTicks(),k=currentKey+'_'+id;
       ticks[k]=true; saveTicks(ticks); ticked=true;
     }
-    if(ticked) skipHide=true;
     var hasLink=item.entry_id&&item.entry_id.length>0;
     var h='';
     if(hasLink) h+='<a class="card-link" href="#" onclick="openEmail(\''+item.entry_id+'\',event)">';
-    h+='<div class="card'+(ticked?' done':''+(skipHide?' item-hidden'+(showingDone?' show-done':''):'')):'')+'" id="item_'+id+'">';
+    h+='<div class="card'+(ticked?' done':'')+'" id="item_'+id+'">';
     h+='<div class="cb-wrap"><div class="cb'+(ticked?' checked':'')+'" id="cb_'+id+'" onclick="toggleTick(\''+id+'\'),'+JSON.stringify(item.subject||'')+';event.preventDefault();event.stopPropagation()"></div></div>';
     h+='<div class="card-accent '+acClass(cls)+'"></div>';
     h+='<div class="card-body">';
