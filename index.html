@@ -267,17 +267,24 @@ function acClass(cls){
   if(cls==='fyi') return 'ac-b';
   return 'ac-g';
 }
+function openEmail(entryId,ev){ev.preventDefault();ev.stopPropagation();window.location.href='openmail://'+entryId;}
 function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map(function(item,i){
     var id=cls+'_'+i,ticked=isTicked(id);
-    var h='<div class="card'+(ticked?' done':'')+'" id="item_'+id+'">';
-    h+='<div class="cb-wrap"><div class="cb'+(ticked?' checked':'')+'" id="cb_'+id+'" onclick="toggleTick(\''+id+'\')"></div></div>';
+    var hasLink=item.entry_id&&item.entry_id.length>0;
+    var h='';
+    if(hasLink) h+='<a class="card-link" href="#" onclick="openEmail(\''+item.entry_id+'\',event)">';
+    h+='<div class="card'+(ticked?' done':'')+'" id="item_'+id+'">';
+    h+='<div class="cb-wrap"><div class="cb'+(ticked?' checked':'')+'" id="cb_'+id+'" onclick="toggleTick(\''+id+'\');event.preventDefault();event.stopPropagation()"></div></div>';
     h+='<div class="card-accent '+acClass(cls)+'"></div>';
     h+='<div class="card-body">';
-    h+='<div class="card-title">'+item.title+' '+badgeHTML(item.badge,item.badgeType)+'</div>';
+    h+='<div class="card-title">'+item.title+' '+badgeHTML(item.badge,item.badgeType);
+    if(hasLink) h+='<span style="font-size:10px;color:#1a5fa8;margin-left:6px;font-weight:500;opacity:0.7">Open →</span>';
+    h+='</div>';
     if(item.sub) h+='<div class="card-sub">'+item.sub+'</div>';
     h+='</div></div>';
+    if(hasLink) h+='</a>';
     return h;
   }).join('');
 }
