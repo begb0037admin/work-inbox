@@ -1,177 +1,167 @@
 {
   "date": "Monday 8 June 2026",
-  "subtitle": "Return from weekend; Marie on leave; James returns 18 June",
-  "context": "You're back after the weekend. Marie Cooksey is on annual leave 8-12 June. James Salas Guillen returns Thursday 18 June from leave starting Friday 5 June. Multiple systems projects are active (HRIS Dashboard, DSE/Cardinus, IM Principles URL changes, College Staff in PXD).",
+  "subtitle": "Marie away, James returning Thursday, IM Principles URL live today",
+  "context": "Marie Cooksey is on annual leave 8-12 June and will be unavailable for all approvals and project oversight. James Salas Guillen returns Thursday 18 June from annual leave starting 5 June. Michael O'Sullivan returns today (Monday 8 June) from out-of-office. The IM Principles URL change goes live today - the old page comes down 23-24 June, so Laura Porter's URL updates must be confirmed live before end of day. DTP1092 College Staff in PXD Proposal has pending Marie comments awaiting your response. The Halo ER Case Management Support Operating Model approval is blocked pending Natasha Heaton's product owner return from sick leave. DSE user data import to Cardinus went live 3 June via James Salas Guillen's interface, but contractor manual record creation responsibility needs confirmation. H&S Handover document from James Salas Guillen outlines outstanding items you and Christopher Sanders are covering during his absence.",
   "urgent": [
     {
-      "title": "H&S Handover items - action required",
-      "sub": "James Salas Guillen has sent handover document with <strong>outstanding items</strong>. Key issues include DSE/Cardinus data upload, Cority integration, and contractor record management. <strong>James on leave until 18 June.</strong>",
-      "badge": "Review today",
+      "title": "IM Principles - verify URL live today",
+      "sub": "Laura Porter confirmed new URL goes live today with old page decommissioning 23-24 June. <strong>Confirm new URL is accessible and update all PXD links immediately.</strong>",
+      "badge": "Live today",
       "badgeType": "red",
-      "subject": "H&S Handover"
-    },
-    {
-      "title": "HRIS Dashboard workflow failures",
-      "sub": "Multiple GitHub workflow failures since 4 June (6 runs failed across different commits). Dashboard updates not completing. <strong>Needs immediate investigation.</strong>",
-      "badge": "Fix required",
-      "badgeType": "red",
-      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main"
-    }
-  ],
-  "needs": [
-    {
-      "title": "IM Principles URL migration deadline",
-      "sub": "Old page goes down <strong>23-24 June</strong>. Laura Porter confirmed new URL live. You sent reply confirming you can update links in PXD. Follow up with Laura to confirm completion status.",
-      "badge": "Deadline 23 June",
-      "badgeType": "yellow",
       "subject": "IM Principles - change to URL",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35E30000"
     },
     {
-      "title": "Halo ER Case Management - approval review schedule",
-      "sub": "Approval confirmation received from Viktoriia. Natasha Heaton's product owner still off sick. <strong>Need to reschedule review</strong> meeting for when role is covered.",
-      "badge": "Reschedule required",
-      "badgeType": "yellow",
-      "subject": "Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FC0000"
-    },
-    {
-      "title": "College Staff in PXD Proposal - task assigned",
-      "sub": "Simon Burford assigned you a task in the SharePoint document. Marie Cooksey has left multiple comments. <strong>Requires your input/sign-off.</strong>",
-      "badge": "Action needed",
-      "badgeType": "yellow",
-      "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362D0000"
-    },
-    {
-      "title": "H&S Management System - vendor evaluation",
-      "sub": "Marie (on leave) asked for feedback on shortlist pack and weighting <strong>over next few weeks</strong>. Helen Harbour scheduling meeting to review evaluation criteria weightings.",
-      "badge": "Due in weeks",
-      "badgeType": "yellow",
-      "subject": "H&S Management System",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
+      "title": "Marie Cooksey unavailable all week",
+      "sub": "Marie is on annual leave 8-12 June. <strong>DTP1092 College Staff in PXD Proposal</strong> has her pending comments awaiting your response. Any items requiring her approval on projects, volunteer reporting queries, H&S Management System weighting feedback, or DSE process documentation updates must wait until she returns.",
+      "badge": "Out 8-12 June",
+      "badgeType": "red",
+      "subject": "Annual Leave - Marie",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000777FAA8970000"
     }
   ],
-  "fyi": [
+  "needs": [
     {
-      "title": "DSE/Cardinus data upload now live",
-      "sub": "Automated data upload from PXD to Cardinus confirmed working (James Salas Guillen, 5 June). Initial spot checks passed. Manual contractor records process still being determined.",
-      "badge": "Update",
-      "badgeType": "blue",
+      "title": "Halo ER Case Management approval blocked",
+      "sub": "<strong>Natasha Heaton's product owner is still off sick.</strong> Review meeting cannot be scheduled until the product owner returns. Check in with Natasha on expected return date.",
+      "badge": "Stalled",
+      "badgeType": "yellow",
+      "subject": "RE: Halo ER Case Management Support Operating Model - Approval Confirmation",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FF0000"
+    },
+    {
+      "title": "Contractor manual records - confirm ownership",
+      "sub": "DSE user data import from PeopleXD to Cardinus is live since 3 June. <strong>James Salas Guillen is monitoring contractor account creation requests.</strong> Confirm who is responsible for creating manual records for contractors etc., and update process documentation.",
+      "badge": "Clarify by 18 June",
+      "badgeType": "yellow",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000"
     },
     {
-      "title": "HR Systems support activities summary",
-      "sub": "Christopher Sanders sent May summary of HR Systems support activities. Latest updates on system incidents and backlog included.",
-      "badge": "Monthly report",
+      "title": "Review H&S Handover - James Salas Guillen",
+      "sub": "James leaves today for annual leave until 18 June. <strong>H&S Handover document outlines outstanding items.</strong> You and Christopher Sanders are covering H&S support queue and escalations in his absence. Review handover immediately to identify priority actions.",
+      "badge": "Review today",
+      "badgeType": "yellow",
+      "subject": "H&S Handover",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
+    }
+  ],
+  "fyi": [
+    {
+      "title": "HR Systems Bulletin - call for content",
+      "sub": "HR Systems Communications requesting contributions for June 2026 bulletin to PeopleXD and HR reporting tools user community.",
+      "badge": "Contribution invited",
       "badgeType": "blue",
-      "subject": "HR Systems support activities in May",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35E40000"
+      "subject": "Call for content - HR Systems Bulletin (June 2026)",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000777FAA8950000"
     },
     {
       "title": "Trinity term HR Policy newsletter published",
-      "sub": "Tracy Fahey confirmed Trinity term HR staff updates document now published on the portal.",
+      "sub": "Tracy Fahey confirms HR staff updates document now live on internal portal.",
       "badge": "Published",
       "badgeType": "blue",
       "subject": "RE: Trinity term HR Policy newsletter",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35E10000"
     },
     {
-      "title": "Cority GX2 2026.2 release",
-      "sub": "New Cority release available with refreshed navigation and AI features. Maintenance completed 6 June.",
-      "badge": "New version",
+      "title": "Access PeopleXD training - final sessions June",
+      "sub": "Access Group running online training sessions this month. Last chance to join.",
+      "badge": "Info only",
       "badgeType": "blue",
-      "subject": "Your GX2 2026 Release is Here with Refreshed Navigation and Smarter AI"
+      "subject": "Last chance to join our PeopleXD online training sessions in June",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361E0000"
     },
     {
-      "title": "Marie Cooksey - Kudoboard finalizing",
-      "sub": "Simon Burford organizing farewell/transition Kudoboard for Marie. Last call for contributions (she's on leave 8-12 June).",
-      "badge": "FYI",
+      "title": "Cority 2026.2 release - navigation and AI updates",
+      "sub": "CorityOne GX2 release now available with refreshed interface.",
+      "badge": "Update available",
       "badgeType": "blue",
-      "subject": "The Kudoboard for Marie Cooksey is being finalized",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36410000"
+      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000"
     }
   ],
   "low": [
     {
-      "title": "Call for content - HR Systems Bulletin (June)",
-      "sub": "HR Systems Communications requesting contributions for June bulletin. Community newsletter for PeopleXD and HR reporting tools users.",
-      "badge": "Bulletin",
+      "title": "Occupational Health appointment reminder",
+      "sub": "Reminder of scheduled appointment.",
+      "badge": "Appointment",
       "badgeType": "gray",
-      "subject": "Call for content - HR Systems Bulletin (June 2026)"
+      "subject": "Appointment Reminder - Occupational Health"
     },
     {
       "title": "New vacancy notifications",
-      "sub": "Routine PeopleXD job board alerts (3 received: 4, 5, 6 June). Matching your saved search criteria.",
-      "badge": "Routine alert",
+      "sub": "Matching your saved criteria from external job board.",
+      "badge": "Recurring",
       "badgeType": "gray",
       "subject": "New Vacancy Notification",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35ED0000"
     },
     {
-      "title": "IT training and maintenance notifications",
-      "sub": "Windows Server Security course (July), OWL network maintenance (11 June), Cisco VPN updates completed, digital capabilities courses.",
-      "badge": "IT updates",
+      "title": "Windows Server Security course July 2026",
+      "sub": "ITS offering 6-7 July. Spaces still available.",
+      "badge": "July training",
       "badgeType": "gray",
       "subject": "[ict-a] Windows Server Security Course - July 2026",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36090000"
     },
     {
-      "title": "Access support case updates",
-      "sub": "Multiple Access Group support case status updates (cases resolved or pending). Routine vendor support tickets.",
-      "badge": "Vendor updates",
+      "title": "OWL network maintenance 11 June",
+      "sub": "Captive portal software upgrade scheduled.",
+      "badge": "11 June",
       "badgeType": "gray",
-      "subject": "Access Support Team | 68981820 - Your Case Has Been Resolved",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362B0000"
+      "subject": "[ict-a] OWL Maintenance - 11th June",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000"
     }
   ],
   "calToday": [],
   "calTomorrow": [
     {
       "time": "All day",
-      "title": "Annual Leave - Marie",
-      "sub": "Marie Cooksey on leave 8-12 June (Mon-Fri). Simon Burford covering/coordinating handovers.",
-      "alert": "Person out of office"
+      "title": "Annual Leave - Marie Cooksey",
+      "sub": "Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations.",
+      "alert": "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"
     }
   ],
   "absences": [
-    "Michael O'Sullivan - out of office, returning Monday 8 June",
-    "Marie Cooksey - annual leave 8-12 June",
-    "James Salas Guillen - annual leave until Thursday 18 June (departing end of Friday 5 June)"
+    "Michael O'Sullivan - out of office, returning Monday 8 June 2026",
+    "James Salas Guillen - annual leave from 5 June, returning Thursday 18 June 2026",
+    "Marie Cooksey - annual leave 8-12 June 2026"
   ],
   "priorities": [
     {
-      "text": "<strong>Review James Salas Guillen's H&S Handover document</strong> - outstanding items need your attention while he's on leave until 18 June",
-      "date": "Today",
+      "text": "Verify IM Principles new URL is live and accessible today; update all PXD page links before 23-24 June decommissioning",
+      "date": "Today - 8 June",
       "dateType": "red",
-      "subject": "H&S Handover"
-    },
-    {
-      "text": "<strong>Investigate HRIS Dashboard workflow failures</strong> - multiple failed runs since 4 June, blocking automated updates",
-      "date": "Today",
-      "dateType": "red",
-      "subject": "[begb0037admin/hris-dashboard] Run failed"
-    },
-    {
-      "text": "Follow up IM Principles URL migration with Laura Porter - deadline 23-24 June, confirm link updates in PXD are on track",
-      "date": "This week",
-      "dateType": "yellow",
       "subject": "IM Principles - change to URL",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35E30000"
     },
     {
-      "text": "Address College Staff in PXD task assigned by Simon Burford - SharePoint document needs your input",
-      "date": "This week",
-      "dateType": "yellow",
-      "subject": "DTP1092 - College Staff in PXD Proposal"
+      "text": "Read H&S Handover from James Salas Guillen and identify priority outstanding items; coordinate H&S support queue coverage with Christopher Sanders",
+      "date": "Today - 8 June",
+      "dateType": "red",
+      "subject": "H&S Handover",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
     },
     {
-      "text": "Reschedule Halo ER Case Management review meeting - coordinate with Natasha Heaton when product owner returns from sick leave",
-      "date": "This week",
+      "text": "Respond to Marie Cooksey's pending comments on DTP1092 College Staff in PXD Proposal - handle all approvals independently during her leave",
+      "date": "Today - 8 June",
       "dateType": "yellow",
-      "subject": "Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FC0000"
+      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362A0000"
+    },
+    {
+      "text": "Confirm contractor manual record ownership for DSE system and update process documentation to reflect live Cardinus interface",
+      "date": "By 18 June",
+      "dateType": "yellow",
+      "subject": "RE: DSE Update - user data import and upload to Cardinus",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000"
+    },
+    {
+      "text": "Check with Natasha Heaton on product owner return date for Halo ER Case Management approval review",
+      "date": "Within 48 hours",
+      "dateType": "yellow",
+      "subject": "RE: Halo ER Case Management Support Operating Model - Approval Confirmation",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FF0000"
     }
   ]
 }
