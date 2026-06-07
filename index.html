@@ -260,16 +260,17 @@ function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   var done=getDone();
   return items.map(function(item,i){
+    var skipHide=false;
     var id=cls+'_'+i,ticked=isTicked(id);
     if(!ticked&&item.subject&&done.includes(item.subject)){
       var ticks=getTicks(),k=currentKey+'_'+id;
       ticks[k]=true; saveTicks(ticks); ticked=true;
     }
-    if(ticked) return '<div class="item-hidden'+(showingDone?' show-done':'')+'" id="item_'+id+'"></div>';
+    if(ticked) skipHide=true;
     var hasLink=item.entry_id&&item.entry_id.length>0;
     var h='';
     if(hasLink) h+='<a class="card-link" href="#" onclick="openEmail(\''+item.entry_id+'\',event)">';
-    h+='<div class="card'+(ticked?' done':'')+'" id="item_'+id+'">';
+    h+='<div class="card'+(ticked?' done':''+(skipHide?' item-hidden'+(showingDone?' show-done':''):'')):'')+'" id="item_'+id+'">';
     h+='<div class="cb-wrap"><div class="cb'+(ticked?' checked':'')+'" id="cb_'+id+'" onclick="toggleTick(\''+id+'\'),'+JSON.stringify(item.subject||'')+';event.preventDefault();event.stopPropagation()"></div></div>';
     h+='<div class="card-accent '+acClass(cls)+'"></div>';
     h+='<div class="card-body">';
