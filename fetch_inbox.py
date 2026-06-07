@@ -11,7 +11,14 @@ outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
 cutoff  = datetime.now() - timedelta(days=7)
 today   = datetime.now().date()
-tomorrow = today + timedelta(days=1)
+
+def next_workday(d):
+    d = d + timedelta(days=1)
+    while d.weekday() >= 5:
+        d = d + timedelta(days=1)
+    return d
+
+tomorrow = next_workday(today)
 
 def dt(com_time):
     try:
@@ -20,21 +27,27 @@ def dt(com_time):
     except:
         return None
 
-inbox = []
-for msg in mapi.GetDefaultFolder(6).Items:
+def restrict_date(folder, cutoff_dt):
+    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %H:%M %p") + "'"
     try:
-        t = dt(msg.ReceivedTime)
-        if t and t >= cutoff:
-            inbox.append({
-                "subject":         msg.Subject,
-                "from":            msg.SenderName,
-                "from_email":      msg.SenderEmailAddress,
-                "received":        str(msg.ReceivedTime),
-                "is_read":         not msg.UnRead,
-                "body_preview":    (msg.Body or "")[:150],
-                "has_attachments": msg.Attachments.Count > 0,
-                "importance":      msg.Importance
-            })
+        return folder.Items.Restrict(filter_str)
+    except:
+        return folder.Items
+
+print("Phase 1 - pulling Outlook data...")
+inbox = []
+for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
+    try:
+        inbox.append({
+            "subject":         msg.Subject,
+            "from":            msg.SenderName,
+            "from_email":      msg.SenderEmailAddress,
+            "received":        str(msg.ReceivedTime),
+            "is_read":         not msg.UnRead,
+            "body_preview":    (msg.Body or "")[:150],
+            "has_attachments": msg.Attachments.Count > 0,
+            "importance":      msg.Importance
+        })
     except:
         continue
 
@@ -59,7 +72,7 @@ calendar = []
 for item in mapi.GetDefaultFolder(9).Items:
     try:
         t = dt(item.Start)
-        if t and today <= t.date() <= tomorrow:
+        if t and t.weekday() < 5 and today <= t.date() <= tomorrow:
             calendar.append({
                 "subject":      item.Subject,
                 "start":        str(item.Start),
@@ -83,12 +96,12 @@ os.makedirs(os.path.dirname(OUTPUT_RAW), exist_ok=True)
 with open(OUTPUT_RAW, "w", encoding="utf-8") as f:
     json.dump(raw, f, indent=2, ensure_ascii=False)
 
-print(f"Phase 1 done — inbox:{len(inbox)} sent:{len(sent)} calendar:{len(calendar)}")
+print(f"Phase 1 done - inbox:{len(inbox)} sent:{len(sent)} calendar:{len(calendar)}")
+print("Phase 2 - calling Anthropic API...")
 
 now = datetime.now()
 today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
-tomorrow_dt  = now + timedelta(days=1)
-tomorrow_str = tomorrow_dt.strftime("%A") + " " + str(tomorrow_dt.day) + " " + tomorrow_dt.strftime("%B %Y")
+tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorrow.strftime("%B %Y")
 
 cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == today]
 cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
@@ -119,9 +132,10 @@ Rules:
 - sub fields may contain <strong> tags for emphasis
 - omit alert from calToday/calTomorrow items unless there is a genuine conflict or required action
 - absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
+- calendar shows working days only (Monday to Friday)
 """
 
-USER = f"""Today is {today_str}. Tomorrow is {tomorrow_str}.
+USER = f"""Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.
 
 INBOX (top 50 by urgency, last 7 days):
 {json.dumps(inbox, indent=2, ensure_ascii=True)}
@@ -136,7 +150,7 @@ CALENDAR TOMORROW:
 {json.dumps(cal_tomorrow, indent=2, ensure_ascii=True)}
 """
 
-client   = anthropic.Anthropic()
+client = anthropic.Anthropic(timeout=60.0)
 response = client.messages.create(
     model      = "claude-sonnet-4-6",
     max_tokens = 4096,
