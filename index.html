@@ -179,7 +179,7 @@ html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Sego
   <div class="main">
     <div class="topbar">
       <div class="topbar-left">
-        <h1 id="main-date">Inbox Briefing</h1>
+        <h1 id="main-greeting">Good morning, Kevin</h1>
         <div class="sub" id="main-subtitle"></div>
       </div>
       <div class="topbar-right">
@@ -272,8 +272,10 @@ async function init() {
 function render(data) {
   // Sidebar
   document.getElementById('sb-date').textContent = data.date || '—';
-  document.getElementById('main-date').textContent = data.date || 'Inbox Briefing';
-  document.getElementById('main-subtitle').textContent = data.subtitle || '';
+  document.getElementById('main-greeting').textContent = getGreeting();
+  const datePart = data.date || '';
+  const subPart  = data.subtitle || '';
+  document.getElementById('main-subtitle').textContent = datePart + (datePart && subPart ? ' \u00b7 ' : '') + subPart;
 
   renderCalSection('sb-cal-today',    data.calToday    || []);
   renderCalSection('sb-cal-tomorrow', data.calTomorrow || []);
@@ -477,6 +479,15 @@ function esc(str) {
 function escQ(str) {
   if (!str) return '';
   return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
+// ── Greeting ──────────────────────────────────────────────────────────────────
+function getGreeting() {
+  // UK local time
+  const hour = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }) * 1;
+  if (hour >= 5  && hour < 12) return 'Good morning, Kevin';
+  if (hour >= 12 && hour < 18) return 'Good afternoon, Kevin';
+  return 'Good evening, Kevin';
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
