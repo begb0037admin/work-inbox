@@ -324,6 +324,23 @@ function renderBriefing(data,key){
 }
 
 (function init(){
+  // Hash-load: if URL contains #load=<base64json>, decode and import automatically
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#load=')) {
+    try {
+      const b64  = hash.slice(6);
+      const json = atob(b64.replace(/-/g, '+' ).replace(/_/g, '/' ));
+      const data = JSON.parse(json);
+      if (data && data.date) {
+        const key = data.date.replace(/[^a-zA-Z0-9]/g, '_');
+        const store = getStore(); store[key] = data; saveStore(store);
+        localStorage.setItem(TODAY_KEY, key);
+        history.replaceState(null, '', window.location.pathname);
+        renderBriefing(data, key);
+        return;
+      }
+    } catch(e) { console.warn('Hash load failed:', e); }
+  }
   const todayKey=localStorage.getItem(TODAY_KEY);
   if(todayKey){const store=getStore(); if(store[todayKey]){renderBriefing(store[todayKey],todayKey);return;}}
   renderBriefing(SEED,'seed');
