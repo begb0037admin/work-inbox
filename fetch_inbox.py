@@ -122,7 +122,7 @@ The JSON must match this exact schema:
 {
   "date": "<Day D Month YYYY>",
   "subtitle": "<one short phrase describing the day, optional>",
-  "context": "<2-3 sentence summary of the current work situation>",
+  "context": "<5-7 sentence summary of the current work situation. Cover: who is absent and what that means for coverage, the most pressing outstanding issues, any deadlines this week, key relationships or dependencies affected, and what Kevin should prioritise first thing>",
   "urgent": [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
   "needs":  [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
   "fyi":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
