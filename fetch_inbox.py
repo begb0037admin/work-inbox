@@ -38,21 +38,24 @@ print("Phase 1 - pulling Outlook data...")
 inbox = []
 for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
-        inbox.append({
+        is_read = not msg.UnRead
+        entry = {
             "subject":         msg.Subject,
             "from":            msg.SenderName,
             "from_email":      msg.SenderEmailAddress,
             "received":        str(msg.ReceivedTime),
-            "is_read":         not msg.UnRead,
-            "body_preview":    (msg.Body or "")[:150],
+            "is_read":         is_read,
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance
-        })
+        }
+        # Unread: include body preview. Read: subject + sender only.
+        if not is_read:
+            entry["body_preview"] = (msg.Body or "")[:150]
+        inbox.append(entry)
     except:
         continue
 
 inbox.sort(key=lambda x: (x["is_read"], x["received"]))
-inbox = inbox[:50]
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
@@ -96,7 +99,8 @@ os.makedirs(os.path.dirname(OUTPUT_RAW), exist_ok=True)
 with open(OUTPUT_RAW, "w", encoding="utf-8") as f:
     json.dump(raw, f, indent=2, ensure_ascii=False)
 
-print(f"Phase 1 done - inbox:{len(inbox)} sent:{len(sent)} calendar:{len(calendar)}")
+unread_count = sum(1 for m in inbox if not m["is_read"])
+print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_count}) sent:{len(sent)} calendar:{len(calendar)}")
 print("Phase 2 - calling Anthropic API...")
 
 now = datetime.now()
@@ -109,6 +113,9 @@ cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date()
 SYSTEM = """You are Kevin's morning inbox triage assistant at Oxford University Personnel Services.
 Analyse the inbox, sent items, and calendar data provided and return ONLY a valid JSON object - no preamble, no markdown, no code fences.
 Use only plain ASCII punctuation: use - instead of dashes, use ' instead of curly quotes, use ... instead of ellipsis.
+
+Note: inbox items with no body_preview field have already been read - triage by subject and sender only.
+Items with body_preview are unread and should be given priority consideration.
 
 The JSON must match this exact schema:
 {
@@ -137,7 +144,7 @@ Rules:
 
 USER = f"""Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.
 
-INBOX (top 50 by urgency, last 7 days):
+INBOX ({len(inbox)} emails, last 7 days - unread have body_preview, read do not):
 {json.dumps(inbox, indent=2, ensure_ascii=True)}
 
 SENT ({len(sent)} items, last 7 days):
@@ -152,7 +159,7 @@ CALENDAR TOMORROW:
 
 client = anthropic.Anthropic(timeout=60.0)
 response = client.messages.create(
-    model      = "claude-sonnet-4-6",
+    model      = "claude-haiku-4-5",
     max_tokens = 4096,
     system     = SYSTEM,
     messages   = [{"role": "user", "content": USER}]
