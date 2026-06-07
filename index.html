@@ -23,6 +23,11 @@
   --orange-bg: #fff4ed;
   --orange-border: #fed7aa;
   --orange-text: #c2410c;
+  --yellow: #ca8a04;
+  --yellow-bg: #fefce8;
+  --yellow-border: #fde047;
+  --yellow-text: #713f12;
+  --yellow-accent: #eab308;
   --blue: #378add;
   --blue-bg: #e6f1fb;
   --blue-border: #b5d4f4;
@@ -62,12 +67,13 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 .sb-section { padding: 12px 18px 4px; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.09em; }
 
-.cal-item { padding: 6px 18px; border-left: 2px solid transparent; margin-bottom: 1px; }
+.cal-item { padding: 8px 18px; border-left: 2px solid transparent; margin-bottom: 4px; }
 .cal-item.active { border-left-color: #60a5fa; background: rgba(96,165,250,0.08); }
-.cal-time { font-size: 10px; color: rgba(255,255,255,0.38); margin-bottom: 1px; }
-.cal-title { font-size: 11px; color: rgba(255,255,255,0.8); line-height: 1.35; }
-.cal-sub { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+.cal-time { font-size: 10px; color: rgba(255,255,255,0.38); margin-bottom: 2px; }
+.cal-title { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); line-height: 1.35; }
+.cal-sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 3px; line-height: 1.4; }
 
+.cal-alert { font-size: 11px; color: #fbbf24; margin-top: 4px; font-weight: 600; line-height: 1.4; }
 .abs-wrap { padding: 6px 18px 10px; }
 .abs-pill { display: inline-block; font-size: 10px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.08); border-radius: 4px; padding: 2px 6px; margin: 2px 2px 0 0; }
 
@@ -86,7 +92,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .btn-primary:hover { opacity: .88; }
 
 /* Context bar */
-.context-bar { background: #fff8e6; border: 1px solid #fde68a; border-radius: var(--radius-lg); padding: 11px 14px; margin-bottom: 20px; font-size: 12px; color: #92400e; line-height: 1.6; }
+.context-bar { background: #fff8e6; border: 1px solid #fde68a; border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: #92400e; line-height: 1.7; }
 .context-bar strong { font-weight: 600; }
 
 /* Section headers */
@@ -94,19 +100,19 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .sec-head:first-of-type { margin-top: 0; }
 .sec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .dot-r { background: var(--red); }
-.dot-o { background: var(--orange); }
+.dot-o { background: var(--yellow-accent); }
 .dot-b { background: var(--blue); }
 .dot-g { background: var(--gray); }
 .sec-lbl { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
 .sec-rule { flex: 1; height: 1px; background: #d1d9e6; }
 
 /* Cards */
-.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 11px 14px; margin-bottom: 6px; display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
 .card.done { opacity: .38; }
 .card.done .card-title { text-decoration: line-through; }
 .card-accent { width: 3px; border-radius: 2px; flex-shrink: 0; align-self: stretch; min-height: 36px; }
 .ac-r { background: var(--red); }
-.ac-o { background: var(--orange); }
+.ac-o { background: var(--yellow-accent); }
 .ac-b { background: var(--blue); }
 .ac-g { background: var(--gray); }
 .cb-wrap { padding-top: 2px; flex-shrink: 0; }
@@ -307,7 +313,7 @@ function renderSidebarCal(items, containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   if(!items||!items.length){el.innerHTML='<div style="padding:4px 18px 8px;font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None</div>';return;}
-  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}</div>`).join('');
+  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div>`).join('');
 }
 
 function renderBriefing(data,key){
