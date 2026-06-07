@@ -138,7 +138,11 @@ Rules:
 - badge is a short deadline or action label (e.g. "Deadline 11 June", "Reply today")
 - priorities is an ordered list of the top actions across all categories
 - sub fields may contain <strong> tags for emphasis
-- omit alert from calToday/calTomorrow items unless there is a genuine conflict or required action
+- calToday/calTomorrow time field: use "All day" for all-day events, never use date ranges like "All week 8-13 June"
+- calToday/calTomorrow title: format as "Event Type - Full Name" e.g. "Annual Leave - Marie Cooksey"
+- calToday/calTomorrow sub: be specific - state exact dates, what is blocked, who is covering. e.g. "Marie is on leave 8-13 June. Any items involving her approval or input must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations." Never write vague text like "Check handover documents and note absence for escalations."
+- calToday/calTomorrow alert: if the person is absent and has active dependencies, name the specific projects or actions affected. e.g. "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently". Never write generic text like "Colleague absent".
+- omit alert only if there are genuinely no active dependencies or actions affected
 - absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
 - calendar shows working days only (Monday to Friday)
 - subject field: copy the exact email subject this item relates to (used to match EntryID for opening in Outlook). If not from a specific email, omit the subject field.
