@@ -1,7 +1,7 @@
 # work-inbox — Living Handover Document
 
 **Last updated:** 2026-06-08
-**Status:** Active development — dashboard visual rebuild in progress.
+**Status:** Active — dashboard fully functional. Session ended 2026-06-08 evening.
 
 ---
 
@@ -15,24 +15,32 @@
 
 ---
 
-## Current State (as of 2026-06-08, commit fa505b6)
+## Current State (as of 2026-06-08 evening, commit 097a9e4)
 
 ### Working
-- fetch_inbox.py — all three phases (Outlook pull, Anthropic triage, GitHub push) confirmed working
+- fetch_inbox.py — all three phases confirmed working (Outlook pull, Anthropic triage, GitHub push)
 - open_email.py — openmail:// protocol registered, strips trailing slash, opens exact email in Outlook
 - Task Scheduler — WorkInbox-Briefing runs at 7am/9am/11am/1pm/3pm/5pm Mon-Fri
-- Dashboard loads live briefing.json from GitHub on open, falls back to localStorage
+- Dashboard loads live briefing.json from GitHub on open, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
 - Time-of-day greeting (Good morning/afternoon/evening, Kevin) — UK timezone
 - Archive panel — past briefings by date, Load arrow to restore
-- Yellow accent for Needs Response section
-- Context bar — richer 5-7 sentence specific briefing (names, dates, cases)
-- Calendar items — specific sub and alert text (no generic phrases)
+- Yellow accent bar for Needs Response section
+- Context bar — 15px font, richer 5-7 sentence specific briefing (names, dates, cases, no PAT/CI mentions)
+- Calendar items — specific sub and alert text with correct/wrong examples baked into prompt
+- AI cross-references OOO emails and handover emails to infer absences not in calendar
+- Card click-through — whole tile clickable via openmail://, hover shadow, checkbox isolated
+- Tick to hide — ticking a card fades then hides after 1500ms
+- Priority actions — tick fades then hides after 1500ms
+- Show Done button — reveals all hidden ticked items for untick or reference
+- Absences — single bullet list block in white text, text justified (not individual pills)
+- Fuzzy EntryID matching — fallback if AI subject slightly differs from inbox subject
+- Verbatim subject prompt — AI instructed to copy exact email subject character for character
 
-### Broken / In Progress (next session)
-- Card click-through to Outlook — whole tile should be clickable via openmail://, hover shadow effect. entry_id present in briefing.json but not wired in current render
-- Tick to hide — ticking a card should fade then hide after 1500ms. Currently only adds .done class, no hide
-- Show Done button — should appear in header, reveals all hidden ticked items for untick or reference. Currently missing entirely
+### Known Issues / Next Session
+- Calendar items still occasionally too vague despite prompt — monitor over next few runs
+- Card openmail:// click-through dependent on entry_id being present in briefing.json — verify on next run
+- Multi-machine setup not yet done (work machine begb0037.AD-OAK)
 
 ---
 
@@ -45,7 +53,12 @@
 - time: "All day" for all-day events, never date ranges
 - title: "Event Type - Full Name" e.g. "Annual Leave - Marie Cooksey"
 - sub: specific — exact dates, what is blocked, who is covering. No vague text.
-- alert: name specific projects/actions affected. No generic text like "Colleague absent".
+- alert: name specific projects/actions affected. No generic text like "Colleague absent" or "Team member absent".
+- Cross-reference OOO emails and handover emails to infer absences not in calendar blocks
+- Correct/wrong examples baked into prompt to enforce standard
+
+### Subject field
+Copy exact email subject verbatim — character for character. Do not paraphrase. Fuzzy matching fallback in Python if slight drift occurs.
 
 ---
 
@@ -69,11 +82,11 @@
 
 | Priority | Task |
 |----------|------|
-| 1 | Reinstate card click-through (openmail://, whole tile, hover shadow) |
-| 2 | Reinstate tick → fade → hide after 1500ms |
-| 3 | Reinstate Show Done button — reveals hidden items for untick/reference |
-| 4 | Multi-machine — replicate setup on work machine (begb0037.AD-OAK) |
-| 5 | Update command-centre ROADMAP.md |
+| 1 | Monitor calendar item quality over next few morning runs — refine prompt if still vague |
+| 2 | Verify card openmail:// click-through working reliably with fuzzy matching |
+| 3 | Multi-machine — replicate setup on work machine (begb0037.AD-OAK) |
+| 4 | Update command-centre ROADMAP.md |
+| 5 | Show Done — verify priority rows restore correctly on untick |
 
 ---
 
@@ -82,3 +95,4 @@
 - fetch_inbox.py and open_email.py are correct — do not touch without explicit instruction
 - All GitHub writes via Contents API (PAT from GITHUB_PAT env var) — never git push from Cowork
 - Every change committed immediately — no batching
+- Seat A never references local disk — all reads via GitHub proxy
