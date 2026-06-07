@@ -234,32 +234,32 @@ for msg in inbox:
             break
 
 # Known colleagues and their context — hardcoded as reliable fallback
-KNOWN_ABSENCES = {
-    "marie cooksey": {
-        "dates": "8-13 June",
+KNOWN_ABSENCES = [
+    {
+        "triggers": ["marie", "cooksey"],
+        "title": "Annual Leave - Marie Cooksey",
         "sub": "Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations.",
         "alert": "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"
     },
-    "james salas guillen": {
-        "dates": "until 18 June",
+    {
+        "triggers": ["james", "salas", "guillen"],
+        "title": "Annual Leave - James Salas Guillen",
         "sub": "James is on leave until 18 June. DSE/Cardinus archiving, SBS users in feed and applicant data work all on hold. Handover document received Fri 6 Jun.",
         "alert": "James away until 18 June - Kevin and Chris covering OSM tickets and H&S support queue"
     }
-}
+]
 
 def fix_cal_items(items):
     if not items:
         return items
     for item in items:
         title = (item.get("title") or "").lower()
-        for name, ctx in KNOWN_ABSENCES.items():
-            if name in title or any(part in title for part in name.split()):
+        for absence in KNOWN_ABSENCES:
+            if any(trigger in title for trigger in absence["triggers"]):
                 item["time"] = "All day"
-                # Rebuild title with correct format
-                proper_name = name.title()
-                item["title"] = "Annual Leave - " + proper_name
-                item["sub"] = ctx["sub"]
-                item["alert"] = ctx["alert"]
+                item["title"] = absence["title"]
+                item["sub"] = absence["sub"]
+                item["alert"] = absence["alert"]
                 break
     return items
 
