@@ -260,19 +260,20 @@ function toggleImport(){
   document.getElementById('archivePanel').classList.remove('visible');
   document.getElementById('importError').style.display='none';
 }
+let showingDoneItems=false;
 function toggleShowDone(){
   const btn=document.getElementById('btn-show-done');
-  const showing=btn.textContent==='Hide done';
-  if(showing){
-    // Hide done — re-hide all done cards and priority rows
+  showingDoneItems=!showingDoneItems;
+  if(showingDoneItems){
+    // Reveal all done items
+    document.querySelectorAll('.card.done').forEach(el=>el.classList.remove('card-hidden'));
+    document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='flex');
+    btn.textContent='Hide done';
+  } else {
+    // Re-hide all done items
     document.querySelectorAll('.card.done').forEach(el=>el.classList.add('card-hidden'));
     document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='none');
     btn.textContent='Show done';
-  } else {
-    // Show done — reveal all done cards and priority rows
-    document.querySelectorAll('.card.done').forEach(el=>el.classList.remove('card-hidden'));
-    document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='');
-    btn.textContent='Hide done';
   }
 }
 function toggleArchive(){
@@ -320,8 +321,7 @@ function toggleTick(id){
   if(item){
     if(ticks[k]){
       item.classList.add('done');
-      const showingDone=document.getElementById('btn-show-done').textContent==='Hide done';
-      if(!showingDone){
+      if(!showingDoneItems){
         setTimeout(()=>{ item.classList.add('card-hidden'); },1500);
       }
     } else {
@@ -331,8 +331,7 @@ function toggleTick(id){
   if(prow){
     if(ticks[k]){
       prow.classList.add('done');
-      const showingDone=document.getElementById('btn-show-done').textContent==='Hide done';
-      if(!showingDone){
+      if(!showingDoneItems){
         setTimeout(()=>{ prow.style.display='none'; },1500);
       }
     } else {
