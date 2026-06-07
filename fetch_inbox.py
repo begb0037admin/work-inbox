@@ -46,9 +46,9 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
             "received":        str(msg.ReceivedTime),
             "is_read":         is_read,
             "has_attachments": msg.Attachments.Count > 0,
-            "importance":      msg.Importance
+            "importance":      msg.Importance,
+            "entry_id":        msg.EntryID
         }
-        # Unread: include body preview. Read: subject + sender only.
         if not is_read:
             entry["body_preview"] = (msg.Body or "")[:150]
         inbox.append(entry)
@@ -110,26 +110,26 @@ tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorro
 cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == today]
 cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
 
+# Strip entry_id from what we send to API - not needed for triage
+inbox_for_api = [{k:v for k,v in m.items() if k != 'entry_id'} for m in inbox]
+
 SYSTEM = """You are Kevin's morning inbox triage assistant at Oxford University Personnel Services.
 Analyse the inbox, sent items, and calendar data provided and return ONLY a valid JSON object - no preamble, no markdown, no code fences.
 Use only plain ASCII punctuation: use - instead of dashes, use ' instead of curly quotes, use ... instead of ellipsis.
-
-Note: inbox items with no body_preview field have already been read - triage by subject and sender only.
-Items with body_preview are unread and should be given priority consideration.
 
 The JSON must match this exact schema:
 {
   "date": "<Day D Month YYYY>",
   "subtitle": "<one short phrase describing the day, optional>",
   "context": "<2-3 sentence summary of the current work situation>",
-  "urgent": [{"title":"...","sub":"...","badge":"...","badgeType":"red|amber|blue|gray"}],
-  "needs":  [{"title":"...","sub":"...","badge":"...","badgeType":"red|amber|blue|gray"}],
-  "fyi":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|amber|blue|gray"}],
-  "low":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|amber|blue|gray"}],
+  "urgent": [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
+  "needs":  [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
+  "fyi":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
+  "low":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
   "calToday":    [{"time":"...","title":"...","sub":"...","alert":"..."}],
   "calTomorrow": [{"time":"...","title":"...","sub":"...","alert":"..."}],
   "absences": ["Name - reason"],
-  "priorities": [{"text":"...","date":"...","dateType":"red|amber|blue|gray"}]
+  "priorities": [{"text":"...","date":"...","dateType":"red|yellow|blue|gray","subject":"..."}]
 }
 
 Rules:
@@ -140,12 +140,13 @@ Rules:
 - omit alert from calToday/calTomorrow items unless there is a genuine conflict or required action
 - absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
 - calendar shows working days only (Monday to Friday)
+- subject field: copy the exact email subject this item relates to (used to match EntryID for opening in Outlook). If not from a specific email, omit the subject field.
 """
 
 USER = f"""Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.
 
-INBOX ({len(inbox)} emails, last 7 days - unread have body_preview, read do not):
-{json.dumps(inbox, indent=2, ensure_ascii=True)}
+INBOX ({len(inbox_for_api)} emails, last 7 days - unread have body_preview, read do not):
+{json.dumps(inbox_for_api, indent=2, ensure_ascii=True)}
 
 SENT ({len(sent)} items, last 7 days):
 {json.dumps(sent, indent=2, ensure_ascii=True)}
@@ -172,6 +173,27 @@ if raw_text.endswith("```"):
     raw_text = "\n".join(raw_text.split("\n")[:-1])
 
 briefing = json.loads(raw_text)
+
+# Build subject -> entry_id lookup from inbox
+subject_to_entryid = {}
+for m in inbox:
+    if m.get("entry_id") and m.get("subject"):
+        subject_to_entryid[m["subject"]] = m["entry_id"]
+
+# Inject entry_ids into briefing items by matching subject
+def inject_entry_ids(items):
+    if not items:
+        return items
+    for item in items:
+        subj = item.get("subject", "")
+        if subj and subj in subject_to_entryid:
+            item["entry_id"] = subject_to_entryid[subj]
+    return items
+
+for section in ["urgent", "needs", "fyi", "low"]:
+    inject_entry_ids(briefing.get(section, []))
+for section in ["priorities"]:
+    inject_entry_ids(briefing.get(section, []))
 
 with open(OUTPUT_BRIEFING, "w", encoding="utf-8") as f:
     json.dump(briefing, f, indent=2, ensure_ascii=False)
