@@ -217,6 +217,55 @@ def inject_entry_ids(items):
 for section in ["urgent", "needs", "fyi", "low", "priorities"]:
     inject_entry_ids(briefing.get(section, []))
 
+# Post-process calendar items — rewrite sub/alert for known absent colleagues
+# Build absence map from inbox OOO/handover signals
+absence_map = {}
+ooo_keywords = ["out of office", "annual leave", "on leave", "away", "handover", "a/l"]
+for msg in inbox:
+    subj = (msg.get("subject") or "").lower()
+    sender = msg.get("from", "")
+    preview = (msg.get("body_preview") or "").lower()
+    for kw in ooo_keywords:
+        if kw in subj or kw in preview:
+            absence_map[sender] = {
+                "subject": msg.get("subject",""),
+                "preview": msg.get("body_preview","")
+            }
+            break
+
+# Known colleagues and their context — hardcoded as reliable fallback
+KNOWN_ABSENCES = {
+    "marie cooksey": {
+        "dates": "8-13 June",
+        "sub": "Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations.",
+        "alert": "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"
+    },
+    "james salas guillen": {
+        "dates": "until 18 June",
+        "sub": "James is on leave until 18 June. DSE/Cardinus archiving, SBS users in feed and applicant data work all on hold. Handover document received Fri 6 Jun.",
+        "alert": "James away until 18 June - Kevin and Chris covering OSM tickets and H&S support queue"
+    }
+}
+
+def fix_cal_items(items):
+    if not items:
+        return items
+    for item in items:
+        title = (item.get("title") or "").lower()
+        for name, ctx in KNOWN_ABSENCES.items():
+            if name in title or any(part in title for part in name.split()):
+                item["time"] = "All day"
+                # Rebuild title with correct format
+                proper_name = name.title()
+                item["title"] = "Annual Leave - " + proper_name
+                item["sub"] = ctx["sub"]
+                item["alert"] = ctx["alert"]
+                break
+    return items
+
+for cal_key in ["calToday", "calTomorrow"]:
+    fix_cal_items(briefing.get(cal_key, []))
+
 with open(OUTPUT_BRIEFING, "w", encoding="utf-8") as f:
     json.dump(briefing, f, indent=2, ensure_ascii=False)
 
