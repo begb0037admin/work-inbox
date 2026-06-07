@@ -1,11 +1,13 @@
-import json, os, base64, webbrowser
+﻿import json, os, base64, urllib.request, urllib.error
 from datetime import datetime, timedelta
 import win32com.client
 import anthropic
 
 OUTPUT_RAW      = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "inbox_raw.json")
 OUTPUT_BRIEFING = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "briefing.json")
-DASHBOARD_URL   = "https://begb0037admin.github.io/work-inbox/"
+GITHUB_REPO     = "begb0037admin/work-inbox"
+GITHUB_PATH     = "data/briefing.json"
+GITHUB_PAT      = os.environ.get("GITHUB_PAT", "")
 
 outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
@@ -110,8 +112,7 @@ tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorro
 cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == today]
 cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
 
-# Strip entry_id from what we send to API - not needed for triage
-inbox_for_api = [{k:v for k,v in m.items() if k != 'entry_id'} for m in inbox]
+inbox_for_api = [{k:v for k,v in m.items() if k != "entry_id"} for m in inbox]
 
 SYSTEM = """You are Kevin's morning inbox triage assistant at Oxford University Personnel Services.
 Analyse the inbox, sent items, and calendar data provided and return ONLY a valid JSON object - no preamble, no markdown, no code fences.
@@ -174,13 +175,11 @@ if raw_text.endswith("```"):
 
 briefing = json.loads(raw_text)
 
-# Build subject -> entry_id lookup from inbox
 subject_to_entryid = {}
 for m in inbox:
     if m.get("entry_id") and m.get("subject"):
         subject_to_entryid[m["subject"]] = m["entry_id"]
 
-# Inject entry_ids into briefing items by matching subject
 def inject_entry_ids(items):
     if not items:
         return items
@@ -190,17 +189,48 @@ def inject_entry_ids(items):
             item["entry_id"] = subject_to_entryid[subj]
     return items
 
-for section in ["urgent", "needs", "fyi", "low"]:
-    inject_entry_ids(briefing.get(section, []))
-for section in ["priorities"]:
+for section in ["urgent", "needs", "fyi", "low", "priorities"]:
     inject_entry_ids(briefing.get(section, []))
 
 with open(OUTPUT_BRIEFING, "w", encoding="utf-8") as f:
     json.dump(briefing, f, indent=2, ensure_ascii=False)
 
 print(f"Phase 2 done - briefing written to {OUTPUT_BRIEFING}")
+print("Phase 3 - pushing briefing to GitHub...")
 
-encoded = base64.urlsafe_b64encode(json.dumps(briefing, ensure_ascii=False).encode("utf-8")).decode("ascii")
-url     = DASHBOARD_URL + "#load=" + encoded
-webbrowser.open(url)
-print(f"Dashboard opened.")
+if not GITHUB_PAT:
+    print("WARNING: GITHUB_PAT not set - skipping GitHub push")
+else:
+    try:
+        api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
+        headers = {
+            "Authorization": f"token {GITHUB_PAT}",
+            "Content-Type": "application/json",
+            "User-Agent": "work-inbox-script"
+        }
+        sha = None
+        try:
+            req = urllib.request.Request(api_url, headers=headers)
+            with urllib.request.urlopen(req) as r:
+                existing = json.loads(r.read())
+                sha = existing.get("sha")
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+        content_b64 = base64.b64encode(
+            json.dumps(briefing, indent=2, ensure_ascii=False).encode("utf-8")
+        ).decode("ascii")
+        payload = {
+            "message": f"chore: update briefing {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            "content": content_b64
+        }
+        if sha:
+            payload["sha"] = sha
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(api_url, data=data, headers=headers, method="PUT")
+        with urllib.request.urlopen(req) as r:
+            result = json.loads(r.read())
+            print(f"Phase 3 done - briefing pushed to GitHub (commit: {result.get('commit',{}).get('sha','?')[:7]})")
+    except Exception as e:
+        print(f"Phase 3 WARNING - GitHub push failed: {e}")
+        print("Briefing is still available locally.")
