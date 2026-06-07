@@ -1,185 +1,161 @@
 {
   "date": "Monday 8 June 2026",
-  "subtitle": "Week starts with handovers and key system updates",
-  "context": "James Salas Guillen is returning from leave today after handing over H&S work. Multiple colleagues (Marie Cooksey, Michael O'Sullivan) are absent. Several systems issues (GitHub dashboard failures, Access support cases) require attention, and IM Principles URL changes need finalizing by 23-24 June.",
+  "subtitle": "Return to work week",
+  "context": "James Salas Guillen is out on annual leave until 18 June, and Marie Cooksey is out until 13 June. Michael O'Sullivan returns today. Several urgent items need attention including GitHub workflow failures, IM Principles URL changes, and handover documents from James.",
   "urgent": [
     {
-      "title": "H&S Handover - James returning, handover document provided",
-      "sub": "Review H&S Handover document for outstanding items and action priorities",
-      "badge": "Review today",
+      "title": "GitHub Dashboard Workflow Failures",
+      "sub": "<strong>Multiple failed pipeline runs</strong> for hris-dashboard since 4 June require investigation and fix",
+      "badge": "Action required",
       "badgeType": "red",
-      "subject": "H&S Handover"
+      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main"
     },
     {
-      "title": "Annual leave coverage - Marie absent this week",
-      "sub": "Marie Cooksey on leave 8-12 June; <strong>handover document sent</strong> with coverage plan",
-      "badge": "Coverage confirmed",
-      "badgeType": "yellow",
-      "subject": "Marie Handover 8-12 June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000"
-    }
-  ],
-  "needs": [
-    {
-      "title": "IM Principles URL migration - action required",
-      "sub": "New URL goes live, old page down 23-24 June. <strong>Confirm Laura Porter has updated all PXD links</strong> as discussed",
-      "badge": "Due 23 June",
-      "badgeType": "yellow",
+      "title": "IM Principles URL Change - Go Live 23-24 June",
+      "sub": "New URL confirmed with Laura Porter. <strong>Old page comes down 23/24 June</strong> - update links in PXD and systems now",
+      "badge": "Deadline 23 June",
+      "badgeType": "red",
       "subject": "RE: IM Principles - change to URL",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FB0000"
     },
     {
-      "title": "Halo ER Case Management - review date pending",
-      "sub": "Natasha Heaton's product owner is off sick. <strong>Set review date when PO returns</strong> - see approval confirmation",
-      "badge": "Awaiting info",
+      "title": "James Salas Guillen Handover",
+      "sub": "H&S and other outstanding items documented. <strong>Review handover priorities</strong> and delegate coverage for his absence until 18 June",
+      "badge": "Review today",
+      "badgeType": "red",
+      "subject": "H&S Handover"
+    }
+  ],
+  "needs": [
+    {
+      "title": "Halo ER Case Management - Review Date Pending",
+      "sub": "Natasha Heaton reports product owner still off sick. <strong>Need to reschedule review</strong> once coverage confirmed",
+      "badge": "Within 48hrs",
       "badgeType": "yellow",
-      "subject": "Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FC0000"
+      "subject": "RE: Halo ER Case Management Support Operating Model - Approval Confirmation",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FF0000"
     },
     {
-      "title": "GitHub dashboard workflow failures - multiple attempts",
-      "sub": "HRIS Dashboard workflow has failed multiple times (at least 6 attempts on 4 June). <strong>Investigate root cause</strong>",
-      "badge": "Review logs",
+      "title": "DSE/Cardinus Data Upload - Contractor Account Requests",
+      "sub": "Marie asking who creates manual records for contractors. <strong>Clarify process with James team</strong> before he leaves",
+      "badge": "Before James leaves",
       "badgeType": "yellow",
-      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard"
-    },
-    {
-      "title": "PeopleXD/Cardinus data upload - new interface live",
-      "sub": "DSE automated data upload now live as of 3 June. <strong>Confirm documentation and process mapping updated</strong>. Monitor contractor account creation process",
-      "badge": "Confirm status",
-      "badgeType": "blue",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000"
+    },
+    {
+      "title": "Turnover and Retention Dashboard Sprint Review",
+      "sub": "Meeting rearranged due to annual leave - <strong>confirm new date and attendees</strong>",
+      "badge": "Reschedule",
+      "badgeType": "yellow",
+      "subject": "[143a] Turnover and Retention Dashboard - Sprint Review Meeting",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35F40000"
     }
   ],
   "fyi": [
     {
-      "title": "HR Systems Bulletin - content call for June",
-      "sub": "Invited to contribute to monthly bulletin shared with PeopleXD and HR reporting tools users",
-      "badge": "Contribute",
+      "title": "HR Systems Bulletin - Call for Content",
+      "sub": "June 2026 edition - contribution deadline to follow",
+      "badge": "FYI",
       "badgeType": "gray",
       "subject": "Call for content - HR Systems Bulletin (June 2026)"
     },
     {
-      "title": "Trinity term HR Policy newsletter published",
-      "sub": "HR staff updates document now live with new content",
+      "title": "H&S Management System Procurement",
+      "sub": "Marie Cooksey requesting feedback on shortlist pack weightings over next few weeks",
       "badge": "FYI",
       "badgeType": "gray",
-      "subject": "RE: Trinity term HR Policy newsletter",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35E10000"
+      "subject": "H&S Management System",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
     },
     {
-      "title": "Turnover and Retention Dashboard - sprint meeting rescheduled",
-      "sub": "Fortnightly sprint review meeting rearranged due to annual leave",
-      "badge": "Rescheduled",
-      "badgeType": "gray",
-      "subject": "[143a] Turnover and Retention Dashboard - Sprint Review Meeting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35F40000"
-    },
-    {
-      "title": "OWL network maintenance - 11 June",
-      "sub": "Newer software release for captive portal being deployed next week",
-      "badge": "11 June",
-      "badgeType": "gray",
-      "subject": "[ict-a] OWL Maintenance - 11th June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000"
-    },
-    {
-      "title": "Strategic H&S system evaluation weightings",
-      "sub": "Helen Harbour scheduling discussion on proposed evaluation criteria weightings for SHSMS",
-      "badge": "Scheduled",
-      "badgeType": "gray",
-      "subject": "Strategic H&S Modular System requirements evaluation weightings",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36420000"
-    },
-    {
-      "title": "Cority PUG meeting",
-      "sub": "Product User Group meeting agenda to follow",
-      "badge": "Agenda pending",
+      "title": "Cority PUG Meeting",
+      "sub": "Product User Group meeting scheduled - agenda to follow",
+      "badge": "FYI",
       "badgeType": "gray",
       "subject": "Cority Product User Group (PUG)",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36440000"
+    },
+    {
+      "title": "Volunteer Reporting Capability",
+      "sub": "Marie asking if system can now report volunteer hours - response: not currently possible",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Question re Volunteer reporting",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE360C0000"
     }
   ],
   "low": [
     {
-      "title": "New vacancy notifications (daily)",
-      "sub": "Automated notifications from PeopleXD job board matching your criteria",
-      "badge": "Auto-feed",
+      "title": "Access Support Tickets",
+      "sub": "Multiple Access Group support case updates and feedback surveys - monitoring in progress",
+      "badge": "Monitoring",
+      "badgeType": "gray",
+      "subject": "Access Support Team cases"
+    },
+    {
+      "title": "New Vacancy Notifications",
+      "sub": "PeopleXD vacancy alerts - routine monitoring continues",
+      "badge": "Routine",
       "badgeType": "gray",
       "subject": "New Vacancy Notification",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35ED0000"
     },
     {
-      "title": "Kudoboard for Marie Cooksey",
-      "sub": "Last call for contributions to Kudoboard as it is being finalized",
-      "badge": "Closing soon",
-      "badgeType": "gray",
-      "subject": "The Kudoboard for Marie Cooksey is being finalized",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36410000"
-    },
-    {
-      "title": "Occupational Health appointment reminder",
-      "sub": "Reminder of your appointment with occupational health",
-      "badge": "Appointment",
+      "title": "Occupational Health Reminder",
+      "sub": "Appointment reminder received - confirm attendance",
+      "badge": "Admin",
       "badgeType": "gray",
       "subject": "Appointment Reminder - Occupational Health"
-    },
-    {
-      "title": "Access support case updates (multiple)",
-      "sub": "Various Access Group support cases with ongoing updates and resolutions",
-      "badge": "Tracking",
-      "badgeType": "gray",
-      "subject": "Access Support Team - Case Updates"
     }
   ],
   "calToday": [],
   "calTomorrow": [
     {
-      "time": "All day",
-      "title": "Marie Cooksey - Annual Leave",
-      "sub": "Marie absent 8-12 June (see handover document for coverage)",
-      "alert": "Coverage arranged"
+      "time": "All day (8-13 June)",
+      "title": "Marie Cooksey Annual Leave",
+      "sub": "Marie out of office - handover coverage arranged",
+      "alert": "Coverage confirmed"
     }
   ],
   "absences": [
-    "Marie Cooksey - Annual leave 8-12 June",
-    "Michael O'Sullivan - Out of office, returning Monday 8 June 2026",
-    "James Salas Guillen - Annual leave from end of 5 June, returning Thursday 18 June"
+    "Michael O'Sullivan - out of office, returning Monday 8 June",
+    "James Salas Guillen - annual leave 5-18 June",
+    "Marie Cooksey - annual leave 8-13 June"
   ],
   "priorities": [
     {
-      "text": "Review James Salas Guillen's H&S handover document and action outstanding items",
+      "text": "Fix GitHub hris-dashboard pipeline failures blocking updates",
+      "date": "Today",
+      "dateType": "red",
+      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main"
+    },
+    {
+      "text": "Update IM Principles links in PXD before 23 June go-live",
+      "date": "By 23 June",
+      "dateType": "red",
+      "subject": "RE: IM Principles - change to URL",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FB0000"
+    },
+    {
+      "text": "Review James Salas Guillen handover doc and confirm coverage for H&S work",
       "date": "Today",
       "dateType": "red",
       "subject": "H&S Handover"
     },
     {
-      "text": "Confirm IM Principles URL updates in PXD with Laura Porter before 23 June cutover",
-      "date": "By 23 June",
-      "dateType": "yellow",
-      "subject": "RE: IM Principles - change to URL",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FB0000"
-    },
-    {
-      "text": "Investigate and resolve GitHub HRIS Dashboard workflow failures (multiple failed runs)",
+      "text": "Reschedule Halo ER Case Management review once product owner returns",
       "date": "This week",
       "dateType": "yellow",
-      "subject": "[begb0037admin/hris-dashboard] Run failed"
+      "subject": "RE: Halo ER Case Management Support Operating Model - Approval Confirmation",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FF0000"
     },
     {
-      "text": "Confirm Cardinus data upload process and documentation with James Salas Guillen (now on leave)",
-      "date": "Before 18 June",
+      "text": "Clarify contractor account creation process before James' leave",
+      "date": "This week",
       "dateType": "yellow",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000"
-    },
-    {
-      "text": "Coordinate Halo ER review date with Natasha Heaton once product owner returns",
-      "date": "Within 48 hours",
-      "dateType": "yellow",
-      "subject": "Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FC0000"
     }
   ]
 }
