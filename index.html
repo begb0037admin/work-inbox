@@ -107,8 +107,11 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .sec-rule { flex: 1; height: 1px; background: #d1d9e6; }
 
 /* Cards */
+.card-link { text-decoration: none; color: inherit; display: block; cursor: pointer; }
+.card-link:hover .card { border-color: #a0aec0; box-shadow: 0 2px 8px rgba(0,33,71,0.1); }
 .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
 .card.done { opacity: .38; }
+.card.card-hidden { display: none; }
 .card.done .card-title { text-decoration: line-through; }
 .card-accent { width: 3px; border-radius: 2px; flex-shrink: 0; align-self: stretch; min-height: 36px; }
 .ac-r { background: var(--red); }
@@ -211,6 +214,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
         <div class="header-date" id="headerDate"></div>
       </div>
       <div class="header-actions">
+        <button class="btn" id="btn-show-done" onclick="toggleShowDone()">Show done</button>
         <button class="btn" onclick="toggleArchive()">Archive</button>
       </div>
     </div>
@@ -254,6 +258,18 @@ function toggleImport(){
   document.getElementById('archivePanel').classList.remove('visible');
   document.getElementById('importError').style.display='none';
 }
+function toggleShowDone(){
+  const btn=document.getElementById('btn-show-done');
+  const hidden=document.querySelectorAll('.card-hidden');
+  const showing=btn.textContent==='Hide done';
+  if(showing){
+    hidden.forEach(el=>el.classList.add('card-hidden'));
+    btn.textContent='Show done';
+  } else {
+    document.querySelectorAll('.card.done').forEach(el=>el.classList.remove('card-hidden'));
+    btn.textContent='Hide done';
+  }
+}
 function toggleArchive(){
   const p=document.getElementById('archivePanel');
   p.classList.toggle('visible');
@@ -295,8 +311,22 @@ function toggleTick(id){
   const item=document.getElementById('item_'+id);
   const prow=document.getElementById('prow_'+id);
   if(cb) cb.classList.toggle('checked',ticks[k]);
-  if(item) item.classList.toggle('done',ticks[k]);
   if(prow) prow.classList.toggle('done',ticks[k]);
+  if(item){
+    if(ticks[k]){
+      item.classList.add('done');
+      const showingDone=document.getElementById('btn-show-done').textContent==='Hide done';
+      if(!showingDone){
+        setTimeout(()=>{ item.classList.add('card-hidden'); },1500);
+      }
+    } else {
+      item.classList.remove('done','card-hidden');
+    }
+  }
+}
+function openEmail(entryId,ev){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  window.location.href='openmail://'+entryId+'/';
 }
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
@@ -305,7 +335,9 @@ function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
-    return`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}')"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${item.sub}</div>`:''}</div></div>`;
+    const hasLink=item.entry_id&&item.entry_id.length>0;
+    const cardHtml=`<div class="card${ticked?' done':''}${ticked?' card-hidden':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${item.sub}</div>`:''}</div></div>`;
+    return hasLink?`<a class="card-link" href="#" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
 
