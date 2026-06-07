@@ -141,8 +141,17 @@ Rules:
 - calToday/calTomorrow time field: use "All day" for all-day events, never use date ranges like "All week 8-13 June"
 - calToday/calTomorrow title: format as "Event Type - Full Name" e.g. "Annual Leave - Marie Cooksey"
 - calToday/calTomorrow sub: be specific - state exact dates, what is blocked, who is covering. e.g. "Marie is on leave 8-13 June. Any items involving her approval or input must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations." Never write vague text like "Check handover documents and note absence for escalations."
-- calToday/calTomorrow alert: if the person is absent and has active dependencies, name the specific projects or actions affected. e.g. "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently". Never write generic text like "Colleague absent".
+- calToday/calTomorrow alert: if the person is absent and has active dependencies, name the specific projects or actions affected. e.g. "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently". Never write generic text like "Colleague absent" or "Team member absent".
 - omit alert only if there are genuinely no active dependencies or actions affected
+
+CALENDAR ITEM EXAMPLE — for an absent manager or colleague, output MUST look exactly like this:
+CORRECT:
+{"time":"All day","title":"Annual Leave - Marie Cooksey","sub":"Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait. Kevin and Chris are covering H&S support queue and OSM escalations in her absence.","alert":"Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"}
+
+NEVER produce output like this — it is wrong and useless:
+{"time":"All week","title":"Marie Cooksey annual leave","sub":"Away 8-12 June. Handover documentation provided.","alert":"Team member absent"}
+
+The difference: correct output names specific projects, specific coverage arrangements, specific actions. Wrong output is generic and tells Kevin nothing he does not already know. Every calendar item for an absent colleague must meet the CORRECT standard above.
 - absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
 - calendar shows working days only (Monday to Friday)
 - calToday/calTomorrow: if a colleague is known to be absent from OOO replies, handover emails or inbox context — even if no calendar block exists — include them as an All day entry. Use the full name from email context, not abbreviated calendar titles like "Annual Leave - Marie". Cross-reference all data sources to build the most complete and accurate picture.
