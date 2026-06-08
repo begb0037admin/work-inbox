@@ -1,20 +1,28 @@
 {
   "date": "Monday 8 June 2026",
-  "subtitle": "Marie absent all week; Ivanti incident active; Access case 68974493 timeline pending",
-  "context": "Marie Cooksey is on leave until Monday 15 June and has sent a handover covering H&S support queue and OSM escalations, which Chris is covering alongside her. The Major Incident involving an Ivanti security vulnerability in OSM Self-Service requires immediate action - Sarah Warne is coordinating with a Senior Support Engineer and needs testing support from Rob and Asta on the PeopleXD service requests interface. Access Support case 68974493 (Chemistry bulk-delete request) is blocked waiting for a timeline from Access Group before they can proceed; Julie Hickman flagged this at 13:29 on 8 June. The Cority employee import error from 5 June on the OxfordUniversity_Demo system needs investigation. DTP1092 College Staff in PXD project has pending comments and approvals from Marie that cannot progress until she returns on 15 June. Open the Access case email from Julie Hickman first - it contains the blocking dependency for a live support issue.",
+  "subtitle": "Marie absent all week, Ivanti incident ongoing, DTP1092 comments blocked",
+  "context": "Marie Cooksey is out of office until Monday 15 June, creating immediate dependencies across your portfolio. The Critical Ivanti security vulnerability requires urgent testing coordination with Asta Palmer on PeopleXD service requests, and Sarah Warne is awaiting confirmation from you and other stakeholders to proceed. DTP1092 College Staff in PXD Proposal has multiple comments from Marie requiring her input that cannot progress until her return on 15 June. Julie Hickman is awaiting a timeline from AG for the Chemistry bulk-delete case 68974493 before they can proceed. Sophie Levy from Cority has not heard from you since April on the Scoping Session and is waiting for an update. The most time-critical deadline this week is the Ivanti Major Incident coordination - open Emma Fitz-Gibbon's email on Priority 1 Support Call immediately to confirm your participation and understand next steps from Sarah Warne.",
   "urgent": [
     {
-      "title": "Major Incident - Ivanti Security Vulnerability",
-      "sub": "<strong>OSM Self-Service issue</strong>. Sarah Warne coordinating with Senior Support Engineer. Rob and Asta assigned to test PeopleXD service requests interface. Action required today.",
+      "title": "Ivanti security vulnerability - Major Incident coordination",
+      "sub": "Emma Fitz-Gibbon and Sarah Warne are coordinating urgent response. Your confirmation needed to move forward with testing involvement.",
       "badge": "Action today",
       "badgeType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2A0000"
     },
     {
-      "title": "Access Case 68974493 - Timeline Required",
-      "sub": "<strong>Chemistry bulk-delete request blocked</strong>. Julie Hickman requesting timeline from Access Group (AG) before proceeding. Kevin's reply sent 14:52 on 8 June confirms AG ready but need two items from us first. Follow up with Julie on status.",
-      "badge": "Reply pending",
+      "title": "DTP1092 comments blocked - Marie absent until 15 June",
+      "sub": "<strong>Marie Cooksey unavailable all week.</strong> DTP1092 College Staff in PXD Proposal has pending comments requiring her approval and input. Project cannot progress on this workstream until she returns.",
+      "badge": "Blocked until 15 June",
+      "badgeType": "red",
+      "subject": "DTP1092 College staff in PXD",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
+    },
+    {
+      "title": "Access Support case 68974493 - Chemistry bulk-delete timeline",
+      "sub": "Julie Hickman has been waiting for AG timeline. Your sent email confirms AG ready to proceed but need two items from you before they can act.",
+      "badge": "Timeline required",
       "badgeType": "red",
       "subject": "RE: Access Support Team | 68974493 - New Case",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E290000"
@@ -22,104 +30,88 @@
   ],
   "needs": [
     {
-      "title": "Cority Employee Import Error",
-      "sub": "Error occurred 5 June on OxfordUniversity_Demo system during 23:00 HR import. Log file attached. Investigate and resolve data sync issue.",
-      "badge": "Within 48hrs",
+      "title": "Scoping Session update overdue - Cority waiting since April",
+      "sub": "<strong>Sophie Levy</strong> has not heard from you in couple of months on Scoping Session. Last update was April. Requires response on project status.",
+      "badge": "Reply within 48hrs",
       "badgeType": "yellow",
-      "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000"
+      "subject": "RE: Scoping Session update",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
     },
     {
-      "title": "DTP1092 - College Staff in PXD Project",
-      "sub": "<strong>Marie unavailable for approvals/comments</strong> until 15 June. Project has pending updates from Marie Cooksey. Crispin Muncaster requested to move this week's meeting. Review blocked comments and plan continuation for her return.",
-      "badge": "After 15 June",
+      "title": "Athena Artuso - Annual Leave notification",
+      "sub": "Out of office notification received. Check handover implications and any active cases requiring coverage.",
+      "badge": "Check coverage",
       "badgeType": "yellow",
-      "subject": "DTP1092 College staff in PXD",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
+      "subject": "Athena A/L",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2F0000"
     },
     {
-      "title": "H&S Management System Evaluation",
-      "sub": "Strategic H&S Modular System (SHSMS) evaluation weightings. Helen Harbour scheduling meeting to review proposed criteria weightings. Feed into shortlist pack over next few weeks. Marie copied but unavailable.",
-      "badge": "Within week",
+      "title": "James Salas Guillen absent 5-18 June - H&S handover",
+      "sub": "<strong>James Salas Guillen</strong> on annual leave from end of 5 June, returning Thursday 18 June. H&S Handover document provided. Monitor DSE user data import and upload to Cardinus during absence.",
+      "badge": "Coverage active",
       "badgeType": "yellow",
-      "subject": "Strategic H&S Modular System requirements evaluation weightings",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36420000"
+      "subject": "Annual leave and support during my absence",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000"
     }
   ],
   "fyi": [
     {
-      "title": "Occupational Health Report Completed",
-      "sub": "Helena Uddin confirmed report sent to referrer. You approved and consented 8 June at 10:51. Complete.",
-      "badge": "Complete",
+      "title": "Canvas cyber incident update from Communications Office",
+      "sub": "Vicky Marriott, Major Incident Manager, has issued information on actions taken following recent data security incident impacting Canvas.",
+      "badge": "FYI",
       "badgeType": "blue",
-      "subject": "RE: OCCUPATIONAL HEALTH - OH REPORT",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E250000"
+      "subject": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E300000"
     },
     {
-      "title": "DSE User Data Import Live",
-      "sub": "James Salas Guillen confirmed automated data upload from PeopleXD to Cardinus now live and functioning. Process mapping and documentation updates underway. No manual account creation requests yet.",
-      "badge": "Live",
+      "title": "H&S Management System - Shortlist and weightings feedback",
+      "sub": "Marie Cooksey requesting feedback on Strategic H&S Modular System evaluation weightings over next few weeks.",
+      "badge": "FYI",
       "badgeType": "blue",
-      "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000"
+      "subject": "H&S Management System",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
     },
     {
-      "title": "Leave & Absence Workshop Summary",
-      "sub": "Lyndsey Middleton shared summary of key findings from workshop on Sustaining Adoption of Leave & Absence. Attachment contains full details.",
-      "badge": "Reference",
+      "title": "Leave & Absence workshop summary",
+      "sub": "Lyndsey Middleton has sent key findings summary from Sustaining Adoption of Leave & Absence workshop.",
+      "badge": "FYI",
       "badgeType": "blue",
       "subject": "RE: Workshop: Sustaining Adoption of Leave & Absence",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E210000"
     },
     {
-      "title": "OWL Maintenance Scheduled 11 June",
-      "sub": "James Turner notifying of OWL network captive portal upgrade to newer release next week (11 June). No action required.",
-      "badge": "Notice",
+      "title": "OWL network maintenance scheduled 11 June",
+      "sub": "James Turner notifying of upgrade to captive portal software next week.",
+      "badge": "11 June",
       "badgeType": "blue",
       "subject": "[ict-a] OWL Maintenance - 11th June",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000"
-    },
-    {
-      "title": "Cisco VPN Update Completed",
-      "sub": "Philip White confirmed VPN update to 5.1.17.3394 completed successfully as planned.",
-      "badge": "Complete",
-      "badgeType": "blue",
-      "subject": "RE: [ict-a] Cisco Secure Client (VPN) update to 5.1.17.3394",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000"
     }
   ],
   "low": [
     {
-      "title": "Head of People Programmes & Change - Expressions of Interest",
-      "sub": "Jonathan Roger inviting expressions of interest for two key roles within People Department. Two senior positions requiring close collaboration.",
-      "badge": "EOI",
+      "title": "Occupational Health report sent to referrer",
+      "sub": "Helena Uddin confirms OH report sent to your referrer. Password-protected document.",
+      "badge": "Complete",
+      "badgeType": "gray",
+      "subject": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E250000"
+    },
+    {
+      "title": "Expressions of Interest - People Department roles",
+      "sub": "Jonathan Roger inviting expressions of interest for Head of People Programmes and Head of Change roles.",
+      "badge": "FYI",
       "badgeType": "gray",
       "subject": "Expressions of Interest - Head of People Programmes & Head of Change - People Department",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E280000"
     },
     {
-      "title": "Cority GX2 2026.2 Release",
-      "sub": "New release available with refreshed navigation and smarter AI. Informational update from Cority Team.",
-      "badge": "Available",
+      "title": "Access Support case 68981549 resolved",
+      "sub": "Resolved support case.",
+      "badge": "Resolved",
       "badgeType": "gray",
-      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000"
-    },
-    {
-      "title": "Bodleian iSkills Workshops - Week 7",
-      "sub": "Bodleian User Education promoting Trinity Term iSkills programme. Full schedule available.",
-      "badge": "Optional",
-      "badgeType": "gray",
-      "subject": "Bodleian iSkills workshops for the week ahead (7th week)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E240000"
-    },
-    {
-      "title": "Digital Toolkit Refresh Courses",
-      "sub": "Digital Capabilities Team promoting summer courses for weeks 7 & 8. Development opportunity.",
-      "badge": "Optional",
-      "badgeType": "gray",
-      "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
+      "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000"
     }
   ],
   "calToday": [
@@ -132,52 +124,46 @@
   ],
   "calTomorrow": [
     {
-      "time": "14:00-15:00",
+      "time": "14:00",
       "title": "GLAM Rostering - Simon Burford",
-      "sub": "Microsoft Teams meeting to discuss Botanic Gardens Ticket Office and Ashmolean Security rostering requirements. Simon hosting discussion on potential involvement and team arrangements.",
+      "sub": "Meeting to discuss Botanic Gardens Ticket Office and Ashmolean Security rostering requirements. Simon organizing in Marie's absence.",
       "alert": ""
     }
   ],
   "absences": [
-    "Marie Cooksey - Annual leave 8-12 June, returns Monday 15 June",
-    "James Salas Guillen - Annual leave from end of 5 June, returns Thursday 18 June"
+    "Marie Cooksey - annual leave until Monday 15 June",
+    "James Salas Guillen - annual leave until Thursday 18 June",
+    "Athena Artuso - annual leave (dates unconfirmed)"
   ],
   "priorities": [
     {
-      "text": "Open Julie Hickman's Access case 68974493 email immediately - Chemistry bulk-delete request blocked waiting for Access Group timeline. Your reply sent confirms we need two items from AG before they proceed.",
-      "date": "8 June",
-      "dateType": "red",
-      "subject": "RE: Access Support Team | 68974493 - New Case",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E290000"
-    },
-    {
-      "text": "Review Emma Fitz-Gibbon's Major Incident update on Ivanti OSM Self-Service vulnerability. Sarah Warne coordinating testing with Rob and Asta on PeopleXD service requests interface. Ensure support resources available.",
-      "date": "8 June",
+      "text": "Open Emma Fitz-Gibbon's Ivanti Major Incident email and confirm your participation with Sarah Warne",
+      "date": "Today",
       "dateType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2A0000"
     },
     {
-      "text": "Investigate Cority employee import error from 5 June (OxfordUniversity_Demo system). Review attached log file and confirm data sync status before end of week.",
-      "date": "9 June",
-      "dateType": "yellow",
-      "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000"
+      "text": "Provide AG with two outstanding items they need before proceeding with Chemistry bulk-delete case 68974493",
+      "date": "Today",
+      "dateType": "red",
+      "subject": "RE: Access Support Team | 68974493 - New Case",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E290000"
     },
     {
-      "text": "Review DTP1092 project status with Crispin Muncaster. Marie is absent until 15 June and has pending comments that block progress. Reschedule this week's meeting and plan for continuation after her return.",
-      "date": "9 June",
+      "text": "Reply to Sophie Levy on Scoping Session status - overdue since April",
+      "date": "By Tuesday",
+      "dateType": "yellow",
+      "subject": "RE: Scoping Session update",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
+    },
+    {
+      "text": "Monitor DTP1092 College Staff in PXD comments and hold for Marie's return 15 June",
+      "date": "Week of 8 June",
       "dateType": "yellow",
       "subject": "DTP1092 College staff in PXD",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
-    },
-    {
-      "text": "Prepare for GLAM Rostering meeting tomorrow 14:00 with Simon Burford covering Botanic Gardens and Ashmolean Security staffing arrangement.",
-      "date": "9 June",
-      "dateType": "blue",
-      "subject": "GLAM Rostering",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000"
     }
   ],
-  "refreshed_at": "Monday 08 June · 16:21"
+  "refreshed_at": "Monday 08 June · 16:36"
 }
