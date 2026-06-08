@@ -143,10 +143,9 @@ The JSON must match this exact schema:
 }
 
 Rules:
-- COVERAGE IS MANDATORY: every email in the inbox data MUST produce at least one card. You must not drop, merge, or omit any email. If an email does not fit urgent/needs/fyi it goes in low. No email is ever silently discarded.
-- urgent = must act today; needs = act within 48hrs; fyi = no action needed; low = noise, admin, automated notifications, resolved cases, social
+- urgent = must act today; needs = act within 48hrs; fyi = no action; low = noise/admin
 - badge is a short deadline or action label (e.g. "Deadline 11 June", "Reply today")
-- priorities is an ordered list of the top 5 actions across all categories
+- priorities is an ordered list of the top actions across all categories
 - sub fields may contain <strong> tags for emphasis
 - calToday/calTomorrow time field: use "All day" for all-day events, never use date ranges like "All week 8-13 June"
 - calToday/calTomorrow title: format as "Event Type - Full Name" e.g. "Annual Leave - Marie Cooksey"
@@ -258,43 +257,6 @@ def fix_cal_items(items):
 
 for cal_key in ["calToday", "calTomorrow"]:
     fix_cal_items(briefing.get(cal_key, []))
-
-# ── Coverage enforcement — every inbox email must have a card ────────────────
-# Collect all subjects already in the briefing
-covered_subjects = set()
-for section in ["urgent", "needs", "fyi", "low"]:
-    for item in briefing.get(section, []):
-        subj = item.get("subject", "")
-        if subj:
-            covered_subjects.add(subj.lower())
-
-# For any inbox email with no matching card, add it to low
-if "low" not in briefing:
-    briefing["low"] = []
-
-for msg in inbox:
-    subj = msg.get("subject", "")
-    if not subj:
-        continue
-    subj_lower = subj.lower()
-    # Check if this email is already covered (exact or fuzzy)
-    already_covered = subj_lower in covered_subjects
-    if not already_covered:
-        for covered in covered_subjects:
-            if subj_lower in covered or covered in subj_lower:
-                already_covered = True
-                break
-    if not already_covered:
-        entry = {
-            "title": subj,
-            "sub": f"From: {msg.get('from', '')}. Received: {msg.get('received', '')[:16]}.",
-            "badge": "Unread" if not msg.get("is_read") else "Read",
-            "badgeType": "gray",
-            "subject": subj,
-            "entry_id": msg.get("entry_id", "")
-        }
-        briefing["low"].append(entry)
-        covered_subjects.add(subj_lower)
 
 briefing["refreshed_at"] = datetime.now().strftime("%A %d %B · %H:%M")
 
