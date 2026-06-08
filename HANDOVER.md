@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-08
+**Last updated:** 2026-06-09
 **Status:** Active — fully working. Session ended 2026-06-08 late evening.
 
 ---
@@ -83,8 +83,8 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 | Script | work-inbox/fetch_inbox.py |
 | Opener | work-inbox/open_email.py |
 | Briefing | work-inbox/data/briefing.json |
-| Local | C:\Users\admin\work-inbox\ |
-| Registry | HKCU:\Software\Classes\openmail |
+| Local | C:\Users\admin\Documents\Claude\Projects\work-inbox\ |
+| Registry | HKCU:\Software\Classes\openmail (points to new path) |
 | Scheduler | WorkInbox-Briefing (Task Scheduler) |
 
 ---
