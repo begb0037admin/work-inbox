@@ -9,7 +9,7 @@
 - **Status:** Active — fully working end-to-end
 - **Repo:** https://github.com/begb0037admin/work-inbox
 - **Live dashboard:** https://begb0037admin.github.io/work-inbox/
-- **Last updated:** 2026-06-09
+- **Last updated:** 2026-06-09 (v1.2)
 
 ## Bootstrap Order
 1. This file (orientation)
@@ -68,3 +68,4 @@ Do not re-investigate Graph API or Chrome-based email access.
 - Always pull fetch_inbox.py from GitHub before running
 - Always update HANDOVER.md at end of session
 - Seat A never reads local disk — all reads via GitHub proxy or API
+- Every Cowork brief Invoke-WebRequest to raw.githubusercontent.com MUST include `?t=$(Get-Date -Format yyyyMMddHHmm)` — no exceptions. Prevents Seat C reading cached stale files.
