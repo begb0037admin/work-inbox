@@ -1,13 +1,11 @@
-﻿import json, os, base64, urllib.request, urllib.error
+import json, os, base64, urllib.request, urllib.error
 from datetime import datetime, timedelta
 import win32com.client
 import anthropic
 
-OUTPUT_RAW      = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "inbox_raw.json")
-OUTPUT_BRIEFING = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "briefing.json")
-GITHUB_REPO     = "begb0037admin/work-inbox"
-GITHUB_PATH     = "data/briefing.json"
-GITHUB_PAT      = os.environ.get("GITHUB_PAT", "")
+GITHUB_REPO = "begb0037admin/work-inbox"
+GITHUB_PATH = "data/briefing.json"
+GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
 
 outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
@@ -30,31 +28,27 @@ def dt(com_time):
         return None
 
 def restrict_date(folder, cutoff_dt):
-    # Outlook Restrict requires this exact format
-    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %I:%M %p")  # FIX 2026-06-08: 12h US locale format for Outlook Restrict + "'"
+    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %I:%M %p") + "'"
     try:
         restricted = folder.Items.Restrict(filter_str)
-        # Verify filter worked — if count is suspiciously large, filter failed
         if restricted.Count > 200:
-            raise Exception("Filter returned too many items — likely failed")
+            raise Exception("Filter returned too many items - likely failed")
         return restricted
     except:
-        # Safe fallback — sort by received time descending, take last 7 days manually
         items = folder.Items
         items.Sort("[ReceivedTime]", True)
         return items
 
+# ── Phase 1 — pull Outlook data ──────────────────────────────────────────────
 print("Phase 1 - pulling Outlook data...")
 inbox = []
 unread_count = 0
-read_count = 0
-MAX_UNREAD = 50
-MAX_READ = 30
-cutoff_str = cutoff.strftime("%Y-%m-%d")
+read_count   = 0
+MAX_UNREAD   = 50
+MAX_READ     = 30
 
 for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
-        # Hard stop if we have enough
         if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
             break
         is_read = not msg.UnRead
@@ -81,7 +75,7 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     except:
         continue
 
-inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)  # FIX 2026-06-08: unread newest-first
+inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
@@ -114,29 +108,20 @@ for item in mapi.GetDefaultFolder(9).Items:
     except:
         continue
 
-raw = {
-    "pulled_at": datetime.now().isoformat(),
-    "inbox":     inbox,
-    "sent":      sent,
-    "calendar":  calendar
-}
+unread_total = sum(1 for m in inbox if not m["is_read"])
+print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)}")
 
-os.makedirs(os.path.dirname(OUTPUT_RAW), exist_ok=True)
-with open(OUTPUT_RAW, "w", encoding="utf-8") as f:
-    json.dump(raw, f, indent=2, ensure_ascii=False)
-
-unread_count = sum(1 for m in inbox if not m["is_read"])
-print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_count}) sent:{len(sent)} calendar:{len(calendar)}")
+# ── Phase 2 — Anthropic triage ───────────────────────────────────────────────
 print("Phase 2 - calling Anthropic API...")
 
-now = datetime.now()
+now          = datetime.now()
 today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
 tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorrow.strftime("%B %Y")
 
 cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == today]
 cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
 
-inbox_for_api = [{k:v for k,v in m.items() if k != "entry_id"} for m in inbox]
+inbox_for_api = [{k: v for k, v in m.items() if k != "entry_id"} for m in inbox]
 
 SYSTEM = """You are Kevin's morning inbox triage assistant at Oxford University Personnel Services.
 Analyse the inbox, sent items, and calendar data provided and return ONLY a valid JSON object - no preamble, no markdown, no code fences.
@@ -168,18 +153,18 @@ Rules:
 - calToday/calTomorrow alert: if the person is absent and has active dependencies, name the specific projects or actions affected. e.g. "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently". Never write generic text like "Colleague absent" or "Team member absent".
 - omit alert only if there are genuinely no active dependencies or actions affected
 
-CALENDAR ITEM EXAMPLE — for an absent manager or colleague, output MUST look exactly like this:
+CALENDAR ITEM EXAMPLE - for an absent manager or colleague, output MUST look exactly like this:
 CORRECT:
 {"time":"All day","title":"Annual Leave - Marie Cooksey","sub":"Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait. Kevin and Chris are covering H&S support queue and OSM escalations in her absence.","alert":"Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"}
 
-NEVER produce output like this — it is wrong and useless:
+NEVER produce output like this - it is wrong and useless:
 {"time":"All week","title":"Marie Cooksey annual leave","sub":"Away 8-12 June. Handover documentation provided.","alert":"Team member absent"}
 
 The difference: correct output names specific projects, specific coverage arrangements, specific actions. Wrong output is generic and tells Kevin nothing he does not already know. Every calendar item for an absent colleague must meet the CORRECT standard above.
 - absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
 - calendar shows working days only (Monday to Friday)
-- calToday/calTomorrow: if a colleague is known to be absent from OOO replies, handover emails or inbox context — even if no calendar block exists — include them as an All day entry. Use the full name from email context, not abbreviated calendar titles like "Annual Leave - Marie". Cross-reference all data sources to build the most complete and accurate picture.
-- subject field: you MUST copy the exact email subject verbatim — character for character — from the inbox data provided. Do NOT paraphrase, summarise or invent a subject. The subject field is used to look up the Outlook EntryID and open the exact email. If you change even one character it will fail. If the item does not relate to a single specific email, omit the subject field entirely.
+- calToday/calTomorrow: if a colleague is known to be absent from OOO replies, handover emails or inbox context - even if no calendar block exists - include them as an All day entry. Use the full name from email context, not abbreviated calendar titles like "Annual Leave - Marie". Cross-reference all data sources to build the most complete and accurate picture.
+- subject field: you MUST copy the exact email subject verbatim - character for character - from the inbox data provided. Do NOT paraphrase, summarise or invent a subject. The subject field is used to look up the Outlook EntryID and open the exact email. If you change even one character it will fail. If the item does not relate to a single specific email, omit the subject field entirely.
 """
 
 USER = f"""Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.
@@ -197,7 +182,7 @@ CALENDAR TOMORROW:
 {json.dumps(cal_tomorrow, indent=2, ensure_ascii=True)}
 """
 
-client = anthropic.Anthropic(timeout=60.0)
+client   = anthropic.Anthropic(timeout=60.0)
 response = client.messages.create(
     model      = "claude-haiku-4-5",
     max_tokens = 4096,
@@ -213,6 +198,7 @@ if raw_text.endswith("```"):
 
 briefing = json.loads(raw_text)
 
+# Inject EntryIDs for click-through
 subject_to_entryid = {}
 for m in inbox:
     if m.get("entry_id") and m.get("subject"):
@@ -225,11 +211,9 @@ def inject_entry_ids(items):
         subj = item.get("subject", "")
         if not subj:
             continue
-        # Exact match first
         if subj in subject_to_entryid:
             item["entry_id"] = subject_to_entryid[subj]
         else:
-            # Fuzzy fallback — find inbox subject that contains or is contained by card subject
             subj_lower = subj.lower()
             for inbox_subj, entry_id in subject_to_entryid.items():
                 inbox_lower = inbox_subj.lower()
@@ -241,23 +225,7 @@ def inject_entry_ids(items):
 for section in ["urgent", "needs", "fyi", "low", "priorities"]:
     inject_entry_ids(briefing.get(section, []))
 
-# Post-process calendar items — rewrite sub/alert for known absent colleagues
-# Build absence map from inbox OOO/handover signals
-absence_map = {}
-ooo_keywords = ["out of office", "annual leave", "on leave", "away", "handover", "a/l"]
-for msg in inbox:
-    subj = (msg.get("subject") or "").lower()
-    sender = msg.get("from", "")
-    preview = (msg.get("body_preview") or "").lower()
-    for kw in ooo_keywords:
-        if kw in subj or kw in preview:
-            absence_map[sender] = {
-                "subject": msg.get("subject",""),
-                "preview": msg.get("body_preview","")
-            }
-            break
-
-# Known colleagues and their context — hardcoded as reliable fallback
+# Post-process calendar — rewrite sub/alert for known absent colleagues
 KNOWN_ABSENCES = [
     {
         "triggers": ["marie", "cooksey"],
@@ -280,9 +248,9 @@ def fix_cal_items(items):
         title = (item.get("title") or "").lower()
         for absence in KNOWN_ABSENCES:
             if any(trigger in title for trigger in absence["triggers"]):
-                item["time"] = "All day"
+                item["time"]  = "All day"
                 item["title"] = absence["title"]
-                item["sub"] = absence["sub"]
+                item["sub"]   = absence["sub"]
                 item["alert"] = absence["alert"]
                 break
     return items
@@ -290,24 +258,22 @@ def fix_cal_items(items):
 for cal_key in ["calToday", "calTomorrow"]:
     fix_cal_items(briefing.get(cal_key, []))
 
-# Stamp exact refresh time — use local machine time (admin machine is UK)
 briefing["refreshed_at"] = datetime.now().strftime("%A %d %B · %H:%M")
 
-with open(OUTPUT_BRIEFING, "w", encoding="utf-8") as f:
-    json.dump(briefing, f, indent=2, ensure_ascii=False)
+print("Phase 2 done - briefing assembled in memory")
 
-print(f"Phase 2 done - briefing written to {OUTPUT_BRIEFING}")
+# ── Phase 3 — push briefing to GitHub ────────────────────────────────────────
 print("Phase 3 - pushing briefing to GitHub...")
 
 if not GITHUB_PAT:
-    print("WARNING: GITHUB_PAT not set - skipping GitHub push")
+    print("ERROR: GITHUB_PAT env var not set - cannot push. Set it and re-run.")
 else:
     try:
         api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
         headers = {
             "Authorization": f"token {GITHUB_PAT}",
-            "Content-Type": "application/json",
-            "User-Agent": "work-inbox-script"
+            "Content-Type":  "application/json",
+            "User-Agent":    "work-inbox-script"
         }
         sha = None
         try:
@@ -333,5 +299,5 @@ else:
             result = json.loads(r.read())
             print(f"Phase 3 done - briefing pushed to GitHub (commit: {result.get('commit',{}).get('sha','?')[:7]})")
     except Exception as e:
-        print(f"Phase 3 WARNING - GitHub push failed: {e}")
-        print("Briefing is still available locally.")
+        print(f"Phase 3 FAILED - GitHub push error: {e}")
+        raise
