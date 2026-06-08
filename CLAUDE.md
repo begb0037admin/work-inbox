@@ -9,7 +9,7 @@
 - **Status:** Active — fully working end-to-end
 - **Repo:** https://github.com/begb0037admin/work-inbox
 - **Live dashboard:** https://begb0037admin.github.io/work-inbox/
-- **Last updated:** 2026-06-09 (v1.2)
+- **Last updated:** 2026-06-08 (v1.3)
 
 ## Bootstrap Order
 1. This file (orientation)
@@ -48,7 +48,7 @@ Do NOT ask Kevin for a recap. The docs above are the recap.
 ## Key Constraints
 - `fetch_inbox.py` must always be pulled from GitHub before running — never run stale local copy
 - Run script: `git fetch origin && git checkout origin/main -- fetch_inbox.py && python fetch_inbox.py`
-- Inbox capped at 50 newest emails (newest-first sort) — guarantees morning emails always captured
+- Inbox: up to 50 unread + 30 read, sorted unread newest-first then read newest-first
 - Calendar uses `IncludeRecurrences = True` with date filter — captures recurring meetings
 - ANTHROPIC_API_KEY and GITHUB_PAT stored as Windows User env vars — never in any file
 - Model locked to claude-haiku-4-5 — Sonnet timed out on this inbox size
@@ -69,3 +69,10 @@ Do not re-investigate Graph API or Chrome-based email access.
 - Always update HANDOVER.md at end of session
 - Seat A never reads local disk — all reads via GitHub proxy or API
 - Every Cowork brief Invoke-WebRequest to raw.githubusercontent.com MUST include `?t=$(Get-Date -Format yyyyMMddHHmm)` — no exceptions. Prevents Seat C reading cached stale files.
+
+## Change Log
+| Date | Change | Reason |
+|---|---|---|
+| 2026-06-08 | Restored full 3-phase script to fetch_inbox.py (was Phase 1 only) | Dashboard not generating new briefings — stale data on every scheduled run |
+| 2026-06-08 | Fixed sort: unread newest-first within each group (was oldest-first) | Morning emails landing at bottom of unread list |
+| 2026-06-08 | Fixed Restrict filter format: %m/%d/%Y %I:%M %p (was mixed 24h/AM-PM) | Risk of silent filter failure on afternoon runs |
