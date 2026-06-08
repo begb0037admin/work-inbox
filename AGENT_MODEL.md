@@ -3,7 +3,7 @@
 
 Version : 1.0
 Status  : Ratified
-Updated : 2026-06-09
+Updated : 2026-06-09 (v1.2)
 Author  : Kevin Lelitte, HR Systems, University of Oxford
 
 Governed by: CONSTITUTION.md
@@ -150,6 +150,17 @@ Large audit or recon output must be written to a file by Cowork,
 not pasted to chat. Seat A reads it surgically on demand via
 targeted fetch.
 
+**Cache-bust rule — mandatory for all Cowork briefs:**
+Every `Invoke-WebRequest` call to `raw.githubusercontent.com` must
+include a cache-busting query string to guarantee a live fetch.
+Use this pattern in every brief:
+```powershell
+$t = Get-Date -Format yyyyMMddHHmm
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/...?t=$t"
+```
+Never use a raw GitHub URL without `?t=$t`. Cached responses are
+stale and will cause Seat C to work from outdated file content.
+
 ---
 
 ## Section 5 — Session Discipline
@@ -247,3 +258,4 @@ without constitutional amendment.
 |---------|------------|-------------------------------------|
 | 1.0     | 2026-06-06 | Initial ratification.               |
 | 1.1     | 2026-06-09 | Updated work-inbox local path.      |
+| 1.2     | 2026-06-09 | Cache-bust rule added to Section 4. |
