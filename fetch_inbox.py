@@ -30,17 +30,38 @@ def dt(com_time):
         return None
 
 def restrict_date(folder, cutoff_dt):
-    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %H:%M %p") + "'"
+    # Outlook Restrict requires this exact format
+    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%d/%m/%Y %H:%M %p") + "'"
     try:
-        return folder.Items.Restrict(filter_str)
+        restricted = folder.Items.Restrict(filter_str)
+        # Verify filter worked — if count is suspiciously large, filter failed
+        if restricted.Count > 200:
+            raise Exception("Filter returned too many items — likely failed")
+        return restricted
     except:
-        return folder.Items
+        # Safe fallback — sort by received time descending, take last 7 days manually
+        items = folder.Items
+        items.Sort("[ReceivedTime]", True)
+        return items
 
 print("Phase 1 - pulling Outlook data...")
 inbox = []
+unread_count = 0
+read_count = 0
+MAX_UNREAD = 50
+MAX_READ = 30
+cutoff_str = cutoff.strftime("%Y-%m-%d")
+
 for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
+        # Hard stop if we have enough
+        if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
+            break
         is_read = not msg.UnRead
+        if is_read and read_count >= MAX_READ:
+            continue
+        if not is_read and unread_count >= MAX_UNREAD:
+            continue
         entry = {
             "subject":         msg.Subject,
             "from":            msg.SenderName,
@@ -53,6 +74,9 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
         }
         if not is_read:
             entry["body_preview"] = (msg.Body or "")[:150]
+            unread_count += 1
+        else:
+            read_count += 1
         inbox.append(entry)
     except:
         continue
