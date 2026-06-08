@@ -1,90 +1,62 @@
-# 💬 CHAT PROMPT — Morning Inbox Briefing
+# CHAT_PROMPT.md — work-inbox
 
-> Paste this into a new Claude chat (or this chat) to start your morning inbox triage session.
+> This file documents how to interact with the work-inbox system.
+> The system is fully automated — no manual email pasting required.
 
----
+## How It Works
 
-## Option A — Full Automated Briefing (Chrome Required)
+The dashboard runs automatically. `fetch_inbox.py` is scheduled via Windows Task Scheduler to run at 7am, 9am, 11am, 1pm, 3pm, 5pm Monday-Friday on the admin machine.
 
-Paste this when you want Claude to go get your emails via Chrome:
+Each run:
+1. Pulls the 50 most recent emails from Outlook inbox + sent items + today/tomorrow calendar
+2. Sends to Anthropic API (claude-haiku-4-5) for triage
+3. Pushes structured `briefing.json` to GitHub
+4. Dashboard at begb0037admin.github.io/work-inbox/ fetches and renders it
 
-```
-Run my morning inbox briefing.
+## Manual Refresh
 
-Use the Chrome extension to access Outlook. Check:
-1. Today's calendar
-2. Sent items (last 7 days) — so we skip already-actioned threads
-3. VIP contacts: Marie Cooksey, Simon Burford (last 7 days)
-4. Full inbox scan (last 7 days) — action-required items only
+To trigger a manual refresh outside the schedule:
 
-Triage everything, draft replies for all 🔴 and 🟡 items in my voice, 
-and produce a structured briefing file.
-```
+**Option A — Desktop shortcut:**
+Double-click `Run Inbox Briefing.bat` on the desktop.
 
----
-
-## Option B — Manual Paste (No Chrome)
-
-Paste this when you're providing email content yourself:
-
-```
-I'm going to paste some emails for inbox triage. 
-
-For each one:
-- Assign a priority: 🔴 Urgent / 🟡 Needs Response / 🔵 FYI / ⚪ Noise
-- Summarise in 1–2 sentences (TL;DR for anything over 3 paragraphs)
-- Draft a reply in my voice for any 🔴 or 🟡 item
-
-Use the standard draft format:
-📧 DRAFT REPLY
-To: [Name]
-Subject: Re: [Subject]
----
-[Draft]
-
-Best,
-Kevin
----
-⚠️ Notes: [Flags]
-
-Ready when you are.
+**Option B — PowerShell:**
+```powershell
+cd C:\Users\admin\Documents\Claude\Projects\work-inbox
+git fetch origin
+git checkout origin/main -- fetch_inbox.py
+python fetch_inbox.py
 ```
 
----
+## Starting a New Session to Work on This Project
 
-## Option C — Specific Thread
-
-Paste this when you just need one email handled:
-
+Tell Claude:
 ```
-Please triage this email and draft a reply in my voice.
-
-[Paste email thread here]
+Read CLAUDE.md and HANDOVER.md from the work-inbox repo, then tell me the current state.
 ```
 
----
+Claude will read both files via the GitHub proxy and report back without asking Kevin for a recap.
 
-## Kevin's Draft Rules (for reference)
+## Dashboard Features
+- Time-of-day greeting (Good morning/afternoon/evening) — UK timezone
+- Amber context bar — 5-7 sentence specific briefing with names, dates, actions
+- Urgent / Needs Response / FYI / Low Priority card sections
+- Click any card to open the exact email in Outlook (openmail:// protocol)
+- Tick a card to mark done — fades and hides after 1.5 seconds
+- Show Done / Hide Done button to reveal/re-hide ticked items
+- Archive panel — past briefings by date
+- Last refreshed timestamp — bottom right, updates every script run
+- Sidebar — calendar today/tomorrow, absences bullet list
 
+## Kevin's Communication Style (for AI triage reference)
 | Rule | Detail |
 |------|--------|
 | Opening | Always `Hi [Name],` |
 | Tone | Professional, warm, contractions fine |
-| Length | 5 sentences or fewer unless complexity warrants more |
-| End | Always a clear next step or CTA |
-| Sign-off | `Best,` then `Kevin` — nothing else |
+| Length | 5 sentences or fewer unless complexity warrants |
+| Sign-off | `Best,` then `Kevin` |
 | Never | Commit to a date/time without a calendar check |
 | Never | "Dear", "Kind regards", "Please don't hesitate" |
 
----
-
-## Priority Levels
-
-| Icon | Meaning |
-|------|---------|
-| 🔴 | Urgent — action required today |
-| 🟡 | Needs response within 24–48 hrs |
-| 🔵 | FYI — no action needed |
-| ⚪ | Low priority / noise |
-
-VIPs (Marie Cooksey, Simon Burford) are always 🔴 or 🟡 — never lower.
+## VIP Contacts
+Marie Cooksey and Simon Burford are always Urgent or Needs Response — never lower priority.
