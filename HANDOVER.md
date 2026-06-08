@@ -1,7 +1,7 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-08 (session 2 -- clean close)
-**Status:** Active -- fully working. All session 2 fixes applied and documented.
+**Last updated:** 2026-06-08 (session 2 -- complete)
+**Status:** Active -- fully working. Task Scheduler fixed and tested. All session 2 changes committed.
 
 ---
 
@@ -106,30 +106,30 @@ Emails were sorted unread-first (correct) but oldest-first within each group (wr
 **Restrict filter date format**
 Outlook COM Restrict filter requires 12-hour US locale date format. The script was passing a mixed 24-hour/AM-PM format that could cause silent filter failure on afternoon runs, falling back to a full inbox scan. Fixed to %m/%d/%Y %I:%M %p.
 
+**Task Scheduler -- broken path fixed, auto-pull baked in**
+Task Scheduler was pointing at C:\Users\admin\work-inbox -- a path that no longer exists after the folder was moved to Documents\Claude\Projects\work-inbox. Every scheduled run had been failing with error -2147024629 (ERROR_DIRECTORY -- invalid directory). Dashboard was showing stale data all day as a result. Fixed: task deleted and recreated via elevated PowerShell with correct working directory and git auto-pull baked directly into the task command. GitHub is now always the source of truth before every scheduled execution. Test run confirmed: Last Result 0 at 16:20:32 on 2026-06-08. Task command: cmd.exe /c cd /d "C:\Users\admin\Documents\Claude\Projects\work-inbox" && git fetch origin && git checkout origin/main -- fetch_inbox.py && C:\Python314\python.exe fetch_inbox.py. Note: recreating the task requires elevated PowerShell (Run as Administrator) -- standard session gives Access Denied.
+
 ### Outstanding
 
 **1. Unactioned thread logic** -- next priority
 Currently the dashboard uses read/unread status to decide what to surface. Read does not mean actioned -- an email may have been opened and never replied to. The fix is to cross-reference sent items (already pulled by the script) to identify threads with no reply from Kevin. Those unactioned threads get a 30-day lookback instead of 7 days so nothing drops off the dashboard just because it is older than a week. The Conor O'Brien / Access Group email from 21 May 2026 is a real example of this failure. Affects: fetch_inbox.py Phase 1 inbox pull logic and the API triage prompt.
 
 **2. Inbox sort -- DO NOT RUN until item 3 is complete**
-A one-off task to file the entire inbox into named folders: Simon, Marie, Projects, and others. A Chrome brief has already been written and is ready to run. Hard blocker: the dashboard currently reads only the default inbox folder. If the sort runs before item 3 is done, any email moved to a subfolder vanishes from the dashboard silently with no error. Affects: fetch_inbox.py Phase 1, dashboard coverage.
+A one-off task to file the entire inbox into named folders: Simon, Marie, Projects, and others. A Chrome brief has already been written and is ready to run. Hard blocker: the dashboard currently reads only the default inbox folder. If the sort runs before item 3 is done, any email moved to a subfolder vanishes from the dashboard silently with no error message. Affects: fetch_inbox.py Phase 1, dashboard coverage.
 
 **3. Subfolder scanning -- prerequisite for item 2**
 Update fetch_inbox.py to scan named subfolders in addition to the main inbox. Required before the inbox sort runs. Approximately 15 lines of additional code in Phase 1. Affects: fetch_inbox.py Phase 1 only.
 
-**4. Task Scheduler auto-pull**
-The Task Scheduler bat file runs whatever fetch_inbox.py is in the local folder. Today the broken Phase 1-only script ran undetected for an unknown number of scheduled runs because the scheduler never checked GitHub. Fix: add a git pull step to the bat file so GitHub is always the source of truth before each run. Affects: Task Scheduler bat file only, not fetch_inbox.py.
-
-**5. James Salas Guillen calendar**
+**4. James Salas Guillen calendar**
 James is absent and appears on the dashboard only because his details are hardcoded into fetch_inbox.py. This requires manual script updates whenever his absence changes. Root cause: no Outlook calendar block exists for his leave. Fix: add him to the Outlook calendar so the script picks him up automatically the same way it handles Marie Cooksey. Affects: fetch_inbox.py KNOWN_ABSENCES block and Outlook calendar.
 
-**6. Click-through reliability monitoring**
+**5. Click-through reliability monitoring**
 The openmail:// protocol uses a unique EntryID to open the exact email in Outlook when a dashboard card is clicked. A fuzzy subject-matching fallback handles cases where the AI slightly rephrases a subject. Not yet tested across all email types -- long subjects, special characters, CC threads, calendar invites. No action required now -- flag any click-through failures as they occur and report the exact subject string that caused the mismatch. Affects: open_email.py, EntryID injection in fetch_inbox.py.
 
-**7. Work machine replication**
+**6. Work machine replication**
 The full setup -- Task Scheduler, openmail:// registry entry, Python environment, local script folder -- exists only on the admin machine (C:\Users\admin). The work machine (begb0037.AD-OAK) has none of it. If working from the office, scheduled runs do not happen. Requires replicating the complete setup on the work machine. Affects: all components, new machine.
 
-**8. command-centre ROADMAP.md**
+**7. command-centre ROADMAP.md**
 The command-centre repo is the master tracker across all HR systems work. Its ROADMAP.md has not been updated to reflect work-inbox project growth. Low priority -- nothing breaks -- but the command-centre view of the project landscape is stale. Affects: command-centre repo only.
 
 ---
