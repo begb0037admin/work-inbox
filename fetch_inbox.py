@@ -290,12 +290,8 @@ def fix_cal_items(items):
 for cal_key in ["calToday", "calTomorrow"]:
     fix_cal_items(briefing.get(cal_key, []))
 
-# Stamp exact refresh time
-from datetime import datetime
-import pytz
-uk_tz = pytz.timezone("Europe/London")
-now_uk = datetime.now(uk_tz)
-briefing["refreshed_at"] = now_uk.strftime("%A %d %B · %H:%M")
+# Stamp exact refresh time — use local machine time (admin machine is UK)
+briefing["refreshed_at"] = datetime.now().strftime("%A %d %B · %H:%M")
 
 with open(OUTPUT_BRIEFING, "w", encoding="utf-8") as f:
     json.dump(briefing, f, indent=2, ensure_ascii=False)
