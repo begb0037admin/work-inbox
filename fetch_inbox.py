@@ -259,6 +259,43 @@ def fix_cal_items(items):
 for cal_key in ["calToday", "calTomorrow"]:
     fix_cal_items(briefing.get(cal_key, []))
 
+# ── Coverage enforcement — every inbox email must have a card ────────────────
+# Collect all subjects already in the briefing
+covered_subjects = set()
+for section in ["urgent", "needs", "fyi", "low"]:
+    for item in briefing.get(section, []):
+        subj = item.get("subject", "")
+        if subj:
+            covered_subjects.add(subj.lower())
+
+# For any inbox email with no matching card, add it to low
+if "low" not in briefing:
+    briefing["low"] = []
+
+for msg in inbox:
+    subj = msg.get("subject", "")
+    if not subj:
+        continue
+    subj_lower = subj.lower()
+    # Check if this email is already covered (exact or fuzzy)
+    already_covered = subj_lower in covered_subjects
+    if not already_covered:
+        for covered in covered_subjects:
+            if subj_lower in covered or covered in subj_lower:
+                already_covered = True
+                break
+    if not already_covered:
+        entry = {
+            "title": subj,
+            "sub": f"From: {msg.get('from', '')}. Received: {msg.get('received', '')[:16]}.",
+            "badge": "Unread" if not msg.get("is_read") else "Read",
+            "badgeType": "gray",
+            "subject": subj,
+            "entry_id": msg.get("entry_id", "")
+        }
+        briefing["low"].append(entry)
+        covered_subjects.add(subj_lower)
+
 briefing["refreshed_at"] = datetime.now().strftime("%A %d %B · %H:%M")
 
 print("Phase 2 done - briefing assembled in memory")
