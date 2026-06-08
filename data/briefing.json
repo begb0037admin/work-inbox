@@ -1,653 +1,149 @@
 {
   "date": "Monday 8 June 2026",
-  "subtitle": "Critical absences blocking projects; urgent Ivanti incident; Cority engagement at risk",
-  "context": "Marie Cooksey is absent until Monday 15 June, blocking handover items documented in her 8-12 June note; James Salas Guillen is on annual leave returning Thursday 18 June, leaving DSE user data imports to Cardinus and PeopleXD integration work unattended. Simon Burford's Major Incident meeting regarding the OSM Self-Service security vulnerability with Ivanti requires urgent coordination - Emma Fitz-Gibbon is coordinating support from Asta Palmer and others, but Sarah Warne's next steps communication is pending. Sophie Levy from Cority has not heard from you in two months regarding the Scoping Session update, sent Friday 8 June at 15:58 and still unread. Julie Hickman's email from Sunday 8 June at 13:29 about Access Support Team case 68974493 needs the timeline from AG to proceed with the Chemistry bulk-delete request. The DTP1092 College Data in PXD project has integration questions from Crispin Muncaster (received 17:29 today with attachments) and meeting reschedule requests requiring immediate attention. Open Sophie Levy's Cority email first as it signals a stalled engagement requiring your direct response.",
+  "subtitle": "Marie absent until 15 June; Ivanti security incident and DTP1092 need attention",
+  "context": "Marie Cooksey is out of office until Monday 15 June and has sent a handover note covering H&S support, OSM escalations, and DSE system updates. James Salas Guillen is on annual leave from end of today until Thursday 18 June, with handover provided for PeopleXD data uploads and Cority test server work. The DTP1092 College staff in PXD project has active comments from Marie awaiting your response, and Crispin Muncaster needs to reschedule this week's meeting. A Priority 1 Ivanti security vulnerability incident is active with Emma Fitz-Gibbon coordinating Sarah Warne's involvement of Rob and Asta Palmer for PeopleXD service request testing. Access Support case 68974493 requires Chemistry bulk-delete authorization before Access Group can proceed. The Strategic H&S Modular System evaluation weightings must be submitted to Helen Harbour within the next few days. Open the Ivanti security incident email from Emma Fitz-Gibbon first, then Marie's handover note.",
   "urgent": [
     {
-      "title": "DTP1092 College Data in PXD - Integrations",
-      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nI contacted the integrations team to get some help to look at the integrations and below is a response ",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "DTP1092 College Data in PXD - Integrations",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E330000"
-    },
-    {
-      "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "sub": "From <strong>Simon Burford</strong>. Hi @Sarah Rowles <mailto:sarah.rowles@admin.ox.ac.uk>  / @Athena Artuso <mailto:athena.artuso@admin.ox.ac.uk>  \r\n\r\n \r\n\r\n",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E310000"
-    },
-    {
-      "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "sub": "From <strong>Emma Fitz-Gibbon</strong>. Thank you, Rob and Asta!\r\n\r\nI’ll pass your names on to Sarah Warne, and she’ll be in touch shortly to explain the next s",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2D0000"
-    },
-    {
-      "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "sub": "From <strong>Asta Palmer</strong>. Hi Emma,\r\n\r\n \r\n\r\nThank you for the update. I am happy to test PeopleXD service requests. \r\n\r\n \r\n\r\nMany thanks\r\n\r\nAsta \r\n",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2C0000"
-    },
-    {
-      "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "sub": "From <strong>Emma Fitz-Gibbon</strong>. Hello all\r\n\r\nFollowing today’s Major Incident meeting regarding the OSM Self-Service issue, Sarah Warne has been working",
+      "title": "Ivanti Security Vulnerability - Priority 1",
+      "sub": "Emma Fitz-Gibbon coordinating with Sarah Warne to brief you and others on next steps for testing PeopleXD service requests with Asta Palmer and Rob.",
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2A0000"
     },
     {
-      "title": "DTP1092 College staff in PXD",
-      "sub": "From <strong>Crispin Muncaster</strong>. Sorry – need to move this week’s meeting.\r\n\r\n \r\n\r\n______________________________________________________________________",
-      "badge": "Act today",
+      "title": "Access case 68974493 - Chemistry bulk-delete authorization",
+      "sub": "Access Group ready to proceed but needs your approval before they can action the Chemistry bulk-delete request. Julie Hickman chased on 8 June.",
+      "badge": "Reply today",
       "badgeType": "red",
-      "subject": "DTP1092 College staff in PXD",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
-    },
-    {
-      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>Marie Cooksey</strong>. <https://unioxfordnexus.sharepoint.com/sites/HumanResources-HRSystems-HRSystemsManagementTeam/Shared%20Documents/HR%20Sy",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36260000"
-    },
-    {
-      "title": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36390000"
-    },
-    {
-      "title": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362D0000"
-    },
-    {
-      "title": "FW: Logging of volunteering hours in People XD",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "FW: Logging of volunteering hours in People XD",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE360B0000"
-    },
-    {
-      "title": "Temporary suspension of self-service user access to Oxford Service Manager (OSM)",
-      "sub": "From <strong>HR Systems Communications</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Temporary suspension of self-service user access to Oxford Service Manager (OSM)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FA0000"
+      "subject": "Re: Access Support Team | 68974493 - New Case",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E290000"
     }
   ],
   "needs": [
     {
-      "title": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
-      "sub": "From <strong>Communications Office</strong>. From: Vicky Marriott, Major Incident Manager \r\nFor: IT Support Staff \r\n \r\nFor Information: Note actions taken following ",
-      "badge": "Reply within 48hrs",
+      "title": "DTP1092 College Staff in PXD - Comments from Marie",
+      "sub": "Marie has left multiple comments on the SharePoint proposal (4 June) awaiting your response. Project blocked until comments addressed. Marie unavailable until 15 June.",
+      "badge": "Within 48hrs",
       "badgeType": "yellow",
-      "subject": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E300000"
+      "subject": "DTP1092 College staff in PXD",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
     },
     {
-      "title": "Athena A/L",
-      "sub": "From <strong>Athena Artuso</strong>.",
-      "badge": "Reply within 48hrs",
+      "title": "Marie Handover 8-12 June - Review coverage",
+      "sub": "Marie's H&S and OSM escalation handover note sent 6 June. Chris covering H&S support queue. Review to understand coverage gaps and action items while she is absent.",
+      "badge": "Within 48hrs",
       "badgeType": "yellow",
-      "subject": "Athena A/L",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2F0000"
-    },
-    {
-      "title": "RE: Scoping Session update",
-      "sub": "From <strong>Sophie Levy</strong>. Hello Kevin, hope you are well!\r\n\r\n \r\n\r\nI have not heard from you in a couple of months, the latst information I have is",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Scoping Session update",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
-    },
-    {
-      "title": "Automatic reply: Access Support Team | 68974493 - New Case",
-      "sub": "From <strong>Marie Cooksey</strong>. I am out of the office until Monday 15th June. I will aim to respond to your email as soon as possible after my return. ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "Automatic reply: Access Support Team | 68974493 - New Case",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2B0000"
-    },
-    {
-      "title": "RE: Access Support Team | 68974493 - New Case",
-      "sub": "From <strong>Julie Hickman</strong>. Hello Kevin,\r\n\r\n \r\n\r\nHope all is well with you and you had a nice weekend.\r\n\r\n \r\n\r\nJust wondering if you had received a ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Access Support Team | 68974493 - New Case",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E290000"
-    },
-    {
-      "title": "Expressions of Interest - Head of People Programmes & Head of Change - People Department",
-      "sub": "From <strong>Jonathan Roger</strong>. Dear colleagues,\r\n\r\n \r\n\r\nWe are inviting expressions of interest for two key roles within the People Department. These r",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "Expressions of Interest - Head of People Programmes & Head of Change - People Department",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E280000"
-    },
-    {
-      "title": "Kevin, we need to talk about AI-assisted complaints...",
-      "sub": "From <strong>Patrick Cunningham</strong>. Join my webinar on Wednesday for practical advice on how large organisations can confidently resolve employee relation c",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "Kevin, we need to talk about AI-assisted complaints...",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E270000"
-    },
-    {
-      "title": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
-      "sub": "From <strong>Helena Uddin</strong>. Dear Kevin,\r\n\r\n \r\n\r\nThank you for your prompt reply.\r\n\r\n \r\n\r\nI can confirm I have now sent the report to your referrer.\r",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E250000"
-    },
-    {
-      "title": "FW: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-      "sub": "From <strong>Michael O'Sullivan</strong>. Hi Simon,\r\n\r\nAhead of your meeting tomorrow, I wanted to share a few thoughts while they are fresh in my mind.\r\n\r\nMy und",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "FW: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E230000"
-    },
-    {
-      "title": "OCCUPATIONAL HEALTH - OH REPORT ",
-      "sub": "From <strong>Helena Uddin</strong>. Dear Mr Lelitte,\r\n\r\nPlease find attached your Occupational Health Report.\r\n\r\nThe document is Password Protected using yo",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "OCCUPATIONAL HEALTH - OH REPORT ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E220000"
-    },
-    {
-      "title": "RE: Workshop: Sustaining Adoption of Leave & Absence",
-      "sub": "From <strong>Lyndsey Middleton</strong>. Hi all,\r\n\r\nThank you again for attending the workshop on Sustaining Adoption of Leave & Absence.\r\n\r\nPlease find attached",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Workshop: Sustaining Adoption of Leave & Absence",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E210000"
-    },
-    {
-      "title": "RE: Question re Volunteer reporting",
-      "sub": "From <strong>Michael O'Sullivan</strong>. Morning,  I’m back from Cornwall, stuffed from pasties and pints!!.\r\n\r\n \r\n\r\nJust to add further context.  The ‘Volunteer",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Question re Volunteer reporting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E200000"
-    },
-    {
-      "title": "Marie Handover 8-12 June",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi all\r\n\r\n \r\n\r\nA few notes for handover, whilst I’m off:\r\n\r\n \r\n\r\n*\tH&S – Chris and I have met with colleagues from the F",
-      "badge": "Overdue",
-      "badgeType": "red",
       "subject": "Marie Handover 8-12 June",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000"
     },
     {
-      "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
-      "sub": "From <strong>Cority_Integration_Platform_Notifications@Cority.com</strong>. An error occured while processing your HR import. Please review the attached log file for additional details.",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000"
+      "title": "Crispin Muncaster - Reschedule meeting",
+      "sub": "Crispin needs to move this week's DTP1092 meeting. Contact him to confirm new date.",
+      "badge": "Within 48hrs",
+      "badgeType": "yellow",
+      "subject": "DTP1092 College staff in PXD",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
     },
     {
-      "title": "Access Support – Case Feedback",
-      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n <https://www.theaccessgroup.com> \t\r\n \r\n\r\nDear Kevi",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support – Case Feedback",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364C0000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Resolved",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364A0000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364A0000"
-    },
-    {
-      "title": "FW: Preventing archiving of users not included in HR data upload",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Team,\r\n\r\n \r\n\r\nThe automated data upload from PeopleXD to the DSE system (Healthy Working Plus) went live on 3rd June,",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "FW: Preventing archiving of users not included in HR data upload",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36470000"
-    },
-    {
-      "title": "Annual leave and support during my absence",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Sharon and Rob, \r\n\r\n \r\n\r\nJust to let you know, I will be on annual leave from the end of today and will return on Thu",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Annual leave and support during my absence",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000"
-    },
-    {
-      "title": "RE: DSE Update - user data import and upload to Cardinus",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Marie, \r\n\r\n \r\n\r\nI’m currently monitoring the level of requests. So far, none have been raised to create an account, b",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000"
-    },
-    {
-      "title": "Cority Product User Group (PUG)",
-      "sub": "From <strong>Christopher Sanders</strong>. Agenda to follow\r\n\r\n________________________________________________________________________________\r\n\r\nMicrosoft Teams ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Cority Product User Group (PUG)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36440000"
-    },
-    {
-      "title": "Strategic H&S Modular System requirements evaluation weightings",
-      "sub": "From <strong>Helen Harbour</strong>. Hi,\r\n\r\nI am putting this in the diary to run through the proposed weightings for the evaluation of the criteria for the ",
-      "badge": "Overdue",
-      "badgeType": "red",
+      "title": "Strategic H&S Modular System weightings",
+      "sub": "Helen Harbour running review of proposed evaluation weightings. Submit your input before end of week. Key decision point for SHSMS procurement.",
+      "badge": "End of week",
+      "badgeType": "yellow",
       "subject": "Strategic H&S Modular System requirements evaluation weightings",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36420000"
-    },
-    {
-      "title": "The Kudoboard for Marie Cooksey is being finalized",
-      "sub": "From <strong>Simon Burford via Kudoboard</strong>. <https://www.kudoboard.com/images/logo/logo-2026.png> \t\r\nLast call for contributions to the Kudoboard for Marie. \r\n\r\nIf ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "The Kudoboard for Marie Cooksey is being finalized",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36410000"
-    },
-    {
-      "title": "RE: [ict-a] Cisco Secure Client (VPN) update to 5.1.17.3394",
-      "sub": "From <strong>Philip White</strong>. Dear ITSS,\r\n\r\n \r\n\r\nThis work has been completed successfully as planned.\r\n\r\n \r\n\r\nRegards,\r\n\r\n \r\n\r\nPhil White\r\n\r\nEndpoint",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: [ict-a] Cisco Secure Client (VPN) update to 5.1.17.3394",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000"
-    },
-    {
-      "title": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
-      "sub": "From <strong>Digital Capabilities Team</strong>. Looking for a productive way to round off the term? These upcoming courses are packed with fresh ideas, practical tips a",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
-    },
-    {
-      "title": "RE: DSE Update - user data import and upload to Cardinus",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi James\r\n\r\n \r\n\r\nThank you for update. Could you please confirm who is creating the manual records for contractors etc? ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363E0000"
-    },
-    {
-      "title": "RE: DSE Update - user data import and upload to Cardinus",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Marie, \r\n\r\n \r\n\r\nYes, the automated data upload from PXD to Cardinus is now live and working as expected. Based on ini",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363D0000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363C0000"
-    },
-    {
-      "title": "RE: DSE Update - user data import and upload to Cardinus",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi James\r\n\r\n \r\n\r\nCould you please confirm that the interface is living and functioning.  Also, is the process mapping, d",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000"
-    },
-    {
-      "title": "FW: POC for HALO data work?",
-      "sub": "From <strong>Simon Burford</strong>. Hi Kevin,\r\n\r\n \r\n\r\nFYI I’ve suggested the Daphne gets in touch with you in the first instance on this, but I don’t have a",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "FW: POC for HALO data work?",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000"
-    },
-    {
-      "title": "H&S Management System",
-      "sub": "From <strong>Marie Cooksey</strong>. Hello all\r\n\r\n \r\n\r\nI have asked that you have the opportunity to feed into the shortlist pack and weighting over the next",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "H&S Management System",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
-    },
-    {
-      "title": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here <https://empower.cority.com/v/NzcyLURQWC04MTEAAAGiMh_NeVQ_E3vubSLgzOZWLY7qY",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000"
-    },
-    {
-      "title": "Access Support – Case Feedback",
-      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n <https://www.theaccessgroup.com> \t\r\n \r\n\r\nDear Kevi",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support – Case Feedback",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362C0000"
-    },
-    {
-      "title": "Access Support Team | 68981820 - Your Case Has Been Resolved",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 68981820 - Your Case Has Been Resolved",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362B0000"
     }
   ],
   "fyi": [
     {
-      "title": "Bodleian iSkills workshops for the week ahead (7th week)",
-      "sub": "From <strong>Bodleian User Education</strong>. Unlock your academic potential with the Bodleian iSkills programme.\r\nSee the full Trinity Term schedule in our term card",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Bodleian iSkills workshops for the week ahead (7th week)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E240000"
+      "title": "James Salas Guillen - Annual leave",
+      "sub": "James on leave from end of today (8 June) until Thursday 18 June. Sharon and Rob covering his DSE and Cority responsibilities. Handover provided.",
+      "badge": "Absence",
+      "badgeType": "blue",
+      "subject": "Annual leave and support during my absence",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000"
     },
     {
-      "title": "Accepted: Michael O'Sullivan - 1-1 Session",
-      "sub": "From <strong>Michael O'Sullivan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Accepted: Michael O'Sullivan - 1-1 Session",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E1F0000"
+      "title": "PeopleXD data upload to Cardinus - Live",
+      "sub": "James Salas Guillen confirmed automated data upload now live and functioning correctly as of 5 June. Process mapping and documentation to be updated.",
+      "badge": "Status update",
+      "badgeType": "blue",
+      "subject": "RE: DSE Update - user data import and upload to Cardinus",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000"
     },
     {
-      "title": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "sub": "From <strong>csn@mail.status.cority.com</strong>. Completed - No components affected - The scheduled maintenance has been completed. ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646F0000"
+      "title": "Occupational Health Report - Password protected",
+      "sub": "Helena Uddin sent your OH report password-protected with your date of birth. You replied on 8 June consenting to referrer disclosure.",
+      "badge": "Your item",
+      "badgeType": "blue",
+      "subject": "OCCUPATIONAL HEALTH - OH REPORT",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E220000"
     },
     {
-      "title": "New Vacancy Notification",
-      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
-      "badge": "FYI",
+      "title": "Workshop: Sustaining Adoption of Leave & Absence",
+      "sub": "Lyndsey Middleton sent summary of key findings from workshop you attended. Review for organizational adoption insights.",
+      "badge": "Reference",
       "badgeType": "gray",
-      "subject": "New Vacancy Notification",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C6AD9250000"
+      "subject": "RE: Workshop: Sustaining Adoption of Leave & Absence",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E210000"
     },
     {
-      "title": "[ict-a] OWL Maintenance - 11th June",
-      "sub": "From <strong>James Turner</strong>. Dear all,\r\n\r\n \r\n\r\nThere is a newer release of the software providing the captive portal for the OWL network which we wil",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "[ict-a] OWL Maintenance - 11th June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000"
-    },
+      "title": "Volunteer reporting context",
+      "sub": "Michael O'Sullivan returned from Cornwall with additional context on Volunteering Days pilot reporting. Marie unavailable until 15 June so action independently if needed.",
+      "badge": "Context",
+      "badgeType": "blue",
+      "subject": "RE: Question re Volunteer reporting",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E200000"
+    }
+  ],
+  "low": [
     {
-      "title": "New Vacancy Notification",
-      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
-      "badge": "FYI",
+      "title": "New Vacancy Notifications",
+      "sub": "Received 2 PeopleXD vacancy notifications (6 June, 5 June) matching your criteria. Review if interested.",
+      "badge": "Admin",
       "badgeType": "gray",
       "subject": "New Vacancy Notification",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000"
     },
     {
-      "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "sub": "From <strong>Cority Customer Support</strong>.",
-      "badge": "FYI",
+      "title": "Bodleian iSkills workshops - Week 7",
+      "sub": "Bodleian User Education sent Trinity Term schedule of workshops. Registration open for June sessions.",
+      "badge": "Optional",
       "badgeType": "gray",
-      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E320000"
+      "subject": "Bodleian iSkills workshops for the week ahead (7th week)",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E240000"
     },
     {
-      "title": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "sub": "From <strong>csn@mail.status.cority.com</strong>.",
-      "badge": "FYI",
+      "title": "Digital Capabilities training courses",
+      "sub": "Digital Capabilities Team promoted summer refresh courses in weeks 7-8 and general digital skills training in June.",
+      "badge": "Optional",
+      "badgeType": "gray",
+      "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
+    },
+    {
+      "title": "Cority maintenance completed",
+      "sub": "Cority GX2 2026.2 release maintenance completed 6 June with no components affected. New release includes refreshed navigation and AI features.",
+      "badge": "Status",
       "badgeType": "gray",
       "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C76F7B60000"
     },
     {
-      "title": "Simon / Kevin 121s",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
+      "title": "OWL Network maintenance - 11 June",
+      "sub": "James Turner advised captive portal upgrade scheduled for 11 June. Newer release of OWL software being deployed.",
+      "badge": "Schedule",
       "badgeType": "gray",
-      "subject": "Simon / Kevin 121s",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36490000"
+      "subject": "[ict-a] OWL Maintenance - 11th June",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000"
     },
     {
-      "title": "H&S Handover ",
-      "sub": "From <strong>James Salas Guillen</strong>.",
-      "badge": "FYI",
+      "title": "Cisco Secure Client VPN update completed",
+      "sub": "Philip White confirmed VPN update to 5.1.17.3394 completed successfully on 5 June.",
+      "badge": "Complete",
       "badgeType": "gray",
-      "subject": "H&S Handover ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
-    },
-    {
-      "title": "Clinical pay uplift 2026 kick off meeting",
-      "sub": "From <strong>Jasmin Khokhra</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Clinical pay uplift 2026 kick off meeting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363B0000"
-    },
-    {
-      "title": "RE: Reference request - Lee Strudwick",
-      "sub": "From <strong>Claire Scrase</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Reference request - Lee Strudwick",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36360000"
-    },
-    {
-      "title": "[ict-a] ICTF Conference 2026 – Final Week for Registration",
-      "sub": "From <strong>Riaz Khimji</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "[ict-a] ICTF Conference 2026 – Final Week for Registration",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36330000"
-    },
-    {
-      "title": "You have been added to a staff team in Microsoft Teams",
-      "sub": "From <strong>Jessica Oldershaw</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "You have been added to a staff team in Microsoft Teams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36320000"
-    },
-    {
-      "title": "GLAM Rostering",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "GLAM Rostering",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000"
-    },
-    {
-      "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362E0000"
-    },
-    {
-      "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36290000"
-    },
-    {
-      "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "sub": "From <strong>Cority Customer Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36280000"
-    },
-    {
-      "title": "Reminder: Training industry trends 2026 - Insights from the Training Industry Benchmark Report",
-      "sub": "From <strong>Rebecca Hennedy</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Reminder: Training industry trends 2026 - Insights from the Training Industry Benchmark Report",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36240000"
-    },
-    {
-      "title": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "sub": "From <strong>Viktoriia Vasyliuta</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36220000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361F0000"
-    },
-    {
-      "title": "Last chance to join our PeopleXD online training sessions in June",
-      "sub": "From <strong>Access PeopleXD</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Last chance to join our PeopleXD online training sessions in June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361E0000"
-    },
-    {
-      "title": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "sub": "From <strong>Simon Burford via Kudoboard</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
-    },
-    {
-      "title": "Kevin Lelitte <kevin.lelitte@admin.ox.ac.uk>",
-      "sub": "From <strong>Hannah Lawrence</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Kevin Lelitte <kevin.lelitte@admin.ox.ac.uk>",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36150000"
-    },
-    {
-      "title": "kevin",
-      "sub": "From <strong>Hannah Lawrence</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "kevin",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36140000"
-    },
-    {
-      "title": "RE: IM Principles - change to URL",
-      "sub": "From <strong>Laura Porter</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: IM Principles - change to URL",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35FB0000"
-    }
-  ],
-  "low": [
-    {
-      "title": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
-      "sub": "From <strong>Marie Cooksey in Teams</strong>. Everyone  - hello all, we are very close to securing a supplier to undertake a Uni-wide people/finance data... ‌ ‌ ‌ ‌ ‌",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646D0000"
-    },
-    {
-      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>SharePoint Online</strong>. <https://unioxfordnexus.sharepoint.com/sites/HumanResources-HRSystems-HRSystemsManagementTeam/Shared%20Documents/HR%20Sy",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36270000"
-    },
-    {
-      "title": "Your May Flow State recap 🌱",
-      "sub": "From <strong>Wispr Flow</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Your May Flow State recap 🌱",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C9864700000"
-    },
-    {
-      "title": "[begb0037admin/work-inbox] Run failed: pages build and deployment - main (7dc4096)",
-      "sub": "From <strong>kevin lelitte</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "[begb0037admin/work-inbox] Run failed: pages build and deployment - main (7dc4096)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC70000"
-    },
-    {
-      "title": "Word, Latex, Planner and MS Projects  - Build Core Digital Skills!",
-      "sub": "From <strong>Digital Capabilities Team</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Word, Latex, Planner and MS Projects  - Build Core Digital Skills!",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36370000"
-    },
-    {
-      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>SharePoint Online</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362A0000"
-    },
-    {
-      "title": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (b97db4e)",
-      "sub": "From <strong>kevin lelitte</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (b97db4e)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36000000"
-    },
-    {
-      "title": "New login from Edge on Windows",
-      "sub": "From <strong>ElevenLabs</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "New login from Edge on Windows",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35F90000"
+      "subject": "RE: [ict-a] Cisco Secure Client (VPN) update to 5.1.17.3394",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000"
     }
   ],
   "calToday": [
@@ -660,46 +156,52 @@
   ],
   "calTomorrow": [
     {
-      "time": "14:00",
-      "title": "GLAM Rostering",
-      "sub": "Simon Burford"
+      "time": "14:00-15:00",
+      "title": "GLAM Rostering - Simon Burford",
+      "sub": "Simon running GLAM rostering meeting (Botanic Gardens Ticket Office and Ashmolean Security). Michael O'Sullivan has thoughts to share on team coverage requirements for tomorrow's meeting.",
+      "alert": ""
     }
   ],
   "absences": [
-    "Athena Artuso",
-    "James Salas Guillen"
+    "Marie Cooksey - Annual leave until Monday 15 June",
+    "James Salas Guillen - Annual leave from end of 8 June until Thursday 18 June"
   ],
   "priorities": [
     {
-      "text": "DTP1092 College Data in PXD - Integrations",
-      "date": "Act today",
+      "text": "Read and respond to Ivanti Priority 1 security incident email from Emma Fitz-Gibbon - coordinate with Sarah Warne on next steps",
+      "date": "Monday 8 June",
       "dateType": "red",
-      "subject": "DTP1092 College Data in PXD - Integrations"
+      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2A0000"
     },
     {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
+      "text": "Authorize Access Group to proceed with Chemistry bulk-delete (case 68974493) - reply to Julie Hickman",
+      "date": "Monday 8 June",
       "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
+      "subject": "Re: Access Support Team | 68974493 - New Case",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E290000"
     },
     {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
+      "text": "Review Marie Cooksey's handover note and confirm H&S and OSM coverage arrangements for 8-15 June",
+      "date": "Monday 8 June",
+      "dateType": "yellow",
+      "subject": "Marie Handover 8-12 June",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000"
     },
     {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
+      "text": "Address Marie Cooksey's comments on DTP1092 SharePoint proposal",
+      "date": "Tuesday 9 June",
+      "dateType": "yellow",
+      "subject": "DTP1092 College staff in PXD",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
     },
     {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
+      "text": "Reschedule DTP1092 meeting with Crispin Muncaster",
+      "date": "Tuesday 9 June",
+      "dateType": "yellow",
+      "subject": "DTP1092 College staff in PXD",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
     }
   ],
-  "refreshed_at": "Monday 08 June · 19:29"
+  "refreshed_at": "Monday 08 June · 15:53"
 }
