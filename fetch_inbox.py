@@ -45,43 +45,30 @@ def restrict_date(folder, cutoff_dt):
         return items
 
 print("Phase 1 - pulling Outlook data...")
-inbox = []
-unread_count = 0
-read_count = 0
-MAX_UNREAD = 50
-MAX_READ = 30
-cutoff_str = cutoff.strftime("%Y-%m-%d")
+# Sort newest first — always capture the 50 most recent emails regardless of read status
+inbox_folder = mapi.GetDefaultFolder(6)
+inbox_items = restrict_date(inbox_folder, cutoff)
+inbox_items.Sort("[ReceivedTime]", True)  # True = descending, newest first
 
-for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
+inbox = []
+for msg in inbox_items:
+    if len(inbox) >= 50:
+        break
     try:
-        # Hard stop if we have enough
-        if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
-            break
-        is_read = not msg.UnRead
-        if is_read and read_count >= MAX_READ:
-            continue
-        if not is_read and unread_count >= MAX_UNREAD:
-            continue
         entry = {
             "subject":         msg.Subject,
             "from":            msg.SenderName,
             "from_email":      msg.SenderEmailAddress,
             "received":        str(msg.ReceivedTime),
-            "is_read":         is_read,
+            "is_read":         not msg.UnRead,
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance,
-            "entry_id":        msg.EntryID
+            "entry_id":        msg.EntryID,
+            "body_preview":    (msg.Body or "")[:150]
         }
-        if not is_read:
-            entry["body_preview"] = (msg.Body or "")[:150]
-            unread_count += 1
-        else:
-            read_count += 1
         inbox.append(entry)
     except:
         continue
-
-inbox.sort(key=lambda x: (x["is_read"], x["received"]))
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
@@ -98,21 +85,32 @@ for msg in mapi.GetDefaultFolder(5).Items:
         continue
 
 calendar = []
-for item in mapi.GetDefaultFolder(9).Items:
-    try:
-        t = dt(item.Start)
-        if t and t.weekday() < 5 and today <= t.date() <= tomorrow:
-            calendar.append({
-                "subject":      item.Subject,
-                "start":        str(item.Start),
-                "end":          str(item.End),
-                "location":     item.Location,
-                "organizer":    item.Organizer,
-                "body_preview": (item.Body or "")[:100],
-                "all_day":      item.AllDayEvent
-            })
-    except:
-        continue
+try:
+    cal_folder = mapi.GetDefaultFolder(9)
+    cal_items = cal_folder.Items
+    cal_items.IncludeRecurrences = True  # Must be set before Sort to capture recurring meetings
+    cal_items.Sort("[Start]")
+    for item in cal_items:
+        try:
+            t = dt(item.Start)
+            if not t:
+                continue
+            item_date = t.date()
+            if item_date == today or item_date == tomorrow:
+                calendar.append({
+                    "subject":      item.Subject,
+                    "start":        str(item.Start),
+                    "end":          str(item.End),
+                    "location":     getattr(item, "Location", ""),
+                    "organizer":    getattr(item, "Organizer", ""),
+                    "body_preview": (item.Body or "")[:100],
+                    "all_day":      item.AllDayEvent
+                })
+        except:
+            continue
+except Exception as e:
+    print(f"Calendar pull warning: {e}")
+    calendar = []
 
 raw = {
     "pulled_at": datetime.now().isoformat(),
