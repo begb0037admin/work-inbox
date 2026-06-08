@@ -143,9 +143,10 @@ The JSON must match this exact schema:
 }
 
 Rules:
-- urgent = must act today; needs = act within 48hrs; fyi = no action; low = noise/admin
+- COVERAGE IS MANDATORY: every email in the inbox data MUST produce at least one card. You must not drop, merge, or omit any email. If an email does not fit urgent/needs/fyi it goes in low. No email is ever silently discarded.
+- urgent = must act today; needs = act within 48hrs; fyi = no action needed; low = noise, admin, automated notifications, resolved cases, social
 - badge is a short deadline or action label (e.g. "Deadline 11 June", "Reply today")
-- priorities is an ordered list of the top actions across all categories
+- priorities is an ordered list of the top 5 actions across all categories
 - sub fields may contain <strong> tags for emphasis
 - calToday/calTomorrow time field: use "All day" for all-day events, never use date ranges like "All week 8-13 June"
 - calToday/calTomorrow title: format as "Event Type - Full Name" e.g. "Annual Leave - Marie Cooksey"
