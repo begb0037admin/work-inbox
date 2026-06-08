@@ -1,4 +1,4 @@
-# CLAUDE.md — work-inbox
+# CLAUDE.md -- work-inbox
 > AI bootstrap entry point. Read this first.
 > Keep this file under 200 lines. Push details to linked docs.
 
@@ -6,7 +6,7 @@
 - **Project:** Work Inbox Dashboard
 - **Purpose:** Fully automated morning inbox briefing for Kevin Lelitte, HR Systems, University of Oxford. Pulls Outlook inbox, sent items, and calendar via Outlook COM → Anthropic API triage → pushes structured briefing.json to GitHub → renders live dashboard.
 - **Owner:** Kevin Lelitte, Manager/Director HR Systems
-- **Status:** Active — fully working end-to-end
+- **Status:** Active -- fully working end-to-end
 - **Repo:** https://github.com/begb0037admin/work-inbox
 - **Live dashboard:** https://begb0037admin.github.io/work-inbox/
 - **Last updated:** 2026-06-08 (v1.5)
@@ -18,7 +18,7 @@
 
 Do NOT ask Kevin for a recap. The docs above are the recap.
 
-## Architecture — Current Working State
+## Architecture -- Current Working State
 
 | Component | Description |
 |---|---|
@@ -40,41 +40,41 @@ Do NOT ask Kevin for a recap. The docs above are the recap.
 ## Phase Status
 | Phase | Description | Status |
 |---|---|---|
-| 1 | Outlook COM pull — inbox, sent, calendar | ✅ Complete |
-| 2 | Anthropic API triage → briefing.json | ✅ Complete |
-| 3 | Task Scheduler — 7am/9am/11am/1pm/3pm/5pm Mon-Fri | ✅ Complete |
-| 4 | Multi-machine — replicate on work machine (begb0037.AD-OAK) | 🔲 Pending |
+| 1 | Outlook COM pull -- inbox, sent, calendar | Complete |
+| 2 | Anthropic API triage → briefing.json | Complete |
+| 3 | Task Scheduler -- 7am/9am/11am/1pm/3pm/5pm Mon-Fri. Git pull baked into task command. Recreated 2026-06-08 after silent failure (old dead path). | Complete |
+| 4 | Multi-machine -- replicate on work machine (begb0037.AD-OAK) | Pending |
 
 ## Key Constraints
-- `fetch_inbox.py` must always be pulled from GitHub before running — never run stale local copy
-- Run script: `git fetch origin && git checkout origin/main -- fetch_inbox.py && python fetch_inbox.py`
-- Inbox: up to 50 unread + 30 read, sorted unread newest-first then read newest-first
-- Calendar uses `IncludeRecurrences = True` with date filter — captures recurring meetings
-- ANTHROPIC_API_KEY and GITHUB_PAT stored as Windows User env vars — never in any file
-- Model locked to claude-haiku-4-5 — Sonnet timed out on this inbox size
+- `fetch_inbox.py` is now auto-pulled by Task Scheduler before every run (baked into task command)
+- Manual run: `git fetch origin && git checkout origin/main -- fetch_inbox.py && python fetch_inbox.py`
+- Inbox capped at 50 newest emails (newest-first sort) -- guarantees morning emails always captured
+- Calendar uses `IncludeRecurrences = True` with date filter -- captures recurring meetings
+- ANTHROPIC_API_KEY and GITHUB_PAT stored as Windows User env vars -- never in any file
+- Model locked to claude-haiku-4-5 -- Sonnet timed out on this inbox size
+- Task Scheduler requires elevated PowerShell (Run as Administrator) to Register/Unregister tasks
 
 ## What Was Tried and Abandoned
 | Approach | Reason |
 |---|---|
 | Claude in Chrome | Too slow, too many tokens |
-| Microsoft Graph API | Oxford blocks — AADSTS errors across all attempts |
-| Microsoft Graph PowerShell | Oxford blocks — needs admin consent |
+| Microsoft Graph API | Oxford blocks -- AADSTS errors across all attempts |
+| Microsoft Graph PowerShell | Oxford blocks -- needs admin consent |
 
 Do not re-investigate Graph API or Chrome-based email access.
 
 ## Hard Rules
 - Never commit raw email data or API keys
-- Never attempt Microsoft Graph API — Oxford blocks it
+- Never attempt Microsoft Graph API -- Oxford blocks it
 - Always pull fetch_inbox.py from GitHub before running
 - Always update HANDOVER.md at end of session
-- Seat A never reads local disk — all reads via GitHub proxy or API
-- Every Cowork brief Invoke-WebRequest to raw.githubusercontent.com MUST include `?t=$(Get-Date -Format yyyyMMddHHmm)` — no exceptions. Prevents Seat C reading cached stale files.
+- Seat A never reads local disk -- all reads via GitHub proxy or API
+- Every Cowork brief Invoke-WebRequest to raw.githubusercontent.com MUST include `?t=$(Get-Date -Format yyyyMMddHHmm)` -- no exceptions. Prevents Seat C reading cached stale files.
+- Unicode em dashes in repo files silently break PowerShell .Replace() -- use split-on-section-headers approach for doc edits
+- No em dashes in PowerShell commit messages -- plain hyphens only
 
-## Change Log
-| Date | Change | Reason |
-|---|---|---|
-| 2026-06-08 | Restored full 3-phase script to fetch_inbox.py (was Phase 1 only) | Dashboard not generating new briefings — stale data on every scheduled run |
-| 2026-06-08 | Fixed sort: unread newest-first within each group (was oldest-first) | Morning emails landing at bottom of unread list |
-| 2026-06-08 | Fixed Restrict filter format: %m/%d/%Y %I:%M %p (was mixed 24h/AM-PM) | Risk of silent filter failure on afternoon runs |
-| 2026-06-08 | Expanded HANDOVER.md roadmap with full descriptions for all items | One-liners were not useful for future sessions or handovers |
-| 2026-06-08 | Fixed Task Scheduler: corrected broken path, baked in auto-pull from GitHub, tested Last Result 0 | Scheduled runs had been silently failing all day with error -2147024629 (invalid directory) |
+## Changelog
+- v1.5 (2026-06-08): Task Scheduler recreated with git pull baked in. Was silently failing since folder move (error -2147024629, dead path). Added em dash / PowerShell lessons to hard rules.
+- v1.4 (2026-06-09 morning): HANDOVER.md expanded with full roadmap descriptions.
+- v1.3 (2026-06-08): fetch_inbox.py restored to full 3-phase script (was Phase 1 only). Sort fix. Restrict filter date format fixed.
+- v1.2 (2026-06-09): Local path updated, bootstrap order clarified.
