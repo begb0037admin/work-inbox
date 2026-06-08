@@ -111,7 +111,8 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 /* Cards */
 .card-link { text-decoration: none; color: inherit; display: block; cursor: pointer; }
 .card-link:hover .card { border-color: #a0aec0; box-shadow: 0 2px 8px rgba(0,33,71,0.1); }
-.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
+#inboxCol { display: block; width: 100%; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 8px; display: flex; width: 100%; box-sizing: border-box; gap: 10px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
 .card.done { opacity: .38; }
 .card.card-hidden { display: none; }
 .card.done .card-title { text-decoration: line-through; }
