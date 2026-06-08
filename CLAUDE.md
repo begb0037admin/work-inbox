@@ -9,7 +9,7 @@
 - **Status:** Active — fully working end-to-end
 - **Repo:** https://github.com/begb0037admin/work-inbox
 - **Live dashboard:** https://begb0037admin.github.io/work-inbox/
-- **Last updated:** 2026-06-08 (v1.3)
+- **Last updated:** 2026-06-08 (v1.4)
 
 ## Bootstrap Order
 1. This file (orientation)
@@ -76,3 +76,4 @@ Do not re-investigate Graph API or Chrome-based email access.
 | 2026-06-08 | Restored full 3-phase script to fetch_inbox.py (was Phase 1 only) | Dashboard not generating new briefings — stale data on every scheduled run |
 | 2026-06-08 | Fixed sort: unread newest-first within each group (was oldest-first) | Morning emails landing at bottom of unread list |
 | 2026-06-08 | Fixed Restrict filter format: %m/%d/%Y %I:%M %p (was mixed 24h/AM-PM) | Risk of silent filter failure on afternoon runs |
+| 2026-06-08 | Expanded HANDOVER.md roadmap with full descriptions for all items | One-liners were not useful for future sessions or handovers |
