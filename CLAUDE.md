@@ -9,7 +9,7 @@
 - **Status:** Active — fully working end-to-end
 - **Repo:** https://github.com/begb0037admin/work-inbox
 - **Live dashboard:** https://begb0037admin.github.io/work-inbox/
-- **Last updated:** 2026-06-08 (v1.4)
+- **Last updated:** 2026-06-08 (v1.5)
 
 ## Bootstrap Order
 1. This file (orientation)
@@ -77,3 +77,4 @@ Do not re-investigate Graph API or Chrome-based email access.
 | 2026-06-08 | Fixed sort: unread newest-first within each group (was oldest-first) | Morning emails landing at bottom of unread list |
 | 2026-06-08 | Fixed Restrict filter format: %m/%d/%Y %I:%M %p (was mixed 24h/AM-PM) | Risk of silent filter failure on afternoon runs |
 | 2026-06-08 | Expanded HANDOVER.md roadmap with full descriptions for all items | One-liners were not useful for future sessions or handovers |
+| 2026-06-08 | Fixed Task Scheduler: corrected broken path, baked in auto-pull from GitHub, tested Last Result 0 | Scheduled runs had been silently failing all day with error -2147024629 (invalid directory) |
