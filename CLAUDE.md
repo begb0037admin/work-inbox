@@ -9,7 +9,7 @@
 - **Status:** Partially working -- Task Scheduler running, dashboard updating, email coverage incomplete
 - **Repo:** https://github.com/begb0037admin/work-inbox
 - **Live dashboard:** https://begb0037admin.github.io/work-inbox/
-- **Last updated:** 2026-06-08 (v1.6)
+- **Last updated:** 2026-06-08 (v1.6 -- session close)
 
 ## Bootstrap Order
 1. This file (orientation)
