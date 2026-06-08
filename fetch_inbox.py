@@ -168,58 +168,40 @@ context  = ai_output.get("context", "")
 subtitle = ai_output.get("subtitle", "")
 print("Phase 2 done - context written")
 
-# ── Phase 3 — thread grouping then card generation ───────────────────────────
-print("Phase 3 - grouping threads and building cards...")
+# ── Phase 3 — Python builds every card ───────────────────────────────────────
+print("Phase 3 - building cards from inbox...")
 
-import re as _re
-
-def base_subject(subj):
-    """Strip RE:/FW:/FWD: prefixes and normalise for thread grouping."""
-    s = (subj or "").strip()
-    s = _re.sub(r'^(re|fw|fwd)\s*:\s*', '', s, flags=_re.IGNORECASE)
-    s = _re.sub(r'^(re|fw|fwd)\s*:\s*', '', s, flags=_re.IGNORECASE)  # double pass for "Re: Fw:"
-    return s.strip().lower()
-
-# Group emails by base subject — newest first within each thread
-threads = {}
-for msg in inbox:
-    key = base_subject(msg.get("subject", ""))
-    if key not in threads:
-        threads[key] = []
-    threads[key].append(msg)
-
-# Each thread: sort newest first, representative = first (newest)
-thread_list = []
-for key, msgs in threads.items():
-    msgs.sort(key=lambda x: x.get("received", ""), reverse=True)
-    thread_list.append(msgs)
-
-# Sort threads: unread first, then by newest message received time
-thread_list.sort(key=lambda msgs: (msgs[0].get("is_read", True), msgs[0].get("received", "")), reverse=True)
-
-URGENT_SUBJECTS = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
-NEEDS_SUBJECTS  = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
-                   "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
-                   "import", "failed", "issue", "case ", "support"]
-FYI_SUBJECTS    = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
-                   "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
-                   "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
-LOW_SUBJECTS    = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
-                   "github", "pages", "build", "deploy", "run failed", "wisp"]
+# Categorisation rules — applied in order, first match wins
+# importance: 0=low, 1=normal, 2=high
+URGENT_SENDERS   = []  # add sender email fragments here if needed
+URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
+NEEDS_SUBJECTS   = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
+                    "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
+                    "import", "failed", "issue", "case ", "support"]
+FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
+                    "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
+                    "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
+LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
+                    "github", "pages", "build", "deploy", "run failed", "wisp"]
 
 def categorise(msg):
-    subj   = (msg.get("subject") or "").lower()
-    sender = (msg.get("from_email") or "").lower()
+    subj    = (msg.get("subject") or "").lower()
+    sender  = (msg.get("from_email") or "").lower()
     is_read = msg.get("is_read", True)
-    imp    = msg.get("importance", 1)
+    imp     = msg.get("importance", 1)
+
+    # High importance flag always pushes to urgent
     if imp == 2:
         return "urgent"
+
+    # Subject keyword matching
     for kw in LOW_SUBJECTS:
         if kw in subj or kw in sender:
             return "low"
     for kw in URGENT_SUBJECTS:
         if kw in subj:
             return "urgent"
+    # Unread + needs keywords → needs response
     if not is_read:
         for kw in NEEDS_SUBJECTS:
             if kw in subj:
@@ -227,71 +209,61 @@ def categorise(msg):
     for kw in FYI_SUBJECTS:
         if kw in subj:
             return "fyi"
+    # Unread with no other match → needs response
     if not is_read:
         return "needs"
+    # Read with no match → fyi
     return "fyi"
 
-CAT_RANK = {"urgent": 0, "needs": 1, "fyi": 2, "low": 3}
+def badge_for(msg, category):
+    imp  = msg.get("importance", 1)
+    received = msg.get("received", "")
+    age_hrs = 0
+    try:
+        t = datetime.fromisoformat(received.split("+")[0].split(" (")[0].strip())
+        age_hrs = (datetime.now() - t).total_seconds() / 3600
+    except:
+        pass
 
-def thread_category(msgs):
-    """Highest priority category across all emails in thread."""
-    cats = [categorise(m) for m in msgs]
-    return min(cats, key=lambda c: CAT_RANK[c])
-
-def badge_for(category, msgs):
     if category == "urgent":
         return "Act today", "red"
     if category == "needs":
-        oldest = min(msgs, key=lambda x: x.get("received", ""))
-        try:
-            t = datetime.fromisoformat(oldest["received"].split("+")[0].split(" (")[0].strip())
-            age_hrs = (datetime.now() - t).total_seconds() / 3600
-            if age_hrs > 48:
-                return "Overdue", "red"
-        except:
-            pass
+        if age_hrs > 48:
+            return "Overdue", "red"
         return "Reply within 48hrs", "yellow"
     if category == "fyi":
         return "FYI", "gray"
     return "", "gray"
 
-def make_card(msgs, category):
-    latest  = msgs[0]  # newest email in thread
-    subj    = latest.get("subject") or "(no subject)"
-    sender  = latest.get("from") or ""
-    preview = (latest.get("body_preview") or "").strip()
-    count   = len(msgs)
-    badge, badge_type = badge_for(category, msgs)
+def make_card(msg, category):
+    subj    = msg.get("subject") or "(no subject)"
+    sender  = msg.get("from") or ""
+    preview = (msg.get("body_preview") or "").strip()
+    badge, badge_type = badge_for(msg, category)
 
-    # Use base subject as title (strip RE:/FW:)
-    title = base_subject(subj).title() if base_subject(subj) else subj
-
-    # Sub line: sender + thread count + preview
-    sub = f"From <strong>{sender}</strong>"
-    if count > 1:
-        senders = list(dict.fromkeys(m.get("from", "") for m in msgs if m.get("from")))
-        sub += f" &middot; <span style='color:#6b7280;font-size:12px'>{count} emails in thread</span>"
-    sub += "."
+    title = subj
+    sub   = f"From <strong>{sender}</strong>."
     if preview:
         sub += f" {preview[:120]}"
 
-    return {
+    card = {
         "title":     title,
         "sub":       sub,
         "badge":     badge,
         "badgeType": badge_type,
-        "subject":   latest.get("subject", ""),  # exact subject for EntryID lookup
-        "entry_id":  latest.get("entry_id", "")
+        "subject":   subj,
+        "entry_id":  msg.get("entry_id", "")
     }
+    return card
 
 urgent = []
 needs  = []
 fyi    = []
 low    = []
 
-for msgs in thread_list:
-    cat  = thread_category(msgs)
-    card = make_card(msgs, cat)
+for msg in inbox:
+    cat  = categorise(msg)
+    card = make_card(msg, cat)
     if cat == "urgent":
         urgent.append(card)
     elif cat == "needs":
@@ -301,7 +273,7 @@ for msgs in thread_list:
     else:
         low.append(card)
 
-print(f"Phase 3 done - {len(thread_list)} threads: urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
+print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
 
 # ── Calendar post-processing ─────────────────────────────────────────────────
 KNOWN_ABSENCES = [
