@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-08 (evening session 3)
+**Last updated:** 2026-06-08 (session 2 -- restore point tagged)
 **Status:** Partially working. Task Scheduler running. Dashboard updating. Email coverage incomplete — AI triage still dropping emails. Core COM issue prevented manual script execution.
 
 ---
@@ -121,6 +121,13 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 
 ---
 
+
+## Restore Point
+**Tag:** restore-2026-06-08-stable
+**Commit:** HEAD at time of tagging -- briefing.json at d9fbfe6, all session 2 fixes in place, Task Scheduler working, layout confirmed good.
+**To restore:** git checkout restore-2026-06-08-stable
+**What is stable:** fetch_inbox.py 3-phase restored, sort fixed, Restrict filter fixed, Task Scheduler path fixed and tested Last Result 0. briefing.json showing correct layout. CLAUDE.md v1.5.
+**What is NOT in this restore point:** unactioned thread logic, subfolder scanning, inbox sort -- all still outstanding on roadmap.
 ## Standing Rules
 - Never commit tokens or raw data
 - All GitHub writes via Contents API (PAT from GITHUB_PAT env var)
