@@ -1,183 +1,317 @@
 {
   "date": "Monday 8 June 2026",
-  "subtitle": "Marie on leave all week - critical handover and DTP1092 comments pending",
-  "context": "Marie Cooksey is on annual leave 8-13 June and will return Monday 15 June. Her absence blocks approval of DTP1092 College Staff in PXD Proposal comments (she has left multiple unresolved comments requiring response), volunteer reporting queries for the Pay & Conditions programme, H&S Management System shortlist feedback, and DSE/Cardinus data verification. James Salas Guillen is on annual leave from today through Thursday 18 June, affecting H&S handover items, Cority uploads to production, and PeopleXD contractor account creation requests - Kevin and Chris are covering the H&S support queue and OSM escalations. Three unread emails from Marie (sent 4 June) on volunteer reporting, H&S system evaluation, and DTP1092 comments require your immediate attention as action items cannot wait for her return. Marie's comments on DTP1092 (received 14:16, 14:45, 4 June) and follow-up replies (8:53, 5 June) are the most time-critical blocker this week. Open Marie's 'Question re Volunteer reporting' email first - it contains the Pay & Conditions programme request that Julie Hickman partially answered but needs your coordination.",
+  "subtitle": "Marie away all week, James absent until 18 June, multiple handovers to action",
+  "context": "Marie Cooksey is on annual leave 8-12 June and James Salas Guillen is absent until Thursday 18 June - both handover documents are in your inbox and require immediate review. The DSE data import to Cardinus is now live (status confirmed by James on 5 June at 10:58) but Marie's question about manual contractor record creation remains unanswered and is blocking full sign-off. DTP1092 College Staff in PXD Proposal has multiple open comments from Marie and Simon Burford awaiting your review and closure. Michael O'Sullivan returned from leave this morning and has sent context on the Volunteering Days pilot. The most time-critical deadline this week is the Strategic H&S Modular System (SHSMS) weightings evaluation discussion with Helen Harbour - date not yet locked but marked urgent. Open first: the Marie Handover document to understand H&S queue coverage and which Marie-dependent items need independent action this week.",
   "urgent": [
     {
-      "title": "DTP1092 - College Staff in PXD Proposal - unresolved comments",
-      "sub": "<strong>Marie's comments require response while she is away.</strong> Multiple comment threads from 4 June (14:16, 14:45) and 5 June (8:53) on the college data proposal are pending. Kevin replied 17:51 on 4 June but Marie's follow-up (8:53, 5 June) indicates further clarification needed. Cannot proceed without addressing her input.",
-      "badge": "Action today",
+      "title": "Marie Handover 8-12 June",
+      "sub": "<strong>Marie on leave all week.</strong> H&S coverage: Chris and Fire team have agreed support approach. Review handover document for all pending approvals and queue items that cannot wait.",
+      "badge": "Review today",
+      "badgeType": "red",
+      "subject": "Marie Handover 8-12 June",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000"
+    },
+    {
+      "title": "James Salas Guillen - Annual leave until 18 June",
+      "sub": "<strong>Absent Friday 5 June through Thursday 18 June.</strong> H&S Handover, DSE data questions, and Cardinus archiving process all pending his input. Sharon and Rob listed as cover contacts.",
+      "badge": "Handover review",
+      "badgeType": "red",
+      "subject": "Annual leave and support during my absence",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000"
+    },
+    {
+      "title": "DTP1092 - College Staff in PXD Proposal comments",
+      "sub": "<strong>Multiple open comments from Marie and Simon require closure.</strong> Marie's questions on manual contractor record creation (from 5 June 11:36) remain unanswered and blocking sign-off. Simon has answered some comments; you replied on 4 June.",
+      "badge": "Close comments",
       "badgeType": "red",
       "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362A0000"
-    },
-    {
-      "title": "Volunteer reporting - Pay & Conditions programme response",
-      "sub": "<strong>Marie needs coordination between Julie Hickman's answer and your approval.</strong> Marie requested confirmation from Julie Hickman on volunteer reporting capabilities for Pay & Conditions. Julie replied (10:07, 4 June) stating only annual leave and sick leave can be self-requested. Marie will need your sign-off on the response to send to Pay & Conditions team.",
-      "badge": "Reply today",
-      "badgeType": "red",
-      "subject": "Question re Volunteer reporting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE360C0000"
-    },
-    {
-      "title": "H&S Handover - review outstanding items",
-      "sub": "<strong>James Salas Guillen is on leave until 18 June.</strong> Handover document (15:44, 5 June) outlines current outstanding H&S items. Kevin and Chris are covering - you must review and assign immediate priorities, particularly Cority production upload and any escalations.",
-      "badge": "Review now",
-      "badgeType": "red",
-      "subject": "H&S Handover ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36260000"
     }
   ],
   "needs": [
     {
-      "title": "Cority production upload - signed SR and next steps",
-      "sub": "James Salas Guillen sent signed SR for Cority test-to-production migration (11:49, 4 June). Production start date needs confirmation. James is on leave until 18 June - may need to action or delegate to Sharon/Rob per his handover.",
-      "badge": "Within 48hrs",
+      "title": "H&S Handover - James Salas Guillen",
+      "sub": "Detailed handover document with current outstanding items. Review before James leaves to understand coverage gaps and any escalations needed during his 18 June return date.",
+      "badge": "By 18 June",
       "badgeType": "yellow",
-      "subject": "RE: Cority upload to the test server - next steps to production server",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36190000"
+      "subject": "H&S Handover",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
     },
     {
-      "title": "H&S Management System - shortlist and weighting feedback",
-      "sub": "Marie sent guidance (16:05, 4 June) requesting team input on Strategic H&S Modular System requirements evaluation weightings over the next few weeks. Helen Harbour scheduled a diary item (13:52, 5 June) to review proposed weightings. Coordinate with Helen on timeline and Kevin's input while Marie is away.",
-      "badge": "Within 48hrs",
-      "badgeType": "yellow",
-      "subject": "H&S Management System",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
-    },
-    {
-      "title": "DSE/Cardinus data interface verification",
-      "sub": "James Salas Guillen confirmed (10:58, 5 June) automated PeopleXD-Cardinus upload is live. Marie asked for confirmation on manual contractor record creation (11:36, 5 June) and James replied (15:15, 5 June) H&S admin can access. Ensure process is fully documented and monitored in James's absence.",
-      "badge": "Within 48hrs",
+      "title": "DSE Update - PeopleXD to Cardinus interface",
+      "sub": "James confirmed interface is live (5 June 10:58). Marie asked about manual contractor records on 5 June 11:36 - answer required before process is fully live. James's departure 5 June-18 June means questions may need escalation.",
+      "badge": "Confirm coverage",
       "badgeType": "yellow",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000"
+    },
+    {
+      "title": "Preventing archiving of users not included in HR data upload",
+      "sub": "James sent detailed technical update on 5 June on automated PeopleXD data upload to DSE (Healthy Working Plus). Review implications for user archiving policy.",
+      "badge": "Within 48 hours",
+      "badgeType": "yellow",
+      "subject": "FW: Preventing archiving of users not included in HR data upload",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36470000"
+    },
+    {
+      "title": "Strategic H&S Modular System (SHSMS) weightings evaluation",
+      "sub": "Helen Harbour sent invitation to discuss proposed evaluation criteria weightings. Documentation to follow. Schedule slot and review weightings document when received.",
+      "badge": "Schedule meeting",
+      "badgeType": "yellow",
+      "subject": "Strategic H&S Modular System requirements evaluation weightings",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36420000"
+    },
+    {
+      "title": "Access Support case 68981549 resolved",
+      "sub": "Case marked resolved 5 June at 16:42. Confirm closure or reopen if further action needed.",
+      "badge": "Confirm closure",
+      "badgeType": "yellow",
+      "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000"
     }
   ],
   "fyi": [
     {
-      "title": "HALO data work POC request",
-      "sub": "Simon Burford has suggested Daphne contact you on HALO data work (17:34, 4 June). Scope unknown - awaiting contact.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "FW: POC for HALO data work?",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000"
+      "title": "Michael O'Sullivan - back from leave",
+      "sub": "Returned 8 June morning with context on Volunteering Days pilot. Calendar meeting 1-1 session accepted.",
+      "badge": "Context noted",
+      "badgeType": "blue",
+      "subject": "RE: Question re Volunteer reporting",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E200000"
     },
     {
-      "title": "Kudoboard for Marie Cooksey - final call",
-      "sub": "Contributions closing soon to the farewell Kudoboard organized by Simon Burford (13:03, 5 June). Last chance message indicates finalizing stage.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "The Kudoboard for Marie Cooksey is being finalized",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36410000"
+      "title": "CorityOne Maintenance completed",
+      "sub": "GX2 TEST Release 2026.2 maintenance completed 6 June 19:00. No components affected.",
+      "badge": "Completed",
+      "badgeType": "blue",
+      "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C76F7B60000"
     },
     {
-      "title": "OWL network maintenance scheduled",
-      "sub": "Captive portal software upgrade scheduled for 11 June (James Turner, 14:26, 5 June). No action required from Kevin at this stage.",
-      "badge": "FYI",
-      "badgeType": "gray",
+      "title": "OWL Network Maintenance - 11 June",
+      "sub": "James Turner: captive portal upgrade scheduled for 11 June. Monitor for user impact.",
+      "badge": "11 June",
+      "badgeType": "blue",
       "subject": "[ict-a] OWL Maintenance - 11th June",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000"
     },
     {
-      "title": "Cority Product User Group meeting",
-      "sub": "Christopher Sanders announced Cority PUG meeting (14:29, 5 June). Agenda to follow - informational only.",
-      "badge": "FYI",
-      "badgeType": "gray",
+      "title": "Citory GX2 2026.2 Release",
+      "sub": "New release with refreshed navigation and AI features now available. Review release notes.",
+      "badge": "Available",
+      "badgeType": "blue",
+      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000"
+    },
+    {
+      "title": "Cority Product User Group (PUG)",
+      "sub": "Christopher Sanders meeting invite. Agenda to follow.",
+      "badge": "Pending agenda",
+      "badgeType": "blue",
       "subject": "Cority Product User Group (PUG)",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36440000"
+    },
+    {
+      "title": "POC for HALO data work",
+      "sub": "Simon Burford forwarded query from Daphne regarding HALO data work POC. Context to follow in conversation.",
+      "badge": "FYI",
+      "badgeType": "blue",
+      "subject": "FW: POC for HALO data work?",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000"
+    },
+    {
+      "title": "GLAM Rostering discussion",
+      "sub": "Simon Burford: Marie asked to discuss Botanic Gardens setup on Rostering following approval.",
+      "badge": "Pending",
+      "badgeType": "blue",
+      "subject": "GLAM Rostering",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000"
+    },
+    {
+      "title": "Marie Cooksey Kudoboard finalized",
+      "sub": "Last call for contributions to farewell Kudoboard before finalization.",
+      "badge": "Deadline soon",
+      "badgeType": "blue",
+      "subject": "The Kudoboard for Marie Cooksey is being finalized",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36410000"
+    },
+    {
+      "title": "Pay Uplift Staff Team added",
+      "sub": "Jessica Oldershaw added you to Pay Uplift Staff team. 18 members coordinating pay uplift work.",
+      "badge": "Team added",
+      "badgeType": "blue",
+      "subject": "You have been added to a staff team in Microsoft Teams",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36320000"
+    },
+    {
+      "title": "Clinical pay uplift 2026 kick off",
+      "sub": "Jasmin Khokhra: kick off meeting scheduled early due to tight timeline.",
+      "badge": "Noted",
+      "badgeType": "blue",
+      "subject": "Clinical pay uplift 2026 kick off meeting",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363B0000"
     }
   ],
   "low": [
     {
-      "title": "Windows Server Security Course - July 2026",
-      "sub": "ITS3 Events offering spaces on 6-7 July course (09:28, 4 June). FYI only - no immediate action.",
+      "title": "New Vacancy Notifications",
+      "sub": "Job board updates matching your criteria. Two notifications sent 5-6 June.",
       "badge": "Admin",
       "badgeType": "gray",
-      "subject": "[ict-a] Windows Server Security Course - July 2026",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36090000"
+      "subject": "New Vacancy Notification",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000"
     },
     {
-      "title": "Summer digital skills courses",
-      "sub": "Digital Capabilities Team promoting weeks 7 & 8 courses (12:26, 5 June). Noise - promotional.",
-      "badge": "Admin",
+      "title": "Access Support case feedback surveys",
+      "sub": "Feedback survey requests from The Access Group (2 items, 4-5 June).",
+      "badge": "Optional",
+      "badgeType": "gray",
+      "subject": "Access Support - Case Feedback"
+    },
+    {
+      "title": "Cority Customer Support note option",
+      "sub": "Response to James re draft notes functionality in Cority. Reference 00476764.",
+      "badge": "Support Q&A",
+      "badgeType": "gray",
+      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36280000"
+    },
+    {
+      "title": "Digital Capabilities training courses",
+      "sub": "Courses offered in weeks 7-8: Word, LaTeX, Planner, MS Projects, summer refresh toolkit.",
+      "badge": "Optional",
       "badgeType": "gray",
       "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
     },
     {
-      "title": "Access Support case notifications",
-      "sub": "Multiple Access Group case updates received throughout 4-5 June. Cases appear to be progressing (several resolved). Low priority unless action required.",
-      "badge": "Monitor",
+      "title": "ICTF Conference 2026 registration closed",
+      "sub": "Registration deadline was 5 June 17:30. Conference details available.",
+      "badge": "Closed",
       "badgeType": "gray",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361F0000"
+      "subject": "[ict-a] ICTF Conference 2026 - Final Week for Registration"
     },
     {
-      "title": "Cisco Secure Client VPN update completed",
-      "sub": "Philip White confirmed VPN update (5.1.17.3394) completed successfully (12:59, 5 June). FYI - no action.",
-      "badge": "FYI",
+      "title": "Cisco VPN update completed",
+      "sub": "Philip White: Cisco Secure Client update to 5.1.17.3394 completed successfully.",
+      "badge": "Completed",
       "badgeType": "gray",
       "subject": "RE: [ict-a] Cisco Secure Client (VPN) update to 5.1.17.3394",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000"
+    },
+    {
+      "title": "Training industry trends reminder",
+      "sub": "AccessPlanit reminder: Training Industry Benchmark Report 2026.",
+      "badge": "Reminder",
+      "badgeType": "gray",
+      "subject": "Reminder: Training industry trends 2026 - Insights from the Training Industry Benchmark Report",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36240000"
+    },
+    {
+      "title": "ElevenLabs login notification",
+      "sub": "New login detected from Edge on Windows. Verify if you initiated.",
+      "badge": "Security check",
+      "badgeType": "gray",
+      "subject": "New login from Edge on Windows",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36230000"
+    },
+    {
+      "title": "Wispr Flow May recap",
+      "sub": "Monthly productivity stats and highlights.",
+      "badge": "Info",
+      "badgeType": "gray",
+      "subject": "Your May Flow State recap",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C9864700000"
+    },
+    {
+      "title": "Cority Employee Import error - 2026-06-05",
+      "sub": "Error in HR data import from PeopleXD to Cority OxfordUniversity_Demo. Log file attached. Review with IT.",
+      "badge": "IT issue",
+      "badgeType": "gray",
+      "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000"
     }
   ],
   "calToday": [
     {
-      "time": "All day",
-      "title": "Annual Leave - Marie Cooksey",
-      "sub": "Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations.",
-      "alert": "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"
+      "time": "09:30",
+      "title": "Meeting - FA Team Daily Catchup",
+      "sub": "Microsoft Teams Meeting",
+      "alert": ""
+    },
+    {
+      "time": "10:00",
+      "title": "Meeting - H&S Roadmap",
+      "sub": "Christopher Sanders organizer. Regular catch-up on open support tickets, H&S roadmap and backlog items.",
+      "alert": ""
+    },
+    {
+      "time": "11:00",
+      "title": "Meeting - Simon / Kevin 121s",
+      "sub": "Simon Burford: weekly catch-up (moving to fortnightly when you are settled)",
+      "alert": ""
+    },
+    {
+      "time": "13:00",
+      "title": "Blocked - Busy",
+      "sub": "13:00-17:00 blocked for priority work",
+      "alert": ""
     }
   ],
   "calTomorrow": [
     {
-      "time": "14:00-15:00",
-      "title": "Meeting - GLAM Rostering",
-      "sub": "Simon Burford leading discussion on GLAM rostering requirements. Meeting organized by Simon; Marie has requested head-count for discussion per meeting body.",
+      "time": "09:30",
+      "title": "Meeting - FA Team Daily Catchup",
+      "sub": "Microsoft Teams Meeting",
+      "alert": ""
+    },
+    {
+      "time": "13:00",
+      "title": "Blocked - Busy",
+      "sub": "13:00-17:00 blocked for priority work",
       "alert": ""
     }
   ],
   "absences": [
-    "Marie Cooksey - annual leave 8-13 June, returns 15 June",
-    "James Salas Guillen - annual leave from 5 June, returns 18 June"
+    "Marie Cooksey - annual leave 8-12 June",
+    "James Salas Guillen - annual leave 5-18 June"
   ],
   "priorities": [
     {
-      "text": "Open and review Marie's 'Question re Volunteer reporting' email - coordinate response between Julie Hickman's answer and Pay & Conditions programme approval",
-      "date": "Today",
+      "text": "Review Marie Handover document and identify H&S queue items requiring independent action during her 8-12 June absence",
+      "date": "8 June",
       "dateType": "red",
-      "subject": "Question re Volunteer reporting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE360C0000"
+      "subject": "Marie Handover 8-12 June",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000"
     },
     {
-      "text": "Review and respond to Marie's outstanding DTP1092 comments (multiple threads 4-5 June) - cannot wait for her return",
-      "date": "Today",
+      "text": "Close open comments on DTP1092 proposal - answer Marie's 5 June question about manual contractor record creation in Cardinus",
+      "date": "8 June",
       "dateType": "red",
       "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362A0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36260000"
     },
     {
-      "text": "Read James Salas Guillen's H&S Handover document and assign immediate priorities for coverage with Chris until 18 June",
-      "date": "Today",
+      "text": "Review James Salas Guillen H&S Handover document and confirm coverage arrangements for his 5-18 June absence",
+      "date": "8 June",
       "dateType": "red",
-      "subject": "H&S Handover ",
+      "subject": "H&S Handover",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
     },
     {
-      "text": "Confirm status and next steps on Cority production upload - signed SR received, production start date needs action",
-      "date": "By Tuesday 9 June",
+      "text": "Schedule SHSMS weightings evaluation meeting with Helen Harbour and review criteria documentation when received",
+      "date": "8-9 June",
       "dateType": "yellow",
-      "subject": "RE: Cority upload to the test server - next steps to production server",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36190000"
+      "subject": "Strategic H&S Modular System requirements evaluation weightings",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36420000"
     },
     {
-      "text": "Coordinate with Helen Harbour on H&S Management System weighting evaluation feedback timeline while Marie is away",
-      "date": "By Tuesday 9 June",
+      "text": "Confirm resolution of Access Support case 68981549 or reopen if further investigation required",
+      "date": "9 June",
       "dateType": "yellow",
-      "subject": "H&S Management System",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
+      "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000"
     }
   ],
-  "refreshed_at": "Monday 08 June · 09:00"
+  "refreshed_at": "Monday 08 June · 09:15"
 }
