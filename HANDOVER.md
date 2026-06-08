@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-09
+**Last updated:** 2026-06-09 (morning)
 **Status:** Active — fully working. Session ended 2026-06-08 late evening.
 
 ---
@@ -34,6 +34,10 @@
 - Show Done / Hide Done — boolean flag, fully working
 - Absences — white bullet list, text justified
 - Fuzzy EntryID matching — fallback if AI subject slightly differs
+
+### Local Path (updated 2026-06-09)
+Folder moved to: `C:\Users\admin\Documents\Claude\Projects\work-inbox`
+Task Scheduler, Registry (openmail://), and desktop bat all updated by Seat C.
 
 ### Critical Note — Local Script
 - Task Scheduler runs local fetch_inbox.py — must stay in sync with GitHub
