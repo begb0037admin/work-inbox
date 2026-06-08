@@ -31,7 +31,7 @@ def dt(com_time):
 
 def restrict_date(folder, cutoff_dt):
     # Outlook Restrict requires this exact format
-    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%d/%m/%Y %H:%M %p") + "'"
+    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %I:%M %p")  # FIX 2026-06-08: 12h US locale format for Outlook Restrict + "'"
     try:
         restricted = folder.Items.Restrict(filter_str)
         # Verify filter worked — if count is suspiciously large, filter failed
@@ -45,30 +45,43 @@ def restrict_date(folder, cutoff_dt):
         return items
 
 print("Phase 1 - pulling Outlook data...")
-# Sort newest first — always capture the 50 most recent emails regardless of read status
-inbox_folder = mapi.GetDefaultFolder(6)
-inbox_items = restrict_date(inbox_folder, cutoff)
-inbox_items.Sort("[ReceivedTime]", True)  # True = descending, newest first
-
 inbox = []
-for msg in inbox_items:
-    if len(inbox) >= 50:
-        break
+unread_count = 0
+read_count = 0
+MAX_UNREAD = 50
+MAX_READ = 30
+cutoff_str = cutoff.strftime("%Y-%m-%d")
+
+for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
+        # Hard stop if we have enough
+        if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
+            break
+        is_read = not msg.UnRead
+        if is_read and read_count >= MAX_READ:
+            continue
+        if not is_read and unread_count >= MAX_UNREAD:
+            continue
         entry = {
             "subject":         msg.Subject,
             "from":            msg.SenderName,
             "from_email":      msg.SenderEmailAddress,
             "received":        str(msg.ReceivedTime),
-            "is_read":         not msg.UnRead,
+            "is_read":         is_read,
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance,
-            "entry_id":        msg.EntryID,
-            "body_preview":    (msg.Body or "")[:150]
+            "entry_id":        msg.EntryID
         }
+        if not is_read:
+            entry["body_preview"] = (msg.Body or "")[:150]
+            unread_count += 1
+        else:
+            read_count += 1
         inbox.append(entry)
     except:
         continue
+
+inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)  # FIX 2026-06-08: unread newest-first
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
@@ -85,37 +98,21 @@ for msg in mapi.GetDefaultFolder(5).Items:
         continue
 
 calendar = []
-try:
-    cal_folder = mapi.GetDefaultFolder(9)
-    cal_items = cal_folder.Items
-    # Date restrict FIRST — narrow to today/tomorrow only, then expand recurrences
-    start_str = today.strftime("%m/%d/%Y") + " 00:00 AM"
-    end_str   = tomorrow.strftime("%m/%d/%Y") + " 11:59 PM"
-    filter_str = f"[Start] >= '{start_str}' AND [End] <= '{end_str}'"
-    cal_items  = cal_items.Restrict(filter_str)
-    cal_items.IncludeRecurrences = True
-    cal_items.Sort("[Start]")
-    for item in cal_items:
-        try:
-            t = dt(item.Start)
-            if not t:
-                continue
-            item_date = t.date()
-            if item_date == today or item_date == tomorrow:
-                calendar.append({
-                    "subject":      item.Subject,
-                    "start":        str(item.Start),
-                    "end":          str(item.End),
-                    "location":     getattr(item, "Location", ""),
-                    "organizer":    getattr(item, "Organizer", ""),
-                    "body_preview": (item.Body or "")[:100],
-                    "all_day":      item.AllDayEvent
-                })
-        except:
-            continue
-except Exception as e:
-    print(f"Calendar pull warning: {e}")
-    calendar = []
+for item in mapi.GetDefaultFolder(9).Items:
+    try:
+        t = dt(item.Start)
+        if t and t.weekday() < 5 and today <= t.date() <= tomorrow:
+            calendar.append({
+                "subject":      item.Subject,
+                "start":        str(item.Start),
+                "end":          str(item.End),
+                "location":     item.Location,
+                "organizer":    item.Organizer,
+                "body_preview": (item.Body or "")[:100],
+                "all_day":      item.AllDayEvent
+            })
+    except:
+        continue
 
 raw = {
     "pulled_at": datetime.now().isoformat(),
