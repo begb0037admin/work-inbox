@@ -371,6 +371,8 @@ function renderBriefing(data,key){
   document.getElementById('pageTitle').textContent=getGreeting();
   document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
   document.getElementById('sidebarDate').textContent=data.date||'';;
+  const stamp=document.getElementById('refresh-stamp');
+  if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
 
   // Sidebar calendar
   renderSidebarCal(data.calToday,'calTodaySidebar');
