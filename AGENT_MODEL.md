@@ -3,7 +3,7 @@
 
 Version : 1.0
 Status  : Ratified
-Updated : 2026-06-06
+Updated : 2026-06-09
 Author  : Kevin Lelitte, HR Systems, University of Oxford
 
 Governed by: CONSTITUTION.md
@@ -36,6 +36,7 @@ Operator : Kevin Lelitte
 OS       : Windows
 Username : begb0037 | Domain: AD-OAK
 Path root: C:\Users\begb0037.AD-OAK\
+work-inbox: C:\Users\admin\Documents\Claude\Projects\work-inbox\
 
 **Personal machine (Hope)**
 Operator : Hope (personal domain)
@@ -244,6 +245,5 @@ without constitutional amendment.
 
 | Version | Date       | Change                              |
 |---------|------------|-------------------------------------|
-| 1.0     | 2026-06-06 | Initial ratification. Amendments    |
-|         |            | applied from governance review:     |
-|         |            | Sections 1, 2, 3, 4, 5, 6, 7, 8.   |
+| 1.0     | 2026-06-06 | Initial ratification.               |
+| 1.1     | 2026-06-09 | Updated work-inbox local path.      |
