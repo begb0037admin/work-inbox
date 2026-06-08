@@ -31,7 +31,7 @@ def dt(com_time):
 
 def restrict_date(folder, cutoff_dt):
     # Outlook Restrict requires this exact format
-    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %I:%M %p")  # FIX 2026-06-08: 12h US locale format for Outlook Restrict + "'"
+    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%d/%m/%Y %H:%M %p") + "'"
     try:
         restricted = folder.Items.Restrict(filter_str)
         # Verify filter worked — if count is suspiciously large, filter failed
@@ -81,7 +81,7 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     except:
         continue
 
-inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)  # FIX 2026-06-08: unread newest-first
+inbox.sort(key=lambda x: (x["is_read"], x["received"]))
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
