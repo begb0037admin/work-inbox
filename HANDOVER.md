@@ -1,7 +1,7 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-08 (session 2 -- restore point tagged)
-**Status:** Partially working. Task Scheduler running. Dashboard updating. Email coverage incomplete — AI triage still dropping emails. Core COM issue prevented manual script execution.
+**Last updated:** 2026-06-08 (session 2 -- closed clean)
+**Status:** Active -- dashboard stable at restore point fbf36a6. Task Scheduler DISABLED. Two issues unresolved: layout break and triage quality. Do not re-enable scheduler until both are fixed and tested.
 
 ---
 
@@ -107,27 +107,61 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 
 ## Roadmap
 
-| Priority | Task |
-|----------|------|
-| 1 | Resolve COM session issue — manual script execution from PowerShell fails (Session 1 vs Session 2 mismatch). Investigate running Python as domain user, or use Task Scheduler exclusively |
-| 2 | Deploy Python card generation (commit 170e926 approach) — AI writes context only, Python builds every card. Blocked on COM issue for testing |
-| 3 | Thread grouping — strip RE:/FW:, one card per thread, latest email, count shown. Code written, reverted pending stable base |
-| 4 | Subfolder scanning — emails filed to subfolders vanish from dashboard without this |
-| 5 | Inbox sort — blocked on subfolder scanning |
-| 6 | Unactioned thread logic — cross-reference sent items, 30-day lookback |
-| 7 | Add James Salas Guillen to Outlook calendar |
-| 8 | Multi-machine — replicate on work machine (begb0037.AD-OAK) |
-| 9 | Update command-centre ROADMAP.md |
+### Completed -- 2026-06-08
+
+**3-phase script restore**
+fetch_inbox.py in GitHub contained Phase 1 only -- it pulled from Outlook and stopped with no API triage, no briefing.json output, and no GitHub push. Dashboard was showing stale data on every scheduled run because the working 3-phase script existed only as a local backup. Fixed by restoring the full script from fetch_inbox_backup_2026-06-09.py. All backup files since removed -- history preserved in git tag restore-2026-06-08-stable.
+
+**Sort fix -- unread newest-first**
+Emails were sorted unread-first (correct) but oldest-first within each group (wrong). Fixed: both unread and read groups now sort newest-first.
+
+**Restrict filter date format**
+Outlook COM Restrict filter requires 12-hour US locale date format. Fixed to %m/%d/%Y %I:%M %p.
+
+**Task Scheduler -- broken path fixed, auto-pull baked in**
+Task Scheduler was pointing at C:\Users\admin\work-inbox -- dead path. Every scheduled run failing with error -2147024629 (ERROR_DIRECTORY). Fixed: task recreated via elevated PowerShell with correct paths and git auto-pull baked in. Test run confirmed Last Result 0 at 16:20:32. Currently DISABLED -- re-enable only after layout and triage fixes: schtasks /change /tn "WorkInbox-Briefing" /enable
+
+**Restore point tagged**
+Git tag restore-2026-06-08-stable at commit fbf36a6. Dashboard layout confirmed good. Restore bat on desktop: Restore_Stable_2026-06-08.bat. To restore: git checkout restore-2026-06-08-stable
+
+**Repo cleanup**
+All 10 backup files removed from repo. History and all versions preserved in git. Restore point tag ensures nothing is lost.
+
+### Outstanding
+
+**1. Layout fix** -- do first, blocks everything else
+Dashboard layout breaks when briefing.json contains larger data volumes. Root cause not yet diagnosed. Both versions preserved in git: stable = d9fbfe6, broken = f2b2a88. Fix must make index.html robust at any data volume. Test against f2b2a88 before pushing. DO NOT run fetch_inbox.py or re-enable scheduler until this is fixed. Affects: index.html only.
+
+**2. Triage quality fix** -- do second
+Dashboard missing urgent emails. Confirmed missing: Emma Fitz-Gibbon Priority 1 security vulnerability (3:40 PM and 2:06 PM), Asta Palmer Priority 1 (3:34 PM), Helena Uddin OH report (9:47 AM), Patrick Cunningham AI-assisted complaints (12:59 PM), Julie Hickman new support case (1:29 PM), Michael O'Sullivan volunteer reporting (8:45 AM). Fix: improve API triage prompt in fetch_inbox.py with Oxford HR domain knowledge. Affects: fetch_inbox.py Phase 2 API prompt only.
+
+**3. Re-enable Task Scheduler** -- do after 1 and 2
+schtasks /change /tn "WorkInbox-Briefing" /enable
+Verify: schtasks /query /tn "WorkInbox-Briefing" /fo LIST /v
+
+**4. Unactioned thread logic**
+Cross-reference sent items to identify threads with no reply from Kevin. Those threads get 30-day lookback. Conor O'Brien / Access Group email from 21 May 2026 is a real example of this failure. Affects: fetch_inbox.py Phase 1 and API triage prompt.
+
+**5. Inbox sort -- DO NOT RUN until item 6 is complete**
+One-off task to file inbox into named folders. Chrome brief already written and ready. Hard blocker: dashboard reads only default inbox folder -- emails moved to subfolders vanish silently. Affects: fetch_inbox.py Phase 1, dashboard coverage.
+
+**6. Subfolder scanning -- prerequisite for item 5**
+Update fetch_inbox.py to scan named subfolders. Approximately 15 lines in Phase 1. Affects: fetch_inbox.py Phase 1 only.
+
+**7. James Salas Guillen calendar**
+Add him to Outlook calendar so script picks him up automatically like Marie Cooksey. Affects: fetch_inbox.py KNOWN_ABSENCES and Outlook calendar.
+
+**8. Click-through reliability monitoring**
+openmail:// not yet tested across all email types. Flag failures as they occur. Affects: open_email.py, EntryID injection.
+
+**9. Work machine replication**
+Full setup only on admin machine. Replicate on begb0037.AD-OAK. Affects: all components, new machine.
+
+**10. command-centre ROADMAP.md**
+Master tracker not updated to reflect work-inbox growth. Low priority. Affects: command-centre repo only.
 
 ---
 
-
-## Restore Point
-**Tag:** restore-2026-06-08-stable
-**Commit:** HEAD at time of tagging -- briefing.json at d9fbfe6, all session 2 fixes in place, Task Scheduler working, layout confirmed good.
-**To restore:** git checkout restore-2026-06-08-stable
-**What is stable:** fetch_inbox.py 3-phase restored, sort fixed, Restrict filter fixed, Task Scheduler path fixed and tested Last Result 0. briefing.json showing correct layout. CLAUDE.md v1.5.
-**What is NOT in this restore point:** unactioned thread logic, subfolder scanning, inbox sort -- all still outstanding on roadmap.
 ## Standing Rules
 - Never commit tokens or raw data
 - All GitHub writes via Contents API (PAT from GITHUB_PAT env var)
