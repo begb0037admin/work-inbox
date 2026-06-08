@@ -80,7 +80,8 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .abs-list li::before { content: "\2022"; color: rgba(255,255,255,0.4); margin-right: 7px; }
 
 /* Main */
-.main { margin-left: var(--sidebar-width); flex: 1; padding: 28px 36px 60px; }
+.main { margin-left: var(--sidebar-width); flex: 1; padding: 28px 36px 60px; min-width: 0; overflow-x: hidden; }
+#inboxCol { display: block; width: 100%; }
 
 /* Header */
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
