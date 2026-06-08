@@ -1,7 +1,7 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-08 (session 2 -- complete)
-**Status:** Active -- fully working. Task Scheduler fixed and tested. All session 2 changes committed.
+**Last updated:** 2026-06-08 (evening session 2)
+**Status:** Active — fully working. Task Scheduler recreated with git pull baked in. Test run result pending verification.
 
 ---
 
@@ -15,13 +15,17 @@
 
 ---
 
-## Current State (fully working as of 2026-06-08 late evening)
+## Current State (as of 2026-06-08 evening session 2)
 
 ### Working
 - fetch_inbox.py — all three phases confirmed working
 - Python post-processing of calendar items — KNOWN_ABSENCES list rewrites sub/alert for Marie Cooksey and James Salas Guillen with hardcoded specific text, bypassing AI entirely for those fields
 - open_email.py — openmail:// protocol registered, confirmed working
 - Task Scheduler — WorkInbox-Briefing runs at 7am/9am/11am/1pm/3pm/5pm Mon-Fri
+  - Recreated 2026-06-08 with correct path and git pull baked in:
+  - `cmd.exe /c cd /d "C:\Users\admin\Documents\Claude\Projects\work-inbox" && git fetch origin && git checkout origin/main -- fetch_inbox.py && C:\Python314\python.exe fetch_inbox.py`
+  - Previous task was silently failing with error -2147024629 (ERROR_DIRECTORY) — was pointing at old dead path `C:\Users\admin\work-inbox` since folder moved months ago
+  - Test run initiated via `schtasks /run /tn "WorkInbox-Briefing"` — result not yet verified
 - Dashboard loads live briefing.json from GitHub on open, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
 - Time-of-day greeting (Good morning/afternoon/evening, Kevin) — UK timezone
@@ -35,19 +39,20 @@
 - Absences — white bullet list, text justified
 - Fuzzy EntryID matching — fallback if AI subject slightly differs
 
-### Local Path (updated 2026-06-09)
-Folder moved to: `C:\Users\admin\Documents\Claude\Projects\work-inbox`
-Task Scheduler, Registry (openmail://), and desktop bat all updated by Seat C.
+### Local Path
+Folder: `C:\Users\admin\Documents\Claude\Projects\work-inbox`
+Task Scheduler, Registry (openmail://), and desktop bat all updated.
 
 ### Critical Note — Local Script
-- Task Scheduler runs local fetch_inbox.py — must stay in sync with GitHub
-- If calendar items revert to vague text, run: git fetch origin && git checkout origin/main -- fetch_inbox.py
-- Then run: python fetch_inbox.py
+- Task Scheduler now auto-pulls latest fetch_inbox.py before running (baked into task command)
+- If calendar items revert to vague text, run manually: `git fetch origin && git checkout origin/main -- fetch_inbox.py && python fetch_inbox.py`
 
-### Known Issues / Next Session
-- Task Scheduler bat file should auto-pull latest fetch_inbox.py before running
+### Known Issues / Pending
+- Task Scheduler test run result not yet verified — check: `schtasks /query /tn "WorkInbox-Briefing" /fo LIST /v | Select-String "Last Run Time|Last Result|Status"`
+  - If Last Result = 0: working. If non-zero: diagnose error code.
 - James Salas Guillen not appearing in calendar (no Outlook calendar block) — post-processing only fires if AI includes him; monitor
 - Multi-machine setup not yet done (work machine begb0037.AD-OAK)
+- HANDOVER.md and CLAUDE.md were not updated during the session that recreated Task Scheduler — this commit is that update
 
 ---
 
@@ -87,55 +92,36 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 | Script | work-inbox/fetch_inbox.py |
 | Opener | work-inbox/open_email.py |
 | Briefing | work-inbox/data/briefing.json |
+| Backup (working) | work-inbox/fetch_inbox_backup_2026-06-09.py |
+| Backup (broken Phase 1 only) | work-inbox/fetch_inbox_backup_2026-06-08.py |
 | Local | C:\Users\admin\Documents\Claude\Projects\work-inbox\ |
-| Registry | HKCU:\Software\Classes\openmail (points to new path) |
-| Scheduler | WorkInbox-Briefing (Task Scheduler) |
+| Registry | HKCU:\Software\Classes\openmail (points to current path) |
+| Scheduler | WorkInbox-Briefing (Task Scheduler, Run As: DESKTOP-MJDJM64\admin) |
 
 ---
 
 ## Roadmap
 
-### Completed -- 2026-06-08
-
-**3-phase script restore**
-fetch_inbox.py in GitHub contained Phase 1 only -- it pulled from Outlook and stopped with no API triage, no briefing.json output, and no GitHub push. Dashboard was showing stale data on every scheduled run because the working 3-phase script existed only as a local backup. Fixed by restoring the full script from fetch_inbox_backup_2026-06-09.py. Broken version preserved as fetch_inbox_backup_2026-06-08.py for rollback if needed.
-
-**Sort fix -- unread newest-first**
-Emails were sorted unread-first (correct) but oldest-first within each group (wrong). Emails arriving this morning were landing at the bottom of the unread section. Fixed: both unread and read groups now sort newest-first, so the most recent emails always appear at the top of their group.
-
-**Restrict filter date format**
-Outlook COM Restrict filter requires 12-hour US locale date format. The script was passing a mixed 24-hour/AM-PM format that could cause silent filter failure on afternoon runs, falling back to a full inbox scan. Fixed to %m/%d/%Y %I:%M %p.
-
-**Task Scheduler -- broken path fixed, auto-pull baked in**
-Task Scheduler was pointing at C:\Users\admin\work-inbox -- a path that no longer exists after the folder was moved to Documents\Claude\Projects\work-inbox. Every scheduled run had been failing with error -2147024629 (ERROR_DIRECTORY -- invalid directory). Dashboard was showing stale data all day as a result. Fixed: task deleted and recreated via elevated PowerShell with correct working directory and git auto-pull baked directly into the task command. GitHub is now always the source of truth before every scheduled execution. Test run confirmed: Last Result 0 at 16:20:32 on 2026-06-08. Task command: cmd.exe /c cd /d "C:\Users\admin\Documents\Claude\Projects\work-inbox" && git fetch origin && git checkout origin/main -- fetch_inbox.py && C:\Python314\python.exe fetch_inbox.py. Note: recreating the task requires elevated PowerShell (Run as Administrator) -- standard session gives Access Denied.
-
-### Outstanding
-
-**1. Unactioned thread logic** -- next priority
-Currently the dashboard uses read/unread status to decide what to surface. Read does not mean actioned -- an email may have been opened and never replied to. The fix is to cross-reference sent items (already pulled by the script) to identify threads with no reply from Kevin. Those unactioned threads get a 30-day lookback instead of 7 days so nothing drops off the dashboard just because it is older than a week. The Conor O'Brien / Access Group email from 21 May 2026 is a real example of this failure. Affects: fetch_inbox.py Phase 1 inbox pull logic and the API triage prompt.
-
-**2. Inbox sort -- DO NOT RUN until item 3 is complete**
-A one-off task to file the entire inbox into named folders: Simon, Marie, Projects, and others. A Chrome brief has already been written and is ready to run. Hard blocker: the dashboard currently reads only the default inbox folder. If the sort runs before item 3 is done, any email moved to a subfolder vanishes from the dashboard silently with no error message. Affects: fetch_inbox.py Phase 1, dashboard coverage.
-
-**3. Subfolder scanning -- prerequisite for item 2**
-Update fetch_inbox.py to scan named subfolders in addition to the main inbox. Required before the inbox sort runs. Approximately 15 lines of additional code in Phase 1. Affects: fetch_inbox.py Phase 1 only.
-
-**4. James Salas Guillen calendar**
-James is absent and appears on the dashboard only because his details are hardcoded into fetch_inbox.py. This requires manual script updates whenever his absence changes. Root cause: no Outlook calendar block exists for his leave. Fix: add him to the Outlook calendar so the script picks him up automatically the same way it handles Marie Cooksey. Affects: fetch_inbox.py KNOWN_ABSENCES block and Outlook calendar.
-
-**5. Click-through reliability monitoring**
-The openmail:// protocol uses a unique EntryID to open the exact email in Outlook when a dashboard card is clicked. A fuzzy subject-matching fallback handles cases where the AI slightly rephrases a subject. Not yet tested across all email types -- long subjects, special characters, CC threads, calendar invites. No action required now -- flag any click-through failures as they occur and report the exact subject string that caused the mismatch. Affects: open_email.py, EntryID injection in fetch_inbox.py.
-
-**6. Work machine replication**
-The full setup -- Task Scheduler, openmail:// registry entry, Python environment, local script folder -- exists only on the admin machine (C:\Users\admin). The work machine (begb0037.AD-OAK) has none of it. If working from the office, scheduled runs do not happen. Requires replicating the complete setup on the work machine. Affects: all components, new machine.
-
-**7. command-centre ROADMAP.md**
-The command-centre repo is the master tracker across all HR systems work. Its ROADMAP.md has not been updated to reflect work-inbox project growth. Low priority -- nothing breaks -- but the command-centre view of the project landscape is stale. Affects: command-centre repo only.
+| Priority | Task |
+|----------|------|
+| 1 | Verify Task Scheduler test run result (Last Result = 0 expected) |
+| 2 | Unactioned thread logic -- cross-reference sent items, 30-day lookback for no-reply threads |
+| 3 | Subfolder scanning -- prereq for inbox sort (emails filed to subfolders vanish from dashboard without this) |
+| 4 | Inbox sort -- blocked on subfolder scanning |
+| 5 | Add James Salas Guillen to Outlook calendar so he appears without AI inference |
+| 6 | Monitor card openmail:// click-through reliability |
+| 7 | Multi-machine -- replicate setup on work machine (begb0037.AD-OAK) |
+| 8 | Update command-centre ROADMAP.md |
+| ~~COMPLETE~~ | ~~Task Scheduler auto-pull -- git pull now baked into task command directly~~ |
 
 ---
+
 ## Standing Rules
 - Never commit tokens or raw data
 - All GitHub writes via Contents API (PAT from GITHUB_PAT env var)
 - Every change committed immediately
-- Seat A never references local disk — all reads via GitHub proxy
+- Seat A never references local disk -- all reads via GitHub proxy or API
 - Local machine must stay in sync: git fetch origin && git checkout origin/main -- fetch_inbox.py
+- Task Scheduler requires elevated PowerShell (Run as Administrator) to Register or Unregister tasks
+- Unicode em dashes in repo files silently break PowerShell .Replace() -- use split-on-section-headers approach for doc edits
+- No em dashes in PowerShell commit messages -- plain hyphens only
