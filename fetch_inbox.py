@@ -88,7 +88,12 @@ calendar = []
 try:
     cal_folder = mapi.GetDefaultFolder(9)
     cal_items = cal_folder.Items
-    cal_items.IncludeRecurrences = True  # Must be set before Sort to capture recurring meetings
+    # Date restrict FIRST — narrow to today/tomorrow only, then expand recurrences
+    start_str = today.strftime("%m/%d/%Y") + " 00:00 AM"
+    end_str   = tomorrow.strftime("%m/%d/%Y") + " 11:59 PM"
+    filter_str = f"[Start] >= '{start_str}' AND [End] <= '{end_str}'"
+    cal_items  = cal_items.Restrict(filter_str)
+    cal_items.IncludeRecurrences = True
     cal_items.Sort("[Start]")
     for item in cal_items:
         try:
