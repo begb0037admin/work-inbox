@@ -111,8 +111,8 @@ for item in mapi.GetDefaultFolder(9).Items:
 unread_total = sum(1 for m in inbox if not m["is_read"])
 print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)}")
 
-# ── Phase 2 — Anthropic triage ───────────────────────────────────────────────
-print("Phase 2 - calling Anthropic API...")
+# ── Phase 2 — AI writes context paragraph only ───────────────────────────────
+print("Phase 2 - calling Anthropic API for context...")
 
 now          = datetime.now()
 today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
@@ -123,54 +123,20 @@ cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date()
 
 inbox_for_api = [{k: v for k, v in m.items() if k != "entry_id"} for m in inbox]
 
-SYSTEM = """You are Kevin's morning inbox triage assistant at Oxford University Personnel Services.
-Analyse the inbox, sent items, and calendar data provided and return ONLY a valid JSON object - no preamble, no markdown, no code fences.
-Use only plain ASCII punctuation: use - instead of dashes, use ' instead of curly quotes, use ... instead of ellipsis.
+SYSTEM = """You are Kevin's morning inbox briefing assistant at Oxford University Personnel Services.
+Your ONLY job is to write the context paragraph. You do not categorise emails. You do not produce cards.
+Return ONLY a valid JSON object with exactly two fields - no preamble, no markdown, no code fences.
+Use only plain ASCII punctuation: use - instead of dashes, use ' instead of curly quotes.
 
-The JSON must match this exact schema:
+Return exactly this:
 {
-  "date": "<Day D Month YYYY>",
-  "subtitle": "<one short phrase describing the day, optional>",
-  "context": "<A dense, specific 5-7 sentence morning briefing written for Kevin. Must include: full names and exact return dates of every absent colleague; which specific projects, systems or cases are blocked or at risk because of those absences; any emails waiting more than 48 hours without a response; the most time-critical deadline this week with its exact date; and the one thing Kevin should open first. Use real names, real dates, real case numbers and real project names from the inbox data. Every sentence must contain at least one specific proper noun from the data. Do not generalise. Do not use vague phrases like several items require attention. Do not mention GitHub PAT exposure, token revocation, workflow authentication failures, or CI/CD pipeline issues - these are handled separately.",
-  "urgent": [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
-  "needs":  [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
-  "fyi":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
-  "low":    [{"title":"...","sub":"...","badge":"...","badgeType":"red|yellow|blue|gray","subject":"..."}],
-  "calToday":    [{"time":"...","title":"...","sub":"...","alert":"..."}],
-  "calTomorrow": [{"time":"...","title":"...","sub":"...","alert":"..."}],
-  "absences": ["Name - reason"],
-  "priorities": [{"text":"...","date":"...","dateType":"red|yellow|blue|gray","subject":"..."}]
-}
-
-Rules:
-- COVERAGE IS MANDATORY: every email in the inbox data MUST produce at least one card. You must not drop, merge, or omit any email. If an email does not fit urgent/needs/fyi it goes in low. No email is ever silently discarded.
-- urgent = must act today; needs = act within 48hrs; fyi = no action needed; low = noise, admin, automated notifications, resolved cases, social
-- badge is a short deadline or action label (e.g. "Deadline 11 June", "Reply today")
-- priorities is an ordered list of the top 5 actions across all categories
-- sub fields may contain <strong> tags for emphasis
-- calToday/calTomorrow time field: use "All day" for all-day events, never use date ranges like "All week 8-13 June"
-- calToday/calTomorrow title: format as "Event Type - Full Name" e.g. "Annual Leave - Marie Cooksey"
-- calToday/calTomorrow sub: be specific - state exact dates, what is blocked, who is covering. e.g. "Marie is on leave 8-13 June. Any items involving her approval or input must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations." Never write vague text like "Check handover documents and note absence for escalations."
-- calToday/calTomorrow alert: if the person is absent and has active dependencies, name the specific projects or actions affected. e.g. "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently". Never write generic text like "Colleague absent" or "Team member absent".
-- omit alert only if there are genuinely no active dependencies or actions affected
-
-CALENDAR ITEM EXAMPLE - for an absent manager or colleague, output MUST look exactly like this:
-CORRECT:
-{"time":"All day","title":"Annual Leave - Marie Cooksey","sub":"Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait. Kevin and Chris are covering H&S support queue and OSM escalations in her absence.","alert":"Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"}
-
-NEVER produce output like this - it is wrong and useless:
-{"time":"All week","title":"Marie Cooksey annual leave","sub":"Away 8-12 June. Handover documentation provided.","alert":"Team member absent"}
-
-The difference: correct output names specific projects, specific coverage arrangements, specific actions. Wrong output is generic and tells Kevin nothing he does not already know. Every calendar item for an absent colleague must meet the CORRECT standard above.
-- absences: only include people confirmed absent, inferred from out-of-office replies or calendar blocks
-- calendar shows working days only (Monday to Friday)
-- calToday/calTomorrow: if a colleague is known to be absent from OOO replies, handover emails or inbox context - even if no calendar block exists - include them as an All day entry. Use the full name from email context, not abbreviated calendar titles like "Annual Leave - Marie". Cross-reference all data sources to build the most complete and accurate picture.
-- subject field: you MUST copy the exact email subject verbatim - character for character - from the inbox data provided. Do NOT paraphrase, summarise or invent a subject. The subject field is used to look up the Outlook EntryID and open the exact email. If you change even one character it will fail. If the item does not relate to a single specific email, omit the subject field entirely.
-"""
+  "context": "<A dense, specific 5-7 sentence morning briefing for Kevin. Must include: full names and exact return dates of every absent colleague; which specific projects, systems or cases are blocked because of those absences; any emails waiting more than 48 hours without a response; the most time-critical deadline this week with its exact date; the one thing Kevin should open first. Use real names, real dates, real case numbers and real project names from the data. Every sentence must contain at least one specific proper noun. Do not generalise. Do not mention GitHub, CI/CD, or workflow authentication issues.>",
+  "subtitle": "<one short phrase describing the day>"
+}"""
 
 USER = f"""Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.
 
-INBOX ({len(inbox_for_api)} emails, last 7 days - unread have body_preview, read do not):
+INBOX ({len(inbox_for_api)} emails, last 7 days):
 {json.dumps(inbox_for_api, indent=2, ensure_ascii=True)}
 
 SENT ({len(sent)} items, last 7 days):
@@ -186,7 +152,7 @@ CALENDAR TOMORROW:
 client   = anthropic.Anthropic(timeout=60.0)
 response = client.messages.create(
     model      = "claude-haiku-4-5",
-    max_tokens = 4096,
+    max_tokens = 1024,
     system     = SYSTEM,
     messages   = [{"role": "user", "content": USER}]
 )
@@ -197,36 +163,119 @@ if raw_text.startswith("```"):
 if raw_text.endswith("```"):
     raw_text = "\n".join(raw_text.split("\n")[:-1])
 
-briefing = json.loads(raw_text)
+ai_output = json.loads(raw_text)
+context  = ai_output.get("context", "")
+subtitle = ai_output.get("subtitle", "")
+print("Phase 2 done - context written")
 
-# Inject EntryIDs for click-through
-subject_to_entryid = {}
-for m in inbox:
-    if m.get("entry_id") and m.get("subject"):
-        subject_to_entryid[m["subject"]] = m["entry_id"]
+# ── Phase 3 — Python builds every card ───────────────────────────────────────
+print("Phase 3 - building cards from inbox...")
 
-def inject_entry_ids(items):
-    if not items:
-        return items
-    for item in items:
-        subj = item.get("subject", "")
-        if not subj:
-            continue
-        if subj in subject_to_entryid:
-            item["entry_id"] = subject_to_entryid[subj]
-        else:
-            subj_lower = subj.lower()
-            for inbox_subj, entry_id in subject_to_entryid.items():
-                inbox_lower = inbox_subj.lower()
-                if subj_lower in inbox_lower or inbox_lower in subj_lower:
-                    item["entry_id"] = entry_id
-                    break
-    return items
+# Categorisation rules — applied in order, first match wins
+# importance: 0=low, 1=normal, 2=high
+URGENT_SENDERS   = []  # add sender email fragments here if needed
+URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
+NEEDS_SUBJECTS   = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
+                    "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
+                    "import", "failed", "issue", "case ", "support"]
+FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
+                    "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
+                    "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
+LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
+                    "github", "pages", "build", "deploy", "run failed", "wisp"]
 
-for section in ["urgent", "needs", "fyi", "low", "priorities"]:
-    inject_entry_ids(briefing.get(section, []))
+def categorise(msg):
+    subj    = (msg.get("subject") or "").lower()
+    sender  = (msg.get("from_email") or "").lower()
+    is_read = msg.get("is_read", True)
+    imp     = msg.get("importance", 1)
 
-# Post-process calendar — rewrite sub/alert for known absent colleagues
+    # High importance flag always pushes to urgent
+    if imp == 2:
+        return "urgent"
+
+    # Subject keyword matching
+    for kw in LOW_SUBJECTS:
+        if kw in subj or kw in sender:
+            return "low"
+    for kw in URGENT_SUBJECTS:
+        if kw in subj:
+            return "urgent"
+    # Unread + needs keywords → needs response
+    if not is_read:
+        for kw in NEEDS_SUBJECTS:
+            if kw in subj:
+                return "needs"
+    for kw in FYI_SUBJECTS:
+        if kw in subj:
+            return "fyi"
+    # Unread with no other match → needs response
+    if not is_read:
+        return "needs"
+    # Read with no match → fyi
+    return "fyi"
+
+def badge_for(msg, category):
+    imp  = msg.get("importance", 1)
+    received = msg.get("received", "")
+    age_hrs = 0
+    try:
+        t = datetime.fromisoformat(received.split("+")[0].split(" (")[0].strip())
+        age_hrs = (datetime.now() - t).total_seconds() / 3600
+    except:
+        pass
+
+    if category == "urgent":
+        return "Act today", "red"
+    if category == "needs":
+        if age_hrs > 48:
+            return "Overdue", "red"
+        return "Reply within 48hrs", "yellow"
+    if category == "fyi":
+        return "FYI", "gray"
+    return "", "gray"
+
+def make_card(msg, category):
+    subj    = msg.get("subject") or "(no subject)"
+    sender  = msg.get("from") or ""
+    preview = (msg.get("body_preview") or "").strip()
+    badge, badge_type = badge_for(msg, category)
+
+    title = subj
+    sub   = f"From <strong>{sender}</strong>."
+    if preview:
+        sub += f" {preview[:120]}"
+
+    card = {
+        "title":     title,
+        "sub":       sub,
+        "badge":     badge,
+        "badgeType": badge_type,
+        "subject":   subj,
+        "entry_id":  msg.get("entry_id", "")
+    }
+    return card
+
+urgent = []
+needs  = []
+fyi    = []
+low    = []
+
+for msg in inbox:
+    cat  = categorise(msg)
+    card = make_card(msg, cat)
+    if cat == "urgent":
+        urgent.append(card)
+    elif cat == "needs":
+        needs.append(card)
+    elif cat == "fyi":
+        fyi.append(card)
+    else:
+        low.append(card)
+
+print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
+
+# ── Calendar post-processing ─────────────────────────────────────────────────
 KNOWN_ABSENCES = [
     {
         "triggers": ["marie", "cooksey"],
@@ -242,69 +291,81 @@ KNOWN_ABSENCES = [
     }
 ]
 
-def fix_cal_items(items):
-    if not items:
-        return items
+def build_cal_items(items):
+    result = []
     for item in items:
-        title = (item.get("title") or "").lower()
+        start = item.get("start", "")
+        try:
+            t = datetime.fromisoformat(start)
+            time_str = "All day" if item.get("all_day") else t.strftime("%H:%M")
+        except:
+            time_str = "All day" if item.get("all_day") else ""
+
+        title = item.get("subject", "")
+        sub   = item.get("organizer", "") or ""
+        alert = ""
+
+        # Check known absences
+        title_lower = title.lower()
         for absence in KNOWN_ABSENCES:
-            if any(trigger in title for trigger in absence["triggers"]):
-                item["time"]  = "All day"
-                item["title"] = absence["title"]
-                item["sub"]   = absence["sub"]
-                item["alert"] = absence["alert"]
+            if any(tr in title_lower for tr in absence["triggers"]):
+                time_str = "All day"
+                title    = absence["title"]
+                sub      = absence["sub"]
+                alert    = absence["alert"]
                 break
-    return items
 
-for cal_key in ["calToday", "calTomorrow"]:
-    fix_cal_items(briefing.get(cal_key, []))
+        cal_item = {"time": time_str, "title": title, "sub": sub}
+        if alert:
+            cal_item["alert"] = alert
+        result.append(cal_item)
+    return result
 
-# ── Coverage enforcement — every inbox email must have a card ────────────────
-# Collect all subjects already in the briefing
-covered_subjects = set()
-for section in ["urgent", "needs", "fyi", "low"]:
-    for item in briefing.get(section, []):
-        subj = item.get("subject", "")
-        if subj:
-            covered_subjects.add(subj.lower())
-
-# For any inbox email with no matching card, add it to low
-if "low" not in briefing:
-    briefing["low"] = []
-
+# Detect absences from OOO emails
+absence_set = set()
+ooo_keywords = ["out of office", "annual leave", "on leave", "away until", "a/l"]
 for msg in inbox:
-    subj = msg.get("subject", "")
-    if not subj:
-        continue
-    subj_lower = subj.lower()
-    # Check if this email is already covered (exact or fuzzy)
-    already_covered = subj_lower in covered_subjects
-    if not already_covered:
-        for covered in covered_subjects:
-            if subj_lower in covered or covered in subj_lower:
-                already_covered = True
-                break
-    if not already_covered:
-        entry = {
-            "title": subj,
-            "sub": f"From: {msg.get('from', '')}. Received: {msg.get('received', '')[:16]}.",
-            "badge": "Unread" if not msg.get("is_read") else "Read",
-            "badgeType": "gray",
-            "subject": subj,
-            "entry_id": msg.get("entry_id", "")
-        }
-        briefing["low"].append(entry)
-        covered_subjects.add(subj_lower)
+    subj    = (msg.get("subject") or "").lower()
+    preview = (msg.get("body_preview") or "").lower()
+    sender  = msg.get("from", "")
+    for kw in ooo_keywords:
+        if kw in subj or kw in preview:
+            absence_set.add(sender)
+            break
 
-briefing["refreshed_at"] = datetime.now().strftime("%A %d %B · %H:%M")
+absences = sorted(list(absence_set))
 
-print("Phase 2 done - briefing assembled in memory")
+# Top 5 priority actions from urgent + needs
+priorities = []
+for card in (urgent + needs)[:5]:
+    priorities.append({
+        "text":     card["title"],
+        "date":     card["badge"],
+        "dateType": card["badgeType"],
+        "subject":  card.get("subject", "")
+    })
 
-# ── Phase 3 — push briefing to GitHub ────────────────────────────────────────
-print("Phase 3 - pushing briefing to GitHub...")
+# ── Assemble final briefing ───────────────────────────────────────────────────
+briefing = {
+    "date":         today_str,
+    "subtitle":     subtitle,
+    "context":      context,
+    "urgent":       urgent,
+    "needs":        needs,
+    "fyi":          fyi,
+    "low":          low,
+    "calToday":     build_cal_items(cal_today),
+    "calTomorrow":  build_cal_items(cal_tomorrow),
+    "absences":     absences,
+    "priorities":   priorities,
+    "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
+}
+
+# ── Phase 4 — push to GitHub ──────────────────────────────────────────────────
+print("Phase 4 - pushing briefing to GitHub...")
 
 if not GITHUB_PAT:
-    print("ERROR: GITHUB_PAT env var not set - cannot push. Set it and re-run.")
+    print("ERROR: GITHUB_PAT env var not set - cannot push.")
 else:
     try:
         api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
@@ -317,8 +378,7 @@ else:
         try:
             req = urllib.request.Request(api_url, headers=headers)
             with urllib.request.urlopen(req) as r:
-                existing = json.loads(r.read())
-                sha = existing.get("sha")
+                sha = json.loads(r.read()).get("sha")
         except urllib.error.HTTPError as e:
             if e.code != 404:
                 raise
@@ -335,7 +395,7 @@ else:
         req = urllib.request.Request(api_url, data=data, headers=headers, method="PUT")
         with urllib.request.urlopen(req) as r:
             result = json.loads(r.read())
-            print(f"Phase 3 done - briefing pushed to GitHub (commit: {result.get('commit',{}).get('sha','?')[:7]})")
+            print(f"Phase 4 done - briefing pushed to GitHub (commit: {result.get('commit',{}).get('sha','?')[:7]})")
     except Exception as e:
-        print(f"Phase 3 FAILED - GitHub push error: {e}")
+        print(f"Phase 4 FAILED - {e}")
         raise
