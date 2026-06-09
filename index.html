@@ -138,6 +138,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .badge-orange { background: var(--orange-bg); color: var(--orange-text); border: 1px solid var(--orange-border); }
 .badge-blue { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
 .badge-gray { background: var(--gray-bg); color: var(--gray-text); border: 1px solid var(--gray-border); }
+.badge-yellow { background: var(--yellow-bg); color: var(--yellow-text); border: 1px solid var(--yellow-border); }
 
 /* Priority list */
 .priority-row { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 11px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; position: relative; overflow: hidden; transition: opacity .2s; }
@@ -349,12 +350,20 @@ function openEmail(entryId,ev){
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
+function sanitizeSub(text){
+  if(!text) return '';
+  return text
+    .replace(/<https?:\/\/[^>]*>/gi, '')   // strip closed angle-bracket URLs: <https://...>
+    .replace(/<https?:\/\/[^\s<>]*/gi, '') // strip unclosed angle-bracket URLs: <https://...
+    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' '); // collapse line breaks
+}
+
 function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
-    const cardHtml=`<div class="card${ticked?' done':''}${ticked?' card-hidden':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${item.sub}</div>`:''}</div></div>`;
+    const cardHtml=`<div class="card${ticked?' done':''}${ticked?' card-hidden':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div></div>`;
     return hasLink?`<a class="card-link" href="#" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
