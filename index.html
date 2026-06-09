@@ -152,6 +152,23 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .date-blue { color: var(--blue-text); background: var(--blue-bg); border: 1px solid var(--blue-border); }
 .date-gray { color: var(--gray-text); background: var(--gray-bg); border: 1px solid var(--gray-border); }
 
+/* Priority cards — expandable, Command Centre style */
+.pri-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--radius-lg); margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
+.pri-card.done { opacity: .38; }
+.pri-card.done .pri-card-title { text-decoration: line-through; }
+.pri-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; }
+.pri-card-header:hover { background: rgba(0,33,71,0.02); border-radius: var(--radius-lg); }
+.pri-card-title { flex: 1; font-size: 15px; font-weight: 600; color: var(--text-dark); }
+.pri-arrow { font-size: 11px; color: var(--text-very-muted); flex-shrink: 0; }
+.pri-card-body { padding: 0 16px 14px 41px; display: none; }
+.pri-action { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding: 2px 0; }
+.pri-action::before { content: '→ '; color: var(--text-very-muted); }
+.pri-meta { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 16px; }
+.pri-meta-item { font-size: 12px; color: var(--text-muted); }
+.pri-meta-label { font-size: 10px; font-weight: 700; color: var(--text-very-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 5px; }
+.pri-meta-notes { width: 100%; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.pri-notes-text { margin-top: 4px; }
+
 /* No items */
 .no-items { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 4px 0; }
 
@@ -375,6 +392,35 @@ function renderSidebarCal(items, containerId){
   el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div>`).join('');
 }
 
+function togglePriCard(i){
+  const body=document.getElementById('pribody_'+i);
+  const arrow=document.getElementById('priarrow_'+i);
+  const isOpen=body.style.display==='block';
+  body.style.display=isOpen?'none':'block';
+  arrow.textContent=isOpen?'▼':'▲';
+}
+
+function renderPriorityCards(priorities,key){
+  if(!priorities||!priorities.length) return '<div class="no-items">No tasks for today.</div>';
+  return priorities.map((p,i)=>{
+    const id='pri_'+i, ticked=isTicked(id);
+    const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
+    const metaHtml=`<div class="pri-meta">
+      ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
+      ${p.dateAdded?`<span class="pri-meta-item"><span class="pri-meta-label">Added</span>${p.dateAdded}</span>`:''}
+      ${p.notes?`<div class="pri-meta-notes"><span class="pri-meta-label">Notes</span><div class="pri-notes-text">${sanitizeSub(p.notes)}</div></div>`:''}
+    </div>`;
+    return `<div class="pri-card${ticked?' done':''}" id="item_${id}">
+      <div class="pri-card-header" onclick="togglePriCard(${i})">
+        <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
+        <span class="pri-card-title">${p.title}</span>
+        <span class="pri-arrow" id="priarrow_${i}">▼</span>
+      </div>
+      <div class="pri-card-body" id="pribody_${i}">${actionsHtml}${metaHtml}</div>
+    </div>`;
+  }).join('');
+}
+
 function renderBriefing(data,key){
   currentData=data; currentKey=key;
 
@@ -403,19 +449,14 @@ function renderBriefing(data,key){
 
   // Main inbox
   let left='';
+  if(data.priorities&&data.priorities.length){
+    left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions — today</span><span class="sec-rule"></span></div>`;
+    left+=renderPriorityCards(data.priorities,key);
+  }
   left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent — action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
   left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response — within 24–48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
   if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI — no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
   if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
-
-  // Priorities
-  if(data.priorities&&data.priorities.length){
-    left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions</span><span class="sec-rule"></span></div>`;
-    left+=data.priorities.map((p,i)=>{
-      const id='priority_'+i, ticked=isTicked(id);
-      return`<div class="priority-row${ticked?' done':''}" id="prow_${id}" onclick="toggleTick('${id}')"><span class="priority-num">${i+1}</span><span class="priority-text">${p.text}</span><span class="priority-date date-${p.dateType||'gray'}">${p.date||''}</span></div>`;
-    }).join('');
-  }
 
   document.getElementById('inboxCol').innerHTML=left;
 }
