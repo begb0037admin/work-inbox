@@ -349,12 +349,19 @@ function openEmail(entryId,ev){
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
+function sanitizeSub(text){
+  if(!text) return '';
+  return text
+    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' ')
+    .replace(/<(?!\/?strong\b)[^>]*>/gi, '');
+}
+
 function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
-    const cardHtml=`<div class="card${ticked?' done':''}${ticked?' card-hidden':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${item.sub}</div>`:''}</div></div>`;
+    const cardHtml=`<div class="card${ticked?' done':''}${ticked?' card-hidden':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div></div>`;
     return hasLink?`<a class="card-link" href="#" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
