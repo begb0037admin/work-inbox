@@ -1,15 +1,15 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Key absences block DSE updates; KPI presentations due tomorrow",
-  "context": "Marie Cooksey is absent on annual leave from 5 June and returns Thursday 18 June, blocking handover items documented in her 6 June email including H&S meetings with the Fire team and DSE system updates. James Salas Guillen is absent from 5 June returning Thursday 18 June, which halts PeopleXD to Cardinus automated data uploads and contractor record creation processes currently under his monitoring. Athena Artuso has sent two absence notifications (8 June and 9 June) with minimal detail requiring clarification of her return date and impact on current projects. Julie Hickman shared the Review Status Insight report for CDR bulk deletion case 68974493 on 9 June at 13:41 but your response sent 8 June at 14:52 indicates you advised Access Group need two items from your team before proceeding - follow up required to confirm those deliverables are ready. Sophie Levy from Cority reached out on 8 June noting no contact since April and requesting an update on scoping sessions. The most time-critical deadline this week is the Team Meeting tomorrow 10 June where Simon Burford expects each team to present KPIs and Statistics - your KPI presentation for May 2026 has been shared with Michael O'Sullivan. Open first: the unread email from Julie Hickman about case 68974493 to confirm Access Group deliverable status and unblock the Chemistry bulk-delete project.",
+  "subtitle": "Absences block systems; KPI meeting tomorrow",
+  "context": "Marie Cooksey is absent from 8-12 June (returning 13 June) and James Salas Guillen is on annual leave until 18 June - both absences block progress on DSE system updates and PeopleXD data uploads that Marie and James are overseeing. Julie Hickman's email from 9 June about case 68974493 (Chemistry bulk-delete CDR request) has waited 48+ hours without your response, and Sophie Levy from Cority contacted you on 8 June noting no contact for two months regarding the scoping session. The most time-critical deadline is the Team Meeting tomorrow (10 June) where each team must present KPIs and Statistics, organised by Simon Burford. Open first: Julie Hickman's RE message about case 68974493 and the Review Status Insight report for CDR bulk deletion, as Access Group needs two items from you before proceeding with the Chemistry project.",
   "urgent": [
     {
-      "title": "DTP1092 College Data in PXD - Integrations",
-      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nI contacted the integrations team to get some help to look at the integrations and below is a response ",
+      "title": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
+      "sub": "From <strong>Communications Office</strong>. From: Saffron Greenwood, Major Incident Manager, IT Services   \r\nFor: IT Support Staff (ITSS)\r\n \r\nThis email is for inte",
       "badge": "Act today",
       "badgeType": "red",
-      "subject": "DTP1092 College Data in PXD - Integrations",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E330000"
+      "subject": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E470000"
     },
     {
       "title": "DTP1092 College Data in PXD - Integrations",
@@ -66,6 +66,14 @@
       "badgeType": "red",
       "subject": "RE: DTP1092 College Data in PXD - Integrations",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E380000"
+    },
+    {
+      "title": "RE: DTP1092 College Data in PXD - Integrations",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "RE: DTP1092 College Data in PXD - Integrations",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E340000"
     },
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -598,14 +606,6 @@
       "badgeType": "gray",
       "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
-    },
-    {
-      "title": "Kevin Lelitte <kevin.lelitte@admin.ox.ac.uk>",
-      "sub": "From <strong>Hannah Lawrence</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Kevin Lelitte <kevin.lelitte@admin.ox.ac.uk>",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36150000"
     }
   ],
   "low": [
@@ -670,10 +670,10 @@
   ],
   "priorities": [
     {
-      "text": "DTP1092 College Data in PXD - Integrations",
+      "text": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
       "date": "Act today",
       "dateType": "red",
-      "subject": "DTP1092 College Data in PXD - Integrations"
+      "subject": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)"
     },
     {
       "text": "DTP1092 College Data in PXD - Integrations",
@@ -700,5 +700,5 @@
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 17:00"
+  "refreshed_at": "Tuesday 09 June · 17:25"
 }
