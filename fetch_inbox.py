@@ -111,6 +111,21 @@ for item in mapi.GetDefaultFolder(9).Items:
 unread_total = sum(1 for m in inbox if not m["is_read"])
 print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)}")
 
+# Fetch Command Centre today tasks
+cc_today_tasks = []
+try:
+    cc_url = "https://api.github.com/repos/begb0037admin/command-centre/contents/data/tasks.json"
+    req = urllib.request.Request(cc_url, headers={
+        "Authorization": f"token {GITHUB_PAT}",
+        "Accept":        "application/vnd.github.v3.raw"
+    })
+    with urllib.request.urlopen(req, timeout=10) as r:
+        cc_data = json.loads(r.read())
+        cc_today_tasks = [t for t in cc_data.get("tasks", []) if t.get("tier") == "today"]
+    print(f"Command Centre: {len(cc_today_tasks)} today tasks fetched")
+except Exception as e:
+    print(f"Command Centre fetch failed (non-fatal): {e}")
+
 # ── Phase 2 — AI writes context paragraph only ───────────────────────────────
 print("Phase 2 - calling Anthropic API for context...")
 
@@ -377,21 +392,24 @@ for msg in inbox:
 
 absences = sorted(list(absence_set))
 
-# Top 5 priority actions from urgent + needs — deduplicated by subject
-seen_subjects = set()
+# Priority Actions — today tasks from Command Centre
+def fmt_date(d):
+    try:
+        from datetime import datetime
+        dt = datetime.fromisoformat(d)
+        return f"{dt.day} {dt.strftime('%b')}"
+    except:
+        return d
+
 priorities = []
-for card in (urgent + needs):
-    if len(priorities) >= 5:
-        break
-    subj = card.get("subject", "")
-    if subj not in seen_subjects:
-        seen_subjects.add(subj)
-        priorities.append({
-            "text":     card["title"],
-            "date":     card["badge"],
-            "dateType": card["badgeType"],
-            "subject":  subj
-        })
+for task in cc_today_tasks:
+    priorities.append({
+        "title":     task.get("title", ""),
+        "source":    task.get("source", ""),
+        "dateAdded": fmt_date(task.get("dateAdded", "")),
+        "actions":   task.get("actions", []),
+        "notes":     task.get("description", "")
+    })
 
 # ── Assemble final briefing ───────────────────────────────────────────────────
 briefing = {
