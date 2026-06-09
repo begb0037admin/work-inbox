@@ -175,9 +175,9 @@ print("Phase 3 - building cards from inbox...")
 # importance: 0=low, 1=normal, 2=high
 URGENT_SENDERS   = []  # add sender email fragments here if needed
 URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
-NEEDS_SUBJECTS   = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
-                    "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
-                    "import", "failed", "issue", "case ", "support"]
+NEEDS_SUBJECTS   = ["action required", "please action", "chasing", "follow up", "follow-up",
+                    "reminder", "scoping", "handover", "import failed", "error",
+                    "case ", "p1", "priority 1"]
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
                     "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
@@ -235,6 +235,16 @@ def badge_for(msg, category):
         return "FYI", "gray"
     return "", "gray"
 
+def clean_preview(text):
+    if not text:
+        return ""
+    import re
+    text = text.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
+    text = re.sub(r'<https?://[^>]*>', '', text)
+    text = re.sub(r'<https?://[^\s<>]*', '', text)
+    text = ' '.join(text.split())
+    return text[:120].strip()
+
 def make_card(msg, category):
     subj    = msg.get("subject") or "(no subject)"
     sender  = msg.get("from") or ""
@@ -244,7 +254,9 @@ def make_card(msg, category):
     title = subj
     sub   = f"From <strong>{sender}</strong>."
     if preview:
-        sub += f" {preview[:120]}"
+        cleaned = clean_preview(preview)
+        if cleaned:
+            sub += f" {cleaned}"
 
     card = {
         "title":     title,
@@ -335,15 +347,21 @@ for msg in inbox:
 
 absences = sorted(list(absence_set))
 
-# Top 5 priority actions from urgent + needs
+# Top 5 priority actions from urgent + needs — deduplicated by subject
+seen_subjects = set()
 priorities = []
-for card in (urgent + needs)[:5]:
-    priorities.append({
-        "text":     card["title"],
-        "date":     card["badge"],
-        "dateType": card["badgeType"],
-        "subject":  card.get("subject", "")
-    })
+for card in (urgent + needs):
+    if len(priorities) >= 5:
+        break
+    subj = card.get("subject", "")
+    if subj not in seen_subjects:
+        seen_subjects.add(subj)
+        priorities.append({
+            "text":     card["title"],
+            "date":     card["badge"],
+            "dateType": card["badgeType"],
+            "subject":  subj
+        })
 
 # ── Assemble final briefing ───────────────────────────────────────────────────
 briefing = {
