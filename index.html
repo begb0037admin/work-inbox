@@ -100,7 +100,6 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 /* Section headers */
 .sec-head { display: flex; align-items: center; gap: 8px; margin: 20px 0 8px; }
-.sec-cards { display: flex; flex-direction: column; width: 100%; }
 .sec-head:first-of-type { margin-top: 0; }
 .sec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .dot-r { background: var(--red); }
@@ -111,11 +110,8 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .sec-rule { flex: 1; height: 1px; background: #d1d9e6; }
 
 /* Cards */
-.card-link { text-decoration: none; color: inherit; display: block; cursor: pointer; transition: opacity .2s; }
+.card-link { text-decoration: none; color: inherit; display: block; cursor: pointer; }
 .card-link:hover .card { border-color: #a0aec0; box-shadow: 0 2px 8px rgba(0,33,71,0.1); }
-.card-link.done { opacity: .38; }
-.card-link.done .card-title { text-decoration: line-through; }
-.card-link.card-hidden { display: none; }
 #inboxCol { display: block; width: 100%; }
 .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 8px; display: flex; width: 100%; box-sizing: border-box; gap: 10px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
 .card.done { opacity: .38; }
@@ -142,7 +138,6 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .badge-orange { background: var(--orange-bg); color: var(--orange-text); border: 1px solid var(--orange-border); }
 .badge-blue { background: var(--blue-bg); color: var(--blue-text); border: 1px solid var(--blue-border); }
 .badge-gray { background: var(--gray-bg); color: var(--gray-text); border: 1px solid var(--gray-border); }
-.badge-yellow { background: var(--yellow-bg); color: var(--yellow-text); border: 1px solid var(--yellow-border); }
 
 /* Priority list */
 .priority-row { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 11px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; position: relative; overflow: hidden; transition: opacity .2s; }
@@ -155,24 +150,6 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .date-orange { color: var(--orange-text); background: var(--orange-bg); border: 1px solid var(--orange-border); }
 .date-blue { color: var(--blue-text); background: var(--blue-bg); border: 1px solid var(--blue-border); }
 .date-gray { color: var(--gray-text); background: var(--gray-bg); border: 1px solid var(--gray-border); }
-
-/* Priority cards — expandable, Command Centre style */
-.pri-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--radius-lg); margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
-.pri-card.done { opacity: .38; }
-.pri-card.card-hidden { display: none; }
-.pri-card.done .pri-card-title { text-decoration: line-through; }
-.pri-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; }
-.pri-card-header:hover { background: rgba(0,33,71,0.02); border-radius: var(--radius-lg); }
-.pri-card-title { flex: 1; font-size: 15px; font-weight: 600; color: var(--text-dark); }
-.pri-arrow { font-size: 11px; color: var(--text-very-muted); flex-shrink: 0; }
-.pri-card-body { padding: 0 16px 14px 41px; display: none; }
-.pri-action { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding: 2px 0; }
-.pri-action::before { content: '→ '; color: var(--text-very-muted); }
-.pri-meta { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 16px; }
-.pri-meta-item { font-size: 12px; color: var(--text-muted); }
-.pri-meta-label { font-size: 10px; font-weight: 700; color: var(--text-very-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 5px; }
-.pri-meta-notes { width: 100%; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
-.pri-notes-text { margin-top: 4px; }
 
 /* No items */
 .no-items { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 4px 0; }
@@ -187,26 +164,13 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .import-error { font-size: 11px; color: var(--red); margin-top: 6px; display: none; }
 
 /* Archive panel */
-.archive-panel { display: none; position: fixed; top: 70px; right: 40px; width: 480px; background: var(--card-bg); border: 1px solid #c8d0dc; border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 8px 32px rgba(0,33,71,0.12); z-index: 100; max-height: 75vh; overflow-y: auto; }
+.archive-panel { display: none; position: fixed; top: 70px; right: 40px; width: 380px; background: var(--card-bg); border: 1px solid #c8d0dc; border-radius: var(--radius-lg); padding: 16px; box-shadow: 0 8px 32px rgba(0,33,71,0.12); z-index: 100; max-height: 60vh; overflow-y: auto; }
 .archive-panel.visible { display: block; }
-.archive-panel-title { font-size: 14px; font-weight: 700; color: var(--oxford); margin-bottom: 14px; }
-.archive-day { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
-.archive-day-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; background: var(--main-bg); user-select: none; }
-.archive-day-header:hover { background: #eef1f7; }
-.archive-day-date { font-size: 13px; font-weight: 600; color: var(--text-dark); }
-.archive-day-meta { font-size: 11px; color: var(--text-very-muted); }
-.archive-day-arrow { font-size: 11px; color: var(--text-very-muted); }
-.archive-day-items { display: none; padding: 8px 14px 12px; border-top: 1px solid var(--border); }
-.archive-day-items.open { display: block; }
-.archive-item-row { font-size: 12px; color: var(--text-muted); padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; }
-.archive-item-row:last-child { border-bottom: none; }
-.archive-item-tick { color: #22c55e; font-weight: 700; flex-shrink: 0; }
-.archive-item-untick { color: var(--text-very-muted); flex-shrink: 0; }
-.archive-item-section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-very-muted); flex-shrink: 0; width: 56px; padding-top: 1px; }
-.archive-actions { display: flex; gap: 8px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
-.archive-purge-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
-.archive-purge-row input { width: 52px; padding: 5px 8px; border: 1px solid #d1d9e6; border-radius: var(--radius); font-size: 12px; font-family: var(--font); text-align: center; }
-.archive-no-items { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 8px 0; }
+.archive-entry { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: border-color .15s; }
+.archive-entry:hover { border-color: #a0aec0; }
+.archive-date { font-size: 12px; font-weight: 500; }
+.archive-meta { font-size: 11px; color: var(--text-very-muted); }
+.archive-load { font-size: 11px; color: var(--blue); }
 
 .footer { font-size: 10px; color: var(--text-very-muted); text-align: center; margin-top: 40px; padding-top: 14px; border-top: 1px solid #e2e8f0; letter-spacing: .04em; }
 
@@ -278,17 +242,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 <!-- Archive panel -->
 <div class="archive-panel" id="archivePanel">
-  <div class="archive-panel-title">Archive</div>
   <div id="archiveList"></div>
-  <div class="archive-actions" id="archiveActions" style="display:none">
-    <button class="btn btn-primary" onclick="exportArchiveMd()">Export .md</button>
-    <div class="archive-purge-row">
-      <span>Purge older than</span>
-      <input type="number" id="purgeDays" value="30" min="1">
-      <span>days</span>
-      <button class="btn" style="color:var(--red);border-color:var(--red-border)" onclick="purgeOldTicks()">Purge</button>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -313,11 +267,13 @@ function toggleShowDone(){
   const btn=document.getElementById('btn-show-done');
   showingDoneItems=!showingDoneItems;
   if(showingDoneItems){
-    document.querySelectorAll('.card.done, .card-link.done, .pri-card.done').forEach(el=>el.classList.remove('card-hidden'));
+    // Reveal all done items
+    document.querySelectorAll('.card.done').forEach(el=>el.classList.remove('card-hidden'));
     document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='flex');
     btn.textContent='Hide done';
   } else {
-    document.querySelectorAll('.card.done, .card-link.done, .pri-card.done').forEach(el=>el.classList.add('card-hidden'));
+    // Re-hide all done items
+    document.querySelectorAll('.card.done').forEach(el=>el.classList.add('card-hidden'));
     document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='none');
     btn.textContent='Show done';
   }
@@ -327,117 +283,6 @@ function toggleArchive(){
   p.classList.toggle('visible');
   document.getElementById('importPanel').classList.remove('visible');
   if(p.classList.contains('visible')) renderArchiveList();
-}
-function getArchiveData(){
-  // Returns array of {key, data, date (Date obj), ticks} sorted newest first
-  const store=getStore(), ticks=getTicks();
-  return Object.keys(store).sort().reverse().map(k=>{
-    const d=store[k];
-    // Parse date from key back to something readable
-    const dateStr=d.date||k.replace(/_/g,' ');
-    return {key:k, data:d, dateStr:dateStr, ticks:ticks};
-  });
-}
-function getSectionLabel(s){
-  return {urgent:'Urgent',needs:'Needs',fyi:'FYI',low:'Low',priorities:'Priority'}[s]||s;
-}
-function getAllItemsForDay(data){
-  // Returns flat array of {section, index, title, ticked}
-  const sections=['priorities','urgent','needs','fyi','low'];
-  const result=[];
-  sections.forEach(s=>{
-    (data[s]||[]).forEach((item,i)=>{result.push({section:s,index:i,title:item.title||item.text||'(untitled)'});});
-  });
-  return result;
-}
-function renderArchiveList(){
-  const entries=getArchiveData();
-  const el=document.getElementById('archiveList');
-  const actionsEl=document.getElementById('archiveActions');
-  if(!entries.length){
-    el.innerHTML='<div class="archive-no-items">No briefings stored yet.</div>';
-    actionsEl.style.display='none';
-    return;
-  }
-  actionsEl.style.display='flex';
-  const ticks=getTicks();
-  el.innerHTML=entries.map((e,di)=>{
-    const items=getAllItemsForDay(e.data);
-    const tickedCount=items.filter(it=>ticks[e.key+'_'+it.section+'_'+it.index]).length;
-    const itemsHtml=items.map(it=>{
-      const t=!!ticks[e.key+'_'+it.section+'_'+it.index];
-      return `<div class="archive-item-row"><span class="${t?'archive-item-tick':'archive-item-untick'}">${t?'✓':'○'}</span><span class="archive-item-section">${getSectionLabel(it.section)}</span><span>${it.title}</span></div>`;
-    }).join('');
-    return `<div class="archive-day">
-      <div class="archive-day-header" onclick="toggleArchiveDay(${di})">
-        <div><div class="archive-day-date">${e.dateStr}</div><div class="archive-day-meta">${items.length} items · ${tickedCount} done</div></div>
-        <span class="archive-day-arrow" id="arch-arrow-${di}">▼</span>
-      </div>
-      <div class="archive-day-items" id="arch-items-${di}">${itemsHtml}</div>
-    </div>`;
-  }).join('');
-}
-function toggleArchiveDay(i){
-  const el=document.getElementById('arch-items-'+i);
-  const arrow=document.getElementById('arch-arrow-'+i);
-  const open=el.classList.toggle('open');
-  arrow.textContent=open?'▲':'▼';
-}
-function exportArchiveMd(){
-  const entries=getArchiveData();
-  const ticks=getTicks();
-  let md='# Inbox Briefing Archive\n\nExported: '+new Date().toLocaleString('en-GB')+'\n\n---\n\n';
-  entries.forEach(e=>{
-    md+='## '+e.dateStr+'\n\n';
-    const sections=['priorities','urgent','needs','fyi','low'];
-    const labels={priorities:'Priority Actions',urgent:'Urgent',needs:'Needs Response',fyi:'FYI',low:'Low Priority'};
-    sections.forEach(s=>{
-      const items=e.data[s]||[];
-      if(!items.length) return;
-      md+='### '+labels[s]+'\n\n';
-      items.forEach((item,i)=>{
-        const t=!!ticks[e.key+'_'+s+'_'+i];
-        const title=item.title||item.text||'(untitled)';
-        md+=(t?'- [x] ':'- [ ] ')+title+'\n';
-        const sub=item.sub||item.notes||'';
-        if(sub) md+='  > '+sub.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim()+'\n';
-      });
-      md+='\n';
-    });
-    md+='---\n\n';
-  });
-  const blob=new Blob([md],{type:'text/markdown'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='inbox-archive-'+new Date().toISOString().slice(0,10)+'.md';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-function purgeOldTicks(){
-  const days=parseInt(document.getElementById('purgeDays').value)||30;
-  if(!confirm('Purge all briefings and ticks older than '+days+' days? This cannot be undone.')) return;
-  const cutoff=new Date();
-  cutoff.setDate(cutoff.getDate()-days);
-  const store=getStore(), ticks=getTicks();
-  let purgedCount=0;
-  Object.keys(store).forEach(k=>{
-    const d=store[k];
-    // Try to parse the date from the briefing
-    const dateStr=d.date||'';
-    const parsed=new Date(dateStr);
-    const age=isNaN(parsed)?null:parsed;
-    if(!age||age<cutoff){
-      // Purge store entry
-      delete store[k];
-      // Purge associated ticks
-      Object.keys(ticks).filter(tk=>tk.startsWith(k+'_')).forEach(tk=>{delete ticks[tk];purgedCount++;});
-    }
-  });
-  saveStore(store);
-  saveTicks(ticks);
-  renderArchiveList();
-  alert('Purge complete.');
 }
 function loadFromImport(){
   const raw=document.getElementById('importInput').value.trim();
@@ -456,6 +301,17 @@ function clearToday(){
   localStorage.removeItem(TODAY_KEY);
   renderBriefing(SEED,'seed');
 }
+function renderArchiveList(){
+  const store=getStore(), keys=Object.keys(store).sort().reverse();
+  const el=document.getElementById('archiveList');
+  if(!keys.length){el.innerHTML='<div class="no-items">No archived briefings yet.</div>';return;}
+  el.innerHTML=keys.map(k=>{const d=store[k];return`<div class="archive-entry" onclick="loadArchive('${k}')"><div><div class="archive-date">${d.date}</div><div class="archive-meta">${(d.urgent||[]).length} urgent &middot; ${(d.needs||[]).length} needs response</div></div><div class="archive-load">Load &rarr;</div></div>`;}).join('');
+}
+function loadArchive(key){
+  const store=getStore(); if(!store[key]) return;
+  renderBriefing(store[key],key);
+  document.getElementById('archivePanel').classList.remove('visible');
+}
 function toggleTick(id){
   const ticks=getTicks(), k=currentKey+'_'+id;
   ticks[k]=!ticks[k]; saveTicks(ticks);
@@ -463,25 +319,27 @@ function toggleTick(id){
   const item=document.getElementById('item_'+id);
   const prow=document.getElementById('prow_'+id);
   if(cb) cb.classList.toggle('checked',ticks[k]);
+  if(prow) prow.classList.toggle('done',ticks[k]);
   if(item){
-    const wrapper=item.closest('.card-link');
     if(ticks[k]){
       item.classList.add('done');
-      if(!showingDoneItems) item.classList.add('card-hidden');
-      else item.classList.remove('card-hidden');
-      if(wrapper){
-        wrapper.classList.add('done');
-        if(!showingDoneItems) wrapper.classList.add('card-hidden');
-        else wrapper.classList.remove('card-hidden');
+      if(!showingDoneItems){
+        setTimeout(()=>{ item.classList.add('card-hidden'); },1500);
       }
     } else {
       item.classList.remove('done','card-hidden');
-      if(wrapper) wrapper.classList.remove('done','card-hidden');
     }
   }
   if(prow){
-    if(ticks[k]){ prow.classList.add('done'); prow.style.display=''; }
-    else { prow.classList.remove('done'); prow.style.display=''; }
+    if(ticks[k]){
+      prow.classList.add('done');
+      if(!showingDoneItems){
+        setTimeout(()=>{ prow.style.display='none'; },1500);
+      }
+    } else {
+      prow.classList.remove('done');
+      prow.style.display='';
+    }
   }
 }
 function openEmail(entryId,ev){
@@ -491,21 +349,13 @@ function openEmail(entryId,ev){
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
-function sanitizeSub(text){
-  if(!text) return '';
-  return text
-    .replace(/<https?:\/\/[^>]*>/gi, '')   // strip closed angle-bracket URLs: <https://...>
-    .replace(/<https?:\/\/[^\s<>]*/gi, '') // strip unclosed angle-bracket URLs: <https://...
-    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' '); // collapse line breaks
-}
-
 function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
-    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div></div>`;
-    return hasLink?`<a class="card-link${ticked?' done':''}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
+    const cardHtml=`<div class="card${ticked?' done':''}${ticked?' card-hidden':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${item.sub}</div>`:''}</div></div>`;
+    return hasLink?`<a class="card-link" href="#" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
 
@@ -514,36 +364,6 @@ function renderSidebarCal(items, containerId){
   if(!el) return;
   if(!items||!items.length){el.innerHTML='<div style="padding:4px 18px 8px;font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None</div>';return;}
   el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div>`).join('');
-}
-
-function togglePriCard(i){
-  const body=document.getElementById('pribody_'+i);
-  const arrow=document.getElementById('priarrow_'+i);
-  const isOpen=body.style.display==='block';
-  body.style.display=isOpen?'none':'block';
-  arrow.textContent=isOpen?'▼':'▲';
-}
-
-function renderPriorityCards(priorities,key){
-  if(!priorities||!priorities.length) return '<div class="no-items">No tasks for today.</div>';
-  return priorities.map((p,i)=>{
-    const id='pri_'+i, ticked=isTicked(id);
-    const titleText = p.title || p.text || '(untitled)';
-    const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
-    const metaHtml=`<div class="pri-meta">
-      ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
-      ${p.dateAdded?`<span class="pri-meta-item"><span class="pri-meta-label">Added</span>${p.dateAdded}</span>`:''}
-      ${p.notes?`<div class="pri-meta-notes"><span class="pri-meta-label">Notes</span><div class="pri-notes-text">${sanitizeSub(p.notes)}</div></div>`:''}
-    </div>`;
-    return `<div class="pri-card${ticked?' done':''}" id="item_${id}">
-      <div class="pri-card-header" onclick="togglePriCard(${i})">
-        <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <span class="pri-card-title">${titleText}</span>
-        <span class="pri-arrow" id="priarrow_${i}">▼</span>
-      </div>
-      <div class="pri-card-body" id="pribody_${i}">${actionsHtml}${metaHtml}</div>
-    </div>`;
-  }).join('');
 }
 
 function renderBriefing(data,key){
@@ -574,14 +394,19 @@ function renderBriefing(data,key){
 
   // Main inbox
   let left='';
+  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent — action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
+  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response — within 24–48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
+  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI — no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
+  if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
+
+  // Priorities
   if(data.priorities&&data.priorities.length){
-    left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions — today</span><span class="sec-rule"></span></div>`;
-    left+=renderPriorityCards(data.priorities,key);
+    left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions</span><span class="sec-rule"></span></div>`;
+    left+=data.priorities.map((p,i)=>{
+      const id='priority_'+i, ticked=isTicked(id);
+      return`<div class="priority-row${ticked?' done':''}" id="prow_${id}" onclick="toggleTick('${id}')"><span class="priority-num">${i+1}</span><span class="priority-text">${p.text}</span><span class="priority-date date-${p.dateType||'gray'}">${p.date||''}</span></div>`;
+    }).join('');
   }
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent — action required today</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.urgent,'urgent')}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response — within 24–48 hrs</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.needs,'needs')}</div>`;
-  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI — no action needed</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.fyi,'fyi')}</div>`;
-  if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.low,'low')}</div>`;
 
   document.getElementById('inboxCol').innerHTML=left;
 }
@@ -626,9 +451,9 @@ async function init(){
   }
 
   // Safety reset: if done ticks would hide everything, clear them
-  const currentKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
   const ticks=getTicks();
-  const allItems=[...(data.urgent||[]),(data.needs||[]),(data.fyi||[]),(data.low||[])].flat();
+  const currentKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
+  const allItems=[...(data.urgent||[]),...(data.needs||[]),...(data.fyi||[]),...(data.low||[])];
   if(allItems.length>0){
     const sections=['urgent','needs','fyi','low'];
     let hiddenCount=0;
