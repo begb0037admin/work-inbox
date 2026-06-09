@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Staffing gaps, telephony urgency, integration oversight",
-  "context": "Marie Cooksey is absent 8-12 June, returning Monday 13 June, with handover notes covering H&S Fire team coordination and other operational priorities. James Salas Guillen is on annual leave from 5 June, returning Thursday 18 June, leaving DSE data integration work and PeopleXD uploads to Cardinus and Healthy Working Plus potentially unmonitored - specifically the live automated data upload from PeopleXD that went live 3 June needs oversight. Athena Artuso is on leave (return date unspecified from her brief A/L email sent 8 June). Sophie Levy from Cority has been waiting over 48 hours without response since her 15 June 58 scoping session email mentioning no contact in two months. The Telephony Replacement Project sent an urgent ACTION email this morning requiring walkarounds to ensure key telephony is operational, with attachments needing immediate review. Michael O'Sullivan's Task# 50958836 for Incident# 11681780 shows a P5 priority assignment being redirected to the Functional Analysis Work Planner. The most time-critical deadline is the OWL Maintenance scheduled for Wednesday 11 June by James Turner, which requires advance coordination. Open first the Telephony Replacement Project email from this morning at 08:57 marked as unread and importance 1 with attachments.",
+  "subtitle": "Staffing gaps collide with three urgent deadlines",
+  "context": "Marie Cooksey is on annual leave from 8-12 June and returns 13 June, while James Salas Guillen is absent until 18 June - both absences directly impact the DSE user data import project and PeopleXD integrations that depend on their oversight. The Telephony Replacement Project sent an unread action item this morning requiring coordination of walkarounds to ensure operational telephony. Sophie Levy from Cority has been waiting since 8 June (over 48 hours) for your response on the Scoping Session update, noting she hasn't heard from you in months since April. The most time-critical deadline is Wednesday 10 June for the Clinical pay uplift 2026 kick off meeting at 09:00 with Jasmin Khokhra, followed by the OWL network maintenance scheduled for 11 June that James Turner announced. Open first the ACTION email from Telephony Replacement Project about walkarounds, then immediately respond to Sophie Levy at Cority regarding the scoping session to prevent further project delay.",
   "urgent": [
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -534,35 +534,44 @@
   ],
   "priorities": [
     {
-      "text": "RE: DTP1092 College Data in PXD - Integrations",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: DTP1092 College Data in PXD - Integrations"
+      "title": "Brief team directly",
+      "source": "SK 1-1 08/06",
+      "dateAdded": "8 Jun",
+      "actions": [
+        "[08 Jun] Identified: team briefing needed — Michael and James already aware, others not yet informed.",
+        "[TODO — 09 Jun] Brief remaining team members directly. Bring Wednesday catch-up forward to Tuesday 9 June."
+      ],
+      "notes": "Kevin returned from leave w/c 2 June on a phased return (4hrs/day, full remote). Team needs to be briefed directly on his return and working arrangements. Michael and James are already across the situation. The others — remaining FA team members — have not yet heard from Kevin directly. Wednesday catch-up was the planned slot but needs bringing forward to Tuesday 9 June."
     },
     {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
+      "title": "Smart notes escalation — Cority ticket 00476764",
+      "source": "H&S Roadmap 08/06",
+      "dateAdded": "8 Jun",
+      "actions": [
+        "[Nov 2025] Ticket 00476764 raised by James Salas Guillen — option to draft or come back to a note after saving.",
+        "[Jan–Apr 2026] Multiple Cority updates from Freeda Franks — dev team still working, no timeline given.",
+        "[Apr 2026] Freeda suggested enhanced access support at a cost — position: this is a missing feature, not a chargeable enhancement.",
+        "[08 Jun 2026] Kevin submitted escalation comment via Cority ticket comment box — requesting committed timeline on CCC-19664, clarification on cost position, and named account manager contact.",
+        "[TODO — 16 Jun] Raise at Quality PUG, 2:00 PM (virtual) — escalate formally if no response received from Freeda before then.",
+        "[AWAITING] Response from Freeda Franks to escalation comment."
+      ],
+      "notes": "Smart notes draft-save feature has been missing in Cority for 6+ months. Originally raised by James Salas Guillen. The ability to save a note as a draft or reopen and edit an existing note is not available — users must complete all fields before saving, which is particularly burdensome for longer notes. Cority acknowledged the issue under CCC-19664 and logged it with their dev team. Status is currently 'Pending Future Release' with no committed timeline. Two major releases have passed with no delivery. There is no active account manager, removing the normal escalation route. In April 2026, Freeda Franks (Cority Customer Support Analyst) suggested enhanced access support at a cost — disputed, as this is a missing feature not an enhancement."
     },
     {
-      "text": "DTP1092 College staff in PXD",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "DTP1092 College staff in PXD"
-    },
-    {
-      "text": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\""
-    },
-    {
-      "text": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\""
+      "title": "Chemistry bulk delete — get details from Julie, pass to Reenu",
+      "source": "Case 68974493",
+      "dateAdded": "8 Jun",
+      "actions": [
+        "[Oct 2025] Case 67938206 raised — Chemistry bulk delete of appraisal assignments.",
+        "[Apr 2026] Flex points agreed as payment route — case 68974493 raised.",
+        "[02 Jun 2026] Marie handed case to Kevin as lead.",
+        "[03 Jun 2026] Reenu Delaney requested appraisal cycle name and affected employee list from Kevin — no reply sent.",
+        "[08 Jun 2026] Kevin drafted reply to Julie Hickman requesting the required details.",
+        "[AWAITING] Julie Hickman to provide appraisal cycle name and affected employee list.",
+        "[TODO — on receipt] Forward details straight to Reenu Delaney at AG to action the deletion."
+      ],
+      "notes": "Chemistry department has incorrectly assigned appraisals in PeopleXD (My Development module). A bulk delete is required. Originally raised as case 67938206 in late 2025 — AG (Reenu Delaney) quoted scripted work via flex points. Flex points case raised in April 2026 as 68974493. Marie Cooksey handed case to Kevin on 2 June 2026. On 3 June, Reenu asked Kevin for the appraisal cycle name and a list of affected employees before she can action the deletion. Ball has been in Oxford's court since 3 June. Julie Hickman is most likely to hold the required details."
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 10:09"
+  "refreshed_at": "Tuesday 09 June · 10:20"
 }
