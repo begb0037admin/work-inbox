@@ -100,7 +100,6 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 /* Section headers */
 .sec-head { display: flex; align-items: center; gap: 8px; margin: 20px 0 8px; }
-.sec-cards { display: block; width: 100%; }
 .sec-head:first-of-type { margin-top: 0; }
 .sec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .dot-r { background: var(--red); }
@@ -578,10 +577,10 @@ function renderBriefing(data,key){
     left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions — today</span><span class="sec-rule"></span></div>`;
     left+=renderPriorityCards(data.priorities,key);
   }
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent — action required today</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.urgent,'urgent')}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response — within 24–48 hrs</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.needs,'needs')}</div>`;
-  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI — no action needed</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.fyi,'fyi')}</div>`;
-  if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div><div class="sec-cards">${renderItems(data.low,'low')}</div>`;
+  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent — action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
+  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response — within 24–48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
+  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI — no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
+  if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
 
   document.getElementById('inboxCol').innerHTML=left;
 }
@@ -651,4 +650,3 @@ init();
 </script>
 </body>
 </html>
-
