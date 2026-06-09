@@ -311,11 +311,11 @@ function toggleShowDone(){
   const btn=document.getElementById('btn-show-done');
   showingDoneItems=!showingDoneItems;
   if(showingDoneItems){
-    document.querySelectorAll('.card.done, .card-link.done').forEach(el=>el.classList.remove('card-hidden'));
+    document.querySelectorAll('.card.done, .card-link.done, .pri-card.done').forEach(el=>el.classList.remove('card-hidden'));
     document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='flex');
     btn.textContent='Hide done';
   } else {
-    document.querySelectorAll('.card.done, .card-link.done').forEach(el=>el.classList.add('card-hidden'));
+    document.querySelectorAll('.card.done, .card-link.done, .pri-card.done').forEach(el=>el.classList.add('card-hidden'));
     document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='none');
     btn.textContent='Show done';
   }
