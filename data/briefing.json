@@ -1,23 +1,16 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "KPI presentation due tomorrow, CDR project blocked awaiting your response",
-  "context": "Kevin, you have three colleagues currently absent affecting active projects: James Salas Guillen is on annual leave until Thursday 18 June, Marie Cooksey is absent 8-12 June (returning Monday 15 June), and Athena Artuso has submitted leave notification. The CDR bulk deletion project (Case 68974493) is blocked awaiting Access Group sign-off - Julie Hickman needs two items from you before they can proceed, and this email has been waiting since 9 June at 13:40. The HESA Module LEVELS UDF data cleardown issue (Case 68351079) escalation from Sarah Rowles arrived 9 June and requires your attention. Your most time-critical deadline is the team meeting tomorrow 10 June where Simon Burford expects each team to present KPIs and Statistics - you've already shared your KPI presentation with Michael O'Sullivan but need to be ready to present. Open Julie Hickman's 13:40 email first regarding Case 68974493 as it contains the blocking items needed for the Chemistry bulk-delete work to progress.",
+  "subtitle": "KPI presentations due, Julie's Access case stalled",
+  "context": "James Salas Guillen is absent on annual leave returning Thursday 18 June, blocking H&S system work and DSE data uploads to Cardinus that he was monitoring. Julie Hickman's Access Support case 68974493 regarding CDR bulk deletion has been waiting since before 7 June without your response - AG need two things from you to proceed. The HESA Module LEVELS UDF data cleardown issue (Case 68351079) escalated by Sarah Rowles on 27 May still requires resolution. Your team meeting tomorrow 10 June at 09:00 with Jasmin Khokhra on Clinical pay uplift 2026 is the week's most time-critical deadline. Open first: Julie Hickman's unread email from 13:40 on 9 June with the Review Status Insight report for CDR bulk deletion and case 68974493 details - this blocks Access Group from proceeding.",
   "urgent": [
-    {
-      "title": "DTP1092 College Data in PXD - Integrations",
-      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nI contacted the integrations team to get some help to look at the integrations and below is a response ",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "DTP1092 College Data in PXD - Integrations",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E330000"
-    },
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
       "sub": "From <strong>Simon Burford</strong>. Hi @Sarah Rowles &lt;mailto:sarah.rowles@admin.ox.ac.uk&gt;  / @Athena Artuso &lt;mailto:athena.artuso@admin.ox.ac.uk&gt;  \r\n\r\n \r\n\r\n",
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E310000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E310000",
+      "received": "8 Jun"
     },
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -25,7 +18,8 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2D0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2D0000",
+      "received": "8 Jun"
     },
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -33,7 +27,8 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2C0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2C0000",
+      "received": "8 Jun"
     },
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -41,7 +36,8 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2A0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2A0000",
+      "received": "8 Jun"
     },
     {
       "title": "DTP1092 College staff in PXD",
@@ -49,7 +45,17 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "DTP1092 College staff in PXD",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000",
+      "received": "8 Jun"
+    },
+    {
+      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
+      "sub": "From <strong>Marie Cooksey</strong>. &lt;https://unioxfordnexus.sharepoint.com/sites/HumanResources-HRSystems-HRSystemsManagementTeam/Shared%20Documents/HR%20Sy",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36260000",
+      "received": "4 Jun"
     },
     {
       "title": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
@@ -57,7 +63,8 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E470000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E470000",
+      "received": "9 Jun"
     },
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -65,7 +72,8 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: DTP1092 College Data in PXD - Integrations",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E380000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E380000",
+      "received": "9 Jun"
     },
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -73,7 +81,17 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: DTP1092 College Data in PXD - Integrations",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E340000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E340000",
+      "received": "8 Jun"
+    },
+    {
+      "title": "DTP1092 College Data in PXD - Integrations",
+      "sub": "From <strong>Crispin Muncaster</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "DTP1092 College Data in PXD - Integrations",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E330000",
+      "received": "8 Jun"
     },
     {
       "title": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
@@ -81,15 +99,8 @@
       "badge": "Act today",
       "badgeType": "red",
       "subject": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36390000"
-    },
-    {
-      "title": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362D0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36390000",
+      "received": "5 Jun"
     }
   ],
   "needs": [
@@ -99,7 +110,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Athena A/L",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E460000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E460000",
+      "received": "9 Jun"
     },
     {
       "title": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
@@ -107,7 +119,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E450000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E450000",
+      "received": "9 Jun"
     },
     {
       "title": "RE: Access Support Team | 68974493 - New Case",
@@ -115,7 +128,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: Access Support Team | 68974493 - New Case",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E440000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E440000",
+      "received": "9 Jun"
     },
     {
       "title": "Bi-monthly CDR/PD working group - 9 June minutes",
@@ -123,7 +137,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Bi-monthly CDR/PD working group - 9 June minutes",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E430000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E430000",
+      "received": "9 Jun"
     },
     {
       "title": "RE: #External# Escalation Request – Case 68351079 | HESA Module LEVELS UDF – Data Cleardown & Update Issues",
@@ -131,7 +146,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: #External# Escalation Request – Case 68351079 | HESA Module LEVELS UDF – Data Cleardown & Update Issues",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E420000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E420000",
+      "received": "9 Jun"
     },
     {
       "title": "Team Meeting - 10th June",
@@ -139,7 +155,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Team Meeting - 10th June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E410000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E410000",
+      "received": "9 Jun"
     },
     {
       "title": "When Safety Failures Become Operational Failures",
@@ -147,7 +164,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "When Safety Failures Become Operational Failures",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E400000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E400000",
+      "received": "9 Jun"
     },
     {
       "title": "Vice-Chancellor’s Awards – congratulations!  ",
@@ -155,7 +173,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Vice-Chancellor’s Awards – congratulations!  ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3F0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3F0000",
+      "received": "9 Jun"
     },
     {
       "title": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
@@ -163,7 +182,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3C0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3C0000",
+      "received": "9 Jun"
     },
     {
       "title": "Enhance your audio with 30% off",
@@ -171,7 +191,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Enhance your audio with 30% off",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E360000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E360000",
+      "received": "8 Jun"
     },
     {
       "title": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
@@ -179,7 +200,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E300000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E300000",
+      "received": "8 Jun"
     },
     {
       "title": "Athena A/L",
@@ -187,7 +209,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Athena A/L",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2F0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2F0000",
+      "received": "8 Jun"
     },
     {
       "title": "RE: Scoping Session update",
@@ -195,7 +218,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: Scoping Session update",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000",
+      "received": "8 Jun"
     },
     {
       "title": "Expressions of Interest - Head of People Programmes & Head of Change - People Department",
@@ -203,7 +227,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Expressions of Interest - Head of People Programmes & Head of Change - People Department",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E280000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E280000",
+      "received": "8 Jun"
     },
     {
       "title": "Kevin, we need to talk about AI-assisted complaints...",
@@ -211,7 +236,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Kevin, we need to talk about AI-assisted complaints...",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E270000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E270000",
+      "received": "8 Jun"
     },
     {
       "title": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
@@ -219,7 +245,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E250000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E250000",
+      "received": "8 Jun"
     },
     {
       "title": "FW: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
@@ -227,7 +254,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "FW: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E230000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E230000",
+      "received": "8 Jun"
     },
     {
       "title": "OCCUPATIONAL HEALTH - OH REPORT ",
@@ -235,7 +263,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "OCCUPATIONAL HEALTH - OH REPORT ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E220000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E220000",
+      "received": "8 Jun"
     },
     {
       "title": "RE: Workshop: Sustaining Adoption of Leave & Absence",
@@ -243,23 +272,8 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: Workshop: Sustaining Adoption of Leave & Absence",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E210000"
-    },
-    {
-      "title": "RE: Question re Volunteer reporting",
-      "sub": "From <strong>Michael O'Sullivan</strong>. Morning,  I’m back from Cornwall, stuffed from pasties and pints!!.\r\n\r\n \r\n\r\nJust to add further context.  The ‘Volunteer",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Question re Volunteer reporting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E390000"
-    },
-    {
-      "title": "Marie Handover 8-12 June",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi all\r\n\r\n \r\n\r\nA few notes for handover, whilst I’m off:\r\n\r\n \r\n\r\n*\tH&amp;S – Chris and I have met with colleagues from the F",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Marie Handover 8-12 June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E210000",
+      "received": "8 Jun"
     },
     {
       "title": "Access Support – Case Feedback",
@@ -267,7 +281,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support – Case Feedback",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364C0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364C0000",
+      "received": "5 Jun"
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Resolved",
@@ -275,7 +290,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000",
+      "received": "5 Jun"
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
@@ -283,7 +299,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364A0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364A0000",
+      "received": "5 Jun"
     },
     {
       "title": "FW: Preventing archiving of users not included in HR data upload",
@@ -291,7 +308,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "FW: Preventing archiving of users not included in HR data upload",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36470000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36470000",
+      "received": "5 Jun"
     },
     {
       "title": "Annual leave and support during my absence",
@@ -299,7 +317,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Annual leave and support during my absence",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000",
+      "received": "5 Jun"
     },
     {
       "title": "RE: DSE Update - user data import and upload to Cardinus",
@@ -307,7 +326,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36450000",
+      "received": "5 Jun"
     },
     {
       "title": "Cority Product User Group (PUG)",
@@ -315,7 +335,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Cority Product User Group (PUG)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36440000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36440000",
+      "received": "5 Jun"
     },
     {
       "title": "Strategic H&S Modular System requirements evaluation weightings",
@@ -323,7 +344,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Strategic H&S Modular System requirements evaluation weightings",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36420000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36420000",
+      "received": "5 Jun"
     },
     {
       "title": "The Kudoboard for Marie Cooksey is being finalized",
@@ -331,7 +353,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "The Kudoboard for Marie Cooksey is being finalized",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36410000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36410000",
+      "received": "5 Jun"
     },
     {
       "title": "RE: [ict-a] Cisco Secure Client (VPN) update to 5.1.17.3394",
@@ -339,7 +362,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "RE: [ict-a] Cisco Secure Client (VPN) update to 5.1.17.3394",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000",
+      "received": "5 Jun"
     },
     {
       "title": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
@@ -347,7 +371,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000",
+      "received": "5 Jun"
     },
     {
       "title": "RE: DSE Update - user data import and upload to Cardinus",
@@ -355,7 +380,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363E0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363E0000",
+      "received": "5 Jun"
     },
     {
       "title": "RE: DSE Update - user data import and upload to Cardinus",
@@ -363,7 +389,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363D0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363D0000",
+      "received": "5 Jun"
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
@@ -371,7 +398,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363C0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363C0000",
+      "received": "5 Jun"
     },
     {
       "title": "RE: DSE Update - user data import and upload to Cardinus",
@@ -379,7 +407,8 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000",
+      "received": "5 Jun"
     },
     {
       "title": "FW: POC for HALO data work?",
@@ -387,7 +416,44 @@
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "FW: POC for HALO data work?",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000",
+      "received": "4 Jun"
+    },
+    {
+      "title": "H&S Management System",
+      "sub": "From <strong>Marie Cooksey</strong>. Hello all\r\n\r\n \r\n\r\nI have asked that you have the opportunity to feed into the shortlist pack and weighting over the next",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "H&S Management System",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000",
+      "received": "4 Jun"
+    },
+    {
+      "title": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
+      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here &lt;https://empower.cority.com/v/NzcyLURQWC04MTEAAAGiMh_NeVQ_E3vubSLgzOZWLY7qY",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000",
+      "received": "4 Jun"
+    },
+    {
+      "title": "Access Support – Case Feedback",
+      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n &lt;https://www.theaccessgroup.com&gt; \t\r\n \r\n\r\nDear Kevi",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "Access Support – Case Feedback",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362C0000",
+      "received": "4 Jun"
+    },
+    {
+      "title": "Access Support Team | 68981820 - Your Case Has Been Resolved",
+      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "Access Support Team | 68981820 - Your Case Has Been Resolved",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362B0000",
+      "received": "4 Jun"
     }
   ],
   "fyi": [
@@ -397,7 +463,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "New Vacancy Notification",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E370000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E370000",
+      "received": "9 Jun"
     },
     {
       "title": "Bodleian iSkills workshops for the week ahead (7th week)",
@@ -405,31 +472,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "Bodleian iSkills workshops for the week ahead (7th week)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E240000"
-    },
-    {
-      "title": "Accepted: Michael O'Sullivan - 1-1 Session",
-      "sub": "From <strong>Michael O'Sullivan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Accepted: Michael O'Sullivan - 1-1 Session",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E1F0000"
-    },
-    {
-      "title": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "sub": "From <strong>csn@mail.status.cority.com</strong>. Completed - No components affected - The scheduled maintenance has been completed. ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646F0000"
-    },
-    {
-      "title": "New Vacancy Notification",
-      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "New Vacancy Notification",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C6AD9250000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E240000",
+      "received": "8 Jun"
     },
     {
       "title": "[ict-a] OWL Maintenance - 11th June",
@@ -437,7 +481,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "[ict-a] OWL Maintenance - 11th June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36430000",
+      "received": "5 Jun"
     },
     {
       "title": "New Vacancy Notification",
@@ -445,7 +490,17 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "New Vacancy Notification",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000",
+      "received": "5 Jun"
+    },
+    {
+      "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077EC2CE7D0000",
+      "received": "9 Jun"
     },
     {
       "title": "RE: Holiday Records Duty - proposed reports",
@@ -453,7 +508,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "RE: Holiday Records Duty - proposed reports",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000",
+      "received": "9 Jun"
     },
     {
       "title": "HR Support and Staff Immigration has a new digital home",
@@ -461,7 +517,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "HR Support and Staff Immigration has a new digital home",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E480000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E480000",
+      "received": "9 Jun"
     },
     {
       "title": "ACTION: walkarounds to ensure telephony is operational ",
@@ -469,7 +526,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "ACTION: walkarounds to ensure telephony is operational ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3D0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3D0000",
+      "received": "9 Jun"
     },
     {
       "title": "Bi-monthly CDR/PD working group",
@@ -477,7 +535,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "Bi-monthly CDR/PD working group",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E350000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E350000",
+      "received": "8 Jun"
     },
     {
       "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
@@ -485,7 +544,26 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E320000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E320000",
+      "received": "8 Jun"
+    },
+    {
+      "title": "RE: Question re Volunteer reporting",
+      "sub": "From <strong>Michael O'Sullivan</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Question re Volunteer reporting",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E390000",
+      "received": "8 Jun"
+    },
+    {
+      "title": "Accepted: Michael O'Sullivan - 1-1 Session",
+      "sub": "From <strong>Michael O'Sullivan</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Accepted: Michael O'Sullivan - 1-1 Session",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E1F0000",
+      "received": "8 Jun"
     },
     {
       "title": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
@@ -493,7 +571,35 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C76F7B60000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646F0000",
+      "received": "6 Jun"
+    },
+    {
+      "title": "Marie Handover 8-12 June",
+      "sub": "From <strong>Marie Cooksey</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Marie Handover 8-12 June",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000",
+      "received": "6 Jun"
+    },
+    {
+      "title": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
+      "sub": "From <strong>csn@mail.status.cority.com</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C76F7B60000",
+      "received": "6 Jun"
+    },
+    {
+      "title": "New Vacancy Notification",
+      "sub": "From <strong>peoplexd@accessacloud.com</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "New Vacancy Notification",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C6AD9250000",
+      "received": "6 Jun"
     },
     {
       "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
@@ -501,7 +607,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000",
+      "received": "6 Jun"
     },
     {
       "title": "Simon / Kevin 121s",
@@ -509,7 +616,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "Simon / Kevin 121s",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36490000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36490000",
+      "received": "5 Jun"
     },
     {
       "title": "H&S Handover ",
@@ -517,7 +625,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "H&S Handover ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000",
+      "received": "5 Jun"
     },
     {
       "title": "Clinical pay uplift 2026 kick off meeting",
@@ -525,7 +634,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "Clinical pay uplift 2026 kick off meeting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363B0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363B0000",
+      "received": "5 Jun"
     },
     {
       "title": "RE: Reference request - Lee Strudwick",
@@ -533,7 +643,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "RE: Reference request - Lee Strudwick",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36360000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36360000",
+      "received": "4 Jun"
     },
     {
       "title": "[ict-a] ICTF Conference 2026 – Final Week for Registration",
@@ -541,7 +652,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "[ict-a] ICTF Conference 2026 – Final Week for Registration",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36330000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36330000",
+      "received": "4 Jun"
     },
     {
       "title": "You have been added to a staff team in Microsoft Teams",
@@ -549,7 +661,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "You have been added to a staff team in Microsoft Teams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36320000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36320000",
+      "received": "4 Jun"
     },
     {
       "title": "GLAM Rostering",
@@ -557,7 +670,8 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "GLAM Rostering",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000",
+      "received": "4 Jun"
     },
     {
       "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
@@ -565,57 +679,28 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362E0000"
-    },
-    {
-      "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36290000"
-    },
-    {
-      "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "sub": "From <strong>Cority Customer Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36280000"
-    },
-    {
-      "title": "Reminder: Training industry trends 2026 - Insights from the Training Industry Benchmark Report",
-      "sub": "From <strong>Rebecca Hennedy</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Reminder: Training industry trends 2026 - Insights from the Training Industry Benchmark Report",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36240000"
-    },
-    {
-      "title": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "sub": "From <strong>Viktoriia Vasyliuta</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36220000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361F0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362E0000",
+      "received": "4 Jun"
     }
   ],
   "low": [
+    {
+      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
+      "sub": "From <strong>SharePoint Online</strong>. &lt;https://unioxfordnexus.sharepoint.com/sites/HumanResources-HRSystems-HRSystemsManagementTeam/Shared%20Documents/HR%20Sy",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36270000",
+      "received": "4 Jun"
+    },
     {
       "title": "Your May Flow State recap 🌱",
       "sub": "From <strong>Wispr Flow</strong>.",
       "badge": "",
       "badgeType": "gray",
       "subject": "Your May Flow State recap 🌱",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C9864700000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C9864700000",
+      "received": "6 Jun"
     },
     {
       "title": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
@@ -623,7 +708,8 @@
       "badge": "",
       "badgeType": "gray",
       "subject": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646D0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646D0000",
+      "received": "6 Jun"
     },
     {
       "title": "[begb0037admin/work-inbox] Run failed: pages build and deployment - main (7dc4096)",
@@ -631,7 +717,8 @@
       "badge": "",
       "badgeType": "gray",
       "subject": "[begb0037admin/work-inbox] Run failed: pages build and deployment - main (7dc4096)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC70000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC70000",
+      "received": "5 Jun"
     },
     {
       "title": "Word, Latex, Planner and MS Projects  - Build Core Digital Skills!",
@@ -639,49 +726,58 @@
       "badge": "",
       "badgeType": "gray",
       "subject": "Word, Latex, Planner and MS Projects  - Build Core Digital Skills!",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36370000"
-    },
-    {
-      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>SharePoint Online</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362A0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36370000",
+      "received": "4 Jun"
     }
   ],
-  "calToday": [],
-  "calTomorrow": [],
+  "calToday": [
+    {
+      "time": "14:00",
+      "title": "GLAM Rostering",
+      "sub": "Simon Burford"
+    }
+  ],
+  "calTomorrow": [
+    {
+      "time": "09:00",
+      "title": "Clinical pay uplift 2026 kick off meeting",
+      "sub": "Jasmin Khokhra"
+    }
+  ],
   "absences": [
     "James Salas Guillen",
+    "Marie",
     "Marie Cooksey"
   ],
   "prioritiesToday": [
     {
       "text": "Smart notes escalation — Cority ticket 00476764",
-      "description": "Smart notes draft-save feature has been missing in Cority for 6+ months. Originally raised by James Salas Guillen. The ability to save a note as a draft or reopen and edit an existing note is not available — users must complete all fields before saving, which is particularly burdensome for longer notes. Cority acknowledged the issue under CCC-19664 and logged it with their dev team. Status is currently 'Pending Future Release' with no committed timeline. Two major releases have passed with no delivery. There is no active account manager, removing the normal escalation route. In April 2026, Freeda Franks (Cority Customer Support Analyst) suggested enhanced access support at a cost — disputed, as this is a missing feature not an enhancement.",
+      "description": "Smart notes in Cority CoreEHS+ (GX2) do not allow edits after save and close. Raised November 2025, dev ref CCC-19664. Cority's official position (confirmed 08 Jun 2026 by Mehran Riaz, support leadership): this is an INTENDED feature — not a bug or missing feature. Cority classify the request to allow post-save edits as an enhancement, and it is NOT on their current roadmap. No timeline will be provided. Beta/early access ('enhanced access support') requires Premium Support, which Oxford does not have. Oxford has no named account manager — we are in a pool. Escalation route: support case owner → support leadership (done). If account/contract items needed, Cority sales team can be asked to reach out. Quality PUG on Tue 16 Jun at 2pm remains the formal pressure point.",
       "actions": [
-        "[Nov 2025] Ticket 00476764 raised by James Salas Guillen — option to draft or come back to a note after saving.",
-        "[Jan–Apr 2026] Multiple Cority updates from Freeda Franks — dev team still working, no timeline given.",
-        "[Apr 2026] Freeda suggested enhanced access support at a cost — position: this is a missing feature, not a chargeable enhancement.",
-        "[08 Jun 2026] Kevin submitted escalation comment via Cority ticket comment box — requesting committed timeline on CCC-19664, clarification on cost position, and named account manager contact.",
-        "[TODO — 16 Jun] Raise at Quality PUG, 2:00 PM (virtual) — escalate formally if no response received from Freeda before then.",
-        "[AWAITING] Response from Freeda Franks to escalation comment."
+        "[Nov 2025] Ticket 00476764 raised by James — smart notes cannot be edited after save/close.",
+        "[Nov–Jun] Multiple 'still working on it' updates from Freeda Franks (support analyst). Dev ref CCC-19664 assigned.",
+        "[08 Jun 2026] Kevin escalated formally — requested timeline, clarification on cost comment, named account manager.",
+        "[08 Jun 2026] Mehran Riaz (support leadership) responded: feature is INTENDED behaviour, classified as enhancement, NOT on roadmap. No timeline. Premium Support required for beta access (Oxford does not have it). No named account manager — pool model. Sales team available if needed.",
+        "[MONITOR] Quality PUG — Tue 16 Jun, 2pm. Raise CCC-19664 formally. Use Mehran's response as evidence that standard escalation is exhausted.",
+        "[TODO — before PUG] Prepare talking points: 6+ months open, intentional feature reclassification, no roadmap commitment, no account manager, Premium Support paywall.",
+        "[TODO — after PUG] Decide whether to pursue via sales/account route or accept as a known limitation and communicate to stakeholders."
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "red"
     },
     {
       "text": "Chemistry bulk delete — get details from Julie, pass to Reenu",
-      "description": "Chemistry department has incorrectly assigned appraisals in PeopleXD (My Development module). A bulk delete is required. Originally raised as case 67938206 in late 2025 — AG (Reenu Delaney) quoted scripted work via flex points. Flex points case raised in April 2026 as 68974493. Marie Cooksey handed case to Kevin on 2 June 2026. On 3 June, Reenu asked Kevin for the appraisal cycle name and a list of affected employees before she can action the deletion. Ball has been in Oxford's court since 3 June. Julie Hickman is most likely to hold the required details.",
+      "description": "Bulk deletion of appraisal cycle assignments in PeopleXD for Chemistry department. Appraisal cycle name: '(DO NOT USE) CDR2025Chemistry'. 5,568 staff incorrectly assigned and need to be removed. AG contact: Reenu Delaney (cases 68974493 / 67938206). Payment via flex points (£525, approved by Marie). Julie Hickman has run the affected employee report and will share the export via OneDrive.",
       "actions": [
         "[Oct 2025] Case 67938206 raised — Chemistry bulk delete of appraisal assignments.",
         "[Apr 2026] Flex points agreed as payment route — case 68974493 raised.",
         "[02 Jun 2026] Marie handed case to Kevin as lead.",
-        "[03 Jun 2026] Reenu Delaney requested appraisal cycle name and affected employee list from Kevin.",
-        "[09 Jun 2026] Email sent to Julie Hickman requesting appraisal cycle name and affected employee list.",
-        "[AWAITING] Julie Hickman to provide details.",
-        "[TODO — on receipt] Forward straight to Reenu Delaney at AG to action the deletion."
+        "[03 Jun 2026] Reenu Delaney requested appraisal cycle name and affected employee list.",
+        "[09 Jun 2026] Email sent to Julie Hickman requesting details.",
+        "[09 Jun 2026] Julie confirmed: cycle name '(DO NOT USE) CDR2025Chemistry', 5,568 staff to be removed. Report run by Julie — OneDrive export incoming.",
+        "[AWAITING] Julie to share OneDrive export of affected employee list.",
+        "[TODO — on receipt] Forward cycle name + employee list export to Reenu Delaney at AG to action the deletion.",
+        "[TODO] Reply to Julie confirming details received and next steps."
       ],
       "source": "Case 68974493",
       "dateType": "red"
@@ -799,5 +895,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 19:33"
+  "refreshed_at": "Tuesday 09 June Â· 20:51"
 }
