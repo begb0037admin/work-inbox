@@ -1,7 +1,7 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-09 (evening)
-**Status:** Active — fully working. Session ended 2026-06-09 evening.
+**Last updated:** 2026-06-09 (late evening)
+**Status:** Active — fully working. Session ended 2026-06-09 late evening.
 
 ---
 
@@ -15,7 +15,7 @@
 
 ---
 
-## Current State (fully working as of 2026-06-09 evening)
+## Current State (fully working as of 2026-06-09 late evening)
 
 ### Working
 - fetch_inbox.py — all three phases confirmed working
@@ -24,7 +24,10 @@
 - Absence dedup — partial-name matching prevents duplicates when KNOWN_ABSENCE_DATES and calendar-detected names overlap (e.g. "Marie" + "Marie Cooksey")
 - Email received date on tiles — safe pywintypes.datetime parsing → "9 Jun" format, right-aligned on card
 - Email sort — newest-first within each category (Urgent, Needs Response, FYI, Low)
-- index.html — all section headings and labels render correctly (mojibake fix: 37 garbled characters replaced using 12-byte binary pattern matching)
+- index.html — ALL garbled Unicode fully resolved (48 characters total across two passes):
+  - Pass 1: 37 instances — em-dash (—) and triangle (▼) in section headings
+  - Pass 2: 11 instances — en-dash (–), rightwards arrow (→), curly quotes (" "), checkmark (✓), white circle bullet (○), up-triangle (▲), warning sign (⚠)
+  - Zero triple-encoding patterns remaining. briefing.json confirmed clean (no encoding issues).
 - Font sizes — increased throughout to match Command Centre scale: sidebar section headers 13px, calendar titles 15px, absence list 14px, section labels 14px, card titles 16px, user/date values 15px
 - open_email.py — openmail:// protocol registered, confirmed working
 - Task Scheduler — WorkInbox-Briefing runs at 7am/9am/11am/1pm/3pm/5pm Mon-Fri
@@ -75,13 +78,16 @@ These are hardcoded in fetch_inbox.py and rewrite AI output for known absent col
 ## Technical Notes — index.html
 
 ### Mojibake Fix (critical for future edits)
-index.html was triple-encoded (UTF-8 → Latin-1 misread × 3), producing 12-byte sequences per intended character.
-Fix applied 2026-06-09: binary `atob()` patch replacing 12-byte patterns → correct UTF-8 bytes, then `btoa()` directly.
+index.html was triple-encoded (UTF-8 → Latin-1 misread x3), producing 12-byte sequences per intended character.
+Two-pass fix applied 2026-06-09:
+- Pass 1: em-dash (U+2014) and down-triangle (U+25BC) — 37 instances
+- Pass 2: en-dash (U+2013), rightwards arrow (U+2192), curly quotes (U+201C/D), checkmark (U+2713), white circle (U+25CB), up-triangle (U+25B2), warning sign (U+26A0) — 11 instances
+Total: 48 instances fixed. Zero triple-encoding patterns remain.
 
-**Rule: Any future edit to index.html MUST use the binary `atob()`/`btoa()` approach — NEVER `TextEncoder` on the file content.** TextEncoder will re-encode the em-dash bytes (0xE2, 0x80, 0x93) and re-garble every section heading.
+**Rule: Any future edit to index.html MUST use the binary atob()/btoa() approach — NEVER TextEncoder on the file content.** TextEncoder will re-encode the multi-byte Unicode chars and re-garble them.
 
 ### CSS Override Pattern
-Font size increases were added as CSS overrides at the end of the `<style>` block (before `</style>`). This is the safest pattern for future edits — existing rules untouched, cascade handles priority.
+Font size increases were added as CSS overrides at the end of the style block (before </style>). Safest pattern for future edits — existing rules untouched, cascade handles priority.
 
 ---
 
