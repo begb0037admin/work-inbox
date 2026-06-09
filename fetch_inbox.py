@@ -95,11 +95,11 @@ week_end = today + timedelta(days=6)
 lookback  = today - timedelta(days=30)  # catch multi-day absences spanning today
 calendar = []
 cal_items = mapi.GetDefaultFolder(9).Items
-cal_items.IncludeRecurrences = True
-cal_items.Sort("[Start]")
-restrict_str = "[Start] >= '{s}' AND [Start] <= '{e}'".format(
-    s=lookback.strftime('%m/%d/%Y'),
-    e=(week_end + timedelta(days=1)).strftime('%m/%d/%Y')
+# Restrict at COM layer for speed — UK date format (DD/MM/YYYY)
+# [End] >= lookback catches events active now (e.g. leave that started days ago)
+restrict_str = "[End] >= '{s}' AND [Start] <= '{e}'".format(
+    s=lookback.strftime('%d/%m/%Y 00:00'),
+    e=(week_end + timedelta(days=1)).strftime('%d/%m/%Y 23:59')
 )
 cal_items = cal_items.Restrict(restrict_str)
 for item in cal_items:
