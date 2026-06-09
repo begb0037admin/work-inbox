@@ -353,7 +353,8 @@ function sanitizeSub(text){
   if(!text) return '';
   return text
     .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' ')
-    .replace(/<(?!\/?strong\b)[^>]*>/gi, '');
+    .replace(/<(?!\/?strong\b)[^>]*>/gi, '')
+    .replace(/<(?!\/?strong\b)[^>]*$/gi, '');
 }
 
 function renderItems(items,cls){
