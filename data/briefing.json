@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Three absences blocking systems work; Cority scoping overdue",
-  "context": "Marie Cooksey is absent from 8-12 June, returning Monday 13 June, blocking H&S handover items and DSE user data import confirmation - James Salas Guillen is also absent from end of 5 June until Thursday 18 June, leaving the PeopleXD to Cardinus automated data upload and Healthy Working Plus DSE system integration unsupervised. Athena Artuso's absence notice arrived on 8 June with no return date specified, creating uncertainty on HRA team availability for the Ivanti security vulnerability Major Incident response. Sophie Levy from Cority reached out on 8 June stating no contact for two months regarding scoping session progress - this email has been waiting 26+ hours without response. The most time-critical deadline is Wednesday 10 June at 09:00 for the Clinical pay uplift 2026 kick off meeting with Jasmin Khokhra on Microsoft Teams, which requires clinical pay project preparation. Open first: Sophie Levy's email about the stalled Cority scoping session, as external vendor engagement has lapsed and needs immediate reconnection.",
+  "subtitle": "Team meeting prep with two colleagues away and security incident pending",
+  "context": "Simon Burford will chair tomorrow's team meeting at 10 June focusing on KPIs and Statistics, requiring each team to present readiness. Marie Cooksey is absent on annual leave from 8-12 June 2026, returning 13 June, with H&S handover notes provided but DTP1092 College Data in PXD project blocked pending her return - Crispin Muncaster needs meeting rescheduled. James Salas Guillen is on annual leave until 18 June 2026 with DSE system updates and PeopleXD data uploads to Cardinus now live, but contractor manual record creation responsibility unconfirmed. Sophie Levy from Cority has waited over 48 hours since 8 June 15:58 without your response on the scoping session update from April discussions. The Major Incident Priority 1 regarding Ivanti security vulnerability requires immediate attention with Emma Fitz-Gibbon coordinating PeopleXD service request testing via Sarah Warne. Open immediately Michael O'Sullivan's Task# 50958836 for Incident# 11681780 regarding P5 task closure and Functional Analysis Work Planner migration. The most time-critical deadline is the OWL network maintenance upgrade on 11 June 2026.",
   "urgent": [
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -50,6 +50,15 @@
     }
   ],
   "needs": [
+    {
+      "title": "Team Meeting - 10th June",
+      "sub": "From <strong>Simon Burford</strong>. Hi all, Tomorrow’s team meeting focusses on KPIs and Statistics so please ensure that each team is ready to present some",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Team Meeting - 10th June",
+      "received": "2026-06-09 12:06:35.355000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E410000"
+    },
     {
       "title": "When Safety Failures Become Operational Failures",
       "sub": "From <strong>EcoOnline</strong>. In this month's The Situation Room, we uncover the blind spots manufacturers may be risking by treating safety as a comp",
@@ -627,5 +636,5 @@
       "notes": "Chemistry department has incorrectly assigned appraisals in PeopleXD (My Development module). A bulk delete is required. Originally raised as case 67938206 in late 2025 — AG (Reenu Delaney) quoted scripted work via flex points. Flex points case raised in April 2026 as 68974493. Marie Cooksey handed case to Kevin on 2 June 2026. On 3 June, Reenu asked Kevin for the appraisal cycle name and a list of affected employees before she can action the deletion. Ball has been in Oxford's court since 3 June. Julie Hickman is most likely to hold the required details."
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 12:20"
+  "refreshed_at": "Tuesday 09 June · 12:22"
 }
