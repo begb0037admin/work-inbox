@@ -155,7 +155,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .date-blue { color: var(--blue-text); background: var(--blue-bg); border: 1px solid var(--blue-border); }
 .date-gray { color: var(--gray-text); background: var(--gray-bg); border: 1px solid var(--gray-border); }
 
-/* Priority cards Ã¢ÂÂ expandable, Command Centre style */
+/* Priority cards – expandable, Command Centre style */
 .pri-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--radius-lg); margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
 .pri-card.done { opacity: .38; }
 .pri-card.card-hidden { display: none; }
@@ -236,10 +236,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
       <div class="date-val" id="sidebarDate"></div>
     </div>
 
-    <div class="sb-section">Calendar Ã¢ÂÂ today</div>
+    <div class="sb-section">Calendar – today</div>
     <div id="calTodaySidebar"></div>
 
-    <div class="sb-section" id="calTomorrowLabel">Calendar Ã¢ÂÂ tomorrow</div>
+    <div class="sb-section" id="calTomorrowLabel">Calendar – tomorrow</div>
     <div id="calTomorrowSidebar"></div>
 
     <div class="sb-section">Absences</div>
@@ -273,7 +273,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
     <button class="btn btn-primary" onclick="loadFromImport()">Load briefing</button>
     <button class="btn" onclick="toggleImport()">Cancel</button>
   </div>
-  <div class="import-error" id="importError">Invalid JSON Ã¢ÂÂ please check and try again.</div>
+  <div class="import-error" id="importError">Invalid JSON – please check and try again.</div>
 </div>
 
 <!-- Archive panel -->
@@ -294,7 +294,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 <script>
 const STORAGE_KEY='workInbox_briefings_v1', TODAY_KEY='workInbox_today_v1', TICKS_KEY='workInbox_ticks_v1';
 
-const SEED={"date":"Tuesday 2 June 2026","subtitle":"First day back","context":"Surgery ~5 May, signed off four weeks. Simon Burford covered throughout May. Phased return may be recommended. Simon sent an occupational health referral Ã¢ÂÂ flag to read directly.","urgent":[{"title":"FlexPoints case #68899229 Ã¢ÂÂ bulk delete assignments","sub":"Marie approved proceeding 28 May. Scope confirmed but vague Ã¢ÂÂ requirements need tightening before kick-off. <strong>Authorise in the Access Group Support Portal today.</strong> Quote expires 11 June.","badge":"Deadline 11 June","badgeType":"red"},{"title":"DTP1092 Ã¢ÂÂ College staff in PXD: Marie sign-off needed","sub":"Marie finalised proposal 29 May and sent to Marie. Must be signed before her leave ends. Conor O'Brien starts test config on return 11 June. Kick-off provisionally <strong>12 June morning.</strong>","badge":"Deadline 5 June","badgeType":"red"},{"title":"DTP1092 Ã¢ÂÂ PXD DPIA: still not signed off","sub":"v0.5 shared with Crispin in May. Marie has not reviewed or signed. Blocks the college staff DPIA.","badge":"Chase Marie ASAP","badgeType":"orange"},{"title":"RSVP Ã¢ÂÂ Eploy project run through (Tue 2 June, 11:00Ã¢ÂÂ11:30)","sub":"Invite from Idris Kamara (Eploy) via Marie Cooksey. Attendees: Rachel Midgley, Simon, Idris, Kevin. Teams call.","badge":"RSVP today","badgeType":"red"}],"needs":[{"title":"Teams telephony transfer Ã¢ÂÂ deadline passed today","sub":"University moving from Chorus to Teams Telephony. Deadline to keep current number was 1 June. You were on leave. Check with Marie or Neil Clarke (L&OD).","badge":"Check with Marie/Neil","badgeType":"orange"},{"title":"EcoOnline/IRIS Ã¢ÂÂ funding still pending","sub":"Marie informed Joanne Grant (EcoOnline) funding is pending as of 28 May. New AE is John Grant (Mike left). Check funding approval status when you speak to Marie.","badge":"Check with Marie","badgeType":"orange"},{"title":"GLAM rostering Ã¢ÂÂ new workstream","sub":"IT Services (Anna Carter-Windle) handing off Botanic Gardens/Ashmolean rostering rollout. Marie described as Ã¢ÂÂnot idealÃ¢ÂÂ Ã¢ÂÂ needs a discussion when everyone is in.","badge":"Add to team agenda","badgeType":"blue"},{"title":"James annual leave Ã¢ÂÂ add Simon as second approver","sub":"James's leave on 22 May was verbally approved by Marie due to approval gap. Simon flagged: add Simon as second approver for FA work group in PXD to prevent recurrence.","badge":"This week","badgeType":"blue"},{"title":"Michelle's birthday Ã¢ÂÂ circulate card","sub":"Michelle's birthday is Wednesday 3 June.","badge":"By Wed 3 June","badgeType":"red"}],"calToday":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"H&S Roadmap","sub":"Christopher Sanders"},{"time":"2:00 PM","title":"James Salas Guillen 1-1","sub":null}],"calTomorrow":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"Azure Integration Platform Sprint Review","sub":"Erika Braverman Ã¢ÂÂ Teams"},{"time":"11:00Ã¢ÂÂ11:30 AM","title":"Hold: Eploy run through","sub":"Marie Cooksey Ã¢ÂÂ Teams","alert":"RSVP needed"},{"time":"3:00 PM","title":"DTP1092 College staff in PXD","sub":"Crispin Muncaster Ã¢ÂÂ Teams"}],"absences":["Simon Burford Ã¢ÂÂ A/L Mon 1 June","Michael O'Sullivan Ã¢ÂÂ A/L until ~5 June","Sarah Rowles Ã¢ÂÂ A/L until 8 June","Marie King Ã¢ÂÂ A/L this week","Conor O'Brien Ã¢ÂÂ A/L until 10 June"],"priorities":[{"text":"Authorise FlexPoints case #68899229 in Access Group portal","date":"11 June","dateType":"orange"},{"text":"Chase Marie Ã¢ÂÂ PXD DPIA sign-off","date":"ASAP / 5 June","dateType":"red"},{"text":"Chase Marie Ã¢ÂÂ DTP1092 proposal sign-off","date":"5 June","dateType":"red"},{"text":"RSVP to Eploy hold meeting (Tue 11am)","date":"Today","dateType":"red"},{"text":"Teams telephony deadline Ã¢ÂÂ check with Marie/Neil Clarke","date":"Today","dateType":"red"},{"text":"Add Simon as second approver Ã¢ÂÂ FA work group in PXD","date":"This week","dateType":"blue"},{"text":"Check EcoOnline/IRIS funding status with Marie","date":"This week","dateType":"blue"},{"text":"Circulate Michelle's birthday card","date":"By Wed 3 June","dateType":"red"}]};
+const SEED={"date":"Tuesday 2 June 2026","subtitle":"First day back","context":"Surgery ~5 May, signed off four weeks. Simon Burford covered throughout May. Phased return may be recommended. Simon sent an occupational health referral – flag to read directly.","urgent":[{"title":"FlexPoints case #68899229 – bulk delete assignments","sub":"Marie approved proceeding 28 May. Scope confirmed but vague – requirements need tightening before kick-off. <strong>Authorise in the Access Group Support Portal today.</strong> Quote expires 11 June.","badge":"Deadline 11 June","badgeType":"red"},{"title":"DTP1092 – College staff in PXD: Marie sign-off needed","sub":"Marie finalised proposal 29 May and sent to Marie. Must be signed before her leave ends. Conor O'Brien starts test config on return 11 June. Kick-off provisionally <strong>12 June morning.</strong>","badge":"Deadline 5 June","badgeType":"red"},{"title":"DTP1092 – PXD DPIA: still not signed off","sub":"v0.5 shared with Crispin in May. Marie has not reviewed or signed. Blocks the college staff DPIA.","badge":"Chase Marie ASAP","badgeType":"orange"},{"title":"RSVP – Eploy project run through (Tue 2 June, 11:00Ã¢ÂÂ11:30)","sub":"Invite from Idris Kamara (Eploy) via Marie Cooksey. Attendees: Rachel Midgley, Simon, Idris, Kevin. Teams call.","badge":"RSVP today","badgeType":"red"}],"needs":[{"title":"Teams telephony transfer – deadline passed today","sub":"University moving from Chorus to Teams Telephony. Deadline to keep current number was 1 June. You were on leave. Check with Marie or Neil Clarke (L&OD).","badge":"Check with Marie/Neil","badgeType":"orange"},{"title":"EcoOnline/IRIS – funding still pending","sub":"Marie informed Joanne Grant (EcoOnline) funding is pending as of 28 May. New AE is John Grant (Mike left). Check funding approval status when you speak to Marie.","badge":"Check with Marie","badgeType":"orange"},{"title":"GLAM rostering – new workstream","sub":"IT Services (Anna Carter-Windle) handing off Botanic Gardens/Ashmolean rostering rollout. Marie described as Ã¢ÂÂnot idealÃ¢ÂÂ – needs a discussion when everyone is in.","badge":"Add to team agenda","badgeType":"blue"},{"title":"James annual leave – add Simon as second approver","sub":"James's leave on 22 May was verbally approved by Marie due to approval gap. Simon flagged: add Simon as second approver for FA work group in PXD to prevent recurrence.","badge":"This week","badgeType":"blue"},{"title":"Michelle's birthday – circulate card","sub":"Michelle's birthday is Wednesday 3 June.","badge":"By Wed 3 June","badgeType":"red"}],"calToday":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"H&S Roadmap","sub":"Christopher Sanders"},{"time":"2:00 PM","title":"James Salas Guillen 1-1","sub":null}],"calTomorrow":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"Azure Integration Platform Sprint Review","sub":"Erika Braverman – Teams"},{"time":"11:00Ã¢ÂÂ11:30 AM","title":"Hold: Eploy run through","sub":"Marie Cooksey – Teams","alert":"RSVP needed"},{"time":"3:00 PM","title":"DTP1092 College staff in PXD","sub":"Crispin Muncaster – Teams"}],"absences":["Simon Burford – A/L Mon 1 June","Michael O'Sullivan – A/L until ~5 June","Sarah Rowles – A/L until 8 June","Marie King – A/L this week","Conor O'Brien – A/L until 10 June"],"priorities":[{"text":"Authorise FlexPoints case #68899229 in Access Group portal","date":"11 June","dateType":"orange"},{"text":"Chase Marie – PXD DPIA sign-off","date":"ASAP / 5 June","dateType":"red"},{"text":"Chase Marie – DTP1092 proposal sign-off","date":"5 June","dateType":"red"},{"text":"RSVP to Eploy hold meeting (Tue 11am)","date":"Today","dateType":"red"},{"text":"Teams telephony deadline – check with Marie/Neil Clarke","date":"Today","dateType":"red"},{"text":"Add Simon as second approver – FA work group in PXD","date":"This week","dateType":"blue"},{"text":"Check EcoOnline/IRIS funding status with Marie","date":"This week","dateType":"blue"},{"text":"Circulate Michelle's birthday card","date":"By Wed 3 June","dateType":"red"}]};
 
 function getStore(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}}}
 function saveStore(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
@@ -371,7 +371,7 @@ function renderArchiveList(){
     return `<div class="archive-day">
       <div class="archive-day-header" onclick="toggleArchiveDay(${di})">
         <div><div class="archive-day-date">${e.dateStr}</div><div class="archive-day-meta">${items.length} items ÃÂ· ${tickedCount} done</div></div>
-        <span class="archive-day-arrow" id="arch-arrow-${di}">Ã¢ÂÂ¼</span>
+        <span class="archive-day-arrow" id="arch-arrow-${di}">–</span>
       </div>
       <div class="archive-day-items" id="arch-items-${di}">${itemsHtml}</div>
     </div>`;
@@ -381,7 +381,7 @@ function toggleArchiveDay(i){
   const el=document.getElementById('arch-items-'+i);
   const arrow=document.getElementById('arch-arrow-'+i);
   const open=el.classList.toggle('open');
-  arrow.textContent=open?'Ã¢ÂÂ²':'Ã¢ÂÂ¼';
+  arrow.textContent=open?'Ã¢ÂÂ²':'–';
 }
 function exportArchiveMd(){
   const entries=getArchiveData();
@@ -523,7 +523,7 @@ function togglePriCard(i){
   const arrow=document.getElementById('priarrow_'+i);
   const isOpen=body.style.display==='block';
   body.style.display=isOpen?'none':'block';
-  arrow.textContent=isOpen?'Ã¢ÂÂ¼':'Ã¢ÂÂ²';
+  arrow.textContent=isOpen?'–':'Ã¢ÂÂ²';
 }
 
 function renderPriorityCards(priorities,key){
@@ -541,7 +541,7 @@ function renderPriorityCards(priorities,key){
       <div class="pri-card-header" onclick="togglePriCard(${i})">
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
         <span class="pri-card-title">${titleText}</span>
-        <span class="pri-arrow" id="priarrow_${i}">Ã¢ÂÂ¼</span>
+        <span class="pri-arrow" id="priarrow_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${i}">${actionsHtml}${metaHtml}</div>
     </div>`;
@@ -577,16 +577,16 @@ function renderBriefing(data,key){
   // Main inbox
   let left='';
   if(data.prioritiesToday&&data.prioritiesToday.length){
-    left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions Ã¢ÂÂ today</span><span class="sec-rule"></span></div>`;
+    left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
     left+=renderPriorityCards(data.prioritiesToday,key);
   }
   if(data.prioritiesWeek&&data.prioritiesWeek.length){
-    left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions Ã¢ÂÂ this week</span><span class="sec-rule"></span></div>`;
+    left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
     left+=renderPriorityCards(data.prioritiesWeek,key);
   }
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent Ã¢ÂÂ action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response Ã¢ÂÂ within 24Ã¢ÂÂ48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
-  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI Ã¢ÂÂ no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
+  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
+  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24Ã¢ÂÂ48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
+  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
   if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
 
   document.getElementById('inboxCol').innerHTML=left;
