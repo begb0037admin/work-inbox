@@ -176,7 +176,7 @@ print("Phase 3 - building cards from inbox...")
 URGENT_SENDERS   = []  # add sender email fragments here if needed
 URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
 NEEDS_SUBJECTS   = ["action required", "please action", "chasing", "follow up", "follow-up",
-                    "reminder", "scoping", "handover", "import failed", "error",
+                    "scoping", "handover", "import failed", "error",
                     "case ", "p1", "priority 1", "approval confirmation", "authorisation to proceed"]
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
