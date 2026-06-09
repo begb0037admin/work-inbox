@@ -1,8 +1,16 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Critical absence coverage - Cority blocking, Marie out, DTP1092 stalled",
-  "context": "Marie Cooksey is absent until Monday 15 June 2026, blocking Access Support case 68974493 on Chemistry bulk-delete requests and DSE user data import oversight to Cardinus - you sent her a status update on 8 June but she's out. James Salas Guillen is on annual leave from 5 June returning Thursday 18 June, leaving the Cority Employee Import error from 6 June unaddressed and H&S DSE automation monitoring uncovered. Sophie Levy from Cority hasn't heard from you in two months and sent a scoping session update on 8 June at 15:58 with no response for 66+ hours - this needs immediate attention. The DTP1092 College Data in PeopleXD project is stalled: Crispin Muncaster's 12 June meeting needs rescheduling, integration questions from Ben Hill via Simon Burford on 8 June require your input, and the integrations team response is waiting on your review. The Priority 1 Ivanti security incident response chain (Emma Fitz-Gibbon, Asta Palmer testing PeopleXD) needs coordination by Friday 12 June. Open Sophie Levy's email first - Cority is waiting on your scoping decision.",
+  "subtitle": "Two key absences block DSE and H&S work; DTP1092 awaits decision",
+  "context": "Marie Cooksey is absent from 8-12 June, returning Monday 13 June, with H&S handover notes covering Fire team meetings and DSE system updates; James Salas Guillen is on annual leave from end of today (9 June) through Thursday 18 June, with H&S admin responsibilities and PeopleXD to Cardinus data upload monitoring now his responsibility. The DSE user data import to Cardinus system went live 3 June via automated PeopleXD upload and requires confirmation of contractor manual record creation processes. Project DTP1092 College Data in PXD Integrations is awaiting your sign-off on integration decisions from Ben Hill via Crispin Muncaster (last email 9 June 07:25) and David Hickman contact. Sophie Levy from Cority has not heard from you in two months (last contact April) regarding scoping session progress and is waiting for update. The Critical deadline is Wednesday 10 June 09:00 for the Clinical pay uplift 2026 kick off meeting with Jasmin Khokhra. Open first: the unread email from Michael O'Sullivan (9 June 07:45) regarding P5 Task #50958836 for Incident #11681780 and his plan to close it via the Functional Analysis Work Planner.",
   "urgent": [
+    {
+      "title": "RE: DTP1092 College Data in PXD - Integrations",
+      "sub": "From <strong>Crispin Muncaster</strong>. Hi Simon\r\n\r\n \r\n\r\nThank you very much for this. Look forward to discussing further tomorrow. In the meantime I will conta",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "RE: DTP1092 College Data in PXD - Integrations",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E380000"
+    },
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
       "sub": "From <strong>Simon Burford</strong>. Hi Crispin,\r\n\r\n \r\n\r\nI’ve responded to Guy – he sent me this (and the context) in an OSM task.\r\n\r\n \r\n\r\nFor transparency, ",
@@ -94,6 +102,14 @@
   ],
   "needs": [
     {
+      "title": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
+      "sub": "From <strong>Michael O'Sullivan</strong>. Morning all,\r\n\r\n \r\n\r\nJust to keep you informed, I plan to close the below incident task and manage this through the Func",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3C0000"
+    },
+    {
       "title": "Enhance your audio with 30% off",
       "sub": "From <strong>DistroKid</strong>. A summertime discount\r\n <https://braze-images.com/appboy/communication/assets/image_assets/images/6a18ac1acf2895007fdb0e",
       "badge": "Reply within 48hrs",
@@ -132,22 +148,6 @@
       "badgeType": "yellow",
       "subject": "RE: Scoping Session update",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
-    },
-    {
-      "title": "Automatic reply: Access Support Team | 68974493 - New Case",
-      "sub": "From <strong>Marie Cooksey</strong>. I am out of the office until Monday 15th June. I will aim to respond to your email as soon as possible after my return. ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "Automatic reply: Access Support Team | 68974493 - New Case",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2B0000"
-    },
-    {
-      "title": "RE: Access Support Team | 68974493 - New Case",
-      "sub": "From <strong>Julie Hickman</strong>. Hello Kevin,\r\n\r\n \r\n\r\nHope all is well with you and you had a nice weekend.\r\n\r\n \r\n\r\nJust wondering if you had received a ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Access Support Team | 68974493 - New Case",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E290000"
     },
     {
       "title": "Expressions of Interest - Head of People Programmes & Head of Change - People Department",
@@ -203,7 +203,7 @@
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: Question re Volunteer reporting",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E200000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E390000"
     },
     {
       "title": "Marie Handover 8-12 June",
@@ -319,11 +319,11 @@
     },
     {
       "title": "RE: DSE Update - user data import and upload to Cardinus",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Marie, \r\n\r\n \r\n\r\nYes, the automated data upload from PXD to Cardinus is now live and working as expected. Based on ini",
+      "sub": "From <strong>Marie Cooksey</strong>. Hi James\r\n\r\n \r\n\r\nThank you for update. Could you please confirm who is creating the manual records for contractors etc? ",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363D0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363E0000"
     },
     {
       "title": "RE: DSE Update - user data import and upload to Cardinus",
@@ -383,6 +383,14 @@
     }
   ],
   "fyi": [
+    {
+      "title": "New Vacancy Notification",
+      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "New Vacancy Notification",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E370000"
+    },
     {
       "title": "Bodleian iSkills workshops for the week ahead (7th week)",
       "sub": "From <strong>Bodleian User Education</strong>. Unlock your academic potential with the Bodleian iSkills programme.\r\nSee the full Trinity Term schedule in our term card",
@@ -594,20 +602,20 @@
   ],
   "low": [
     {
-      "title": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
-      "sub": "From <strong>Marie Cooksey in Teams</strong>. Everyone  - hello all, we are very close to securing a supplier to undertake a Uni-wide people/finance data... ‌ ‌ ‌ ‌ ‌",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646D0000"
-    },
-    {
       "title": "Your May Flow State recap 🌱",
       "sub": "From <strong>Wispr Flow</strong>.",
       "badge": "",
       "badgeType": "gray",
       "subject": "Your May Flow State recap 🌱",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C9864700000"
+    },
+    {
+      "title": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
+      "sub": "From <strong>Marie Cooksey in Teams</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646D0000"
     },
     {
       "title": "[begb0037admin/work-inbox] Run failed: pages build and deployment - main (7dc4096)",
@@ -640,14 +648,6 @@
       "badgeType": "gray",
       "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (b97db4e)",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36000000"
-    },
-    {
-      "title": "New login from Edge on Windows",
-      "sub": "From <strong>ElevenLabs</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "New login from Edge on Windows",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE35F90000"
     }
   ],
   "calToday": [
@@ -676,6 +676,12 @@
       "subject": "RE: DTP1092 College Data in PXD - Integrations"
     },
     {
+      "text": "RE: DTP1092 College Data in PXD - Integrations",
+      "date": "Act today",
+      "dateType": "red",
+      "subject": "RE: DTP1092 College Data in PXD - Integrations"
+    },
+    {
       "text": "DTP1092 College Data in PXD - Integrations",
       "date": "Act today",
       "dateType": "red",
@@ -692,13 +698,7 @@
       "date": "Act today",
       "dateType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
-    },
-    {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 08:17"
+  "refreshed_at": "Tuesday 09 June · 09:19"
 }
