@@ -1,15 +1,15 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "escalation case, two absences blocking data flows, team meeting prep",
-  "context": "Sarah Rowles sent an unread escalation on Case 68351079 regarding HESA Module LEVELS UDF data cleardown issues at 12:32 today - open this first as it has attachments and high importance. Marie Cooksey is absent from 8-12 June and returns on Monday 13 June, with H&S handover notes requiring attention for fire team coordination and other pending items. James Salas Guillen is on annual leave from end of day 5 June through Thursday 18 June, blocking DSE system updates and PeopleXD to Cardinus data uploads which are now live but need monitoring. Simon Burford's Team Meeting on 10 June tomorrow focuses on KPIs and Statistics requiring team presentations. The DTP1092 College Data in PXD - Integrations project is progressing with responses from Crispin Muncaster and Simon Burford, but Sophie Levy from Cority has waited over 48 hours without response regarding the scoping session update sent on 8 June at 15:58. The critical deadline this week is the OWL Maintenance scheduled for 11 June which requires system preparation.",
+  "subtitle": "Two colleagues absent, CDR approval blocking, team metrics due tomorrow",
+  "context": "Marie Cooksey is absent from 8-12 June, returning Monday 13 June, with handover notes covering H&S Fire team coordination and DSE system updates; James Salas Guillen is on annual leave from 5 June through Thursday 18 June, with H&S handover and monitoring of PXD to Cardinus data uploads during his absence. The CDR bulk deletion project (Case 68974493) is awaiting Access Group sign-off pending two items from Oxford University Personnel Services before Chemistry data deletion can proceed - Julie Hickman shared the Review Status Insight report on 09.06.26 requiring your approval. The DSE automated data upload from PeopleXD to Cardinus went live on 3 June and is functioning, but Sarah Rowles' escalation on HESA Module LEVELS UDF data cleardown (Case 68351079) from Michael O'Sullivan on 27 May remains unresolved after 13 days. Simon Burford's team meeting on 10 June (tomorrow) requires KPIs and Statistics presentations from each team, and your GLAM Rostering meeting is at 14:00 today on Microsoft Teams. Open Julie Hickman's latest email first regarding the Chemistry CDR case 68974493 as Access Group is ready to proceed pending your two deliverables.",
   "urgent": [
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
-      "sub": "From <strong>Crispin Muncaster</strong>. Hi Simon Thank you very much for this. Look forward to discussing further tomorrow. In the meantime I will contact David",
+      "sub": "From <strong>Simon Burford</strong>. Hi Crispin, I’ve responded to Guy – he sent me this (and the context) in an OSM task. For transparency, the full text fr",
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: DTP1092 College Data in PXD - Integrations",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E380000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E340000"
     },
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -45,6 +45,30 @@
     }
   ],
   "needs": [
+    {
+      "title": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
+      "sub": "From <strong>Julie Hickman</strong>. Julie Hickman invited you to edit a file Here's the document that Julie Hickman shared with you.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E450000"
+    },
+    {
+      "title": "RE: Access Support Team | 68974493 - New Case",
+      "sub": "From <strong>Julie Hickman</strong>. Hi Kevin, The details were in the other email conversation, but I’ve reposted the details here for ease. The review name",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Access Support Team | 68974493 - New Case",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E440000"
+    },
+    {
+      "title": "Bi-monthly CDR/PD working group - 9 June minutes",
+      "sub": "From <strong>Lindsey Spriggs</strong>. Dear all Please find the minutes and actions from today’s CDR/PD working group attached. Also attached (as per the actio",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Bi-monthly CDR/PD working group - 9 June minutes",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E430000"
+    },
     {
       "title": "RE: #External# Escalation Request – Case 68351079 | HESA Module LEVELS UDF – Data Cleardown & Update Issues",
       "sub": "From <strong>Sarah Rowles</strong>. Thanks Michael From: Michael O'Sullivan <michael.osullivan@admin.ox.ac.uk> Sent: 27 May 2026 09:19 To: Sarah Rowles <sar",
@@ -164,14 +188,6 @@
       "badgeType": "red",
       "subject": "FW: POC for HALO data work?",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000"
-    },
-    {
-      "title": "H&S Management System",
-      "sub": "From <strong>Marie Cooksey</strong>. Hello all I have asked that you have the opportunity to feed into the shortlist pack and weighting over the next few wee",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "H&S Management System",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
     },
     {
       "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
@@ -304,14 +320,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000"
     },
     {
-      "title": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000"
-    },
-    {
       "title": "ACTION: walkarounds to ensure telephony is operational ",
       "sub": "From <strong>Telephony Replacement Project</strong>.",
       "badge": "FYI",
@@ -366,14 +374,6 @@
       "badgeType": "gray",
       "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
-    },
-    {
-      "title": "FW: Bi-monthly CDR/PD working group - 9 June",
-      "sub": "From <strong>Lindsey Spriggs</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "FW: Bi-monthly CDR/PD working group - 9 June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36120000"
     }
   ],
   "low": [
@@ -581,5 +581,5 @@
       "notes": "Chemistry department has incorrectly assigned appraisals in PeopleXD (My Development module). A bulk delete is required. Originally raised as case 67938206 in late 2025 — AG (Reenu Delaney) quoted scripted work via flex points. Flex points case raised in April 2026 as 68974493. Marie Cooksey handed case to Kevin on 2 June 2026. On 3 June, Reenu asked Kevin for the appraisal cycle name and a list of affected employees before she can action the deletion. Ball has been in Oxford's court since 3 June. Julie Hickman is most likely to hold the required details."
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 12:45"
+  "refreshed_at": "Tuesday 09 June · 14:22"
 }
