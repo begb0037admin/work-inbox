@@ -1,4 +1,4 @@
-import json, os, base64, urllib.request, urllib.error
+import json, os, base64, html, urllib.request, urllib.error
 from datetime import datetime, timedelta
 import win32com.client
 import anthropic
@@ -244,7 +244,7 @@ def make_card(msg, category):
     title = subj
     sub   = f"From <strong>{sender}</strong>."
     if preview:
-        sub += f" {preview[:120]}"
+        sub += f" {html.escape(preview[:120])}"
 
     card = {
         "title":     title,
