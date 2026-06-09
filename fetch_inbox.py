@@ -111,21 +111,6 @@ for item in mapi.GetDefaultFolder(9).Items:
 unread_total = sum(1 for m in inbox if not m["is_read"])
 print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)}")
 
-# Fetch Command Centre today tasks
-cc_today_tasks = []
-try:
-    cc_url = "https://api.github.com/repos/begb0037admin/command-centre/contents/data/tasks.json"
-    req = urllib.request.Request(cc_url, headers={
-        "Authorization": f"token {GITHUB_PAT}",
-        "Accept":        "application/vnd.github.v3.raw"
-    })
-    with urllib.request.urlopen(req, timeout=10) as r:
-        cc_data = json.loads(r.read())
-        cc_today_tasks = [t for t in cc_data.get("tasks", []) if t.get("tier") == "today"]
-    print(f"Command Centre: {len(cc_today_tasks)} today tasks fetched")
-except Exception as e:
-    print(f"Command Centre fetch failed (non-fatal): {e}")
-
 # ── Phase 2 — AI writes context paragraph only ───────────────────────────────
 print("Phase 2 - calling Anthropic API for context...")
 
@@ -190,22 +175,14 @@ print("Phase 3 - building cards from inbox...")
 # importance: 0=low, 1=normal, 2=high
 URGENT_SENDERS   = []  # add sender email fragments here if needed
 URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
-NEEDS_SUBJECTS   = ["action required", "please action", "chasing", "follow up", "follow-up",
-                    "scoping", "handover", "import failed", "error",
-                    "case ", "p1", "priority 1", "approval confirmation", "authorisation to proceed"]
+NEEDS_SUBJECTS   = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
+                    "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
+                    "import", "failed", "issue", "case ", "support"]
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
-                    "out of office", "automatic reply", "accepted:", "declined:", "cancelled:",
-                    "for information", "has been resolved", "has been updated", "reminder:",
-                    "a/l", "expressions of interest", "kudoboard", "been finalized",
-                    "user group", "pug", "release is here", "new features", "[ict-a]"]
+                    "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
 LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
-                    "github", "pages", "build", "deploy", "run failed", "wisp",
-                    "% off", "enhance your audio", "we need to talk about",
-                    "summer refresh", "digital toolkit", "training industry",
-                    "has been resolved", "has been updated", "vacancy notification",
-                    "final week for registration", "added to a staff team",
-                    "last chance to join", "kevin lelitte", "kevin"]
+                    "github", "pages", "build", "deploy", "run failed", "wisp"]
 
 def categorise(msg):
     subj    = (msg.get("subject") or "").lower()
@@ -224,10 +201,11 @@ def categorise(msg):
     for kw in URGENT_SUBJECTS:
         if kw in subj:
             return "urgent"
-    # Subject keyword matching — needs signals apply regardless of read status
-    for kw in NEEDS_SUBJECTS:
-        if kw in subj:
-            return "needs"
+    # Unread + needs keywords → needs response
+    if not is_read:
+        for kw in NEEDS_SUBJECTS:
+            if kw in subj:
+                return "needs"
     for kw in FYI_SUBJECTS:
         if kw in subj:
             return "fyi"
@@ -257,16 +235,6 @@ def badge_for(msg, category):
         return "FYI", "gray"
     return "", "gray"
 
-def clean_preview(text):
-    if not text:
-        return ""
-    import re
-    text = text.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
-    text = re.sub(r'<https?://[^>]*>', '', text)
-    text = re.sub(r'<https?://[^\s<>]*', '', text)
-    text = ' '.join(text.split())
-    return text[:120].strip()
-
 def make_card(msg, category):
     subj    = msg.get("subject") or "(no subject)"
     sender  = msg.get("from") or ""
@@ -276,9 +244,7 @@ def make_card(msg, category):
     title = subj
     sub   = f"From <strong>{sender}</strong>."
     if preview:
-        cleaned = clean_preview(preview)
-        if cleaned:
-            sub += f" {cleaned}"
+        sub += f" {preview[:120]}"
 
     card = {
         "title":     title,
@@ -289,21 +255,6 @@ def make_card(msg, category):
         "entry_id":  msg.get("entry_id", "")
     }
     return card
-
-def dedup_threads(cards):
-    import re
-    seen = set()
-    result = []
-    for card in cards:
-        base = re.sub(
-            r'^(re:|fw:|fwd:|r:|f:)\s*', '',
-            (card.get('subject') or ''),
-            flags=re.IGNORECASE
-        ).strip().lower()
-        if base not in seen:
-            seen.add(base)
-            result.append(card)
-    return result
 
 urgent = []
 needs  = []
@@ -323,14 +274,6 @@ for msg in inbox:
         low.append(card)
 
 print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
-urgent = dedup_threads(urgent)
-print(f"Phase 3 dedup  - urgent:{len(urgent)} (after thread dedup)")
-needs = dedup_threads(needs)
-print(f"Phase 3 dedup  - needs:{len(needs)} (after thread dedup)")
-fyi = dedup_threads(fyi)
-print(f"Phase 3 dedup  - fyi:{len(fyi)} (after thread dedup)")
-low = dedup_threads(low)
-print(f"Phase 3 dedup  - low:{len(low)} (after thread dedup)")
 
 # ── Calendar post-processing ─────────────────────────────────────────────────
 KNOWN_ABSENCES = [
@@ -392,23 +335,14 @@ for msg in inbox:
 
 absences = sorted(list(absence_set))
 
-# Priority Actions — today tasks from Command Centre
-def fmt_date(d):
-    try:
-        from datetime import datetime
-        dt = datetime.fromisoformat(d)
-        return f"{dt.day} {dt.strftime('%b')}"
-    except:
-        return d
-
+# Top 5 priority actions from urgent + needs
 priorities = []
-for task in cc_today_tasks:
+for card in (urgent + needs)[:5]:
     priorities.append({
-        "title":     task.get("title", ""),
-        "source":    task.get("source", ""),
-        "dateAdded": fmt_date(task.get("dateAdded", "")),
-        "actions":   task.get("actions", []),
-        "notes":     task.get("description", "")
+        "text":     card["title"],
+        "date":     card["badge"],
+        "dateType": card["badgeType"],
+        "subject":  card.get("subject", "")
     })
 
 # ── Assemble final briefing ───────────────────────────────────────────────────
