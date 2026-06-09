@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Absent colleagues blocking handover; two urgent access cases awaiting approvals",
-  "context": "Marie Cooksey is absent until 12 June and James Salas Guillen is away until 18 June, blocking handover items for H&S management and DSE system uploads to Cardinus. Case 68974493 for CDR bulk deletion requires Access Group approval but needs two confirmations from your team before they proceed. Julie Hickman's unread status report on CDR bulk deletion (received 13:41 yesterday) and the escalation on HESA case 68351079 regarding data cleardown issues both need your review. Sophie Levy from Cority has been waiting over 48 hours for a response after reaching out about scoping session updates. Your team meeting tomorrow 10 June at 09:00 with Jasmin Khokhra for the Clinical pay uplift 2026 kick off is your most time-critical deadline this week. Open Julie Hickman's Review Status Insight report first, as it contains the Chemistry bulk-delete blocking details you acknowledged to her yesterday.",
+  "subtitle": "Key absences block DSE updates; KPI presentations due tomorrow",
+  "context": "Marie Cooksey is absent on annual leave from 5 June and returns Thursday 18 June, blocking handover items documented in her 6 June email including H&S meetings with the Fire team and DSE system updates. James Salas Guillen is absent from 5 June returning Thursday 18 June, which halts PeopleXD to Cardinus automated data uploads and contractor record creation processes currently under his monitoring. Athena Artuso has sent two absence notifications (8 June and 9 June) with minimal detail requiring clarification of her return date and impact on current projects. Julie Hickman shared the Review Status Insight report for CDR bulk deletion case 68974493 on 9 June at 13:41 but your response sent 8 June at 14:52 indicates you advised Access Group need two items from your team before proceeding - follow up required to confirm those deliverables are ready. Sophie Levy from Cority reached out on 8 June noting no contact since April and requesting an update on scoping sessions. The most time-critical deadline this week is the Team Meeting tomorrow 10 June where Simon Burford expects each team to present KPIs and Statistics - your KPI presentation for May 2026 has been shared with Michael O'Sullivan. Open first: the unread email from Julie Hickman about case 68974493 to confirm Access Group deliverable status and unblock the Chemistry bulk-delete project.",
   "urgent": [
     {
       "title": "DTP1092 College Data in PXD - Integrations",
@@ -12,8 +12,16 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E330000"
     },
     {
+      "title": "DTP1092 College Data in PXD - Integrations",
+      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nI contacted the integrations team to get some help to look at the integrations and below is a response ",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "DTP1092 College Data in PXD - Integrations",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E330000"
+    },
+    {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "sub": "From <strong>Simon Burford</strong>. Hi @Sarah Rowles <mailto:sarah.rowles@admin.ox.ac.uk>  / @Athena Artuso <mailto:athena.artuso@admin.ox.ac.uk>  \r\n\r\n \r\n\r\n",
+      "sub": "From <strong>Simon Burford</strong>. Hi @Sarah Rowles &lt;mailto:sarah.rowles@admin.ox.ac.uk&gt;  / @Athena Artuso &lt;mailto:athena.artuso@admin.ox.ac.uk&gt;  \r\n\r\n \r\n\r\n",
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -86,8 +94,16 @@
   ],
   "needs": [
     {
+      "title": "Athena A/L",
+      "sub": "From <strong>Athena Artuso</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Athena A/L",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E460000"
+    },
+    {
       "title": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
-      "sub": "From <strong>Julie Hickman</strong>. Julie Hickman invited you to edit a file \r\n\r\n\t\r\nHere's the document that Julie Hickman shared with you. \r\n\r\n<https://uni",
+      "sub": "From <strong>Julie Hickman</strong>. Julie Hickman invited you to edit a file \r\n\r\n\t\r\nHere&#x27;s the document that Julie Hickman shared with you. \r\n\r\n&lt;https://uni",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
@@ -111,7 +127,7 @@
     },
     {
       "title": "RE: #External# Escalation Request – Case 68351079 | HESA Module LEVELS UDF – Data Cleardown & Update Issues",
-      "sub": "From <strong>Sarah Rowles</strong>. Thanks Michael\r\n\r\n \r\n\r\nFrom: Michael O'Sullivan <michael.osullivan@admin.ox.ac.uk> \r\nSent: 27 May 2026 09:19\r\nTo: Sarah ",
+      "sub": "From <strong>Sarah Rowles</strong>. Thanks Michael\r\n\r\n \r\n\r\nFrom: Michael O&#x27;Sullivan &lt;michael.osullivan@admin.ox.ac.uk&gt; \r\nSent: 27 May 2026 09:19\r\nTo: Sarah ",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: #External# Escalation Request – Case 68351079 | HESA Module LEVELS UDF – Data Cleardown & Update Issues",
@@ -127,7 +143,7 @@
     },
     {
       "title": "When Safety Failures Become Operational Failures",
-      "sub": "From <strong>EcoOnline</strong>. In this month's The Situation Room, we uncover the blind spots manufacturers may be risking by treating safety as a comp",
+      "sub": "From <strong>EcoOnline</strong>. In this month&#x27;s The Situation Room, we uncover the blind spots manufacturers may be risking by treating safety as a comp",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "When Safety Failures Become Operational Failures",
@@ -151,7 +167,7 @@
     },
     {
       "title": "Enhance your audio with 30% off",
-      "sub": "From <strong>DistroKid</strong>. A summertime discount\r\n <https://braze-images.com/appboy/communication/assets/image_assets/images/6a18ac1acf2895007fdb0e",
+      "sub": "From <strong>DistroKid</strong>. A summertime discount\r\n &lt;https://braze-images.com/appboy/communication/assets/image_assets/images/6a18ac1acf2895007fdb0e",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Enhance your audio with 30% off",
@@ -223,7 +239,7 @@
     },
     {
       "title": "RE: Workshop: Sustaining Adoption of Leave & Absence",
-      "sub": "From <strong>Lyndsey Middleton</strong>. Hi all,\r\n\r\nThank you again for attending the workshop on Sustaining Adoption of Leave & Absence.\r\n\r\nPlease find attached",
+      "sub": "From <strong>Lyndsey Middleton</strong>. Hi all,\r\n\r\nThank you again for attending the workshop on Sustaining Adoption of Leave &amp; Absence.\r\n\r\nPlease find attached",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "RE: Workshop: Sustaining Adoption of Leave & Absence",
@@ -239,7 +255,7 @@
     },
     {
       "title": "Marie Handover 8-12 June",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi all\r\n\r\n \r\n\r\nA few notes for handover, whilst I’m off:\r\n\r\n \r\n\r\n*\tH&S – Chris and I have met with colleagues from the F",
+      "sub": "From <strong>Marie Cooksey</strong>. Hi all\r\n\r\n \r\n\r\nA few notes for handover, whilst I’m off:\r\n\r\n \r\n\r\n*\tH&amp;S – Chris and I have met with colleagues from the F",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Marie Handover 8-12 June",
@@ -247,7 +263,7 @@
     },
     {
       "title": "Access Support – Case Feedback",
-      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n <https://www.theaccessgroup.com> \t\r\n \r\n\r\nDear Kevi",
+      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n &lt;https://www.theaccessgroup.com&gt; \t\r\n \r\n\r\nDear Kevi",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support – Case Feedback",
@@ -255,7 +271,7 @@
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Resolved",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
+      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
@@ -263,7 +279,7 @@
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
+      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
@@ -311,7 +327,7 @@
     },
     {
       "title": "The Kudoboard for Marie Cooksey is being finalized",
-      "sub": "From <strong>Simon Burford via Kudoboard</strong>. <https://www.kudoboard.com/images/logo/logo-2026.png> \t\r\nLast call for contributions to the Kudoboard for Marie. \r\n\r\nIf ",
+      "sub": "From <strong>Simon Burford via Kudoboard</strong>. &lt;https://www.kudoboard.com/images/logo/logo-2026.png&gt; \t\r\nLast call for contributions to the Kudoboard for Marie. \r\n\r\nIf ",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "The Kudoboard for Marie Cooksey is being finalized",
@@ -351,7 +367,7 @@
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. <https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&oid=00D58000000Z4gm&lastMod=166367870",
+      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
@@ -364,22 +380,6 @@
       "badgeType": "red",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000"
-    },
-    {
-      "title": "FW: POC for HALO data work?",
-      "sub": "From <strong>Simon Burford</strong>. Hi Kevin,\r\n\r\n \r\n\r\nFYI I’ve suggested the Daphne gets in touch with you in the first instance on this, but I don’t have a",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "FW: POC for HALO data work?",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000"
-    },
-    {
-      "title": "H&S Management System",
-      "sub": "From <strong>Marie Cooksey</strong>. Hello all\r\n\r\n \r\n\r\nI have asked that you have the opportunity to feed into the shortlist pack and weighting over the next",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "H&S Management System",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
     }
   ],
   "fyi": [
@@ -454,14 +454,6 @@
       "badgeType": "gray",
       "subject": "Bi-monthly CDR/PD working group",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E350000"
-    },
-    {
-      "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "sub": "From <strong>Cority Customer Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E320000"
     },
     {
       "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
@@ -606,6 +598,14 @@
       "badgeType": "gray",
       "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
+    },
+    {
+      "title": "Kevin Lelitte <kevin.lelitte@admin.ox.ac.uk>",
+      "sub": "From <strong>Hannah Lawrence</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Kevin Lelitte <kevin.lelitte@admin.ox.ac.uk>",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36150000"
     }
   ],
   "low": [
@@ -676,10 +676,10 @@
       "subject": "DTP1092 College Data in PXD - Integrations"
     },
     {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
+      "text": "DTP1092 College Data in PXD - Integrations",
       "date": "Act today",
       "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
+      "subject": "DTP1092 College Data in PXD - Integrations"
     },
     {
       "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -700,5 +700,5 @@
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 15:00"
+  "refreshed_at": "Tuesday 09 June · 17:00"
 }
