@@ -268,6 +268,21 @@ def make_card(msg, category):
     }
     return card
 
+def dedup_threads(cards):
+    import re
+    seen = set()
+    result = []
+    for card in cards:
+        base = re.sub(
+            r'^(re:|fw:|fwd:|r:|f:)\s*', '',
+            (card.get('subject') or ''),
+            flags=re.IGNORECASE
+        ).strip().lower()
+        if base not in seen:
+            seen.add(base)
+            result.append(card)
+    return result
+
 urgent = []
 needs  = []
 fyi    = []
@@ -286,6 +301,8 @@ for msg in inbox:
         low.append(card)
 
 print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
+urgent = dedup_threads(urgent)
+print(f"Phase 3 dedup  - urgent:{len(urgent)} (after thread dedup)")
 
 # ── Calendar post-processing ─────────────────────────────────────────────────
 KNOWN_ABSENCES = [
