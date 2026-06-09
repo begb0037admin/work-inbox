@@ -286,25 +286,15 @@ def make_card(msg, category):
         "badge":     badge,
         "badgeType": badge_type,
         "subject":   subj,
-        "received":  msg.get("received", ""),
         "entry_id":  msg.get("entry_id", "")
     }
     return card
 
 def dedup_threads(cards):
     import re
-    from datetime import datetime
-    # Sort by received date newest-first before deduping so we always keep the most recent
-    def parse_received(card):
-        r = card.get('received', '')
-        try:
-            return datetime.fromisoformat(r.split('+')[0].split(' (')[0].strip())
-        except:
-            return datetime.min
-    sorted_cards = sorted(cards, key=parse_received, reverse=True)
     seen = set()
     result = []
-    for card in sorted_cards:
+    for card in cards:
         base = re.sub(
             r'^(re:|fw:|fwd:|r:|f:)\s*', '',
             (card.get('subject') or ''),
@@ -313,8 +303,6 @@ def dedup_threads(cards):
         if base not in seen:
             seen.add(base)
             result.append(card)
-    # Restore original order (unread first, then by received)
-    result.sort(key=lambda x: (not x.get('is_read', False), x.get('received', '')), reverse=True)
     return result
 
 urgent = []
@@ -477,4 +465,3 @@ else:
     except Exception as e:
         print(f"Phase 4 FAILED - {e}")
         raise
-
