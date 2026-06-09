@@ -575,9 +575,13 @@ function renderBriefing(data,key){
 
   // Main inbox
   let left='';
-  if(data.priorities&&data.priorities.length){
+  if(data.prioritiesToday&&data.prioritiesToday.length){
     left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions — today</span><span class="sec-rule"></span></div>`;
-    left+=renderPriorityCards(data.priorities,key);
+    left+=renderPriorityCards(data.prioritiesToday,key);
+  }
+  if(data.prioritiesWeek&&data.prioritiesWeek.length){
+    left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions — this week</span><span class="sec-rule"></span></div>`;
+    left+=renderPriorityCards(data.prioritiesWeek,key);
   }
   left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent — action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
   left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response — within 24–48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
