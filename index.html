@@ -134,6 +134,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .card-title { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; line-height: 1.4; }
 .card-sub { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
 .card-sub strong { color: var(--text-dark); font-weight: 600; }
+.card-date { font-size: 11px; color: var(--text-very-muted); white-space: nowrap; flex-shrink: 0; padding-top: 2px; }
 
 /* Badges */
 .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
@@ -487,6 +488,18 @@ function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
+function fmtReceived(r){
+  if(!r) return '';
+  try{
+    const d=new Date(r.split('+')[0].split(' (')[0].trim());
+    if(isNaN(d)) return '';
+    const now=new Date();
+    const isToday=d.toDateString()===now.toDateString();
+    const time=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    if(isToday) return time;
+    return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+time;
+  }catch(e){return '';}
+}
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
@@ -503,7 +516,8 @@ function renderItems(items,cls){
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
-    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div></div>`;
+    const dateStr=fmtReceived(item.received);
+    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div>${dateStr?`<div class="card-date">${dateStr}</div>`:''}</div>`;
     return hasLink?`<a class="card-link${ticked?' done':''}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
