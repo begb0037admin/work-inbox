@@ -404,6 +404,7 @@ function renderPriorityCards(priorities,key){
   if(!priorities||!priorities.length) return '<div class="no-items">No tasks for today.</div>';
   return priorities.map((p,i)=>{
     const id='pri_'+i, ticked=isTicked(id);
+    const titleText = p.title || p.text || '(untitled)';
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
@@ -413,7 +414,7 @@ function renderPriorityCards(priorities,key){
     return `<div class="pri-card${ticked?' done':''}" id="item_${id}">
       <div class="pri-card-header" onclick="togglePriCard(${i})">
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <span class="pri-card-title">${p.title}</span>
+        <span class="pri-card-title">${titleText}</span>
         <span class="pri-arrow" id="priarrow_${i}">▼</span>
       </div>
       <div class="pri-card-body" id="pribody_${i}">${actionsHtml}${metaHtml}</div>
