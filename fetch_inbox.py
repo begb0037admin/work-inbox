@@ -190,7 +190,7 @@ LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "autom
                     "summer refresh", "digital toolkit", "training industry",
                     "has been resolved", "has been updated", "vacancy notification",
                     "final week for registration", "added to a staff team",
-                    "last chance to join", "kevin lelitte"]
+                    "last chance to join", "kevin lelitte", "kevin"]
 
 def categorise(msg):
     subj    = (msg.get("subject") or "").lower()
@@ -209,11 +209,10 @@ def categorise(msg):
     for kw in URGENT_SUBJECTS:
         if kw in subj:
             return "urgent"
-    # Unread + needs keywords → needs response
-    if not is_read:
-        for kw in NEEDS_SUBJECTS:
-            if kw in subj:
-                return "needs"
+    # Subject keyword matching — needs signals apply regardless of read status
+    for kw in NEEDS_SUBJECTS:
+        if kw in subj:
+            return "needs"
     for kw in FYI_SUBJECTS:
         if kw in subj:
             return "fyi"
@@ -313,6 +312,10 @@ urgent = dedup_threads(urgent)
 print(f"Phase 3 dedup  - urgent:{len(urgent)} (after thread dedup)")
 needs = dedup_threads(needs)
 print(f"Phase 3 dedup  - needs:{len(needs)} (after thread dedup)")
+fyi = dedup_threads(fyi)
+print(f"Phase 3 dedup  - fyi:{len(fyi)} (after thread dedup)")
+low = dedup_threads(low)
+print(f"Phase 3 dedup  - low:{len(low)} (after thread dedup)")
 
 # ── Calendar post-processing ─────────────────────────────────────────────────
 KNOWN_ABSENCES = [
