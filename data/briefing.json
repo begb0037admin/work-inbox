@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Two staff absent, external vendor waiting, telephony action urgent",
-  "context": "Marie Cooksey is on annual leave from 8-12 June, returning Thursday 18 June 2026, with handover notes covering H&S meetings and fire team coordination. James Salas Guillen is absent from end of day 5 June through Thursday 18 June 2026, blocking DSE system user data imports and Cardinus uploads that went live on 3 June - the automated PeopleXD interface is now live but James is the sole monitor. Athena Artuso sent an annual leave notification on 8 June with no return date specified in the preview. Sophie Levy from Cority has waited 48+ hours without response since 8 June 15:58, noting she hasn't heard from you in two months since April discussions about a scoping session. The Telephony Replacement Project sent an unread priority action on 9 June 08:57 requiring coordination of walkarounds to ensure key telephony is operational by an August deadline. Michael O'Sullivan's Task# 50958836 for Incident# 11681780 is flagged as unread since 9 June 07:45, with plans to close it and manage through the Functional Analysis Work Planner. Open Sophie Levy's Cority email first - she's awaiting critical scoping session updates and represents an external vendor relationship that's been dormant since April.",
+  "subtitle": "Staffing gaps, telephony urgency, integration oversight",
+  "context": "Marie Cooksey is absent 8-12 June, returning Monday 13 June, with handover notes covering H&S Fire team coordination and other operational priorities. James Salas Guillen is on annual leave from 5 June, returning Thursday 18 June, leaving DSE data integration work and PeopleXD uploads to Cardinus and Healthy Working Plus potentially unmonitored - specifically the live automated data upload from PeopleXD that went live 3 June needs oversight. Athena Artuso is on leave (return date unspecified from her brief A/L email sent 8 June). Sophie Levy from Cority has been waiting over 48 hours without response since her 15 June 58 scoping session email mentioning no contact in two months. The Telephony Replacement Project sent an urgent ACTION email this morning requiring walkarounds to ensure key telephony is operational, with attachments needing immediate review. Michael O'Sullivan's Task# 50958836 for Incident# 11681780 shows a P5 priority assignment being redirected to the Functional Analysis Work Planner. The most time-critical deadline is the OWL Maintenance scheduled for Wednesday 11 June by James Turner, which requires advance coordination. Open first the Telephony Replacement Project email from this morning at 08:57 marked as unread and importance 1 with attachments.",
   "urgent": [
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -188,14 +188,6 @@
       "badgeType": "red",
       "subject": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36220000"
-    },
-    {
-      "title": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "sub": "From <strong>Simon Burford via Kudoboard</strong>.",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
     }
   ],
   "fyi": [
@@ -342,6 +334,14 @@
       "badgeType": "gray",
       "subject": "GLAM Rostering",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000"
+    },
+    {
+      "title": "Reminder: Add to the Kudoboard for Marie Cooksey",
+      "sub": "From <strong>Simon Burford via Kudoboard</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
     },
     {
       "title": "FW: Bi-monthly CDR/PD working group - 9 June",
@@ -564,5 +564,5 @@
       "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\""
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 10:05"
+  "refreshed_at": "Tuesday 09 June · 10:09"
 }
