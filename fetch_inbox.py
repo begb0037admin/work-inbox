@@ -180,9 +180,14 @@ NEEDS_SUBJECTS   = ["action required", "please action", "chasing", "follow up", 
                     "case ", "p1", "priority 1"]
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
-                    "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
+                    "out of office", "automatic reply", "accepted:", "declined:", "cancelled:",
+                    "for information", "has been resolved", "has been updated", "reminder:",
+                    "a/l", "expressions of interest", "kudoboard", "been finalized",
+                    "user group", "pug", "release is here", "new features"]
 LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
-                    "github", "pages", "build", "deploy", "run failed", "wisp"]
+                    "github", "pages", "build", "deploy", "run failed", "wisp",
+                    "% off", "enhance your audio", "we need to talk about",
+                    "summer refresh", "digital toolkit", "training industry"]
 
 def categorise(msg):
     subj    = (msg.get("subject") or "").lower()
@@ -303,6 +308,8 @@ for msg in inbox:
 print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
 urgent = dedup_threads(urgent)
 print(f"Phase 3 dedup  - urgent:{len(urgent)} (after thread dedup)")
+needs = dedup_threads(needs)
+print(f"Phase 3 dedup  - needs:{len(needs)} (after thread dedup)")
 
 # ── Calendar post-processing ─────────────────────────────────────────────────
 KNOWN_ABSENCES = [
