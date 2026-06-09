@@ -92,18 +92,21 @@ for msg in mapi.GetDefaultFolder(5).Items:
         continue
 
 week_end = today + timedelta(days=6)
+lookback  = today - timedelta(days=30)  # catch multi-day absences spanning today
 calendar = []
 cal_items = mapi.GetDefaultFolder(9).Items
 cal_items.IncludeRecurrences = True
 cal_items.Sort("[Start]")
+restrict_str = "[Start] >= '{s}' AND [Start] <= '{e}'".format(
+    s=lookback.strftime('%m/%d/%Y'),
+    e=(week_end + timedelta(days=1)).strftime('%m/%d/%Y')
+)
+cal_items = cal_items.Restrict(restrict_str)
 for item in cal_items:
     try:
         t = dt(item.Start)
         if not t:
             continue
-        # Stop iterating once we're past the week window
-        if t.date() > week_end:
-            break
         calendar.append({
             "subject":      item.Subject,
             "start":        str(item.Start),
