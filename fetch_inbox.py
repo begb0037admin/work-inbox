@@ -31,9 +31,8 @@ def restrict_date(folder, cutoff_dt):
     filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %I:%M %p") + "'"
     try:
         restricted = folder.Items.Restrict(filter_str)
-        if restricted.Count > 3000:
+        if restricted.Count > 200:
             raise Exception("Filter returned too many items - likely failed")
-        restricted.Sort("[ReceivedTime]", True)
         return restricted
     except:
         items = folder.Items
