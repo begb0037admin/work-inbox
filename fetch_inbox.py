@@ -177,17 +177,20 @@ URGENT_SENDERS   = []  # add sender email fragments here if needed
 URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
 NEEDS_SUBJECTS   = ["action required", "please action", "chasing", "follow up", "follow-up",
                     "reminder", "scoping", "handover", "import failed", "error",
-                    "case ", "p1", "priority 1"]
+                    "case ", "p1", "priority 1", "approval confirmation", "authorisation to proceed"]
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
                     "out of office", "automatic reply", "accepted:", "declined:", "cancelled:",
                     "for information", "has been resolved", "has been updated", "reminder:",
                     "a/l", "expressions of interest", "kudoboard", "been finalized",
-                    "user group", "pug", "release is here", "new features"]
+                    "user group", "pug", "release is here", "new features", "[ict-a]"]
 LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
                     "github", "pages", "build", "deploy", "run failed", "wisp",
                     "% off", "enhance your audio", "we need to talk about",
-                    "summer refresh", "digital toolkit", "training industry"]
+                    "summer refresh", "digital toolkit", "training industry",
+                    "has been resolved", "has been updated", "vacancy notification",
+                    "final week for registration", "added to a staff team",
+                    "last chance to join", "kevin lelitte"]
 
 def categorise(msg):
     subj    = (msg.get("subject") or "").lower()
