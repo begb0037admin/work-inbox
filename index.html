@@ -158,6 +158,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 /* Priority cards — expandable, Command Centre style */
 .pri-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--radius-lg); margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
 .pri-card.done { opacity: .38; }
+.pri-card.card-hidden { display: none; }
 .pri-card.done .pri-card-title { text-decoration: line-through; }
 .pri-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; }
 .pri-card-header:hover { background: rgba(0,33,71,0.02); border-radius: var(--radius-lg); }
@@ -462,15 +463,19 @@ function toggleTick(id){
   const prow=document.getElementById('prow_'+id);
   if(cb) cb.classList.toggle('checked',ticks[k]);
   if(item){
-    // If item is inside a card-link wrapper, apply done to the wrapper too
     const wrapper=item.closest('.card-link');
     if(ticks[k]){
       item.classList.add('done');
-      item.classList.remove('card-hidden');
-      if(wrapper){ wrapper.classList.add('done'); wrapper.classList.remove('card-hidden'); }
+      if(!showingDoneItems) item.classList.add('card-hidden');
+      else item.classList.remove('card-hidden');
+      if(wrapper){
+        wrapper.classList.add('done');
+        if(!showingDoneItems) wrapper.classList.add('card-hidden');
+        else wrapper.classList.remove('card-hidden');
+      }
     } else {
       item.classList.remove('done','card-hidden');
-      if(wrapper){ wrapper.classList.remove('done','card-hidden'); }
+      if(wrapper) wrapper.classList.remove('done','card-hidden');
     }
   }
   if(prow){
