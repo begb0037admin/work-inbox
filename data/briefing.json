@@ -1,16 +1,16 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Two key staff absent, urgent vendor follow-up required",
-  "context": "Marie Cooksey is absent on annual leave from 5 June through 12 June, returning Thursday 18 June, during which time the H&S Handover and DSE Update projects are blocked pending her sign-off on contractor record creation processes and PXD integration documentation. James Salas Guillen is on annual leave from 5 June through 17 June, returning Thursday 18 June, leaving the PeopleXD to Cardinus automated data upload and H&S admin team account creation requests without primary oversight. Sophie Levy from Cority has not received contact from you since April and sent a follow-up on 8 June at 15:58 that remains unresponded to after 48+ hours, requiring urgent clarification on the scoping session status. The Ivanti security vulnerability Major Incident involving the OSM Self-Service issue and PeopleXD service request testing requires your input by Friday 13 June, with Emma Fitz-Gibbon and Sarah Warne coordinating the response. Open first the unread email from Sophie Levy regarding the Cority scoping session update, as this external vendor relationship needs immediate re-engagement.",
+  "subtitle": "Three absences blocking systems work; Cority scoping overdue",
+  "context": "Marie Cooksey is absent from 8-12 June, returning Monday 13 June, blocking H&S handover items and DSE user data import confirmation - James Salas Guillen is also absent from end of 5 June until Thursday 18 June, leaving the PeopleXD to Cardinus automated data upload and Healthy Working Plus DSE system integration unsupervised. Athena Artuso's absence notice arrived on 8 June with no return date specified, creating uncertainty on HRA team availability for the Ivanti security vulnerability Major Incident response. Sophie Levy from Cority reached out on 8 June stating no contact for two months regarding scoping session progress - this email has been waiting 26+ hours without response. The most time-critical deadline is Wednesday 10 June at 09:00 for the Clinical pay uplift 2026 kick off meeting with Jasmin Khokhra on Microsoft Teams, which requires clinical pay project preparation. Open first: Sophie Levy's email about the stalled Cority scoping session, as external vendor engagement has lapsed and needs immediate reconnection.",
   "urgent": [
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
-      "sub": "From <strong>Simon Burford</strong>. Hi Crispin, I’ve responded to Guy – he sent me this (and the context) in an OSM task. For transparency, the full text fr",
+      "sub": "From <strong>Crispin Muncaster</strong>.",
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: DTP1092 College Data in PXD - Integrations",
-      "received": "2026-06-08 18:25:13.777000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E340000"
+      "received": "2026-06-09 07:25:28.249000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E380000"
     },
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -123,6 +123,15 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000"
     },
     {
+      "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
+      "sub": "From <strong>Cority_Integration_Platform_Notifications@Cority.com</strong>.",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
+      "received": "2026-06-06 00:01:12.911000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000"
+    },
+    {
       "title": "Access Support – Case Feedback",
       "sub": "From <strong>Access Group</strong>. Message from The Access Group ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ Dear Kevin, We are passionate about",
       "badge": "Overdue",
@@ -130,6 +139,15 @@
       "subject": "Access Support – Case Feedback",
       "received": "2026-06-05 16:42:46.404000+00:00",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364C0000"
+    },
+    {
+      "title": "H&S Handover ",
+      "sub": "From <strong>James Salas Guillen</strong>.",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "H&S Handover ",
+      "received": "2026-06-05 15:44:52.234000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
     },
     {
       "title": "FW: Preventing archiving of users not included in HR data upload",
@@ -177,24 +195,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
     },
     {
-      "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
-      "sub": "From <strong>Cority_Integration_Platform_Notifications@Cority.com</strong>.",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity_Demo - 2026-06-05 23:00",
-      "received": "2026-06-06 00:01:12.911000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC80000"
-    },
-    {
-      "title": "H&S Handover ",
-      "sub": "From <strong>James Salas Guillen</strong>.",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "H&S Handover ",
-      "received": "2026-06-05 15:44:52.234000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
-    },
-    {
       "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
       "sub": "From <strong>Simon Burford</strong>.",
       "badge": "Overdue",
@@ -214,6 +214,33 @@
     }
   ],
   "fyi": [
+    {
+      "title": "ACTION: walkarounds to ensure telephony is operational ",
+      "sub": "From <strong>Telephony Replacement Project</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "ACTION: walkarounds to ensure telephony is operational ",
+      "received": "2026-06-09 08:57:43.866000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3D0000"
+    },
+    {
+      "title": "Bi-monthly CDR/PD working group",
+      "sub": "From <strong>Lindsey Spriggs</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Bi-monthly CDR/PD working group",
+      "received": "2026-06-08 20:32:43.524000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E350000"
+    },
+    {
+      "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
+      "sub": "From <strong>Cority Customer Support</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
+      "received": "2026-06-08 17:16:54.535000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E320000"
+    },
     {
       "title": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
       "sub": "From <strong>Communications Office</strong>. From: Vicky Marriott, Major Incident Manager For: IT Support Staff For Information: Note actions taken following the rec",
@@ -323,42 +350,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36400000"
     },
     {
-      "title": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "received": "2026-06-04 16:01:59.181000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000"
-    },
-    {
-      "title": "ACTION: walkarounds to ensure telephony is operational ",
-      "sub": "From <strong>Telephony Replacement Project</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "ACTION: walkarounds to ensure telephony is operational ",
-      "received": "2026-06-09 08:57:43.866000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E3D0000"
-    },
-    {
-      "title": "Bi-monthly CDR/PD working group",
-      "sub": "From <strong>Lindsey Spriggs</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Bi-monthly CDR/PD working group",
-      "received": "2026-06-08 20:32:43.524000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E350000"
-    },
-    {
-      "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "sub": "From <strong>Cority Customer Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "received": "2026-06-08 17:16:54.535000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E320000"
-    },
-    {
       "title": "Clinical pay uplift 2026 kick off meeting",
       "sub": "From <strong>Jasmin Khokhra</strong>.",
       "badge": "FYI",
@@ -384,6 +375,15 @@
       "subject": "GLAM Rostering",
       "received": "2026-06-04 16:33:09.604000+00:00",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000"
+    },
+    {
+      "title": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
+      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
+      "received": "2026-06-04 16:01:59.181000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000"
     },
     {
       "title": "Reminder: Add to the Kudoboard for Marie Cooksey",
@@ -424,51 +424,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E270000"
     },
     {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Resolved",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
-      "received": "2026-06-05 16:42:33.192000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "received": "2026-06-05 16:42:07.745000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364A0000"
-    },
-    {
-      "title": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
-      "sub": "From <strong>Digital Capabilities Team</strong>. Looking for a productive way to round off the term? These upcoming courses are packed with fresh ideas, practical tips a",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
-      "received": "2026-06-05 12:26:28.407000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
-    },
-    {
-      "title": "Access Support Team | 68981820 - Your Case Has Been Resolved",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68981820 - Your Case Has Been Resolved",
-      "received": "2026-06-04 15:26:32.130000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362B0000"
-    },
-    {
-      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>SharePoint Online</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "received": "2026-06-04 14:46:28.565000+00:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36270000"
-    },
-    {
       "title": "Your May Flow State recap 🌱",
       "sub": "From <strong>Wispr Flow</strong>.",
       "badge": "",
@@ -496,6 +451,24 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC70000"
     },
     {
+      "title": "Access Support Team | 68981549 - Your Case Has Been Resolved",
+      "sub": "From <strong>Access Support</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
+      "received": "2026-06-05 16:42:33.192000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364B0000"
+    },
+    {
+      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
+      "sub": "From <strong>Access Support</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
+      "received": "2026-06-05 16:42:07.745000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE364A0000"
+    },
+    {
       "title": "Simon / Kevin 121s",
       "sub": "From <strong>Simon Burford</strong>.",
       "badge": "",
@@ -503,6 +476,15 @@
       "subject": "Simon / Kevin 121s",
       "received": "2026-06-05 15:57:30.939000+00:00",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36490000"
+    },
+    {
+      "title": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
+      "sub": "From <strong>Digital Capabilities Team</strong>. Looking for a productive way to round off the term? These upcoming courses are packed with fresh ideas, practical tips a",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
+      "received": "2026-06-05 12:26:28.407000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
     },
     {
       "title": "Word, Latex, Planner and MS Projects  - Build Core Digital Skills!",
@@ -530,6 +512,24 @@
       "subject": "You have been added to a staff team in Microsoft Teams",
       "received": "2026-06-04 16:39:51.178000+00:00",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36320000"
+    },
+    {
+      "title": "Access Support Team | 68981820 - Your Case Has Been Resolved",
+      "sub": "From <strong>Access Support</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Access Support Team | 68981820 - Your Case Has Been Resolved",
+      "received": "2026-06-04 15:26:32.130000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362B0000"
+    },
+    {
+      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
+      "sub": "From <strong>SharePoint Online</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
+      "received": "2026-06-04 15:15:28.639000+00:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362A0000"
     },
     {
       "title": "Reminder: Training industry trends 2026 - Insights from the Training Industry Benchmark Report",
@@ -627,5 +627,5 @@
       "notes": "Chemistry department has incorrectly assigned appraisals in PeopleXD (My Development module). A bulk delete is required. Originally raised as case 67938206 in late 2025 — AG (Reenu Delaney) quoted scripted work via flex points. Flex points case raised in April 2026 as 68974493. Marie Cooksey handed case to Kevin on 2 June 2026. On 3 June, Reenu asked Kevin for the appraisal cycle name and a list of affected employees before she can action the deletion. Ball has been in Oxford's court since 3 June. Julie Hickman is most likely to hold the required details."
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 11:49"
+  "refreshed_at": "Tuesday 09 June · 12:20"
 }
