@@ -91,20 +91,28 @@ for msg in mapi.GetDefaultFolder(5).Items:
     except:
         continue
 
+week_end = today + timedelta(days=6)
 calendar = []
-for item in mapi.GetDefaultFolder(9).Items:
+cal_items = mapi.GetDefaultFolder(9).Items
+cal_items.IncludeRecurrences = True
+cal_items.Sort("[Start]")
+for item in cal_items:
     try:
         t = dt(item.Start)
-        if t and t.weekday() < 5 and today <= t.date() <= tomorrow:
-            calendar.append({
-                "subject":      item.Subject,
-                "start":        str(item.Start),
-                "end":          str(item.End),
-                "location":     item.Location,
-                "organizer":    item.Organizer,
-                "body_preview": (item.Body or "")[:100],
-                "all_day":      item.AllDayEvent
-            })
+        if not t:
+            continue
+        # Stop iterating once we're past the week window
+        if t.date() > week_end:
+            break
+        calendar.append({
+            "subject":      item.Subject,
+            "start":        str(item.Start),
+            "end":          str(item.End),
+            "location":     item.Location,
+            "organizer":    item.Organizer,
+            "body_preview": (item.Body or "")[:100],
+            "all_day":      item.AllDayEvent
+        })
     except:
         continue
 
@@ -321,29 +329,79 @@ def build_cal_items(items):
         result.append(cal_item)
     return result
 
-# Detect absences from OOO emails
+# Detect absences from calendar — all-day leave events spanning today
+ABSENCE_KEYWORDS = ["annual leave", "a/l", "on leave", "out of office", "holiday"]
 absence_set = set()
-ooo_keywords = ["out of office", "annual leave", "on leave", "away until", "a/l"]
-for msg in inbox:
-    subj    = (msg.get("subject") or "").lower()
-    preview = (msg.get("body_preview") or "").lower()
-    sender  = msg.get("from", "")
-    for kw in ooo_keywords:
-        if kw in subj or kw in preview:
-            absence_set.add(sender)
-            break
+for item in calendar:
+    if not item.get("all_day"):
+        continue
+    subj_lower = (item.get("subject") or "").lower()
+    if not any(kw in subj_lower for kw in ABSENCE_KEYWORDS):
+        continue
+    try:
+        item_start = datetime.fromisoformat(item["start"]).date()
+        item_end   = datetime.fromisoformat(item["end"]).date()
+        # Outlook all-day end date is exclusive (midnight next day), so use < not <=
+        if item_start <= today < item_end:
+            # Extract name from subject — strip the keyword portion
+            name = item.get("subject", "")
+            for kw in ["- Annual Leave", "- A/L", "- On Leave", "- Out of Office", "- Holiday",
+                       "Annual Leave -", "A/L -", "Annual Leave", "A/L"]:
+                name = name.replace(kw, "").strip()
+            if name:
+                absence_set.add(name)
+    except:
+        continue
 
 absences = sorted(list(absence_set))
 
-# Top 5 priority actions from urgent + needs
-priorities = []
-for card in (urgent + needs)[:5]:
-    priorities.append({
-        "text":     card["title"],
-        "date":     card["badge"],
-        "dateType": card["badgeType"],
-        "subject":  card.get("subject", "")
-    })
+# Always include hardcoded known absences if their date range covers today
+KNOWN_ABSENCE_DATES = [
+    {"name": "Marie Cooksey",       "from": "2026-06-08", "to": "2026-06-13"},
+    {"name": "James Salas Guillen", "from": "2026-06-08", "to": "2026-06-18"},
+]
+for ka in KNOWN_ABSENCE_DATES:
+    ka_start = datetime.strptime(ka["from"], "%Y-%m-%d").date()
+    ka_end   = datetime.strptime(ka["to"],   "%Y-%m-%d").date()
+    if ka_start <= today <= ka_end:
+        if ka["name"] not in absences:
+            absences.append(ka["name"])
+absences = sorted(absences)
+
+# Priority actions — pulled from Command Centre tasks.json
+COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
+COMMAND_CENTRE_PATH = "data/tasks.json"
+priorities_today = []
+priorities_week  = []
+try:
+    cc_url     = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
+    cc_headers = {
+        "Authorization": f"token {GITHUB_PAT}",
+        "Content-Type":  "application/json",
+        "User-Agent":    "work-inbox-script"
+    }
+    cc_req = urllib.request.Request(cc_url, headers=cc_headers)
+    with urllib.request.urlopen(cc_req) as r:
+        cc_data    = json.loads(r.read())
+        cc_content = json.loads(base64.b64decode(cc_data["content"]).decode("utf-8"))
+    for task in cc_content.get("tasks", []):
+        tier = task.get("tier", "")
+        entry = {
+            "text":        task.get("title", ""),
+            "description": task.get("description", ""),
+            "actions":     task.get("actions", []),
+            "source":      task.get("source", ""),
+            "dateType":    "red" if tier == "today" else "orange"
+        }
+        if tier == "today":
+            priorities_today.append(entry)
+        elif tier == "week":
+            priorities_week.append(entry)
+    print(f"Command Centre loaded - today:{len(priorities_today)} week:{len(priorities_week)}")
+except Exception as e:
+    print(f"WARNING: Could not load Command Centre tasks - {e}")
+    priorities_today = []
+    priorities_week  = []
 
 # ── Assemble final briefing ───────────────────────────────────────────────────
 briefing = {
@@ -357,7 +415,8 @@ briefing = {
     "calToday":     build_cal_items(cal_today),
     "calTomorrow":  build_cal_items(cal_tomorrow),
     "absences":     absences,
-    "priorities":   priorities,
+    "prioritiesToday": priorities_today,
+    "prioritiesWeek":  priorities_week,
     "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
 }
 
