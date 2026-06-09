@@ -1,16 +1,8 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Absences block systems; KPI meeting tomorrow",
-  "context": "Marie Cooksey is absent from 8-12 June (returning 13 June) and James Salas Guillen is on annual leave until 18 June - both absences block progress on DSE system updates and PeopleXD data uploads that Marie and James are overseeing. Julie Hickman's email from 9 June about case 68974493 (Chemistry bulk-delete CDR request) has waited 48+ hours without your response, and Sophie Levy from Cority contacted you on 8 June noting no contact for two months regarding the scoping session. The most time-critical deadline is the Team Meeting tomorrow (10 June) where each team must present KPIs and Statistics, organised by Simon Burford. Open first: Julie Hickman's RE message about case 68974493 and the Review Status Insight report for CDR bulk deletion, as Access Group needs two items from you before proceeding with the Chemistry project.",
+  "subtitle": "KPI presentation due tomorrow, CDR project blocked awaiting your response",
+  "context": "Kevin, you have three colleagues currently absent affecting active projects: James Salas Guillen is on annual leave until Thursday 18 June, Marie Cooksey is absent 8-12 June (returning Monday 15 June), and Athena Artuso has submitted leave notification. The CDR bulk deletion project (Case 68974493) is blocked awaiting Access Group sign-off - Julie Hickman needs two items from you before they can proceed, and this email has been waiting since 9 June at 13:40. The HESA Module LEVELS UDF data cleardown issue (Case 68351079) escalation from Sarah Rowles arrived 9 June and requires your attention. Your most time-critical deadline is the team meeting tomorrow 10 June where Simon Burford expects each team to present KPIs and Statistics - you've already shared your KPI presentation with Michael O'Sullivan but need to be ready to present. Open Julie Hickman's 13:40 email first regarding Case 68974493 as it contains the blocking items needed for the Chemistry bulk-delete work to progress.",
   "urgent": [
-    {
-      "title": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
-      "sub": "From <strong>Communications Office</strong>. From: Saffron Greenwood, Major Incident Manager, IT Services   \r\nFor: IT Support Staff (ITSS)\r\n \r\nThis email is for inte",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E470000"
-    },
     {
       "title": "DTP1092 College Data in PXD - Integrations",
       "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nI contacted the integrations team to get some help to look at the integrations and below is a response ",
@@ -60,20 +52,20 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
     },
     {
+      "title": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
+      "sub": "From <strong>Communications Office</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E470000"
+    },
+    {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
       "sub": "From <strong>Crispin Muncaster</strong>.",
       "badge": "Act today",
       "badgeType": "red",
       "subject": "RE: DTP1092 College Data in PXD - Integrations",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E380000"
-    },
-    {
-      "title": "RE: DTP1092 College Data in PXD - Integrations",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "RE: DTP1092 College Data in PXD - Integrations",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E340000"
     },
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -388,6 +380,14 @@
       "badgeType": "red",
       "subject": "RE: DSE Update - user data import and upload to Cardinus",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363A0000"
+    },
+    {
+      "title": "FW: POC for HALO data work?",
+      "sub": "From <strong>Simon Burford</strong>. Hi Kevin,\r\n\r\n \r\n\r\nFYI I’ve suggested the Daphne gets in touch with you in the first instance on this, but I don’t have a",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "FW: POC for HALO data work?",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36350000"
     }
   ],
   "fyi": [
@@ -446,6 +446,22 @@
       "badgeType": "gray",
       "subject": "New Vacancy Notification",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000"
+    },
+    {
+      "title": "RE: Holiday Records Duty - proposed reports",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Holiday Records Duty - proposed reports",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000"
+    },
+    {
+      "title": "HR Support and Staff Immigration has a new digital home",
+      "sub": "From <strong>People Communications</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "HR Support and Staff Immigration has a new digital home",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E480000"
     },
     {
       "title": "ACTION: walkarounds to ensure telephony is operational ",
@@ -590,22 +606,6 @@
       "badgeType": "gray",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361F0000"
-    },
-    {
-      "title": "Last chance to join our PeopleXD online training sessions in June",
-      "sub": "From <strong>Access PeopleXD</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Last chance to join our PeopleXD online training sessions in June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361E0000"
-    },
-    {
-      "title": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "sub": "From <strong>Simon Burford via Kudoboard</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
     }
   ],
   "low": [
@@ -650,55 +650,154 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362A0000"
     }
   ],
-  "calToday": [
-    {
-      "time": "14:00",
-      "title": "GLAM Rostering",
-      "sub": "Simon Burford"
-    }
-  ],
-  "calTomorrow": [
-    {
-      "time": "09:00",
-      "title": "Clinical pay uplift 2026 kick off meeting",
-      "sub": "Jasmin Khokhra"
-    }
-  ],
+  "calToday": [],
+  "calTomorrow": [],
   "absences": [
-    "Athena Artuso",
-    "James Salas Guillen"
+    "James Salas Guillen",
+    "Marie Cooksey"
   ],
-  "priorities": [
+  "prioritiesToday": [
     {
-      "text": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)"
+      "text": "Smart notes escalation — Cority ticket 00476764",
+      "description": "Smart notes draft-save feature has been missing in Cority for 6+ months. Originally raised by James Salas Guillen. The ability to save a note as a draft or reopen and edit an existing note is not available — users must complete all fields before saving, which is particularly burdensome for longer notes. Cority acknowledged the issue under CCC-19664 and logged it with their dev team. Status is currently 'Pending Future Release' with no committed timeline. Two major releases have passed with no delivery. There is no active account manager, removing the normal escalation route. In April 2026, Freeda Franks (Cority Customer Support Analyst) suggested enhanced access support at a cost — disputed, as this is a missing feature not an enhancement.",
+      "actions": [
+        "[Nov 2025] Ticket 00476764 raised by James Salas Guillen — option to draft or come back to a note after saving.",
+        "[Jan–Apr 2026] Multiple Cority updates from Freeda Franks — dev team still working, no timeline given.",
+        "[Apr 2026] Freeda suggested enhanced access support at a cost — position: this is a missing feature, not a chargeable enhancement.",
+        "[08 Jun 2026] Kevin submitted escalation comment via Cority ticket comment box — requesting committed timeline on CCC-19664, clarification on cost position, and named account manager contact.",
+        "[TODO — 16 Jun] Raise at Quality PUG, 2:00 PM (virtual) — escalate formally if no response received from Freeda before then.",
+        "[AWAITING] Response from Freeda Franks to escalation comment."
+      ],
+      "source": "H&S Roadmap 08/06",
+      "dateType": "red"
     },
     {
-      "text": "DTP1092 College Data in PXD - Integrations",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "DTP1092 College Data in PXD - Integrations"
-    },
-    {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
-    },
-    {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
-    },
-    {
-      "text": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "date": "Act today",
-      "dateType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti."
+      "text": "Chemistry bulk delete — get details from Julie, pass to Reenu",
+      "description": "Chemistry department has incorrectly assigned appraisals in PeopleXD (My Development module). A bulk delete is required. Originally raised as case 67938206 in late 2025 — AG (Reenu Delaney) quoted scripted work via flex points. Flex points case raised in April 2026 as 68974493. Marie Cooksey handed case to Kevin on 2 June 2026. On 3 June, Reenu asked Kevin for the appraisal cycle name and a list of affected employees before she can action the deletion. Ball has been in Oxford's court since 3 June. Julie Hickman is most likely to hold the required details.",
+      "actions": [
+        "[Oct 2025] Case 67938206 raised — Chemistry bulk delete of appraisal assignments.",
+        "[Apr 2026] Flex points agreed as payment route — case 68974493 raised.",
+        "[02 Jun 2026] Marie handed case to Kevin as lead.",
+        "[03 Jun 2026] Reenu Delaney requested appraisal cycle name and affected employee list from Kevin.",
+        "[09 Jun 2026] Email sent to Julie Hickman requesting appraisal cycle name and affected employee list.",
+        "[AWAITING] Julie Hickman to provide details.",
+        "[TODO — on receipt] Forward straight to Reenu Delaney at AG to action the deletion."
+      ],
+      "source": "Case 68974493",
+      "dateType": "red"
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 17:25"
+  "prioritiesWeek": [
+    {
+      "text": "Brief team directly",
+      "description": "Kevin returned from leave w/c 2 June on a phased return (4hrs/day, full remote). Team needs to be briefed directly on his return and working arrangements. Michael and James are already across the situation. The others — remaining FA team members — have not yet heard from Kevin directly. Wednesday catch-up was the planned slot but needs bringing forward to Tuesday 9 June.",
+      "actions": [
+        "[08 Jun] Identified: team briefing needed — Michael and James already aware, others not yet informed.",
+        "[09 Jun 2026] Team briefed at FA Team Catch-up — OH outcome, phased return schedule (4hrs/day, mornings, fully remote), org structure context, and flex points ask all covered.",
+        "[09 Jun 2026] KPI data sent to Michael for Wednesday HR Systems team meeting presentation. ✓"
+      ],
+      "source": "SK 1-1 08/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "Web pages and URL linking — job posting updates",
+      "description": "Internal Mobility Principles page moved to a new OxIntranet URL. Three pages still link to the old location: main ops intranet page, professional services search page, and individual vacancy application pages. New URL confirmed live on 3 June. Old page expected to be retired 23/24 June. Agreed approach: update all links to the new URL, use hyperlinked text (“IM Principles” / “internal mobility principles”) rather than displaying the full long URL, test before making any live changes, and check whether links can open in a new tab. Updates planned for 22 June ahead of old page retirement. Follow-up with Laura scheduled 15–16 June.",
+      "actions": [
+        "[03 Jun 2026] Meeting with Laura Porter — reviewed three pages needing link updates.",
+        "[03 Jun 2026] New URL confirmed live later that day: https://unioxfordnexus.sharepoint.com/sites/OXINTRANET-working-here/SitePages/internal-mobility-principles.aspx",
+        "[TODO — 15/16 Jun] Reconnect with Laura Porter as planned.",
+        "[TODO — 22 Jun] Test new URL, update links on all three identified pages, replace visible long URLs with hyperlinked text, check whether links open in a new tab.",
+        "[TODO] Email Laura with updates if changes are made before they next meet.",
+        "[MONITOR] Old page retirement — expected 23/24 June."
+      ],
+      "source": "Meeting with Laura Porter 03/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "Flex points plan before Marie returns",
+      "description": "2,935 flex points remaining with expiry approximately early July 2026. Simon and Marie have already agreed a plan will be ready when Marie returns from leave. Chemistry bulk deletion (£525, AG, approved by Marie) is already committed. Remaining points need to be allocated before expiry — options discussed include payroll training and manager holiday compliance reports. Athena has sent an email with holiday compliance requirements that needs to be passed to Michael to assess against current system capability.",
+      "actions": [
+        "[08 Jun] Simon to send Athena's holiday compliance requirements email — awaiting.",
+        "[09 Jun 2026] Team asked for flex point usage ideas by end of week at FA Team Catch-up.",
+        "[TODO] Once Athena's email received from Simon, pass to Michael — ask him to pull screenshots confirming system meets holiday provision requirements (holiday calculator evidence included).",
+        "[TODO] Talk to Michael about additional flex point ideas — get as many quotes to AG as possible.",
+        "[TODO] Build tracking document: three columns — agreed, booked, under investigation — with point values against each.",
+        "[AWAITING] Simon to send Athena's email. Marie's return to formally sign off plan."
+      ],
+      "source": "SK 1-1 08/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "Raise DTP1092 change management record",
+      "description": "A formal change management record needs to be raised in OSM for the DTP1092 College Staff into PeopleXD project. This was not raised by Simon during Kevin's leave and remains outstanding. Marie Cooksey is the approver — the record won't be formally approved until go-live but needs to exist now for audit and governance purposes.",
+      "actions": [
+        "[08 Jun] Confirmed outstanding — Simon did not raise during Kevin's leave.",
+        "[TODO] Raise OSM change management record for DTP1092. Set Marie Cooksey as approver.",
+        "[TODO] Record does not need Marie's formal sign-off immediately — just needs to exist before go-live."
+      ],
+      "source": "SK 1-1 08/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "Set up pay admin buy codes — after Simon's assessment",
+      "description": "Pay admin buy codes need to be set up in PeopleXD for DTP1092. Blocked pending Simon's assessment of what already exists at level 6 in the system. Simon will create missing reference data (Division 901, subdivision, levels 4 and 5) before Kevin proceeds. Context: during Kevin's leave, two org structure changes were incomplete — full department structures had not been created down to pay admin level. Michael had to create missing codes ad hoc when staff requests couldn't be processed. Root cause is linked to the documentation/process gap (see t006). No action from Kevin until Simon gives the green light.",
+      "actions": [
+        "[08 Jun] Confirmed blocked — waiting for Simon's level 6 assessment.",
+        "[09 Jun 2026] Context confirmed at FA Catch-up: ad hoc codes created by Michael during Kevin's leave as workaround. Last two structure changes were incomplete at pay admin level.",
+        "[AWAITING] Simon to complete assessment and create missing reference data (Division 901, subdivision, levels 4 and 5).",
+        "[TODO — after Simon] Set up pay admin buy codes once Simon confirms ready."
+      ],
+      "source": "SK 1-1 08/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "SharePoint documentation response + alignment meeting",
+      "description": "The shared drive was moved to SharePoint but guidance documentation was not updated to reflect the new location. Only Kevin and Lee were managing the migration, so other team members did not know where to find documents. The documents exist and are in the right place — they are just not signposted correctly. Simon has raised this and Kevin needs to respond in writing before recommending an alignment meeting to bring the whole team up to speed. Michael also needs to be looped in.",
+      "actions": [
+        "[08 Jun] Issue identified and raised by Simon — shared drive moved to SharePoint, guidance not updated.",
+        "[09 Jun 2026] Root cause confirmed at FA Team Catch-up: when content moved from shared drive to SharePoint/Teams, guidance pointing to documents was not updated. Created a single point of failure between Kevin and Lee — others didn't know where to look. Documents exist and are correctly placed; signposting is the issue.",
+        "[TODO] Write response to Simon explaining the situation and confirming documents are accessible.",
+        "[TODO] Recommend alignment meeting to get whole team up to speed on SharePoint structure.",
+        "[TODO] Touch base with Michael separately on this."
+      ],
+      "source": "SK 1-1 08/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "DSC upload monitoring — Wednesday 10 June",
+      "description": "James Salas is on leave for two weeks (returning 18 June). As part of the handover (5 June), Kevin agreed to monitor the weekly DSC upload on Wednesday 10 June. This involves monitoring the SFTP and running system checks. James will be back in time for the following upload so this is a one-off cover.",
+      "actions": [
+        "[05 Jun] James handover completed — Kevin confirmed as cover for Wednesday 10 June DSC upload.",
+        "[TODO — 10 Jun] Monitor SFTP and run system checks for DSC upload. Flag any issues immediately."
+      ],
+      "source": "James A/L Handover 05/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "HWP archived users check — Wednesday 10 June",
+      "description": "Users not present in PeopleXD are being incorrectly archived in Healthy Working Plus (HWP). This affects contractors and non-PXD users. A manual rule has been created for known cases (e.g. Jill Farmer). The H&S admin team are checking on Wednesday 10 June. Two open HWP tickets are pending discussion with Gail Miller — James has confirmed these can wait until he returns on 18 June.",
+      "actions": [
+        "[05 Jun] James flagged issue in handover — users not in PXD being incorrectly archived in HWP.",
+        "[05 Jun] Manual rule created for known cases (e.g. Jill Farmer).",
+        "[TODO — 10 Jun] Be available Wednesday — H&S admin team checking. Escalate if anything surfaces.",
+        "[PARKED] Two open HWP tickets with Gail Miller — wait for James to return 18 June."
+      ],
+      "source": "James A/L Handover 05/06",
+      "dateType": "orange"
+    },
+    {
+      "text": "DSE data feed issues — post go-live",
+      "description": "DSE data feed went live on Wednesday 3 June 2026. Three issues emerged immediately after go-live that require resolution. 1. SBS opted out of the main DSE system (they have their own) but were included in the initial feed — Azure integrations team is handling their exclusion. 2. Contractors are missing from PeopleXD and therefore absent from the feed despite having DSE requirements — a manual addition process is needed. 3. A small number of users do not have university email addresses, preventing standard access — James is investigating with the supplier. James is on leave until 18 June. Kevin to monitor and flag any escalations. It was noted as disappointing that the SBS exclusion was a known requirement but was not built into the original feed.",
+      "actions": [
+        "[03 Jun 2026] DSE data feed went live — three issues identified post go-live.",
+        "[08 Jun 2026] Issues reviewed in H&S Roadmap meeting: SBS exclusion (Azure team handling), contractors missing from PXD feed (manual process needed), users without university emails (James investigating with supplier).",
+        "[MONITOR] SBS exclusion — Azure integrations team handling. Confirm resolved when confirmed.",
+        "[AWAITING] James to return 18 June and progress contractor manual addition and email-less user resolution with supplier.",
+        "[TODO] Flag any escalations from Rob or first line while James is on leave."
+      ],
+      "source": "H&S Roadmap 08/06",
+      "dateType": "orange"
+    }
+  ],
+  "refreshed_at": "Tuesday 09 June · 19:33"
 }
