@@ -224,7 +224,16 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .user-label{font-size:12px;}
 .user-link{font-size:15px;}
 .date-val{font-size:15px;}
-</style>
+
+/* -- TASKS WIDGET -- */
+.tasks-widget-section{padding:14px 22px 6px;font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.09em}
+.tasks-widget-panel{padding:4px 22px 14px}
+.tasks-widget-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.tasks-widget-name{color:rgba(255,255,255,.7)}
+.tasks-widget-count{font-weight:700;color:rgba(255,255,255,.9)}
+.tasks-widget-link{display:block;margin-top:8px;font-size:12px;color:#60a5fa;text-decoration:none}
+.tasks-widget-link:hover{text-decoration:underline}
+.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}</style>
 </head>
 <body>
 <div class="shell">
@@ -256,6 +265,11 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
     <div class="sb-section">Absences</div>
     <div class="abs-wrap" id="absencesSidebar"></div>
+
+    <div class="tasks-widget-section">Tasks</div>
+    <div class="tasks-widget-panel" id="tasksWidget">
+      <div class="tasks-widget-unavailable">Loading...</div>
+    </div>
   </div>
 
   <!-- Main -->
@@ -667,6 +681,27 @@ async function init(){
 
 init();
 </script>
-</body>
+
+<script>
+async function loadTasksWidget(){
+  var el=document.getElementById('tasksWidget');
+  if(!el)return;
+  try{
+    var res=await fetch('https://raw.githubusercontent.com/begb0037admin/command-centre/main/data/tasks.json?_='+Date.now());
+    if(!res.ok)throw new Error('fetch failed');
+    var data=await res.json();
+    var tasks=data.tasks||[];
+    var todayCount=tasks.filter(function(t){return t.tier==='today';}).length;
+    var weekCount=tasks.filter(function(t){return t.tier==='week';}).length;
+    var todoCount=tasks.filter(function(t){return (t.actions||[]).some(function(a){return a.includes('[TODO]');});}).length;
+    el.innerHTML=
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Today</span><span class="tasks-widget-count">'+todayCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
+      '<a class="tasks-widget-link" href="https://begb0037admin.github.io/command-centre/" target="_blank">&#8594; Open command centre</a>';
+  }catch(e){el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';}
+}
+loadTasksWidget();
+</script></body>
 </html>
 
