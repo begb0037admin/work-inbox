@@ -286,6 +286,7 @@ def make_card(msg, category):
         "badge":     badge,
         "badgeType": badge_type,
         "subject":   subj,
+        "received":  msg.get("received", ""),
         "entry_id":  msg.get("entry_id", "")
     }
     return card
@@ -465,3 +466,4 @@ else:
     except Exception as e:
         print(f"Phase 4 FAILED - {e}")
         raise
+
