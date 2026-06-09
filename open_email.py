@@ -1,12 +1,17 @@
-﻿import sys
+import sys
 import win32com.client
 from datetime import datetime
+import os
 
-LOG = r"C:\Users\admin\work-inbox\data\openmail.log"
+LOG = r"C:\Users\admin\Documents\Claude\Projects\work-inbox\data\openmail.log"
 
 def log(msg):
-    with open(LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now().isoformat()} {msg}\n")
+    try:
+        os.makedirs(os.path.dirname(LOG), exist_ok=True)
+        with open(LOG, "a", encoding="utf-8") as f:
+            f.write(f"{datetime.now().isoformat()} {msg}\n")
+    except Exception:
+        pass  # never let logging crash the opener
 
 if len(sys.argv) < 2:
     log("ERROR: no argument passed")
