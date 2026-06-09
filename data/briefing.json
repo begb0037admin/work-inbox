@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 9 June 2026",
-  "subtitle": "Two key absences block critical data migrations; urgent Cority response needed",
-  "context": "Marie Cooksey is absent 8-12 June, returning 13 June, blocking handover of H&S workstreams and DSE user data coordination; James Salas Guillen is absent from end of day 5 June through 18 June, blocking monitoring of the PeopleXD to Cardinus automated data upload and contractor account creation decisions. Sophie Levy from Cority has not received a response in 2 months and is requesting urgent update on scoping session status. The Telephony Replacement Project sent action items this morning requiring walkarounds to ensure operational telephony by an undefined August deadline. Michael O'Sullivan's P5 Task# 50958836 for Incident# 11681780 requires closure coordination via the Functional Analysis Work Planner. The most time-critical deadline is the OWL network maintenance on 11 June requiring confirmation of readiness. Open Sophie Levy's scoping session email first to provide immediate response on Cority engagement status.",
+  "subtitle": "Two staff absent, external vendor waiting, telephony action urgent",
+  "context": "Marie Cooksey is on annual leave from 8-12 June, returning Thursday 18 June 2026, with handover notes covering H&S meetings and fire team coordination. James Salas Guillen is absent from end of day 5 June through Thursday 18 June 2026, blocking DSE system user data imports and Cardinus uploads that went live on 3 June - the automated PeopleXD interface is now live but James is the sole monitor. Athena Artuso sent an annual leave notification on 8 June with no return date specified in the preview. Sophie Levy from Cority has waited 48+ hours without response since 8 June 15:58, noting she hasn't heard from you in two months since April discussions about a scoping session. The Telephony Replacement Project sent an unread priority action on 9 June 08:57 requiring coordination of walkarounds to ensure key telephony is operational by an August deadline. Michael O'Sullivan's Task# 50958836 for Incident# 11681780 is flagged as unread since 9 June 07:45, with plans to close it and manage through the Functional Analysis Work Planner. Open Sophie Levy's Cority email first - she's awaiting critical scoping session updates and represents an external vendor relationship that's been dormant since April.",
   "urgent": [
     {
       "title": "RE: DTP1092 College Data in PXD - Integrations",
@@ -164,6 +164,38 @@
       "badgeType": "red",
       "subject": "H&S Management System",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36300000"
+    },
+    {
+      "title": "H&S Handover ",
+      "sub": "From <strong>James Salas Guillen</strong>.",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "H&S Handover ",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
+    },
+    {
+      "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362E0000"
+    },
+    {
+      "title": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
+      "sub": "From <strong>Viktoriia Vasyliuta</strong>.",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36220000"
+    },
+    {
+      "title": "Reminder: Add to the Kudoboard for Marie Cooksey",
+      "sub": "From <strong>Simon Burford via Kudoboard</strong>.",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
     }
   ],
   "fyi": [
@@ -288,30 +320,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E320000"
     },
     {
-      "title": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "sub": "From <strong>csn@mail.status.cority.com</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C76F7B60000"
-    },
-    {
-      "title": "Simon / Kevin 121s",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Simon / Kevin 121s",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36490000"
-    },
-    {
-      "title": "H&S Handover ",
-      "sub": "From <strong>James Salas Guillen</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "H&S Handover ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36480000"
-    },
-    {
       "title": "Clinical pay uplift 2026 kick off meeting",
       "sub": "From <strong>Jasmin Khokhra</strong>.",
       "badge": "FYI",
@@ -334,54 +342,6 @@
       "badgeType": "gray",
       "subject": "GLAM Rostering",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000"
-    },
-    {
-      "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362E0000"
-    },
-    {
-      "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36290000"
-    },
-    {
-      "title": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "sub": "From <strong>Cority Customer Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Option to draft or come back to a note after 'saving' [ ref:_00DE0JBMl._500OFR5uTZ:ref ] 00476764.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36280000"
-    },
-    {
-      "title": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "sub": "From <strong>Viktoriia Vasyliuta</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Re: Halo ER Case Management Support Operating Model - Approval Confirmation",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36220000"
-    },
-    {
-      "title": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "sub": "From <strong>Simon Burford via Kudoboard</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Reminder: Add to the Kudoboard for Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361D0000"
-    },
-    {
-      "title": "kevin",
-      "sub": "From <strong>Hannah Lawrence</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "kevin",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36140000"
     },
     {
       "title": "FW: Bi-monthly CDR/PD working group - 9 June",
@@ -418,14 +378,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E270000"
     },
     {
-      "title": "New Vacancy Notification",
-      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE The vacancies listed below (that match your criteria) have recently been added to the University of O",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "New Vacancy Notification",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C6AD9250000"
-    },
-    {
       "title": "Access Support Team | 68981549 - Your Case Has Been Resolved",
       "sub": "From <strong>Access Support</strong>.",
       "badge": "",
@@ -448,22 +400,6 @@
       "badgeType": "gray",
       "subject": "A Summer Refresh for Your Digital Toolkit in Weeks 7 & 8",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363F0000"
-    },
-    {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363C0000"
-    },
-    {
-      "title": "New Vacancy Notification",
-      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE The vacancies listed below (that match your criteria) have recently been added to the University of O",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "New Vacancy Notification",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000"
     },
     {
       "title": "Access Support Team | 68981820 - Your Case Has Been Resolved",
@@ -496,6 +432,14 @@
       "badgeType": "gray",
       "subject": "[begb0037admin/work-inbox] Run failed: pages build and deployment - main (7dc4096)",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C2ACCC70000"
+    },
+    {
+      "title": "Simon / Kevin 121s",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Simon / Kevin 121s",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36490000"
     },
     {
       "title": "Word, Latex, Planner and MS Projects  - Build Core Digital Skills!",
@@ -538,14 +482,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36240000"
     },
     {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE361F0000"
-    },
-    {
       "title": "Last chance to join our PeopleXD online training sessions in June",
       "sub": "From <strong>Access PeopleXD</strong>.",
       "badge": "",
@@ -560,6 +496,14 @@
       "badgeType": "gray",
       "subject": "Kevin Lelitte <kevin.lelitte@admin.ox.ac.uk>",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36150000"
+    },
+    {
+      "title": "kevin",
+      "sub": "From <strong>Hannah Lawrence</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "kevin",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36140000"
     },
     {
       "title": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (b97db4e)",
@@ -620,5 +564,5 @@
       "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\""
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 09:59"
+  "refreshed_at": "Tuesday 09 June · 10:05"
 }
