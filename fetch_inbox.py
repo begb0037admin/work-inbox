@@ -39,7 +39,7 @@ def restrict_date(folder, cutoff_dt):
         items.Sort("[ReceivedTime]", True)
         return items
 
-# ── Phase 1 — pull Outlook data ──────────────────────────────────────────────
+# ââ Phase 1 â pull Outlook data ââââââââââââââââââââââââââââââââââââââââââââââ
 print("Phase 1 - pulling Outlook data...")
 inbox = []
 unread_count = 0
@@ -94,35 +94,28 @@ for msg in mapi.GetDefaultFolder(5).Items:
 week_end = today + timedelta(days=6)
 lookback  = today - timedelta(days=30)  # catch multi-day absences spanning today
 calendar = []
-cal_items = mapi.GetDefaultFolder(9).Items
-# Restrict at COM layer for speed — UK date format (DD/MM/YYYY)
-# [End] >= lookback catches events active now (e.g. leave that started days ago)
-restrict_str = "[End] >= '{s}' AND [Start] <= '{e}'".format(
-    s=lookback.strftime('%d/%m/%Y 00:00'),
-    e=(week_end + timedelta(days=1)).strftime('%d/%m/%Y 23:59')
-)
-cal_items = cal_items.Restrict(restrict_str)
-for item in cal_items:
+for item in mapi.GetDefaultFolder(9).Items:
     try:
         t = dt(item.Start)
         if not t:
             continue
-        calendar.append({
-            "subject":      item.Subject,
-            "start":        str(item.Start),
-            "end":          str(item.End),
-            "location":     item.Location,
-            "organizer":    item.Organizer,
-            "body_preview": (item.Body or "")[:100],
-            "all_day":      item.AllDayEvent
-        })
+        if lookback <= t.date() <= week_end:
+            calendar.append({
+                "subject":      item.Subject,
+                "start":        str(item.Start),
+                "end":          str(item.End),
+                "location":     item.Location,
+                "organizer":    item.Organizer,
+                "body_preview": (item.Body or "")[:100],
+                "all_day":      item.AllDayEvent
+            })
     except:
         continue
 
 unread_total = sum(1 for m in inbox if not m["is_read"])
 print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)}")
 
-# ── Phase 2 — AI writes context paragraph only ───────────────────────────────
+# ââ Phase 2 â AI writes context paragraph only âââââââââââââââââââââââââââââââ
 print("Phase 2 - calling Anthropic API for context...")
 
 now          = datetime.now()
@@ -179,10 +172,10 @@ context  = ai_output.get("context", "")
 subtitle = ai_output.get("subtitle", "")
 print("Phase 2 done - context written")
 
-# ── Phase 3 — Python builds every card ───────────────────────────────────────
+# ââ Phase 3 â Python builds every card âââââââââââââââââââââââââââââââââââââââ
 print("Phase 3 - building cards from inbox...")
 
-# Categorisation rules — applied in order, first match wins
+# Categorisation rules â applied in order, first match wins
 # importance: 0=low, 1=normal, 2=high
 URGENT_SENDERS   = []  # add sender email fragments here if needed
 URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
@@ -212,7 +205,7 @@ def categorise(msg):
     for kw in URGENT_SUBJECTS:
         if kw in subj:
             return "urgent"
-    # Unread + needs keywords → needs response
+    # Unread + needs keywords â needs response
     if not is_read:
         for kw in NEEDS_SUBJECTS:
             if kw in subj:
@@ -220,10 +213,10 @@ def categorise(msg):
     for kw in FYI_SUBJECTS:
         if kw in subj:
             return "fyi"
-    # Unread with no other match → needs response
+    # Unread with no other match â needs response
     if not is_read:
         return "needs"
-    # Read with no match → fyi
+    # Read with no match â fyi
     return "fyi"
 
 def badge_for(msg, category):
@@ -257,13 +250,21 @@ def make_card(msg, category):
     if preview:
         sub += f" {html.escape(preview[:120])}"
 
+    received_str = ""
+    try:
+        rec = msg.get("received", "")
+        rec_dt = datetime.fromisoformat(rec.split("+")[0].split(" (")[0].strip())
+        received_str = rec_dt.strftime("%#d %b")
+    except:
+        pass
     card = {
         "title":     title,
         "sub":       sub,
         "badge":     badge,
         "badgeType": badge_type,
         "subject":   subj,
-        "entry_id":  msg.get("entry_id", "")
+        "entry_id":  msg.get("entry_id", ""),
+        "received":  received_str
     }
     return card
 
@@ -286,7 +287,7 @@ for msg in inbox:
 
 print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
 
-# ── Calendar post-processing ─────────────────────────────────────────────────
+# ââ Calendar post-processing âââââââââââââââââââââââââââââââââââââââââââââââââ
 KNOWN_ABSENCES = [
     {
         "triggers": ["marie", "cooksey"],
@@ -332,7 +333,7 @@ def build_cal_items(items):
         result.append(cal_item)
     return result
 
-# Detect absences from calendar — all-day leave events spanning today
+# Detect absences from calendar â all-day leave events spanning today
 ABSENCE_KEYWORDS = ["annual leave", "a/l", "on leave", "out of office", "holiday"]
 absence_set = set()
 for item in calendar:
@@ -346,7 +347,7 @@ for item in calendar:
         item_end   = datetime.fromisoformat(item["end"]).date()
         # Outlook all-day end date is exclusive (midnight next day), so use < not <=
         if item_start <= today < item_end:
-            # Extract name from subject — strip the keyword portion
+            # Extract name from subject â strip the keyword portion
             name = item.get("subject", "")
             for kw in ["- Annual Leave", "- A/L", "- On Leave", "- Out of Office", "- Holiday",
                        "Annual Leave -", "A/L -", "Annual Leave", "A/L"]:
@@ -371,7 +372,7 @@ for ka in KNOWN_ABSENCE_DATES:
             absences.append(ka["name"])
 absences = sorted(absences)
 
-# Priority actions — pulled from Command Centre tasks.json
+# Priority actions â pulled from Command Centre tasks.json
 COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
 COMMAND_CENTRE_PATH = "data/tasks.json"
 priorities_today = []
@@ -406,7 +407,7 @@ except Exception as e:
     priorities_today = []
     priorities_week  = []
 
-# ── Assemble final briefing ───────────────────────────────────────────────────
+# ââ Assemble final briefing âââââââââââââââââââââââââââââââââââââââââââââââââââ
 briefing = {
     "date":         today_str,
     "subtitle":     subtitle,
@@ -420,10 +421,10 @@ briefing = {
     "absences":     absences,
     "prioritiesToday": priorities_today,
     "prioritiesWeek":  priorities_week,
-    "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
+    "refreshed_at": datetime.now().strftime("%A %d %B Â· %H:%M")
 }
 
-# ── Phase 4 — push to GitHub ──────────────────────────────────────────────────
+# ââ Phase 4 â push to GitHub ââââââââââââââââââââââââââââââââââââââââââââââââââ
 print("Phase 4 - pushing briefing to GitHub...")
 
 if not GITHUB_PAT:
