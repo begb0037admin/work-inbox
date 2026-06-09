@@ -381,7 +381,7 @@ function renderItems(items,cls){
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
     const cardHtml=`<div class="card${ticked?' done':''}${ticked?' card-hidden':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div></div>`;
-    return hasLink?`<a class="card-link" href="#" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
+    return hasLink?`<a class="card-link" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
 
@@ -501,10 +501,17 @@ async function init(){
     return;
   }
 
+  // Purge ticks from previous days
+  const currentKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
+  (function(){
+    const ticks=getTicks();
+    const stale=Object.keys(ticks).filter(k=>!k.startsWith(currentKey+'_'));
+    if(stale.length){stale.forEach(k=>delete ticks[k]);saveTicks(ticks);}
+  })();
+
   // Safety reset: if done ticks would hide everything, clear them
   const ticks=getTicks();
-  const currentKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
-  const allItems=[...(data.urgent||[]),...(data.needs||[]),...(data.fyi||[]),...(data.low||[])];
+  const allItems=[...(data.urgent||[]),(data.needs||[]),(data.fyi||[]),(data.low||[])].flat();
   if(allItems.length>0){
     const sections=['urgent','needs','fyi','low'];
     let hiddenCount=0;
