@@ -9,8 +9,7 @@ GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
 
 outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
-cutoff_48hr = datetime.now() - timedelta(hours=48)
-cutoff_old  = datetime.now() - timedelta(days=60)  # how far back to look for old unreads
+cutoff  = datetime.now() - timedelta(days=7)
 today   = datetime.now().date()
 
 def next_workday(d):
@@ -28,11 +27,12 @@ def dt(com_time):
     except:
         return None
 
-def get_restricted(folder, cutoff_dt):
+def restrict_date(folder, cutoff_dt):
     filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %I:%M %p") + "'"
     try:
         restricted = folder.Items.Restrict(filter_str)
-        restricted.Sort("[ReceivedTime]", True)
+        if restricted.Count > 200:
+            raise Exception("Filter returned too many items - likely failed")
         return restricted
     except:
         items = folder.Items
@@ -42,27 +42,20 @@ def get_restricted(folder, cutoff_dt):
 # ── Phase 1 — pull Outlook data ──────────────────────────────────────────────
 print("Phase 1 - pulling Outlook data...")
 inbox = []
-seen_ids = set()
-MAX_UNREAD_RECENT = 80   # unread within 48hrs
-MAX_READ_RECENT   = 40   # read within 48hrs
-MAX_OLD_UNREAD    = 25   # unread older than 48hrs
-
-# Pass 1: last 48 hours
 unread_count = 0
 read_count   = 0
-for msg in get_restricted(mapi.GetDefaultFolder(6), cutoff_48hr):
+MAX_UNREAD   = 50
+MAX_READ     = 30
+
+for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
-        if unread_count >= MAX_UNREAD_RECENT and read_count >= MAX_READ_RECENT:
+        if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
             break
         is_read = not msg.UnRead
-        if is_read and read_count >= MAX_READ_RECENT:
+        if is_read and read_count >= MAX_READ:
             continue
-        if not is_read and unread_count >= MAX_UNREAD_RECENT:
+        if not is_read and unread_count >= MAX_UNREAD:
             continue
-        eid = msg.EntryID
-        if eid in seen_ids:
-            continue
-        seen_ids.add(eid)
         entry = {
             "subject":         msg.Subject,
             "from":            msg.SenderName,
@@ -71,7 +64,7 @@ for msg in get_restricted(mapi.GetDefaultFolder(6), cutoff_48hr):
             "is_read":         is_read,
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance,
-            "entry_id":        eid
+            "entry_id":        msg.EntryID
         }
         if not is_read:
             entry["body_preview"] = (msg.Body or "")[:150]
@@ -82,40 +75,13 @@ for msg in get_restricted(mapi.GetDefaultFolder(6), cutoff_48hr):
     except:
         continue
 
-# Pass 2: old unreads (older than 48hrs, up to 60 days)
-old_unread_count = 0
-for msg in get_restricted(mapi.GetDefaultFolder(6), cutoff_old):
-    try:
-        if old_unread_count >= MAX_OLD_UNREAD:
-            break
-        is_read = not msg.UnRead
-        if is_read:
-            continue
-        eid = msg.EntryID
-        if eid in seen_ids:
-            continue
-        seen_ids.add(eid)
-        entry = {
-            "subject":         msg.Subject,
-            "from":            msg.SenderName,
-            "from_email":      msg.SenderEmailAddress,
-            "received":        str(msg.ReceivedTime),
-            "is_read":         False,
-            "has_attachments": msg.Attachments.Count > 0,
-            "importance":      msg.Importance,
-            "entry_id":        eid,
-            "body_preview":    (msg.Body or "")[:150]
-        }
-        old_unread_count += 1
-        inbox.append(entry)
-    except:
-        continue
+inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
     try:
         t = dt(msg.SentOn)
-        if t and t >= cutoff_48hr:
+        if t and t >= cutoff:
             sent.append({
                 "subject":      msg.Subject,
                 "to":           msg.To,
@@ -143,8 +109,7 @@ for item in mapi.GetDefaultFolder(9).Items:
         continue
 
 unread_total = sum(1 for m in inbox if not m["is_read"])
-inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
-print(f"Phase 1 done - inbox:{len(inbox)} (recent_unread:{unread_count} recent_read:{read_count} old_unread:{old_unread_count}) sent:{len(sent)} calendar:{len(calendar)}")
+print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)}")
 
 # Fetch Command Centre today tasks
 cc_today_tasks = []
