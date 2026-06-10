@@ -69,5 +69,5 @@ Do not re-investigate Graph API or Chrome-based email access.
 - Never attempt Microsoft Graph API — Oxford blocks it
 - Always pull fetch_inbox.py from GitHub before running
 - Always update HANDOVER.md at end of session
-- Seat A never reads local disk — all reads via GitHub proxy or API
-- Every Cowork brief Invoke-WebRequest to raw.githubusercontent.com MUST include `?t=$(Get-Date -Format yyyyMMddHHmm)` — no exceptions. Prevents Seat C reading cached stale files.
+- GitHub is the only working surface — all reads and writes via GitHub API (locally-run Outlook COM scripts excepted; they pull latest from GitHub before every run)
+- Every raw.githubusercontent.com fetch MUST include a `?t=<timestamp>` cache-buster — no exceptions. Prevents reading cached stale files.
