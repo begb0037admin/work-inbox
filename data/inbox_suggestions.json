@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-06-10 09:00",
+  "generated_at": "2026-06-10 09:02",
   "new_tasks": [
     {
-      "title": "Review Holiday Records Duty proposed reports",
+      "title": "Review Holiday Records Duty reports",
       "tier": "week",
-      "description": "Simon has asked Kevin to review proposed reports for Holiday Records Duty that Athena has prepared. This is a new actionable task requiring Kevin's assessment of the reports before they can proceed.",
+      "description": "Simon Burford is asking Kevin to review proposed Holiday Records Duty reports from Athena. This is follow-up work on an existing HR reporting requirement that needs Kevin's assessment and sign-off.",
       "email_subject": "RE: Holiday Records Duty - proposed reports",
       "email_from": "Simon Burford",
       "received": "2026-06-09 17:35",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000"
     },
     {
-      "title": "Provide Sophie Levy with scoping session update",
+      "title": "Respond to Sophie Levy on Scoping Session",
       "tier": "week",
-      "description": "Sophie Levy is following up on a scoping session with no contact since April 2026. She needs an update on current status and next steps. Kevin should reconnect and provide progress information.",
+      "description": "Sophie Levy has not heard from Kevin in two months and is chasing for an update on a scoping session, with the last information from April. Kevin needs to provide a substantive response on project status.",
       "email_subject": "RE: Scoping Session update",
       "email_from": "Sophie Levy",
       "received": "2026-06-08 15:58",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
     },
     {
-      "title": "Contact Daphne re: HALO data work POC",
+      "title": "Clarify HALO data work request with Daphne",
       "tier": "week",
-      "description": "Simon has suggested Kevin as the first point of contact for a HALO data work query from Daphne. Kevin needs to wait for her contact and scope the request to understand what is being asked.",
+      "description": "Simon has suggested Daphne contact Kevin about HALO data work, but the scope is unclear. Kevin needs to engage with Daphne to understand the requirements and define the ask.",
       "email_subject": "FW: POC for HALO data work?",
       "email_from": "Simon Burford",
       "received": "2026-06-04 17:34",
@@ -33,7 +33,7 @@
     {
       "task_id": "t014",
       "task_title": "Chemistry bulk delete — get details from Julie, pass to Reenu",
-      "note": "Julie has shared the Review Status Insight report for the CDR bulk deletion (dated 09.06.26), confirming the details and numbers for the Chemistry department appraisal cycle deletion.",
+      "note": "Julie Hickman has shared the Review Status Insight report for the CDR bulk deletion, providing the required details for Kevin to pass to Reenu.",
       "email_subject": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
       "email_from": "Julie Hickman",
       "received": "2026-06-09 13:41",
@@ -42,7 +42,7 @@
     {
       "task_id": "t014",
       "task_title": "Chemistry bulk delete — get details from Julie, pass to Reenu",
-      "note": "Julie has reposted the bulk deletion details in a new email for ease of reference, confirming the review name '(DO NOT USE) CDR2025Chemistry' and reiterating the process for Reenu.",
+      "note": "Julie Hickman has reposted the bulk deletion details (review name, staff count, case numbers) confirming the Chemistry appraisal cycle deletion information is ready for handoff.",
       "email_subject": "RE: Access Support Team | 68974493 - New Case",
       "email_from": "Julie Hickman",
       "received": "2026-06-09 13:40",
@@ -51,7 +51,7 @@
     {
       "task_id": "t013",
       "task_title": "Insight module update — Lindsey Spriggs",
-      "note": "Lindsey Spriggs has shared minutes from the 9 June CDR/PD working group meeting with new actions, likely including follow-up on the Insight module automated reminder functionality that remains outstanding.",
+      "note": "New CDR/PD working group minutes from 9 June contain updated action items; task 13 (Insight module update) status needs to be confirmed against the latest working group actions.",
       "email_subject": "Bi-monthly CDR/PD working group - 9 June minutes",
       "email_from": "Lindsey Spriggs",
       "received": "2026-06-09 13:28",
@@ -60,38 +60,38 @@
     {
       "task_id": "t001",
       "task_title": "Brief team directly",
-      "note": "Simon has scheduled a team meeting for tomorrow (10 June) focussing on KPIs and Statistics; Kevin should prepare to present for his team and attend as part of his phased return.",
+      "note": "Team meeting scheduled for 10 June (today) with focus on KPIs and Statistics; Kevin needs to ensure he is ready to present and may use this as the forum to brief the team directly on his return.",
       "email_subject": "Team Meeting - 10th June",
       "email_from": "Simon Burford",
       "received": "2026-06-09 12:06",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E410000"
     },
     {
-      "task_id": "t004",
-      "task_title": "Raise DTP1092 change management record",
-      "note": "Crispin Muncaster has requested to move this week's DTP1092 College staff in PXD meeting, affecting Kevin's timeline for the change management record and related actions.",
-      "email_subject": "DTP1092 College staff in PXD",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-06-08 12:53",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
+      "task_id": "t007",
+      "task_title": "DSC upload monitoring — Wednesday 10 June",
+      "note": "James Salas confirms he is on annual leave from 5 June returning 18 June, reinforcing that today (10 June) DSC upload monitoring is Kevin's responsibility as agreed in handover.",
+      "email_subject": "Annual leave and support during my absence",
+      "email_from": "James Salas Guillen",
+      "received": "2026-06-05 15:20",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000"
     },
     {
       "task_id": "t008",
       "task_title": "HWP archived users check — Wednesday 10 June",
-      "note": "James Salas has forwarded information confirming that the automated DSE data upload to Healthy Working Plus went live on 3 June; the H&S admin team will check archived users on 10 June as planned.",
+      "note": "James Salas provides update on DSE system and HWP automated archiving issues; the H&S admin team check scheduled for today (10 June) is confirmed as planned.",
       "email_subject": "FW: Preventing archiving of users not included in HR data upload",
       "email_from": "James Salas Guillen",
       "received": "2026-06-05 15:41",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36470000"
     },
     {
-      "task_id": "t007",
-      "task_title": "DSC upload monitoring — Wednesday 10 June",
-      "note": "James Salas has confirmed he is on leave from 5 June, returning 18 June, and Kevin is covering the DSC upload monitoring on Wednesday 10 June as agreed.",
-      "email_subject": "Annual leave and support during my absence",
-      "email_from": "James Salas Guillen",
-      "received": "2026-06-05 15:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36460000"
+      "task_id": "t004",
+      "task_title": "Raise DTP1092 change management record",
+      "note": "Crispin Muncaster is requesting to move this week's DTP1092 College staff in PXD meeting, affecting the timing of the change management record task.",
+      "email_subject": "DTP1092 College staff in PXD",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-06-08 12:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000"
     }
   ]
 }
