@@ -472,7 +472,9 @@ try:
         "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
         "Identify:\n"
         "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Be selective. Max 5.\n"
-        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 8.\n"
+        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 8. "
+"A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
+"If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
         "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
         "{\n"
         '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|tomorrow|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
