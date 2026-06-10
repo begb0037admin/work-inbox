@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 10 June 2026",
-  "subtitle": "Two absences blocking data work; urgent case feedback needed",
-  "context": "James Salas Guillen is absent on annual leave from 5 June and returns on 18 June, blocking DSE system user data import work and Cardinus interface updates that Marie Cooksey is waiting to confirm. Athena Artuso is absent (two A/L notifications sent 8-9 June) and her holiday records duty work on proposed reports from Simon Burford requires your review - this email has been unread for over 48 hours since 9 June. The most time-critical deadline is tomorrow, 11 June, when OWL network maintenance goes live per James Turner's notice, and the multi-company setup codes for FP 68261303 will be set up in UOXU system per Simon Burford's 9 June email requiring your attention. Case 68974493 (Chemistry bulk-delete request) from Julie Hickman sent 9 June at 13:40 is also waiting on your response with two items needed before Access Group can proceed. Open Simon Burford's 'RE: Holiday Records Duty' email first - it tags you directly and needs your review of Athena Artuso's proposed holiday records reports before the team meeting today.",
+  "subtitle": "Absent colleagues blocking DSE work and project handovers; KPI presentation due tomorrow",
+  "context": "James Salas Guillen is absent on annual leave until Thursday 18 June 2026, blocking DSE system integration work and Healthy Working Plus data uploads that went live 3 June. Athena Artuso sent two minimal absence notifications on 8-9 June with no return date specified, creating uncertainty around Holiday Records Duty reports that Simon Burford asked you to review. Marie Cooksey is absent 8-12 June (returning Monday 15 June) during a critical handover period for the Strategic H&S Modular System evaluation and DTP1092 College Staff in PXD project. Julie Hickman's email from 9 June about case 68974493 regarding CDR bulk deletion has waited 27 hours without your substantive response - she noted Access Group needs two items from you before proceeding. The most time-critical deadline is tomorrow (Thursday 11 June) for the Team Meeting KPIs and Statistics presentation that Simon Burford confirmed on 9 June requires each team to present. Open first: Simon Burford's email from 9 June requesting your review of Holiday Records Duty reports, as this is blocking downstream work and waiting 27 hours.",
   "urgent": [
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -104,6 +104,15 @@
     }
   ],
   "needs": [
+    {
+      "title": "It's time to vote in the Board of Directors: Member Elected Director Election!",
+      "sub": "From <strong>Scrum Alliance Nominating Committee</strong>. Have your voice heard! Vote for your next Member Elected Director Board Member. ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "It's time to vote in the Board of Directors: Member Elected Director Election!",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC20000",
+      "received": "10 Jun"
+    },
     {
       "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
       "sub": "From <strong>Simon Burford</strong>. Hi Conor,\r\n\r\n \r\n\r\nPlease see the attached requirements for our new org structure. We will go ahead and set up the codes ",
@@ -255,15 +264,6 @@
       "badgeType": "yellow",
       "subject": "Kevin, we need to talk about AI-assisted complaints...",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E270000",
-      "received": "8 Jun"
-    },
-    {
-      "title": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
-      "sub": "From <strong>Helena Uddin</strong>. Dear Kevin,\r\n\r\n \r\n\r\nThank you for your prompt reply.\r\n\r\n \r\n\r\nI can confirm I have now sent the report to your referrer.\r",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E250000",
       "received": "8 Jun"
     },
     {
@@ -429,15 +429,6 @@
       "received": "5 Jun"
     },
     {
-      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. [link] \t\r\n [link]",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363C0000",
-      "received": "5 Jun"
-    },
-    {
       "title": "RE: DSE Update - user data import and upload to Cardinus",
       "sub": "From <strong>Marie Cooksey</strong>. Hi James\r\n\r\n \r\n\r\nCould you please confirm that the interface is living and functioning.  Also, is the process mapping, d",
       "badge": "Overdue",
@@ -484,6 +475,15 @@
     }
   ],
   "fyi": [
+    {
+      "title": "New Vacancy Notification",
+      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "New Vacancy Notification",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC30000",
+      "received": "10 Jun"
+    },
     {
       "title": "New Vacancy Notification",
       "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
@@ -888,5 +888,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Wednesday 10 June · 09:00"
+  "refreshed_at": "Wednesday 10 June · 09:02"
 }
