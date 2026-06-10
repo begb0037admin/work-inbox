@@ -598,10 +598,10 @@ function togglePriCard(i){
   arrow.textContent=isOpen?'–':'▲';
 }
 
-function renderPriorityCards(priorities,key){
+function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="no-items">No tasks for today.</div>';
   return priorities.map((p,i)=>{
-    const id='pri_'+i, ticked=isTicked(id);
+    const id='pri_'+sec+'_'+i, ticked=isTicked(id);
     const titleText = p.title || p.text || '(untitled)';
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
@@ -610,12 +610,12 @@ function renderPriorityCards(priorities,key){
       ${p.notes?`<div class="pri-meta-notes"><span class="pri-meta-label">Notes</span><div class="pri-notes-text">${sanitizeSub(p.notes)}</div></div>`:''}
     </div>`;
     return `<div class="pri-card${ticked?' done':''}" id="item_${id}">
-      <div class="pri-card-header" onclick="togglePriCard(${i})">
+      <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
         <span class="pri-card-title">${titleText}</span>
-        <span class="pri-arrow" id="priarrow_${i}">–</span>
+        <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
-      <div class="pri-card-body" id="pribody_${i}">${actionsHtml}${metaHtml}</div>
+      <div class="pri-card-body" id="pribody_${sec}_${i}">${actionsHtml}${metaHtml}</div>
     </div>`;
   }).join('');
 }
@@ -650,11 +650,11 @@ function renderBriefing(data,key){
   let left='';
   if(data.prioritiesToday&&data.prioritiesToday.length){
     left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
-    left+=renderPriorityCards(data.prioritiesToday,key);
+    left+=renderPriorityCards(data.prioritiesToday,key,'pt');
   }
   if(data.prioritiesWeek&&data.prioritiesWeek.length){
     left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
-    left+=renderPriorityCards(data.prioritiesWeek,key);
+    left+=renderPriorityCards(data.prioritiesWeek,key,'pw');
   }
   left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
   left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
