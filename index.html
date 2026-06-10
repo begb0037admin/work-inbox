@@ -396,7 +396,7 @@ function renderArchiveList(){
     }).join('');
     return `<div class="archive-day">
       <div class="archive-day-header" onclick="toggleArchiveDay(${di})">
-        <div><div class="archive-day-date">${e.dateStr}</div><div class="archive-day-meta">${items.length} items ÃÂ· ${tickedCount} done</div></div>
+        <div><div class="archive-day-date">${e.dateStr}</div><div class="archive-day-meta">${items.length} items · ${tickedCount} done</div></div>
         <span class="archive-day-arrow" id="arch-arrow-${di}">–</span>
       </div>
       <div class="archive-day-items" id="arch-items-${di}">${itemsHtml}</div>
@@ -579,7 +579,7 @@ function renderBriefing(data,key){
 
   // Header
   document.getElementById('pageTitle').textContent=getGreeting();
-  document.getElementById('headerDate').textContent=data.date+(data.subtitle?' ÃÂ· '+data.subtitle:'');
+  document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
   document.getElementById('sidebarDate').textContent=data.date||'';;
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
