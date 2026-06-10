@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 10 June 2026",
-  "subtitle": "Absences blocking DSE/H&S work; DTP1092 code issues need urgent review",
-  "context": "James Salas Guillen is absent on annual leave returning Thursday 18 June, blocking DSE system updates and Healthy Working Plus data uploads that went live 3 June - Marie Cooksey needs confirmation on manual contractor record creation for the PeopleXD to Cardinus interface. Marie Cooksey is absent 8-12 June, affecting H&S Management System evaluation work and Strategic H&S Modular System requirements weightings that need stakeholder feedback over coming weeks. Athena Artuso sent three blank 'A/L' emails (9 June 14:30, 8 June 16:00) indicating leave without details of coverage. Simon Burford needs immediate input on DTP1092 College Staff in PXD Proposal reference code length issues found in test environment UOXU and Multi Company Setup case FP 68261303, with code adjustments requiring team review - the Team Meeting 10 June focuses on KPIs and Statistics presentations. Sophie Levy from Cority has not heard from Kevin since April on scoping session status and needs an update response. Sarah Rowles' email on HESA Module LEVELS UDF escalation case 68351079 data cleardown issues (received 9 June 12:32) has waited 22 hours without response. Open Simon Burford's latest PeopleXD proposal email first as it contains critical system configuration decisions affecting multiple projects.",
+  "subtitle": "Annual absence blocking data workflows, vendor follow-up overdue, critical system config issues",
+  "context": "James Salas Guillen is absent on annual leave and will return Thursday 18 June, blocking progress on the DSE system data upload to Cardinus which went live 3 June and requires his monitoring of contractor account requests. Sophie Levy from Cority is waiting on a response from you regarding scoping session updates - she last heard from you in April and has not been contacted in over two months. Simon Burford is preparing KPI presentations for today's team meeting on 10 June and has flagged critical configuration issues in the PeopleXD test environment UOXU, specifically that proposed organisation structure codes are too long, which impacts the DTP1092 College Staff in PXD Proposal and the external case FP 68261303 Multi Company Setup with vendor Conor. The most time-critical deadline this week is the OWL network maintenance scheduled for Thursday 11 June requiring system upgrades. Open first the email from Athena Artuso on Holiday Records Duty proposed reports received at 13:48 today - it contains management team meeting outcomes and requires your review with attachments pending.",
   "urgent": [
     {
       "title": "Simon Burford mentioned you in \"DTP1092 - College Staff in PXD Proposal\".",
@@ -96,6 +96,24 @@
   ],
   "needs": [
     {
+      "title": "RE: Holiday Records Duty - proposed reports",
+      "sub": "From <strong>Athena Artuso</strong>. Hi both,\r\n\r\n \r\n\r\nFollowing discussion in today’s management team meeting, I’ve pivoted from attempting to join everythin",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Holiday Records Duty - proposed reports",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACE0000",
+      "received": "10 Jun"
+    },
+    {
+      "title": "RE: College staff in PeopleXD proposal",
+      "sub": "From <strong>Crispin Muncaster</strong>. Thanks Simon\r\n\r\n \r\n\r\nI have also put into our project Teams site with the filename updated with today’s date:  Organizat",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: College staff in PeopleXD proposal",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACD0000",
+      "received": "10 Jun"
+    },
+    {
       "title": "RE: College staff in PeopleXD proposal",
       "sub": "From <strong>Simon Burford</strong>. Hi all,\r\n\r\n \r\n\r\nWhen configuring the reference data codes in the system I’ve found that some of the codes were too long,",
       "badge": "Reply within 48hrs",
@@ -121,15 +139,6 @@
       "subject": "It's time to vote in the Board of Directors: Member Elected Director Election!",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC20000",
       "received": "10 Jun"
-    },
-    {
-      "title": "Athena A/L",
-      "sub": "From <strong>Athena Artuso</strong>.",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "Athena A/L",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E460000",
-      "received": "9 Jun"
     },
     {
       "title": "Athena A/L",
@@ -206,8 +215,8 @@
     {
       "title": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
       "sub": "From <strong>Communications Office</strong>. From: Vicky Marriott, Major Incident Manager \r\nFor: IT Support Staff \r\n \r\nFor Information: Note actions taken following ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "[ict-a] For Information: Update on action taken following the recent cyber incident impacting Canvas",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E300000",
       "received": "8 Jun"
@@ -215,8 +224,8 @@
     {
       "title": "Athena A/L",
       "sub": "From <strong>Athena Artuso</strong>.",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "Athena A/L",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2F0000",
       "received": "8 Jun"
@@ -224,8 +233,8 @@
     {
       "title": "RE: Scoping Session update",
       "sub": "From <strong>Sophie Levy</strong>. Hello Kevin, hope you are well!\r\n\r\n \r\n\r\nI have not heard from you in a couple of months, the latst information I have is",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "RE: Scoping Session update",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000",
       "received": "8 Jun"
@@ -273,15 +282,6 @@
       "badgeType": "red",
       "subject": "OCCUPATIONAL HEALTH - OH REPORT ",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E220000",
-      "received": "8 Jun"
-    },
-    {
-      "title": "RE: Workshop: Sustaining Adoption of Leave & Absence",
-      "sub": "From <strong>Lyndsey Middleton</strong>. Hi all,\r\n\r\nThank you again for attending the workshop on Sustaining Adoption of Leave &amp; Absence.\r\n\r\nPlease find attached",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Workshop: Sustaining Adoption of Leave & Absence",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E210000",
       "received": "8 Jun"
     },
     {
@@ -837,7 +837,9 @@
         "[10 Jun 2026] Simon created in UOXU: Division Code 901 (Colleges and Halls), USER_CODE1 ZSD901, USER_CODE2 Z90101, MANAGEMENT_UNITs Z901 (Colleges) and Z902 (Permanent Private Halls).",
         "[TODO] Set up all 40 Pay Administered By codes in UOXU (list in docs/REF2029_pay_admin_codes.md).",
         "[TODO] Raise change request - include Simon’s created items (Division 901, ZSD901, Z90101, Z901, Z902) and note the Division Code blocker below.",
-        "[AWAITING] Division Code cannot be added until linked to a Company Code - blocked until Conor walks through the config on Fri 12 Jun."
+        "[AWAITING] Division Code cannot be added until linked to a Company Code - blocked until Conor walks through the config on Fri 12 Jun.",
+        "[10 Jun 2026] Simon has found that some reference data codes were too long and adjusted them; Kevin needs to review the changes to confirm they are acceptable before proceeding with the setup. (email: Simon Burford - RE: College staff in PeopleXD proposal)",
+        "[10 Jun 2026] Simon identified that proposed org structure codes for the multi-company setup were too long and has made adjustments in the test environment; Kevin should review these changes. (email: Simon Burford - RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup)"
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange"
@@ -897,11 +899,13 @@
       "text": "Review Holiday Records Duty reports from Athena",
       "description": "Athena Artuso has sent a full review of Holiday Records Duty requirements with an introductory section covering what is actually required. Kevin has asked her to send this through and needs to review it to understand the scope and requirements for this duty.",
       "actions": [
-        "[10 Jun 2026] Created from inbox suggestion (email from Athena Artuso)"
+        "[10 Jun 2026] Created from inbox suggestion (email from Athena Artuso)",
+        "[10 Jun 2026] Kevin asked Athena to send through the requirements review document to examine scope and requirements (sent: Re: Holiday Records Duty - proposed reports).",
+        "[AWAITING] Athena to send the Holiday Records Duty requirements review document."
       ],
       "source": "Inbox 2026-06-10 09:43",
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Wednesday 10 June · 15:06"
+  "refreshed_at": "Wednesday 10 June · 17:00"
 }
