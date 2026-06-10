@@ -1,17 +1,8 @@
 {
-  "date": "Tuesday 9 June 2026",
-  "subtitle": "Team KPI presentations due tomorrow - case 68974493 needs closing",
-  "context": "James Salas Guillen is on annual leave until Thursday 18 June 2026, blocking DSE system updates and Healthy Working Plus data uploads that he is monitoring. Julie Hickman's Access Support case 68974493 for the Chemistry bulk-delete review (DO NOT USE) has been waiting for response since 9 June and requires two items from Oxford Personnel Services before Access Group can proceed. Sarah Rowles' escalation on HESA Module LEVELS UDF case 68351079 data cleardown issues received a response on 9 June from Michael O'Sullivan but has not been actioned. The most time-critical deadline is tomorrow, Wednesday 10 June 2026, when Simon Burford's team meeting on KPIs and Statistics requires presentations from each team - you shared your KPI presentation with Michael O'Sullivan on 9 June at 15:11. Open first the email from Julie Hickman on 9 June about case 68974493 to confirm those two required items are ready for Access Group.",
+  "date": "Wednesday 10 June 2026",
+  "subtitle": "Two absences blocking data work; urgent case feedback needed",
+  "context": "James Salas Guillen is absent on annual leave from 5 June and returns on 18 June, blocking DSE system user data import work and Cardinus interface updates that Marie Cooksey is waiting to confirm. Athena Artuso is absent (two A/L notifications sent 8-9 June) and her holiday records duty work on proposed reports from Simon Burford requires your review - this email has been unread for over 48 hours since 9 June. The most time-critical deadline is tomorrow, 11 June, when OWL network maintenance goes live per James Turner's notice, and the multi-company setup codes for FP 68261303 will be set up in UOXU system per Simon Burford's 9 June email requiring your attention. Case 68974493 (Chemistry bulk-delete request) from Julie Hickman sent 9 June at 13:40 is also waiting on your response with two items needed before Access Group can proceed. Open Simon Burford's 'RE: Holiday Records Duty' email first - it tags you directly and needs your review of Athena Artuso's proposed holiday records reports before the team meeting today.",
   "urgent": [
-    {
-      "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "sub": "From <strong>Simon Burford</strong>. Hi @Sarah Rowles &lt;mailto:sarah.rowles@admin.ox.ac.uk&gt;  / @Athena Artuso &lt;mailto:athena.artuso@admin.ox.ac.uk&gt;  \r\n\r\n \r\n\r\n",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E310000",
-      "received": "8 Jun"
-    },
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
       "sub": "From <strong>Emma Fitz-Gibbon</strong>. Thank you, Rob and Asta!\r\n\r\nI’ll pass your names on to Sarah Warne, and she’ll be in touch shortly to explain the next s",
@@ -47,15 +38,6 @@
       "subject": "DTP1092 College staff in PXD",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E260000",
       "received": "8 Jun"
-    },
-    {
-      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>Marie Cooksey</strong>. &lt;https://unioxfordnexus.sharepoint.com/sites/HumanResources-HRSystems-HRSystemsManagementTeam/Shared%20Documents/HR%20Sy",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36260000",
-      "received": "4 Jun"
     },
     {
       "title": "[ict-a] For Information: Update on the IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
@@ -94,6 +76,15 @@
       "received": "8 Jun"
     },
     {
+      "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E310000",
+      "received": "8 Jun"
+    },
+    {
       "title": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
       "sub": "From <strong>Marie Cooksey</strong>.",
       "badge": "Act today",
@@ -101,9 +92,36 @@
       "subject": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36390000",
       "received": "5 Jun"
+    },
+    {
+      "title": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362D0000",
+      "received": "4 Jun"
     }
   ],
   "needs": [
+    {
+      "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "sub": "From <strong>Simon Burford</strong>. Hi Conor,\r\n\r\n \r\n\r\nPlease see the attached requirements for our new org structure. We will go ahead and set up the codes ",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077EC2CE7D0000",
+      "received": "9 Jun"
+    },
+    {
+      "title": "RE: Holiday Records Duty - proposed reports",
+      "sub": "From <strong>Simon Burford</strong>. Hi Athena,\r\n\r\n \r\n\r\nThank you for pulling this together.\r\n\r\n \r\n\r\n@Kevin Lelitte &lt;mailto:kevin.lelitte@admin.ox.ac.uk&gt;  – ",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Holiday Records Duty - proposed reports",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000",
+      "received": "9 Jun"
+    },
     {
       "title": "Athena A/L",
       "sub": "From <strong>Athena Artuso</strong>.",
@@ -115,7 +133,7 @@
     },
     {
       "title": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
-      "sub": "From <strong>Julie Hickman</strong>. Julie Hickman invited you to edit a file \r\n\r\n\t\r\nHere&#x27;s the document that Julie Hickman shared with you. \r\n\r\n&lt;https://uni",
+      "sub": "From <strong>Julie Hickman</strong>. Julie Hickman invited you to edit a file \r\n\r\n\t\r\nHere&#x27;s the document that Julie Hickman shared with you. \r\n\r\n[link]",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
@@ -187,7 +205,7 @@
     },
     {
       "title": "Enhance your audio with 30% off",
-      "sub": "From <strong>DistroKid</strong>. A summertime discount\r\n &lt;https://braze-images.com/appboy/communication/assets/image_assets/images/6a18ac1acf2895007fdb0e",
+      "sub": "From <strong>DistroKid</strong>. A summertime discount\r\n [link]",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Enhance your audio with 30% off",
@@ -249,6 +267,15 @@
       "received": "8 Jun"
     },
     {
+      "title": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
+      "sub": "From <strong>Helena Uddin</strong>. Dear Kevin,\r\n\r\n \r\n\r\nThank you for your prompt reply.\r\n\r\n \r\n\r\nI can confirm I have now sent the report to your referrer.\r",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: OCCUPATIONAL HEALTH - OH REPORT ",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E250000",
+      "received": "8 Jun"
+    },
+    {
       "title": "FW: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
       "sub": "From <strong>Michael O'Sullivan</strong>. Hi Simon,\r\n\r\nAhead of your meeting tomorrow, I wanted to share a few thoughts while they are fresh in my mind.\r\n\r\nMy und",
       "badge": "Reply within 48hrs",
@@ -277,7 +304,7 @@
     },
     {
       "title": "Access Support – Case Feedback",
-      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n &lt;https://www.theaccessgroup.com&gt; \t\r\n \r\n\r\nDear Kevi",
+      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n [link] \t\r\n \r\n\r\nDear Kevin,\r\n \r\nWe are passionate a",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support – Case Feedback",
@@ -286,7 +313,7 @@
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Resolved",
-      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
+      "sub": "From <strong>Access Support</strong>. [link] \t\r\n [link]",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Resolved",
@@ -295,7 +322,7 @@
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
+      "sub": "From <strong>Access Support</strong>. [link] \t\r\n [link]",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
@@ -349,7 +376,7 @@
     },
     {
       "title": "The Kudoboard for Marie Cooksey is being finalized",
-      "sub": "From <strong>Simon Burford via Kudoboard</strong>. &lt;https://www.kudoboard.com/images/logo/logo-2026.png&gt; \t\r\nLast call for contributions to the Kudoboard for Marie. \r\n\r\nIf ",
+      "sub": "From <strong>Simon Burford via Kudoboard</strong>. [link] \t\r\nLast call for contributions to the Kudoboard for Marie. \r\n\r\nIf you&#x27;ve already made your",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "The Kudoboard for Marie Cooksey is being finalized",
@@ -394,7 +421,16 @@
     },
     {
       "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
+      "sub": "From <strong>Access Support</strong>. [link] \t\r\n [link]",
+      "badge": "Overdue",
+      "badgeType": "red",
+      "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE363C0000",
+      "received": "5 Jun"
+    },
+    {
+      "title": "Access Support Team | 68981549 - Your Case Has Been Updated",
+      "sub": "From <strong>Access Support</strong>. [link] \t\r\n [link]",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support Team | 68981549 - Your Case Has Been Updated",
@@ -430,7 +466,7 @@
     },
     {
       "title": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
-      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here &lt;https://empower.cority.com/v/NzcyLURQWC04MTEAAAGiMh_NeVQ_E3vubSLgzOZWLY7qY",
+      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here [link]",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
@@ -439,20 +475,11 @@
     },
     {
       "title": "Access Support – Case Feedback",
-      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n &lt;https://www.theaccessgroup.com&gt; \t\r\n \r\n\r\nDear Kevi",
+      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n [link] \t\r\n \r\n\r\nDear Kevin,\r\n \r\nWe are passionate a",
       "badge": "Overdue",
       "badgeType": "red",
       "subject": "Access Support – Case Feedback",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362C0000",
-      "received": "4 Jun"
-    },
-    {
-      "title": "Access Support Team | 68981820 - Your Case Has Been Resolved",
-      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 68981820 - Your Case Has Been Resolved",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362B0000",
       "received": "4 Jun"
     }
   ],
@@ -492,24 +519,6 @@
       "subject": "New Vacancy Notification",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000",
       "received": "5 Jun"
-    },
-    {
-      "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077EC2CE7D0000",
-      "received": "9 Jun"
-    },
-    {
-      "title": "RE: Holiday Records Duty - proposed reports",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Holiday Records Duty - proposed reports",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000",
-      "received": "9 Jun"
     },
     {
       "title": "HR Support and Staff Immigration has a new digital home",
@@ -685,15 +694,6 @@
   ],
   "low": [
     {
-      "title": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>SharePoint Online</strong>. &lt;https://unioxfordnexus.sharepoint.com/sites/HumanResources-HRSystems-HRSystemsManagementTeam/Shared%20Documents/HR%20Sy",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey left a comment in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36270000",
-      "received": "4 Jun"
-    },
-    {
       "title": "Your May Flow State recap 🌱",
       "sub": "From <strong>Wispr Flow</strong>.",
       "badge": "",
@@ -732,18 +732,12 @@
   ],
   "calToday": [
     {
-      "time": "14:00",
-      "title": "GLAM Rostering",
-      "sub": "Simon Burford"
-    }
-  ],
-  "calTomorrow": [
-    {
       "time": "09:00",
       "title": "Clinical pay uplift 2026 kick off meeting",
       "sub": "Jasmin Khokhra"
     }
   ],
+  "calTomorrow": [],
   "absences": [
     "James Salas Guillen",
     "Marie Cooksey"
@@ -894,5 +888,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Tuesday 09 June · 21:02"
+  "refreshed_at": "Wednesday 10 June · 09:00"
 }
