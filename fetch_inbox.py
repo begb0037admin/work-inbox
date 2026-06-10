@@ -1,4 +1,4 @@
-import json, os, base64, html, urllib.request, urllib.error
+import json, os, base64, html, re, urllib.request, urllib.error
 from datetime import datetime, timedelta
 import win32com.client
 import anthropic
@@ -243,6 +243,7 @@ def make_card(msg, category):
     subj    = msg.get("subject") or "(no subject)"
     sender  = msg.get("from") or ""
     preview = (msg.get("body_preview") or "").strip()
+    preview = re.sub(r"<?\s*https?://\S+>?", "[link]", preview)
     badge, badge_type = badge_for(msg, category)
 
     title = subj
@@ -408,6 +409,110 @@ except Exception as e:
     priorities_today = []
     priorities_week  = []
 
+# Phase 3.5 - AI triage: which emails should become Command Centre tasks
+print("Phase 3.5 - triaging inbox for task suggestions...")
+suggestions = {
+    "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+    "new_tasks":    [],
+    "task_updates": []
+}
+try:
+    task_summaries = []
+    for t in cc_content.get("tasks", []):
+        task_summaries.append({
+            "id":          t.get("id", ""),
+            "title":       t.get("title", ""),
+            "description": (t.get("description") or "")[:300],
+            "emailRef":    t.get("emailRef", "")
+        })
+    if not task_summaries:
+        raise Exception("Command Centre tasks unavailable - skipping triage")
+
+    email_candidates = []
+    for m in inbox:
+        if categorise(m) in ("urgent", "needs"):
+            email_candidates.append({
+                "subject":      m.get("subject", ""),
+                "from":         m.get("from", ""),
+                "received":     (m.get("received", "") or "")[:16],
+                "body_preview": re.sub(r"<?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
+                "entry_id":     m.get("entry_id", "")
+            })
+
+    api_emails = [{"n": i, "subject": e["subject"], "from": e["from"],
+                   "received": e["received"], "body_preview": e["body_preview"]}
+                  for i, e in enumerate(email_candidates)]
+
+    TRIAGE_SYSTEM = (
+        "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
+        "You receive his existing Command Centre task list and his recent action-required emails.\n"
+        "Identify:\n"
+        "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Be selective. Max 5.\n"
+        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 8.\n"
+        "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
+        "{\n"
+        '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
+        '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}]\n'
+        "}\n"
+        'Rules: tier "today" only if the deadline is today or overdue, otherwise "week". '
+        "Never invent case numbers or names. Automated notifications, newsletters, calendar "
+        "accept/decline messages and out-of-office replies are never tasks."
+    )
+
+    triage_user = (
+        f"Today is {today_str}.\n\n"
+        f"EXISTING TASKS:\n{json.dumps(task_summaries, indent=1, ensure_ascii=True)}\n\n"
+        f"EMAILS (urgent + needs response):\n{json.dumps(api_emails, indent=1, ensure_ascii=True)}"
+    )
+
+    t_resp = client.messages.create(
+        model      = "claude-haiku-4-5",
+        max_tokens = 1500,
+        system     = TRIAGE_SYSTEM,
+        messages   = [{"role": "user", "content": triage_user}]
+    )
+    t_raw = t_resp.content[0].text.strip()
+    if t_raw.startswith("```"):
+        t_raw = "\n".join(t_raw.split("\n")[1:])
+    if t_raw.endswith("```"):
+        t_raw = "\n".join(t_raw.split("\n")[:-1])
+    t_out = json.loads(t_raw)
+
+    task_by_id = {t["id"]: t for t in task_summaries}
+    for nt in t_out.get("new_tasks", [])[:5]:
+        i = nt.get("email_n")
+        if not isinstance(i, int) or not (0 <= i < len(email_candidates)):
+            continue
+        src = email_candidates[i]
+        suggestions["new_tasks"].append({
+            "title":         nt.get("title", ""),
+            "tier":          nt.get("tier") if nt.get("tier") in ("today", "week") else "week",
+            "description":   nt.get("description", ""),
+            "email_subject": src["subject"],
+            "email_from":    src["from"],
+            "received":      src["received"],
+            "entry_id":      src["entry_id"]
+        })
+    for tu in t_out.get("task_updates", [])[:8]:
+        i   = tu.get("email_n")
+        tid = tu.get("task_id", "")
+        if not isinstance(i, int) or not (0 <= i < len(email_candidates)) or tid not in task_by_id:
+            continue
+        src = email_candidates[i]
+        suggestions["task_updates"].append({
+            "task_id":       tid,
+            "task_title":    task_by_id[tid]["title"],
+            "note":          tu.get("note", ""),
+            "email_subject": src["subject"],
+            "email_from":    src["from"],
+            "received":      src["received"],
+            "entry_id":      src["entry_id"]
+        })
+    print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} updates:{len(suggestions['task_updates'])}")
+except Exception as e:
+    print(f"WARNING: Phase 3.5 triage failed - {e}")
+
+
 # Ã¢ÂÂÃ¢ÂÂ Assemble final briefing Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 briefing = {
     "date":         today_str,
@@ -463,3 +568,38 @@ else:
     except Exception as e:
         print(f"Phase 4 FAILED - {e}")
         raise
+
+
+# Phase 5 - push task suggestions to GitHub (consumed by Command Centre dashboard)
+if GITHUB_PAT:
+    try:
+        sug_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/inbox_suggestions.json"
+        headers = {
+            "Authorization": f"token {GITHUB_PAT}",
+            "Content-Type":  "application/json",
+            "User-Agent":    "work-inbox-script"
+        }
+        sha = None
+        try:
+            req = urllib.request.Request(sug_url, headers=headers)
+            with urllib.request.urlopen(req) as r:
+                sha = json.loads(r.read()).get("sha")
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+        content_b64 = base64.b64encode(
+            json.dumps(suggestions, indent=2, ensure_ascii=False).encode("utf-8")
+        ).decode("ascii")
+        payload = {
+            "message": f"chore: update task suggestions {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            "content": content_b64
+        }
+        if sha:
+            payload["sha"] = sha
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(sug_url, data=data, headers=headers, method="PUT")
+        with urllib.request.urlopen(req) as r:
+            result = json.loads(r.read())
+            print(f"Phase 5 done - suggestions pushed (commit: {result.get('commit',{}).get('sha','?')[:7]})")
+    except Exception as e:
+        print(f"Phase 5 FAILED - {e}")
