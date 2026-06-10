@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 10 June 2026",
-  "subtitle": "Absences blocking case 68974493; urgent team KPI presentation due today",
-  "context": "Julie Hickman from Access Support is on annual leave returning Monday 15 June, blocking case 68974493 Chemistry bulk-delete request which awaits two critical items from your team before Access Group can proceed. James Salas Guillen is absent from 5 June through Thursday 18 June, leaving the DSE system integration with Cardinus and Healthy Working Plus data uploads unmonitored - the automated PeopleXD upload went live 3 June but requires oversight on contractor record creation. Athena Artuso's email on Holiday Records Duty with proposed reports review arrived at 09:43 today unread with attachments requiring your response. Sophie Levy from Cority has waited 2+ months (last contact April) without reply on the Scoping Session update and is actively waiting to hear from you. Sarah Rowles' escalation on case 68351079 regarding HESA Module LEVELS UDF data cleardown arrived Tuesday 9 June at 12:32 unread with attachments still pending action. Your critical deadline is Simon Burford's Team Meeting today at 10:00 requiring KPI and Statistics presentations from each team - your KPI presentation for May 2026 was shared with Michael O'Sullivan yesterday. Open immediately the unread email from Crispin Muncaster at 09:17 today about the College staff in PeopleXD proposal meeting reminder, as he references Simon's materials in readiness for 'later this morning'.",
+  "subtitle": "Three colleagues absent, critical reviews due, team KPI meeting today",
+  "context": "Julie Hickman from Access Support is on annual leave until Monday 8 June - note this auto-reply shows a date inconsistency but she is currently absent, blocking Case 68974493 which you sent an export for on 10 June that needs handoff. James Salas Guillen is on annual leave from 5 June returning Thursday 18 June, which blocks DSE system updates and Healthy Working Plus data uploads - the PeopleXD to Cardinus interface went live 3 June but James was monitoring requests before departure. Marie Cooksey is on leave 8-12 June per her handover note, affecting H&S Management System evaluation weightings and DTP1092 College staff in PXD project decisions. Athena Artuso sent you her Holiday Records Duty review with attachments this morning at 09:43 on 10 June - this is your immediate priority as it contains the full analysis needed. The team meeting scheduled for today 10 June focuses on KPIs and Statistics per Simon Burford's 09:12 email on 9 June. Case 68978576 from Access Support shows your case was updated 10 June at 09:19. The most time-critical deadline is tomorrow Thursday 11 June for OWL network maintenance per James Turner's email, and Simon Burford's meeting restructuring request for DTP1092 must be rescheduled this week.",
   "urgent": [
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -269,8 +269,8 @@
     {
       "title": "FW: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
       "sub": "From <strong>Michael O'Sullivan</strong>. Hi Simon,\r\n\r\nAhead of your meeting tomorrow, I wanted to share a few thoughts while they are fresh in my mind.\r\n\r\nMy und",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "FW: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E230000",
       "received": "8 Jun"
@@ -453,15 +453,6 @@
       "badgeType": "red",
       "subject": "Your GX2 2026.2 Release is Here with Refreshed Navigation and Smarter AI",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362F0000",
-      "received": "4 Jun"
-    },
-    {
-      "title": "Access Support – Case Feedback",
-      "sub": "From <strong>Access Group</strong>. Message from The Access Group\r\n‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \r\n [link] \t\r\n \r\n\r\nDear Kevin,\r\n \r\nWe are passionate a",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support – Case Feedback",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362C0000",
       "received": "4 Jun"
     }
   ],
@@ -694,6 +685,15 @@
   ],
   "low": [
     {
+      "title": "[GitHub] A fine-grained personal access token has been added to your account",
+      "sub": "From <strong>GitHub</strong>. [link] \r\n\r\n@begb0037admin, a personal access token was created on your account.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "[GitHub] A fine-grained personal access token has been added to your account",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC80000",
+      "received": "10 Jun"
+    },
+    {
       "title": "Your May Flow State recap 🌱",
       "sub": "From <strong>Wispr Flow</strong>.",
       "badge": "",
@@ -770,7 +770,9 @@
         "[09 Jun 2026] Julie confirmed: cycle name '(DO NOT USE) CDR2025Chemistry', 5,568 staff to be removed. Report run by Julie — OneDrive export incoming.",
         "[AWAITING] Julie to share OneDrive export of affected employee list.",
         "[TODO — on receipt] Forward cycle name + employee list export to Reenu Delaney at AG to action the deletion.",
-        "[TODO] Reply to Julie confirming details received and next steps."
+        "[TODO] Reply to Julie confirming details received and next steps.",
+        "[10 Jun 2026] Julie Hickman is on annual leave 10 June; queries should be redirected per her auto-reply instructions. (email: Julie Hickman - Automatic reply: Access Support Team | 68974493 - New Case)",
+        "[10 Jun 2026] Access Group case 68978576 has been updated; monitor for resolution progress. (email: Access Support - Access Support Team | 68978576 - Your Case Has Been Updated)"
       ],
       "source": "Case 68974493",
       "dateType": "red"
@@ -783,7 +785,8 @@
       "actions": [
         "[08 Jun] Identified: team briefing needed — Michael and James already aware, others not yet informed.",
         "[09 Jun 2026] Team briefed at FA Team Catch-up — OH outcome, phased return schedule (4hrs/day, mornings, fully remote), org structure context, and flex points ask all covered.",
-        "[09 Jun 2026] KPI data sent to Michael for Wednesday HR Systems team meeting presentation. ✓"
+        "[09 Jun 2026] KPI data sent to Michael for Wednesday HR Systems team meeting presentation. ✓",
+        "[10 Jun 2026] Team meeting today (10 June) will focus on KPIs and Statistics; each team should be ready to present. (email: Simon Burford - Team Meeting - 10th June)"
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange"
@@ -822,7 +825,8 @@
       "actions": [
         "[08 Jun] Confirmed outstanding — Simon did not raise during Kevin's leave.",
         "[TODO] Raise OSM change management record for DTP1092. Set Marie Cooksey as approver.",
-        "[TODO] Record does not need Marie's formal sign-off immediately — just needs to exist before go-live."
+        "[TODO] Record does not need Marie's formal sign-off immediately — just needs to exist before go-live.",
+        "[10 Jun 2026] Crispin Muncaster is reminding attendees to review Simon's materials ahead of a meeting later today on College staff in PeopleXD proposal. (email: Crispin Muncaster - RE: College staff in PeopleXD proposal)"
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange"
@@ -857,7 +861,8 @@
       "description": "James Salas is on leave for two weeks (returning 18 June). As part of the handover (5 June), Kevin agreed to monitor the weekly DSC upload on Wednesday 10 June. This involves monitoring the SFTP and running system checks. James will be back in time for the following upload so this is a one-off cover.",
       "actions": [
         "[05 Jun] James handover completed — Kevin confirmed as cover for Wednesday 10 June DSC upload.",
-        "[TODO — 10 Jun] Monitor SFTP and run system checks for DSC upload. Flag any issues immediately."
+        "[TODO — 10 Jun] Monitor SFTP and run system checks for DSC upload. Flag any issues immediately.",
+        "[10 Jun 2026] James Salas confirms he is on annual leave from end of 5 June and returns 18 June; coverage for DSC upload on 10 June is confirmed. (email: James Salas Guillen - Annual leave and support during my absence)"
       ],
       "source": "James A/L Handover 05/06",
       "dateType": "orange"
@@ -869,7 +874,8 @@
         "[05 Jun] James flagged issue in handover — users not in PXD being incorrectly archived in HWP.",
         "[05 Jun] Manual rule created for known cases (e.g. Jill Farmer).",
         "[TODO — 10 Jun] Be available Wednesday — H&S admin team checking. Escalate if anything surfaces.",
-        "[PARKED] Two open HWP tickets with Gail Miller — wait for James to return 18 June."
+        "[PARKED] Two open HWP tickets with Gail Miller — wait for James to return 18 June.",
+        "[10 Jun 2026] James confirms DSE automated data upload to HWP went live 3 June and overall dataset looks good; H&S admin team will check on 10 June as planned. (email: James Salas Guillen - FW: Preventing archiving of users not included in HR data upload)"
       ],
       "source": "James A/L Handover 05/06",
       "dateType": "orange"
@@ -888,5 +894,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Wednesday 10 June · 09:57"
+  "refreshed_at": "Wednesday 10 June · 10:03"
 }
