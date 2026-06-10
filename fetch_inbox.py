@@ -86,7 +86,8 @@ for msg in mapi.GetDefaultFolder(5).Items:
                 "subject":      msg.Subject,
                 "to":           msg.To,
                 "sent":         str(msg.SentOn),
-                "body_preview": (msg.Body or "")[:100]
+                "body_preview": (msg.Body or "")[:100],
+                "entry_id":     msg.EntryID
             })
     except:
         continue
@@ -451,13 +452,24 @@ try:
                 "entry_id":     m.get("entry_id", "")
             })
 
-    api_emails = [{"n": i, "subject": e["subject"], "from": e["from"],
+    for s in sent[:30]:
+        email_candidates.append({
+            "subject":      s.get("subject", ""),
+            "from":         "Kevin (sent to: " + (s.get("to") or "") + ")",
+            "received":     (s.get("sent", "") or "")[:16],
+            "body_preview": re.sub(r"<?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
+            "entry_id":     s.get("entry_id", ""),
+            "direction":    "sent"
+        })
+
+    api_emails = [{"n": i, "direction": e.get("direction", "received"),
+                   "subject": e["subject"], "from": e["from"],
                    "received": e["received"], "body_preview": e["body_preview"]}
                   for i, e in enumerate(email_candidates)]
 
     TRIAGE_SYSTEM = (
         "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
-        "You receive his existing Command Centre task list and his recent action-required emails.\n"
+        "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
         "Identify:\n"
         "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Be selective. Max 5.\n"
         "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 8.\n"
@@ -468,13 +480,17 @@ try:
         "}\n"
         'Rules: tier "today" only if the deadline is today or overdue; "tomorrow" if it must happen the next working day; otherwise "week". '
         "Never invent case numbers or names. Automated notifications, newsletters, calendar "
-        "accept/decline messages and out-of-office replies are never tasks."
+        "accept/decline messages and out-of-office replies are never tasks. "
+        "Use direction=sent emails to log Kevin's own actions on existing tasks as task_updates "
+        "(e.g. 'Kevin replied to Reenu with the requested staff list') so the action log shows "
+        "both sides of the conversation. Never propose a new task for work that a sent email "
+        "shows Kevin has already handled."
     )
 
     triage_user = (
         f"Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.\n\n"
         f"EXISTING TASKS:\n{json.dumps(task_summaries, indent=1, ensure_ascii=True)}\n\n"
-        f"EMAILS (urgent + needs response):\n{json.dumps(api_emails, indent=1, ensure_ascii=True)}"
+        f"EMAILS (received urgent/needs + sent by Kevin, last 7 days):\n{json.dumps(api_emails, indent=1, ensure_ascii=True)}"
     )
 
     t_resp = client.messages.create(
