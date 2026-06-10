@@ -392,6 +392,8 @@ try:
         cc_data    = json.loads(r.read())
         cc_content = json.loads(base64.b64decode(cc_data["content"]).decode("utf-8"))
     for task in cc_content.get("tasks", []):
+        if task.get("done"):
+            continue
         tier = task.get("tier", "")
         entry = {
             "text":        task.get("title", ""),
