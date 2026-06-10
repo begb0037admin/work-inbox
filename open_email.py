@@ -1,4 +1,5 @@
 import sys
+import re
 import win32com.client
 from datetime import datetime
 import os
@@ -19,7 +20,7 @@ if len(sys.argv) < 2:
 
 raw = sys.argv[1]
 log(f"RAW ARG: {raw}")
-entry_id = raw.replace("openmail://", "").rstrip("/")
+entry_id = re.sub(r"^openmail:/*", "", raw).rstrip("/")
 log(f"ENTRY ID: {entry_id}")
 
 try:
