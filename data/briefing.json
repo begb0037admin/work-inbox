@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 10 June 2026",
-  "subtitle": "Absent colleagues blocking DSE work and project handovers; KPI presentation due tomorrow",
-  "context": "James Salas Guillen is absent on annual leave until Thursday 18 June 2026, blocking DSE system integration work and Healthy Working Plus data uploads that went live 3 June. Athena Artuso sent two minimal absence notifications on 8-9 June with no return date specified, creating uncertainty around Holiday Records Duty reports that Simon Burford asked you to review. Marie Cooksey is absent 8-12 June (returning Monday 15 June) during a critical handover period for the Strategic H&S Modular System evaluation and DTP1092 College Staff in PXD project. Julie Hickman's email from 9 June about case 68974493 regarding CDR bulk deletion has waited 27 hours without your substantive response - she noted Access Group needs two items from you before proceeding. The most time-critical deadline is tomorrow (Thursday 11 June) for the Team Meeting KPIs and Statistics presentation that Simon Burford confirmed on 9 June requires each team to present. Open first: Simon Burford's email from 9 June requesting your review of Holiday Records Duty reports, as this is blocking downstream work and waiting 27 hours.",
+  "subtitle": "Absences blocking case 68974493; urgent team KPI presentation due today",
+  "context": "Julie Hickman from Access Support is on annual leave returning Monday 15 June, blocking case 68974493 Chemistry bulk-delete request which awaits two critical items from your team before Access Group can proceed. James Salas Guillen is absent from 5 June through Thursday 18 June, leaving the DSE system integration with Cardinus and Healthy Working Plus data uploads unmonitored - the automated PeopleXD upload went live 3 June but requires oversight on contractor record creation. Athena Artuso's email on Holiday Records Duty with proposed reports review arrived at 09:43 today unread with attachments requiring your response. Sophie Levy from Cority has waited 2+ months (last contact April) without reply on the Scoping Session update and is actively waiting to hear from you. Sarah Rowles' escalation on case 68351079 regarding HESA Module LEVELS UDF data cleardown arrived Tuesday 9 June at 12:32 unread with attachments still pending action. Your critical deadline is Simon Burford's Team Meeting today at 10:00 requiring KPI and Statistics presentations from each team - your KPI presentation for May 2026 was shared with Michael O'Sullivan yesterday. Open immediately the unread email from Crispin Muncaster at 09:17 today about the College staff in PeopleXD proposal meeting reminder, as he references Simon's materials in readiness for 'later this morning'.",
   "urgent": [
     {
       "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
@@ -92,18 +92,45 @@
       "subject": "Marie Cooksey replied to a comment in \"DTP1092 - College Staff in PXD Proposal\"",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36390000",
       "received": "5 Jun"
-    },
-    {
-      "title": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Simon Burford assigned you a task in \"DTP1092 - College Staff in PXD Proposal\"",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362D0000",
-      "received": "4 Jun"
     }
   ],
   "needs": [
+    {
+      "title": "RE: Holiday Records Duty - proposed reports",
+      "sub": "From <strong>Athena Artuso</strong>. Hi Kevin,\r\n\r\n \r\n\r\nOf course – please see attached for the full review I’ve performed. The introductory section covers wh",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Holiday Records Duty - proposed reports",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC70000",
+      "received": "10 Jun"
+    },
+    {
+      "title": "Automatic reply: Access Support Team | 68974493 - New Case",
+      "sub": "From <strong>Julie Hickman</strong>. I am taking annual leave on Wednesday 10 June, my next working day is Monday 8 June.\r\n\r\n \r\n\r\nPlease re-direct any urgent",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Automatic reply: Access Support Team | 68974493 - New Case",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC60000",
+      "received": "10 Jun"
+    },
+    {
+      "title": "Access Support Team | 68978576 - Your Case Has Been Updated",
+      "sub": "From <strong>Access Support</strong>. [link] \t\r\n [link]",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Access Support Team | 68978576 - Your Case Has Been Updated",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC50000",
+      "received": "10 Jun"
+    },
+    {
+      "title": "RE: College staff in PeopleXD proposal",
+      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nJust a reminder to please take a look at what Simon has sent through in readiness for our meeting later",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: College staff in PeopleXD proposal",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC40000",
+      "received": "10 Jun"
+    },
     {
       "title": "It's time to vote in the Board of Directors: Member Elected Director Election!",
       "sub": "From <strong>Scrum Alliance Nominating Committee</strong>. Have your voice heard! Vote for your next Member Elected Director Board Member. ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏",
@@ -114,48 +141,12 @@
       "received": "10 Jun"
     },
     {
-      "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "sub": "From <strong>Simon Burford</strong>. Hi Conor,\r\n\r\n \r\n\r\nPlease see the attached requirements for our new org structure. We will go ahead and set up the codes ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077EC2CE7D0000",
-      "received": "9 Jun"
-    },
-    {
-      "title": "RE: Holiday Records Duty - proposed reports",
-      "sub": "From <strong>Simon Burford</strong>. Hi Athena,\r\n\r\n \r\n\r\nThank you for pulling this together.\r\n\r\n \r\n\r\n@Kevin Lelitte &lt;mailto:kevin.lelitte@admin.ox.ac.uk&gt;  – ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Holiday Records Duty - proposed reports",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000",
-      "received": "9 Jun"
-    },
-    {
       "title": "Athena A/L",
       "sub": "From <strong>Athena Artuso</strong>.",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "Athena A/L",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E460000",
-      "received": "9 Jun"
-    },
-    {
-      "title": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
-      "sub": "From <strong>Julie Hickman</strong>. Julie Hickman invited you to edit a file \r\n\r\n\t\r\nHere&#x27;s the document that Julie Hickman shared with you. \r\n\r\n[link]",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E450000",
-      "received": "9 Jun"
-    },
-    {
-      "title": "RE: Access Support Team | 68974493 - New Case",
-      "sub": "From <strong>Julie Hickman</strong>. Hi Kevin,\r\n\r\n \r\n\r\nThe details were in the other email conversation, but I’ve reposted the details here for ease.\r\n\r\n \r\n\r",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Access Support Team | 68974493 - New Case",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E440000",
       "received": "9 Jun"
     },
     {
@@ -287,8 +278,8 @@
     {
       "title": "OCCUPATIONAL HEALTH - OH REPORT ",
       "sub": "From <strong>Helena Uddin</strong>. Dear Mr Lelitte,\r\n\r\nPlease find attached your Occupational Health Report.\r\n\r\nThe document is Password Protected using yo",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "OCCUPATIONAL HEALTH - OH REPORT ",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E220000",
       "received": "8 Jun"
@@ -296,8 +287,8 @@
     {
       "title": "RE: Workshop: Sustaining Adoption of Leave & Absence",
       "sub": "From <strong>Lyndsey Middleton</strong>. Hi all,\r\n\r\nThank you again for attending the workshop on Sustaining Adoption of Leave &amp; Absence.\r\n\r\nPlease find attached",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "RE: Workshop: Sustaining Adoption of Leave & Absence",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E210000",
       "received": "8 Jun"
@@ -521,12 +512,48 @@
       "received": "5 Jun"
     },
     {
+      "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077EC2CE7D0000",
+      "received": "9 Jun"
+    },
+    {
+      "title": "RE: Holiday Records Duty - proposed reports",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Holiday Records Duty - proposed reports",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E490000",
+      "received": "9 Jun"
+    },
+    {
       "title": "HR Support and Staff Immigration has a new digital home",
       "sub": "From <strong>People Communications</strong>.",
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "HR Support and Staff Immigration has a new digital home",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E480000",
+      "received": "9 Jun"
+    },
+    {
+      "title": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Julie Hickman shared \"Review Status Insight report - CDR bulk deletion 09.06.26\" with you",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E450000",
+      "received": "9 Jun"
+    },
+    {
+      "title": "RE: Access Support Team | 68974493 - New Case",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Access Support Team | 68974493 - New Case",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E440000",
       "received": "9 Jun"
     },
     {
@@ -662,33 +689,6 @@
       "badgeType": "gray",
       "subject": "[ict-a] ICTF Conference 2026 – Final Week for Registration",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36330000",
-      "received": "4 Jun"
-    },
-    {
-      "title": "You have been added to a staff team in Microsoft Teams",
-      "sub": "From <strong>Jessica Oldershaw</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "You have been added to a staff team in Microsoft Teams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36320000",
-      "received": "4 Jun"
-    },
-    {
-      "title": "GLAM Rostering",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "GLAM Rostering",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36310000",
-      "received": "4 Jun"
-    },
-    {
-      "title": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: College Data in PeopleXD - Authorisation to proceed required",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE362E0000",
       "received": "4 Jun"
     }
   ],
@@ -888,5 +888,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Wednesday 10 June · 09:02"
+  "refreshed_at": "Wednesday 10 June · 09:57"
 }
