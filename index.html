@@ -325,9 +325,55 @@ const SEED={"date":"Tuesday 2 June 2026","subtitle":"First day back","context":"
 function getStore(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}}}
 function saveStore(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
 function getTicks(){try{return JSON.parse(localStorage.getItem(TICKS_KEY)||'{}')}catch(e){return{}}}
-function saveTicks(t){localStorage.setItem(TICKS_KEY,JSON.stringify(t))}
+function saveTicks(t){localStorage.setItem(TICKS_KEY,JSON.stringify(t));scheduleStateSync()}
 
 let currentData=null, currentKey=null;
+
+// --- cross-machine tick sync (via Cloudflare Worker) ---
+const STATE_WRITER_URL='https://cc-tasks-writer.kevinlelitte.workers.dev';
+const TICKS_URL='https://raw.githubusercontent.com/begb0037admin/work-inbox/main/data/ticks.json';
+let stateSyncTimer=null, stateSyncReady=false;
+function scheduleStateSync(){
+  if(!stateSyncReady) return;
+  clearTimeout(stateSyncTimer);
+  stateSyncTimer=setTimeout(pushTicks,1500);
+}
+async function pushTicks(){
+  try{
+    const doc={ticks:getTicks(),updated_at:new Date().toISOString()};
+    const res=await fetch(STATE_WRITER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:'inbox-state',message:'tick sync',doc:doc})});
+    const out=await res.json().catch(()=>({}));
+    if(!res.ok||!out.ok) throw new Error(out.error||('HTTP '+res.status));
+    console.log('Ticks synced to GitHub');
+  }catch(e){
+    console.warn('Tick sync failed',e);
+    wiNotify('Ticks not synced - local only. '+(e.message||''));
+  }
+}
+function wiNotify(msg){
+  let el=document.getElementById('wiToast');
+  if(!el){
+    el=document.createElement('div');
+    el.id='wiToast';
+    el.style.cssText='position:fixed;bottom:18px;right:18px;max-width:340px;background:#1a2740;color:#fff;padding:12px 16px;border-radius:10px;font-size:13px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.25);line-height:1.45';
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;
+  el.style.display='block';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{el.style.display='none'},7000);
+}
+async function loadRemoteTicks(){
+  try{
+    const res=await fetch(TICKS_URL+'?t='+Date.now());
+    if(res.ok){
+      const st=await res.json();
+      if(st&&typeof st==='object'&&st.ticks) localStorage.setItem(TICKS_KEY,JSON.stringify(st.ticks));
+    }
+  }catch(e){console.warn('Remote ticks unavailable',e);}
+  stateSyncReady=true;
+}
+
 
 function toggleImport(){
   document.getElementById('importPanel').classList.toggle('visible');
@@ -632,6 +678,8 @@ async function init(){
   const titleEl=document.getElementById('pageTitle');
   if(titleEl) titleEl.textContent=getGreeting();
 
+  await loadRemoteTicks();
+
   let data=null;
 
   // Try GitHub fetch
@@ -670,9 +718,7 @@ async function init(){
       });
     });
     if(hiddenCount===allItems.length){
-      localStorage.removeItem(TICKS_KEY);
-      location.reload();
-      return;
+      saveTicks({});
     }
   }
 
@@ -692,10 +738,12 @@ async function loadTasksWidget(){
     var data=await res.json();
     var tasks=data.tasks||[];
     var todayCount=tasks.filter(function(t){return t.tier==='today';}).length;
+    var tomorrowCount=tasks.filter(function(t){return t.tier==='tomorrow';}).length;
     var weekCount=tasks.filter(function(t){return t.tier==='week';}).length;
     var todoCount=tasks.filter(function(t){return (t.actions||[]).some(function(a){return a.includes('[TODO]');});}).length;
     el.innerHTML=
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Today</span><span class="tasks-widget-count">'+todayCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
       '<a class="tasks-widget-link" href="https://begb0037admin.github.io/command-centre/" target="_blank">&#8594; Open command centre</a>';
