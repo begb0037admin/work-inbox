@@ -1,9 +1,9 @@
 # AGENT_MODEL.md
 # Runtime Operating Model
 
-Version : 1.0
+Version : 2.0
 Status  : Ratified
-Updated : 2026-06-09 (v1.2)
+Updated : 2026-06-10 (v2.0 — single-agent model)
 Author  : Kevin Lelitte, HR Systems, University of Oxford
 
 Governed by: CONSTITUTION.md
@@ -15,8 +15,16 @@ Scope      : All work repositories (begb0037admin)
 
 This document defines the current implementation of the four-role
 model established in CONSTITUTION.md Section 1. It assigns tools
-and software to roles, defines dispatch mechanics, and records
+and software to roles, defines execution mechanics, and records
 platform context.
+
+v2.0 replaces the four-tool dispatch model (Claude Chat / Kevin /
+Cowork / Chrome) with a single-agent model built on Claude Code.
+The constitutional roles are unchanged. What has changed is that
+one agent now holds the reasoning, execution, and verification
+seats, because Claude Code can perform all three natively. The
+role boundaries survive as approval gates rather than as briefs
+passed between tools.
 
 This document changes more frequently than the constitution. When
 the tooling changes, this document is updated. The constitutional
@@ -31,12 +39,11 @@ wins. See CONSTITUTION.md Section 6.
 
 Two machines are in scope for work operations.
 
-**Work machine (Kevin)**
+**Admin machine (Kevin)**
 Operator : Kevin Lelitte
 OS       : Windows
-Username : begb0037 | Domain: AD-OAK
-Path root: C:\Users\begb0037.AD-OAK\
-work-inbox: C:\Users\admin\Documents\Claude\Projects\work-inbox\
+Runs     : Claude Code (primary agent), Outlook COM scripts via
+           Task Scheduler (fetch_inbox.py)
 
 **Personal machine (Hope)**
 Operator : Hope (personal domain)
@@ -44,25 +51,17 @@ OS       : macOS
 Scope    : AIMM and personal projects only — out of scope for
            all work repositories
 
-The paths listed in this section are descriptive runtime context
-only and are not authoritative configuration values.
+The two machines do not share a local filesystem.
 
-The two machines do not share a local filesystem. Files stored on
-one machine are not directly accessible from the other.
-
-GitHub is the authoritative source of truth for all governed
-repositories and acts as the shared storage layer between machines.
-Repository content is authoritative; local copies are working
-copies only.
-
-A Cowork brief that relies on machine-specific paths, configuration,
-or local files may not execute correctly on the other machine. Any
-brief that touches the local filesystem must make the target machine
-explicit.
+**GitHub is the sole authoritative source of truth and the only
+working surface.** As of 2026-06-10, local clones are retired as
+working copies — all reads and writes go through the GitHub API.
+The single exception is scripts that must run locally (Outlook COM),
+and those pull their own latest version from GitHub before every
+run.
 
 Never hardcode machine-specific paths in repository files. Use
-GitHub URLs as the stable reference wherever possible. Scripts that
-require local paths must derive or parameterise them at runtime.
+GitHub URLs as the stable reference wherever possible.
 
 ---
 
@@ -70,116 +69,104 @@ require local paths must derive or parameterise them at runtime.
 
 The four constitutional roles are currently assigned as follows.
 
-**Seat A — Reasoning Seat → Claude Chat**
+**Seat A — Reasoning Seat → Claude Code**
 Thinks, plans, architects, and routes. All sessions begin here.
-Produces all dispatch briefs. Makes all architectural decisions.
-Does not write files. Does not execute commands. Does not operate
-the browser.
 
 **Seat B — Human Seat → Kevin (work) / Hope (personal)**
-Executes read-only terminal commands on instruction from Seat A.
-Pastes output back verbatim without interpretation or modification.
-Human authority is available for oversight, approval, and
-intervention at any point. When invoked, it supersedes all
-in-flight decisions. See CONSTITUTION.md Section 1.
+Holds approval authority and oversight. May intervene at any
+point; when invoked, supersedes all in-flight decisions. Is no
+longer required to run scripts or paste output — Claude Code
+executes directly — but retains the right to do either.
 
-**Seat C — Execution Seat → Cowork**
-The sole seat authorised to implement approved changes. Writes
-files to disk, executes bash commands, makes git commits, and
-controls the browser when browser automation is required. Acts
-only on complete, explicit briefs from Seat A. Has no authority
-to make decisions beyond the brief.
+**Seat C — Execution Seat → Claude Code**
+Implements approved changes directly: GitHub Contents API writes,
+git operations, and script execution on the local machine where a
+task requires it.
 
-**Seat D — Verification Seat → Chrome (browser)**
-Confirms live behaviour in a running environment. Read-only.
-Reports what it observes. Does not interpret or decide.
+**Seat D — Verification Seat → Claude Code**
+Verifies live behaviour by fetching deployed pages and data
+(GitHub Pages, raw content, API state) and by browser inspection
+where needed. Kevin remains the final visual check on dashboards.
 
-Verification is requested only when the required answer cannot be
-obtained from reasoning or implementation outputs.
+One agent holding Seats A, C, and D does not collapse the
+boundaries — it removes the brief-passing overhead between them.
+The boundaries survive as the approval gates below.
 
-Seat D is never the first seat reached in a workflow.
+**Approval gates — Kevin's explicit confirmation is required
+before:**
 
----
+1. Creating new tasks or changing task tiers in command-centre
+2. Any destructive or hard-to-reverse operation — deletions,
+   history rewrites, repository settings changes, credential
+   changes
+3. Publishing anything beyond the begb0037admin repositories
+4. Any amendment to CONSTITUTION.md
+5. Any action in the personal domain (Hope) from a work session,
+   or vice versa
 
-## Section 3 — Dispatch Protocol
-
-Dispatches are issued by Seat A only. Each dispatch targets exactly
-one seat. Dispatches are strictly sequential. Parallel dispatches
-are not permitted. See CONSTITUTION.md Section 2.
-
-**Dispatch notation:**
-
-🔵 RUN SCRIPT   → Seat B
-   Read-only terminal command. Kevin runs exactly as given and
-   pastes output back verbatim.
-
-🟡 COWORK BRIEF → Seat C
-   Implementation instruction. Commands only — no prose. Must be
-   fully self-contained with complete context. Cowork has zero
-   assumed knowledge of the current session.
-
-🔴 CHROME BRIEF → Seat D
-   Numbered checklist of browser actions with specific expected
-   outputs at each step. Used only when Seats A and C cannot
-   resolve the verification need.
-
-A brief is complete when the receiving seat requires no
-architectural decisions to carry it out. An incomplete brief is
-a Seat A failure. See CONSTITUTION.md Section 2.
+Everything else — reads, reversible writes under the backup rules,
+verification — Claude Code executes without asking.
 
 ---
 
-## Section 4 — Cowork Brief Standards
+## Section 3 — Execution Protocol
 
-Cowork briefs must be self-contained. The following are required
-in every brief:
+The v1.x dispatch notation (🔵 RUN SCRIPT / 🟡 COWORK BRIEF /
+🔴 CHROME BRIEF) is retired. Claude Code reasons and executes in
+one loop.
 
-- **Restore point** — the SHA or file state to return to if the
-  change fails. Must be stated explicitly. See CONSTITUTION.md
-  Section 4.
-- **Target machine** — Windows (work) or macOS (personal).
-  Never assumed.
-- **Complete file paths** — derived from GitHub URLs, never
-  hardcoded local paths.
-- **Exit condition** — a clear statement of what done looks like.
+The constitutional sequencing rules survive unchanged:
 
-Assumptions are prohibited. Any information required to complete
-the task must be present in the brief.
+1. **One change at a time.** Verify the result of a write before
+   making the next. No parallel writes to the same file.
+2. **Restore point before change** (CONSTITUTION.md Section 4).
+   Every API write is a commit — the prior commit SHA is the
+   restore point and the rollback procedures in each repo's
+   CLAUDE.md apply. Governed data files additionally require the
+   datestamped Archive/ backup before any write.
+3. **Stop and report** (CONSTITUTION.md Section 2). If a task
+   requires a decision outside the approved scope or hits an
+   approval gate, Claude Code stops and asks Kevin. It does not
+   improvise past a gate.
 
-Large audit or recon output must be written to a file by Cowork,
-not pasted to chat. Seat A reads it surgically on demand via
-targeted fetch.
+---
 
-**Cache-bust rule — mandatory for all Cowork briefs:**
-Every `Invoke-WebRequest` call to `raw.githubusercontent.com` must
-include a cache-busting query string to guarantee a live fetch.
-Use this pattern in every brief:
-```powershell
-$t = Get-Date -Format yyyyMMddHHmm
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/...?t=$t"
-```
-Never use a raw GitHub URL without `?t=$t`. Cached responses are
-stale and will cause Seat C to work from outdated file content.
+## Section 4 — Write Standards
+
+All GitHub writes follow these rules:
+
+- **Contents API only** — GET fresh SHA immediately before PUT.
+  On 409 conflict, re-fetch and retry once; on second failure,
+  stop and report.
+- **Archive/ backup first** for governed data files (command-centre:
+  data/tasks.json and index.html; work-inbox: index.html). One
+  datestamped backup per file per day; skip if today's exists.
+- **Byte-level edits for non-ASCII content.** Files containing
+  multi-byte characters are edited as bytes (base64 in, targeted
+  byte replacement, base64 out). Never decode/re-encode whole
+  files through a text layer — that is how the 2026-06 mojibake
+  was created.
+- **Cache-bust all raw reads.** Every raw.githubusercontent.com
+  fetch carries `?t=<timestamp>`. API reads do not need it.
+- **No secrets in any committed file.** PATs and API keys live in
+  Windows user environment variables (scripts) and the gh CLI
+  keyring (Claude Code).
+- **Large outputs** are written to files in the repo, not pasted
+  into chat.
 
 ---
 
 ## Section 5 — Session Discipline
 
-These rules apply every session.
-
-1. Large output → Cowork writes to file. Never pasted to chat.
-   Seat A requests specific sections only.
-2. Trigger "prep handover" before any large execution task —
-   not after. Large execution task is determined by operator
-   judgement and includes any task expected to generate substantial
-   output, prolonged execution, or significant context accumulation.
-3. Open a fresh session for any task that starts with a large
-   data load.
-4. After a sustained or complex session, Seat A flags proactively:
-   "This session has been running for a while — should I generate
-   a handover brief now as a precaution?"
-5. No session closes without documentation updated to reflect
-   current state. See CONSTITUTION.md Section 5.
+1. Claude Code holds persistent memory across sessions and the
+   repositories hold the documentation. Together these replace
+   handover briefs for same-operator continuation. Handover briefs
+   remain mandatory for cross-operator transfer (Section 6).
+2. No session closes without documentation updated to reflect
+   current state (CONSTITUTION.md Section 5). HANDOVER.md is
+   updated at the end of every working session.
+3. Decisions live in documentation, not in chat history. Anything
+   worth keeping gets committed.
 
 ---
 
@@ -191,24 +178,13 @@ Two operators share the same GitHub account and tooling.
 **Hope**  — personal domain. AIMM and personal projects only.
 
 Domain boundaries are strict. Work context is never carried into
-personal sessions and vice versa. Mixed-domain briefs are not
-valid.
+personal sessions and vice versa. Mixed-domain work requires a
+Cross-Domain Code Brief.
 
-Shared tooling does not create shared authority. Domain separation
-remains in force regardless of platform, repository ownership, or
-account configuration.
-
-When an operator hits a session limit, they generate a handover
-brief and pass it to the other operator. The receiving operator
-works from the brief alone — zero assumed knowledge from the
-sending session. On completion, the receiving operator issues a
-return brief.
-
-The sending operator always generates the handover brief. The
-receiving operator never generates it on their behalf.
-
-If a receiving operator is asked to pick up work without a
-handover brief, the correct response is to request one before
+When an operator hands work to the other, the sending operator
+generates a handover brief; the receiving operator works from the
+brief alone and issues a return brief on completion. If asked to
+pick up work without a handover brief, request one before
 proceeding.
 
 **Failover chain (work):** Kevin → Hope
@@ -218,17 +194,20 @@ proceeding.
 
 ## Section 7 — GitHub Access
 
-All repositories are hosted under the begb0037admin GitHub
-account. Private repositories are accessed via the GitHub
-Contents API.
+All repositories are hosted under the begb0037admin GitHub account.
 
-URL pattern : https://api.github.com/repos/begb0037admin/
-              {repo}/contents/{path}?ref=main
-Auth header : Authorization: token {PAT}
+Claude Code authenticates via the gh CLI (keyring; repo, workflow,
+gist, read:org scopes). Scripts (fetch_inbox.py) authenticate with
+a PAT held in Windows user environment variables.
 
-Authentication secrets are held outside repository files and are
-never committed. When credentials are rotated, both operator
-preferences must be updated on the same day.
+Repositories are currently public — required for GitHub Pages
+hosting on the current plan. The historical access reason (Seats
+A/C could not reach private repos) no longer applies under Claude
+Code; visibility is now a data-exposure decision, tracked per repo
+in CLAUDE.md.
+
+Authentication secrets are never committed. When credentials are
+rotated, both operator preferences must be updated on the same day.
 
 ---
 
@@ -241,9 +220,11 @@ without constitutional amendment.
 | Repository           | Status         | Notes                    |
 |----------------------|----------------|--------------------------|
 | clockify             | Active         | Gold standard / template |
+| command-centre       | Active         | Task dashboard (Module 1)|
+| work-inbox           | Active         | Inbox briefing pipeline  |
 | hris-dashboard       | Active         | Complex — handle last    |
+| hris-launcher        | Active         |                          |
 | hr-fa-knowledge-base | Active         |                          |
-| work-inbox           | Active         |                          |
 | meeting-records      | Active         |                          |
 | hr-projects          | Active         |                          |
 | desktop-tutorial     | Decommissioned | Deletion pending         |
@@ -259,3 +240,11 @@ without constitutional amendment.
 | 1.0     | 2026-06-06 | Initial ratification.               |
 | 1.1     | 2026-06-09 | Updated work-inbox local path.      |
 | 1.2     | 2026-06-09 | Cache-bust rule added to Section 4. |
+| 2.0     | 2026-06-10 | Single-agent model: Claude Code     |
+|         |            | holds Seats A, C, D; Kevin holds    |
+|         |            | Seat B as approval authority.       |
+|         |            | Dispatch notation retired; approval |
+|         |            | gates defined. GitHub-only working  |
+|         |            | surface ratified. Repo table        |
+|         |            | updated (command-centre,            |
+|         |            | hris-launcher added).               |
