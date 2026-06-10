@@ -401,7 +401,7 @@ try:
         }
         if tier == "today":
             priorities_today.append(entry)
-        elif tier == "week":
+        elif tier in ("week", "tomorrow"):
             priorities_week.append(entry)
     print(f"Command Centre loaded - today:{len(priorities_today)} week:{len(priorities_week)}")
 except Exception as e:
@@ -416,6 +416,18 @@ suggestions = {
     "new_tasks":    [],
     "task_updates": []
 }
+# Dedupe ledger - emails already applied to Command Centre tasks
+ledger = {"applied": {}}
+if GITHUB_PAT:
+    try:
+        _lurl = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
+        _lreq = urllib.request.Request(_lurl, headers={"Authorization": f"token {GITHUB_PAT}", "User-Agent": "work-inbox-script"})
+        with urllib.request.urlopen(_lreq) as r:
+            ledger = json.loads(base64.b64decode(json.loads(r.read())["content"]).decode("utf-8"))
+        if "applied" not in ledger:
+            ledger["applied"] = {}
+    except Exception:
+        pass
 try:
     task_summaries = []
     for t in cc_content.get("tasks", []):
@@ -451,16 +463,16 @@ try:
         "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 8.\n"
         "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
         "{\n"
-        '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
+        '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|tomorrow|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
         '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}]\n'
         "}\n"
-        'Rules: tier "today" only if the deadline is today or overdue, otherwise "week". '
+        'Rules: tier "today" only if the deadline is today or overdue; "tomorrow" if it must happen the next working day; otherwise "week". '
         "Never invent case numbers or names. Automated notifications, newsletters, calendar "
         "accept/decline messages and out-of-office replies are never tasks."
     )
 
     triage_user = (
-        f"Today is {today_str}.\n\n"
+        f"Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.\n\n"
         f"EXISTING TASKS:\n{json.dumps(task_summaries, indent=1, ensure_ascii=True)}\n\n"
         f"EMAILS (urgent + needs response):\n{json.dumps(api_emails, indent=1, ensure_ascii=True)}"
     )
@@ -486,7 +498,7 @@ try:
         src = email_candidates[i]
         suggestions["new_tasks"].append({
             "title":         nt.get("title", ""),
-            "tier":          nt.get("tier") if nt.get("tier") in ("today", "week") else "week",
+            "tier":          nt.get("tier") if nt.get("tier") in ("today", "tomorrow", "week") else "week",
             "description":   nt.get("description", ""),
             "email_subject": src["subject"],
             "email_from":    src["from"],
@@ -497,6 +509,8 @@ try:
         i   = tu.get("email_n")
         tid = tu.get("task_id", "")
         if not isinstance(i, int) or not (0 <= i < len(email_candidates)) or tid not in task_by_id:
+            continue
+        if email_candidates[i]["entry_id"] + "_" + tid in ledger.get("applied", {}):
             continue
         src = email_candidates[i]
         suggestions["task_updates"].append({
@@ -514,6 +528,77 @@ except Exception as e:
 
 
 # Ã¢ÂÂÃ¢ÂÂ Assemble final briefing Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+
+# Phase 3.6 - apply task updates directly to Command Centre tasks.json
+def _gh_get(url, headers):
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read())
+
+def _gh_put(url, headers, message, content_bytes, sha=None):
+    payload = {"message": message,
+               "content": base64.b64encode(content_bytes).decode("ascii")}
+    if sha:
+        payload["sha"] = sha
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"),
+                                 headers=headers, method="PUT")
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read())
+
+if GITHUB_PAT and suggestions["task_updates"]:
+    try:
+        gh_headers = {"Authorization": f"token {GITHUB_PAT}",
+                      "Content-Type":  "application/json",
+                      "User-Agent":    "work-inbox-script"}
+        cc_tasks_url = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
+        cc_meta   = _gh_get(cc_tasks_url, gh_headers)
+        tasks_doc = json.loads(base64.b64decode(cc_meta["content"]).decode("utf-8"))
+
+        # Mandatory daily backup before any write to tasks.json
+        backup_path = f"Archive/tasks_backup_{datetime.now().strftime('%Y%m%d')}.json"
+        backup_url  = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{backup_path}"
+        try:
+            _gh_get(backup_url, gh_headers)
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+            _gh_put(backup_url, gh_headers,
+                    f"backup: tasks.json {datetime.now().strftime('%Y-%m-%d')}",
+                    base64.b64decode(cc_meta["content"]))
+            print(f"Phase 3.6 - daily backup created: {backup_path}")
+
+        stamp   = datetime.now().strftime("%d %b %Y")
+        applied = 0
+        for upd in suggestions["task_updates"]:
+            for task in tasks_doc.get("tasks", []):
+                if task.get("id") == upd["task_id"]:
+                    task.setdefault("actions", []).append(
+                        f"[{stamp}] {upd['note']} (email: {upd['email_from']} - {upd['email_subject']})")
+                    task["entryId"] = upd["entry_id"]
+                    applied += 1
+                    break
+        if applied:
+            _gh_put(cc_tasks_url, gh_headers,
+                    f"inbox: apply {applied} task update(s) {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                    json.dumps(tasks_doc, indent=2, ensure_ascii=False).encode("utf-8"),
+                    cc_meta["sha"])
+            print(f"Phase 3.6 done - {applied} update(s) applied to Command Centre")
+            for u in suggestions["task_updates"]:
+                ledger["applied"][u["entry_id"] + "_" + u["task_id"]] = datetime.now().strftime("%Y-%m-%d")
+            ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
+            l_sha = None
+            try:
+                l_sha = _gh_get(ledger_url, gh_headers).get("sha")
+            except urllib.error.HTTPError as e:
+                if e.code != 404:
+                    raise
+            _gh_put(ledger_url, gh_headers, "chore: update triage ledger",
+                    json.dumps(ledger, indent=1).encode("utf-8"), l_sha)
+        suggestions["applied_updates"] = suggestions.pop("task_updates")
+    except Exception as e:
+        print(f"WARNING: Phase 3.6 apply failed - {e}")
+
+
 briefing = {
     "date":         today_str,
     "subtitle":     subtitle,
