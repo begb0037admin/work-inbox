@@ -1,61 +1,34 @@
 {
-  "generated_at": "2026-06-10 15:05",
+  "generated_at": "2026-06-10 17:00",
   "new_tasks": [
     {
-      "title": "Review CDR/PD working group minutes and confirm Insight module action",
+      "title": "Reconnect with Sophie Levy on scoping project status",
       "tier": "week",
-      "description": "Lindsey Spriggs sent minutes from the 9 June CDR/PD working group meeting. This includes action item #6 (Insight module automated reminder functionality) that Kevin is responsible for and which has been marked In Progress since February 2026. Kevin needs to review the minutes and confirm whether a response has been captured or if further action is required.",
-      "email_subject": "Bi-monthly CDR/PD working group - 9 June minutes",
-      "email_from": "Lindsey Spriggs",
-      "received": "2026-06-09 13:28",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E430000"
-    },
-    {
-      "title": "Reconnect with Sophie Levy on scoping session status",
-      "tier": "tomorrow",
-      "description": "Sophie Levy has not heard from Kevin in two months and is seeking an update on a scoping project. Latest information she has is from April 2026. Kevin needs to reconnect and provide a current status update on the scoping work to close this gap.",
+      "description": "Sophie Levy has not heard from Kevin in two months and is seeking a project status update with latest information from April 2026. Kevin needs to reconnect and provide current clarity on the scoping work that was discussed.",
       "email_subject": "RE: Scoping Session update",
       "email_from": "Sophie Levy",
       "received": "2026-06-08 15:58",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
-    },
-    {
-      "title": "Request Holiday Records Duty review document from Athena",
-      "tier": "week",
-      "description": "Kevin asked Athena to send through a Holiday Records Duty requirements review document that he needs to examine. This will help Kevin understand the scope and requirements for this duty, which feeds into existing task t1781099880461.",
-      "email_subject": "Re: Holiday Records Duty - proposed reports",
-      "email_from": "Kevin (sent to: Simon Burford; Athena Artuso)",
-      "received": "2026-06-10 09:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077ECC59D30000"
     }
   ],
-  "applied_updates": [
+  "task_updates": [
     {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project — set up REF2029 pay admin codes in UOXU",
-      "note": "Simon has found that some reference data codes were too long and adjusted them; Kevin needs to review the changes to confirm they are acceptable before proceeding with the setup.",
-      "email_subject": "RE: College staff in PeopleXD proposal",
-      "email_from": "Simon Burford",
-      "received": "2026-06-10 12:06",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACC0000"
+      "task_id": "t1781099880461",
+      "task_title": "Review Holiday Records Duty reports from Athena",
+      "note": "Athena has sent the full Holiday Records Duty review with introductory section following management team meeting discussion; Kevin needs to review this document.",
+      "email_subject": "RE: Holiday Records Duty - proposed reports",
+      "email_from": "Athena Artuso",
+      "received": "2026-06-10 13:48",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACE0000"
     },
     {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project — set up REF2029 pay admin codes in UOXU",
-      "note": "Simon identified that proposed org structure codes for the multi-company setup were too long and has made adjustments in the test environment; Kevin should review these changes.",
-      "email_subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "task_id": "t004",
+      "task_title": "Raise DTP1092 College data change management record",
+      "note": "Simon has mentioned Kevin in the DTP1092 College Staff in PXD Proposal document, indicating progress on the change management record setup.",
+      "email_subject": "Simon Burford mentioned you in \"DTP1092 - College Staff in PXD Proposal\".",
       "email_from": "Simon Burford",
-      "received": "2026-06-10 12:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACB0000"
-    },
-    {
-      "task_id": "t001",
-      "task_title": "Brief team directly",
-      "note": "Kevin shared a KPI presentation with Michael O'Sullivan on 9 June, indicating progress on team coordination work as part of the return briefing cycle.",
-      "email_subject": "Kevin Lelitte shared \"KPI presentation - May 2026\" with you",
-      "email_from": "Kevin (sent to: Michael O'Sullivan)",
-      "received": "2026-06-09 15:11",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077D9F83560000"
+      "received": "2026-06-10 11:13",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACA0000"
     }
   ]
 }
