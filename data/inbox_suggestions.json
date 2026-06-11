@@ -1,34 +1,34 @@
 {
-  "generated_at": "2026-06-10 17:00",
+  "generated_at": "2026-06-11 09:00",
   "new_tasks": [
     {
-      "title": "Reconnect with Sophie Levy on scoping project status",
+      "title": "Reconnect with Sophie Levy on scoping project",
       "tier": "week",
-      "description": "Sophie Levy has not heard from Kevin in two months and is seeking a project status update with latest information from April 2026. Kevin needs to reconnect and provide current clarity on the scoping work that was discussed.",
+      "description": "Sophie Levy has not heard from Kevin in two months and is seeking an update on scoping work from April 2026. Kevin needs to reconnect, clarify current project status, and provide an update on progress.",
       "email_subject": "RE: Scoping Session update",
       "email_from": "Sophie Levy",
       "received": "2026-06-08 15:58",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
     }
   ],
-  "task_updates": [
+  "applied_updates": [
     {
       "task_id": "t1781099880461",
       "task_title": "Review Holiday Records Duty reports from Athena",
-      "note": "Athena has sent the full Holiday Records Duty review with introductory section following management team meeting discussion; Kevin needs to review this document.",
+      "note": "Athena has sent the full Holiday Records Duty review with scope and requirements as requested; Kevin can now proceed to review.",
       "email_subject": "RE: Holiday Records Duty - proposed reports",
       "email_from": "Athena Artuso",
       "received": "2026-06-10 13:48",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACE0000"
     },
     {
-      "task_id": "t004",
-      "task_title": "Raise DTP1092 College data change management record",
-      "note": "Simon has mentioned Kevin in the DTP1092 College Staff in PXD Proposal document, indicating progress on the change management record setup.",
-      "email_subject": "Simon Burford mentioned you in \"DTP1092 - College Staff in PXD Proposal\".",
-      "email_from": "Simon Burford",
-      "received": "2026-06-10 11:13",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACA0000"
+      "task_id": "t1781099880461",
+      "task_title": "Review Holiday Records Duty reports from Athena",
+      "note": "Kevin confirmed willingness to review Athena's Holiday Records Duty proposed reports and asked Athena to send through the document.",
+      "email_subject": "Re: Holiday Records Duty - proposed reports",
+      "email_from": "Kevin (sent to: Simon Burford; Athena Artuso)",
+      "received": "2026-06-10 09:34",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077ECC59D30000"
     }
   ]
 }
