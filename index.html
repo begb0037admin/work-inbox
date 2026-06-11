@@ -285,6 +285,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
       </div>
     </div>
 
+    <div id="staleBanner"></div>
     <div id="contextBar"></div>
     <div id="inboxCol"></div>
     <div class="footer">All outgoing communication requires Kevin's review and sign-off before sending</div>
@@ -368,7 +369,9 @@ async function loadRemoteTicks(){
     const res=await fetch(TICKS_URL+'?t='+Date.now());
     if(res.ok){
       const st=await res.json();
-      if(st&&typeof st==='object'&&st.ticks) localStorage.setItem(TICKS_KEY,JSON.stringify(st.ticks));
+      // Merge remote over local (remote wins per key) - never wholesale replace,
+      // so tick history that only exists on this machine is not destroyed.
+      if(st&&typeof st==='object'&&st.ticks) localStorage.setItem(TICKS_KEY,JSON.stringify(Object.assign({},getTicks(),st.ticks)));
     }
   }catch(e){console.warn('Remote ticks unavailable',e);}
   stateSyncReady=true;
@@ -411,14 +414,44 @@ function getArchiveData(){
   });
 }
 function getSectionLabel(s){
-  return {urgent:'Urgent',needs:'Needs',fyi:'FYI',low:'Low',priorities:'Priority'}[s]||s;
+  return {urgent:'Urgent',needs:'Needs',fyi:'FYI',low:'Low',priorities:'Priority',pt:'Today',pw:'Week'}[s]||s;
+}
+// --- stable tick keys ---
+// Ticks were originally keyed by position (e.g. urgent_3). The briefing regenerates
+// several times a day and items shift position, so positional keys re-attach done
+// state to the wrong items. Keys are now derived from stable content (entry_id for
+// emails, title for tasks); positional keys are still read as a legacy fallback.
+function tickHash(s){let h=5381;for(let i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0;}return h.toString(36);}
+function tickIdFor(section,item,index){
+  const pri=(section==='pt'||section==='pw');
+  const basis=pri?(item.title||item.text||''):((item.entry_id&&item.entry_id.length)?item.entry_id:(item.title||item.text||''));
+  const prefix=pri?('pri_'+section):section;
+  return basis?(prefix+'_h'+tickHash(basis)):(prefix+'_'+index);
+}
+function legacyTickIdFor(section,index){
+  return (section==='pt'||section==='pw')?('pri_'+section+'_'+index):(section+'_'+index);
+}
+function makeTickIds(items,section){
+  const seen={};
+  return items.map((item,i)=>{
+    let id=tickIdFor(section,item,i);
+    if(seen[id]!=null){seen[id]++;id+='_d'+seen[id];}else seen[id]=0;
+    return id;
+  });
+}
+function tickedFor(ticks,dayKey,entry){
+  const k=dayKey+'_'+entry.id;
+  if(k in ticks) return !!ticks[k];
+  return !!ticks[dayKey+'_'+entry.legacyId];
 }
 function getAllItemsForDay(data){
-  // Returns flat array of {section, index, title, ticked}
-  const sections=['priorities','urgent','needs','fyi','low'];
+  // Returns flat array of {section, index, id, legacyId, item, title}
+  const groups=[['pt','prioritiesToday'],['pw','prioritiesWeek'],['priorities','priorities'],['urgent','urgent'],['needs','needs'],['fyi','fyi'],['low','low']];
   const result=[];
-  sections.forEach(s=>{
-    (data[s]||[]).forEach((item,i)=>{result.push({section:s,index:i,title:item.title||item.text||'(untitled)'});});
+  groups.forEach(g=>{
+    const sec=g[0], items=data[g[1]]||[];
+    const ids=makeTickIds(items,sec);
+    items.forEach((item,i)=>{result.push({section:sec,index:i,id:ids[i],legacyId:legacyTickIdFor(sec,i),item:item,title:item.title||item.text||'(untitled)'});});
   });
   return result;
 }
@@ -435,9 +468,9 @@ function renderArchiveList(){
   const ticks=getTicks();
   el.innerHTML=entries.map((e,di)=>{
     const items=getAllItemsForDay(e.data);
-    const tickedCount=items.filter(it=>ticks[e.key+'_'+it.section+'_'+it.index]).length;
+    const tickedCount=items.filter(it=>tickedFor(ticks,e.key,it)).length;
     const itemsHtml=items.map(it=>{
-      const t=!!ticks[e.key+'_'+it.section+'_'+it.index];
+      const t=tickedFor(ticks,e.key,it);
       return `<div class="archive-item-row"><span class="${t?'archive-item-tick':'archive-item-untick'}">${t?'✓':'○'}</span><span class="archive-item-section">${getSectionLabel(it.section)}</span><span>${it.title}</span></div>`;
     }).join('');
     return `<div class="archive-day">
@@ -461,22 +494,21 @@ function exportArchiveMd(){
   let md='# Inbox Briefing Archive\n\nExported: '+new Date().toLocaleString('en-GB')+'\n\n---\n\n';
   entries.forEach(e=>{
     md+='## '+e.dateStr+'\n\n';
-    const sections=['priorities','urgent','needs','fyi','low'];
-    const labels={priorities:'Priority Actions',urgent:'Urgent',needs:'Needs Response',fyi:'FYI',low:'Low Priority'};
-    sections.forEach(s=>{
-      const items=e.data[s]||[];
-      if(!items.length) return;
-      md+='### '+labels[s]+'\n\n';
-      items.forEach((item,i)=>{
-        const t=!!ticks[e.key+'_'+s+'_'+i];
-        const title=item.title||item.text||'(untitled)';
-        md+=(t?'- [x] ':'- [ ] ')+title+'\n';
-        const sub=item.sub||item.notes||'';
-        if(sub) md+='  > '+sub.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim()+'\n';
-      });
-      md+='\n';
+    const labels={pt:'Priority Actions - Today',pw:'Priority Actions - This Week',priorities:'Priority Actions',urgent:'Urgent',needs:'Needs Response',fyi:'FYI',low:'Low Priority'};
+    const all=getAllItemsForDay(e.data);
+    let lastSec=null;
+    all.forEach(it=>{
+      if(it.section!==lastSec){
+        if(lastSec!==null) md+='\n';
+        md+='### '+(labels[it.section]||it.section)+'\n\n';
+        lastSec=it.section;
+      }
+      const t=tickedFor(ticks,e.key,it);
+      md+=(t?'- [x] ':'- [ ] ')+it.title+'\n';
+      const sub=it.item.sub||it.item.notes||'';
+      if(sub) md+='  > '+sub.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim()+'\n';
     });
-    md+='---\n\n';
+    md+='\n---\n\n';
   });
   const blob=new Blob([md],{type:'text/markdown'});
   const url=URL.createObjectURL(blob);
@@ -528,39 +560,68 @@ function clearToday(){
   localStorage.removeItem(TODAY_KEY);
   renderBriefing(SEED,'seed');
 }
-function toggleTick(id){
+// Burst guard: on 11 June 2026 ~30 items were ticked in seconds by runaway clicks
+// (each instant hide pulled the next checkbox under the pointer). Require explicit
+// confirmation when ticks arrive faster than deliberate use.
+let recentTickTimes=[];
+function tickBurstOk(){
+  const now=Date.now();
+  recentTickTimes=recentTickTimes.filter(t=>now-t<4000);
+  recentTickTimes.push(now);
+  if(recentTickTimes.length>=5){
+    recentTickTimes=[];
+    if(!confirm('You are marking items done very quickly - keep going?')) return false;
+  }
+  return true;
+}
+function hideLater(el){
+  clearTimeout(el._hideT);
+  el._hideT=setTimeout(()=>{el.classList.add('card-hidden')},700);
+}
+function cancelHide(el){
+  clearTimeout(el._hideT);
+  el.classList.remove('card-hidden');
+}
+function toggleTick(id,legacyId){
+  const next=!isTicked(id,legacyId);
+  if(next&&!tickBurstOk()) return;
   const ticks=getTicks(), k=currentKey+'_'+id;
-  ticks[k]=!ticks[k]; saveTicks(ticks);
+  ticks[k]=next;
+  if(legacyId&&legacyId!==id) delete ticks[currentKey+'_'+legacyId];
+  saveTicks(ticks);
   const cb=document.getElementById('cb_'+id);
   const item=document.getElementById('item_'+id);
   const prow=document.getElementById('prow_'+id);
-  if(cb) cb.classList.toggle('checked',ticks[k]);
+  if(cb) cb.classList.toggle('checked',next);
   if(item){
     const wrapper=item.closest('.card-link');
-    if(ticks[k]){
+    if(next){
       item.classList.add('done');
-      if(!showingDoneItems) item.classList.add('card-hidden');
-      else item.classList.remove('card-hidden');
-      if(wrapper){
-        wrapper.classList.add('done');
-        if(!showingDoneItems) wrapper.classList.add('card-hidden');
-        else wrapper.classList.remove('card-hidden');
-      }
+      if(wrapper) wrapper.classList.add('done');
+      // Delay the hide so the list does not collapse under the pointer -
+      // a repeated click toggles this same item instead of ticking the next one.
+      if(!showingDoneItems){ hideLater(item); if(wrapper) hideLater(wrapper); }
+      else { cancelHide(item); if(wrapper) cancelHide(wrapper); }
     } else {
-      item.classList.remove('done','card-hidden');
-      if(wrapper) wrapper.classList.remove('done','card-hidden');
+      item.classList.remove('done'); cancelHide(item);
+      if(wrapper){ wrapper.classList.remove('done'); cancelHide(wrapper); }
     }
   }
   if(prow){
-    if(ticks[k]){ prow.classList.add('done'); prow.style.display=''; }
-    else { prow.classList.remove('done'); prow.style.display=''; }
+    prow.classList.toggle('done',next); prow.style.display='';
   }
 }
 function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
-function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
+function isTicked(id,legacyId){
+  if(!currentKey) return false;
+  const t=getTicks(), k=currentKey+'_'+id;
+  if(k in t) return !!t[k];
+  if(legacyId){const lk=currentKey+'_'+legacyId; if(lk in t) return !!t[lk];}
+  return false;
+}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
 function sanitizeSub(text){
@@ -575,10 +636,11 @@ function sanitizeSub(text){
 
 function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
+  const ids=makeTickIds(items,cls);
   return items.map((item,i)=>{
-    const id=cls+'_'+i, ticked=isTicked(id);
+    const id=ids[i], legacyId=legacyTickIdFor(cls,i), ticked=isTicked(id,legacyId);
     const hasLink=item.entry_id&&item.entry_id.length>0;
-    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
+    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}','${legacyId}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
     return hasLink?`<a class="card-link${ticked?' done':''}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
@@ -600,8 +662,9 @@ function togglePriCard(i){
 
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="no-items">No tasks for today.</div>';
+  const ids=makeTickIds(priorities,sec);
   return priorities.map((p,i)=>{
-    const id='pri_'+sec+'_'+i, ticked=isTicked(id);
+    const id=ids[i], legacyId=legacyTickIdFor(sec,i), ticked=isTicked(id,legacyId);
     const titleText = p.title || p.text || '(untitled)';
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
@@ -611,7 +674,7 @@ function renderPriorityCards(priorities,key,sec){
     </div>`;
     return `<div class="pri-card${ticked?' done':''}" id="item_${id}">
       <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
-        <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
+        <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}','${legacyId}');event.stopPropagation()"></div></div>
         <span class="pri-card-title">${titleText}</span>
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
@@ -705,24 +768,30 @@ async function init(){
     return;
   }
 
-  // Safety reset: if done ticks would hide everything, clear them
-  const currentKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
-  const ticks=getTicks();
-  const allItems=[...(data.urgent||[]),(data.needs||[]),(data.fyi||[]),(data.low||[])].flat();
-  if(allItems.length>0){
-    const sections=['urgent','needs','fyi','low'];
-    let hiddenCount=0;
-    sections.forEach(function(s){
-      (data[s]||[]).forEach(function(_,i){
-        if(ticks[currentKey+'_'+s+'_'+i]) hiddenCount++;
-      });
-    });
-    if(hiddenCount===allItems.length){
-      saveTicks({});
+  const dayKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
+  renderBriefing(data, dayKey);
+
+  // Stale-briefing banner: if the displayed briefing is not from today, say so -
+  // otherwise old ticks on an old briefing look like a refresh wiped the day.
+  const todayStr=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Europe/London'}).replace(/,/g,'').replace(/\s+/g,' ').trim();
+  const briefDate=(data.date||'').replace(/,/g,'').replace(/\s+/g,' ').trim();
+  if(briefDate&&briefDate!==todayStr){
+    const b=document.getElementById('staleBanner');
+    if(b){
+      b.style.cssText='background:#fff7e0;border:1px solid #e6c200;color:#664d03;padding:10px 16px;border-radius:10px;margin-bottom:14px;font-size:13px;font-weight:600';
+      b.textContent='This briefing is from '+data.date+' - a new one has not been generated yet today.';
     }
   }
 
-  renderBriefing(data, currentKey);
+  // Safety guard: if every item is ticked, do NOT delete anything (the old reset
+  // wiped the whole tick store, including other days). Show the items instead so
+  // an accidental mass-tick is visible and reversible.
+  const ticks=getTicks();
+  const all=getAllItemsForDay(data);
+  if(all.length&&all.every(it=>tickedFor(ticks,dayKey,it))){
+    if(!showingDoneItems) toggleShowDone();
+    wiNotify('Every item is marked done - showing all items. Nothing has been deleted; untick anything not actually complete.');
+  }
 }
 
 init();

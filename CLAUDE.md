@@ -53,6 +53,7 @@ Do NOT ask Kevin for a recap. The docs above are the recap.
 - ANTHROPIC_API_KEY and GITHUB_PAT stored as Windows User env vars — never in any file
 - Model locked to claude-haiku-4-5 — Sonnet timed out on this inbox size
 - `index.html` edits: always use binary `atob()`/`btoa()` approach — NEVER `TextEncoder` on file content (re-encodes em-dash bytes, re-garbles headings)
+- Tick keys in `data/ticks.json` are content-hash based (`<dateKey>_<section>_h<hash>`); legacy positional keys (`<dateKey>_<section>_<index>`) are read as fallback only — never write new positional keys
 
 ## What Was Tried and Abandoned
 | Approach | Reason |
