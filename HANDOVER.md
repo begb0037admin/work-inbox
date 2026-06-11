@@ -1,7 +1,25 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-09 (late evening)
-**Status:** Active — fully working. Session ended 2026-06-09 late evening.
+**Last updated:** 2026-06-11
+**Status:** Active — fully working. 2026-06-11 session: mass-tick incident investigated, state restored, root-cause fixes applied.
+
+---
+
+## Incident 2026-06-11 — all priority actions marked done
+
+**Symptom:** Morning of 11 June, dashboard showed the 10 June briefing with every priority action / urgent / needs item ticked and struck through. Kevin did not tick them.
+
+**Root cause (from git history of data/ticks.json):** Not a refresh, rollover, or key-mismatch bug — the ticks were real writes synced via the Cloudflare Worker between 00:17 and 01:19 BST on 11 June, in strict top-to-bottom index order in rapid batches (e.g. urgent_0–9 inside one 1.5s-debounce window, then needs_0–7, stopping at 8 of 40 needs items). Mechanism: ticking a card hid it **instantly**, collapsing the list so the next checkbox slid under the pointer — repeated clicks at one screen position (stuck/faulty mouse button, phantom touch, or similar runaway input on a machine with the dashboard open) tick an entire section. The header said "Wednesday 10 June" because no 11 June briefing had been generated yet; the stale date was a red herring.
+
+**Recovery:** data/ticks.json restored to the last user-intended state (commit 336c5e8, everything unticked). Incident keys kept explicitly `false` so the merge-on-load overrides stale `true` values in any browser's localStorage. No data was deleted — full tick history remains in git.
+
+**Fixes applied (index.html):**
+1. **Stable tick keys** — ticks now keyed by content hash (email entry_id, or title for priority tasks) instead of list position, with legacy positional keys still honoured as a read fallback. Briefing regeneration/reordering can no longer re-attach done state to the wrong items.
+2. **Burst guard** — 5+ ticks within 4 seconds prompts "keep going?" before continuing; blocks runaway input.
+3. **Delayed hide (700ms)** — ticked cards no longer vanish instantly, so a repeated click toggles the *same* item rather than cascading down the list.
+4. **Remote tick load merges instead of replaces** localStorage (remote wins per key) — machine-local history is no longer destroyed on load.
+5. **Destructive "safety reset" removed** — the old init() path wiped the *entire* tick store (all days) if every inbox item was ticked. Now: nothing is deleted; the dashboard auto-shows done items with a toast.
+6. **Stale-briefing banner** — if the displayed briefing is not from today, a yellow banner says so.
 
 ---
 
