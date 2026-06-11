@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-06-11 09:00",
+  "generated_at": "2026-06-11 11:00",
   "new_tasks": [
     {
-      "title": "Reconnect with Sophie Levy on scoping project",
-      "tier": "week",
-      "description": "Sophie Levy has not heard from Kevin in two months and is seeking an update on scoping work from April 2026. Kevin needs to reconnect, clarify current project status, and provide an update on progress.",
+      "title": "Reconnect with Sophie Levy on scoping project status",
+      "tier": "tomorrow",
+      "description": "Sophie Levy has not heard from Kevin in two months and is seeking an update on the scoping session work from April 2026. Kevin needs to reconnect, clarify current project status, and provide a meaningful update to resume engagement.",
       "email_subject": "RE: Scoping Session update",
       "email_from": "Sophie Levy",
       "received": "2026-06-08 15:58",
@@ -13,22 +13,22 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t1781099880461",
-      "task_title": "Review Holiday Records Duty reports from Athena",
-      "note": "Athena has sent the full Holiday Records Duty review with scope and requirements as requested; Kevin can now proceed to review.",
-      "email_subject": "RE: Holiday Records Duty - proposed reports",
-      "email_from": "Athena Artuso",
-      "received": "2026-06-10 13:48",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACE0000"
+      "task_id": "t004",
+      "task_title": "Raise DTP1092 College data change management record",
+      "note": "Crispin has uploaded the updated Organization Structure document to the project Teams site with today's date; this supports the DTP1092 change management record work.",
+      "email_subject": "RE: College staff in PeopleXD proposal",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-06-10 13:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACD0000"
     },
     {
-      "task_id": "t1781099880461",
-      "task_title": "Review Holiday Records Duty reports from Athena",
-      "note": "Kevin confirmed willingness to review Athena's Holiday Records Duty proposed reports and asked Athena to send through the document.",
-      "email_subject": "Re: Holiday Records Duty - proposed reports",
-      "email_from": "Kevin (sent to: Simon Burford; Athena Artuso)",
-      "received": "2026-06-10 09:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077ECC59D30000"
+      "task_id": "t005",
+      "task_title": "College Data in PXD Project — set up REF2029 pay admin codes in UOXU",
+      "note": "Kevin has located Pay Administered By values in UOXU and can see what exists at level 6; ready to progress once Simon confirms missing reference data creation.",
+      "email_subject": "Re: Organisational Hierarchy & Payroll Company Set-Up",
+      "email_from": "Kevin (sent to: Conor O'Brien)",
+      "received": "2026-06-11 09:46",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B20000"
     }
   ]
 }
