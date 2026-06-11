@@ -1,8 +1,17 @@
 {
   "date": "Thursday 11 June 2026",
-  "subtitle": "Three colleagues absent, critical config meeting tomorrow",
-  "context": "James Salas Guillen is on annual leave returning Thursday 18 June, blocking the DSE system data upload monitoring and PeopleXD to Cardinus interface oversight that he manages. Athena Artuso is on leave tomorrow 12 June through 13 June, which will delay the Holiday Records Duty reports project that requires her input on the revised three-report specification. Mike West from The Access Group is on annual leave returning 15 June, blocking sign-off on the Organisational Hierarchy and Payroll Company Set-Up configuration work needed for case FP 68261303. Sophie Levy from Cority sent an unresponded email on 8 June (now 3 days old) about scoping session updates, requiring your immediate reply before tomorrow's 10am meeting with Conor O'Brien on Organisational Hierarchy & Payroll Company Set-Up configuration in the UOXU test environment. The critical deadline this week is Friday 12 June at 10:00 for the Organisational Hierarchy & Payroll Company Set-Up meeting with Conor O'Brien where you must present the draft REF2029 load file format you prepared and resolve the Pay Administered By values configuration issues Simon Burford identified. Open first the email from Sophie Levy at Cority (received 8 June 15:58) which needs a substantive response about the scoping session status before your scheduled call with Conor O'Brien tomorrow.",
+  "subtitle": "Access case #69001638 overdue; Friday meeting prep critical",
+  "context": "James Salas Guillen is absent on annual leave and will return Thursday 18 June, blocking progress on the DSE system data upload to Cardinus that went live 3 June and the automated PeopleXD interface monitoring he manages. Athena Artuso is absent all day Friday 12 June. Sophie Levy from Cority has been waiting 72 hours (since 8 June) without response regarding the scoping session she mentioned in April. Ann-Marie Topliss at The Access Group created FlexPoints case #69001638 for the PeopleXD Insight Reporting quote request, with your FlexPoints expiring by 29 June 2026 - this needs immediate attention before the deadline. The critical deadline this week is your Friday 12 June 10:00-12:00 meeting with Conor O'Brien on Organisational Hierarchy & Payroll Company Set-Up via Microsoft Teams, where you'll need to present the draft REF2029 load file you prepared. Open first: Ann-Marie Topliss's email about Access Support case #69001638 regarding the Holiday Records Reports quote, as Mike West is out of office and you're now the primary contact for this deliverable.",
   "urgent": [
+    {
+      "title": "DTP1092 - Team Meeting Notes - 10th June 2026",
+      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nSome notes from our team meeting held on 10th June.\r\n\r\n \r\n\r\nHR Systems Proposal Document\r\n\r\n \r\n\r\n*\tThe ",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "DTP1092 - Team Meeting Notes - 10th June 2026",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA8616A0000",
+      "received": "11 Jun"
+    },
     {
       "title": "Simon Burford mentioned you in \"DTP1092 - College Staff in PXD Proposal\".",
       "sub": "From <strong>Simon Burford</strong>. [link]",
@@ -92,62 +101,44 @@
       "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E310000",
       "received": "8 Jun"
+    },
+    {
+      "title": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "RE: Major Incident - Priority 1 Support Call# TBC - a Security vulnerability with Ivanti.",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E310000",
+      "received": "8 Jun"
     }
   ],
   "needs": [
     {
-      "title": "RE: [ict-a] OWL Maintenance - 11th June",
-      "sub": "From <strong>James Turner</strong>. Dear all,\r\n\r\n \r\n\r\nThis work was successfully completed this morning and the service is running on the new version. Some ",
+      "title": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "sub": "From <strong>Ann-Marie Topliss</strong>. Hi Kevin,\r\n\r\n \r\n\r\nIn Mike’s absence I have created a FlexPoints case for you - #69001638.\r\n\r\n \r\n\r\nYou FlexPoints are due",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
-      "subject": "RE: [ict-a] OWL Maintenance - 11th June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861590000",
+      "subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861680000",
       "received": "11 Jun"
     },
     {
-      "title": "Clinical pay uplift 2026 check ins",
-      "sub": "From <strong>Jasmin Khokhra</strong>. Dear all,\r\n\r\n \r\n\r\nWe discussed in the meeting to have follow ups for the uplift until fully implemented. Initially the a",
+      "title": "Access Support Team | 69001655 - Your Case Has Been Received",
+      "sub": "From <strong>Access Support</strong>. [link] \t\r\n [link]",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
-      "subject": "Clinical pay uplift 2026 check ins",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861580000",
+      "subject": "Access Support Team | 69001655 - Your Case Has Been Received",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861690000",
       "received": "11 Jun"
     },
     {
-      "title": "Automatic reply: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
-      "sub": "From <strong>Mike West</strong>. Thank you for your email I am on Annual leave returning on the 15th June.\r\n\r\nIf your query is urgent please email your a",
+      "title": "Access FlexPoints | Quote Pending",
+      "sub": "From <strong>Access Support</strong>. [link] \t\r\n\t\r\n\r\nQuote Pending\r\n\r\nHi Kevin,\r\n\r\nThank y",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
-      "subject": "Automatic reply: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861560000",
+      "subject": "Access FlexPoints | Quote Pending",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861670000",
       "received": "11 Jun"
-    },
-    {
-      "title": "What’s next for your recruitment platform",
-      "sub": "From <strong>Access Recruitment</strong>. A practical look at agentic AI, new capabilities and where teams see measurable impact.\r\nMessage from The Access Group \r",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "What’s next for your recruitment platform",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861550000",
-      "received": "11 Jun"
-    },
-    {
-      "title": "🔥 30% OFF SoundID VoiceAI + Bundle Deals",
-      "sub": "From <strong>Anita from Sonarworks</strong>. Summer Savings on SoundID VoiceAI Are Here  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "🔥 30% OFF SoundID VoiceAI + Bundle Deals",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AD10000",
-      "received": "10 Jun"
-    },
-    {
-      "title": "RE: Holiday Records Duty - proposed reports",
-      "sub": "From <strong>Athena Artuso</strong>. Hi both,\r\n\r\n \r\n\r\nFollowing discussion in today’s management team meeting, I’ve pivoted from attempting to join everythin",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Holiday Records Duty - proposed reports",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACE0000",
-      "received": "10 Jun"
     },
     {
       "title": "RE: College staff in PeopleXD proposal",
@@ -188,8 +179,8 @@
     {
       "title": "Athena A/L",
       "sub": "From <strong>Athena Artuso</strong>.",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "Athena A/L",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E460000",
       "received": "9 Jun"
@@ -197,8 +188,8 @@
     {
       "title": "Bi-monthly CDR/PD working group - 9 June minutes",
       "sub": "From <strong>Lindsey Spriggs</strong>. Dear all\r\n\r\n \r\n\r\nPlease find the minutes and actions from today’s CDR/PD working group attached.\r\n\r\n \r\n\r\nAlso attached (",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "Bi-monthly CDR/PD working group - 9 June minutes",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E430000",
       "received": "9 Jun"
@@ -463,15 +454,6 @@
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "New Vacancy Notification",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861540000",
-      "received": "11 Jun"
-    },
-    {
-      "title": "New Vacancy Notification",
-      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "New Vacancy Notification",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC30000",
       "received": "10 Jun"
     },
@@ -503,6 +485,15 @@
       "received": "5 Jun"
     },
     {
+      "title": "New Vacancy Notification",
+      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "New Vacancy Notification",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000779BE36380000",
+      "received": "5 Jun"
+    },
+    {
       "title": "RE: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
       "sub": "From <strong>Conor O'Brien</strong>.",
       "badge": "FYI",
@@ -512,12 +503,57 @@
       "received": "11 Jun"
     },
     {
+      "title": "Automatic reply: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
+      "sub": "From <strong>Mike West</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Automatic reply: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861560000",
+      "received": "11 Jun"
+    },
+    {
+      "title": "What’s next for your recruitment platform",
+      "sub": "From <strong>Access Recruitment</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "What’s next for your recruitment platform",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861550000",
+      "received": "11 Jun"
+    },
+    {
+      "title": "New Vacancy Notification",
+      "sub": "From <strong>peoplexd@accessacloud.com</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "New Vacancy Notification",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861540000",
+      "received": "11 Jun"
+    },
+    {
+      "title": "🔥 30% OFF SoundID VoiceAI + Bundle Deals",
+      "sub": "From <strong>Anita from Sonarworks</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "🔥 30% OFF SoundID VoiceAI + Bundle Deals",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AD10000",
+      "received": "10 Jun"
+    },
+    {
       "title": "RE: Confirming ERs pension rates for annual Financial Statements -- FINAL",
       "sub": "From <strong>HR Systems Support</strong>.",
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "RE: Confirming ERs pension rates for annual Financial Statements -- FINAL",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACF0000",
+      "received": "10 Jun"
+    },
+    {
+      "title": "RE: Holiday Records Duty - proposed reports",
+      "sub": "From <strong>Athena Artuso</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Holiday Records Duty - proposed reports",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0ACE0000",
       "received": "10 Jun"
     },
     {
@@ -654,36 +690,27 @@
       "subject": "RE: Question re Volunteer reporting",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E390000",
       "received": "8 Jun"
-    },
-    {
-      "title": "Accepted: Michael O'Sullivan - 1-1 Session",
-      "sub": "From <strong>Michael O'Sullivan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Accepted: Michael O'Sullivan - 1-1 Session",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E1F0000",
-      "received": "8 Jun"
-    },
-    {
-      "title": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "sub": "From <strong>csn@mail.status.cority.com</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "CorityOne Maintenance - GX2 - TEST Release 2026.2 - 6 June 2026",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646F0000",
-      "received": "6 Jun"
-    },
-    {
-      "title": "Marie Handover 8-12 June",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Marie Handover 8-12 June",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646E0000",
-      "received": "6 Jun"
     }
   ],
   "low": [
+    {
+      "title": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (42a7b32)",
+      "sub": "From <strong>kevin lelitte</strong>. [link] \r\n\r\n[begb0037admin/hris-dashboard] Update HRIS Dashboard workflow run",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (42a7b32)",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA8616C0000",
+      "received": "11 Jun"
+    },
+    {
+      "title": "University of Oxford - PeopleXD Customer Support Monthly Report for May 2026 - NO-REPLY E-MAIL ADDRESS",
+      "sub": "From <strong>People XD Reports</strong>. Hi all, \r\n\r\nPlease find attached the Customer Support Monthly Report for May 2026, along with the XLSX file for the raw ",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "University of Oxford - PeopleXD Customer Support Monthly Report for May 2026 - NO-REPLY E-MAIL ADDRESS",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA8616B0000",
+      "received": "11 Jun"
+    },
     {
       "title": "[begb0037admin/hr-fa-knowledge-base] Run failed: pages build and deployment - main (a8dc74f)",
       "sub": "From <strong>kevin lelitte</strong>.",
@@ -701,33 +728,6 @@
       "subject": "[GitHub] A fine-grained personal access token has been added to your account",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC80000",
       "received": "10 Jun"
-    },
-    {
-      "title": "[GitHub] A fine-grained personal access token has been added to your account",
-      "sub": "From <strong>GitHub</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "[GitHub] A fine-grained personal access token has been added to your account",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077ECC0AC80000",
-      "received": "10 Jun"
-    },
-    {
-      "title": "Your May Flow State recap 🌱",
-      "sub": "From <strong>Wispr Flow</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Your May Flow State recap 🌱",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C9864700000",
-      "received": "6 Jun"
-    },
-    {
-      "title": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
-      "sub": "From <strong>Marie Cooksey in Teams</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Marie Cooksey mentioned everyone in a chat in Microsoft Teams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077C98646D0000",
-      "received": "6 Jun"
     }
   ],
   "calToday": [],
@@ -791,7 +791,8 @@
         "[AWAITING] Athena to send the Holiday Records Duty requirements review document.",
         "[10 Jun 2026] Athena has sent the full Holiday Records Duty review with introductory section following management team meeting discussion; Kevin needs to review this document. (email: Athena Artuso - RE: Holiday Records Duty - proposed reports)",
         "[11 Jun 2026] Athena has sent the full Holiday Records Duty review with scope and requirements as requested; Kevin can now proceed to review. (email: Athena Artuso - RE: Holiday Records Duty - proposed reports)",
-        "[11 Jun 2026] Kevin confirmed willingness to review Athena's Holiday Records Duty proposed reports and asked Athena to send through the document. (email: Kevin (sent to: Simon Burford; Athena Artuso) - Re: Holiday Records Duty - proposed reports)"
+        "[11 Jun 2026] Kevin confirmed willingness to review Athena's Holiday Records Duty proposed reports and asked Athena to send through the document. (email: Kevin (sent to: Simon Burford; Athena Artuso) - Re: Holiday Records Duty - proposed reports)",
+        "[11 Jun 2026] Kevin has reviewed the revised three-report specification and confirmed it aligns with requirements; now moving to quote stage with Access Group. (email: Kevin (sent to: Athena Artuso; Simon Burford) - Re: Holiday Records Duty - proposed reports)"
       ],
       "source": "Inbox 2026-06-10 09:43",
       "dateType": "red"
@@ -903,5 +904,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Thursday 11 June · 13:00"
+  "refreshed_at": "Thursday 11 June · 20:05"
 }
