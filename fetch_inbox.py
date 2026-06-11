@@ -380,6 +380,7 @@ COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
 COMMAND_CENTRE_PATH = "data/tasks.json"
 priorities_today = []
 priorities_week  = []
+cc_content = {"tasks": []}
 try:
     cc_url     = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
     cc_headers = {
