@@ -1,43 +1,34 @@
 {
-  "generated_at": "2026-06-11 13:00",
+  "generated_at": "2026-06-11 20:05",
   "new_tasks": [
     {
-      "title": "Get Holiday Records Insight reporting quote from Access",
+      "title": "Allocate remaining flex points before 29 June expiry",
       "tier": "week",
-      "description": "Kevin has initiated a quote request to Mike West at Access Group for new PeopleXD Insight reports to support Holiday Records Duty requirements. This follows Athena's detailed specification review. Quote and timeline needed to scope the work.",
-      "email_subject": "PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "email_from": "Kevin (sent to: Mike West; Ann-Marie Topliss; Amanda Mcdonnell)",
-      "received": "2026-06-11 12:03",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B60000"
-    },
-    {
-      "title": "Follow up on clinical pay uplift implementation check-ins",
-      "tier": "week",
-      "description": "Jasmin Khokhra is coordinating follow-up check-ins for the 2026 clinical pay uplift until fully implemented. Kevin needs to confirm his team's involvement and commitment to the schedule agreed in the meeting.",
-      "email_subject": "Clinical pay uplift 2026 check ins",
-      "email_from": "Jasmin Khokhra",
-      "received": "2026-06-11 10:36",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861580000"
+      "description": "Ann-Marie Topliss has created FlexPoints case #69001638. Kevin's flex points expire by 29 June 2026. Chemistry bulk deletion (£525) is already committed, leaving remaining points to be allocated before expiry. This needs coordination with Simon and Marie's plan (t003).",
+      "email_subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "email_from": "Ann-Marie Topliss",
+      "received": "2026-06-11 15:01",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA861680000"
     }
   ],
   "applied_updates": [
     {
-      "task_id": "t1781099880461",
-      "task_title": "Review Holiday Records Duty reports from Athena",
-      "note": "Kevin has reviewed the revised three-report specification and confirmed it aligns with requirements; now moving to quote stage with Access Group.",
-      "email_subject": "Re: Holiday Records Duty - proposed reports",
-      "email_from": "Kevin (sent to: Athena Artuso; Simon Burford)",
-      "received": "2026-06-11 11:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B50000"
+      "task_id": "t004",
+      "task_title": "Raise DTP1092 College data change management record",
+      "note": "DTP1092 team meeting held 10 June; meeting notes confirm HR Systems Proposal Document status and next steps on change management record.",
+      "email_subject": "DTP1092 - Team Meeting Notes - 10th June 2026",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-06-11 13:29",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077FA8616A0000"
     },
     {
-      "task_id": "t1781099896490",
-      "task_title": "Follow up on Scoping Session with Sophie Levy",
-      "note": "Sophie Levy chased for an update after two months with no contact; latest information she has is from April 2026.",
-      "email_subject": "RE: Scoping Session update",
-      "email_from": "Sophie Levy",
-      "received": "2026-06-08 15:58",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500077D9F1E2E0000"
+      "task_id": "t005",
+      "task_title": "College Data in PXD Project — set up REF2029 pay admin codes in UOXU",
+      "note": "Kevin has prepared a draft REF2029 load file based on test HR Reference File format and sent to Conor O'Brien.",
+      "email_subject": "Re: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
+      "email_from": "Kevin (sent to: Conor O'Brien)",
+      "received": "2026-06-11 11:03",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B30000"
     }
   ]
 }
