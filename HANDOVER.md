@@ -120,6 +120,29 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 
 ---
 
+## Session 2026-06-12 (later) — AG FlexPoints live
+
+- Repo **begb0037admin/AG-FlexPoints** created by Kevin and populated (files
+  downloaded from work-inbox main via Invoke-WebRequest; cloud sessions remain
+  scoped to work-inbox only — even after repo creation, writes were denied, so
+  work-inbox `ag-flexpoints/` stays the development surface and Kevin syncs
+  files across with the cache-busted download block).
+- PR #4 (scaffold), #5 (paginated PDF), #6 (PDF = Access portal replica +
+  hardened Playwright login w/ `source/_login_debug.png` dump on failure),
+  #7 (per-item links: script harvests ref→URL from portal pages; dashboard
+  rows, PDF refs and CSV link to each item's exact transaction page) all
+  merged to work-inbox main. NOTE: squash merges make the next PR from
+  `claude/determined-allen-zanfr0` conflict — resolve with
+  `git checkout --ours`.
+- Dashboard confirmed working live; env vars + Playwright installed on admin
+  machine. First live pull failed: "could not find username field" on the
+  Salesforce login — awaiting Kevin's `_login_debug.png` to fix selectors.
+  `playwright` CLI not on PATH — use `python -m playwright install chromium`.
+- PDF export = Access portal format (red logo, dark banner, outlined tiles,
+  portal tables). Print needs "Background graphics" ticked.
+- Real portal data seeded: 2,935 pts available, ALL expiring 2026-06-29;
+  quote 69001638 (2,800 pts) awaiting approval.
+
 ## Session 2026-06-12 — AG FlexPoints scaffolded
 
 New sister project built in `ag-flexpoints/` on branch `claude/determined-allen-zanfr0`
