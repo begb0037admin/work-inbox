@@ -1,0 +1,46 @@
+{
+  "generated": "2026-06-12 09:30",
+  "source": "portal screenshot (seed data)",
+  "summary_tiles": {
+    "available": 2935,
+    "requested": 5425,
+    "booked": 5210,
+    "expiring_30": 2935,
+    "expiring_60": 2935,
+    "expiring_90": 2935,
+    "awaiting_estimate": 0,
+    "awaiting_approval": 1
+  },
+  "quotes_received": [
+    { "ref": "69001638", "name": "Holiday Records Report Creation x 3 reports", "owner": "Me", "date": "2026-06-11", "points": 2800, "status": "Awaiting Approval" }
+  ],
+  "requested": [
+    { "ref": "FPT-062315", "name": "Bulk Delete Assignments as per 67938206", "owner": "Me", "date": "2026-05-28", "points": -525, "status": "Requested" },
+    { "ref": "FPT-056744", "name": "Multi Company setup (Part 1)", "owner": "Marie Cooksey", "date": "2026-03-04", "points": -4200, "status": "Requested" },
+    { "ref": "FPT-053858", "name": "Return Absence to Employee", "owner": "Marie Cooksey", "date": "2026-01-29", "points": -700, "status": "Requested" }
+  ],
+  "booked": [
+    { "ref": "FPT-058323", "name": "Recruitment data scripts to aid clean up in UAT and Live", "owner": "Marie Cooksey", "date": "2026-03-27", "points": -1750, "status": "Booked" },
+    { "ref": "FPT-039599", "name": "Payroll Management Training", "owner": "Marie Cooksey", "date": "2025-06-12", "points": -1010, "status": "Booked" },
+    { "ref": "FPT-039596", "name": "Payroll Module - Process Review", "owner": "Marie Cooksey", "date": "2025-06-12", "points": -2450, "status": "Booked" }
+  ],
+  "transaction_history": [
+    { "ref": "FPT-062315", "name": "Bulk Delete Assignments as per 67938206", "owner": "Me", "date": "2026-05-28", "expiry_date": null, "points": -525, "status": "Requested" },
+    { "ref": "FPT-058323", "name": "Recruitment data scripts to aid clean up in UAT and Live", "owner": "Marie Cooksey", "date": "2026-03-27", "expiry_date": null, "points": -1750, "status": "Booked" },
+    { "ref": "FPT-056744", "name": "Multi Company setup (Part 1)", "owner": "Marie Cooksey", "date": "2026-03-04", "expiry_date": null, "points": -4200, "status": "Requested" },
+    { "ref": "FPT-054572", "name": "Assistance in testing in UAT move of email server", "owner": "Marie Cooksey", "date": "2026-02-09", "expiry_date": null, "points": -700, "status": "Delivered" },
+    { "ref": "FPT-053858", "name": "Return Absence to Employee", "owner": "Marie Cooksey", "date": "2026-01-29", "expiry_date": null, "points": -700, "status": "Requested" },
+    { "ref": "FPT-046639", "name": "Amendments to the My Development Insight report", "owner": "Marie Cooksey", "date": "2025-10-09", "expiry_date": null, "points": -350, "status": "Delivered" },
+    { "ref": "FPT-039758", "name": "Points Top Up -Premier", "owner": null, "date": "2025-07-01", "expiry_date": "2026-06-29", "points": 11160, "status": "Premier" },
+    { "ref": "FPT-039599", "name": "Payroll Management Training", "owner": "Marie Cooksey", "date": "2025-06-12", "expiry_date": null, "points": -1010, "status": "Booked" },
+    { "ref": "FPT-039596", "name": "Payroll Module - Process Review", "owner": "Marie Cooksey", "date": "2025-06-12", "expiry_date": null, "points": -2450, "status": "Booked" },
+    { "ref": "FPT-039595", "name": "Storage Reclaim on UOXP", "owner": "Simon Burford", "date": "2025-06-12", "expiry_date": null, "points": -1400, "status": "Delivered" }
+  ],
+  "highlights": [
+    "All 2,935 available points expire by 2026-06-29 (the 2025 Premier top-up rolls off) - they show in every expiry window, so this is the deadline that matters.",
+    "Quote 69001638 (Holiday Records Report Creation x 3 reports, 2,800 pts) is awaiting approval - approving it would use almost the entire expiring balance before the deadline.",
+    "5,425 pts sit in Requested but not yet booked - Multi Company setup Part 1 alone is 4,200 pts; chase Access to convert these to Booked.",
+    "Only 1 transaction this quarter was raised by you - Marie Cooksey owns most open items; confirm ownership before the expiry date."
+  ],
+  "context": "You have 2,935 FlexPoints available and every one of them expires on 2026-06-29 when the July 2025 Premier top-up (11,160 pts) rolls off. The fastest way to avoid losing them is to approve quote 69001638 (2,800 pts, Holiday Records Report Creation), which is already sitting in Awaiting Approval. Separately, 5,425 pts of work is stuck at Requested status - worth chasing Access to get those booked."
+}
