@@ -1,5 +1,5 @@
 # CLAUDE.md — AG-FlexPoints
-> AI bootstrap entry point. Read this first. Keep under 200 lines.
+> AI bootstrap entry point. Read this first, then HANDOVER.md (current state, open issues). Keep under 200 lines.
 
 ## Identity
 - **Project:** AG FlexPoints — recurring Access Group FlexPoints report
