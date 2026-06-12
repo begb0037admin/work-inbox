@@ -41,53 +41,80 @@ def get_portal_text():
     except ImportError:
         print("Phase 1 - playwright not installed (pip install playwright && playwright install chromium)")
         return None
+    USER_SELECTORS = ('input[type="email"]', 'input[name*="user" i]',
+                      'input[id*="user" i]', 'input[autocomplete="username"]',
+                      'input[placeholder*="sername" i]', 'input[placeholder*="mail" i]',
+                      'lightning-input input', 'input[type="text"]')
+    PASS_SELECTORS = ('input[type="password"]', 'input[autocomplete="current-password"]')
+    SUBMIT_SELECTORS = ('button:has-text("Log in")', 'button:has-text("Login")',
+                        'button:has-text("Sign in")', 'button[type="submit"]',
+                        'input[type="submit"]')
+
+    def find_in_frames(page, selectors):
+        """Salesforce login forms often live inside an iframe - search all frames."""
+        for frame in page.frames:
+            for sel in selectors:
+                try:
+                    loc = frame.locator(sel).first
+                    if loc.is_visible(timeout=2000):
+                        return loc
+                except Exception:
+                    continue
+        return None
+
     pages_text = {}
+    page = None
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto(LOGIN_URL, wait_until="networkidle", timeout=60000)
-            # Salesforce Experience Cloud login form - selectors are generic on
-            # purpose; if Access change the form, lift the working login from
-            # the hr-fa-knowledge-base scrape script into this function.
-            filled = False
-            for sel in ('input[type="email"]', 'input[name*="user" i]',
-                        'input[placeholder*="sername" i]', 'input[type="text"]'):
-                try:
-                    page.fill(sel, user, timeout=5000)
-                    filled = True
-                    break
-                except Exception:
-                    continue
-            if not filled:
+            page.goto(LOGIN_URL, timeout=60000)
+            page.wait_for_timeout(6000)  # Lightning login form renders late
+            user_box = find_in_frames(page, USER_SELECTORS)
+            if not user_box:
                 raise Exception("could not find username field on login page")
-            page.fill('input[type="password"]', pwd, timeout=5000)
-            for sel in ('button:has-text("Log in")', 'button:has-text("Login")',
-                        'button[type="submit"]', 'input[type="submit"]'):
-                try:
-                    page.click(sel, timeout=5000)
-                    break
-                except Exception:
-                    continue
-            page.wait_for_load_state("networkidle", timeout=60000)
+            user_box.fill(user)
+            pass_box = find_in_frames(page, PASS_SELECTORS)
+            if not pass_box:
+                raise Exception("could not find password field on login page")
+            pass_box.fill(pwd)
+            btn = find_in_frames(page, SUBMIT_SELECTORS)
+            if btn:
+                btn.click()
+            else:
+                pass_box.press("Enter")
+            page.wait_for_timeout(8000)
             if "login" in page.url.lower():
                 raise Exception("still on login page after submit - check credentials")
             for name, url in PORTAL_PAGES.items():
-                page.goto(url, wait_until="networkidle", timeout=60000)
-                page.wait_for_timeout(4000)  # Lightning components render late
+                page.goto(url, timeout=60000)
+                page.wait_for_timeout(6000)  # Lightning components render late
                 pages_text[name] = page.inner_text("body")
                 print(f"Phase 1 - pulled {name} ({len(pages_text[name])} chars)")
             browser.close()
         return pages_text
     except Exception as e:
         print(f"Phase 1 - live pull failed: {e}")
+        # dump what the robot saw so the selectors can be fixed precisely
+        # (source/ is gitignored - these never get committed)
+        try:
+            if page:
+                os.makedirs(SOURCE_DIR, exist_ok=True)
+                page.screenshot(path=os.path.join(SOURCE_DIR, "_login_debug.png"), full_page=True)
+                with open(os.path.join(SOURCE_DIR, "_login_debug.html"), "w", encoding="utf-8") as f:
+                    f.write(page.content())
+                print("Phase 1 - saved source\\_login_debug.png - send this screenshot to Claude to fix the login")
+        except Exception:
+            pass
         return None
 
 def read_saved_source():
     """Fallback: parse the newest page Kevin saved into source/ from a
     logged-in browser (Ctrl+S the FlexPoints page as HTML, or paste as .txt)."""
     files = [f for f in glob.glob(os.path.join(SOURCE_DIR, "*"))
-             if os.path.isfile(f) and not f.lower().endswith((".md", ".gitkeep"))]
+             if os.path.isfile(f)
+             and not f.lower().endswith((".md", ".gitkeep", ".png"))
+             and not os.path.basename(f).startswith("_")]
     if not files:
         return None
     newest = max(files, key=os.path.getmtime)

@@ -65,23 +65,42 @@
   .toolbar { display:flex; gap:10px; justify-content:flex-end; margin-bottom:14px; }
   .toolbar button { font-family:'Inter',sans-serif; font-size:13px; font-weight:700; border:none; border-radius:8px; padding:9px 16px; cursor:pointer; background:#002147; color:#fff; }
   .toolbar button.alt { background:#fff; color:#002147; box-shadow:0 1px 4px rgba(0,33,71,0.15); }
-  .print-only { display:none; }
-  @page { margin: 16mm 14mm; }
+  #print-report { display:none; }
+  @page { margin: 12mm 11mm; }
   @media print {
-    .sidebar, .toolbar { display:none; }
-    .print-only { display:block; }
-    .main { margin-left:0; max-width:none; padding:0; }
+    /* print = faithful replica of the Access portal FlexPoints page */
     body { background:#fff; display:block; }
-    .row, .tile, .context, ul.highlights li { box-shadow:none; border:1px solid #d7e1ec; cursor:default; }
-    .row, .tile, ul.highlights li { page-break-inside:avoid; }
-    h2 { page-break-after:avoid; }
-    /* report pagination: page 1 = overview, then each section starts clean */
-    #sec-open, #sec-history { page-break-before:always; }
-    .print-header { border-bottom:4px solid #002147; padding-bottom:12px; margin-bottom:18px; }
-    .print-header .ph-title { font-size:24px; font-weight:800; color:#002147; letter-spacing:-0.5px; }
-    .print-header .ph-meta { font-size:12px; color:#5a6f88; margin-top:6px; }
-    .print-intro { font-size:13px; color:#3a4a5e; line-height:1.7; margin:0 0 14px; }
-    .section-banner { background:#002147; color:#fff; font-size:15px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; padding:10px 14px; border-radius:6px; margin-bottom:4px; }
+    .sidebar, .toolbar, #sec-summary, #sec-open, #sec-history { display:none; }
+    .main { margin-left:0; max-width:none; padding:0; }
+    #print-report { display:block; color:#1a1a1a; }
+    .ag-top { display:flex; align-items:center; justify-content:space-between; padding:2px 0 10px; }
+    .ag-brand { font-size:26px; font-weight:700; color:#3a3a3a; letter-spacing:-1px; display:flex; align-items:center; gap:9px; }
+    .ag-dot { width:18px; height:18px; border:5px solid #e01e26; border-radius:50%; display:inline-block; }
+    .ag-gen { font-size:11px; color:#777; text-align:right; line-height:1.6; }
+    .ag-banner { background:#3d3d3d; color:#fff; padding:16px 18px; font-size:25px; font-weight:600; margin-bottom:16px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .ag-h1 { font-size:22px; font-weight:600; margin:22px 0 8px; page-break-after:avoid; }
+    .ag-h2 { font-size:18px; font-weight:600; margin:22px 0 4px; padding-bottom:7px; border-bottom:2px solid #e8920a; page-break-after:avoid; }
+    .ag-h2.blue { border-bottom-color:#4a90d9; }
+    .ag-tiles { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 6px; }
+    .ag-tile { flex:1 1 100px; min-width:92px; border:2px solid #1a1a1a; border-radius:3px; text-align:center; padding:13px 6px; page-break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .ag-tile .v { font-size:16px; font-weight:700; }
+    .ag-tile .l { font-size:9.5px; margin-top:5px; color:#555; line-height:1.4; }
+    .ag-tile.req  { border-color:#e8920a; } .ag-tile.req .v  { color:#e8920a; }
+    .ag-tile.bkd  { border-color:#2eb774; } .ag-tile.bkd .v  { color:#2eb774; }
+    .ag-tile.exp  { border-color:#cf3b2f; background:#cf3b2f; }
+    .ag-tile.exp .v, .ag-tile.exp .l { color:#fff; }
+    .ag-tile.wait { border-color:#8b6cc1; } .ag-tile.wait .v { color:#8b6cc1; }
+    table.ag { width:100%; border-collapse:collapse; font-size:12px; }
+    table.ag th { text-align:left; color:#555; font-weight:600; padding:8px 10px; border-bottom:1px solid #c9c9c9; }
+    table.ag td { padding:9px 10px; border-bottom:1px solid #e7e7e7; vertical-align:top; }
+    table.ag tr { page-break-inside:avoid; }
+    .ag-ref { color:#de4b32; }
+    .ag-st-requested { color:#e8920a; } .ag-st-awaiting { color:#8b6cc1; }
+    .ag-st-premier { color:#2eb774; } .ag-st-booked, .ag-st-delivered, .ag-st-other { color:#444; }
+    .ag-overview { font-size:12.5px; line-height:1.75; color:#333; border:1px solid #ddd; border-left:4px solid #e01e26; padding:12px 14px; margin:14px 0 4px; }
+    .ag-hl { list-style:none; margin:6px 0 0; }
+    .ag-hl li { font-size:12px; line-height:1.6; color:#333; padding:7px 0 7px 14px; border-left:3px solid #e8920a; margin-bottom:6px; page-break-inside:avoid; }
+    .ag-pb { page-break-before:always; }
   }
   @media (max-width:900px) {
     .sidebar { display:none; } .main { margin-left:0; }
@@ -118,18 +137,6 @@
   </div>
 
   <section id="sec-summary">
-    <div class="print-header print-only">
-      <div class="ph-title">AG FlexPoints &mdash; Service Credits Report</div>
-      <div class="ph-meta">University of Oxford &middot; HR Systems &middot; Generated <span id="p-generated">-</span> &middot; Source: Access Customer Success Portal</div>
-    </div>
-    <div class="print-intro print-only">
-      FlexPoints are pre-paid service credits from The Access Group, spent on
-      training, configuration and consultancy for our Access systems. Points
-      roll over for 12 months and expire if unused. This report shows the
-      current balance, everything awaiting a decision, work already booked,
-      and the full transaction record. Page 1 summarises the position and the
-      actions needed; the following pages give the detail behind it.
-    </div>
     <div class="context" id="context">Loading report...</div>
 
     <h2>FlexPoints Summary</h2>
@@ -140,12 +147,6 @@
   </section>
 
   <section id="sec-open">
-    <div class="section-banner print-only">Open Items &mdash; Awaiting a Decision or Access Action</div>
-    <div class="print-intro print-only">
-      Quotes need approval from our side before work can be scheduled;
-      requested items are with Access waiting to be converted into bookings.
-      Points shown negative are spends against the balance.
-    </div>
     <div class="section-quote">
       <h2><span class="accent" style="background:#f1c40f"></span>Quote Received — Needs Response</h2>
       <div id="quotes"></div>
@@ -159,15 +160,11 @@
   </section>
 
   <section id="sec-history">
-    <div class="section-banner print-only">Transaction History &mdash; Complete Record</div>
-    <div class="print-intro print-only">
-      Every FlexPoints movement on the account, newest first. Positive entries
-      are point top-ups (with their 12-month expiry date); negative entries
-      are services requested, booked or delivered against the balance.
-    </div>
     <h2><span class="accent" style="background:#002147"></span>Transaction History</h2>
     <div id="history"></div>
   </section>
+
+  <div id="print-report"></div>
 </div>
 
 <script>
@@ -224,7 +221,6 @@ async function load() {
     return;
   }
   document.getElementById("generated").textContent = r.generated || "-";
-  document.getElementById("p-generated").textContent = r.generated || "-";
   document.getElementById("source").textContent = r.source || "-";
   document.getElementById("context").textContent = r.context || r.summary || "No summary in this run.";
 
@@ -254,8 +250,61 @@ async function load() {
   document.getElementById("booked").innerHTML = rows(r.booked, "No services booked.");
   document.getElementById("history").innerHTML = rows(r.transaction_history, "No transactions captured.");
   window.__report = r;
+  buildPrintReport(r);
 }
 load();
+
+// -- print/PDF: faithful replica of the Access portal FlexPoints page --
+function buildPrintReport(r) {
+  const s = r.summary_tiles || {};
+  const stCls = st => {
+    const x = String(st || "").toLowerCase();
+    return x.includes("request") ? "ag-st-requested" : x.includes("book") ? "ag-st-booked"
+      : x.includes("deliver") ? "ag-st-delivered" : x.includes("await") ? "ag-st-awaiting"
+      : x.includes("premier") ? "ag-st-premier" : "ag-st-other";
+  };
+  const tile = (v, lbl, cls, pts) =>
+    `<div class="ag-tile ${cls || ""}"><div class="v">${v ?? "-"}${pts && v != null ? " pts" : ""}</div><div class="l">${lbl}</div></div>`;
+  const tbl = (list, nameHead, withExpiry) => {
+    if (!list || !list.length) return `<table class="ag"><tr><td style="color:#888">None</td></tr></table>`;
+    const head = `<tr><th>Ref</th><th>${nameHead}</th><th>Owner</th><th>Date</th>${withExpiry ? "<th>Expiry Date</th>" : ""}<th>Points</th><th>Status</th></tr>`;
+    const body = list.map(x => `<tr>
+      <td class="ag-ref">${esc(x.ref)}</td><td>${esc(x.name)}</td><td>${esc(x.owner || "")}</td>
+      <td>${esc(x.date)}</td>${withExpiry ? `<td>${esc(x.expiry_date || "")}</td>` : ""}
+      <td>${typeof x.points === "number" && x.points > 0 ? "+" : ""}${esc(x.points ?? "")}</td>
+      <td class="${stCls(x.status)}">${esc(x.status || "")}</td></tr>`).join("");
+    return `<table class="ag">${head}${body}</table>`;
+  };
+  document.getElementById("print-report").innerHTML = `
+    <div class="ag-top">
+      <div class="ag-brand"><span class="ag-dot"></span>access</div>
+      <div class="ag-gen">FlexPoints Report<br>Generated ${esc(r.generated || "-")}</div>
+    </div>
+    <div class="ag-banner">FlexPoints</div>
+    <div class="ag-h1">FlexPoints Summary</div>
+    <div class="ag-tiles">
+      ${tile(s.available, "Available", "", true)}
+      ${tile(s.requested, "Requested", "req", true)}
+      ${tile(s.booked, "Booked", "bkd", true)}
+      ${tile(s.expiring_30, "Expiring within 30 Days", "exp", true)}
+      ${tile(s.expiring_60, "Expiring within 60 Days", "exp", true)}
+      ${tile(s.expiring_90, "Expiring within 90 Days", "exp", true)}
+      ${tile(s.awaiting_estimate, "Awaiting Estimate", "wait", false)}
+      ${tile(s.awaiting_approval, "Awaiting Approval", "wait", false)}
+    </div>
+    <div class="ag-overview">${esc(r.context || r.summary || "")}</div>
+    <ul class="ag-hl">${(r.highlights || []).map(h => `<li>${esc(h)}</li>`).join("")}</ul>
+    <div class="ag-pb"></div>
+    <div class="ag-h2">Quote Received</div>
+    ${tbl(r.quotes_received, "Case name", false)}
+    <div class="ag-h2">Requested</div>
+    ${tbl(r.requested, "Transaction name", false)}
+    <div class="ag-h2 blue">Booked</div>
+    ${tbl(r.booked, "Transaction name", false)}
+    <div class="ag-pb"></div>
+    <div class="ag-h1" style="font-size:26px">Transaction History</div>
+    ${tbl(r.transaction_history, "Transaction name", true)}`;
+}
 
 function exportCSV() {
   const r = window.__report;
