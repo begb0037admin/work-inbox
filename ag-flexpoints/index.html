@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Inter',sans-serif; background:#eaf2f8; color:#1a2433; display:flex; min-height:100vh; }
+  body { font-family:'Inter',sans-serif; background:#f7f9fb; color:#1a1a1a; display:flex; min-height:100vh; }
 
   /* -- Oxford navy sidebar (work-inbox) -- */
   .sidebar { width:300px; background:#002147; color:#fff; padding:28px 24px; position:fixed; top:0; bottom:0; overflow-y:auto; }
@@ -16,96 +16,80 @@
   .sidebar .sub { font-size:13px; color:#9db4cc; margin-top:6px; line-height:1.5; }
   .greeting { font-size:15px; font-weight:600; margin-top:24px; }
   .side-label { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9db4cc; margin:26px 0 10px; }
-  .side-stat { display:flex; justify-content:space-between; font-size:14px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.08); }
+  .side-stat { display:flex; justify-content:space-between; font-size:14px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer; }
+  .side-stat:hover { color:#cfe0f0; }
   .side-stat b { font-weight:700; }
-  .expiry-alert { background:#c0392b; border-radius:10px; padding:14px 16px; margin-top:14px; font-size:13px; line-height:1.6; }
+  .expiry-alert { background:#c0392b; border-radius:10px; padding:14px 16px; margin-top:14px; font-size:13px; line-height:1.6; cursor:pointer; }
   .expiry-alert b { font-size:20px; display:block; }
   .portal-btn { display:block; text-align:center; background:#fff; color:#002147; font-weight:700; font-size:13px; border-radius:8px; padding:10px; margin-top:24px; text-decoration:none; }
   .side-meta { margin-top:22px; font-size:12px; color:#9db4cc; line-height:1.9; }
   .side-meta b { color:#fff; font-weight:600; }
 
-  /* -- main -- */
-  .main { margin-left:300px; flex:1; padding:30px 36px; max-width:1150px; }
-  .context { background:#fff; border-radius:12px; padding:18px 22px; box-shadow:0 1px 4px rgba(0,33,71,0.08); font-size:14px; line-height:1.7; border-left:5px solid #002147; }
-  h2 { font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#5a6f88; margin:30px 0 12px; }
-  h2 .accent { display:inline-block; width:26px; height:4px; border-radius:2px; vertical-align:middle; margin-right:8px; }
-
-  /* portal-style summary tiles */
-  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(125px,1fr)); gap:12px; }
-  .tile { background:#fff; border-radius:12px; padding:16px 12px; text-align:center; box-shadow:0 1px 4px rgba(0,33,71,0.08); border-top:4px solid #002147; }
-  .tile .num { font-size:26px; font-weight:800; color:#002147; }
-  .tile .lbl { font-size:11px; color:#5a6f88; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-top:4px; line-height:1.4; }
-  .tile.req  { border-top-color:#e8920a; } .tile.req .num  { color:#b36b00; }
-  .tile.bkd  { border-top-color:#1d8348; } .tile.bkd .num  { color:#1d8348; }
-  .tile.exp  { background:#c0392b; border-top-color:#8e2418; }
-  .tile.exp .num { color:#fff; } .tile.exp .lbl { color:#f5c7c0; }
-  .tile.wait { border-top-color:#7d3c98; } .tile.wait .num { color:#7d3c98; }
-
-  ul.highlights { list-style:none; }
-  ul.highlights li { background:#fff; border-radius:10px; padding:12px 16px; margin-bottom:8px; font-size:14px; line-height:1.6; box-shadow:0 1px 4px rgba(0,33,71,0.08); border-left:4px solid #e8920a; }
-
-  /* work-inbox style card rows for transactions */
-  .row { background:#fff; border-radius:12px; padding:14px 18px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,33,71,0.08); display:flex; align-items:center; gap:16px; transition:box-shadow .15s; cursor:pointer; }
-  .row:hover { box-shadow:0 3px 10px rgba(0,33,71,0.18); }
-  .row .ref { font-size:12px; font-weight:600; color:#4a90d9; width:90px; flex-shrink:0; }
-  .row .name { flex:1; font-size:15px; font-weight:600; color:#1a2433; }
-  .row .who { font-size:13px; color:#5a6f88; width:130px; flex-shrink:0; }
-  .row .date { font-size:13px; color:#5a6f88; width:90px; text-align:right; flex-shrink:0; }
-  .row .pts { font-size:15px; font-weight:800; color:#002147; width:70px; text-align:right; flex-shrink:0; }
-  .row .pts.credit { color:#1d8348; }
-  .badge { font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; width:130px; text-align:center; flex-shrink:0; }
-  .b-requested { background:#fff4e5; color:#b36b00; }
-  .b-booked    { background:#e8f6ee; color:#1d8348; }
-  .b-delivered { background:#e9f0f8; color:#2e6da4; }
-  .b-awaiting  { background:#f3e9f8; color:#7d3c98; }
-  .b-premier   { background:#f3e9f8; color:#7d3c98; }
-  .b-other     { background:#eef3f8; color:#5a6f88; }
-  .section-quote .row { border-left:5px solid #f1c40f; }   /* yellow accent = needs response */
-  .empty { color:#8295ab; font-size:13px; font-style:italic; padding:10px 0; }
+  /* -- main: Access portal format -- */
+  .main { margin-left:300px; flex:1; padding:26px 38px 60px; max-width:1200px; }
   .toolbar { display:flex; gap:10px; justify-content:flex-end; margin-bottom:14px; }
   .toolbar button { font-family:'Inter',sans-serif; font-size:13px; font-weight:700; border:none; border-radius:8px; padding:9px 16px; cursor:pointer; background:#002147; color:#fff; }
   .toolbar button.alt { background:#fff; color:#002147; box-shadow:0 1px 4px rgba(0,33,71,0.15); }
-  #print-report { display:none; }
+
+  .context { background:#fff; border-radius:10px; padding:16px 20px; box-shadow:0 1px 4px rgba(0,33,71,0.08); font-size:14px; line-height:1.7; border-left:5px solid #002147; margin-bottom:8px; }
+
+  .ag-top { display:flex; align-items:center; justify-content:space-between; padding:2px 0 10px; }
+  .ag-brand { font-size:26px; font-weight:700; color:#3a3a3a; letter-spacing:-1px; display:flex; align-items:center; gap:9px; }
+  .ag-dot { width:18px; height:18px; border:5px solid #e01e26; border-radius:50%; display:inline-block; }
+  .ag-gen { font-size:11px; color:#777; text-align:right; line-height:1.6; }
+  .ag-banner { background:#3d3d3d; color:#fff; padding:16px 18px; font-size:25px; font-weight:600; margin-bottom:16px; }
+
+  .ag-h1 { font-size:22px; font-weight:600; margin:26px 0 8px; }
+  .ag-h1.big { font-size:27px; }
+  .ag-h2 { font-size:19px; font-weight:600; margin:30px 0 0; padding-bottom:8px; border-bottom:2px solid #e8920a; }
+  .ag-h2.blue { border-bottom-color:#4a90d9; }
+  .ag-h2.green { border-bottom-color:#2eb774; }
+
+  .ag-tiles { display:flex; flex-wrap:wrap; gap:10px; margin:10px 0 6px; }
+  .ag-tile { flex:1 1 110px; min-width:104px; border:2px solid #1a1a1a; border-radius:4px; text-align:center; padding:16px 8px; background:#fff; cursor:pointer; transition:transform .1s, box-shadow .1s; }
+  .ag-tile:hover { transform:translateY(-2px); box-shadow:0 3px 10px rgba(0,0,0,0.15); }
+  .ag-tile .v { font-size:19px; font-weight:700; }
+  .ag-tile .l { font-size:10.5px; margin-top:6px; color:#555; line-height:1.4; }
+  .ag-tile.req  { border-color:#e8920a; } .ag-tile.req .v  { color:#e8920a; }
+  .ag-tile.bkd  { border-color:#2eb774; } .ag-tile.bkd .v  { color:#2eb774; }
+  .ag-tile.exp  { border-color:#cf3b2f; background:#cf3b2f; }
+  .ag-tile.exp .v, .ag-tile.exp .l { color:#fff; }
+  .ag-tile.wait { border-color:#8b6cc1; } .ag-tile.wait .v { color:#8b6cc1; }
+
+  table.ag { width:100%; border-collapse:collapse; font-size:13.5px; background:#fff; }
+  table.ag th { text-align:left; color:#555; font-weight:600; padding:11px 12px; border-bottom:1px solid #c9c9c9; background:#fafafa; }
+  table.ag td { padding:12px; border-bottom:1px solid #e7e7e7; vertical-align:top; }
+  table.ag tr:hover td { background:#f5f8fb; }
+  a.ag-ref, span.ag-ref { color:#0070d2; text-decoration:none; font-weight:500; }
+  a.ag-ref:hover { text-decoration:underline; }
+  .ag-st-requested { color:#e8920a; } .ag-st-awaiting { color:#8b6cc1; font-weight:600; }
+  .ag-st-premier { color:#2eb774; } .ag-st-booked, .ag-st-delivered, .ag-st-other { color:#444; }
+
+  ul.ag-hl { list-style:none; margin:8px 0 0; }
+  ul.ag-hl li { font-size:13.5px; line-height:1.65; color:#333; background:#fff; padding:11px 14px; border-left:4px solid #e8920a; border-radius:0 8px 8px 0; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,33,71,0.07); }
+
+  .empty { color:#888; font-size:13px; font-style:italic; padding:12px; background:#fff; }
+  .flash { animation:flash 1.6s ease-out; }
+  @keyframes flash { 0%,40% { background:#fff4d6; } 100% { background:transparent; } }
+
+  .print-only { display:none; }
   @page { margin: 12mm 11mm; }
   @media print {
-    /* print = faithful replica of the Access portal FlexPoints page */
     body { background:#fff; display:block; }
-    .sidebar, .toolbar, #sec-summary, #sec-open, #sec-history { display:none; }
+    .sidebar, .toolbar { display:none; }
+    .print-only { display:block; }
     .main { margin-left:0; max-width:none; padding:0; }
-    #print-report { display:block; color:#1a1a1a; }
-    .ag-top { display:flex; align-items:center; justify-content:space-between; padding:2px 0 10px; }
-    .ag-brand { font-size:26px; font-weight:700; color:#3a3a3a; letter-spacing:-1px; display:flex; align-items:center; gap:9px; }
-    .ag-dot { width:18px; height:18px; border:5px solid #e01e26; border-radius:50%; display:inline-block; }
-    .ag-gen { font-size:11px; color:#777; text-align:right; line-height:1.6; }
-    .ag-banner { background:#3d3d3d; color:#fff; padding:16px 18px; font-size:25px; font-weight:600; margin-bottom:16px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .ag-h1 { font-size:22px; font-weight:600; margin:22px 0 8px; page-break-after:avoid; }
-    .ag-h2 { font-size:18px; font-weight:600; margin:22px 0 4px; padding-bottom:7px; border-bottom:2px solid #e8920a; page-break-after:avoid; }
-    .ag-h2.blue { border-bottom-color:#4a90d9; }
-    .ag-tiles { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 6px; }
-    .ag-tile { flex:1 1 100px; min-width:92px; border:2px solid #1a1a1a; border-radius:3px; text-align:center; padding:13px 6px; page-break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .ag-tile .v { font-size:16px; font-weight:700; }
-    .ag-tile .l { font-size:9.5px; margin-top:5px; color:#555; line-height:1.4; }
-    .ag-tile.req  { border-color:#e8920a; } .ag-tile.req .v  { color:#e8920a; }
-    .ag-tile.bkd  { border-color:#2eb774; } .ag-tile.bkd .v  { color:#2eb774; }
-    .ag-tile.exp  { border-color:#cf3b2f; background:#cf3b2f; }
-    .ag-tile.exp .v, .ag-tile.exp .l { color:#fff; }
-    .ag-tile.wait { border-color:#8b6cc1; } .ag-tile.wait .v { color:#8b6cc1; }
-    table.ag { width:100%; border-collapse:collapse; font-size:12px; }
-    table.ag th { text-align:left; color:#555; font-weight:600; padding:8px 10px; border-bottom:1px solid #c9c9c9; }
-    table.ag td { padding:9px 10px; border-bottom:1px solid #e7e7e7; vertical-align:top; }
-    table.ag tr { page-break-inside:avoid; }
-    .ag-ref { color:#de4b32; text-decoration:none; }
-    .ag-st-requested { color:#e8920a; } .ag-st-awaiting { color:#8b6cc1; }
-    .ag-st-premier { color:#2eb774; } .ag-st-booked, .ag-st-delivered, .ag-st-other { color:#444; }
-    .ag-overview { font-size:12.5px; line-height:1.75; color:#333; border:1px solid #ddd; border-left:4px solid #e01e26; padding:12px 14px; margin:14px 0 4px; }
-    .ag-hl { list-style:none; margin:6px 0 0; }
-    .ag-hl li { font-size:12px; line-height:1.6; color:#333; padding:7px 0 7px 14px; border-left:3px solid #e8920a; margin-bottom:6px; page-break-inside:avoid; }
-    .ag-pb { page-break-before:always; }
+    .context { box-shadow:none; border:1px solid #ddd; border-left:4px solid #e01e26; }
+    .ag-banner { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .ag-tile { -webkit-print-color-adjust:exact; print-color-adjust:exact; cursor:default; }
+    .ag-tile:hover { transform:none; box-shadow:none; }
+    table.ag tr, .ag-tile, ul.ag-hl li { page-break-inside:avoid; }
+    .ag-h1, .ag-h2 { page-break-after:avoid; }
+    #sec-quote { page-break-before:always; margin-top:0; }
+    #sec-history-h { page-break-before:always; }
+    ul.ag-hl li { box-shadow:none; }
   }
-  @media (max-width:900px) {
-    .sidebar { display:none; } .main { margin-left:0; }
-    .row { flex-wrap:wrap; } .row .who,.row .date { width:auto; }
-  }
+  @media (max-width:900px) { .sidebar { display:none; } .main { margin-left:0; padding:18px; } }
 </style>
 </head>
 <body>
@@ -115,11 +99,11 @@
   <div class="greeting" id="greeting">Hello, Kevin</div>
 
   <div class="side-label">Points at a glance</div>
-  <div class="side-stat"><span>Available</span><b id="s-available">-</b></div>
-  <div class="side-stat"><span>Requested</span><b id="s-requested">-</b></div>
-  <div class="side-stat"><span>Booked</span><b id="s-booked">-</b></div>
-  <div class="side-stat"><span>Awaiting approval</span><b id="s-approval">-</b></div>
-  <div class="expiry-alert" id="expiry-alert" style="display:none">
+  <div class="side-stat" onclick="jump('sec-history-h')"><span>Available</span><b id="s-available">-</b></div>
+  <div class="side-stat" onclick="jump('sec-requested')"><span>Requested</span><b id="s-requested">-</b></div>
+  <div class="side-stat" onclick="jump('sec-booked')"><span>Booked</span><b id="s-booked">-</b></div>
+  <div class="side-stat" onclick="jump('sec-quote')"><span>Awaiting approval</span><b id="s-approval">-</b></div>
+  <div class="expiry-alert" id="expiry-alert" style="display:none" onclick="jump('sec-history-h')">
     <b id="s-expiring">-</b> points expiring within 30 days
   </div>
 
@@ -136,35 +120,31 @@
     <button onclick="window.print()">Export PDF / Print</button>
   </div>
 
-  <section id="sec-summary">
-    <div class="context" id="context">Loading report...</div>
+  <div class="ag-top print-only">
+    <div class="ag-brand"><span class="ag-dot"></span>access</div>
+    <div class="ag-gen">FlexPoints Report<br>Generated <span id="p-generated">-</span></div>
+  </div>
+  <div class="ag-banner print-only">FlexPoints</div>
 
-    <h2>FlexPoints Summary</h2>
-    <div class="tiles" id="tiles"></div>
+  <div class="context" id="context">Loading report...</div>
 
-    <h2><span class="accent" style="background:#e8920a"></span>Action Highlights</h2>
-    <ul class="highlights" id="highlights"></ul>
-  </section>
+  <div class="ag-h1">FlexPoints Summary</div>
+  <div class="ag-tiles" id="tiles"></div>
 
-  <section id="sec-open">
-    <div class="section-quote">
-      <h2><span class="accent" style="background:#f1c40f"></span>Quote Received — Needs Response</h2>
-      <div id="quotes"></div>
-    </div>
+  <div class="ag-h2" style="margin-top:24px">Action Highlights</div>
+  <ul class="ag-hl" id="highlights"></ul>
 
-    <h2><span class="accent" style="background:#e8920a"></span>Requested</h2>
-    <div id="requested"></div>
+  <div class="ag-h2" id="sec-quote">Quote Received</div>
+  <div id="quotes"></div>
 
-    <h2><span class="accent" style="background:#1d8348"></span>Booked</h2>
-    <div id="booked"></div>
-  </section>
+  <div class="ag-h2" id="sec-requested">Requested</div>
+  <div id="requested"></div>
 
-  <section id="sec-history">
-    <h2><span class="accent" style="background:#002147"></span>Transaction History</h2>
-    <div id="history"></div>
-  </section>
+  <div class="ag-h2 green" id="sec-booked">Booked</div>
+  <div id="booked"></div>
 
-  <div id="print-report"></div>
+  <div class="ag-h1 big" id="sec-history-h">Transaction History</div>
+  <div id="history"></div>
 </div>
 
 <script>
@@ -177,40 +157,47 @@ const h = new Date().getHours();
 document.getElementById("greeting").textContent =
   (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + ", Kevin";
 
+function jump(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  const target = el.nextElementSibling || el;
+  target.classList.remove("flash"); void target.offsetWidth; target.classList.add("flash");
+}
+
 async function getJson(path) {
   try {
     return await (await fetch(`https://raw.githubusercontent.com/${REPO}/main/${path}?t=${t}`)).json();
   } catch (e) {
-    // repo not live yet - fall back to the copy served alongside this page
-    return await (await fetch(`${path}?t=${t}`)).json();
+    return await (await fetch(`${path}?t=${t}`)).json(); // fallback: served alongside page
   }
 }
 
-function badge(status) {
-  const s = String(status || "").toLowerCase();
-  const cls = s.includes("request") ? "b-requested" : s.includes("book") ? "b-booked"
-    : s.includes("deliver") ? "b-delivered" : s.includes("await") ? "b-awaiting"
-    : s.includes("premier") ? "b-premier" : "b-other";
-  return `<span class="badge ${cls}">${esc(status || "-")}</span>`;
+const stCls = st => {
+  const x = String(st || "").toLowerCase();
+  return x.includes("request") ? "ag-st-requested" : x.includes("book") ? "ag-st-booked"
+    : x.includes("deliver") ? "ag-st-delivered" : x.includes("await") ? "ag-st-awaiting"
+    : x.includes("premier") ? "ag-st-premier" : "ag-st-other";
+};
+
+function tile(v, lbl, cls, pts, target) {
+  return `<div class="ag-tile ${cls || ""}" onclick="jump('${target}')" title="Click to view">
+    <div class="v">${v ?? "-"}${pts && v != null ? " pts" : ""}</div><div class="l">${lbl}</div></div>`;
 }
-function rows(list, emptyMsg) {
+
+function tbl(list, nameHead, withExpiry, emptyMsg) {
   if (!list || !list.length) return `<div class="empty">${emptyMsg}</div>`;
-  return list.map(r => {
-    const pts = r.points ?? "";
-    const credit = typeof pts === "number" && pts > 0;
-    const href = r.url || PORTAL; // exact transaction page when captured
-    return `<div class="row" onclick="window.open('${esc(href)}','_blank')">
-      <span class="ref">${esc(r.ref)}</span>
-      <span class="name">${esc(r.name)}</span>
-      <span class="who">${esc(r.owner || "-")}</span>
-      <span class="date">${esc(r.date)}${r.expiry_date ? " &rarr; " + esc(r.expiry_date) : ""}</span>
-      <span class="pts${credit ? " credit" : ""}">${credit ? "+" : ""}${esc(pts)}</span>
-      ${badge(r.status)}
-    </div>`;
+  const head = `<tr><th>Ref</th><th>${nameHead}</th><th>Owner</th><th>Date</th>${withExpiry ? "<th>Expiry Date</th>" : ""}<th>Points</th><th>Status</th></tr>`;
+  const body = list.map(x => {
+    const ref = x.url
+      ? `<a class="ag-ref" href="${esc(x.url)}" target="_blank">${esc(x.ref)}</a>`
+      : `<a class="ag-ref" href="${PORTAL}" target="_blank">${esc(x.ref)}</a>`;
+    return `<tr><td>${ref}</td><td>${esc(x.name)}</td><td>${esc(x.owner || "")}</td>
+      <td>${esc(x.date)}</td>${withExpiry ? `<td>${esc(x.expiry_date || "")}</td>` : ""}
+      <td>${typeof x.points === "number" && x.points > 0 ? "+" : ""}${esc(x.points ?? "")}</td>
+      <td class="${stCls(x.status)}">${esc(x.status || "")}</td></tr>`;
   }).join("");
-}
-function tile(v, lbl, cls) {
-  return `<div class="tile ${cls || ""}"><div class="num">${v ?? "-"}</div><div class="lbl">${lbl}</div></div>`;
+  return `<table class="ag">${head}${body}</table>`;
 }
 
 async function load() {
@@ -222,19 +209,20 @@ async function load() {
     return;
   }
   document.getElementById("generated").textContent = r.generated || "-";
+  document.getElementById("p-generated").textContent = r.generated || "-";
   document.getElementById("source").textContent = r.source || "-";
   document.getElementById("context").textContent = r.context || r.summary || "No summary in this run.";
 
   const s = r.summary_tiles || {};
   document.getElementById("tiles").innerHTML =
-    tile(s.available, "Available") +
-    tile(s.requested, "Requested", "req") +
-    tile(s.booked, "Booked", "bkd") +
-    tile(s.expiring_30, "Expiring within 30 days", "exp") +
-    tile(s.expiring_60, "Expiring within 60 days", "exp") +
-    tile(s.expiring_90, "Expiring within 90 days", "exp") +
-    tile(s.awaiting_estimate, "Awaiting estimate", "wait") +
-    tile(s.awaiting_approval, "Awaiting approval", "wait");
+    tile(s.available, "Available", "", true, "sec-history-h") +
+    tile(s.requested, "Requested", "req", true, "sec-requested") +
+    tile(s.booked, "Booked", "bkd", true, "sec-booked") +
+    tile(s.expiring_30, "Expiring within 30 Days", "exp", true, "sec-history-h") +
+    tile(s.expiring_60, "Expiring within 60 Days", "exp", true, "sec-history-h") +
+    tile(s.expiring_90, "Expiring within 90 Days", "exp", true, "sec-history-h") +
+    tile(s.awaiting_estimate, "Awaiting Estimate", "wait", false, "sec-quote") +
+    tile(s.awaiting_approval, "Awaiting Approval", "wait", false, "sec-quote");
 
   for (const [id, val] of [["s-available", s.available], ["s-requested", s.requested],
                            ["s-booked", s.booked], ["s-approval", s.awaiting_approval]])
@@ -246,66 +234,13 @@ async function load() {
 
   document.getElementById("highlights").innerHTML =
     (r.highlights || []).map(x => `<li>${esc(x)}</li>`).join("") || '<div class="empty">Nothing flagged.</div>';
-  document.getElementById("quotes").innerHTML = rows(r.quotes_received, "No quotes awaiting response.");
-  document.getElementById("requested").innerHTML = rows(r.requested, "No open requests.");
-  document.getElementById("booked").innerHTML = rows(r.booked, "No services booked.");
-  document.getElementById("history").innerHTML = rows(r.transaction_history, "No transactions captured.");
+  document.getElementById("quotes").innerHTML = tbl(r.quotes_received, "Case name", false, "No quotes awaiting response.");
+  document.getElementById("requested").innerHTML = tbl(r.requested, "Transaction name", false, "No open requests.");
+  document.getElementById("booked").innerHTML = tbl(r.booked, "Transaction name", false, "No services booked.");
+  document.getElementById("history").innerHTML = tbl(r.transaction_history, "Transaction name", true, "No transactions captured.");
   window.__report = r;
-  buildPrintReport(r);
 }
 load();
-
-// -- print/PDF: faithful replica of the Access portal FlexPoints page --
-function buildPrintReport(r) {
-  const s = r.summary_tiles || {};
-  const stCls = st => {
-    const x = String(st || "").toLowerCase();
-    return x.includes("request") ? "ag-st-requested" : x.includes("book") ? "ag-st-booked"
-      : x.includes("deliver") ? "ag-st-delivered" : x.includes("await") ? "ag-st-awaiting"
-      : x.includes("premier") ? "ag-st-premier" : "ag-st-other";
-  };
-  const tile = (v, lbl, cls, pts) =>
-    `<div class="ag-tile ${cls || ""}"><div class="v">${v ?? "-"}${pts && v != null ? " pts" : ""}</div><div class="l">${lbl}</div></div>`;
-  const tbl = (list, nameHead, withExpiry) => {
-    if (!list || !list.length) return `<table class="ag"><tr><td style="color:#888">None</td></tr></table>`;
-    const head = `<tr><th>Ref</th><th>${nameHead}</th><th>Owner</th><th>Date</th>${withExpiry ? "<th>Expiry Date</th>" : ""}<th>Points</th><th>Status</th></tr>`;
-    const body = list.map(x => `<tr>
-      <td>${x.url ? `<a class="ag-ref" href="${esc(x.url)}">${esc(x.ref)}</a>` : `<span class="ag-ref">${esc(x.ref)}</span>`}</td><td>${esc(x.name)}</td><td>${esc(x.owner || "")}</td>
-      <td>${esc(x.date)}</td>${withExpiry ? `<td>${esc(x.expiry_date || "")}</td>` : ""}
-      <td>${typeof x.points === "number" && x.points > 0 ? "+" : ""}${esc(x.points ?? "")}</td>
-      <td class="${stCls(x.status)}">${esc(x.status || "")}</td></tr>`).join("");
-    return `<table class="ag">${head}${body}</table>`;
-  };
-  document.getElementById("print-report").innerHTML = `
-    <div class="ag-top">
-      <div class="ag-brand"><span class="ag-dot"></span>access</div>
-      <div class="ag-gen">FlexPoints Report<br>Generated ${esc(r.generated || "-")}</div>
-    </div>
-    <div class="ag-banner">FlexPoints</div>
-    <div class="ag-h1">FlexPoints Summary</div>
-    <div class="ag-tiles">
-      ${tile(s.available, "Available", "", true)}
-      ${tile(s.requested, "Requested", "req", true)}
-      ${tile(s.booked, "Booked", "bkd", true)}
-      ${tile(s.expiring_30, "Expiring within 30 Days", "exp", true)}
-      ${tile(s.expiring_60, "Expiring within 60 Days", "exp", true)}
-      ${tile(s.expiring_90, "Expiring within 90 Days", "exp", true)}
-      ${tile(s.awaiting_estimate, "Awaiting Estimate", "wait", false)}
-      ${tile(s.awaiting_approval, "Awaiting Approval", "wait", false)}
-    </div>
-    <div class="ag-overview">${esc(r.context || r.summary || "")}</div>
-    <ul class="ag-hl">${(r.highlights || []).map(h => `<li>${esc(h)}</li>`).join("")}</ul>
-    <div class="ag-pb"></div>
-    <div class="ag-h2">Quote Received</div>
-    ${tbl(r.quotes_received, "Case name", false)}
-    <div class="ag-h2">Requested</div>
-    ${tbl(r.requested, "Transaction name", false)}
-    <div class="ag-h2 blue">Booked</div>
-    ${tbl(r.booked, "Transaction name", false)}
-    <div class="ag-pb"></div>
-    <div class="ag-h1" style="font-size:26px">Transaction History</div>
-    ${tbl(r.transaction_history, "Transaction name", true)}`;
-}
 
 function exportCSV() {
   const r = window.__report;
