@@ -28,6 +28,19 @@ SOURCE_DIR = os.path.join(SCRIPT_DIR, "source")
 
 # -- Phase 1 - pull portal pages ---------------------------------------------
 
+REF_PATTERN = re.compile(r"(FPT-\d+|\d{6,10})$")
+
+def harvest_links(anchors, links):
+    """Collect ref -> portal URL so every dashboard/PDF item links to its
+    exact transaction detail page."""
+    for a in anchors:
+        text = (a.get("text") or "").strip()
+        href = (a.get("href") or "").strip()
+        if href and REF_PATTERN.fullmatch(text):
+            if href.startswith("/"):
+                href = "https://accessgroup.my.site.com" + href
+            links[text] = href
+
 def get_portal_text():
     """Log in to the Access portal with Playwright and return rendered page text.
     Credentials come from Windows User env vars - never stored in any file."""
@@ -90,6 +103,9 @@ def get_portal_text():
                 page.goto(url, timeout=60000)
                 page.wait_for_timeout(6000)  # Lightning components render late
                 pages_text[name] = page.inner_text("body")
+                harvest_links(page.eval_on_selector_all(
+                    "a[href]", "els => els.map(e => ({text: e.textContent, href: e.href}))"
+                ), ITEM_LINKS)
                 print(f"Phase 1 - pulled {name} ({len(pages_text[name])} chars)")
             browser.close()
         return pages_text
@@ -120,6 +136,9 @@ def read_saved_source():
     newest = max(files, key=os.path.getmtime)
     raw = open(newest, "r", encoding="utf-8", errors="replace").read()
     if newest.lower().endswith((".html", ".htm", ".mhtml")):
+        harvest_links([{"text": re.sub(r"<[^>]+>", "", m.group(2)), "href": m.group(1)}
+                       for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>',
+                                            raw, re.S | re.I)], ITEM_LINKS)
         raw = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", raw, flags=re.S | re.I)
         raw = re.sub(r"<[^>]+>", " ", raw)
         raw = re.sub(r"\s+", " ", raw)
@@ -128,6 +147,7 @@ def read_saved_source():
     return {"saved_page": raw}
 
 print("Phase 1 - pulling FlexPoints pages...")
+ITEM_LINKS = {}
 pages = get_portal_text() or read_saved_source()
 if not pages:
     print("ERROR: no portal data - set ACCESS_PORTAL_USER/ACCESS_PORTAL_PASSWORD env vars,")
@@ -188,6 +208,16 @@ report = {
     "source": "live portal" if "flexpoints" in pages else "saved page",
     **parsed
 }
+
+# link every item to its exact transaction page on the portal
+linked = 0
+for key in ("quotes_received", "requested", "booked", "transaction_history"):
+    for item in report.get(key) or []:
+        url = ITEM_LINKS.get(str(item.get("ref", "")).strip())
+        if url:
+            item["url"] = url
+            linked += 1
+print(f"Phase 2 - {linked} item(s) linked to portal detail pages")
 print(f"Phase 2 done - quotes:{len(report.get('quotes_received', []))} "
       f"requested:{len(report.get('requested', []))} "
       f"booked:{len(report.get('booked', []))} "

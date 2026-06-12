@@ -94,7 +94,7 @@
     table.ag th { text-align:left; color:#555; font-weight:600; padding:8px 10px; border-bottom:1px solid #c9c9c9; }
     table.ag td { padding:9px 10px; border-bottom:1px solid #e7e7e7; vertical-align:top; }
     table.ag tr { page-break-inside:avoid; }
-    .ag-ref { color:#de4b32; }
+    .ag-ref { color:#de4b32; text-decoration:none; }
     .ag-st-requested { color:#e8920a; } .ag-st-awaiting { color:#8b6cc1; }
     .ag-st-premier { color:#2eb774; } .ag-st-booked, .ag-st-delivered, .ag-st-other { color:#444; }
     .ag-overview { font-size:12.5px; line-height:1.75; color:#333; border:1px solid #ddd; border-left:4px solid #e01e26; padding:12px 14px; margin:14px 0 4px; }
@@ -198,7 +198,8 @@ function rows(list, emptyMsg) {
   return list.map(r => {
     const pts = r.points ?? "";
     const credit = typeof pts === "number" && pts > 0;
-    return `<div class="row" onclick="window.open('${PORTAL}','_blank')">
+    const href = r.url || PORTAL; // exact transaction page when captured
+    return `<div class="row" onclick="window.open('${esc(href)}','_blank')">
       <span class="ref">${esc(r.ref)}</span>
       <span class="name">${esc(r.name)}</span>
       <span class="who">${esc(r.owner || "-")}</span>
@@ -269,7 +270,7 @@ function buildPrintReport(r) {
     if (!list || !list.length) return `<table class="ag"><tr><td style="color:#888">None</td></tr></table>`;
     const head = `<tr><th>Ref</th><th>${nameHead}</th><th>Owner</th><th>Date</th>${withExpiry ? "<th>Expiry Date</th>" : ""}<th>Points</th><th>Status</th></tr>`;
     const body = list.map(x => `<tr>
-      <td class="ag-ref">${esc(x.ref)}</td><td>${esc(x.name)}</td><td>${esc(x.owner || "")}</td>
+      <td>${x.url ? `<a class="ag-ref" href="${esc(x.url)}">${esc(x.ref)}</a>` : `<span class="ag-ref">${esc(x.ref)}</span>`}</td><td>${esc(x.name)}</td><td>${esc(x.owner || "")}</td>
       <td>${esc(x.date)}</td>${withExpiry ? `<td>${esc(x.expiry_date || "")}</td>` : ""}
       <td>${typeof x.points === "number" && x.points > 0 ? "+" : ""}${esc(x.points ?? "")}</td>
       <td class="${stCls(x.status)}">${esc(x.status || "")}</td></tr>`).join("");
@@ -320,9 +321,9 @@ function exportCSV() {
   const sections = [["QUOTE RECEIVED", r.quotes_received], ["REQUESTED", r.requested],
                     ["BOOKED", r.booked], ["TRANSACTION HISTORY", r.transaction_history]];
   for (const [title, list] of sections) {
-    lines.push(title, "Ref,Name,Owner,Date,Expiry date,Points,Status");
+    lines.push(title, "Ref,Name,Owner,Date,Expiry date,Points,Status,Link");
     for (const x of list || [])
-      lines.push([x.ref, x.name, x.owner, x.date, x.expiry_date, x.points, x.status].map(q).join(","));
+      lines.push([x.ref, x.name, x.owner, x.date, x.expiry_date, x.points, x.status, x.url].map(q).join(","));
     lines.push("");
   }
   lines.push("HIGHLIGHTS");
