@@ -65,12 +65,23 @@
   .toolbar { display:flex; gap:10px; justify-content:flex-end; margin-bottom:14px; }
   .toolbar button { font-family:'Inter',sans-serif; font-size:13px; font-weight:700; border:none; border-radius:8px; padding:9px 16px; cursor:pointer; background:#002147; color:#fff; }
   .toolbar button.alt { background:#fff; color:#002147; box-shadow:0 1px 4px rgba(0,33,71,0.15); }
+  .print-only { display:none; }
+  @page { margin: 16mm 14mm; }
   @media print {
     .sidebar, .toolbar { display:none; }
+    .print-only { display:block; }
     .main { margin-left:0; max-width:none; padding:0; }
-    body { background:#fff; }
+    body { background:#fff; display:block; }
     .row, .tile, .context, ul.highlights li { box-shadow:none; border:1px solid #d7e1ec; cursor:default; }
-    .row { break-inside:avoid; }
+    .row, .tile, ul.highlights li { page-break-inside:avoid; }
+    h2 { page-break-after:avoid; }
+    /* report pagination: page 1 = overview, then each section starts clean */
+    #sec-open, #sec-history { page-break-before:always; }
+    .print-header { border-bottom:4px solid #002147; padding-bottom:12px; margin-bottom:18px; }
+    .print-header .ph-title { font-size:24px; font-weight:800; color:#002147; letter-spacing:-0.5px; }
+    .print-header .ph-meta { font-size:12px; color:#5a6f88; margin-top:6px; }
+    .print-intro { font-size:13px; color:#3a4a5e; line-height:1.7; margin:0 0 14px; }
+    .section-banner { background:#002147; color:#fff; font-size:15px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; padding:10px 14px; border-radius:6px; margin-bottom:4px; }
   }
   @media (max-width:900px) {
     .sidebar { display:none; } .main { margin-left:0; }
@@ -105,27 +116,58 @@
     <button class="alt" onclick="exportCSV()">Export CSV</button>
     <button onclick="window.print()">Export PDF / Print</button>
   </div>
-  <div class="context" id="context">Loading report...</div>
 
-  <h2>FlexPoints Summary</h2>
-  <div class="tiles" id="tiles"></div>
+  <section id="sec-summary">
+    <div class="print-header print-only">
+      <div class="ph-title">AG FlexPoints &mdash; Service Credits Report</div>
+      <div class="ph-meta">University of Oxford &middot; HR Systems &middot; Generated <span id="p-generated">-</span> &middot; Source: Access Customer Success Portal</div>
+    </div>
+    <div class="print-intro print-only">
+      FlexPoints are pre-paid service credits from The Access Group, spent on
+      training, configuration and consultancy for our Access systems. Points
+      roll over for 12 months and expire if unused. This report shows the
+      current balance, everything awaiting a decision, work already booked,
+      and the full transaction record. Page 1 summarises the position and the
+      actions needed; the following pages give the detail behind it.
+    </div>
+    <div class="context" id="context">Loading report...</div>
 
-  <h2><span class="accent" style="background:#e8920a"></span>Action Highlights</h2>
-  <ul class="highlights" id="highlights"></ul>
+    <h2>FlexPoints Summary</h2>
+    <div class="tiles" id="tiles"></div>
 
-  <div class="section-quote">
-    <h2><span class="accent" style="background:#f1c40f"></span>Quote Received — Needs Response</h2>
-    <div id="quotes"></div>
-  </div>
+    <h2><span class="accent" style="background:#e8920a"></span>Action Highlights</h2>
+    <ul class="highlights" id="highlights"></ul>
+  </section>
 
-  <h2><span class="accent" style="background:#e8920a"></span>Requested</h2>
-  <div id="requested"></div>
+  <section id="sec-open">
+    <div class="section-banner print-only">Open Items &mdash; Awaiting a Decision or Access Action</div>
+    <div class="print-intro print-only">
+      Quotes need approval from our side before work can be scheduled;
+      requested items are with Access waiting to be converted into bookings.
+      Points shown negative are spends against the balance.
+    </div>
+    <div class="section-quote">
+      <h2><span class="accent" style="background:#f1c40f"></span>Quote Received — Needs Response</h2>
+      <div id="quotes"></div>
+    </div>
 
-  <h2><span class="accent" style="background:#1d8348"></span>Booked</h2>
-  <div id="booked"></div>
+    <h2><span class="accent" style="background:#e8920a"></span>Requested</h2>
+    <div id="requested"></div>
 
-  <h2><span class="accent" style="background:#002147"></span>Transaction History</h2>
-  <div id="history"></div>
+    <h2><span class="accent" style="background:#1d8348"></span>Booked</h2>
+    <div id="booked"></div>
+  </section>
+
+  <section id="sec-history">
+    <div class="section-banner print-only">Transaction History &mdash; Complete Record</div>
+    <div class="print-intro print-only">
+      Every FlexPoints movement on the account, newest first. Positive entries
+      are point top-ups (with their 12-month expiry date); negative entries
+      are services requested, booked or delivered against the balance.
+    </div>
+    <h2><span class="accent" style="background:#002147"></span>Transaction History</h2>
+    <div id="history"></div>
+  </section>
 </div>
 
 <script>
@@ -163,7 +205,7 @@ function rows(list, emptyMsg) {
       <span class="ref">${esc(r.ref)}</span>
       <span class="name">${esc(r.name)}</span>
       <span class="who">${esc(r.owner || "-")}</span>
-      <span class="date">${esc(r.expiry_date ? r.date + " &rarr; " + r.expiry_date : r.date)}</span>
+      <span class="date">${esc(r.date)}${r.expiry_date ? " &rarr; " + esc(r.expiry_date) : ""}</span>
       <span class="pts${credit ? " credit" : ""}">${credit ? "+" : ""}${esc(pts)}</span>
       ${badge(r.status)}
     </div>`;
@@ -182,6 +224,7 @@ async function load() {
     return;
   }
   document.getElementById("generated").textContent = r.generated || "-";
+  document.getElementById("p-generated").textContent = r.generated || "-";
   document.getElementById("source").textContent = r.source || "-";
   document.getElementById("context").textContent = r.context || r.summary || "No summary in this run.";
 
