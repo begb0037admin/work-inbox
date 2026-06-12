@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AG FlexPoints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#eaf2f8; color:#1a2433; display:flex; min-height:100vh; }
+
+  /* -- Oxford navy sidebar (work-inbox) -- */
+  .sidebar { width:300px; background:#002147; color:#fff; padding:28px 24px; position:fixed; top:0; bottom:0; overflow-y:auto; }
+  .sidebar h1 { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
+  .sidebar .sub { font-size:13px; color:#9db4cc; margin-top:6px; line-height:1.5; }
+  .greeting { font-size:15px; font-weight:600; margin-top:24px; }
+  .side-label { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9db4cc; margin:26px 0 10px; }
+  .side-stat { display:flex; justify-content:space-between; font-size:14px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.08); }
+  .side-stat b { font-weight:700; }
+  .expiry-alert { background:#c0392b; border-radius:10px; padding:14px 16px; margin-top:14px; font-size:13px; line-height:1.6; }
+  .expiry-alert b { font-size:20px; display:block; }
+  .portal-btn { display:block; text-align:center; background:#fff; color:#002147; font-weight:700; font-size:13px; border-radius:8px; padding:10px; margin-top:24px; text-decoration:none; }
+  .side-meta { margin-top:22px; font-size:12px; color:#9db4cc; line-height:1.9; }
+  .side-meta b { color:#fff; font-weight:600; }
+
+  /* -- main -- */
+  .main { margin-left:300px; flex:1; padding:30px 36px; max-width:1150px; }
+  .context { background:#fff; border-radius:12px; padding:18px 22px; box-shadow:0 1px 4px rgba(0,33,71,0.08); font-size:14px; line-height:1.7; border-left:5px solid #002147; }
+  h2 { font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#5a6f88; margin:30px 0 12px; }
+  h2 .accent { display:inline-block; width:26px; height:4px; border-radius:2px; vertical-align:middle; margin-right:8px; }
+
+  /* portal-style summary tiles */
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(125px,1fr)); gap:12px; }
+  .tile { background:#fff; border-radius:12px; padding:16px 12px; text-align:center; box-shadow:0 1px 4px rgba(0,33,71,0.08); border-top:4px solid #002147; }
+  .tile .num { font-size:26px; font-weight:800; color:#002147; }
+  .tile .lbl { font-size:11px; color:#5a6f88; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-top:4px; line-height:1.4; }
+  .tile.req  { border-top-color:#e8920a; } .tile.req .num  { color:#b36b00; }
+  .tile.bkd  { border-top-color:#1d8348; } .tile.bkd .num  { color:#1d8348; }
+  .tile.exp  { background:#c0392b; border-top-color:#8e2418; }
+  .tile.exp .num { color:#fff; } .tile.exp .lbl { color:#f5c7c0; }
+  .tile.wait { border-top-color:#7d3c98; } .tile.wait .num { color:#7d3c98; }
+
+  ul.highlights { list-style:none; }
+  ul.highlights li { background:#fff; border-radius:10px; padding:12px 16px; margin-bottom:8px; font-size:14px; line-height:1.6; box-shadow:0 1px 4px rgba(0,33,71,0.08); border-left:4px solid #e8920a; }
+
+  /* work-inbox style card rows for transactions */
+  .row { background:#fff; border-radius:12px; padding:14px 18px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,33,71,0.08); display:flex; align-items:center; gap:16px; transition:box-shadow .15s; cursor:pointer; }
+  .row:hover { box-shadow:0 3px 10px rgba(0,33,71,0.18); }
+  .row .ref { font-size:12px; font-weight:600; color:#4a90d9; width:90px; flex-shrink:0; }
+  .row .name { flex:1; font-size:15px; font-weight:600; color:#1a2433; }
+  .row .who { font-size:13px; color:#5a6f88; width:130px; flex-shrink:0; }
+  .row .date { font-size:13px; color:#5a6f88; width:90px; text-align:right; flex-shrink:0; }
+  .row .pts { font-size:15px; font-weight:800; color:#002147; width:70px; text-align:right; flex-shrink:0; }
+  .row .pts.credit { color:#1d8348; }
+  .badge { font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; width:130px; text-align:center; flex-shrink:0; }
+  .b-requested { background:#fff4e5; color:#b36b00; }
+  .b-booked    { background:#e8f6ee; color:#1d8348; }
+  .b-delivered { background:#e9f0f8; color:#2e6da4; }
+  .b-awaiting  { background:#f3e9f8; color:#7d3c98; }
+  .b-premier   { background:#f3e9f8; color:#7d3c98; }
+  .b-other     { background:#eef3f8; color:#5a6f88; }
+  .section-quote .row { border-left:5px solid #f1c40f; }   /* yellow accent = needs response */
+  .empty { color:#8295ab; font-size:13px; font-style:italic; padding:10px 0; }
+  .toolbar { display:flex; gap:10px; justify-content:flex-end; margin-bottom:14px; }
+  .toolbar button { font-family:'Inter',sans-serif; font-size:13px; font-weight:700; border:none; border-radius:8px; padding:9px 16px; cursor:pointer; background:#002147; color:#fff; }
+  .toolbar button.alt { background:#fff; color:#002147; box-shadow:0 1px 4px rgba(0,33,71,0.15); }
+  @media print {
+    .sidebar, .toolbar { display:none; }
+    .main { margin-left:0; max-width:none; padding:0; }
+    body { background:#fff; }
+    .row, .tile, .context, ul.highlights li { box-shadow:none; border:1px solid #d7e1ec; cursor:default; }
+    .row { break-inside:avoid; }
+  }
+  @media (max-width:900px) {
+    .sidebar { display:none; } .main { margin-left:0; }
+    .row { flex-wrap:wrap; } .row .who,.row .date { width:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <h1>AG FlexPoints</h1>
+  <div class="sub">Access Group FlexPoints<br>recurring report</div>
+  <div class="greeting" id="greeting">Hello, Kevin</div>
+
+  <div class="side-label">Points at a glance</div>
+  <div class="side-stat"><span>Available</span><b id="s-available">-</b></div>
+  <div class="side-stat"><span>Requested</span><b id="s-requested">-</b></div>
+  <div class="side-stat"><span>Booked</span><b id="s-booked">-</b></div>
+  <div class="side-stat"><span>Awaiting approval</span><b id="s-approval">-</b></div>
+  <div class="expiry-alert" id="expiry-alert" style="display:none">
+    <b id="s-expiring">-</b> points expiring within 30 days
+  </div>
+
+  <a class="portal-btn" href="https://accessgroup.my.site.com/Support/s/flexpoints" target="_blank">Open Access Portal &rarr;</a>
+  <div class="side-meta">
+    <b>Last run</b><br><span id="generated">loading...</span><br>
+    <b>Source</b><br><span id="source">-</span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="toolbar">
+    <button class="alt" onclick="exportCSV()">Export CSV</button>
+    <button onclick="window.print()">Export PDF / Print</button>
+  </div>
+  <div class="context" id="context">Loading report...</div>
+
+  <h2>FlexPoints Summary</h2>
+  <div class="tiles" id="tiles"></div>
+
+  <h2><span class="accent" style="background:#e8920a"></span>Action Highlights</h2>
+  <ul class="highlights" id="highlights"></ul>
+
+  <div class="section-quote">
+    <h2><span class="accent" style="background:#f1c40f"></span>Quote Received — Needs Response</h2>
+    <div id="quotes"></div>
+  </div>
+
+  <h2><span class="accent" style="background:#e8920a"></span>Requested</h2>
+  <div id="requested"></div>
+
+  <h2><span class="accent" style="background:#1d8348"></span>Booked</h2>
+  <div id="booked"></div>
+
+  <h2><span class="accent" style="background:#002147"></span>Transaction History</h2>
+  <div id="history"></div>
+</div>
+
+<script>
+const REPO = "begb0037admin/AG-FlexPoints";
+const PORTAL = "https://accessgroup.my.site.com/Support/s/flexpoints";
+const t = Date.now(); // cache-buster - mandatory on every raw fetch
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const h = new Date().getHours();
+document.getElementById("greeting").textContent =
+  (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + ", Kevin";
+
+async function getJson(path) {
+  try {
+    return await (await fetch(`https://raw.githubusercontent.com/${REPO}/main/${path}?t=${t}`)).json();
+  } catch (e) {
+    // repo not live yet - fall back to the copy served alongside this page
+    return await (await fetch(`${path}?t=${t}`)).json();
+  }
+}
+
+function badge(status) {
+  const s = String(status || "").toLowerCase();
+  const cls = s.includes("request") ? "b-requested" : s.includes("book") ? "b-booked"
+    : s.includes("deliver") ? "b-delivered" : s.includes("await") ? "b-awaiting"
+    : s.includes("premier") ? "b-premier" : "b-other";
+  return `<span class="badge ${cls}">${esc(status || "-")}</span>`;
+}
+function rows(list, emptyMsg) {
+  if (!list || !list.length) return `<div class="empty">${emptyMsg}</div>`;
+  return list.map(r => {
+    const pts = r.points ?? "";
+    const credit = typeof pts === "number" && pts > 0;
+    return `<div class="row" onclick="window.open('${PORTAL}','_blank')">
+      <span class="ref">${esc(r.ref)}</span>
+      <span class="name">${esc(r.name)}</span>
+      <span class="who">${esc(r.owner || "-")}</span>
+      <span class="date">${esc(r.expiry_date ? r.date + " &rarr; " + r.expiry_date : r.date)}</span>
+      <span class="pts${credit ? " credit" : ""}">${credit ? "+" : ""}${esc(pts)}</span>
+      ${badge(r.status)}
+    </div>`;
+  }).join("");
+}
+function tile(v, lbl, cls) {
+  return `<div class="tile ${cls || ""}"><div class="num">${v ?? "-"}</div><div class="lbl">${lbl}</div></div>`;
+}
+
+async function load() {
+  let r;
+  try { r = await getJson("data/flexpoints.json"); }
+  catch (e) {
+    document.getElementById("context").textContent =
+      "No report yet - run fetch_flexpoints.py to generate the first one.";
+    return;
+  }
+  document.getElementById("generated").textContent = r.generated || "-";
+  document.getElementById("source").textContent = r.source || "-";
+  document.getElementById("context").textContent = r.context || r.summary || "No summary in this run.";
+
+  const s = r.summary_tiles || {};
+  document.getElementById("tiles").innerHTML =
+    tile(s.available, "Available") +
+    tile(s.requested, "Requested", "req") +
+    tile(s.booked, "Booked", "bkd") +
+    tile(s.expiring_30, "Expiring within 30 days", "exp") +
+    tile(s.expiring_60, "Expiring within 60 days", "exp") +
+    tile(s.expiring_90, "Expiring within 90 days", "exp") +
+    tile(s.awaiting_estimate, "Awaiting estimate", "wait") +
+    tile(s.awaiting_approval, "Awaiting approval", "wait");
+
+  for (const [id, val] of [["s-available", s.available], ["s-requested", s.requested],
+                           ["s-booked", s.booked], ["s-approval", s.awaiting_approval]])
+    document.getElementById(id).textContent = val ?? "-";
+  if (s.expiring_30) {
+    document.getElementById("s-expiring").textContent = s.expiring_30.toLocaleString("en-GB");
+    document.getElementById("expiry-alert").style.display = "block";
+  }
+
+  document.getElementById("highlights").innerHTML =
+    (r.highlights || []).map(x => `<li>${esc(x)}</li>`).join("") || '<div class="empty">Nothing flagged.</div>';
+  document.getElementById("quotes").innerHTML = rows(r.quotes_received, "No quotes awaiting response.");
+  document.getElementById("requested").innerHTML = rows(r.requested, "No open requests.");
+  document.getElementById("booked").innerHTML = rows(r.booked, "No services booked.");
+  document.getElementById("history").innerHTML = rows(r.transaction_history, "No transactions captured.");
+  window.__report = r;
+}
+load();
+
+function exportCSV() {
+  const r = window.__report;
+  if (!r) return;
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [
+    `AG FlexPoints report,${q(r.generated)}`,
+    "",
+    "SUMMARY,Points",
+    ...Object.entries(r.summary_tiles || {}).map(([k, v]) => `${q(k)},${q(v)}`),
+    ""
+  ];
+  const sections = [["QUOTE RECEIVED", r.quotes_received], ["REQUESTED", r.requested],
+                    ["BOOKED", r.booked], ["TRANSACTION HISTORY", r.transaction_history]];
+  for (const [title, list] of sections) {
+    lines.push(title, "Ref,Name,Owner,Date,Expiry date,Points,Status");
+    for (const x of list || [])
+      lines.push([x.ref, x.name, x.owner, x.date, x.expiry_date, x.points, x.status].map(q).join(","));
+    lines.push("");
+  }
+  lines.push("HIGHLIGHTS");
+  for (const x of r.highlights || []) lines.push(q(x));
+  const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `flexpoints-report-${(r.generated || "").slice(0, 10) || "latest"}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>

@@ -120,10 +120,32 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 
 ---
 
+## Session 2026-06-12 — AG FlexPoints scaffolded
+
+New sister project built in `ag-flexpoints/` on branch `claude/determined-allen-zanfr0`
+(PR open): recurring report on Access Group FlexPoints, destined for its own repo
+**begb0037admin/AG-FlexPoints** (could not be created from the cloud session —
+GitHub App token is scoped to work-inbox only; Kevin must create the repo and
+grant the Claude GitHub App access to it).
+
+- `ag-flexpoints/fetch_flexpoints.py` — Playwright login to accessgroup.my.site.com
+  (ACCESS_PORTAL_USER / ACCESS_PORTAL_PASSWORD Windows env vars — same
+  username/password flow as the hr-fa-knowledge-base scrape; lift its login code
+  if the generic selectors miss), claude-haiku-4-5 parses pages → full report JSON
+  → pushed via Contents API. Fallback: parse newest page saved into `source/`.
+- `ag-flexpoints/index.html` — hybrid dashboard: Access portal layout (summary
+  tiles, Quote Received, Requested, Booked, Transaction History) in work-inbox
+  style (navy sidebar, context bar). CSV + PDF/print export.
+- `ag-flexpoints/data/flexpoints.json` — seeded with real data from Kevin's
+  2026-06-12 portal screenshot (2,935 pts available, ALL expiring 2026-06-29;
+  quote 69001638 for 2,800 pts awaiting approval).
+- Portal is unreachable from cloud agents (403) — local script is the only bridge.
+
 ## Roadmap
 
 | Priority | Task |
 |----------|------|
+| 0 | AG FlexPoints: create repo begb0037admin/AG-FlexPoints, move ag-flexpoints/ contents to its root, enable Pages, set ACCESS_PORTAL_USER/ACCESS_PORTAL_PASSWORD env vars, pip install playwright, schedule weekly run |
 | 1 | Update Task Scheduler bat to auto-pull fetch_inbox.py before running |
 | 2 | Add James Salas Guillen to Outlook calendar so he appears without AI inference |
 | 3 | Monitor card openmail:// click-through reliability |
