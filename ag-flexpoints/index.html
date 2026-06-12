@@ -60,6 +60,7 @@
   table.ag th { text-align:left; color:#555; font-weight:600; padding:11px 12px; border-bottom:1px solid #c9c9c9; background:#fafafa; }
   table.ag td { padding:12px; border-bottom:1px solid #e7e7e7; vertical-align:top; }
   table.ag tr:hover td { background:#f5f8fb; }
+  td .det { font-size:11.5px; color:#777; margin-top:4px; line-height:1.5; }
   a.ag-ref, span.ag-ref { color:#0070d2; text-decoration:none; font-weight:500; }
   a.ag-ref:hover { text-decoration:underline; }
   .ag-st-requested { color:#e8920a; } .ag-st-awaiting { color:#8b6cc1; font-weight:600; }
@@ -102,10 +103,13 @@
   <div class="side-stat" onclick="jump('sec-history-h')"><span>Available</span><b id="s-available">-</b></div>
   <div class="side-stat" onclick="jump('sec-requested')"><span>Requested</span><b id="s-requested">-</b></div>
   <div class="side-stat" onclick="jump('sec-booked')"><span>Booked</span><b id="s-booked">-</b></div>
-  <div class="side-stat" onclick="jump('sec-quote')"><span>Awaiting approval</span><b id="s-approval">-</b></div>
+  <div class="side-stat" onclick="jump('item:quotes_received:sec-quote')"><span>Awaiting approval</span><b id="s-approval">-</b></div>
   <div class="expiry-alert" id="expiry-alert" style="display:none" onclick="jump('sec-history-h')">
     <b id="s-expiring">-</b> points expiring within 30 days
   </div>
+
+  <div class="side-label" id="guardians-label" style="display:none">FlexPoints Guardians</div>
+  <div id="guardians"></div>
 
   <a class="portal-btn" href="https://accessgroup.my.site.com/Support/s/flexpoints" target="_blank">Open Access Portal &rarr;</a>
   <div class="side-meta">
@@ -125,6 +129,7 @@
     <div class="ag-gen">FlexPoints Report<br>Generated <span id="p-generated">-</span></div>
   </div>
   <div class="ag-banner print-only">FlexPoints</div>
+  <div class="print-only" id="p-guardians" style="font-size:11px;color:#555;margin:-8px 0 10px"></div>
 
   <div class="context" id="context">Loading report...</div>
 
@@ -158,6 +163,14 @@ document.getElementById("greeting").textContent =
   (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + ", Kevin";
 
 function jump(id) {
+  // "item:<listKey>:<sectionId>" - open the item's own portal page when there
+  // is exactly one and its link was captured; otherwise scroll to the section
+  if (id.startsWith("item:")) {
+    const [, key, sec] = id.split(":");
+    const list = (window.__report || {})[key] || [];
+    if (list.length === 1 && list[0].url) { window.open(list[0].url, "_blank"); return; }
+    id = sec;
+  }
   const el = document.getElementById(id);
   if (!el) return;
   el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -192,7 +205,13 @@ function tbl(list, nameHead, withExpiry, emptyMsg) {
     const ref = x.url
       ? `<a class="ag-ref" href="${esc(x.url)}" target="_blank">${esc(x.ref)}</a>`
       : `<a class="ag-ref" href="${PORTAL}" target="_blank">${esc(x.ref)}</a>`;
-    return `<tr><td>${ref}</td><td>${esc(x.name)}</td><td>${esc(x.owner || "")}</td>
+    const d = x.detail || {};
+    const facts = [d.service && "Service: " + d.service, d.type && "Type: " + d.type,
+                   d.product && "Product: " + d.product].filter(Boolean).join(" &middot; ");
+    const det = (facts || d.outcomes)
+      ? `<div class="det">${facts ? esc(facts).replace(/&amp;middot;/g, "&middot;") : ""}${d.outcomes ? `<div>${esc(d.outcomes)}</div>` : ""}</div>`
+      : "";
+    return `<tr><td>${ref}</td><td>${esc(x.name)}${det}</td><td>${esc(x.owner || "")}</td>
       <td>${esc(x.date)}</td>${withExpiry ? `<td>${esc(x.expiry_date || "")}</td>` : ""}
       <td>${typeof x.points === "number" && x.points > 0 ? "+" : ""}${esc(x.points ?? "")}</td>
       <td class="${stCls(x.status)}">${esc(x.status || "")}</td></tr>`;
@@ -221,8 +240,8 @@ async function load() {
     tile(s.expiring_30, "Expiring within 30 Days", "exp", true, "sec-history-h") +
     tile(s.expiring_60, "Expiring within 60 Days", "exp", true, "sec-history-h") +
     tile(s.expiring_90, "Expiring within 90 Days", "exp", true, "sec-history-h") +
-    tile(s.awaiting_estimate, "Awaiting Estimate", "wait", false, "sec-quote") +
-    tile(s.awaiting_approval, "Awaiting Approval", "wait", false, "sec-quote");
+    tile(s.awaiting_estimate, "Awaiting Estimate", "wait", false, "item:quotes_received:sec-quote") +
+    tile(s.awaiting_approval, "Awaiting Approval", "wait", false, "item:quotes_received:sec-quote");
 
   for (const [id, val] of [["s-available", s.available], ["s-requested", s.requested],
                            ["s-booked", s.booked], ["s-approval", s.awaiting_approval]])
@@ -230,6 +249,15 @@ async function load() {
   if (s.expiring_30) {
     document.getElementById("s-expiring").textContent = s.expiring_30.toLocaleString("en-GB");
     document.getElementById("expiry-alert").style.display = "block";
+  }
+
+  const guards = r.guardians || [];
+  if (guards.length) {
+    document.getElementById("guardians-label").style.display = "block";
+    document.getElementById("guardians").innerHTML = guards.map(g =>
+      `<div class="side-stat" style="cursor:default"><span>${esc(g.name)}</span></div>`).join("");
+    document.getElementById("p-guardians").innerHTML = "FlexPoints Guardians: " +
+      guards.map(g => `${esc(g.name)}${g.email ? " (" + esc(g.email) + ")" : ""}`).join(" &middot; ");
   }
 
   document.getElementById("highlights").innerHTML =
@@ -256,9 +284,12 @@ function exportCSV() {
   const sections = [["QUOTE RECEIVED", r.quotes_received], ["REQUESTED", r.requested],
                     ["BOOKED", r.booked], ["TRANSACTION HISTORY", r.transaction_history]];
   for (const [title, list] of sections) {
-    lines.push(title, "Ref,Name,Owner,Date,Expiry date,Points,Status,Link");
-    for (const x of list || [])
-      lines.push([x.ref, x.name, x.owner, x.date, x.expiry_date, x.points, x.status, x.url].map(q).join(","));
+    lines.push(title, "Ref,Name,Owner,Date,Expiry date,Points,Status,Service,Type,Product,Agreed scope,Outcomes,Link");
+    for (const x of list || []) {
+      const d = x.detail || {};
+      lines.push([x.ref, x.name, x.owner, x.date, x.expiry_date, x.points, x.status,
+                  d.service, d.type, d.product, d.agreed_scope, d.outcomes, x.url].map(q).join(","));
+    }
     lines.push("");
   }
   lines.push("HIGHLIGHTS");

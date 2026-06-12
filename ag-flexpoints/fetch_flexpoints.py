@@ -25,6 +25,7 @@ PORTAL_PAGES = {
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SOURCE_DIR = os.path.join(SCRIPT_DIR, "source")
+MAX_DETAIL_PAGES = 25  # detail pages visited per run (newest items first)
 
 # -- Phase 1 - pull portal pages ---------------------------------------------
 
@@ -107,6 +108,16 @@ def get_portal_text():
                     "a[href]", "els => els.map(e => ({text: e.textContent, href: e.href}))"
                 ), ITEM_LINKS)
                 print(f"Phase 1 - pulled {name} ({len(pages_text[name])} chars)")
+            # visit each item's detail page - Service/Scope/Outcomes/Product etc.
+            # are key fields for the managers' report
+            for ref, url in list(ITEM_LINKS.items())[:MAX_DETAIL_PAGES]:
+                try:
+                    page.goto(url, timeout=60000)
+                    page.wait_for_timeout(5000)
+                    pages_text[f"detail {ref}"] = page.inner_text("body")[:5000]
+                    print(f"Phase 1 - pulled detail for {ref}")
+                except Exception as de:
+                    print(f"Phase 1 - detail pull failed for {ref}: {de}")
             browser.close()
         return pages_text
     except Exception as e:
@@ -168,7 +179,11 @@ services booked by the organisation's Points Guardian.
 The FlexPoints page shows: a summary tile row (Available / Requested / Booked /
 Expiring within 30, 60, 90 Days / Awaiting Estimate / Awaiting Approval), then
 tables: Quote Received, Requested, Booked, and Transaction History (which adds
-an Expiry Date column; points top-ups are positive, spends negative).
+an Expiry Date column; points top-ups are positive, spends negative). The page
+also lists the organisation's FlexPoints Guardians (name + email). Pages named
+"detail <ref>" are individual transaction/case detail pages with fields like
+Service, Description, Agreed Scope, Outcomes, Prerequisites, Type, Product,
+Requester, Assigned to - this detail is key for the managers' report.
 
 From the page text below, return ONLY a JSON object with this shape:
 {
@@ -177,13 +192,19 @@ From the page text below, return ONLY a JSON object with this shape:
     "expiring_30": <int or null>, "expiring_60": <int or null>, "expiring_90": <int or null>,
     "awaiting_estimate": <int or null>, "awaiting_approval": <int or null>
   },
-  "quotes_received":     [{"ref": "", "name": "", "owner": "", "date": "", "points": <int>, "status": ""}],
-  "requested":           [{"ref": "", "name": "", "owner": "", "date": "", "points": <int>, "status": ""}],
-  "booked":              [{"ref": "", "name": "", "owner": "", "date": "", "points": <int>, "status": ""}],
-  "transaction_history": [{"ref": "", "name": "", "owner": "", "date": "", "expiry_date": "<or null>", "points": <int>, "status": ""}],
+  "quotes_received":     [{"ref": "", "name": "", "owner": "", "date": "", "points": <int>, "status": "", "detail": <see below>}],
+  "requested":           [{"ref": "", "name": "", "owner": "", "date": "", "points": <int>, "status": "", "detail": <see below>}],
+  "booked":              [{"ref": "", "name": "", "owner": "", "date": "", "points": <int>, "status": "", "detail": <see below>}],
+  "transaction_history": [{"ref": "", "name": "", "owner": "", "date": "", "expiry_date": "<or null>", "points": <int>, "status": "", "detail": <see below>}],
+  "guardians": [{"name": "", "email": ""}],
   "highlights": ["<up to 5 short bullets: points at risk of expiry, quotes awaiting approval, requested items stuck unbooked, anything Kevin should act on>"],
   "context": "<2-4 sentence plain-English status paragraph, lead with the most urgent action>"
 }
+
+"detail" (include ONLY when a "detail <ref>" page exists for that ref, else omit):
+  {"service": "", "type": "", "product": "", "agreed_scope": "",
+   "description": "<max 30 words>", "outcomes": "<max 30 words>",
+   "requester": "", "assigned_to": ""}
 
 Rules: capture EVERY row of every table - this is a full report, not a sample.
 Keep points signs exactly as shown (spends negative, top-ups positive). Only

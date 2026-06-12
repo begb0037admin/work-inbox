@@ -12,29 +12,188 @@
     "awaiting_approval": 1
   },
   "quotes_received": [
-    { "ref": "69001638", "name": "Holiday Records Report Creation x 3 reports", "owner": "Me", "date": "2026-06-11", "points": 2800, "status": "Awaiting Approval" }
+    {
+      "ref": "69001638",
+      "name": "Holiday Records Report Creation x 3 reports",
+      "owner": "Me",
+      "date": "2026-06-11",
+      "points": 2800,
+      "status": "Awaiting Approval",
+      "detail": {
+        "service": "Report Creation",
+        "type": "Education/Training",
+        "product": "PeopleXD - Workforce Management",
+        "agreed_scope": "Holiday Records Report Creation x 3 reports",
+        "description": "Following a confirmation of your reporting requirements we will create a bespoke Insight report. From 700 FlexPoints",
+        "outcomes": "Tailored and customised reports that are accurate, visually appealing, and delivered in a timely manner.",
+        "requester": "Kevin Lelitte",
+        "assigned_to": "Kevin Lelitte"
+      }
+    }
   ],
   "requested": [
-    { "ref": "FPT-062315", "name": "Bulk Delete Assignments as per 67938206", "owner": "Me", "date": "2026-05-28", "points": -525, "status": "Requested" },
-    { "ref": "FPT-056744", "name": "Multi Company setup (Part 1)", "owner": "Marie Cooksey", "date": "2026-03-04", "points": -4200, "status": "Requested" },
-    { "ref": "FPT-053858", "name": "Return Absence to Employee", "owner": "Marie Cooksey", "date": "2026-01-29", "points": -700, "status": "Requested" }
+    {
+      "ref": "FPT-062315",
+      "name": "Bulk Delete Assignments as per 67938206",
+      "owner": "Me",
+      "date": "2026-05-28",
+      "points": -525,
+      "status": "Requested",
+      "detail": {
+        "service": "Bespoke Consultancy",
+        "type": "Strategic Engagements",
+        "product": "PeopleXD - People Management",
+        "agreed_scope": "Bulk Delete Assignments as per 67938206",
+        "description": "Personalized and flexible solution designed to meet the unique needs and challenges of your organization. From 700 FlexPoints",
+        "outcomes": "An efficiently tailored solution to address your organization's specific needs via an initial scoping workshop.",
+        "requester": "Kevin Lelitte",
+        "assigned_to": "Kevin Lelitte"
+      }
+    },
+    {
+      "ref": "FPT-056744",
+      "name": "Multi Company setup (Part 1)",
+      "owner": "Marie Cooksey",
+      "date": "2026-03-04",
+      "points": -4200,
+      "status": "Requested"
+    },
+    {
+      "ref": "FPT-053858",
+      "name": "Return Absence to Employee",
+      "owner": "Marie Cooksey",
+      "date": "2026-01-29",
+      "points": -700,
+      "status": "Requested"
+    }
   ],
   "booked": [
-    { "ref": "FPT-058323", "name": "Recruitment data scripts to aid clean up in UAT and Live", "owner": "Marie Cooksey", "date": "2026-03-27", "points": -1750, "status": "Booked" },
-    { "ref": "FPT-039599", "name": "Payroll Management Training", "owner": "Marie Cooksey", "date": "2025-06-12", "points": -1010, "status": "Booked" },
-    { "ref": "FPT-039596", "name": "Payroll Module - Process Review", "owner": "Marie Cooksey", "date": "2025-06-12", "points": -2450, "status": "Booked" }
+    {
+      "ref": "FPT-058323",
+      "name": "Recruitment data scripts to aid clean up in UAT and Live",
+      "owner": "Marie Cooksey",
+      "date": "2026-03-27",
+      "points": -1750,
+      "status": "Booked"
+    },
+    {
+      "ref": "FPT-039599",
+      "name": "Payroll Management Training",
+      "owner": "Marie Cooksey",
+      "date": "2025-06-12",
+      "points": -1010,
+      "status": "Booked"
+    },
+    {
+      "ref": "FPT-039596",
+      "name": "Payroll Module - Process Review",
+      "owner": "Marie Cooksey",
+      "date": "2025-06-12",
+      "points": -2450,
+      "status": "Booked"
+    }
   ],
   "transaction_history": [
-    { "ref": "FPT-062315", "name": "Bulk Delete Assignments as per 67938206", "owner": "Me", "date": "2026-05-28", "expiry_date": null, "points": -525, "status": "Requested" },
-    { "ref": "FPT-058323", "name": "Recruitment data scripts to aid clean up in UAT and Live", "owner": "Marie Cooksey", "date": "2026-03-27", "expiry_date": null, "points": -1750, "status": "Booked" },
-    { "ref": "FPT-056744", "name": "Multi Company setup (Part 1)", "owner": "Marie Cooksey", "date": "2026-03-04", "expiry_date": null, "points": -4200, "status": "Requested" },
-    { "ref": "FPT-054572", "name": "Assistance in testing in UAT move of email server", "owner": "Marie Cooksey", "date": "2026-02-09", "expiry_date": null, "points": -700, "status": "Delivered" },
-    { "ref": "FPT-053858", "name": "Return Absence to Employee", "owner": "Marie Cooksey", "date": "2026-01-29", "expiry_date": null, "points": -700, "status": "Requested" },
-    { "ref": "FPT-046639", "name": "Amendments to the My Development Insight report", "owner": "Marie Cooksey", "date": "2025-10-09", "expiry_date": null, "points": -350, "status": "Delivered" },
-    { "ref": "FPT-039758", "name": "Points Top Up -Premier", "owner": null, "date": "2025-07-01", "expiry_date": "2026-06-29", "points": 11160, "status": "Premier" },
-    { "ref": "FPT-039599", "name": "Payroll Management Training", "owner": "Marie Cooksey", "date": "2025-06-12", "expiry_date": null, "points": -1010, "status": "Booked" },
-    { "ref": "FPT-039596", "name": "Payroll Module - Process Review", "owner": "Marie Cooksey", "date": "2025-06-12", "expiry_date": null, "points": -2450, "status": "Booked" },
-    { "ref": "FPT-039595", "name": "Storage Reclaim on UOXP", "owner": "Simon Burford", "date": "2025-06-12", "expiry_date": null, "points": -1400, "status": "Delivered" }
+    {
+      "ref": "FPT-062315",
+      "name": "Bulk Delete Assignments as per 67938206",
+      "owner": "Me",
+      "date": "2026-05-28",
+      "expiry_date": null,
+      "points": -525,
+      "status": "Requested",
+      "detail": {
+        "service": "Bespoke Consultancy",
+        "type": "Strategic Engagements",
+        "product": "PeopleXD - People Management",
+        "agreed_scope": "Bulk Delete Assignments as per 67938206",
+        "description": "Personalized and flexible solution designed to meet the unique needs and challenges of your organization. From 700 FlexPoints",
+        "outcomes": "An efficiently tailored solution to address your organization's specific needs via an initial scoping workshop.",
+        "requester": "Kevin Lelitte",
+        "assigned_to": "Kevin Lelitte"
+      }
+    },
+    {
+      "ref": "FPT-058323",
+      "name": "Recruitment data scripts to aid clean up in UAT and Live",
+      "owner": "Marie Cooksey",
+      "date": "2026-03-27",
+      "expiry_date": null,
+      "points": -1750,
+      "status": "Booked"
+    },
+    {
+      "ref": "FPT-056744",
+      "name": "Multi Company setup (Part 1)",
+      "owner": "Marie Cooksey",
+      "date": "2026-03-04",
+      "expiry_date": null,
+      "points": -4200,
+      "status": "Requested"
+    },
+    {
+      "ref": "FPT-054572",
+      "name": "Assistance in testing in UAT move of email server",
+      "owner": "Marie Cooksey",
+      "date": "2026-02-09",
+      "expiry_date": null,
+      "points": -700,
+      "status": "Delivered"
+    },
+    {
+      "ref": "FPT-053858",
+      "name": "Return Absence to Employee",
+      "owner": "Marie Cooksey",
+      "date": "2026-01-29",
+      "expiry_date": null,
+      "points": -700,
+      "status": "Requested"
+    },
+    {
+      "ref": "FPT-046639",
+      "name": "Amendments to the My Development Insight report",
+      "owner": "Marie Cooksey",
+      "date": "2025-10-09",
+      "expiry_date": null,
+      "points": -350,
+      "status": "Delivered"
+    },
+    {
+      "ref": "FPT-039758",
+      "name": "Points Top Up -Premier",
+      "owner": null,
+      "date": "2025-07-01",
+      "expiry_date": "2026-06-29",
+      "points": 11160,
+      "status": "Premier"
+    },
+    {
+      "ref": "FPT-039599",
+      "name": "Payroll Management Training",
+      "owner": "Marie Cooksey",
+      "date": "2025-06-12",
+      "expiry_date": null,
+      "points": -1010,
+      "status": "Booked"
+    },
+    {
+      "ref": "FPT-039596",
+      "name": "Payroll Module - Process Review",
+      "owner": "Marie Cooksey",
+      "date": "2025-06-12",
+      "expiry_date": null,
+      "points": -2450,
+      "status": "Booked"
+    },
+    {
+      "ref": "FPT-039595",
+      "name": "Storage Reclaim on UOXP",
+      "owner": "Simon Burford",
+      "date": "2025-06-12",
+      "expiry_date": null,
+      "points": -1400,
+      "status": "Delivered"
+    }
   ],
   "highlights": [
     "All 2,935 available points expire by 2026-06-29 (the 2025 Premier top-up rolls off) - they show in every expiry window, so this is the deadline that matters.",
@@ -42,5 +201,19 @@
     "5,425 pts sit in Requested but not yet booked - Multi Company setup Part 1 alone is 4,200 pts; chase Access to convert these to Booked.",
     "Only 1 transaction this quarter was raised by you - Marie Cooksey owns most open items; confirm ownership before the expiry date."
   ],
-  "context": "You have 2,935 FlexPoints available and every one of them expires on 2026-06-29 when the July 2025 Premier top-up (11,160 pts) rolls off. The fastest way to avoid losing them is to approve quote 69001638 (2,800 pts, Holiday Records Report Creation), which is already sitting in Awaiting Approval. Separately, 5,425 pts of work is stuck at Requested status - worth chasing Access to get those booked."
+  "context": "You have 2,935 FlexPoints available and every one of them expires on 2026-06-29 when the July 2025 Premier top-up (11,160 pts) rolls off. The fastest way to avoid losing them is to approve quote 69001638 (2,800 pts, Holiday Records Report Creation), which is already sitting in Awaiting Approval. Separately, 5,425 pts of work is stuck at Requested status - worth chasing Access to get those booked.",
+  "guardians": [
+    {
+      "name": "Simon Burford",
+      "email": "simon.burford@admin.ox.ac.uk"
+    },
+    {
+      "name": "Marie Cooksey",
+      "email": "marie.cooksey@admin.ox.ac.uk"
+    },
+    {
+      "name": "Kevin Lelitte",
+      "email": "kevin.lelitte@admin.ox.ac.uk"
+    }
+  ]
 }
