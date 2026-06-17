@@ -1,15 +1,24 @@
 {
-  "generated_at": "2026-06-15 09:00",
+  "generated_at": "2026-06-17 15:00",
   "new_tasks": [],
   "applied_updates": [
     {
-      "task_id": "t1781204987882",
-      "task_title": "Allocate remaining flex points before 29 June expiry",
-      "note": "Kevin initiated the Holiday Records Reports quote request with Mike West, confirming the requirement and seeking pricing.",
-      "email_subject": "PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "email_from": "Kevin (sent to: Mike West; Ann-Marie Topliss; Amanda Mcdonnell)",
-      "received": "2026-06-11 12:03",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B60000"
+      "task_id": "t021",
+      "task_title": "FP 68261303 -- Multi Company Setup, respond to Conor O'Brien",
+      "note": "Kevin replied to Conor O'Brien with Pay Administered By values found in UOXU for the multi-company setup work.",
+      "email_subject": "Re: Organisational Hierarchy & Payroll Company Set-Up",
+      "email_from": "Kevin (sent to: Conor O'Brien)",
+      "received": "2026-06-11 09:46",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B20000"
+    },
+    {
+      "task_id": "t021",
+      "task_title": "FP 68261303 -- Multi Company Setup, respond to Conor O'Brien",
+      "note": "Kevin sent Conor O'Brien a draft REF2029 load file based on the test HR Reference File format for multi-company setup.",
+      "email_subject": "Re: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
+      "email_from": "Kevin (sent to: Conor O'Brien)",
+      "received": "2026-06-11 11:03",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B30000"
     }
   ]
 }
