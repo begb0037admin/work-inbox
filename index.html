@@ -604,9 +604,12 @@ function togglePriCard(i){
 
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="no-items">No tasks for today.</div>';
+  const _d=new Date(),_mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayPfx='['+String(_d.getDate()).padStart(2,'0')+' '+_mo[_d.getMonth()]+' '+_d.getFullYear()+']';
   return priorities.map((p,i)=>{
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
     const titleText = p.title || p.text || '(untitled)';
+    const updBadge=(p.actions&&p.actions.some(a=>a.startsWith(todayPfx)))?badge('UPDATED','blue'):'';
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
@@ -616,7 +619,7 @@ function renderPriorityCards(priorities,key,sec){
     return `<div class="pri-card${ticked?' done':''}" id="item_${id}">
       <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <span class="pri-card-title">${titleText}</span>
+        <span class="pri-card-title">${titleText}${updBadge}</span>
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${actionsHtml}${metaHtml}</div>
