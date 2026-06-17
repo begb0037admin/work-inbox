@@ -1,24 +1,42 @@
 {
-  "generated_at": "2026-06-17 15:00",
+  "generated_at": "2026-06-17 18:24",
   "new_tasks": [],
   "applied_updates": [
     {
-      "task_id": "t021",
-      "task_title": "FP 68261303 -- Multi Company Setup, respond to Conor O'Brien",
-      "note": "Kevin replied to Conor O'Brien with Pay Administered By values found in UOXU for the multi-company setup work.",
-      "email_subject": "Re: Organisational Hierarchy & Payroll Company Set-Up",
-      "email_from": "Kevin (sent to: Conor O'Brien)",
-      "received": "2026-06-11 09:46",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B20000"
+      "task_id": "t015",
+      "task_title": "Web pages and URL linking -- job posting updates",
+      "note": "Kevin confirmed with Laura Porter on 16 June that the additional couple of days' contingency before 23/24 June URL retirement is useful.",
+      "email_subject": "Re: IM Principles - change to URL",
+      "email_from": "Kevin (sent to: Laura Porter)",
+      "received": "2026-06-16 15:21",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000781E167670000"
     },
     {
-      "task_id": "t021",
-      "task_title": "FP 68261303 -- Multi Company Setup, respond to Conor O'Brien",
-      "note": "Kevin sent Conor O'Brien a draft REF2029 load file based on the test HR Reference File format for multi-company setup.",
-      "email_subject": "Re: #External# Re: Organisational Hierarchy & Payroll Company Set-Up",
-      "email_from": "Kevin (sent to: Conor O'Brien)",
-      "received": "2026-06-11 11:03",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077FA8E3B30000"
+      "task_id": "t015",
+      "task_title": "Web pages and URL linking -- job posting updates",
+      "note": "Kevin provided Laura Porter an update on the IM Principles URL change on 16 June.",
+      "email_subject": "Re: IM Principles - change to URL",
+      "email_from": "Kevin (sent to: Laura Porter)",
+      "received": "2026-06-16 14:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000781E167660000"
+    },
+    {
+      "task_id": "t1781204987882",
+      "task_title": "Allocate remaining flex points before 29 June expiry",
+      "note": "Kevin sought Marie Cooksey's approval for Holiday Records reporting work flex points spend on 15 June.",
+      "email_subject": "Holiday Records Reporting – FlexPoints Approval",
+      "email_from": "Kevin (sent to: Marie Cooksey; Simon Burford)",
+      "received": "2026-06-15 17:31",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000781E167650000"
+    },
+    {
+      "task_id": "t020",
+      "task_title": "Org hierarchy migration -- enable COREPORTAL_ADMIN menu options",
+      "note": "Kevin asked Asta Palmer to run a comparison and send details of menu profile differences between environments on 15 June.",
+      "email_subject": "Re: Menu Profile for hierarchy administration",
+      "email_from": "Kevin (sent to: Asta Palmer; Michael O'Sullivan; Simon Burford)",
+      "received": "2026-06-15 09:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000781E167630000"
     }
   ]
 }
