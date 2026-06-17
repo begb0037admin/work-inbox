@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 17 June 2026",
-  "subtitle": "Clear inbox, H&S evaluation meeting tomorrow",
-  "context": "Your inbox is clear with no pending emails requiring immediate attention. Your recent outbound work focuses on three key areas: the REF2029 load file and organisational hierarchy mapping with Conor O'Brien (last contact 11 June), the PeopleXD Insight reporting requirements involving Mike West, Ann-Marie Topliss, and Amanda Mcdonnell (quote request sent 11 June), and Holiday Records Duty proposed reports being coordinated with Athena Artuso and Simon Burford (approval given 11 June). Tomorrow on 18 June you have a critical Strategic H&S Modular System requirements evaluation weightings meeting at 14:00 with Helen Harbour on Microsoft Teams - this appears to be your most time-sensitive commitment this week. No colleagues are currently marked absent, and no responses are overdue beyond 48 hours. Start your day by reviewing any draft specifications or evaluation materials for the H&S Modular System meeting tomorrow.",
+  "subtitle": "Clear inbox, active projects on track",
+  "context": "Your inbox is clear with no pending emails, but your sent items show active projects requiring attention. The Holiday Records reporting work is moving forward with your FlexPoints approval request to Marie Cooksey and Simon Burford sent on 15 June, while the PeopleXD Insight Reporting quote request to Mike West, Ann-Marie Topliss, and Amanda Mcdonnell sent on 11 June awaits vendor response. The Menu Profile hierarchy administration comparison is pending from Asta Palmer following your 15 June request to Michael O'Sullivan and Simon Burford. Tomorrow at 14:00 you have the Strategic H&S Modular System requirements evaluation weightings meeting with Helen Harbour on Microsoft Teams, which is your most time-critical commitment this week. The IM Principles URL change coordination with Laura Porter is progressing with contingency time built in as of 16 June. Focus first on reviewing any responses from Marie Cooksey regarding FlexPoints approval, as this gates the Holiday Records reporting deliverables.",
   "urgent": [],
   "needs": [],
   "fyi": [],
@@ -139,7 +139,9 @@
       "actions": [
         "[15 Jun 2026] Conor O'Brien emailed with update on FP 68261303 Multi Company Setup. (email: Conor O'Brien - RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup)",
         "[TODO] Review Conor's email and determine what response or next action is required.",
-        "[TODO] Reply to Conor / coordinate with Simon on next steps for multi-company setup."
+        "[TODO] Reply to Conor / coordinate with Simon on next steps for multi-company setup.",
+        "[17 Jun 2026] Kevin replied to Conor O'Brien with Pay Administered By values found in UOXU for the multi-company setup work. (email: Kevin (sent to: Conor O'Brien) - Re: Organisational Hierarchy & Payroll Company Set-Up)",
+        "[17 Jun 2026] Kevin sent Conor O'Brien a draft REF2029 load file based on the test HR Reference File format for multi-company setup. (email: Kevin (sent to: Conor O'Brien) - Re: #External# Re: Organisational Hierarchy & Payroll Company Set-Up)"
       ],
       "source": "Email 15/06 12:54",
       "dateType": "red"
@@ -238,5 +240,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Wednesday 17 June · 15:00"
+  "refreshed_at": "Wednesday 17 June · 18:24"
 }
