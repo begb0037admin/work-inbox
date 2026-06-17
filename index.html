@@ -177,6 +177,16 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .pri-meta-notes { width: 100%; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
 .pri-notes-text { margin-top: 4px; }
 
+/* Priority drag-and-drop */
+.pri-drag-handle { font-size: 11px; color: var(--text-very-muted); cursor: grab; flex-shrink: 0; letter-spacing: -1px; user-select: none; }
+.pri-drag-handle:active { cursor: grabbing; }
+.pri-card.pri-dragging { opacity: 0.35; }
+.pri-card.pri-drop-before { border-top: 2px solid var(--blue); }
+.pri-card.pri-drop-after { border-bottom: 2px solid var(--blue); }
+.pri-drop-zone { min-height: 4px; border-radius: var(--radius-lg); transition: background 0.12s; }
+.pri-drop-zone.pri-zone-active { background: rgba(55,138,221,0.06); outline: 2px dashed rgba(55,138,221,0.3); outline-offset: 2px; }
+.pri-zone-empty { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 8px 4px; }
+
 /* No items */
 .no-items { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 4px 0; }
 
@@ -602,13 +612,92 @@ function togglePriCard(i){
   arrow.textContent=isOpen?'–':'▲';
 }
 
+// Priority drag-and-drop helpers
+let _priDragState=null;
+function _priGetKey(p){return(p.title||p.text||'').toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,40)||'item';}
+function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
+function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
+function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
+function _priSetOrder(pt,pw){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw}));}
+
+function applyPriOverrides(data){
+  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'}))];
+  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[]};
+  for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(secs[s]||secs.pw).push({...item,_priKey:k});}
+  for(const s of['pt','pw']){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
+  return secs;
+}
+
+function priDragStart(e,sec,priKey){
+  _priDragState={sec,priKey};
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',priKey);
+  setTimeout(()=>{const el=document.querySelector(`.pri-card[data-prikey="${priKey}"]`);if(el)el.classList.add('pri-dragging');},0);
+}
+function priDragEnd(e){
+  document.querySelectorAll('.pri-card.pri-dragging').forEach(el=>el.classList.remove('pri-dragging'));
+  document.querySelectorAll('.pri-card.pri-drop-before,.pri-card.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));
+  document.querySelectorAll('.pri-drop-zone.pri-zone-active').forEach(el=>el.classList.remove('pri-zone-active'));
+  _priDragState=null;
+}
+function priCardDragOver(e,sec,priKey){
+  if(!_priDragState)return;
+  e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.pri-card.pri-drop-before,.pri-card.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));
+  const r=e.currentTarget.getBoundingClientRect();
+  e.currentTarget.classList.add(e.clientY<r.top+r.height/2?'pri-drop-before':'pri-drop-after');
+}
+function priCardDragLeave(e,priKey){
+  if(e.relatedTarget&&e.currentTarget.contains(e.relatedTarget))return;
+  e.currentTarget.classList.remove('pri-drop-before','pri-drop-after');
+}
+function priCardDrop(e,sec,priKey){
+  e.preventDefault();e.stopPropagation();
+  if(!_priDragState)return;
+  const{sec:fromSec,priKey:fromKey}=_priDragState;
+  const before=e.currentTarget.classList.contains('pri-drop-before');
+  const ptKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pt"] .pri-card')).map(c=>c.dataset.prikey);
+  const pwKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pw"] .pri-card')).map(c=>c.dataset.prikey);
+  let newPt=ptKeys.filter(k=>k!==fromKey),newPw=pwKeys.filter(k=>k!==fromKey);
+  if(fromSec!==sec)_priSetOverride(fromKey,sec);
+  const tarr=sec==='pt'?newPt:newPw;
+  const ti=tarr.indexOf(priKey);
+  tarr.splice(ti>=0?(before?ti:ti+1):tarr.length,0,fromKey);
+  _priSetOrder(newPt,newPw);
+  priDragEnd(e);
+  if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
+}
+function priZoneDragOver(e,sec){
+  if(!_priDragState)return;
+  e.preventDefault();e.dataTransfer.dropEffect='move';
+  document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`)?.classList.add('pri-zone-active');
+}
+function priZoneDragLeave(e,sec){
+  const z=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
+  if(z&&!z.contains(e.relatedTarget))z.classList.remove('pri-zone-active');
+}
+function priZoneDrop(e,sec){
+  e.preventDefault();
+  if(!_priDragState)return;
+  const{sec:fromSec,priKey:fromKey}=_priDragState;
+  if(fromSec!==sec)_priSetOverride(fromKey,sec);
+  const ptKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pt"] .pri-card')).map(c=>c.dataset.prikey);
+  const pwKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pw"] .pri-card')).map(c=>c.dataset.prikey);
+  let newPt=ptKeys.filter(k=>k!==fromKey),newPw=pwKeys.filter(k=>k!==fromKey);
+  if(sec==='pt')newPt.push(fromKey);else newPw.push(fromKey);
+  _priSetOrder(newPt,newPw);
+  priDragEnd(e);
+  if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
+}
+
 function renderPriorityCards(priorities,key,sec){
-  if(!priorities||!priorities.length) return '<div class="no-items">No tasks for today.</div>';
+  if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
   const _d=new Date(),_mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const todayPfx='['+String(_d.getDate()).padStart(2,'0')+' '+_mo[_d.getMonth()]+' '+_d.getFullYear()+']';
   return priorities.map((p,i)=>{
+    const priKey=p._priKey||_priGetKey(p);
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
-    const titleText = p.title || p.text || '(untitled)';
+    const titleText=p.title||p.text||'(untitled)';
     const updBadge=(p.actions&&p.actions.some(a=>a.startsWith(todayPfx)))?badge('UPDATED','blue'):'';
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
@@ -616,10 +705,12 @@ function renderPriorityCards(priorities,key,sec){
       ${p.dateAdded?`<span class="pri-meta-item"><span class="pri-meta-label">Added</span>${p.dateAdded}</span>`:''}
       ${p.notes?`<div class="pri-meta-notes"><span class="pri-meta-label">Notes</span><div class="pri-notes-text">${sanitizeSub(p.notes)}</div></div>`:''}
     </div>`;
-    return `<div class="pri-card${ticked?' done':''}" id="item_${id}">
+    return `<div class="pri-card${ticked?' done':''}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
       <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
+        <div class="pri-drag-handle" onclick="event.stopPropagation()">⣿⣿</div>
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <span class="pri-card-title">${titleText}${updBadge}</span>
+        <span class="pri-card-title">${titleText}</span>
+        ${updBadge}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${actionsHtml}${metaHtml}</div>
@@ -629,6 +720,7 @@ function renderPriorityCards(priorities,key,sec){
 
 function renderBriefing(data,key){
   currentData=data; currentKey=key;
+  window._wipData=data; window._wipKey=key;
 
   // Header
   document.getElementById('pageTitle').textContent=getGreeting();
@@ -655,13 +747,13 @@ function renderBriefing(data,key){
 
   // Main inbox
   let left='';
-  if(data.prioritiesToday&&data.prioritiesToday.length){
+  const _hasPri=(data.prioritiesToday&&data.prioritiesToday.length)||(data.prioritiesWeek&&data.prioritiesWeek.length);
+  if(_hasPri){
+    const priSecs=applyPriOverrides(data);
     left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
-    left+=renderPriorityCards(data.prioritiesToday,key,'pt');
-  }
-  if(data.prioritiesWeek&&data.prioritiesWeek.length){
+    left+=`<div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${renderPriorityCards(priSecs.pt,key,'pt')}</div>`;
     left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
-    left+=renderPriorityCards(data.prioritiesWeek,key,'pw');
+    left+=`<div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${renderPriorityCards(priSecs.pw,key,'pw')}</div>`;
   }
   left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
   left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
