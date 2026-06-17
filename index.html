@@ -226,6 +226,8 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
 .card { animation: fadeIn .18s ease both; }
 .card-date{font-size:11px;color:var(--text-very-muted);white-space:nowrap;flex-shrink:0;padding-top:2px;margin-left:auto;}
+.sg-btn{padding:4px 10px;border-radius:20px;border:1px solid #d1d9e6;background:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all .12s;flex-shrink:0;}
+.sg-btn:hover{background:#edf0f6;color:var(--text-dark);border-color:#b0b8c8}
 .sb-section{font-size:13px;}
 .cal-title{font-size:15px;}
 .cal-sub,.cal-alert{font-size:13px;}
@@ -710,7 +712,9 @@ function renderPriorityCards(priorities,key,sec){
         <div class="pri-drag-handle" onclick="event.stopPropagation()">⣿⣿</div>
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
         <span class="pri-card-title">${titleText}</span>
+        <span style="flex:1"></span>
         ${updBadge}
+        ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">📧 Open email</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${actionsHtml}${metaHtml}</div>
