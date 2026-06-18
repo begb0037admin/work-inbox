@@ -696,16 +696,16 @@ function priZoneDrop(e,sec){
 
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
-  const _d=new Date(),_mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const todayPfx='['+String(_d.getDate()).padStart(2,'0')+' '+_mo[_d.getMonth()]+' '+_d.getFullYear()+']';
+  const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const _recentPfxs4=Array.from({length:4},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return'['+String(d.getDate()).padStart(2,'0')+' '+_mo[d.getMonth()]+' '+d.getFullYear()+']';});
+  const _cutoff=new Date();_cutoff.setDate(_cutoff.getDate()-4);_cutoff.setHours(0,0,0,0);
   return priorities.map((p,i)=>{
     const priKey=p._priKey||_priGetKey(p);
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
     const titleText=p.title||p.text||'(untitled)';
-    const todayISO=new Date().toISOString().slice(0,10);
     const aiBadge=p.badge?badge(p.badge,p.badgeType||'gray'):'';
-    const newBadge=(!aiBadge&&p.dateAdded===todayISO)?badge('NEW','green'):'';
-    const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>a.startsWith(todayPfx)))?badge('UPDATED','blue'):'';
+    const newBadge=(!aiBadge&&p.dateAdded&&new Date(p.dateAdded+'T12:00:00')>=_cutoff)?badge('NEW','green'):'';
+    const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
