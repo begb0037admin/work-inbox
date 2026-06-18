@@ -71,3 +71,14 @@ Do not re-investigate Graph API or Chrome-based email access.
 - Always update HANDOVER.md at end of session
 - GitHub is the only working surface — all reads and writes via GitHub API (locally-run Outlook COM scripts excepted; they pull latest from GitHub before every run)
 - Every raw.githubusercontent.com fetch MUST include a `?t=<timestamp>` cache-buster — no exceptions. Prevents reading cached stale files.
+
+## Branch and Merge Protocol
+Every time files are pushed to a branch, immediately ask Kevin:
+> "I've pushed to a branch — are you happy with this? Shall I merge to main now?"
+
+Recurring triggers throughout every session:
+- **On every push** — ask immediately, without waiting
+- **When Kevin signals satisfaction** — phrases like "good", "happy with that", "that's great", "okay", "done", "let's move on" — check if anything is on a branch and ask to merge
+- **When the topic shifts** — before starting a new subject, check if anything is on a branch
+
+Never leave files on a branch without Kevin's explicit sign-off.
