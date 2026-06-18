@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-11 (evening)
+**Last updated:** 2026-06-18 (drag-and-drop re-enabled and extended)
 **Status:** Active — pipeline working but scheduled runs unreliable (see Known Issues).
 
 ---
@@ -15,7 +15,7 @@
 
 ---
 
-## Current State (fully working as of 2026-06-09 late evening)
+## Current State (fully working as of 2026-06-18)
 
 ### Working
 - fetch_inbox.py — all three phases confirmed working
@@ -42,6 +42,10 @@
 - Show Done / Hide Done — boolean flag, fully working
 - Absences — white bullet list, text justified
 - Fuzzy EntryID matching — fallback if AI subject slightly differs
+- **Badge CSS normalised** — NEW (green) and UPDATED (blue) badges now identical to Command Centre (11px / 600wt / 3px 8px padding / 5px radius / coloured border)
+- **"Open email" buttons** — emoji removed from all instances
+- **"Priority actions – next week" section** (pnw drop zone) — sits between "this week" and "urgent"; teal dot accent
+- **Drag-and-drop fully re-enabled and extended** — email cards (urgent / needs / fyi / low) are now draggable directly into any priority section; priority sections (today / this week / next week / ur / nr) always render as drop targets regardless of whether briefing.json contains AI-generated priority items; custom priority items persisted in `workInbox_customPri_v1` localStorage key; `applyPriOverrides()` merges AI items with user-dragged custom items
 
 ### Local Path
 Folder: `C:\Users\admin\Documents\Claude\Projects\work-inbox`
@@ -57,8 +61,21 @@ Task Scheduler, Registry (openmail://), and desktop bat all updated 2026-06-09.
 - **Scheduled 7am run missing (2026-06-11):** machine likely asleep/locked. Check Task Scheduler → WorkInbox-Briefing → History; enable "Wake the computer to run this task" on the Conditions tab.
 - **Local git repo unreliable (2026-06-11):** `git fetch` on the admin machine triggered gc which hung on "Deletion of directory '.git/objects/00' failed" — likely OneDrive/antivirus locking `.git` (repo lives under Documents). Both bat files failed as a result. Fix applied: `Run_Inbox_Briefing.bat` no longer uses git — it downloads fetch_inbox.py directly from raw.githubusercontent.com (with `?t=` cache-buster) then runs it. The push to GitHub happens inside fetch_inbox.py via the Contents API, so git is not needed at all for a refresh. Consider excluding the project folder from OneDrive backup, and re-download the bat to the local machine (the old local copy still uses git).
 - Task Scheduler bat file should auto-pull latest fetch_inbox.py before running (use the same no-git download approach as Run_Inbox_Briefing.bat)
-- James Salas Guillen not appearing in calendar (no Outlook calendar block) — post-processing only fires if AI includes him; monitor until he returns 18 Jun
+- **KNOWN_ABSENCES cleanup due** — Marie returned 13 Jun; James returns 18 Jun. Remove or update their hardcoded absence entries in fetch_inbox.py.
 - Multi-machine setup not yet done (work machine begb0037.AD-OAK)
+
+---
+
+## localStorage Keys (index.html)
+
+| Key | Purpose |
+|-----|---------|
+| `workInbox_briefings_v1` | Archive of past briefing JSON objects, keyed by date string |
+| `workInbox_today_v1` | Key of the currently displayed briefing |
+| `workInbox_ticks_v1` | Tick (done) state for all cards |
+| `workInbox_priOverrides_v1` | Per-card section overrides for priority drag-and-drop |
+| `workInbox_priOrder_v1` | Per-section sort order for priority cards |
+| `workInbox_customPri_v1` | Email cards manually dragged into priority sections (persisted across refreshes) |
 
 ---
 
@@ -66,15 +83,15 @@ Task Scheduler, Registry (openmail://), and desktop bat all updated 2026-06-09.
 
 These are hardcoded in fetch_inbox.py and rewrite AI output for known absent colleagues:
 
-**Marie Cooksey** (leave 8–13 June)
+**Marie Cooksey** (leave 8–13 June — should now be cleared)
 - sub: "Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations."
 - alert: "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"
 
-**James Salas Guillen** (leave until 18 June)
+**James Salas Guillen** (leave until 18 June — should now be cleared)
 - sub: "James is on leave until 18 June. DSE/Cardinus archiving, SBS users in feed and applicant data work all on hold. Handover document received Fri 6 Jun."
 - alert: "James away until 18 June - Kevin and Chris covering OSM tickets and H&S support queue"
 
-**Action:** Update/remove these entries when absences end.
+**Action:** Remove both entries from fetch_inbox.py now that both colleagues have returned.
 
 ---
 
@@ -91,6 +108,13 @@ Total: 48 instances fixed. Zero triple-encoding patterns remain.
 
 ### CSS Override Pattern
 Font size increases were added as CSS overrides at the end of the style block (before </style>). Safest pattern for future edits — existing rules untouched, cascade handles priority.
+
+### Priority Drag-and-Drop Architecture
+- Five named sections: `pt` (today), `pw` (this week), `pnw` (next week), `ur` (urgent overlay), `nr` (needs overlay)
+- Sections always render — not gated by briefing data
+- Two drag types handled: priority cards (`_priDragState`) and email cards (`_emailDragData`)
+- Email card drop → `_addEmailCardToPriority()` → stores in `workInbox_customPri_v1` + sets override
+- `applyPriOverrides(data)` merges AI items (prioritiesToday/prioritiesWeek) + custom items, then applies overrides and order
 
 ---
 
@@ -172,16 +196,27 @@ grant the Claude GitHub App access to it).
   quote 69001638 for 2,800 pts awaiting approval).
 - Portal is unreachable from cloud agents (403) — local script is the only bridge.
 
+## Session 2026-06-18 — UI polish + drag-and-drop re-enabled
+
+- **Badge CSS normalised** — NEW (green) and UPDATED (blue) badges now identical across Work Inbox and Command Centre: 11px / 600wt / 3px 8px padding / 5px radius / coloured borders.
+- **Emoji removed** from all "Open email" buttons.
+- **"Priority actions – next week" section** added (pnw drop zone, teal dot). Sits between "this week" and "urgent" sections.
+- **Drag-and-drop fully re-enabled and extended:**
+  - Root cause of breakage: priority sections were gated behind `if(_hasPri)` — when briefing.json had no AI-generated priority items, nothing rendered and there were no drop targets.
+  - Fix: all five priority sections (pt / pw / pnw / ur / nr) now always render.
+  - New: email cards (urgent / needs / fyi / low) are draggable into any priority section. Drop triggers `_addEmailCardToPriority()` — stores card data in `workInbox_customPri_v1` localStorage key and sets a section override.
+  - `applyPriOverrides()` merges AI briefing items with custom dragged-in items before rendering.
+- Live on main: commit `727f50e`. PR #16 created as draft.
+
 ## Roadmap
 
 | Priority | Task |
 |----------|------|
-| 0 | AG FlexPoints: create repo begb0037admin/AG-FlexPoints, move ag-flexpoints/ contents to its root, enable Pages, set ACCESS_PORTAL_USER/ACCESS_PORTAL_PASSWORD env vars, pip install playwright, schedule weekly run |
-| 1 | Update Task Scheduler bat to auto-pull fetch_inbox.py before running |
-| 2 | Add James Salas Guillen to Outlook calendar so he appears without AI inference |
+| 0 | Clear KNOWN_ABSENCES for Marie (returned 13 Jun) and James (returned 18 Jun) from fetch_inbox.py |
+| 1 | AG FlexPoints: create repo begb0037admin/AG-FlexPoints, move ag-flexpoints/ contents to its root, enable Pages, set ACCESS_PORTAL_USER/ACCESS_PORTAL_PASSWORD env vars, pip install playwright, schedule weekly run |
+| 2 | Update Task Scheduler bat to auto-pull fetch_inbox.py before running |
 | 3 | Monitor card openmail:// click-through reliability |
 | 4 | Multi-machine — replicate setup on work machine (begb0037.AD-OAK) |
-| 5 | Update KNOWN_ABSENCES when Marie returns 13 Jun and James returns 18 Jun |
 
 ---
 
