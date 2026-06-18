@@ -594,7 +594,7 @@ function renderItems(items,cls){
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
-    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const today=new Date().toISOString().slice(0,10);return item.received.startsWith(today)?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
+    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
     return hasLink?`<a class="card-link${ticked?' done':''}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)">${cardHtml}</a>`:cardHtml;
   }).join('');
 }
@@ -699,12 +699,15 @@ function renderPriorityCards(priorities,key,sec){
   const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const _recentPfxs4=Array.from({length:4},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return'['+String(d.getDate()).padStart(2,'0')+' '+_mo[d.getMonth()]+' '+d.getFullYear()+']';});
   const _cutoff=new Date();_cutoff.setDate(_cutoff.getDate()-4);_cutoff.setHours(0,0,0,0);
+  const _mo2={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  function _firstActionDate(actions){if(!actions||!actions.length)return null;const m=actions[0].match(/^\[(\d{1,2}) (\w{3}) (\d{4})\]/);if(!m)return null;return new Date(parseInt(m[3]),_mo2[m[2]],parseInt(m[1]),12,0,0);}
   return priorities.map((p,i)=>{
     const priKey=p._priKey||_priGetKey(p);
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
     const titleText=p.title||p.text||'(untitled)';
     const aiBadge=p.badge?badge(p.badge,p.badgeType||'gray'):'';
-    const newBadge=(!aiBadge&&p.dateAdded&&new Date(p.dateAdded+'T12:00:00')>=_cutoff)?badge('NEW','green'):'';
+    const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
+    const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
