@@ -109,6 +109,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .dot-o { background: var(--yellow-accent); }
 .dot-b { background: var(--blue); }
 .dot-g { background: var(--gray); }
+.dot-t { background: #0891b2; }
 .sec-lbl { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
 .sec-rule { flex: 1; height: 1px; background: #d1d9e6; }
 
@@ -620,12 +621,12 @@ function _priGetKey(p){return(p.title||p.text||'').toLowerCase().replace(/[^a-z0
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
-function _priSetOrder(pt,pw,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw,ur:ur||[],nr:nr||[]}));}
+function _priSetOrder(pt,pw,pnw,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw,pnw:pnw||[],ur:ur||[],nr:nr||[]}));}
 
 function applyPriOverrides(data){
   const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'}))];
-  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],ur:[],nr:[]};
-  const validSecs=['pt','pw','ur','nr'];
+  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],pnw:[],ur:[],nr:[]};
+  const validSecs=['pt','pw','pnw','ur','nr'];
   for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
   for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
   return secs;
@@ -659,14 +660,14 @@ function priCardDrop(e,sec,priKey){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   const before=e.currentTarget.classList.contains('pri-drop-before');
-  const allSecs=['pt','pw','ur','nr'];
+  const allSecs=['pt','pw','pnw','ur','nr'];
   const sk={};
   allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   const ti=sk[sec].indexOf(priKey);
   sk[sec].splice(ti>=0?(before?ti:ti+1):sk[sec].length,0,fromKey);
-  _priSetOrder(sk.pt,sk.pw,sk.ur,sk.nr);
+  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -684,12 +685,12 @@ function priZoneDrop(e,sec){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
-  const allSecs=['pt','pw','ur','nr'];
+  const allSecs=['pt','pw','pnw','ur','nr'];
   const sk={};
   allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   sk[sec].push(fromKey);
-  _priSetOrder(sk.pt,sk.pw,sk.ur,sk.nr);
+  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -761,12 +762,14 @@ function renderBriefing(data,key){
   // Main inbox
   let left='';
   const _hasPri=(data.prioritiesToday&&data.prioritiesToday.length)||(data.prioritiesWeek&&data.prioritiesWeek.length);
-  const priSecs=_hasPri?applyPriOverrides(data):{pt:[],pw:[],ur:[],nr:[]};
+  const priSecs=_hasPri?applyPriOverrides(data):{pt:[],pw:[],pnw:[],ur:[],nr:[]};
   if(_hasPri){
     left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
     left+=`<div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${renderPriorityCards(priSecs.pt,key,'pt')}</div>`;
     left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
     left+=`<div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${renderPriorityCards(priSecs.pw,key,'pw')}</div>`;
+    left+=`<div class="sec-head"><span class="sec-dot dot-t"></span><span class="sec-lbl">Priority actions – next week</span><span class="sec-rule"></span></div>`;
+    left+=`<div class="pri-drop-zone" data-sec="pnw" ondragover="priZoneDragOver(event,'pnw')" ondragleave="priZoneDragLeave(event,'pnw')" ondrop="priZoneDrop(event,'pnw')">${priSecs.pnw.length?renderPriorityCards(priSecs.pnw,key,'pnw'):'<div class="pri-zone-empty">Drop items here to plan for next week</div>'}</div>`;
   }
   left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>`;
   if(_hasPri) left+=`<div class="pri-drop-zone" data-sec="ur" ondragover="priZoneDragOver(event,'ur')" ondragleave="priZoneDragLeave(event,'ur')" ondrop="priZoneDrop(event,'ur')">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
