@@ -620,13 +620,14 @@ function _priGetKey(p){return(p.title||p.text||'').toLowerCase().replace(/[^a-z0
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
-function _priSetOrder(pt,pw){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw}));}
+function _priSetOrder(pt,pw,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw,ur:ur||[],nr:nr||[]}));}
 
 function applyPriOverrides(data){
   const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'}))];
-  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[]};
-  for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(secs[s]||secs.pw).push({...item,_priKey:k});}
-  for(const s of['pt','pw']){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
+  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],ur:[],nr:[]};
+  const validSecs=['pt','pw','ur','nr'];
+  for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
+  for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
   return secs;
 }
 
@@ -658,14 +659,14 @@ function priCardDrop(e,sec,priKey){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   const before=e.currentTarget.classList.contains('pri-drop-before');
-  const ptKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pt"] .pri-card')).map(c=>c.dataset.prikey);
-  const pwKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pw"] .pri-card')).map(c=>c.dataset.prikey);
-  let newPt=ptKeys.filter(k=>k!==fromKey),newPw=pwKeys.filter(k=>k!==fromKey);
+  const allSecs=['pt','pw','ur','nr'];
+  const sk={};
+  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
-  const tarr=sec==='pt'?newPt:newPw;
-  const ti=tarr.indexOf(priKey);
-  tarr.splice(ti>=0?(before?ti:ti+1):tarr.length,0,fromKey);
-  _priSetOrder(newPt,newPw);
+  allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
+  const ti=sk[sec].indexOf(priKey);
+  sk[sec].splice(ti>=0?(before?ti:ti+1):sk[sec].length,0,fromKey);
+  _priSetOrder(sk.pt,sk.pw,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -683,11 +684,12 @@ function priZoneDrop(e,sec){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
-  const ptKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pt"] .pri-card')).map(c=>c.dataset.prikey);
-  const pwKeys=Array.from(document.querySelectorAll('.pri-drop-zone[data-sec="pw"] .pri-card')).map(c=>c.dataset.prikey);
-  let newPt=ptKeys.filter(k=>k!==fromKey),newPw=pwKeys.filter(k=>k!==fromKey);
-  if(sec==='pt')newPt.push(fromKey);else newPw.push(fromKey);
-  _priSetOrder(newPt,newPw);
+  const allSecs=['pt','pw','ur','nr'];
+  const sk={};
+  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
+  allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
+  sk[sec].push(fromKey);
+  _priSetOrder(sk.pt,sk.pw,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -700,7 +702,11 @@ function renderPriorityCards(priorities,key,sec){
     const priKey=p._priKey||_priGetKey(p);
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
     const titleText=p.title||p.text||'(untitled)';
-    const updBadge=(p.actions&&p.actions.some(a=>a.startsWith(todayPfx)))?badge('UPDATED','blue'):'';
+    const todayISO=new Date().toISOString().slice(0,10);
+    const aiBadge=p.badge?badge(p.badge,p.badgeType||'gray'):'';
+    const newBadge=(!aiBadge&&p.dateAdded===todayISO)?badge('NEW','green'):'';
+    const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>a.startsWith(todayPfx)))?badge('UPDATED','blue'):'';
+    const theBadge=aiBadge||newBadge||updBadge;
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
@@ -713,7 +719,7 @@ function renderPriorityCards(priorities,key,sec){
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
         <span class="pri-card-title">${titleText}</span>
         <span style="flex:1"></span>
-        ${updBadge}
+        ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">📧 Open email</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
@@ -752,15 +758,19 @@ function renderBriefing(data,key){
   // Main inbox
   let left='';
   const _hasPri=(data.prioritiesToday&&data.prioritiesToday.length)||(data.prioritiesWeek&&data.prioritiesWeek.length);
+  const priSecs=_hasPri?applyPriOverrides(data):{pt:[],pw:[],ur:[],nr:[]};
   if(_hasPri){
-    const priSecs=applyPriOverrides(data);
     left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
     left+=`<div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${renderPriorityCards(priSecs.pt,key,'pt')}</div>`;
     left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
     left+=`<div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${renderPriorityCards(priSecs.pw,key,'pw')}</div>`;
   }
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>${renderItems(data.urgent,'urgent')}`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span></div>${renderItems(data.needs,'needs')}`;
+  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>`;
+  if(_hasPri) left+=`<div class="pri-drop-zone" data-sec="ur" ondragover="priZoneDragOver(event,'ur')" ondragleave="priZoneDragLeave(event,'ur')" ondrop="priZoneDrop(event,'ur')">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
+  left+=renderItems(data.urgent,'urgent');
+  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span></div>`;
+  if(_hasPri) left+=`<div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
+  left+=renderItems(data.needs,'needs');
   if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
   if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
 
