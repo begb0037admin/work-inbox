@@ -723,7 +723,7 @@ function renderPriorityCards(priorities,key,sec){
         <span class="pri-card-title">${titleText}</span>
         <span style="flex:1"></span>
         ${theBadge}
-        ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">📧 Open email</button>`:''}
+        ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${actionsHtml}${metaHtml}</div>
