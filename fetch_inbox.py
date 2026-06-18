@@ -1,7 +1,11 @@
-import json, os, base64, html, re, urllib.request, urllib.error
+import json, os, base64, html, re, urllib.request, urllib.error, subprocess
 from datetime import datetime, timedelta
 import win32com.client
 import anthropic
+
+# Suppress Windows git gc --auto interactive prompts
+subprocess.run(["git", "config", "gc.auto", "0"], capture_output=True,
+               cwd=os.path.dirname(os.path.abspath(__file__)))
 
 GITHUB_REPO = "begb0037admin/work-inbox"
 GITHUB_PATH = "data/briefing.json"
