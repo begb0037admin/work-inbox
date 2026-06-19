@@ -1,7 +1,7 @@
 {
   "date": "Friday 19 June 2026",
-  "subtitle": "Clear inbox, multiple pending responses",
-  "context": "Your inbox is clear as of Friday 19 June, but you have pending follow-ups awaiting responses from several colleagues. Michael O'Sullivan needs to contact Access Group regarding the unexpected case creation emails following new starter setup, a task you assigned on 18 June. Asta Palmer is running a comparison on Menu Profile for hierarchy administration that you requested on 15 June and should send details when complete. Laura Porter has confirmed additional contingency time for the IM Principles URL change that you discussed on 16 June. Marie Cooksey and Simon Burford are reviewing your Holiday Records Reporting proposal for FlexPoints Approval submitted 15 June. Your next critical deadline is the Clinical pay uplift 2026 check-in with Jasmin Khokhra on Monday 22 June at 15:00, where implementation progress will be reviewed. Open the Company 90 Test Approach meeting with Erika Braverman this morning at 09:45 first, as it addresses integration issues that may affect your weekend preparation.",
+  "subtitle": "End of week - four pending responses await resolution",
+  "context": "Your inbox is clear with no pending emails, but your sent items from the past week show active threads requiring follow-up. Laura Porter is waiting on your URL change decision for the IM Principles project following your 16 June exchanges. Marie Cooksey and Simon Burford need your attention regarding the Holiday Records Reporting FlexPoints approval you sent on 15 June - this has now been waiting 4 days without documented response. Michael O'Sullivan's case regarding unexpected emails from Access Group following new starter setup (sent 18 June) requires his confirmation on user impact before you can close that issue. Your most time-critical deadline is the Clinical pay uplift 2026 check-in meeting with Jasmin Khokhra on Monday 22 June at 15:00, which will require an update on implementation status. Open first thing Monday: confirm whether Marie Cooksey has approved the Holiday Records reporting work, as this blocks downstream reporting cycles.",
   "urgent": [],
   "needs": [],
   "fyi": [],
@@ -188,7 +188,8 @@
         "[AWAITING] Simon to send Athena's email. Marie's return to formally sign off plan.",
         "[10 Jun 2026] Simon (Teams, after 1-1): Athena will ask Codex to output a requirements document for individual reports - likely easier than the all-in-one report spec, and easier to take to Access Group for a quote.",
         "[AWAITING] Athena's requirements document - hold off raising anything with Access Group until she sends it through.",
-        "[TODO] Come up with report ideas together with Michael."
+        "[TODO] Come up with report ideas together with Michael.",
+        "[19 Jun 2026] Kevin coordinated with the team regarding support cover in July, part of capacity planning for the flex points allocation period. (email: Kevin (sent to: Julie Hickman; Sarah Rowles; Marie Cooksey; Simon Burford; Athena Artuso) - Re: Support cover for first two weeks in July)"
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange"
@@ -226,11 +227,12 @@
         "[08 Jun 2026] Issues reviewed in H&S Roadmap meeting: SBS exclusion (Azure team handling), contractors missing from PXD feed (manual process needed), users without university emails (James investigating with supplier).",
         "[MONITOR] SBS exclusion -- Azure integrations team handling. Confirm resolved when confirmed.",
         "[AWAITING] James to return 18 June and progress contractor manual addition and email-less user resolution with supplier.",
-        "[TODO] Flag any escalations from Rob or first line while James is on leave."
+        "[TODO] Flag any escalations from Rob or first line while James is on leave.",
+        "[19 Jun 2026] Kevin asked Michael O'Sullivan to follow up with Access Group on the scope of unexpected case creation emails following new starter setup. (email: Kevin (sent to: Michael O'Sullivan) - Re: #External# Unexpected Case Creation Emails Following New Starter Setup)"
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Friday 19 June · 09:05"
+  "refreshed_at": "Friday 19 June · 09:08"
 }
