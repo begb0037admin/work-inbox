@@ -618,7 +618,7 @@ function togglePriCard(i){
 
 // Priority drag-and-drop helpers
 let _priDragState=null;
-function _priGetKey(p){return(p.title||p.text||'').toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,40)||'item';}
+function _priGetKey(p){return(p.title||p.text||p.subject||'').toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,40)||'item';}
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}

@@ -294,20 +294,7 @@ for msg in inbox:
 print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
 
 # Ã¢ÂÂÃ¢ÂÂ Calendar post-processing Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-KNOWN_ABSENCES = [
-    {
-        "triggers": ["marie", "cooksey"],
-        "title": "Annual Leave - Marie Cooksey",
-        "sub": "Marie is on leave 8-13 June. Any items requiring her approval or sign-off must wait until she returns. Kevin and Chris are covering H&S support queue and OSM escalations.",
-        "alert": "Marie unavailable all week - action DTP1092 comments and volunteer reporting queries independently"
-    },
-    {
-        "triggers": ["james", "salas", "guillen"],
-        "title": "Annual Leave - James Salas Guillen",
-        "sub": "James is on leave until 18 June. DSE/Cardinus archiving, SBS users in feed and applicant data work all on hold. Handover document received Fri 6 Jun.",
-        "alert": "James away until 18 June - Kevin and Chris covering OSM tickets and H&S support queue"
-    }
-]
+KNOWN_ABSENCES = []
 
 def build_cal_items(items):
     result = []
@@ -366,10 +353,7 @@ for item in calendar:
 absences = sorted(list(absence_set))
 
 # Always include hardcoded known absences if their date range covers today
-KNOWN_ABSENCE_DATES = [
-    {"name": "Marie Cooksey",       "from": "2026-06-08", "to": "2026-06-13"},
-    {"name": "James Salas Guillen", "from": "2026-06-08", "to": "2026-06-18"},
-]
+KNOWN_ABSENCE_DATES = []
 for ka in KNOWN_ABSENCE_DATES:
     ka_start = datetime.strptime(ka["from"], "%Y-%m-%d").date()
     ka_end   = datetime.strptime(ka["to"],   "%Y-%m-%d").date()
