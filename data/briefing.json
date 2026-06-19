@@ -1,43 +1,31 @@
 {
-  "date": "Wednesday 17 June 2026",
-  "subtitle": "Clear inbox, active projects on track",
-  "context": "Your inbox is clear with no pending emails, but your sent items show active projects requiring attention. The Holiday Records reporting work is moving forward with your FlexPoints approval request to Marie Cooksey and Simon Burford sent on 15 June, while the PeopleXD Insight Reporting quote request to Mike West, Ann-Marie Topliss, and Amanda Mcdonnell sent on 11 June awaits vendor response. The Menu Profile hierarchy administration comparison is pending from Asta Palmer following your 15 June request to Michael O'Sullivan and Simon Burford. Tomorrow at 14:00 you have the Strategic H&S Modular System requirements evaluation weightings meeting with Helen Harbour on Microsoft Teams, which is your most time-critical commitment this week. The IM Principles URL change coordination with Laura Porter is progressing with contingency time built in as of 16 June. Focus first on reviewing any responses from Marie Cooksey regarding FlexPoints approval, as this gates the Holiday Records reporting deliverables.",
+  "date": "Friday 19 June 2026",
+  "subtitle": "Clear inbox, multiple pending responses",
+  "context": "Your inbox is clear as of Friday 19 June, but you have pending follow-ups awaiting responses from several colleagues. Michael O'Sullivan needs to contact Access Group regarding the unexpected case creation emails following new starter setup, a task you assigned on 18 June. Asta Palmer is running a comparison on Menu Profile for hierarchy administration that you requested on 15 June and should send details when complete. Laura Porter has confirmed additional contingency time for the IM Principles URL change that you discussed on 16 June. Marie Cooksey and Simon Burford are reviewing your Holiday Records Reporting proposal for FlexPoints Approval submitted 15 June. Your next critical deadline is the Clinical pay uplift 2026 check-in with Jasmin Khokhra on Monday 22 June at 15:00, where implementation progress will be reviewed. Open the Company 90 Test Approach meeting with Erika Braverman this morning at 09:45 first, as it addresses integration issues that may affect your weekend preparation.",
   "urgent": [],
   "needs": [],
   "fyi": [],
   "low": [],
   "calToday": [
     {
-      "time": "11:30",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "time": "09:45",
+      "title": "Company 90 Test Approach",
+      "sub": "Erika Braverman"
     },
     {
-      "time": "10:00",
+      "time": "11:30",
       "title": "Busy",
       "sub": "Kevin Lelitte"
     }
   ],
   "calTomorrow": [
     {
-      "time": "14:00",
-      "title": "Strategic H&S Modular System requirements evaluation weightings",
-      "sub": "Helen Harbour"
-    },
-    {
-      "time": "11:30",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "10:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "time": "15:00",
+      "title": "Clinical pay uplift 2026 check ins",
+      "sub": "Jasmin Khokhra"
     }
   ],
-  "absences": [
-    "James Salas Guillen"
-  ],
+  "absences": [],
   "prioritiesToday": [
     {
       "text": "Web pages and URL linking -- job posting updates",
@@ -48,7 +36,9 @@
         "[TODO -- today 16 Jun] Reconnect with Laura Porter as planned.",
         "[TODO -- 22 Jun] Test new URL, update links on all three identified pages, replace visible long URLs with hyperlinked text, check whether links open in a new tab.",
         "[TODO] Email Laura with updates if changes are made before they next meet.",
-        "[MONITOR] Old page retirement -- expected 23/24 June."
+        "[MONITOR] Old page retirement -- expected 23/24 June.",
+        "[17 Jun 2026] Kevin confirmed with Laura Porter on 16 June that the additional couple of days' contingency before 23/24 June URL retirement is useful. (email: Kevin (sent to: Laura Porter) - Re: IM Principles - change to URL)",
+        "[17 Jun 2026] Kevin provided Laura Porter an update on the IM Principles URL change on 16 June. (email: Kevin (sent to: Laura Porter) - Re: IM Principles - change to URL)"
       ],
       "source": "Meeting with Laura Porter 03/06",
       "dateType": "red"
@@ -96,7 +86,8 @@
         "[15 Jun 2026] Kevin initiated the Holiday Records Reports quote request with Mike West, confirming the requirement and seeking pricing. (email: Kevin (sent to: Mike West; Ann-Marie Topliss; Amanda Mcdonnell) - PeopleXD Insight Reporting - Quote Request for Holiday Records Reports)",
         "[AWAITING] Quote from AG for Holiday Records Reports (case #69001638).",
         "[TODO] Confirm total committed spend and remaining balance once quote received.",
-        "[TODO] Identify any further flex point uses before 29 June expiry."
+        "[TODO] Identify any further flex point uses before 29 June expiry.",
+        "[17 Jun 2026] Kevin sought Marie Cooksey's approval for Holiday Records reporting work flex points spend on 15 June. (email: Kevin (sent to: Marie Cooksey; Simon Burford) - Holiday Records Reporting – FlexPoints Approval)"
       ],
       "source": "Inbox 2026-06-11 15:01",
       "dateType": "red"
@@ -128,7 +119,8 @@
         "[TODO] Enable confirmed menu options on COREPORTAL_ADMIN in UOXU first (proof of concept), then DEV / TEST / QA / LIVE.",
         "[TODO] Produce Portal-specific How-To guidance for org hierarchy management -- no documentation currently exists.",
         "[TODO] Verify configuration in each environment before sign-off.",
-        "[TODO] Coordinate with Michael and Simon throughout."
+        "[TODO] Coordinate with Michael and Simon throughout.",
+        "[17 Jun 2026] Kevin asked Asta Palmer to run a comparison and send details of menu profile differences between environments on 15 June. (email: Kevin (sent to: Asta Palmer; Michael O'Sullivan; Simon Burford) - Re: Menu Profile for hierarchy administration)"
       ],
       "source": "Michael 1-1 15/06",
       "dateType": "red"
@@ -240,5 +232,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Wednesday 17 June · 18:24"
+  "refreshed_at": "Friday 19 June · 09:05"
 }
