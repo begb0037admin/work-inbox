@@ -162,6 +162,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 /* Priority cards – expandable, Command Centre style */
 .pri-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--radius-lg); margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
+.pri-card[data-sec="pt"]   { border-left-color: var(--red); }
+.pri-card[data-sec="pw"]   { border-left-color: var(--yellow-accent); }
+.pri-card[data-sec="pnw"]  { border-left-color: var(--blue); }
+.pri-card[data-sec="pfyi"] { border-left-color: var(--gray); }
 .pri-card.done { opacity: .38; }
 .pri-card.card-hidden { display: none; }
 .pri-card.done .pri-card-title { text-decoration: line-through; }
