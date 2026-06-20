@@ -104,9 +104,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 /* Section headers */
 .sec-head { display: flex; align-items: center; gap: 8px; margin: 20px 0 8px; }
 .sec-head:first-of-type { margin-top: 0; }
-.sec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sec-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
 .dot-r { background: var(--red); }
 .dot-o { background: var(--yellow-accent); }
+.dot-green { background: #22c55e; }
 .dot-b { background: var(--blue); }
 .dot-g { background: var(--gray); }
 .dot-t { background: #0891b2; }
@@ -162,14 +163,22 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 /* Priority cards – expandable, Command Centre style */
 .pri-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: var(--radius-lg); margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,33,71,0.05); transition: opacity .2s; }
+.pri-card[data-sec="pt"]   { border-left-color: var(--red); }
+.pri-card[data-sec="ptom"] { border-left-color: var(--yellow-accent); }
+.pri-card[data-sec="pw"]   { border-left-color: #22c55e; }
+.pri-card[data-sec="pfyi"] { border-left-color: var(--gray); }
 .pri-card.done { opacity: .38; }
 .pri-card.card-hidden { display: none; }
 .pri-card.done .pri-card-title { text-decoration: line-through; }
-.pri-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; }
+.pri-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; min-height: 64px; }
 .pri-card-header:hover { background: rgba(0,33,71,0.02); border-radius: var(--radius-lg); }
 .pri-card-title { flex: 1; font-size: 15px; font-weight: 600; color: var(--text-dark); }
+.pri-card-title-wrap { flex: 1; min-width: 0; }
+.pri-card-title-main { font-size: 15px; font-weight: 600; color: var(--text-dark); line-height: 1.3; }
+.pri-card-title-sub  { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
 .pri-arrow { font-size: 11px; color: var(--text-very-muted); flex-shrink: 0; }
 .pri-card-body { padding: 0 16px 14px 41px; display: none; }
+.pri-ai-summary { font-size: 13px; color: var(--text-dark); line-height: 1.55; padding: 7px 10px; background: #f0f4ff; border-radius: 5px; margin-bottom: 9px; border-left: 3px solid #6b7fcc; }
 .pri-action { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding: 2px 0; }
 .pri-action::before { content: '→ '; color: var(--text-very-muted); }
 .pri-meta { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 16px; }
@@ -229,6 +238,8 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .card-date{font-size:11px;color:var(--text-very-muted);white-space:nowrap;flex-shrink:0;padding-top:2px;margin-left:auto;}
 .sg-btn{padding:4px 10px;border-radius:20px;border:1px solid #d1d9e6;background:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all .12s;flex-shrink:0;}
 .sg-btn:hover{background:#edf0f6;color:var(--text-dark);border-color:#b0b8c8}
+.sg-btn-cc{border-color:#c7d0e8;color:#4a5a8a;}
+.sg-btn-cc:hover{background:#eef1fb;color:#2a3a6a;border-color:#9aa5cc}
 .sb-section{font-size:13px;}
 .cal-title{font-size:15px;}
 .cal-sub,.cal-alert{font-size:13px;}
@@ -250,7 +261,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .tasks-widget-count{font-weight:700;color:rgba(255,255,255,.9)}
 .tasks-widget-link{display:block;margin-top:8px;font-size:12px;color:#60a5fa;text-decoration:none}
 .tasks-widget-link:hover{text-decoration:underline}
-.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}</style>
+.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}
+/* ── 2×2 grid layout ── */
+.inbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.inbox-grid-cell {}</style>
 </head>
 <body>
 <div class="shell">
@@ -258,7 +272,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-logo">
-      <img class="sidebar-crest" src="data:image/jpeg;base64,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" alt="University of Oxford crest">
+      <img class="sidebar-crest" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEBUSExEWFhUXFxoXFhgYGR8eFxkbHxoXHhYWHyEbHSkgHh8lGx0eITEjJSstLzEuHx8zODMsNygtLisBCgoKDg0OGxAQGy4lHyUrKzUrLS8tNSstLSstLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tLS0tLf/AABEIAOAA4AMBIgACEQEDEQH/xAAbAAEBAAMBAQEAAAAAAAAAAAAABgQFBwMCAf/EAEwQAAIBAwIEAgcDBwgIBQUAAAECAwAEEQUhBhIxQRNRBxQiMmFxgRUVkRShISMzQlJiscFDVXKClLLS8CZWY3SSosTRNVSTo+EWFyQlNP/EABkBAQEBAQEBAAAAAAAAAAAAAAACAwEEBf/EACgRAAICAgEDBAICAwAAAAAAAAABAhEhMRIDQVEyYXGBEyKx8JGh4f/aAAwDAQACEQMRAD8A5LSlK+oeAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSveys5JnEcUbSOeiopZvuHb41WQ+ji5Vee8nt7JP9tIC/wBFU/xqXJLZ1RbIylWn2XocW0mo3Nww6iCHkX75Af30a90AdLO+f4tKq/3WrnPwmVw8si6VZi+0A9bO+T4rMrf3mr9Ol6HL+b1C5tyenjw86j5mMD99Ofsxw8Mi6VZy+jm4dS9nPb3qj/UyASf8LH+NSl9ZSwuY5onjcfoupU/j1Hxrqmno44tGPSlKokUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKVl6VpstzMkEKF5HOFUfiT5AdjRuglZjxxszBVBZicAAZJJ6AAdTVrBwhb2aLNq0xjyOZLSI5ncftEe4P8AOR0rKub+30ZTFa8s+oEYluCAY4P1o4werfH7/KtBr+n3VpcQ3MsizNKFnjmz4iSHYkZYb42BHljtWPJy9jVJIrk1S/e1drKCLS7FVJEjEI8uxwOdhzMx8wO/U1I8L2dteSPFdTyJcS49XmduZOf9STO/tdAc/jjNHoOry6tFc6fdSc87/l7RmwOWRBvEMDABXsO3NXOnUgkEEEEgg9QRsR9DSMdrTEnplrxnpZstPsbWSNVuGeeaYgDm2crGMjcjB2+VTGg6Ybm5itxIsZkbl5391die/uxB3OK3XFuuxXVnYlpCbmGN4Zg2d1Dfk35jsSRv9d6nIrOR/didv6KMf3CqhajnZyWzJ17TDbXMtuZFkMbcvOvutsDkff0881u+FdEtzbT397zm3hZY1jQ8rzStghM9gAQSR/CpyWzkUe1FIv8ASRh+8VVcNXtvcadLp01wlu3jC4glf80W5QrI5HTbofj8KSf6iKyevqNpc2k93YxSWlxaesPIBKrRsSOfkXYqQwxuR/3rz1TuzbSRXIJO2SAM79B2re6F6O7u5KvcYsocZE1wDzBux8IHUc2/0qrNPVaH0Y6bpv2Y28Cx46BQf4DrXYYYqkUlFKkkUkkUkkUkkUkkUkkUkkUkUkkUkkUkkUkkUkkUkkUkkX/9k=" alt="University of Oxford crest">
       <div>
         <div class="uni-name">University of Oxford</div>
         <div class="uni-sub">Inbox Briefing</div>
@@ -337,7 +351,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 <script>
 const STORAGE_KEY='workInbox_briefings_v1', TODAY_KEY='workInbox_today_v1', TICKS_KEY='workInbox_ticks_v1';
 
-const SEED={"date":"Tuesday 2 June 2026","subtitle":"First day back","context":"Surgery ~5 May, signed off four weeks. Simon Burford covered throughout May. Phased return may be recommended. Simon sent an occupational health referral – flag to read directly.","urgent":[{"title":"FlexPoints case #68899229 – bulk delete assignments","sub":"Marie approved proceeding 28 May. Scope confirmed but vague – requirements need tightening before kick-off. <strong>Authorise in the Access Group Support Portal today.</strong> Quote expires 11 June.","badge":"Deadline 11 June","badgeType":"red"},{"title":"DTP1092 – College staff in PXD: Marie sign-off needed","sub":"Marie finalised proposal 29 May and sent to Marie. Must be signed before her leave ends. Conor O'Brien starts test config on return 11 June. Kick-off provisionally <strong>12 June morning.</strong>","badge":"Deadline 5 June","badgeType":"red"},{"title":"DTP1092 – PXD DPIA: still not signed off","sub":"v0.5 shared with Crispin in May. Marie has not reviewed or signed. Blocks the college staff DPIA.","badge":"Chase Marie ASAP","badgeType":"orange"},{"title":"RSVP – Eploy project run through (Tue 2 June, 11:00–11:30)","sub":"Invite from Idris Kamara (Eploy) via Marie Cooksey. Attendees: Rachel Midgley, Simon, Idris, Kevin. Teams call.","badge":"RSVP today","badgeType":"red"}],"needs":[{"title":"Teams telephony transfer – deadline passed today","sub":"University moving from Chorus to Teams Telephony. Deadline to keep current number was 1 June. You were on leave. Check with Marie or Neil Clarke (L&OD).","badge":"Check with Marie/Neil","badgeType":"orange"},{"title":"EcoOnline/IRIS – funding still pending","sub":"Marie informed Joanne Grant (EcoOnline) funding is pending as of 28 May. New AE is John Grant (Mike left). Check funding approval status when you speak to Marie.","badge":"Check with Marie","badgeType":"orange"},{"title":"GLAM rostering – new workstream","sub":"IT Services (Anna Carter-Windle) handing off Botanic Gardens/Ashmolean rostering rollout. Marie described as “not ideal” – needs a discussion when everyone is in.","badge":"Add to team agenda","badgeType":"blue"},{"title":"James annual leave – add Simon as second approver","sub":"James's leave on 22 May was verbally approved by Marie due to approval gap. Simon flagged: add Simon as second approver for FA work group in PXD to prevent recurrence.","badge":"This week","badgeType":"blue"},{"title":"Michelle's birthday – circulate card","sub":"Michelle's birthday is Wednesday 3 June.","badge":"By Wed 3 June","badgeType":"red"}],"calToday":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"H&S Roadmap","sub":"Christopher Sanders"},{"time":"2:00 PM","title":"James Salas Guillen 1-1","sub":null}],"calTomorrow":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"Azure Integration Platform Sprint Review","sub":"Erika Braverman – Teams"},{"time":"11:00–11:30 AM","title":"Hold: Eploy run through","sub":"Marie Cooksey – Teams","alert":"RSVP needed"},{"time":"3:00 PM","title":"DTP1092 College staff in PXD","sub":"Crispin Muncaster – Teams"}],"absences":["Simon Burford – A/L Mon 1 June","Michael O'Sullivan – A/L until ~5 June","Sarah Rowles – A/L until 8 June","Marie King – A/L this week","Conor O'Brien – A/L until 10 June"],"priorities":[{"text":"Authorise FlexPoints case #68899229 in Access Group portal","date":"11 June","dateType":"orange"},{"text":"Chase Marie – PXD DPIA sign-off","date":"ASAP / 5 June","dateType":"red"},{"text":"Chase Marie – DTP1092 proposal sign-off","date":"5 June","dateType":"red"},{"text":"RSVP to Eploy hold meeting (Tue 11am)","date":"Today","dateType":"red"},{"text":"Teams telephony deadline – check with Marie/Neil Clarke","date":"Today","dateType":"red"},{"text":"Add Simon as second approver – FA work group in PXD","date":"This week","dateType":"blue"},{"text":"Check EcoOnline/IRIS funding status with Marie","date":"This week","dateType":"blue"},{"text":"Circulate Michelle's birthday card","date":"By Wed 3 June","dateType":"red"}]};
+const SEED={"date":"Tuesday 2 June 2026","subtitle":"Clear backlog before annual reviews","context":"Back from leave. Key absences: James Salas Guillen (returns Thursday), Sarah Rowles (returns Friday). FlexPoints budget closes end of June - allocation still pending. Three P1 tickets unresolved from last week. DSE go-live prep needs sign-off from Simon before Friday.","prioritiesToday":[{"title":"DSE go-live sign-off -- get confirmation from Simon","source":"H&S ROADMAP 01/06","actions":["[01 Jun 2026] Raised with Simon at roadmap meeting. Awaiting written confirmation.","[TODO] Chase Simon at Wednesday 1-1 if not received before then."]},{"title":"FlexPoints allocation -- Chemistry and Holiday Records","source":"INBOX 2026-06-01 09:15","actions":["[01 Jun 2026] Chemistry confirmed. Holiday Records quote still outstanding from AG.","[AWAITING] Mike West at AG - quote for Holiday Records module.","[TODO] Confirm remaining balance and allocate once quote received."]},{"title":"P1 incident -- OSM data feed failure","source":"INCIDENT LOG","actions":["[28 May 2026] OSM feed failed overnight. Asta managing manually.","[MONITOR] No resolution from supplier yet. Escalate if not resolved by COB today."]}],"prioritiesWeek":[{"title":"SharePoint documentation -- written response and team alignment","source":"SK 1-1 08/06","actions":["[08 Jun 2026] Simon flagged guidance not updated when drive moved.","[TODO] Written response confirming current guidance.","[TODO] Schedule team alignment meeting."]},{"title":"HWP archived users -- one-off DSC upload cover","source":"JAMES HANDOVER","actions":["[TODO] One-off DSC upload cover while James on leave.","[MONITOR] Two open HWP tickets with Gail Miller."]}],"fyi":[{"title":"Vacancy alert email retest -- case 68388326","sub":"Conor to pick up on return from leave.","badge":"Parked","badgeType":"gray"},{"title":"Iris enhancements on hold","sub":"Pending H&S funding approval. New AE contact: Michael Hanson.","badge":"H&S Roadmap","badgeType":"gray"}],"calToday":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams - Michael, Asta, James"},{"time":"14:00","title":"H&S Roadmap","sub":"James Salas Guillen - Teams"}],"calTomorrow":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"11:00","title":"1-1 Simon Burford","sub":"Teams"}],"absences":["James Salas Guillen - returns Thursday 5 June","Sarah Rowles - returns Friday 6 June"]};
 
 function getStore(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}}}
 function saveStore(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
@@ -418,11 +432,9 @@ function toggleArchive(){
   if(p.classList.contains('visible')) renderArchiveList();
 }
 function getArchiveData(){
-  // Returns array of {key, data, date (Date obj), ticks} sorted newest first
   const store=getStore(), ticks=getTicks();
   return Object.keys(store).sort().reverse().map(k=>{
     const d=store[k];
-    // Parse date from key back to something readable
     const dateStr=d.date||k.replace(/_/g,' ');
     return {key:k, data:d, dateStr:dateStr, ticks:ticks};
   });
@@ -431,7 +443,6 @@ function getSectionLabel(s){
   return {urgent:'Urgent',needs:'Needs',fyi:'FYI',low:'Low',priorities:'Priority'}[s]||s;
 }
 function getAllItemsForDay(data){
-  // Returns flat array of {section, index, title, ticked}
   const sections=['priorities','urgent','needs','fyi','low'];
   const result=[];
   sections.forEach(s=>{
@@ -512,14 +523,11 @@ function purgeOldTicks(){
   let purgedCount=0;
   Object.keys(store).forEach(k=>{
     const d=store[k];
-    // Try to parse the date from the briefing
     const dateStr=d.date||'';
     const parsed=new Date(dateStr);
     const age=isNaN(parsed)?null:parsed;
     if(!age||age<cutoff){
-      // Purge store entry
       delete store[k];
-      // Purge associated ticks
       Object.keys(ticks).filter(tk=>tk.startsWith(k+'_')).forEach(tk=>{delete ticks[tk];purgedCount++;});
     }
   });
@@ -583,11 +591,11 @@ function badge(text,type){return text?`<span class="badge badge-${type||'gray'}"
 function sanitizeSub(text){
   if(!text) return '';
   return text
-    .replace(/<https?:\/\/[^>]*>/gi, '')         // strip closed angle-bracket URLs: <https://...>
-    .replace(/<https?:\/\/[^\s<>]*/gi, '')        // strip unclosed angle-bracket URLs: <https://...
-    .replace(/<(?!\/?strong\b)[^>]*>/gi, '')      // strip complete non-strong tags
-    .replace(/<(?!\/?strong\b)[^>]*$/gi, '')      // strip unclosed tags at end of string
-    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' '); // collapse line breaks
+    .replace(/<https?:\/\/[^>]*>/gi, '')
+    .replace(/<https?:\/\/[^\s<>]*/gi, '')
+    .replace(/<(?!\/?strong\b)[^>]*>/gi, '')
+    .replace(/<(?!\/?strong\b)[^>]*$/gi, '')
+    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' ');
 }
 
 function renderItems(items,cls){
@@ -622,16 +630,17 @@ function _priGetKey(p){return(p.title||p.text||p.subject||'').toLowerCase().repl
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
-function _priSetOrder(pt,pw,pnw,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw,pnw:pnw||[],ur:ur||[],nr:nr||[]}));}
+function _priSetOrder(pt,ptom,pw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
 function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
 function applyPriOverrides(data){
-  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),..._getCustomPri()];
-  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],pnw:[],ur:[],nr:[]};
-  const validSecs=['pt','pw','pnw','ur','nr'];
-  for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
+  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesTomorrow||[]).map(p=>({...p,_dfSec:'ptom'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.fyi||[]).map(p=>({...p,text:p.title,_dfSec:'pfyi'})),..._getCustomPri()];
+  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],ptom:[],pw:[],pfyi:[],ur:[],nr:[]};
+  const validSecs=['pt','ptom','pw','pfyi','ur','nr'];
+  const _seen=new Set();
+  for(const item of all){const k=_priGetKey(item);if(_seen.has(k))continue;_seen.add(k);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
   for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
   return secs;
 }
@@ -676,14 +685,14 @@ function priCardDrop(e,sec,priKey){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   const before=e.currentTarget.classList.contains('pri-drop-before');
-  const allSecs=['pt','pw','pnw','ur','nr'];
+  const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
   const sk={};
   allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   const ti=sk[sec].indexOf(priKey);
   sk[sec].splice(ti>=0?(before?ti:ti+1):sk[sec].length,0,fromKey);
-  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.ur,sk.nr);
+  _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -702,12 +711,12 @@ function priZoneDrop(e,sec){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
-  const allSecs=['pt','pw','pnw','ur','nr'];
+  const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
   const sk={};
   allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   sk[sec].push(fromKey);
-  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.ur,sk.nr);
+  _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -715,6 +724,14 @@ function priZoneDrop(e,sec){
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
   const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Canvas text measurement for smart one-line vs two-line decision
+  if(!renderPriorityCards._canvas){renderPriorityCards._canvas=document.createElement('canvas');renderPriorityCards._ctx=renderPriorityCards._canvas.getContext('2d');}
+  const _mctx=renderPriorityCards._ctx;
+  function _tw(t,f){_mctx.font=f;return _mctx.measureText(t).width;}
+  const _titleFont='600 15px Inter,sans-serif';
+  const _gridCellW=Math.max(280,(window.innerWidth-340-72-24)/2);
+  const _cardInnerW=_gridCellW-32;
+  const _fixedW=55;
   const _recentPfxs4=Array.from({length:4},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return'['+String(d.getDate()).padStart(2,'0')+' '+_mo[d.getMonth()]+' '+d.getFullYear()+']';});
   const _cutoff=new Date();_cutoff.setDate(_cutoff.getDate()-4);_cutoff.setHours(0,0,0,0);
   const _mo2={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
@@ -722,13 +739,23 @@ function renderPriorityCards(priorities,key,sec){
   return priorities.map((p,i)=>{
     const priKey=p._priKey||_priGetKey(p);
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
-    const titleText=p.title||p.text||'(untitled)';
-    const aiBadge=p.badge?badge(p.badge,p.badgeType||'gray'):'';
+    const _rawTitle=p.title||p.text||'(untitled)';
+    const _titleParts=_rawTitle.split(' -- ');
+    const titleText=_titleParts[0];
+    const titleSub=_titleParts.length>1?_titleParts.slice(1).join(' -- '):'';
+    const aiBadge=(p.badge&&sec!=='pfyi')?badge(p.badge,p.badgeType||'gray'):'';
     const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
-    const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
+    // Measure whether combined title fits on one line
+    const _badgeW=theBadge?82:0;
+    const _btnW=(p.entry_id||p.entryId)?118:0;
+    const _ccBtnW=p.id?96:0;
+    const _availW=_cardInnerW-_fixedW-_badgeW-_btnW-_ccBtnW;
+    const _combined=titleSub?titleText+' – '+titleSub:titleText;
+    const _oneLine=!titleSub||_tw(_combined,_titleFont)<=_availW;
+    const summaryHtml=p.ai_summary?`<div class="pri-ai-summary">${sanitizeSub(p.ai_summary)}</div>`:'';
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
       ${p.dateAdded?`<span class="pri-meta-item"><span class="pri-meta-label">Added</span>${p.dateAdded}</span>`:''}
@@ -738,13 +765,13 @@ function renderPriorityCards(priorities,key,sec){
       <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
         <div class="pri-drag-handle" onclick="event.stopPropagation()">⣿⣿</div>
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <span class="pri-card-title">${titleText}</span>
-        <span style="flex:1"></span>
+        <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
+        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://begb0037admin.github.io/command-centre/#${p.id}','_blank');event.stopPropagation()">CC →</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
-      <div class="pri-card-body" id="pribody_${sec}_${i}">${actionsHtml}${metaHtml}</div>
+      <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${metaHtml}</div>
     </div>`;
   }).join('');
 }
@@ -776,24 +803,26 @@ function renderBriefing(data,key){
   const ctxEl=document.getElementById('contextBar');
   ctxEl.innerHTML=data.context?`<div class="context-bar"><strong>Context:</strong> ${data.context}</div>`:'';
 
-  // Main inbox
-  let left='';
+  // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-t"></span><span class="sec-lbl">Priority actions – next week</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pnw" ondragover="priZoneDragOver(event,'pnw')" ondragleave="priZoneDragLeave(event,'pnw')" ondrop="priZoneDrop(event,'pnw')">${priSecs.pnw.length?renderPriorityCards(priSecs.pnw,key,'pnw'):'<div class="pri-zone-empty">Drop items here to plan for next week</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="ur" ondragover="priZoneDragOver(event,'ur')" ondragleave="priZoneDragLeave(event,'ur')" ondrop="priZoneDrop(event,'ur')">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
-  left+=renderItems(data.urgent,'urgent');
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
-  left+=renderItems(data.needs,'needs');
-  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
-  if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
-
+  const left=`<div class="inbox-grid">
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>
+      <div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+    </div>
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – tomorrow</span><span class="sec-rule"></span></div>
+      <div class="pri-drop-zone" data-sec="ptom" ondragover="priZoneDragOver(event,'ptom')" ondragleave="priZoneDragLeave(event,'ptom')" ondrop="priZoneDrop(event,'ptom')">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+    </div>
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-green"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>
+      <div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+    </div>
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>
+      <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
+    </div>
+  </div>`;
   document.getElementById('inboxCol').innerHTML=left;
 }
 
@@ -804,10 +833,9 @@ function getGreeting(){
   return 'Good evening, Kevin';
 }
 
-const BRIEFING_URL='https://raw.githubusercontent.com/begb0037admin/work-inbox/main/data/briefing.json';
+const BRIEFING_API='https://api.github.com/repos/begb0037admin/work-inbox/contents/data/briefing.json';
 
 async function init(){
-  // Set greeting immediately
   const titleEl=document.getElementById('pageTitle');
   if(titleEl) titleEl.textContent=getGreeting();
 
@@ -815,19 +843,17 @@ async function init(){
 
   let data=null;
 
-  // Try GitHub fetch
   try{
-    const res=await fetch(BRIEFING_URL+'?t='+Date.now(),{cache:'no-store'});
+    const res=await fetch(BRIEFING_API+'?t='+Date.now(),{cache:'no-store',headers:{'Accept':'application/vnd.github.v3+json'}});
     if(res.ok){
-      data=await res.json();
-      // Archive it
+      const meta=await res.json();
+      data=JSON.parse(atob(meta.content.replace(/\n/g,'')));
       const key=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
       const store=getStore(); store[key]=data; saveStore(store);
       localStorage.setItem(TODAY_KEY,key);
     }
   }catch(e){console.warn('GitHub fetch failed:',e);}
 
-  // Fallback: last stored briefing
   if(!data){
     const todayKey=localStorage.getItem(TODAY_KEY);
     if(todayKey){const store=getStore(); if(store[todayKey]) data=store[todayKey];}
@@ -838,7 +864,6 @@ async function init(){
     return;
   }
 
-  // Safety reset: if done ticks would hide everything, clear them
   const currentKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
   const ticks=getTicks();
   const allItems=[...(data.urgent||[]),(data.needs||[]),(data.fyi||[]),(data.low||[])].flat();
