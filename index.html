@@ -177,6 +177,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .pri-card-title-sub  { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
 .pri-arrow { font-size: 11px; color: var(--text-very-muted); flex-shrink: 0; }
 .pri-card-body { padding: 0 16px 14px 41px; display: none; }
+.pri-ai-summary { font-size: 13px; color: var(--text-dark); line-height: 1.55; padding: 7px 10px; background: #f0f4ff; border-radius: 5px; margin-bottom: 9px; border-left: 3px solid #6b7fcc; }
 .pri-action { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding: 2px 0; }
 .pri-action::before { content: '→ '; color: var(--text-very-muted); }
 .pri-meta { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 16px; }
@@ -749,6 +750,7 @@ function renderPriorityCards(priorities,key,sec){
     const _availW=_cardInnerW-_fixedW-_badgeW-_btnW;
     const _combined=titleSub?titleText+' – '+titleSub:titleText;
     const _oneLine=!titleSub||_tw(_combined,_titleFont)<=_availW;
+    const summaryHtml=p.ai_summary?`<div class="pri-ai-summary">${sanitizeSub(p.ai_summary)}</div>`:'';
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
@@ -764,7 +766,7 @@ function renderPriorityCards(priorities,key,sec){
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
-      <div class="pri-card-body" id="pribody_${sec}_${i}">${actionsHtml}${metaHtml}</div>
+      <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${actionsHtml}${metaHtml}</div>
     </div>`;
   }).join('');
 }
