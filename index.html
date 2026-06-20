@@ -165,9 +165,12 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .pri-card.done { opacity: .38; }
 .pri-card.card-hidden { display: none; }
 .pri-card.done .pri-card-title { text-decoration: line-through; }
-.pri-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; }
+.pri-card-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; min-height: 64px; }
 .pri-card-header:hover { background: rgba(0,33,71,0.02); border-radius: var(--radius-lg); }
 .pri-card-title { flex: 1; font-size: 15px; font-weight: 600; color: var(--text-dark); }
+.pri-card-title-wrap { flex: 1; min-width: 0; }
+.pri-card-title-main { font-size: 15px; font-weight: 600; color: var(--text-dark); line-height: 1.3; }
+.pri-card-title-sub  { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
 .pri-arrow { font-size: 11px; color: var(--text-very-muted); flex-shrink: 0; }
 .pri-card-body { padding: 0 16px 14px 41px; display: none; }
 .pri-action { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding: 2px 0; }
@@ -340,7 +343,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 <script>
 const STORAGE_KEY='workInbox_briefings_v1', TODAY_KEY='workInbox_today_v1', TICKS_KEY='workInbox_ticks_v1';
 
-const SEED={"date":"Tuesday 2 June 2026","subtitle":"Clear backlog before annual reviews","context":"Back from leave. Key absences: James Salas Guillen (returns Thursday), Sarah Rowles (returns Friday). FlexPoints budget closes end of June - allocation still pending. Three P1 tickets unresolved from last week. DSE go-live prep needs sign-off from Simon before Friday.","prioritiesToday":[{"title":"DSE go-live sign-off - get confirmation from Simon","source":"H&S ROADMAP 01/06","actions":["[01 Jun 2026] Raised with Simon at roadmap meeting. Awaiting written confirmation.","[TODO] Chase Simon at Wednesday 1-1 if not received before then."]},{"title":"FlexPoints allocation - Chemistry and Holiday Records","source":"INBOX 2026-06-01 09:15","actions":["[01 Jun 2026] Chemistry confirmed. Holiday Records quote still outstanding from AG.","[AWAITING] Mike West at AG - quote for Holiday Records module.","[TODO] Confirm remaining balance and allocate once quote received."]},{"title":"P1 incident - OSM data feed failure","source":"INCIDENT LOG","actions":["[28 May 2026] OSM feed failed overnight. Asta managing manually.","[MONITOR] No resolution from supplier yet. Escalate if not resolved by COB today."]}],"prioritiesWeek":[{"title":"SharePoint documentation update","source":"SK 1-1 08/06","actions":["[08 Jun 2026] Simon flagged guidance not updated when drive moved.","[TODO] Written response confirming current guidance.","[TODO] Schedule team alignment meeting."]},{"title":"HWP archived users check","source":"JAMES HANDOVER","actions":["[TODO] One-off DSC upload cover while James on leave.","[MONITOR] Two open HWP tickets with Gail Miller."]}],"fyi":[{"title":"Vacancy alert email retest - case 68388326","sub":"Conor to pick up on return from leave.","badge":"Parked","badgeType":"gray"},{"title":"Iris enhancements on hold","sub":"Pending H&S funding approval. New AE contact: Michael Hanson.","badge":"H&S Roadmap","badgeType":"gray"}],"calToday":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams - Michael, Asta, James"},{"time":"14:00","title":"H&S Roadmap","sub":"James Salas Guillen - Teams"}],"calTomorrow":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"11:00","title":"1-1 Simon Burford","sub":"Teams"}],"absences":["James Salas Guillen - returns Thursday 5 June","Sarah Rowles - returns Friday 6 June"]};
+const SEED={"date":"Tuesday 2 June 2026","subtitle":"Clear backlog before annual reviews","context":"Back from leave. Key absences: James Salas Guillen (returns Thursday), Sarah Rowles (returns Friday). FlexPoints budget closes end of June - allocation still pending. Three P1 tickets unresolved from last week. DSE go-live prep needs sign-off from Simon before Friday.","prioritiesToday":[{"title":"DSE go-live sign-off -- get confirmation from Simon","source":"H&S ROADMAP 01/06","actions":["[01 Jun 2026] Raised with Simon at roadmap meeting. Awaiting written confirmation.","[TODO] Chase Simon at Wednesday 1-1 if not received before then."]},{"title":"FlexPoints allocation -- Chemistry and Holiday Records","source":"INBOX 2026-06-01 09:15","actions":["[01 Jun 2026] Chemistry confirmed. Holiday Records quote still outstanding from AG.","[AWAITING] Mike West at AG - quote for Holiday Records module.","[TODO] Confirm remaining balance and allocate once quote received."]},{"title":"P1 incident -- OSM data feed failure","source":"INCIDENT LOG","actions":["[28 May 2026] OSM feed failed overnight. Asta managing manually.","[MONITOR] No resolution from supplier yet. Escalate if not resolved by COB today."]}],"prioritiesWeek":[{"title":"SharePoint documentation -- written response and team alignment","source":"SK 1-1 08/06","actions":["[08 Jun 2026] Simon flagged guidance not updated when drive moved.","[TODO] Written response confirming current guidance.","[TODO] Schedule team alignment meeting."]},{"title":"HWP archived users -- one-off DSC upload cover","source":"JAMES HANDOVER","actions":["[TODO] One-off DSC upload cover while James on leave.","[MONITOR] Two open HWP tickets with Gail Miller."]}],"fyi":[{"title":"Vacancy alert email retest -- case 68388326","sub":"Conor to pick up on return from leave.","badge":"Parked","badgeType":"gray"},{"title":"Iris enhancements on hold","sub":"Pending H&S funding approval. New AE contact: Michael Hanson.","badge":"H&S Roadmap","badgeType":"gray"}],"calToday":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams - Michael, Asta, James"},{"time":"14:00","title":"H&S Roadmap","sub":"James Salas Guillen - Teams"}],"calTomorrow":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"11:00","title":"1-1 Simon Burford","sub":"Teams"}],"absences":["James Salas Guillen - returns Thursday 5 June","Sarah Rowles - returns Friday 6 June"]};
 
 function getStore(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}}}
 function saveStore(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
@@ -421,11 +424,9 @@ function toggleArchive(){
   if(p.classList.contains('visible')) renderArchiveList();
 }
 function getArchiveData(){
-  // Returns array of {key, data, date (Date obj), ticks} sorted newest first
   const store=getStore(), ticks=getTicks();
   return Object.keys(store).sort().reverse().map(k=>{
     const d=store[k];
-    // Parse date from key back to something readable
     const dateStr=d.date||k.replace(/_/g,' ');
     return {key:k, data:d, dateStr:dateStr, ticks:ticks};
   });
@@ -434,7 +435,6 @@ function getSectionLabel(s){
   return {urgent:'Urgent',needs:'Needs',fyi:'FYI',low:'Low',priorities:'Priority'}[s]||s;
 }
 function getAllItemsForDay(data){
-  // Returns flat array of {section, index, title, ticked}
   const sections=['priorities','urgent','needs','fyi','low'];
   const result=[];
   sections.forEach(s=>{
@@ -515,14 +515,11 @@ function purgeOldTicks(){
   let purgedCount=0;
   Object.keys(store).forEach(k=>{
     const d=store[k];
-    // Try to parse the date from the briefing
     const dateStr=d.date||'';
     const parsed=new Date(dateStr);
     const age=isNaN(parsed)?null:parsed;
     if(!age||age<cutoff){
-      // Purge store entry
       delete store[k];
-      // Purge associated ticks
       Object.keys(ticks).filter(tk=>tk.startsWith(k+'_')).forEach(tk=>{delete ticks[tk];purgedCount++;});
     }
   });
@@ -586,11 +583,11 @@ function badge(text,type){return text?`<span class="badge badge-${type||'gray'}"
 function sanitizeSub(text){
   if(!text) return '';
   return text
-    .replace(/<https?:\/\/[^>]*>/gi, '')         // strip closed angle-bracket URLs: <https://...>
-    .replace(/<https?:\/\/[^\s<>]*/gi, '')        // strip unclosed angle-bracket URLs: <https://...
-    .replace(/<(?!\/?strong\b)[^>]*>/gi, '')      // strip complete non-strong tags
-    .replace(/<(?!\/?strong\b)[^>]*$/gi, '')      // strip unclosed tags at end of string
-    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' '); // collapse line breaks
+    .replace(/<https?:\/\/[^>]*>/gi, '')
+    .replace(/<https?:\/\/[^\s<>]*/gi, '')
+    .replace(/<(?!\/?strong\b)[^>]*>/gi, '')
+    .replace(/<(?!\/?strong\b)[^>]*$/gi, '')
+    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' ');
 }
 
 function renderItems(items,cls){
@@ -625,15 +622,15 @@ function _priGetKey(p){return(p.title||p.text||p.subject||'').toLowerCase().repl
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
-function _priSetOrder(pt,pw,pnw,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw,pnw:pnw||[],ur:ur||[],nr:nr||[]}));}
+function _priSetOrder(pt,pw,pnw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,pw,pnw:pnw||[],pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
 function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
 function applyPriOverrides(data){
   const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.prioritiesNextWeek||[]).map(p=>({...p,_dfSec:'pnw'})),..._getCustomPri()];
-  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],pnw:[],ur:[],nr:[]};
-  const validSecs=['pt','pw','pnw','ur','nr'];
+  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],pnw:[],pfyi:[],ur:[],nr:[]};
+  const validSecs=['pt','pw','pnw','pfyi','ur','nr'];
   for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
   for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
   return secs;
@@ -679,14 +676,14 @@ function priCardDrop(e,sec,priKey){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   const before=e.currentTarget.classList.contains('pri-drop-before');
-  const allSecs=['pt','pw','pnw','ur','nr'];
+  const allSecs=['pt','pw','pnw','pfyi','ur','nr'];
   const sk={};
   allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   const ti=sk[sec].indexOf(priKey);
   sk[sec].splice(ti>=0?(before?ti:ti+1):sk[sec].length,0,fromKey);
-  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.ur,sk.nr);
+  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.pfyi,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -705,12 +702,12 @@ function priZoneDrop(e,sec){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
-  const allSecs=['pt','pw','pnw','ur','nr'];
+  const allSecs=['pt','pw','pnw','pfyi','ur','nr'];
   const sk={};
   allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   sk[sec].push(fromKey);
-  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.ur,sk.nr);
+  _priSetOrder(sk.pt,sk.pw,sk.pnw,sk.pfyi,sk.ur,sk.nr);
   priDragEnd(e);
   if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
 }
@@ -725,7 +722,10 @@ function renderPriorityCards(priorities,key,sec){
   return priorities.map((p,i)=>{
     const priKey=p._priKey||_priGetKey(p);
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
-    const titleText=p.title||p.text||'(untitled)';
+    const _rawTitle=p.title||p.text||'(untitled)';
+    const _titleParts=_rawTitle.split(' -- ');
+    const titleText=_titleParts[0];
+    const titleSub=_titleParts.length>1?_titleParts.slice(1).join(' -- '):'';
     const aiBadge=p.badge?badge(p.badge,p.badgeType||'gray'):'';
     const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
@@ -741,7 +741,7 @@ function renderPriorityCards(priorities,key,sec){
       <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
         <div class="pri-drag-handle" onclick="event.stopPropagation()">⣿⣿</div>
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <span class="pri-card-title">${titleText}</span>
+        <div class="pri-card-title-wrap">${titleSub?`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`:`<div class="pri-card-title">${titleText}</div>`}</div>
         <span style="flex:1"></span>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
@@ -781,7 +781,7 @@ function renderBriefing(data,key){
 
   // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
-  const fyiHtml=(data.fyi&&data.fyi.length)?renderItems(data.fyi,'fyi'):'<div class="pri-zone-empty">None today.</div>';
+  const fyiEmailHtml=(data.fyi&&data.fyi.length)?renderItems(data.fyi,'fyi'):'';
   const left=`<div class="inbox-grid">
     <div class="inbox-grid-cell">
       <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>
@@ -797,7 +797,8 @@ function renderBriefing(data,key){
     </div>
     <div class="inbox-grid-cell">
       <div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>
-      ${fyiHtml}
+      <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):(fyiEmailHtml||'<div class="pri-zone-empty">Drop items here to park</div>')}</div>
+      ${priSecs.pfyi.length&&fyiEmailHtml?fyiEmailHtml:''}
     </div>
   </div>`;
   document.getElementById('inboxCol').innerHTML=left;
@@ -813,7 +814,6 @@ function getGreeting(){
 const BRIEFING_URL='https://raw.githubusercontent.com/begb0037admin/work-inbox/main/data/briefing.json';
 
 async function init(){
-  // Set greeting immediately
   const titleEl=document.getElementById('pageTitle');
   if(titleEl) titleEl.textContent=getGreeting();
 
@@ -821,19 +821,16 @@ async function init(){
 
   let data=null;
 
-  // Try GitHub fetch
   try{
     const res=await fetch(BRIEFING_URL+'?t='+Date.now(),{cache:'no-store'});
     if(res.ok){
       data=await res.json();
-      // Archive it
       const key=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
       const store=getStore(); store[key]=data; saveStore(store);
       localStorage.setItem(TODAY_KEY,key);
     }
   }catch(e){console.warn('GitHub fetch failed:',e);}
 
-  // Fallback: last stored briefing
   if(!data){
     const todayKey=localStorage.getItem(TODAY_KEY);
     if(todayKey){const store=getStore(); if(store[todayKey]) data=store[todayKey];}
@@ -844,7 +841,6 @@ async function init(){
     return;
   }
 
-  // Safety reset: if done ticks would hide everything, clear them
   const currentKey=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
   const ticks=getTicks();
   const allItems=[...(data.urgent||[]),(data.needs||[]),(data.fyi||[]),(data.low||[])].flat();
