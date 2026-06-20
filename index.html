@@ -250,7 +250,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .tasks-widget-count{font-weight:700;color:rgba(255,255,255,.9)}
 .tasks-widget-link{display:block;margin-top:8px;font-size:12px;color:#60a5fa;text-decoration:none}
 .tasks-widget-link:hover{text-decoration:underline}
-.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}</style>
+.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}
+/* ── 2×2 grid layout ── */
+.inbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.inbox-grid-cell {}</style>
 </head>
 <body>
 <div class="shell">
@@ -337,7 +340,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 <script>
 const STORAGE_KEY='workInbox_briefings_v1', TODAY_KEY='workInbox_today_v1', TICKS_KEY='workInbox_ticks_v1';
 
-const SEED={"date":"Tuesday 2 June 2026","subtitle":"First day back","context":"Surgery ~5 May, signed off four weeks. Simon Burford covered throughout May. Phased return may be recommended. Simon sent an occupational health referral – flag to read directly.","urgent":[{"title":"FlexPoints case #68899229 – bulk delete assignments","sub":"Marie approved proceeding 28 May. Scope confirmed but vague – requirements need tightening before kick-off. <strong>Authorise in the Access Group Support Portal today.</strong> Quote expires 11 June.","badge":"Deadline 11 June","badgeType":"red"},{"title":"DTP1092 – College staff in PXD: Marie sign-off needed","sub":"Marie finalised proposal 29 May and sent to Marie. Must be signed before her leave ends. Conor O'Brien starts test config on return 11 June. Kick-off provisionally <strong>12 June morning.</strong>","badge":"Deadline 5 June","badgeType":"red"},{"title":"DTP1092 – PXD DPIA: still not signed off","sub":"v0.5 shared with Crispin in May. Marie has not reviewed or signed. Blocks the college staff DPIA.","badge":"Chase Marie ASAP","badgeType":"orange"},{"title":"RSVP – Eploy project run through (Tue 2 June, 11:00–11:30)","sub":"Invite from Idris Kamara (Eploy) via Marie Cooksey. Attendees: Rachel Midgley, Simon, Idris, Kevin. Teams call.","badge":"RSVP today","badgeType":"red"}],"needs":[{"title":"Teams telephony transfer – deadline passed today","sub":"University moving from Chorus to Teams Telephony. Deadline to keep current number was 1 June. You were on leave. Check with Marie or Neil Clarke (L&OD).","badge":"Check with Marie/Neil","badgeType":"orange"},{"title":"EcoOnline/IRIS – funding still pending","sub":"Marie informed Joanne Grant (EcoOnline) funding is pending as of 28 May. New AE is John Grant (Mike left). Check funding approval status when you speak to Marie.","badge":"Check with Marie","badgeType":"orange"},{"title":"GLAM rostering – new workstream","sub":"IT Services (Anna Carter-Windle) handing off Botanic Gardens/Ashmolean rostering rollout. Marie described as “not ideal” – needs a discussion when everyone is in.","badge":"Add to team agenda","badgeType":"blue"},{"title":"James annual leave – add Simon as second approver","sub":"James's leave on 22 May was verbally approved by Marie due to approval gap. Simon flagged: add Simon as second approver for FA work group in PXD to prevent recurrence.","badge":"This week","badgeType":"blue"},{"title":"Michelle's birthday – circulate card","sub":"Michelle's birthday is Wednesday 3 June.","badge":"By Wed 3 June","badgeType":"red"}],"calToday":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"H&S Roadmap","sub":"Christopher Sanders"},{"time":"2:00 PM","title":"James Salas Guillen 1-1","sub":null}],"calTomorrow":[{"time":"9:00 AM","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"10:00 AM","title":"Azure Integration Platform Sprint Review","sub":"Erika Braverman – Teams"},{"time":"11:00–11:30 AM","title":"Hold: Eploy run through","sub":"Marie Cooksey – Teams","alert":"RSVP needed"},{"time":"3:00 PM","title":"DTP1092 College staff in PXD","sub":"Crispin Muncaster – Teams"}],"absences":["Simon Burford – A/L Mon 1 June","Michael O'Sullivan – A/L until ~5 June","Sarah Rowles – A/L until 8 June","Marie King – A/L this week","Conor O'Brien – A/L until 10 June"],"priorities":[{"text":"Authorise FlexPoints case #68899229 in Access Group portal","date":"11 June","dateType":"orange"},{"text":"Chase Marie – PXD DPIA sign-off","date":"ASAP / 5 June","dateType":"red"},{"text":"Chase Marie – DTP1092 proposal sign-off","date":"5 June","dateType":"red"},{"text":"RSVP to Eploy hold meeting (Tue 11am)","date":"Today","dateType":"red"},{"text":"Teams telephony deadline – check with Marie/Neil Clarke","date":"Today","dateType":"red"},{"text":"Add Simon as second approver – FA work group in PXD","date":"This week","dateType":"blue"},{"text":"Check EcoOnline/IRIS funding status with Marie","date":"This week","dateType":"blue"},{"text":"Circulate Michelle's birthday card","date":"By Wed 3 June","dateType":"red"}]};
+const SEED={"date":"Tuesday 2 June 2026","subtitle":"Clear backlog before annual reviews","context":"Back from leave. Key absences: James Salas Guillen (returns Thursday), Sarah Rowles (returns Friday). FlexPoints budget closes end of June - allocation still pending. Three P1 tickets unresolved from last week. DSE go-live prep needs sign-off from Simon before Friday.","prioritiesToday":[{"title":"DSE go-live sign-off - get confirmation from Simon","source":"H&S ROADMAP 01/06","actions":["[01 Jun 2026] Raised with Simon at roadmap meeting. Awaiting written confirmation.","[TODO] Chase Simon at Wednesday 1-1 if not received before then."]},{"title":"FlexPoints allocation - Chemistry and Holiday Records","source":"INBOX 2026-06-01 09:15","actions":["[01 Jun 2026] Chemistry confirmed. Holiday Records quote still outstanding from AG.","[AWAITING] Mike West at AG - quote for Holiday Records module.","[TODO] Confirm remaining balance and allocate once quote received."]},{"title":"P1 incident - OSM data feed failure","source":"INCIDENT LOG","actions":["[28 May 2026] OSM feed failed overnight. Asta managing manually.","[MONITOR] No resolution from supplier yet. Escalate if not resolved by COB today."]}],"prioritiesWeek":[{"title":"SharePoint documentation update","source":"SK 1-1 08/06","actions":["[08 Jun 2026] Simon flagged guidance not updated when drive moved.","[TODO] Written response confirming current guidance.","[TODO] Schedule team alignment meeting."]},{"title":"HWP archived users check","source":"JAMES HANDOVER","actions":["[TODO] One-off DSC upload cover while James on leave.","[MONITOR] Two open HWP tickets with Gail Miller."]}],"fyi":[{"title":"Vacancy alert email retest - case 68388326","sub":"Conor to pick up on return from leave.","badge":"Parked","badgeType":"gray"},{"title":"Iris enhancements on hold","sub":"Pending H&S funding approval. New AE contact: Michael Hanson.","badge":"H&S Roadmap","badgeType":"gray"}],"calToday":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams - Michael, Asta, James"},{"time":"14:00","title":"H&S Roadmap","sub":"James Salas Guillen - Teams"}],"calTomorrow":[{"time":"09:00","title":"FA Team Daily Catchup","sub":"Teams"},{"time":"11:00","title":"1-1 Simon Burford","sub":"Teams"}],"absences":["James Salas Guillen - returns Thursday 5 June","Sarah Rowles - returns Friday 6 June"]};
 
 function getStore(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}}}
 function saveStore(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
@@ -628,7 +631,7 @@ function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
 function applyPriOverrides(data){
-  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),..._getCustomPri()];
+  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.prioritiesNextWeek||[]).map(p=>({...p,_dfSec:'pnw'})),..._getCustomPri()];
   const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],pnw:[],ur:[],nr:[]};
   const validSecs=['pt','pw','pnw','ur','nr'];
   for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
@@ -776,24 +779,27 @@ function renderBriefing(data,key){
   const ctxEl=document.getElementById('contextBar');
   ctxEl.innerHTML=data.context?`<div class="context-bar"><strong>Context:</strong> ${data.context}</div>`:'';
 
-  // Main inbox
-  let left='';
+  // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-t"></span><span class="sec-lbl">Priority actions – next week</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pnw" ondragover="priZoneDragOver(event,'pnw')" ondragleave="priZoneDragLeave(event,'pnw')" ondrop="priZoneDrop(event,'pnw')">${priSecs.pnw.length?renderPriorityCards(priSecs.pnw,key,'pnw'):'<div class="pri-zone-empty">Drop items here to plan for next week</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="ur" ondragover="priZoneDragOver(event,'ur')" ondragleave="priZoneDragLeave(event,'ur')" ondrop="priZoneDrop(event,'ur')">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
-  left+=renderItems(data.urgent,'urgent');
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
-  left+=renderItems(data.needs,'needs');
-  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
-  if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
-
+  const fyiHtml=(data.fyi&&data.fyi.length)?renderItems(data.fyi,'fyi'):'<div class="pri-zone-empty">None today.</div>';
+  const left=`<div class="inbox-grid">
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>
+      <div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+    </div>
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>
+      <div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+    </div>
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-t"></span><span class="sec-lbl">Priority actions – next week</span><span class="sec-rule"></span></div>
+      <div class="pri-drop-zone" data-sec="pnw" ondragover="priZoneDragOver(event,'pnw')" ondragleave="priZoneDragLeave(event,'pnw')" ondrop="priZoneDrop(event,'pnw')">${priSecs.pnw.length?renderPriorityCards(priSecs.pnw,key,'pnw'):'<div class="pri-zone-empty">Drop items here to plan for next week</div>'}</div>
+    </div>
+    <div class="inbox-grid-cell">
+      <div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>
+      ${fyiHtml}
+    </div>
+  </div>`;
   document.getElementById('inboxCol').innerHTML=left;
 }
 
