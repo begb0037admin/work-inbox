@@ -250,7 +250,17 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .tasks-widget-count{font-weight:700;color:rgba(255,255,255,.9)}
 .tasks-widget-link{display:block;margin-top:8px;font-size:12px;color:#60a5fa;text-decoration:none}
 .tasks-widget-link:hover{text-decoration:underline}
-.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}</style>
+.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}
+/* Email card 2-layer layout */
+.card{flex-direction:column;padding:0;gap:0}
+.card-face-row{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;cursor:pointer;width:100%;box-sizing:border-box}
+.source-chip{display:inline-block;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:#eef2f8;color:#5a6a82;border-radius:3px;padding:1px 5px;margin-left:3px;vertical-align:middle;flex-shrink:0}
+.email-drawer{display:none;border-top:1px solid var(--border);padding:10px 14px 12px 16px}
+.email-drawer.open{display:block}
+.ed-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.ed-value{font-size:12px;color:var(--text-dark);line-height:1.6}
+.open-email-drawer-btn{font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;background:var(--oxford);color:#fff;border:none;border-radius:5px;padding:5px 13px;margin-top:9px;cursor:pointer;transition:opacity .15s;display:inline-block}
+.open-email-drawer-btn:hover{opacity:.85}</style>
 </head>
 <body>
 <div class="shell">
@@ -577,6 +587,10 @@ function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
+function toggleEmailDrawer(id){
+  const d=document.getElementById('edrawer_'+id);
+  if(d) d.classList.toggle('open');
+}
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
@@ -596,8 +610,12 @@ function renderItems(items,cls){
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
     const dragAttrs=`draggable="true" ondragstart="emailCardDragStart(event,'${cls}',${i})" ondragend="emailCardDragEnd(event)"`;
-    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
-    return hasLink?`<a class="card-link${ticked?' done':''}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)" ${dragAttrs}>${cardHtml}</a>`:`<div ${dragAttrs}>${cardHtml}</div>`;
+    const newBadge=(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})();
+    const srcChip=item.from?`<span class="source-chip">${item.from}</span>`:'';
+    const cardFace=`<div class="card-face-row"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${newBadge}${srcChip}</div></div><div class="card-date">${item.received||''}</div></div>`;
+    const drawer=`<div class="email-drawer" id="edrawer_${id}">${item.sub?`<div class="ed-label">Summary</div><div class="ed-value">${sanitizeSub(item.sub)}</div>`:''}${hasLink?`<button class="open-email-drawer-btn" onclick="openEmail('${item.entry_id}',event)">Open email</button>`:''}</div>`;
+    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}" onclick="toggleEmailDrawer('${id}')">${cardFace}${drawer}</div>`;
+    return `<div class="card-link${ticked?' done':''}" ${dragAttrs}>${cardHtml}</div>`;
   }).join('');
 }
 
