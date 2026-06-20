@@ -611,6 +611,52 @@ if GITHUB_PAT and suggestions["task_updates"]:
         print(f"WARNING: Phase 3.6 apply failed - {e}")
 
 
+# Phase 3.7 - AI summaries for priority tasks
+print("Phase 3.7 - generating AI task summaries...")
+all_priorities = priorities_today + priorities_week
+if all_priorities:
+    try:
+        tasks_for_summary = [
+            {
+                "id":          e["id"],
+                "title":       e["text"],
+                "description": (e.get("description") or "")[:500],
+                "actions":     e.get("actions", [])[-10:]
+            }
+            for e in all_priorities if e.get("id")
+        ]
+        SUMMARY_SYSTEM = (
+            "You are Kevin's task briefing assistant at Oxford University Personnel Services.\n"
+            "For each task, write a 1-2 sentence status summary: current state, what needs to happen next, any blockers.\n"
+            "Be specific - use names, dates and case numbers from the data. Plain ASCII punctuation only.\n"
+            "Return ONLY a valid JSON object mapping task id to summary string - no preamble, no markdown.\n"
+            "Example: {\"task-001\": \"Awaiting response from Jane Smith re HRIS migration. Next: chase by Friday 20 Jun.\"}"
+        )
+        summary_user = (
+            f"Today is {today_str}.\n\n"
+            f"TASKS:\n{json.dumps(tasks_for_summary, indent=1, ensure_ascii=True)}"
+        )
+        s_resp = client.messages.create(
+            model      = "claude-haiku-4-5",
+            max_tokens = 1000,
+            system     = SUMMARY_SYSTEM,
+            messages   = [{"role": "user", "content": summary_user}]
+        )
+        s_raw = s_resp.content[0].text.strip()
+        if s_raw.startswith("```"):
+            s_raw = "\n".join(s_raw.split("\n")[1:])
+        if s_raw.endswith("```"):
+            s_raw = "\n".join(s_raw.split("\n")[:-1])
+        summaries = json.loads(s_raw)
+        for entry in all_priorities:
+            tid = entry.get("id", "")
+            if tid in summaries:
+                entry["ai_summary"] = summaries[tid]
+        print(f"Phase 3.7 done - {len(summaries)} summaries generated")
+    except Exception as e:
+        print(f"WARNING: Phase 3.7 AI summaries failed - {e}")
+
+
 # Build calFull -- Mon through Fri of the current working week
 def _week_workdays(ref):
     mon = ref - timedelta(days=ref.weekday())
