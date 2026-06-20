@@ -719,6 +719,14 @@ function priZoneDrop(e,sec){
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
   const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Canvas text measurement for smart one-line vs two-line decision
+  if(!renderPriorityCards._canvas){renderPriorityCards._canvas=document.createElement('canvas');renderPriorityCards._ctx=renderPriorityCards._canvas.getContext('2d');}
+  const _mctx=renderPriorityCards._ctx;
+  function _tw(t,f){_mctx.font=f;return _mctx.measureText(t).width;}
+  const _titleFont='600 15px Inter,sans-serif';
+  const _gridCellW=Math.max(280,(window.innerWidth-340-72-24)/2);
+  const _cardInnerW=_gridCellW-32;
+  const _fixedW=55;
   const _recentPfxs4=Array.from({length:4},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return'['+String(d.getDate()).padStart(2,'0')+' '+_mo[d.getMonth()]+' '+d.getFullYear()+']';});
   const _cutoff=new Date();_cutoff.setDate(_cutoff.getDate()-4);_cutoff.setHours(0,0,0,0);
   const _mo2={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
@@ -735,6 +743,12 @@ function renderPriorityCards(priorities,key,sec){
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
+    // Measure whether combined title fits on one line
+    const _badgeW=theBadge?82:0;
+    const _btnW=(p.entry_id||p.entryId)?118:0;
+    const _availW=_cardInnerW-_fixedW-_badgeW-_btnW;
+    const _combined=titleSub?titleText+' – '+titleSub:titleText;
+    const _oneLine=!titleSub||_tw(_combined,_titleFont)<=_availW;
     const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
@@ -745,8 +759,7 @@ function renderPriorityCards(priorities,key,sec){
       <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
         <div class="pri-drag-handle" onclick="event.stopPropagation()">⣿⣿</div>
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <div class="pri-card-title-wrap">${titleSub?`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`:`<div class="pri-card-title">${titleText}</div>`}</div>
-        <span style="flex:1"></span>
+        <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
