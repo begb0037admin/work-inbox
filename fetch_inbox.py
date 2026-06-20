@@ -386,6 +386,7 @@ try:
             continue
         tier = task.get("tier", "")
         entry = {
+            "id":          task.get("id", ""),
             "text":        task.get("title", ""),
             "description": task.get("description", ""),
             "actions":     task.get("actions", []),
