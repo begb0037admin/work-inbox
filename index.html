@@ -635,7 +635,7 @@ function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
 function applyPriOverrides(data){
-  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.prioritiesNextWeek||[]).map(p=>({...p,_dfSec:'pnw'})),..._getCustomPri()];
+  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.prioritiesNextWeek||[]).map(p=>({...p,_dfSec:'pnw'})),...(data.fyi||[]).map(p=>({...p,text:p.title,_dfSec:'pfyi'})),..._getCustomPri()];
   const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],pnw:[],pfyi:[],ur:[],nr:[]};
   const validSecs=['pt','pw','pnw','pfyi','ur','nr'];
   for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
@@ -754,7 +754,6 @@ function renderPriorityCards(priorities,key,sec){
     const _combined=titleSub?titleText+' – '+titleSub:titleText;
     const _oneLine=!titleSub||_tw(_combined,_titleFont)<=_availW;
     const summaryHtml=p.ai_summary?`<div class="pri-ai-summary">${sanitizeSub(p.ai_summary)}</div>`:'';
-    const actionsHtml=(p.actions||[]).map(a=>`<div class="pri-action">${sanitizeSub(a)}</div>`).join('');
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
       ${p.dateAdded?`<span class="pri-meta-item"><span class="pri-meta-label">Added</span>${p.dateAdded}</span>`:''}
@@ -770,7 +769,7 @@ function renderPriorityCards(priorities,key,sec){
         ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://begb0037admin.github.io/command-centre/#${p.id}','_blank');event.stopPropagation()">CC →</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
-      <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${actionsHtml}${metaHtml}</div>
+      <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${metaHtml}</div>
     </div>`;
   }).join('');
 }
@@ -804,7 +803,6 @@ function renderBriefing(data,key){
 
   // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
-  const fyiEmailHtml=(data.fyi&&data.fyi.length)?renderItems(data.fyi,'fyi'):'';
   const left=`<div class="inbox-grid">
     <div class="inbox-grid-cell">
       <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>
@@ -820,8 +818,7 @@ function renderBriefing(data,key){
     </div>
     <div class="inbox-grid-cell">
       <div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>
-      <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):(fyiEmailHtml||'<div class="pri-zone-empty">Drop items here to park</div>')}</div>
-      ${priSecs.pfyi.length&&fyiEmailHtml?fyiEmailHtml:''}
+      <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
     </div>
   </div>`;
   document.getElementById('inboxCol').innerHTML=left;
