@@ -638,7 +638,8 @@ function applyPriOverrides(data){
   const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.prioritiesNextWeek||[]).map(p=>({...p,_dfSec:'pnw'})),...(data.fyi||[]).map(p=>({...p,text:p.title,_dfSec:'pfyi'})),..._getCustomPri()];
   const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],pw:[],pnw:[],pfyi:[],ur:[],nr:[]};
   const validSecs=['pt','pw','pnw','pfyi','ur','nr'];
-  for(const item of all){const k=_priGetKey(item);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
+  const _seen=new Set();
+  for(const item of all){const k=_priGetKey(item);if(_seen.has(k))continue;_seen.add(k);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
   for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
   return secs;
 }
@@ -741,7 +742,7 @@ function renderPriorityCards(priorities,key,sec){
     const _titleParts=_rawTitle.split(' -- ');
     const titleText=_titleParts[0];
     const titleSub=_titleParts.length>1?_titleParts.slice(1).join(' -- '):'';
-    const aiBadge=p.badge?badge(p.badge,p.badgeType||'gray'):'';
+    const aiBadge=(p.badge&&sec!=='pfyi')?badge(p.badge,p.badgeType||'gray'):'';
     const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
