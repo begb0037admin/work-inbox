@@ -261,7 +261,13 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .ed-value{font-size:12px;color:var(--text-dark);line-height:1.6}
 .open-email-drawer-btn{font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;background:var(--oxford);color:#fff;border:none;border-radius:5px;padding:5px 13px;margin-top:9px;cursor:pointer;transition:opacity .15s;display:inline-block}
 .open-email-drawer-btn:hover{opacity:.85}
-.card-expand-arrow{font-size:10px;color:var(--text-very-muted);flex-shrink:0;margin-left:6px;padding-top:2px;}</style>
+.card-expand-arrow{font-size:10px;color:var(--text-very-muted);flex-shrink:0;margin-left:6px;padding-top:2px;}
+/* Kanban board */
+.kanban-board{display:flex;gap:14px;align-items:flex-start;overflow-x:auto;padding-bottom:24px;}
+.k-col{flex:0 0 260px;min-width:220px;}
+.k-col-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.k-col-lbl{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;flex:1;}
+.k-count{background:rgba(0,33,71,0.07);border-radius:10px;font-size:11px;font-weight:700;padding:2px 7px;color:var(--text-muted);}</style>
 </head>
 <body>
 <div class="shell">
@@ -797,25 +803,36 @@ function renderBriefing(data,key){
   const ctxEl=document.getElementById('contextBar');
   ctxEl.innerHTML=data.context?`<div class="context-bar"><strong>Context:</strong> ${data.context}</div>`:'';
 
-  // Main inbox
-  let left='';
+  // Main inbox – 6-column kanban
   const priSecs=applyPriOverrides(data);
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-t"></span><span class="sec-lbl">Priority actions – next week</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="pnw" ondragover="priZoneDragOver(event,'pnw')" ondragleave="priZoneDragLeave(event,'pnw')" ondrop="priZoneDrop(event,'pnw')">${priSecs.pnw.length?renderPriorityCards(priSecs.pnw,key,'pnw'):'<div class="pri-zone-empty">Drop items here to plan for next week</div>'}</div>`;
-  left+=`<div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="ur" ondragover="priZoneDragOver(event,'ur')" ondragleave="priZoneDragLeave(event,'ur')" ondrop="priZoneDrop(event,'ur')">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
-  left+=renderItems(data.urgent,'urgent');
-  left+=`<div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span></div>`;
-  left+=`<div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop priority items here</div>'}</div>`;
-  left+=renderItems(data.needs,'needs');
-  if(data.fyi&&data.fyi.length) left+=`<div class="sec-head"><span class="sec-dot dot-b"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>${renderItems(data.fyi,'fyi')}`;
-  if(data.low&&data.low.length) left+=`<div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">Low priority / noise</span><span class="sec-rule"></span></div>${renderItems(data.low,'low')}`;
+  const needsToday=(data.needs||[]).filter(c=>c.badge==='Overdue');
+  const needsTomorrow=(data.needs||[]).filter(c=>c.badge!=='Overdue');
+  window._wipData.needsToday=needsToday;
+  window._wipData.needsTomorrow=needsTomorrow;
+  const kCol=(dot,lbl,cnt,body)=>`<div class="k-col"><div class="k-col-head"><span class="sec-dot ${dot}"></span><span class="k-col-lbl">${lbl}</span>${cnt?`<span class="k-count">${cnt}</span>`:''}</div>${body}</div>`;
+  const dz=(sec,empty)=>`<div class="pri-drop-zone" data-sec="${sec}" ondragover="priZoneDragOver(event,'${sec}')" ondragleave="priZoneDragLeave(event,'${sec}')" ondrop="priZoneDrop(event,'${sec}')">${priSecs[sec].length?renderPriorityCards(priSecs[sec],key,sec):`<div class="pri-zone-empty">${empty}</div>`}</div>`;
 
-  document.getElementById('inboxCol').innerHTML=left;
+  const colUrgent = dz('ur','Drop urgent items here')+renderItems(data.urgent||[],'urgent');
+  const colToday  = dz('pt','Drop today items here')+(needsToday.length?renderItems(needsToday,'needsToday'):'');
+  const colTom    = dz('nr','Drop tomorrow items here')+(needsTomorrow.length?renderItems(needsTomorrow,'needsTomorrow'):'');
+  const colWeek   = dz('pw','Drop this week items here')+dz('pnw','Drop next week items here');
+  const colLow    = renderItems(data.low||[],'low');
+  const colFyi    = renderItems(data.fyi||[],'fyi');
+
+  const urgentN=(priSecs.ur||[]).length+(data.urgent||[]).length;
+  const todayN=(priSecs.pt||[]).length+needsToday.length;
+  const tomN=(priSecs.nr||[]).length+needsTomorrow.length;
+  const weekN=(priSecs.pw||[]).length+(priSecs.pnw||[]).length;
+
+  document.getElementById('inboxCol').innerHTML=
+    `<div class="kanban-board">`+
+    kCol('dot-r','Urgent',urgentN,colUrgent)+
+    kCol('dot-r','Today',todayN,colToday)+
+    kCol('dot-o','Tomorrow',tomN,colTom)+
+    kCol('dot-o','This Week',weekN,colWeek)+
+    kCol('dot-g','Low Priority',(data.low||[]).length,colLow)+
+    kCol('dot-b','FYI',(data.fyi||[]).length,colFyi)+
+    `</div>`;
 }
 
 function getGreeting(){
