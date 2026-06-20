@@ -834,7 +834,7 @@ function getGreeting(){
   return 'Good evening, Kevin';
 }
 
-const BRIEFING_URL='https://raw.githubusercontent.com/begb0037admin/work-inbox/main/data/briefing.json';
+const BRIEFING_API='https://api.github.com/repos/begb0037admin/work-inbox/contents/data/briefing.json';
 
 async function init(){
   const titleEl=document.getElementById('pageTitle');
@@ -845,9 +845,10 @@ async function init(){
   let data=null;
 
   try{
-    const res=await fetch(BRIEFING_URL+'?t='+Date.now(),{cache:'no-store'});
+    const res=await fetch(BRIEFING_API+'?t='+Date.now(),{cache:'no-store',headers:{'Accept':'application/vnd.github.v3+json'}});
     if(res.ok){
-      data=await res.json();
+      const meta=await res.json();
+      data=JSON.parse(atob(meta.content.replace(/\n/g,'')));
       const key=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
       const store=getStore(); store[key]=data; saveStore(store);
       localStorage.setItem(TODAY_KEY,key);
