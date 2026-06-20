@@ -248,7 +248,7 @@ def make_card(msg, category):
     subj    = msg.get("subject") or "(no subject)"
     sender  = msg.get("from") or ""
     preview = (msg.get("body_preview") or "").strip()
-    preview = re.sub(r"<?\s*https?://\S+>?", "[link]", preview)
+    preview = re.sub(r"<?\ s*https?://\S+>?", "[link]", preview)
     badge, badge_type = badge_for(msg, category)
 
     title = subj
@@ -440,7 +440,7 @@ try:
                 "subject":      m.get("subject", ""),
                 "from":         m.get("from", ""),
                 "received":     (m.get("received", "") or "")[:16],
-                "body_preview": re.sub(r"<?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
+                "body_preview": re.sub(r"<?\ s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
                 "entry_id":     m.get("entry_id", "")
             })
 
@@ -449,7 +449,7 @@ try:
             "subject":      s.get("subject", ""),
             "from":         "Kevin (sent to: " + (s.get("to") or "") + ")",
             "received":     (s.get("sent", "") or "")[:16],
-            "body_preview": re.sub(r"<?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
+            "body_preview": re.sub(r"<?\ s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
             "entry_id":     s.get("entry_id", ""),
             "direction":    "sent"
         })
@@ -610,6 +610,21 @@ if GITHUB_PAT and suggestions["task_updates"]:
         print(f"WARNING: Phase 3.6 apply failed - {e}")
 
 
+# Build calFull -- Mon through Fri of the current working week
+def _week_workdays(ref):
+    mon = ref - timedelta(days=ref.weekday())
+    return [mon + timedelta(days=i) for i in range(5)]
+
+calFull = []
+for _wd in _week_workdays(today):
+    _day_items = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == _wd]
+    calFull.append({
+        "date":    _wd.strftime("%Y-%m-%d"),
+        "label":   _wd.strftime("%A") + " " + str(_wd.day) + " " + _wd.strftime("%b"),
+        "items":   build_cal_items(_day_items),
+        "isToday": _wd == today
+    })
+
 briefing = {
     "date":         today_str,
     "subtitle":     subtitle,
@@ -620,6 +635,7 @@ briefing = {
     "low":          low,
     "calToday":     build_cal_items(cal_today),
     "calTomorrow":  build_cal_items(cal_tomorrow),
+    "calFull":      calFull,
     "absences":     absences,
     "prioritiesToday": priorities_today,
     "prioritiesWeek":  priorities_week,
