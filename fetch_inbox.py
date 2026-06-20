@@ -367,8 +367,9 @@ absences = sorted(absences)
 # Priority actions -- pulled from Command Centre tasks.json
 COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
 COMMAND_CENTRE_PATH = "data/tasks.json"
-priorities_today = []
-priorities_week  = []
+priorities_today    = []
+priorities_tomorrow = []
+priorities_week     = []
 cc_content = {"tasks": []}
 try:
     cc_url     = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
@@ -395,13 +396,16 @@ try:
         }
         if tier == "today":
             priorities_today.append(entry)
-        elif tier in ("week", "tomorrow"):
+        elif tier == "tomorrow":
+            priorities_tomorrow.append(entry)
+        elif tier == "week":
             priorities_week.append(entry)
-    print(f"Command Centre loaded - today:{len(priorities_today)} week:{len(priorities_week)}")
+    print(f"Command Centre loaded - today:{len(priorities_today)} tomorrow:{len(priorities_tomorrow)} week:{len(priorities_week)}")
 except Exception as e:
     print(f"WARNING: Could not load Command Centre tasks - {e}")
-    priorities_today = []
-    priorities_week  = []
+    priorities_today    = []
+    priorities_tomorrow = []
+    priorities_week     = []
 
 # Phase 3.5 - AI triage: which emails should become Command Centre tasks
 print("Phase 3.5 - triaging inbox for task suggestions...")
@@ -613,7 +617,7 @@ if GITHUB_PAT and suggestions["task_updates"]:
 
 # Phase 3.7 - AI summaries for priority tasks
 print("Phase 3.7 - generating AI task summaries...")
-all_priorities = priorities_today + priorities_week
+all_priorities = priorities_today + priorities_tomorrow + priorities_week
 if all_priorities:
     try:
         tasks_for_summary = [
@@ -684,8 +688,9 @@ briefing = {
     "calTomorrow":  build_cal_items(cal_tomorrow),
     "calFull":      calFull,
     "absences":     absences,
-    "prioritiesToday": priorities_today,
-    "prioritiesWeek":  priorities_week,
+    "prioritiesToday":    priorities_today,
+    "prioritiesTomorrow": priorities_tomorrow,
+    "prioritiesWeek":     priorities_week,
     "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
 }
 
