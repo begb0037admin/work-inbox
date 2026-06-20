@@ -237,6 +237,8 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .card-date{font-size:11px;color:var(--text-very-muted);white-space:nowrap;flex-shrink:0;padding-top:2px;margin-left:auto;}
 .sg-btn{padding:4px 10px;border-radius:20px;border:1px solid #d1d9e6;background:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text-muted);transition:all .12s;flex-shrink:0;}
 .sg-btn:hover{background:#edf0f6;color:var(--text-dark);border-color:#b0b8c8}
+.sg-btn-cc{border-color:#c7d0e8;color:#4a5a8a;}
+.sg-btn-cc:hover{background:#eef1fb;color:#2a3a6a;border-color:#9aa5cc}
 .sb-section{font-size:13px;}
 .cal-title{font-size:15px;}
 .cal-sub,.cal-alert{font-size:13px;}
@@ -747,7 +749,8 @@ function renderPriorityCards(priorities,key,sec){
     // Measure whether combined title fits on one line
     const _badgeW=theBadge?82:0;
     const _btnW=(p.entry_id||p.entryId)?118:0;
-    const _availW=_cardInnerW-_fixedW-_badgeW-_btnW;
+    const _ccBtnW=p.id?96:0;
+    const _availW=_cardInnerW-_fixedW-_badgeW-_btnW-_ccBtnW;
     const _combined=titleSub?titleText+' – '+titleSub:titleText;
     const _oneLine=!titleSub||_tw(_combined,_titleFont)<=_availW;
     const summaryHtml=p.ai_summary?`<div class="pri-ai-summary">${sanitizeSub(p.ai_summary)}</div>`:'';
@@ -764,6 +767,7 @@ function renderPriorityCards(priorities,key,sec){
         <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
+        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://begb0037admin.github.io/command-centre/#${p.id}','_blank');event.stopPropagation()">CC →</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${actionsHtml}${metaHtml}</div>
