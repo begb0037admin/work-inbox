@@ -39,7 +39,7 @@
   --gray-bg: #f1efe8;
   --gray-border: #d3d1c7;
   --gray-text: #5f5e5a;
-  --sidebar-width: 340px;
+  --sidebar-width: 300px;
   --font: 'Inter', sans-serif;
   --radius: 6px;
   --radius-lg: 10px;
@@ -613,7 +613,7 @@ function renderSidebarCal(items, containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   if(!items||!items.length){el.innerHTML='<div style="padding:4px 18px 8px;font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None</div>';return;}
-  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div>`).join('');
+  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">${c.alert}</div>`:''}</div>`).join('');
 }
 
 function togglePriCard(i){
@@ -729,7 +729,7 @@ function renderPriorityCards(priorities,key,sec){
   const _mctx=renderPriorityCards._ctx;
   function _tw(t,f){_mctx.font=f;return _mctx.measureText(t).width;}
   const _titleFont='600 15px Inter,sans-serif';
-  const _gridCellW=Math.max(280,(window.innerWidth-340-72-24)/2);
+  const _gridCellW=Math.max(280,(window.innerWidth-300-72-24)/2);
   const _cardInnerW=_gridCellW-32;
   const _fixedW=55;
   const _recentPfxs4=Array.from({length:4},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return'['+String(d.getDate()).padStart(2,'0')+' '+_mo[d.getMonth()]+' '+d.getFullYear()+']';});
@@ -763,7 +763,7 @@ function renderPriorityCards(priorities,key,sec){
     </div>`;
     return `<div class="pri-card${ticked?' done':''}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
       <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
-        <div class="pri-drag-handle" onclick="event.stopPropagation()">⣿⣿</div>
+        <div class="pri-drag-handle" onclick="event.stopPropagation()">::</div>
         <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
         <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
@@ -904,7 +904,7 @@ async function loadTasksWidget(){
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
-      '<a class="tasks-widget-link" href="https://begb0037admin.github.io/command-centre/" target="_blank">&#8594; Open command centre</a>';
+      '<a class="tasks-widget-link" href="https://begb0037admin.github.io/command-centre/" target="_blank">Open command centre</a>';
   }catch(e){el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';}
 }
 loadTasksWidget();
