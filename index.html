@@ -943,7 +943,7 @@ async function loadTasksWidget(){
   var dot=document.getElementById('tasksLiveDot');
   if(!el)return;
   try{
-    var res=await fetch('https://api.github.com/repos/begb0037admin/command-centre/contents/data/tasks.json',{headers:{'Accept':'application/vnd.github.v3.raw','Cache-Control':'no-cache'},cache:'no-store'});
+    var res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/tasks.json?t='+Date.now(),{cache:'no-store'});
     if(!res.ok)throw new Error('fetch failed');
     var data=await res.json();
     var tasks=Array.isArray(data)?data:(data.tasks||[]);
