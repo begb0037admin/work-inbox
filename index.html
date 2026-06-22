@@ -294,7 +294,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .date-val{font-size:15px;}
 
 /* -- TASKS WIDGET -- */
-.tasks-widget-section{padding:14px 22px 6px;font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.09em}
+.tasks-widget-section{padding:14px 22px 6px;font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:7px}
+.tasks-live-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;transition:opacity .2s}
+@keyframes tasksPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+.tasks-live-dot.pulsing{animation:tasksPulse .6s ease-in-out}
 .tasks-widget-panel{padding:4px 22px 14px}
 .tasks-widget-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)}
 .tasks-widget-name{color:rgba(255,255,255,.7)}
@@ -338,7 +341,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
     <div class="sb-section">Absences</div>
     <div class="abs-wrap" id="absencesSidebar"></div>
 
-    <div class="tasks-widget-section">Tasks</div>
+    <div class="tasks-widget-section">Tasks<span class="tasks-live-dot" id="tasksLiveDot"></span></div>
     <div class="tasks-widget-panel" id="tasksWidget">
       <div class="tasks-widget-unavailable">Loading...</div>
     </div>
@@ -946,6 +949,8 @@ async function loadTasksWidget(){
       '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
       '<a class="tasks-widget-link" href="https://begb0037admin.github.io/command-centre/" target="_blank">&#8594; Open command centre</a>';
+    var dot=document.getElementById('tasksLiveDot');
+    if(dot){dot.classList.add('pulsing');setTimeout(function(){dot.classList.remove('pulsing');},700);}
   }catch(e){el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';}
 }
 loadTasksWidget();
