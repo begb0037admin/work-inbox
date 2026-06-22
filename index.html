@@ -138,8 +138,11 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .btn-primary:hover { opacity: .88; }
 
 /* Context bar */
-.context-bar { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 20px; font-size: 15px; color: #1e3a8a; line-height: 1.8; }
-.context-bar strong { font-weight: 700; font-size: 17px; color: #1d4ed8; }
+.context-bar { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-lg); padding: 20px 28px; margin-bottom: 20px; color: #1e3a8a; }
+.context-bar-title { font-weight: 700; font-size: 17px; color: #1d4ed8; margin-bottom: 10px; }
+.context-bar-item { display: flex; gap: 12px; padding: 7px 0; border-bottom: 1px solid #bfdbfe; font-size: 13.5px; line-height: 1.5; }
+.context-bar-item:last-child { border-bottom: none; }
+.context-bar-bullet { color: #dc2626; font-weight: 700; flex-shrink: 0; }
 
 /* Section headers */
 .sec-head { display: flex; align-items: center; gap: 8px; margin: 20px 0 8px; }
@@ -845,7 +848,11 @@ function renderBriefing(data,key){
 
   // Context bar
   const ctxEl=document.getElementById('contextBar');
-  ctxEl.innerHTML=data.context?`<div class="context-bar"><strong>Context:</strong> ${data.context}</div>`:'';
+  if(data.context){
+    const sentences=data.context.split(/(?<=\.)\s+/).filter(s=>s.trim().length>0);
+    const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">—</span><span>${s.trim()}</span></div>`).join('');
+    ctxEl.innerHTML=`<div class="context-bar"><div class="context-bar-title">Context</div>${items}</div>`;
+  } else { ctxEl.innerHTML=''; }
 
   // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
