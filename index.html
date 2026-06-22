@@ -54,10 +54,50 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 /* Sidebar */
 .sidebar { width: var(--sidebar-width); flex-shrink: 0; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; }
 
-.sidebar-logo { padding: 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 16px; }
-.sidebar-crest { width: 72px; height: 72px; object-fit: contain; flex-shrink: 0; }
-.uni-name { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.25; letter-spacing: 0.01em; }
-.uni-sub { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+.sidebar-logo {
+  padding: 20px 20px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.sidebar-crest {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.sidebar-brand-text {
+  display: inline-flex;
+  flex-direction: column;
+}
+.sb-univ-of {
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.30em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.70);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.sb-oxford {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.sb-app-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin-top: 4px;
+  line-height: 1.4;
+}
 
 .user-block { padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); }
 .user-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; font-weight: 600; }
@@ -273,9 +313,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
   <div class="sidebar">
     <div class="sidebar-logo">
       <img class="sidebar-crest" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEBUSExEWFhUXFxoXFhgYGR8eFxkbHxoXHhYWHyEbHSkgHh8lGx0eITEjJSstLzEuHx8zODMsNygtLisBCgoKDg0OGxAQGy4lHyUrKzUrLS8tNSstLSstLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tLS0tLf/AABEIAOAA4AMBIgACEQEDEQH/xAAbAAEBAAMBAQEAAAAAAAAAAAAABgQFBwMCAf/EAEwQAAIBAwIEAgcDBwgIBQUAAAECAwAEEQUhBhIxQRNRBxQiMmFxgRUVkRShISMzQlJiscFDVXKClLLS8CZWY3SSosTRNVSTo+EWFyQlNP/EABkBAQEBAQEBAAAAAAAAAAAAAAACAwEEBf/EACgRAAICAgEDBAICAwAAAAAAAAABAhEhMRIDQVEyYXGBEyKx8JGh4f/aAAwDAQACEQMRAD8A5LSlK+oeAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSveys5JnEcUbSOeiopZvuHb41WQ+ji5Vee8nt7JP9tIC/wBFU/xqXJLZ1RbIylWn2XocW0mo3Nww6iCHkX75Af30a90AdLO+f4tKq/3WrnPwmVw8si6VZi+0A9bO+T4rMrf3mr9Ol6HL+b1C5tyenjw86j5mMD99Ofsxw8Mi6VZy+jm4dS9nPb3qj/UyASf8LH+NSl9ZSwuY5onjcfoupU/j1Hxrqmno44tGPSlKokUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKVl6VpstzMkEKF5HOFUfiT5AdjRuglZjxxszBVBZicAAZJJ6AAdTVrBwhb2aLNq0xjyOZLSI5ncftEe4P8AOR0rKub+30ZTFa8s+oEYluCAY4P1o4werfH7/KtBr+n3VpcQ3MsizNKFnjmz4iSHYkZYb42BHljtWPJy9jVJIrk1S/e1drKCLS7FVJEjEI8uxwOdhzMx8wO/U1I8L2dteSPFdTyJcS49XmduZOf9STO/tdAc/jjNHoOry6tFc6fdSc87/l7RmwOWRBvEMDABXsO3NXOnUgkEEEEgg9QRsR9DSMdrTEnplrxnpZstPsbWSNVuGeeaYgDm2crGMjcjB2+VTGg6Ybm5itxIsZkbl5391die/uxB3OK3XFuuxXVnYlpCbmGN4Zg2d1Dfk35jsSRv9d6nIrOR/didv6KMf3CqhajnZyWzJ17TDbXMtuZFkMbcvOvutsDkff0881u+FdEtzbT397zm3hZY1jQ8rzStghM9gAQSR/CpyWzkUe1FIv8ASRh+8VVcNXtvcadLp01wlu3jC4glf80W5QrI5HTbofj8KSf6iKyevqNpc2k93YxSWlxaesPIBKrRsSOfkXYqQwxuR/3rz1TuzbSRXIJO2SAM79B2re6F6O7u5KvcYsocZE1wDzBux8IHUc2/0qrNPVaH0Y6bpv2Y28Cx46BQf4DrXYYYqkUlFKkkUkkUkkUkkUkkUkkUkkUkUkkUkkUkkUkkUkkUkkUkkX/9k=" alt="University of Oxford crest">
-      <div>
-        <div class="uni-name">University of Oxford</div>
-        <div class="uni-sub">Inbox Briefing</div>
+      <div class="sidebar-brand-text">
+        <span class="sb-univ-of">University of</span>
+        <span class="sb-oxford">Oxford</span>
+        <span class="sb-app-name">Work Inbox</span>
       </div>
     </div>
 
