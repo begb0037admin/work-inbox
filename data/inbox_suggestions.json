@@ -1,52 +1,25 @@
 {
-  "generated_at": "2026-06-20 18:52",
+  "generated_at": "2026-06-23 11:32",
   "new_tasks": [
     {
-      "title": "Escalation Request Case 69001655 -- follow up on dev call",
+      "title": "DSE system - exclude SBS users change request",
       "tier": "week",
-      "description": "Sarah Murphy has submitted a request to the Dev team on Kevin's behalf for a call regarding Case 69001655 and is awaiting their response. Kevin needs to follow up once the dev team confirms availability to discuss the issue.",
-      "email_subject": "RE: #External# Escalation Request – Case 69001655",
-      "email_from": "Sarah Murphy",
-      "received": "2026-06-19 16:25",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000784EFEED90000"
+      "description": "James Salas is raising a change request to exclude specific users from the DSE (Healthy Working Plus) data extract. This relates to the post-go-live DSE data feed issues (t016) where SBS opted out of the main system but were included in the initial feed. Coordinate with Azure integrations team and James to progress this change request.",
+      "email_subject": "DSE System - exclude SBS users ",
+      "email_from": "James Salas Guillen",
+      "received": "2026-06-23 10:29",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C0D0000"
     }
   ],
   "applied_updates": [
     {
       "task_id": "t015",
       "task_title": "Web pages and URL linking -- job posting updates",
-      "note": "Laura Porter confirmed the URL change approach is working well and noted she does not need to include the full URL, providing contingency buffer through 23/24 June retirement window.",
-      "email_subject": "RE: IM Principles - change to URL",
-      "email_from": "Laura Porter",
-      "received": "2026-06-16 16:08",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E13A000000"
-    },
-    {
-      "task_id": "t1781204987882",
-      "task_title": "Allocate remaining flex points before 29 June expiry",
-      "note": "Ann-Marie Topliss confirmed FlexPoints case #69001638 has been formally transitioned to Access Group and is progressing to quote stage.",
-      "email_subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "email_from": "Ann-Marie Topliss",
-      "received": "2026-06-17 10:15",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D6B0000"
-    },
-    {
-      "task_id": "t021",
-      "task_title": "FP 68261303 -- Multi Company Setup, respond to Conor O'Brien",
-      "note": "Kevin escalated Case 69001655 (Multi Company Setup FP 68261303) to Sarah Murphy at Access Group requesting dev team involvement.",
-      "email_subject": "Escalation Request – Case 69001655",
+      "note": "Kevin clarified to Sarah Murphy that today (23 June) is the actual scheduled change day for the IM URL change, confirming critical timing.",
+      "email_subject": "Re: #External# Escalation Request – Case 69001655",
       "email_from": "Kevin (sent to: Sarah Murphy)",
-      "received": "2026-06-19 12:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000784F08A3A0000"
-    },
-    {
-      "task_id": "t020",
-      "task_title": "Org hierarchy migration -- enable COREPORTAL_ADMIN menu options",
-      "note": "Change notification 20020472 received for Org Hierarchy Migration to enable 16 COREPORTAL_ADMIN menu options, with Kevin listed as Coordinator.",
-      "email_subject": "Coordination Required - Change# 20020472 - Org Hierarchy Migration: Enable 16 COREPORTAL_ADMIN Menu Options",
-      "email_from": "changenotifications@it.ox.ac.uk",
-      "received": "2026-06-16 16:17",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E13A010000"
+      "received": "2026-06-23 09:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000787631D200000"
     }
   ]
 }
