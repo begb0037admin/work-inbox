@@ -51,6 +51,30 @@ read_count   = 0
 MAX_UNREAD   = 50
 MAX_READ     = 30
 
+# VIP senders — always captured regardless of cap
+VIP_NAMES = {
+    'Athena Artuso','Marie Cooksey','Sarah Rowles','Simon Burford',
+    'Asta Palmer','James Salas Guillen',"Michael O'Sullivan",
+    'Anna Carter-Windle','Anthony Kong','Beth Gray','Christopher Sanders',
+    'David Johnson','Emma Fitz-Gibbon','Henry Acheampong','Iyanuloluwa Akinsanya',
+    'Julie Hickman','Marie King','Michelle Williams','Nathan Kirwan',
+    'Susan Pratt','Anne Mortimer','Nicholas Chandler','Steve McBrearty',
+}
+VIP_EMAILS = {
+    'tony.boydell@it.ox.ac.uk','erika.braverman@it.ox.ac.uk',
+    'hr.systems@admin.ox.ac.uk','support.access@theaccessgroup.com',
+    'edward.demetillo@cority.com','crispin.muncaster@it.ox.ac.uk',
+    'christopher.sanders@admin.ox.ac.uk','henry.acheampong@admin.ox.ac.uk',
+    'iyanuloluwa.akinsanya@tss.ox.ac.uk',
+}
+
+def is_vip(msg):
+    try:
+        return (msg.SenderName or '').strip() in VIP_NAMES or \
+               (msg.SenderEmailAddress or '').lower().strip() in VIP_EMAILS
+    except:
+        return False
+
 for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
         if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
@@ -80,6 +104,35 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
         continue
 
 inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
+
+# VIP sweep — pick up any VIP emails missed by the cap
+captured_ids = {e["entry_id"] for e in inbox}
+for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
+    try:
+        if msg.EntryID in captured_ids:
+            continue
+        if not is_vip(msg):
+            continue
+        is_read = not msg.UnRead
+        entry = {
+            "subject":         msg.Subject,
+            "from":            msg.SenderName,
+            "from_email":      msg.SenderEmailAddress,
+            "received":        str(msg.ReceivedTime),
+            "is_read":         is_read,
+            "has_attachments": msg.Attachments.Count > 0,
+            "importance":      msg.Importance,
+            "entry_id":        msg.EntryID
+        }
+        if not is_read:
+            entry["body_preview"] = (msg.Body or "")[:150]
+        inbox.append(entry)
+        captured_ids.add(msg.EntryID)
+    except:
+        continue
+
+inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
+print(f"Phase 1 VIP sweep done - total inbox now: {len(inbox)}")
 
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
