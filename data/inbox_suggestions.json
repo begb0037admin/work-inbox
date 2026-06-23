@@ -1,24 +1,79 @@
 {
-  "generated_at": "2026-06-23 15:40",
+  "generated_at": "2026-06-23 17:31",
   "new_tasks": [
     {
-      "title": "Arrange support cover for first two weeks in July",
-      "tier": "week",
-      "description": "Julie Hickman has flagged that both Michael and Emma are on leave during the week commencing early July, requiring coverage planning for the FA team. Kevin needs to coordinate support arrangements during this period.",
-      "email_subject": "RE: Support cover for first two weeks in July",
-      "email_from": "Julie Hickman",
-      "received": "2026-06-23 15:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000"
+      "title": "Provide reference for Nikolas Sharkey",
+      "tier": "today",
+      "description": "TSS Enquiries has requested an urgent reference for Nikolas Sharkey who is being considered for temporary vacancies. Kevin is listed as a referee. This is time-sensitive and must be completed today.",
+      "email_subject": "Urgent Reference Request for Nikolas Sharkey",
+      "email_from": "TSS Enquiries",
+      "received": "2026-06-23 12:11",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C140000"
     },
     {
-      "title": "Review and approve DSE SBS exclusion change request CR-126017",
+      "title": "Review and approve DSE SBS exclusion change request",
       "tier": "tomorrow",
-      "description": "Tony Boydell has drafted and refined a change request to exclude SBS users from the DSE system (linked to t016 post go-live issue). Kevin and James are asked to review and approve the CR at Azure DevOps work item 126017.",
+      "description": "Tony Boydell has drafted a change request (CR 126017) to exclude SBS users from the DSE system data feed, following the issue that emerged post go-live. Kevin needs to review and approve this CR.",
       "email_subject": "Re: DSE System - exclude SBS users ",
       "email_from": "Tony Boydell",
       "received": "2026-06-23 15:18",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1A0000"
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t021",
+      "task_title": "FP 68261303 -- Multi Company Setup, respond to Conor O'Brien",
+      "note": "Simon has updated Conor O'Brien with the project team's proposal for post-design multi-company setup following today's meeting.",
+      "email_subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "email_from": "Simon Burford",
+      "received": "2026-06-23 15:40",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1D0000"
+    },
+    {
+      "task_id": "t001",
+      "task_title": "Brief team directly",
+      "note": "Julie has provided notice that both Michael and Emma are on leave during the week commencing 1 July, relevant to team briefing and support coverage planning.",
+      "email_subject": "RE: Support cover for first two weeks in July",
+      "email_from": "Julie Hickman",
+      "received": "2026-06-23 15:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000"
+    },
+    {
+      "task_id": "t1781204987882",
+      "task_title": "Allocate remaining flex points before 29 June expiry",
+      "note": "Access Support has updated case #69001655 with progress on flex points allocation.",
+      "email_subject": "Access Support Team | 69001655 - Your Case Has Been Updated",
+      "email_from": "Access Support",
+      "received": "2026-06-23 11:52",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C120000"
+    },
+    {
+      "task_id": "t014",
+      "task_title": "Chemistry bulk delete -- get details from Julie, pass to Reenu",
+      "note": "Access Support has updated case #68978576, likely concerning Chemistry bulk deletion or related PeopleXD work.",
+      "email_subject": "Access Support Team | 68978576 - Your Case Has Been Updated",
+      "email_from": "Access Support",
+      "received": "2026-06-22 14:41",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078716632D0000"
+    },
+    {
+      "task_id": "t001",
+      "task_title": "Brief team directly",
+      "note": "Kevin sent a follow-up request to Michael O'Sullivan asking him to confirm case creation email impact following new starter setup.",
+      "email_subject": "Re: #External# Unexpected Case Creation Emails Following New Starter Setup",
+      "email_from": "Kevin (sent to: Michael O'Sullivan)",
+      "received": "2026-06-18 13:40",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007839150C30000"
+    },
+    {
+      "task_id": "t1781204987882",
+      "task_title": "Allocate remaining flex points before 29 June expiry",
+      "note": "Kevin escalated case #69001655 to Sarah Murphy on 19 June, requesting assistance with resolution.",
+      "email_subject": "Escalation Request – Case 69001655",
+      "email_from": "Kevin (sent to: Sarah Murphy)",
+      "received": "2026-06-19 12:50",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000784F08A3A0000"
+    }
+  ]
 }
