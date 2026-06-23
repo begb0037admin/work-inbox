@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 23 June 2026",
-  "subtitle": "Critical Cority import failure + 56-hour response gap on Ash VEA",
-  "context": "Kevin, you have 24 unread emails requiring immediate attention. James Salas Guillen has sent two critical unread messages about business rule automation (ref 00501337) and DSE System user exclusions, both marked high-importance with attachments. The Cority Employee Import process for OxfordUniversity failed on 22 June at 17:15 due to SFTP connection issues, blocking the data migration pipeline - Edward Demetillo from Cority and James Salas Guillen have been exchanging technical details about file format problems since 17:36 on 22 June. Marie Cooksey's email from 15:40 on 22 June about Support Call 11688462 for the Ash VEA team project has waited 56 hours without your response, with Anna Carter-Windle and Cathy also involved. The OSM (Oxford Service Manager) Major Incident created temporary approval process changes that Sarah Warne confirmed were reversed on 23 June at 07:20, and Louise Piper's 08:50 update on 23 June confirms IT Self-Service access restoration - these require coordination confirmation. Your most time-critical deadline is the Windows Server Security Course booking closing this week (6-7 July 2026), with ITS3 Events flagging only final spaces remain. Open first: James Salas Guillen's 10:58 email from today about the UOX_LONEBASE business rule intermittent issue (ref 00501337), as it contains attachments and requires immediate technical decision-making.",
+  "subtitle": "Absent colleagues block support; three urgent technical blockers need resolution today",
+  "context": "Michael O'Sullivan and Emma are both absent during the week commencing 1 July 2026, according to Julie Hickman's update received at 15:23 today, blocking support coverage coordination. James Salas Guillen's DSE System change request to exclude SBS users is pending Tony Boydell's review of the Azure change record 126017, with no response in over 48 hours since 23 June 10:29. The Cority Employee Import for OxfordUniversity failed on 22 June 17:15 due to SFTP connectivity issues reported by Cority_Integration_Platform_Notifications, and Edward Demetillo identified file formatting problems requiring correction before production deployment. Access Group Case 69001655 has a scheduled Microsoft Teams meeting with Robert Slejiuc at 15:00 today and requires escalation follow-up with Sarah Murphy after Kevin's 09:39 sent message on 23 June. The most time-critical deadline is Change 20020472 for the Org Hierarchy Migration to enable COREPORTAL_ADMIN menu options, which arrived as a coordination request on 16 June and needs Kevin's action before 24 June. Open the James Salas Guillen DSE System email first as it blocks the DSE data extract work and has been waiting since yesterday morning.",
   "urgent": [
     {
       "title": "[ict-a] For Information: Update on IT Major Incident affecting Self-Service and Oxford Service Manager (OSM) ",
@@ -14,16 +14,6 @@
       "received": "22 Jun"
     },
     {
-      "title": "[ict-a] CISO Update: Critical Vulnerabilities – Action Required",
-      "sub": "From <strong>Chris Mortlock</strong>. Dear ITSS,\r\nRecent weeks have seen a significant number of high and critical vulnerabilities disclosed across commonly d",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "[ict-a] CISO Update: Critical Vulnerabilities – Action Required",
-      "from": "Chris Mortlock",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000784EFEEDA0000",
-      "received": "19 Jun"
-    },
-    {
       "title": "[ict-a] For Information: Action to be taken today in response to ongoing IT Major Incident affecting Self-Service and OSM",
       "sub": "From <strong>Communications Office</strong>. From: Saffron Greenwood, Major Incident Manager, IT Services   \r\nFor: IT Support Staff\r\n \r\nThis email is for intended re",
       "badge": "Act today",
@@ -32,16 +22,6 @@
       "from": "Communications Office",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D680000",
       "received": "17 Jun"
-    },
-    {
-      "title": "[ict-a] For Information: Update on IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
-      "sub": "From <strong>Communications Office</strong>. From: Saffron Greenwood, Major Incident Manager, IT Services   \r\nFor: IT Support Staff\r\n \r\nThis email is for intended re",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "[ict-a] For Information: Update on IT Major Incident affecting Self-Service and Oxford Service Manager (OSM)",
-      "from": "Communications Office",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139FA0000",
-      "received": "16 Jun"
     },
     {
       "title": "[ict-a] For Information: Access restored - Update on IT Major Incident affecting Self-Service and Oxford Service Manager (OSM) ",
@@ -82,19 +62,59 @@
       "from": "Marie Cooksey",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D670000",
       "received": "17 Jun"
-    },
-    {
-      "title": "UCEA Clinical pay uplift - April 2026",
-      "sub": "From <strong>Athena Artuso</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "UCEA Clinical pay uplift - April 2026",
-      "from": "Athena Artuso",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139FD0000",
-      "received": "16 Jun"
     }
   ],
   "needs": [
+    {
+      "title": "RE: Support cover for first two weeks in July",
+      "sub": "From <strong>Julie Hickman</strong>. Hello all,\r\n\r\n \r\n\r\nJust a further update from me.\r\n\r\n \r\n\r\nI wanted to make you aware that both Michael and Emma are on l",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Support cover for first two weeks in July",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000",
+      "received": "23 Jun"
+    },
+    {
+      "title": "UKVI requirement for Skilled Workers",
+      "sub": "From <strong>CoreHR HEI Group</strong>. Hi\r\n\r\n \r\n\r\nHope you are all ok and not melting too much….. 😉 \r\n\r\n \r\n\r\nWe’re in conversation with colleagues in HR regard",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "UKVI requirement for Skilled Workers",
+      "from": "CoreHR HEI Group",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1B0000",
+      "received": "23 Jun"
+    },
+    {
+      "title": "Re: DSE System - exclude SBS users ",
+      "sub": "From <strong>Tony Boydell</strong>. James, Kevin,\r\n\r\nThe CR has been drafted and refined here:\r\nhttps://dev.azure.com/oxforduniversity/Integration/_workitem",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Re: DSE System - exclude SBS users ",
+      "from": "Tony Boydell",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1A0000",
+      "received": "23 Jun"
+    },
+    {
+      "title": "69001655",
+      "sub": "From <strong>Robert Slejiuc</strong>. ________________________________________________________________________________\r\nMicrosoft Teams meeting \r\nJoin:[link]",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "69001655",
+      "from": "Robert Slejiuc",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C190000",
+      "received": "23 Jun"
+    },
+    {
+      "title": "Access Support Team | 69001655 - Your Case Has Been Updated",
+      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Access Support Team | 69001655 - Your Case Has Been Updated",
+      "from": "Access Support",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C120000",
+      "received": "23 Jun"
+    },
     {
       "title": "Create scroll-stopping clips for social media in minutes",
       "sub": "From <strong>Descript</strong>. &lt;https://clicks.descript.com/q/vTkKywRo9FJ1D69RcLQcQQ~~/AAQRxRA~/6LxxmIsgF97aT9eEiywtWe5qA4NAdV2aER1xtlTyxfYXa0t7IsJXX9T",
@@ -186,16 +206,6 @@
       "received": "22 Jun"
     },
     {
-      "title": "RE: Support Call# 11688462: Ash VEA team",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi Anna\r\n\r\n \r\n\r\nThanks for this, it is really helpful. I think it would be useful for you to the join the internal team ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Support Call# 11688462: Ash VEA team",
-      "from": "Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663350000",
-      "received": "22 Jun"
-    },
-    {
       "title": "RE: Cority upload to the test server - next steps to production server",
       "sub": "From <strong>James Salas Guillen</strong>. Hi Ed, \r\n\r\n \r\n\r\nThank you for confirming the scheduled job. However, we noticed that the file was not uploaded, even tho",
       "badge": "Reply within 48hrs",
@@ -203,16 +213,6 @@
       "subject": "RE: Cority upload to the test server - next steps to production server",
       "from": "James Salas Guillen",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663340000",
-      "received": "22 Jun"
-    },
-    {
-      "title": "RE: Support Call# 11688462: Ash VEA team",
-      "sub": "From <strong>Anna Carter-Windle</strong>. Hi Marie\r\n\r\n \r\n\r\nI have had a hunt through my emails and will look through the files, however, as I wasn’t involved in t",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Support Call# 11688462: Ash VEA team",
-      "from": "Anna Carter-Windle",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663330000",
       "received": "22 Jun"
     },
     {
@@ -226,24 +226,24 @@
       "received": "22 Jun"
     },
     {
-      "title": "RE: Support Call# 11688462: Ash VEA team",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi Emma\r\n\r\n \r\n\r\nI have copied in Anna and Kevin.\r\n\r\n \r\n\r\n@Kevin Lelitte &lt;mailto:kevin.lelitte@admin.ox.ac.uk&gt;  – Could y",
+      "title": "One platform. Stronger safety + environmental oversight. Here's the proof.",
+      "sub": "From <strong>The Cority Team</strong>. To view this email as a web page, click here &lt;https://empower.cority.com/v/NzcyLURQWC04MTEAAAGijp02mSr_BbadcuTpW9ttgIzD0",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
-      "subject": "RE: Support Call# 11688462: Ash VEA team",
-      "from": "Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663300000",
+      "subject": "One platform. Stronger safety + environmental oversight. Here's the proof.",
+      "from": "The Cority Team",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078716632E0000",
       "received": "22 Jun"
     },
     {
-      "title": "Edit videos like a pro",
-      "sub": "From <strong>Descript</strong>. &lt;https://clicks.descript.com/q/7q-wjYxqW3IRCmgreS1zGw~~/AAQRxRA~/9dLyjX53qlQpHIKjxFXRiz1xo8CkFKcn0YbSGAewIZi6PN4JhJHFKox",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Edit videos like a pro",
-      "from": "Descript",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000784EFEEDE0000",
-      "received": "20 Jun"
+      "title": "Access Support Team | 68978576 - Your Case Has Been Updated",
+      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Access Support Team | 68978576 - Your Case Has Been Updated",
+      "from": "Access Support",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078716632D0000",
+      "received": "22 Jun"
     },
     {
       "title": "RE: OSM Change Enablement: temporary approval process change",
@@ -334,26 +334,6 @@
       "from": "changenotifications@it.ox.ac.uk",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E13A010000",
       "received": "16 Jun"
-    },
-    {
-      "title": "RE: IM Principles - change to URL",
-      "sub": "From <strong>Laura Porter</strong>. That’s great – thanks Kevin, and so much better not to have to include the full URL. \r\n\r\n \r\n\r\nFrom: Kevin Lelitte &lt;kevin",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: IM Principles - change to URL",
-      "from": "Laura Porter",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E13A000000",
-      "received": "16 Jun"
-    },
-    {
-      "title": "Access Support Team | 69004669 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>. &lt;https://accessgroup.file.force.com/servlet/servlet.ImageServer?id=0158e0000000XiR&amp;oid=00D58000000Z4gm&amp;lastMod=166367870",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Access Support Team | 69004669 - Your Case Has Been Updated",
-      "from": "Access Support",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139F90000",
-      "received": "16 Jun"
     }
   ],
   "fyi": [
@@ -366,16 +346,6 @@
       "from": "peoplexd@accessacloud.com",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C080000",
       "received": "23 Jun"
-    },
-    {
-      "title": "New Vacancy Notification",
-      "sub": "From <strong>peoplexd@accessacloud.com</strong>. Dear KEVIN LELITTE\r\n\r\nThe vacancies listed below (that match your criteria) have recently been added to the University o",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "New Vacancy Notification",
-      "from": "peoplexd@accessacloud.com",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000784EFEEDD0000",
-      "received": "20 Jun"
     },
     {
       "title": "New Vacancy Notification",
@@ -405,6 +375,36 @@
       "subject": "RE: Cority upload to the test server - next steps to production server",
       "from": "Edward Demetillo",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000784C393480000",
+      "received": "18 Jun"
+    },
+    {
+      "title": "RE: #External# Unexpected Case Creation Emails Following New Starter Setup",
+      "sub": "From <strong>Sarah Murphy</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: #External# Unexpected Case Creation Emails Following New Starter Setup",
+      "from": "Sarah Murphy",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D980000",
+      "received": "18 Jun"
+    },
+    {
+      "title": "Cority Security Notice: Third-Party Data Incident",
+      "sub": "From <strong>Daphne Reed</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Cority Security Notice: Third-Party Data Incident",
+      "from": "Daphne Reed",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D970000",
+      "received": "18 Jun"
+    },
+    {
+      "title": "Weightings spreadsheet",
+      "sub": "From <strong>Sonhal Mistry</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Weightings spreadsheet",
+      "from": "Sonhal Mistry",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D950000",
       "received": "18 Jun"
     },
     {
@@ -558,47 +558,27 @@
       "received": "16 Jun"
     },
     {
-      "title": "Access Support Team | 68978576 - Your Case Has Been Updated",
-      "sub": "From <strong>Access Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Access Support Team | 68978576 - Your Case Has Been Updated",
-      "from": "Access Support",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139FF0000",
-      "received": "16 Jun"
-    },
-    {
       "title": "RE: IM Principles - change to URL",
       "sub": "From <strong>Laura Porter</strong>.",
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "RE: IM Principles - change to URL",
       "from": "Laura Porter",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139FE0000",
-      "received": "16 Jun"
-    },
-    {
-      "title": "Press play on your summer reading list.",
-      "sub": "From <strong>ElevenReader</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Press play on your summer reading list.",
-      "from": "ElevenReader",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139FC0000",
-      "received": "16 Jun"
-    },
-    {
-      "title": "RE: IM Principles - change to URL",
-      "sub": "From <strong>Laura Porter</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: IM Principles - change to URL",
-      "from": "Laura Porter",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139FB0000",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E13A000000",
       "received": "16 Jun"
     }
   ],
   "low": [
+    {
+      "title": "Business Rule for automated email not triggered [ ref:_00DE0JBMl._500OFXl1VY:ref ] 00501337.",
+      "sub": "From <strong>Cority Customer Support</strong>. Hi James\r\n \r\nIt is weird that rebuilding the Business Rule has fixed the issue, especially if the rebuilt Business Rule ",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Business Rule for automated email not triggered [ ref:_00DE0JBMl._500OFXl1VY:ref ] 00501337.",
+      "from": "Cority Customer Support",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C100000",
+      "received": "23 Jun"
+    },
     {
       "title": "RE: Business Rule for automated email not triggered [ ref:_00DE0JBMl._500OFXl1VY:ref ] 00501337.",
       "sub": "From <strong>James Salas Guillen</strong>. Hi Jack, \r\n\r\n \r\n\r\nThe issue we were seeing was intermittent and appears to be the same scenario as the one identified wi",
@@ -608,6 +588,26 @@
       "from": "James Salas Guillen",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C0F0000",
       "received": "23 Jun"
+    },
+    {
+      "title": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (4f0b60a)",
+      "sub": "From <strong>kevin lelitte</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (4f0b60a)",
+      "from": "kevin lelitte",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D9B0000",
+      "received": "18 Jun"
+    },
+    {
+      "title": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (cce6353)",
+      "sub": "From <strong>kevin lelitte</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (cce6353)",
+      "from": "kevin lelitte",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D990000",
+      "received": "18 Jun"
     },
     {
       "title": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (729b2b8)",
@@ -638,16 +638,6 @@
       "from": "cloudflare-workers-and-pages[bot]",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E13A030000",
       "received": "16 Jun"
-    },
-    {
-      "title": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (e73a717)",
-      "sub": "From <strong>kevin lelitte</strong>.",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "[begb0037admin/hris-dashboard] Run failed: Update HRIS Dashboard - main (e73a717)",
-      "from": "kevin lelitte",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000781E139F80000",
-      "received": "16 Jun"
     }
   ],
   "calToday": [
@@ -660,6 +650,11 @@
       "time": "10:00",
       "title": "Busy",
       "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "15:00",
+      "title": "69001655",
+      "sub": "Robert Slejiuc"
     }
   ],
   "calTomorrow": [],
@@ -694,6 +689,11 @@
           "time": "10:00",
           "title": "Busy",
           "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "15:00",
+          "title": "69001655",
+          "sub": "Robert Slejiuc"
         }
       ],
       "isToday": true
@@ -736,17 +736,42 @@
         "[03 Jun 2026] Reenu Delaney requested appraisal cycle name and affected employee list.",
         "[09 Jun 2026] Email sent to Julie Hickman requesting details.",
         "[09 Jun 2026] Julie confirmed: cycle name '(DO NOT USE) CDR2025Chemistry', 5,568 staff to be removed. Report run by Julie -- OneDrive export incoming.",
-        "[AWAITING] Julie to share OneDrive export of affected employee list.",
-        "[TODO -- on receipt] Forward cycle name + employee list export to Reenu Delaney at AG to action the deletion.",
-        "[TODO] Reply to Julie confirming details received and next steps.",
+        "[10 Jun 2026] Julie shared OneDrive export of affected employee list — received by Kevin.",
+        "[10 Jun 2026] Forwarded cycle name and employee list export to Reenu Delaney at AG.",
+        "[10 Jun 2026] Replied to Julie confirming details received and next steps.",
         "[10 Jun 2026] Julie Hickman is on annual leave 10 June; queries should be redirected per her auto-reply instructions. (email: Julie Hickman - Automatic reply: Access Support Team | 68974493 - New Case)",
         "[10 Jun 2026] Access Group case 68978576 has been updated; monitor for resolution progress. (email: Access Support - Access Support Team | 68978576 - Your Case Has Been Updated)",
         "[10 Jun 2026] Kevin replied to Julie Hickman confirming AG are ready to proceed on Chemistry bulk delete; two items needed from Kevin's team before they can progress. (email: Kevin (sent to: Julie Hickman) - Re: Access Support Team | 68974493 - New Case)",
-        "[10 Jun 2026] Kevin confirmed receipt of export from Julie Hickman for Chemistry bulk delete and is passing details across to Reenu Delaney to progress the AG case. (email: Kevin (sent to: Julie Hickman) - Re: Access Support Team | 68974493 - New Case)"
+        "[10 Jun 2026] Kevin confirmed receipt of export from Julie Hickman for Chemistry bulk delete and is passing details across to Reenu Delaney to progress the AG case. (email: Kevin (sent to: Julie Hickman) - Re: Access Support Team | 68974493 - New Case)",
+        "[23 Jun 2026] Kevin signed off UAT — changes confirmed good, instructed Reenu to proceed to live. Awaiting confirmation email when live deployment complete. (case: 68974493)",
+        "[AWAITING] Reenu Delaney to confirm live deployment complete and email Kevin."
       ],
       "source": "Case 68974493",
       "dateType": "red",
-      "ai_summary": "Export received from Julie Hickman on 10 Jun and passed to Reenu Delaney (AG cases 68974493 / 67938206) for bulk deletion of 5,568 Chemistry staff from appraisal cycle '(DO NOT USE) CDR2025Chemistry'. Next: monitor AG progress and confirm completion once processed."
+      "ai_summary": "UAT signed off 23 Jun, Chemistry bulk delete cycle '(DO NOT USE) CDR2025Chemistry' (5,568 staff) ready for live deployment. Awaiting confirmation email from Reenu Delaney (case 68974493) that live deployment complete."
+    },
+    {
+      "id": "t015",
+      "text": "Web pages and URL linking -- job posting updates",
+      "description": "Internal Mobility Principles page moved to a new OxIntranet URL. Three pages still link to the old location: main ops intranet page, professional services search page, and individual vacancy application pages. New URL confirmed live on 3 June. Old page expected to be retired 23/24 June. Agreed approach: update all links to the new URL, use hyperlinked text ('IM Principles' / 'internal mobility principles') rather than displaying the full long URL, test before making any live changes, and check whether links can open in a new tab. Updates planned for 22 June ahead of old page retirement. Follow-up with Laura scheduled 15-16 June.",
+      "actions": [
+        "[03 Jun 2026] Meeting with Laura Porter -- reviewed three pages needing link updates.",
+        "[03 Jun 2026] New URL confirmed live later that day: https://unioxfordnexus.sharepoint.com/sites/OXINTRANET-working-here/SitePages/internal-mobility-principles.aspx",
+        "[16 Jun 2026] Reconnected with Laura Porter as planned.",
+        "[22 Jun 2026] URL change approach confirmed working (per Laura 20 Jun) — link updates progressing ahead of retirement.",
+        "[17 Jun 2026] Emailed Laura with update on changes.",
+        "[MONITOR] Old page retirement — TODAY 23/24 June.",
+        "[17 Jun 2026] Kevin confirmed with Laura Porter on 16 June that the additional couple of days' contingency before 23/24 June URL retirement is useful. (email: Kevin (sent to: Laura Porter) - Re: IM Principles - change to URL)",
+        "[17 Jun 2026] Kevin provided Laura Porter an update on the IM Principles URL change on 16 June. (email: Kevin (sent to: Laura Porter) - Re: IM Principles - change to URL)",
+        "[20 Jun 2026] Laura Porter confirmed the URL change approach is working well and noted she does not need to include the full URL, providing contingency buffer through 23/24 June retirement window. (email: Laura Porter - RE: IM Principles - change to URL)",
+        "[23 Jun 2026] Kevin clarified to Sarah Murphy that today (23 June) is the actual scheduled change day for the IM URL change, confirming critical timing. (email: Kevin (sent to: Sarah Murphy) - Re: #External# Escalation Request – Case 69001655)",
+        "[23 Jun 2026] Urgent escalation — unable to save changes in Search Appointments V4 E-Form Maintenance (case 69001555); returns \"Sorry But Page Not Found\" in Production, OXU and OXZ. Blocking URL updates on vacancy application pages. Kevin requested urgent Teams call with Maura McGlynn (AG). Escalated to Sarah Murphy.",
+        "[23 Jun 2026] Maura McGlynn applied a config fix — reports changes now saving successfully. Kevin asked to review and confirm. (case: 69001555)",
+        "[AWAITING] Kevin to review Maura's config fix and confirm E-Form save issue resolved in Search Appointments V4."
+      ],
+      "source": "Meeting with Laura Porter 03/06",
+      "dateType": "red",
+      "ai_summary": "Critical: IM Principles URL retirement scheduled TODAY 23/24 Jun. E-Form save issue blocking vacancy page updates (case 69001555) -- Maura McGlynn applied config fix, awaiting Kevin review to confirm resolved."
     },
     {
       "id": "t1781099880461",
@@ -762,7 +787,7 @@
       ],
       "source": "Inbox 2026-06-10 09:43",
       "dateType": "red",
-      "ai_summary": "Quote request initiated 15 Jun with Mike West / Ann-Marie Topliss for Holiday Records Reports (three-report specification confirmed aligned to requirements). Next: receipt of quote from AG, then coordinate spend approval with Marie."
+      "ai_summary": "Holiday Records Duty three-report spec confirmed aligned with requirements 11 Jun. Quote request sent to Access Group (Mike West, case 69001638) on 15 Jun. Awaiting quote pricing."
     },
     {
       "id": "t1781204987882",
@@ -779,7 +804,7 @@
       ],
       "source": "Inbox 2026-06-11 15:01",
       "dateType": "red",
-      "ai_summary": "Chemistry bulk delete (GBP 525) committed; remaining flex points expire 29 Jun 2026. Holiday Records Reports quote in progress (case 69001638); awaiting AG pricing. Next: receive quote, confirm total committed spend and identify further allocations before expiry."
+      "ai_summary": "Chemistry bulk delete (GBP525) committed; flex points expire 29 Jun 2026. Holiday Records Reports quote pending from AG (case 69001638). Next: receive quote, confirm total spend committed, identify additional flex point uses before expiry."
     },
     {
       "id": "t019",
@@ -794,7 +819,7 @@
       ],
       "source": "Michael 1-1 15/06",
       "dateType": "red",
-      "ai_summary": "Pay Code 121 / PAYPAY25 required for this month's payroll run; raised by Michael 15 Jun. Next: confirm which specific report(s) need amending, edit SQL, render in Visual Studio, deploy DEV -> TEST -> QA -> LIVE, and verify before payroll run."
+      "ai_summary": "Pay Code 121 / PAYPAY25 needed for this month's payroll -- raised by Michael 15 Jun. Not yet started: confirm specific reports needing amendment, edit SQL, render in Visual Studio, deploy DEV->TEST->QA->LIVE."
     },
     {
       "id": "t020",
@@ -817,7 +842,7 @@
       ],
       "source": "Michael 1-1 15/06",
       "dateType": "red",
-      "ai_summary": "Change notification 20020472 received 20 Jun for org hierarchy migration to enable 16 COREPORTAL_ADMIN menu options (Kevin listed as Coordinator). Awaiting Asta Palmer's comparison of menu options; next: enable in UOXU proof of concept, produce Portal How-To guidance, and deploy through environments."
+      "ai_summary": "Change 20020472 received 20 Jun for COREPORTAL_ADMIN org hierarchy menu migration (16 options). Awaiting Asta Palmer's comparison of menu options. Next: enable in UOXU (proof of concept), produce Portal How-To guidance, verify all environments."
     },
     {
       "id": "t021",
@@ -833,29 +858,10 @@
       ],
       "source": "Email 15/06 12:54",
       "dateType": "red",
-      "ai_summary": "Kevin escalated case 69001655 (FP 68261303 Multi Company Setup) to Sarah Murphy at AG on 20 Jun requesting dev team involvement; draft REF2029 load file sent to Conor O'Brien 17 Jun. Next: await AG dev team response and coordinate next steps with Simon."
+      "ai_summary": "Escalated case 69001655 (Multi Company Setup FP 68261303) to Sarah Murphy 20 Jun requesting dev team involvement. Kevin sent Conor O'Brien draft REF2029 load file and pay admin values. Awaiting response and next steps coordination with Simon."
     }
   ],
   "prioritiesTomorrow": [
-    {
-      "id": "t015",
-      "text": "Web pages and URL linking -- job posting updates",
-      "description": "Internal Mobility Principles page moved to a new OxIntranet URL. Three pages still link to the old location: main ops intranet page, professional services search page, and individual vacancy application pages. New URL confirmed live on 3 June. Old page expected to be retired 23/24 June. Agreed approach: update all links to the new URL, use hyperlinked text ('IM Principles' / 'internal mobility principles') rather than displaying the full long URL, test before making any live changes, and check whether links can open in a new tab. Updates planned for 22 June ahead of old page retirement. Follow-up with Laura scheduled 15-16 June.",
-      "actions": [
-        "[03 Jun 2026] Meeting with Laura Porter -- reviewed three pages needing link updates.",
-        "[03 Jun 2026] New URL confirmed live later that day: https://unioxfordnexus.sharepoint.com/sites/OXINTRANET-working-here/SitePages/internal-mobility-principles.aspx",
-        "[TODO -- today 16 Jun] Reconnect with Laura Porter as planned.",
-        "[TODO -- 22 Jun] Test new URL, update links on all three identified pages, replace visible long URLs with hyperlinked text, check whether links open in a new tab.",
-        "[TODO] Email Laura with updates if changes are made before they next meet.",
-        "[MONITOR] Old page retirement -- expected 23/24 June.",
-        "[17 Jun 2026] Kevin confirmed with Laura Porter on 16 June that the additional couple of days' contingency before 23/24 June URL retirement is useful. (email: Kevin (sent to: Laura Porter) - Re: IM Principles - change to URL)",
-        "[17 Jun 2026] Kevin provided Laura Porter an update on the IM Principles URL change on 16 June. (email: Kevin (sent to: Laura Porter) - Re: IM Principles - change to URL)",
-        "[20 Jun 2026] Laura Porter confirmed the URL change approach is working well and noted she does not need to include the full URL, providing contingency buffer through 23/24 June retirement window. (email: Laura Porter - RE: IM Principles - change to URL)"
-      ],
-      "source": "Meeting with Laura Porter 03/06",
-      "dateType": "orange",
-      "ai_summary": "URL change for Internal Mobility Principles agreed with Laura Porter; new URL live 3 Jun, old page retiring 23-24 Jun. Kevin confirmed contingency buffer 17 Jun; Laura confirmed approach working well 20 Jun. Next: test and update all three pages with new hyperlinks before retirement date."
-    },
     {
       "id": "t003",
       "text": "Flex points plan before Marie returns",
@@ -874,7 +880,7 @@
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange",
-      "ai_summary": "2,935 flex points remain with early July expiry; Chemistry bulk delete (GBP 525) committed. Holiday Records Reports quote in progress; awaiting Athena's requirements document and Michael's assessment. Next: receive quote, build tracking document, finalise plan for Marie's sign-off."
+      "ai_summary": "2,935 flex points expire early July 2026; Chemistry bulk deletion (GBP525) committed. Awaiting Simon to send Athena's holiday compliance email, then pass to Michael for system assessment. Build tracking document (agreed/booked/under investigation). Marie returns to sign off final plan."
     },
     {
       "id": "t005",
@@ -897,7 +903,7 @@
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange",
-      "ai_summary": "Simon created Division 901 and reference codes (ZSD901, Z90101, Z901, Z902) in UOXU on 10 Jun. Kevin to set up all 40 REF2029 Pay Administered By codes; blocker: Division Code setup awaits Conor's config walkthrough on Company Code linking. Next: confirm Conor walkthrough completed, then proceed with code setup and raise change request."
+      "ai_summary": "40 REF2029 pay admin buy codes need setup in UOXU. Simon created Division 901 and user codes 10 Jun; Kevin reviewed and ready to proceed. Blocker: Division Code cannot be added until linked to Company Code (awaiting Conor walk-through). Draft load file sent to Conor 11 Jun."
     }
   ],
   "prioritiesWeek": [
@@ -916,7 +922,7 @@
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "orange",
-      "ai_summary": "Cority (support leadership Mehran Riaz) confirmed 8 Jun that smart notes edit limitation is INTENDED, classified as enhancement NOT on roadmap, no timeline provided. Raised at PUG 16 Jun with Christopher Sanders. Next: escalate directly to Cority for firm delivery date on CCC-19664, then decide pursue/accept approach."
+      "ai_summary": "Smart notes edit-after-save issue (Cority ticket 00476764, dev CCC-19664) confirmed INTENDED behaviour by Mehran Riaz 08 Jun -- not on roadmap, requires Premium Support. Raised at PUG 16 Jun. Next: chase Cority for firm delivery date or decide to accept as known limitation."
     },
     {
       "id": "t006",
@@ -931,7 +937,7 @@
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange",
-      "ai_summary": "SharePoint migration completed but guidance documentation not updated; documents exist and correctly placed but signposting missing. Next: write response to Simon confirming accessibility, recommend alignment meeting for whole team, loop in Michael separately."
+      "ai_summary": "SharePoint migration (shared drive to SharePoint/Teams) completed but guidance documentation not updated -- only Kevin and Lee know location. Documents exist correctly; signposting is issue. Next: write response to Simon, recommend alignment meeting for whole team, loop in Michael."
     },
     {
       "id": "t008",
@@ -945,7 +951,7 @@
       ],
       "source": "James A/L Handover 05/06",
       "dateType": "orange",
-      "ai_summary": "H&S admin team DSE/HWP check completed 10 Jun; data upload went live 3 Jun. James returns 18 Jun to pick up two open HWP tickets with Gail Miller. Next: await James' return and resolution of pending HWP discussions."
+      "ai_summary": "H&S admin check completed 10 Jun; DSE upload live 3 Jun looks good. Manual rule created for known non-PXD users (e.g. Jill Farmer). Two open HWP tickets with Gail Miller awaiting James return 18 Jun."
     },
     {
       "id": "t016",
@@ -961,8 +967,8 @@
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "orange",
-      "ai_summary": "DSE data feed went live 3 Jun; three post-go-live issues: SBS exclusion (Azure team handling), contractors missing from PXD (manual process needed), users without emails (James investigating with supplier). James returns 18 Jun. Next: confirm SBS resolved, progress contractor and email-less user resolutions on James' return."
+      "ai_summary": "DSE data feed live 3 Jun 2026 -- three post go-live issues: (1) SBS exclusion handled by Azure team, (2) contractors missing from PXD feed -- manual process needed, (3) users without university emails -- James investigating. Awaiting James return 18 Jun and supplier follow-up."
     }
   ],
-  "refreshed_at": "Tuesday 23 June · 11:33"
+  "refreshed_at": "Tuesday 23 June · 15:40"
 }
