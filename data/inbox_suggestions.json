@@ -1,25 +1,24 @@
 {
-  "generated_at": "2026-06-23 11:32",
+  "generated_at": "2026-06-23 15:40",
   "new_tasks": [
     {
-      "title": "DSE system - exclude SBS users change request",
+      "title": "Arrange support cover for first two weeks in July",
       "tier": "week",
-      "description": "James Salas is raising a change request to exclude specific users from the DSE (Healthy Working Plus) data extract. This relates to the post-go-live DSE data feed issues (t016) where SBS opted out of the main system but were included in the initial feed. Coordinate with Azure integrations team and James to progress this change request.",
-      "email_subject": "DSE System - exclude SBS users ",
-      "email_from": "James Salas Guillen",
-      "received": "2026-06-23 10:29",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C0D0000"
+      "description": "Julie Hickman has flagged that both Michael and Emma are on leave during the week commencing early July, requiring coverage planning for the FA team. Kevin needs to coordinate support arrangements during this period.",
+      "email_subject": "RE: Support cover for first two weeks in July",
+      "email_from": "Julie Hickman",
+      "received": "2026-06-23 15:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000"
+    },
+    {
+      "title": "Review and approve DSE SBS exclusion change request CR-126017",
+      "tier": "tomorrow",
+      "description": "Tony Boydell has drafted and refined a change request to exclude SBS users from the DSE system (linked to t016 post go-live issue). Kevin and James are asked to review and approve the CR at Azure DevOps work item 126017.",
+      "email_subject": "Re: DSE System - exclude SBS users ",
+      "email_from": "Tony Boydell",
+      "received": "2026-06-23 15:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1A0000"
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t015",
-      "task_title": "Web pages and URL linking -- job posting updates",
-      "note": "Kevin clarified to Sarah Murphy that today (23 June) is the actual scheduled change day for the IM URL change, confirming critical timing.",
-      "email_subject": "Re: #External# Escalation Request – Case 69001655",
-      "email_from": "Kevin (sent to: Sarah Murphy)",
-      "received": "2026-06-23 09:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000787631D200000"
-    }
-  ]
+  "task_updates": []
 }
