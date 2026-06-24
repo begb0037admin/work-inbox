@@ -48,14 +48,13 @@ def main():
 
     print("Phase 1 done")
 
-    # Helper: navigate to nested folder
     def fld(*path):
         f = inbox
         for p in path:
             f = f.Folders[p]
         return f
 
-    # -- Phase 2: Rules --
+    # -- Phase 2: Rules (incremental saves to identify failures) --
     print("\nPhase 2 - Creating rules...")
 
     rules = ns.DefaultStore.GetRules()
@@ -69,14 +68,37 @@ def main():
 
     created = skipped = failed = 0
 
+    def save_one(name):
+        """Try to save ruleset. If rejected, remove this rule and restore."""
+        nonlocal created, failed
+        try:
+            rules.Save()
+            created += 1
+            print(f"  created: {name}")
+        except Exception:
+            # Remove the rule we just added and save the clean state
+            for i in range(rules.Count, 0, -1):
+                try:
+                    if rules.Item(i).Name == name:
+                        rules.Remove(i)
+                        try:
+                            rules.Save()
+                        except Exception:
+                            pass
+                        break
+                except Exception:
+                    pass
+            failed += 1
+            print(f"  FAIL (Outlook rejected): {name}")
+
     def rule_delete(name, addresses=None, subjects=None, headers=None):
-        nonlocal created, skipped, failed
+        nonlocal skipped
         if name in existing:
             skipped += 1
             print(f"  skip (exists): {name}")
             return
         try:
-            r = rules.Create(name, 0)  # 0 = olRuleReceive
+            r = rules.Create(name, 0)
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
                 r.Conditions.SenderAddress.Enabled = True
@@ -87,20 +109,20 @@ def main():
                 r.Conditions.MessageHeader.Text = headers
                 r.Conditions.MessageHeader.Enabled = True
             r.Actions.Delete.Enabled = True
-            created += 1
-            print(f"  created: {name}")
+            save_one(name)
         except Exception as e:
+            nonlocal failed
             failed += 1
             print(f"  FAIL: {name} - {e}")
 
     def rule_file(name, dest, addresses=None, subjects=None, headers=None, cc=False):
-        nonlocal created, skipped, failed
+        nonlocal skipped
         if name in existing:
             skipped += 1
             print(f"  skip (exists): {name}")
             return
         try:
-            r = rules.Create(name, 0)  # 0 = olRuleReceive
+            r = rules.Create(name, 0)
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
                 r.Conditions.SenderAddress.Enabled = True
@@ -114,114 +136,45 @@ def main():
                 r.Conditions.CC.Enabled = True
             r.Actions.MoveToFolder.Folder = dest
             r.Actions.MoveToFolder.Enabled = True
-            created += 1
-            print(f"  created: {name}")
+            save_one(name)
         except Exception as e:
+            nonlocal failed
             failed += 1
             print(f"  FAIL: {name} - {e}")
 
-    # Auto-delete rules (ordered first so they run before file rules)
-    rule_delete("Del - Teams notifications",
-        addresses=["no-reply@teams.mail.microsoft"])
-
-    rule_delete("Del - GitHub",
-        addresses=["notifications@github.com", "noreply@github.com"])
-
-    rule_delete("Del - Access Group marketing",
-        headers=["@go.theaccessgroup.com", "@surveys.theaccessgroup.com"])
-
-    rule_delete("Del - New Vacancy Notification",
-        subjects=["New Vacancy Notification"])
-
-    rule_delete("Del - Cority status alerts",
-        addresses=["csn@mail.status.cority.com"])
-
-    rule_delete("Del - DistroKid",
-        headers=["@hello.distrokid.com"])
-
-    rule_delete("Del - Anthropic/Claude",
-        addresses=["no-reply@email.claude.com"])
-
-    rule_delete("Del - Descript marketing",
-        headers=["@marketing.descript.com"])
-
-    rule_delete("Del - Accessplanit",
-        headers=["@accessplanit.com"])
-
-    rule_delete("Del - Skype voicemail",
-        addresses=["no-reply@emails.skype.com"])
-
-    rule_delete("Del - MetaCompliance",
-        headers=["@metacompliance.com"])
-
-    rule_delete("Del - Annual Leave system",
-        subjects=["ANNUAL LEAVE request submitted"])
+    # Auto-delete rules
+    rule_delete("Del - Teams notifications",    addresses=["no-reply@teams.mail.microsoft"])
+    rule_delete("Del - GitHub",                 addresses=["notifications@github.com", "noreply@github.com"])
+    rule_delete("Del - Access Group marketing", headers=["@go.theaccessgroup.com", "@surveys.theaccessgroup.com"])
+    rule_delete("Del - New Vacancy Notification", subjects=["New Vacancy Notification"])
+    rule_delete("Del - Cority status alerts",   addresses=["csn@mail.status.cority.com"])
+    rule_delete("Del - DistroKid",              headers=["@hello.distrokid.com"])
+    rule_delete("Del - Anthropic/Claude",       addresses=["no-reply@email.claude.com"])
+    rule_delete("Del - Descript marketing",     headers=["@marketing.descript.com"])
+    rule_delete("Del - Accessplanit",           headers=["@accessplanit.com"])
+    rule_delete("Del - Skype voicemail",        addresses=["no-reply@emails.skype.com"])
+    rule_delete("Del - MetaCompliance",         headers=["@metacompliance.com"])
+    rule_delete("Del - Annual Leave system",    subjects=["ANNUAL LEAVE request submitted"])
 
     # Auto-file rules
-    rule_file("File - Reports - ITSRVXT",
-        dest=fld("Reports"),
-        addresses=["itservxt@ox.ac.uk"])
+    rule_file("File - Reports - ITSRVXT",           dest=fld("Reports"),                          addresses=["itservxt@ox.ac.uk"])
+    rule_file("File - Reports - PeopleXD Reports",  dest=fld("Reports"),                          addresses=["PeopleXDReports@theaccessgroup.com"])
+    rule_file("File - Access Support - Team Cases", dest=fld("Access Group", "Team Cases"),       addresses=["support.access@theaccessgroup.com"], cc=True)
+    rule_file("File - Access Support - My Cases",   dest=fld("Access Group", "My Cases"),         addresses=["support.access@theaccessgroup.com"])
+    rule_file("File - PeopleXD System",             dest=fld("PeopleXD System"),                  addresses=["peoplexd@accessacloud.com"])
+    rule_file("File - Cority",                      dest=fld("H&S", "Cority"),                    headers=["@cority.com"])
+    rule_file("File - HR Broadcast",                dest=fld("Reference", "HR Broadcast"),        addresses=["hris@admin.ox.ac.uk"])
+    rule_file("File - ICT subject tag",             dest=fld("Reference", "ICT Mailing Lists"),   subjects=["[ict-a]"])
+    rule_file("File - ICT senders",                dest=fld("Reference", "ICT Mailing Lists"),   addresses=["changenotifications@it.ox.ac.uk", "skills@it.ox.ac.uk"])
+    rule_file("File - Bodleian & Sector",          dest=fld("Reference", "Bodleian & Sector"),   headers=["@bodleian.ox.ac.uk", "@jiscmail.ac.uk"])
+    rule_file("File - Team James",                 dest=fld("Team", "James Salas Guillen"),       addresses=["james.salas-guillen@admin.ox.ac.uk"])
+    rule_file("File - Team Michael",               dest=fld("Team", "Michael O'Sullivan"),        addresses=["michael.osullivan@admin.ox.ac.uk"])
+    rule_file("File - Team Asta",                  dest=fld("Team", "Asta Palmer"),              addresses=["asta.palmer@admin.ox.ac.uk"])
 
-    rule_file("File - Reports - PeopleXD Reports",
-        dest=fld("Reports"),
-        addresses=["PeopleXDReports@theaccessgroup.com"])
-
-    # Access Support: CC rule first (Team Cases), then primary recipient (My Cases)
-    rule_file("File - Access Support - Team Cases",
-        dest=fld("Access Group", "Team Cases"),
-        addresses=["support.access@theaccessgroup.com"],
-        cc=True)
-
-    rule_file("File - Access Support - My Cases",
-        dest=fld("Access Group", "My Cases"),
-        addresses=["support.access@theaccessgroup.com"])
-
-    rule_file("File - PeopleXD System",
-        dest=fld("PeopleXD System"),
-        addresses=["peoplexd@accessacloud.com"])
-
-    rule_file("File - Cority",
-        dest=fld("H&S", "Cority"),
-        headers=["@cority.com"])
-
-    rule_file("File - HR Broadcast",
-        dest=fld("Reference", "HR Broadcast"),
-        addresses=["hris@admin.ox.ac.uk"])
-
-    rule_file("File - ICT subject tag",
-        dest=fld("Reference", "ICT Mailing Lists"),
-        subjects=["[ict-a]"])
-
-    rule_file("File - ICT senders",
-        dest=fld("Reference", "ICT Mailing Lists"),
-        addresses=["changenotifications@it.ox.ac.uk", "skills@it.ox.ac.uk"])
-
-    rule_file("File - Bodleian & Sector",
-        dest=fld("Reference", "Bodleian & Sector"),
-        headers=["@bodleian.ox.ac.uk", "@jiscmail.ac.uk"])
-
-    rule_file("File - Team James",
-        dest=fld("Team", "James Salas Guillen"),
-        addresses=["james.salas-guillen@admin.ox.ac.uk"])
-
-    rule_file("File - Team Michael",
-        dest=fld("Team", "Michael O'Sullivan"),
-        addresses=["michael.osullivan@admin.ox.ac.uk"])
-
-    rule_file("File - Team Asta",
-        dest=fld("Team", "Asta Palmer"),
-        addresses=["asta.palmer@admin.ox.ac.uk"])
-
-    # Save
-    try:
-        rules.Save()
-        print(f"\nPhase 2 done - created:{created}  skipped:{skipped}  failed:{failed}")
-    except Exception as e:
-        print(f"\nPhase 2 FAILED to save rules: {e}")
-
+    print(f"\nPhase 2 done - created:{created}  skipped:{skipped}  failed:{failed}")
     print("\nSetup complete.")
     if failed:
-        print(f"  {failed} rule(s) failed - add these manually via Outlook Rules & Alerts.")
+        print(f"  {failed} rule(s) were rejected by Outlook - see FAIL lines above.")
     print("  To apply rules to existing emails:")
     print("    Outlook > Home > Rules > Manage Rules & Alerts > Run Rules Now")
 
