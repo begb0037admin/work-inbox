@@ -1,19 +1,27 @@
 """
-Outlook Inbox Setup v4
+Outlook Inbox Setup v5
 Creates folder structure and rules per docs/INBOX_ORGANISATION.md
 Governance: pull from GitHub, run via Setup_Inbox.bat
 """
 import win32com.client
 
-VERSION = "v4-fresh-refs"
+VERSION = "v5-early-binding"
 
 def main():
     print(f"Outlook Inbox Setup {VERSION}")
     print("===================")
 
-    outlook = win32com.client.Dispatch("Outlook.Application")
-    ns      = outlook.GetNamespace("MAPI")
-    inbox   = ns.GetDefaultFolder(6)   # olFolderInbox
+    # EnsureDispatch = early binding; generates type-aware COM wrappers so that
+    # object property assignment (e.g. MoveToFolder.Folder = folder_obj) works
+    # correctly instead of being silently mis-dispatched via late binding.
+    try:
+        outlook = win32com.client.gencache.EnsureDispatch("Outlook.Application")
+    except Exception:
+        # Fall back to late binding if type cache fails
+        outlook = win32com.client.Dispatch("Outlook.Application")
+
+    ns    = outlook.GetNamespace("MAPI")
+    inbox = ns.GetDefaultFolder(6)   # olFolderInbox
 
     # -- Phase 1: Folder structure --
     print("\nPhase 1 - Creating folders...")
@@ -50,9 +58,8 @@ def main():
 
     print("Phase 1 done")
 
-    # Store folder EntryIDs so we can re-fetch fresh COM objects any time
     def get_folder(*path):
-        """Always returns a fresh folder COM object via EntryID."""
+        """Fresh folder reference via EntryID lookup."""
         f = inbox
         for p in path:
             f = f.Folders[p]
@@ -76,16 +83,13 @@ def main():
     counts = {"created": 0, "skipped": 0, "failed": 0}
 
     def save_one(name):
-        """Try to save. If rejected, remove rule and restore clean state."""
         nonlocal rules_obj
         try:
             rules_obj.Save()
             counts["created"] += 1
             print(f"  created: {name}")
-            # Re-fetch after every successful save so the next rule gets a clean object
             rules_obj = fresh_rules()
         except Exception as se:
-            # Remove the rule we just added, then restore
             for i in range(rules_obj.Count, 0, -1):
                 try:
                     if rules_obj.Item(i).Name == name:
@@ -99,7 +103,7 @@ def main():
                     pass
             rules_obj = fresh_rules()
             counts["failed"] += 1
-            print(f"  FAIL (Outlook rejected): {name}")
+            print(f"  FAIL (rejected): {name} | {se}")
 
     def rule_delete(name, addresses=None, subjects=None, headers=None):
         if name in existing:
@@ -121,7 +125,7 @@ def main():
             save_one(name)
         except Exception as e:
             counts["failed"] += 1
-            print(f"  FAIL (create error): {name} - {e}")
+            print(f"  FAIL (create): {name} - {e}")
 
     def rule_file(name, folder_path, addresses=None, subjects=None, headers=None, cc=False):
         if name in existing:
@@ -129,7 +133,7 @@ def main():
             print(f"  skip (exists): {name}")
             return
         try:
-            dest = get_folder(*folder_path)  # fresh COM object every time
+            dest = get_folder(*folder_path)
             r = rules_obj.Create(name, 0)
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
@@ -147,7 +151,7 @@ def main():
             save_one(name)
         except Exception as e:
             counts["failed"] += 1
-            print(f"  FAIL (create error): {name} - {e}")
+            print(f"  FAIL (create): {name} - {e}")
 
     # Auto-delete rules
     rule_delete("Del - Teams notifications",      addresses=["no-reply@teams.mail.microsoft"])
@@ -163,7 +167,7 @@ def main():
     rule_delete("Del - MetaCompliance",           headers=["@metacompliance.com"])
     rule_delete("Del - Annual Leave system",      subjects=["ANNUAL LEAVE request submitted"])
 
-    # Auto-file rules  (folder_path = tuple of folder names from Inbox down)
+    # Auto-file rules
     rule_file("File - Reports - ITSRVXT",           folder_path=("Reports",),                         addresses=["itservxt@ox.ac.uk"])
     rule_file("File - Reports - PeopleXD Reports",  folder_path=("Reports",),                         addresses=["PeopleXDReports@theaccessgroup.com"])
     rule_file("File - Access Support - Team Cases", folder_path=("Access Group", "Team Cases"),       addresses=["support.access@theaccessgroup.com"], cc=True)
