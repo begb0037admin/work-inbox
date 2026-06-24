@@ -13,7 +13,7 @@ def main():
     ns      = outlook.GetNamespace("MAPI")
     inbox   = ns.GetDefaultFolder(6)   # olFolderInbox
 
-    # ── Phase 1: Folder structure ────────────────────────────────────────
+    # -- Phase 1: Folder structure --
     print("\nPhase 1 - Creating folders...")
 
     def mkf(parent, name):
@@ -47,14 +47,14 @@ def main():
 
     print("Phase 1 done")
 
-    # ── Helper: navigate to nested folder ───────────────────────────────
+    # Helper: navigate to nested folder
     def fld(*path):
         f = inbox
         for p in path:
             f = f.Folders[p]
         return f
 
-    # ── Phase 2: Rules ───────────────────────────────────────────────────
+    # -- Phase 2: Rules --
     print("\nPhase 2 - Creating rules...")
 
     rules = ns.DefaultStore.GetRules()
@@ -68,31 +68,14 @@ def main():
 
     created = skipped = failed = 0
 
-    def _base_rule(name):
-        """Create a new receive rule, return it or None."""
-        nonlocal created, skipped
+    def rule_delete(name, addresses=None, subjects=None, headers=None):
+        nonlocal created, skipped, failed
         if name in existing:
             skipped += 1
             print(f"  skip (exists): {name}")
-            return None
-        r = rules.Create(name, 0)  # 0 = olRuleReceive
-        return r
-
-    def _save_rule(r, name):
-        nonlocal created, failed
-        try:
-            r.StopProcessingMore = True
-            created += 1
-            print(f"  created: {name}")
-        except Exception as e:
-            failed += 1
-            print(f"  FAIL: {name} - {e}")
-
-    def rule_delete(name, addresses=None, subjects=None, headers=None):
-        r = _base_rule(name)
-        if r is None:
             return
         try:
+            r = rules.Create(name, 0)  # 0 = olRuleReceive
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
                 r.Conditions.SenderAddress.Enabled = True
@@ -103,17 +86,20 @@ def main():
                 r.Conditions.MessageHeader.Text = headers
                 r.Conditions.MessageHeader.Enabled = True
             r.Actions.Delete.Enabled = True
-            _save_rule(r, name)
+            created += 1
+            print(f"  created: {name}")
         except Exception as e:
-            global failed
             failed += 1
             print(f"  FAIL: {name} - {e}")
 
     def rule_file(name, dest, addresses=None, subjects=None, headers=None, cc=False):
-        r = _base_rule(name)
-        if r is None:
+        nonlocal created, skipped, failed
+        if name in existing:
+            skipped += 1
+            print(f"  skip (exists): {name}")
             return
         try:
+            r = rules.Create(name, 0)  # 0 = olRuleReceive
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
                 r.Conditions.SenderAddress.Enabled = True
@@ -127,12 +113,13 @@ def main():
                 r.Conditions.CC.Enabled = True
             r.Actions.MoveToFolder.Folder = dest
             r.Actions.MoveToFolder.Enabled = True
-            _save_rule(r, name)
+            created += 1
+            print(f"  created: {name}")
         except Exception as e:
             failed += 1
             print(f"  FAIL: {name} - {e}")
 
-    # ── Auto-delete rules (run first) ────────────────────────────────────
+    # Auto-delete rules (ordered first so they run before file rules)
     rule_delete("Del - Teams notifications",
         addresses=["no-reply@teams.mail.microsoft"])
 
@@ -169,9 +156,8 @@ def main():
     rule_delete("Del - Annual Leave system",
         subjects=["ANNUAL LEAVE request submitted"])
 
-    # ── Auto-file rules ──────────────────────────────────────────────────
-    # Access Support: CC rule first (higher priority = Team Cases),
-    # then catch-all for primary recipient (My Cases).
+    # Auto-file rules
+    # Access Support: CC rule first (Team Cases), then primary recipient (My Cases)
     rule_file("File - Access Support - Team Cases",
         dest=fld("Access Group", "Team Cases"),
         addresses=["support.access@theaccessgroup.com"],
@@ -217,16 +203,16 @@ def main():
         dest=fld("Team", "Asta Palmer"),
         addresses=["asta.palmer@admin.ox.ac.uk"])
 
-    # ── Save ─────────────────────────────────────────────────────────────
+    # Save
     try:
         rules.Save()
-        print(f"\nPhase 2 done — created:{created}  skipped:{skipped}  failed:{failed}")
+        print(f"\nPhase 2 done - created:{created}  skipped:{skipped}  failed:{failed}")
     except Exception as e:
         print(f"\nPhase 2 FAILED to save rules: {e}")
 
     print("\nSetup complete.")
     if failed:
-        print(f"  {failed} rule(s) failed — add these manually via Outlook Rules & Alerts.")
+        print(f"  {failed} rule(s) failed - add these manually via Outlook Rules & Alerts.")
     print("  To apply rules to existing emails:")
     print("    Outlook > Home > Rules > Manage Rules & Alerts > Run Rules Now")
 
