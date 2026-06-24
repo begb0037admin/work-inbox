@@ -1,11 +1,11 @@
 """
-Outlook Inbox Setup v3
+Outlook Inbox Setup v4
 Creates folder structure and rules per docs/INBOX_ORGANISATION.md
 Governance: pull from GitHub, run via Setup_Inbox.bat
 """
 import win32com.client
 
-VERSION = "v3-incremental"
+VERSION = "v4-fresh-refs"
 
 def main():
     print(f"Outlook Inbox Setup {VERSION}")
@@ -50,16 +50,21 @@ def main():
 
     print("Phase 1 done")
 
-    def fld(*path):
+    # Store folder EntryIDs so we can re-fetch fresh COM objects any time
+    def get_folder(*path):
+        """Always returns a fresh folder COM object via EntryID."""
         f = inbox
         for p in path:
             f = f.Folders[p]
-        return f
+        return ns.GetFolderFromID(f.EntryID, f.StoreID)
 
-    # -- Phase 2: Rules (incremental saves to identify failures) --
+    # -- Phase 2: Rules --
     print("\nPhase 2 - Creating rules...")
 
-    rules_obj = ns.DefaultStore.GetRules()
+    def fresh_rules():
+        return ns.DefaultStore.GetRules()
+
+    rules_obj = fresh_rules()
 
     existing = set()
     for i in range(1, rules_obj.Count + 1):
@@ -71,12 +76,16 @@ def main():
     counts = {"created": 0, "skipped": 0, "failed": 0}
 
     def save_one(name):
-        """Try to save. If rejected, remove this rule and restore clean state."""
+        """Try to save. If rejected, remove rule and restore clean state."""
+        nonlocal rules_obj
         try:
             rules_obj.Save()
             counts["created"] += 1
             print(f"  created: {name}")
+            # Re-fetch after every successful save so the next rule gets a clean object
+            rules_obj = fresh_rules()
         except Exception as se:
+            # Remove the rule we just added, then restore
             for i in range(rules_obj.Count, 0, -1):
                 try:
                     if rules_obj.Item(i).Name == name:
@@ -88,6 +97,7 @@ def main():
                         break
                 except Exception:
                     pass
+            rules_obj = fresh_rules()
             counts["failed"] += 1
             print(f"  FAIL (Outlook rejected): {name}")
 
@@ -113,12 +123,13 @@ def main():
             counts["failed"] += 1
             print(f"  FAIL (create error): {name} - {e}")
 
-    def rule_file(name, dest, addresses=None, subjects=None, headers=None, cc=False):
+    def rule_file(name, folder_path, addresses=None, subjects=None, headers=None, cc=False):
         if name in existing:
             counts["skipped"] += 1
             print(f"  skip (exists): {name}")
             return
         try:
+            dest = get_folder(*folder_path)  # fresh COM object every time
             r = rules_obj.Create(name, 0)
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
@@ -152,27 +163,27 @@ def main():
     rule_delete("Del - MetaCompliance",           headers=["@metacompliance.com"])
     rule_delete("Del - Annual Leave system",      subjects=["ANNUAL LEAVE request submitted"])
 
-    # Auto-file rules
-    rule_file("File - Reports - ITSRVXT",           dest=fld("Reports"),                         addresses=["itservxt@ox.ac.uk"])
-    rule_file("File - Reports - PeopleXD Reports",  dest=fld("Reports"),                         addresses=["PeopleXDReports@theaccessgroup.com"])
-    rule_file("File - Access Support - Team Cases", dest=fld("Access Group", "Team Cases"),      addresses=["support.access@theaccessgroup.com"], cc=True)
-    rule_file("File - Access Support - My Cases",   dest=fld("Access Group", "My Cases"),        addresses=["support.access@theaccessgroup.com"])
-    rule_file("File - PeopleXD System",             dest=fld("PeopleXD System"),                 addresses=["peoplexd@accessacloud.com"])
-    rule_file("File - Cority",                      dest=fld("H&S", "Cority"),                   headers=["@cority.com"])
-    rule_file("File - HR Broadcast",                dest=fld("Reference", "HR Broadcast"),       addresses=["hris@admin.ox.ac.uk"])
-    rule_file("File - ICT subject tag",             dest=fld("Reference", "ICT Mailing Lists"),  subjects=["[ict-a]"])
-    rule_file("File - ICT senders",                 dest=fld("Reference", "ICT Mailing Lists"),  addresses=["changenotifications@it.ox.ac.uk", "skills@it.ox.ac.uk"])
-    rule_file("File - Bodleian & Sector",           dest=fld("Reference", "Bodleian & Sector"),  headers=["@bodleian.ox.ac.uk", "@jiscmail.ac.uk"])
-    rule_file("File - Team James",                  dest=fld("Team", "James Salas Guillen"),      addresses=["james.salas-guillen@admin.ox.ac.uk"])
-    rule_file("File - Team Michael",                dest=fld("Team", "Michael O'Sullivan"),       addresses=["michael.osullivan@admin.ox.ac.uk"])
-    rule_file("File - Team Asta",                   dest=fld("Team", "Asta Palmer"),             addresses=["asta.palmer@admin.ox.ac.uk"])
+    # Auto-file rules  (folder_path = tuple of folder names from Inbox down)
+    rule_file("File - Reports - ITSRVXT",           folder_path=("Reports",),                         addresses=["itservxt@ox.ac.uk"])
+    rule_file("File - Reports - PeopleXD Reports",  folder_path=("Reports",),                         addresses=["PeopleXDReports@theaccessgroup.com"])
+    rule_file("File - Access Support - Team Cases", folder_path=("Access Group", "Team Cases"),       addresses=["support.access@theaccessgroup.com"], cc=True)
+    rule_file("File - Access Support - My Cases",   folder_path=("Access Group", "My Cases"),         addresses=["support.access@theaccessgroup.com"])
+    rule_file("File - PeopleXD System",             folder_path=("PeopleXD System",),                 addresses=["peoplexd@accessacloud.com"])
+    rule_file("File - Cority",                      folder_path=("H&S", "Cority"),                    headers=["@cority.com"])
+    rule_file("File - HR Broadcast",                folder_path=("Reference", "HR Broadcast"),        addresses=["hris@admin.ox.ac.uk"])
+    rule_file("File - ICT subject tag",             folder_path=("Reference", "ICT Mailing Lists"),   subjects=["[ict-a]"])
+    rule_file("File - ICT senders",                 folder_path=("Reference", "ICT Mailing Lists"),   addresses=["changenotifications@it.ox.ac.uk", "skills@it.ox.ac.uk"])
+    rule_file("File - Bodleian & Sector",           folder_path=("Reference", "Bodleian & Sector"),   headers=["@bodleian.ox.ac.uk", "@jiscmail.ac.uk"])
+    rule_file("File - Team James",                  folder_path=("Team", "James Salas Guillen"),       addresses=["james.salas-guillen@admin.ox.ac.uk"])
+    rule_file("File - Team Michael",                folder_path=("Team", "Michael O'Sullivan"),        addresses=["michael.osullivan@admin.ox.ac.uk"])
+    rule_file("File - Team Asta",                   folder_path=("Team", "Asta Palmer"),              addresses=["asta.palmer@admin.ox.ac.uk"])
 
     c = counts
     print(f"\nPhase 2 done - created:{c['created']}  skipped:{c['skipped']}  failed:{c['failed']}")
     print("\nSetup complete.")
     if c['failed']:
-        print(f"  {c['failed']} rule(s) rejected - see FAIL lines above for which ones.")
-        print("  Add those rules manually via Outlook Rules and Alerts.")
+        print(f"  {c['failed']} rule(s) rejected - see FAIL lines above.")
+        print("  Add those manually via Outlook Rules and Alerts.")
     print("  To apply rules to existing emails:")
     print("    Outlook > Home > Rules > Manage Rules & Alerts > Run Rules Now")
 
