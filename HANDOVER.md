@@ -1,7 +1,25 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-18 (drag-and-drop re-enabled and extended)
+**Last updated:** 2026-06-24
 **Status:** Active — pipeline working but scheduled runs unreliable (see Known Issues).
+
+---
+
+## Session 2026-06-24 — Inbox Organisation Complete
+
+Full inbox organisation completed based on analysis of 2,742 inbox + 377 sent emails (Dec 2025 – Jun 2026).
+
+| Item | Status | Detail |
+|---|---|---|
+| 19 folders created inside Inbox | ✅ Done | Access Group (My Cases, Team Cases), PeopleXD System, Reports, Team (Michael, Asta, James), H&S (Cority, DSE·IRIS·Risk Base), Projects (DTP1092, DTP1334, ePloy), Reference (HR Broadcast, ICT Mailing Lists, Bodleian & Sector), _Archive |
+| 12 auto-delete rules | ✅ Done | Created via Python COM. Del- prefix. Teams, GitHub, Access Group marketing, New Vacancy Notification, Cority status, DistroKid, Anthropic/Claude, Descript, Accessplanit, Skype voicemail, MetaCompliance, Annual Leave system |
+| 13 auto-file rules | ✅ Done | Created by Cowork via Outlook Rules Wizard UI (Python COM blocked by Oxford Exchange for MoveToFolder). Team James/Michael/Asta, Reports ITSRVXT/PeopleXD Reports, PeopleXD System, Cority, HR Broadcast, ICT subject/senders, Bodleian & Sector, Access My Cases/Team Cases |
+| Run Rules Now | ✅ Done | Inbox 362 → 170 (192 emails filed) |
+| data/inbox_export.json | ✅ Deleted | Commit cacbcfe |
+| surveys.theaccessgroup.com delete rule | ⚠️ Gap | One delete rule missed — Kevin to add manually via Rules Wizard (Del - Access Group surveys, from: surveys.theaccessgroup.com, move to Deleted Items) |
+
+Reference document: `docs/INBOX_ORGANISATION.md`
+Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 
 ---
 
@@ -31,7 +49,7 @@
 - Font sizes — increased throughout to match Command Centre scale: sidebar section headers 13px, calendar titles 15px, absence list 14px, section labels 14px, card titles 16px, user/date values 15px
 - open_email.py — openmail:// protocol registered, confirmed working
 - Task Scheduler — WorkInbox-Briefing runs at 7am/9am/11am/1pm/3pm/5pm Mon-Fri
-- Dashboard loads live briefing.json from GitHub on open, falls back to localStorage archive
+- Dashboard loads live briefing.json from GitHub on load, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
 - Time-of-day greeting (Good morning/afternoon/evening, Kevin) — UK timezone
 - Archive panel — past briefings by date, Load arrow to restore
@@ -208,11 +226,14 @@ grant the Claude GitHub App access to it).
   - `applyPriOverrides()` merges AI briefing items with custom dragged-in items before rendering.
 - Live on main: commit `727f50e`. PR #16 created as draft.
 
+---
+
 ## Roadmap
 
 | Priority | Task |
 |----------|------|
 | 0 | Clear KNOWN_ABSENCES for Marie (returned 13 Jun) and James (returned 18 Jun) from fetch_inbox.py |
+| 0 | Add missing delete rule manually: Del - Access Group surveys → from: surveys.theaccessgroup.com → move to Deleted Items |
 | 1 | AG FlexPoints: create repo begb0037admin/AG-FlexPoints, move ag-flexpoints/ contents to its root, enable Pages, set ACCESS_PORTAL_USER/ACCESS_PORTAL_PASSWORD env vars, pip install playwright, schedule weekly run |
 | 2 | Update Task Scheduler bat to auto-pull fetch_inbox.py before running |
 | 3 | Monitor card openmail:// click-through reliability |
