@@ -1,0 +1,21 @@
+name: Export Inbox History
+# Run once manually to export 6 months of inbox + sent metadata for inbox organisation analysis.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  export:
+    runs-on: self-hosted
+    steps:
+      - name: Configure git safe directory
+        shell: powershell
+        run: git config --global --add safe.directory C:/actions-runner/_work/work-inbox/work-inbox
+
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Run inbox history export
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+        run: python export_inbox_history.py
