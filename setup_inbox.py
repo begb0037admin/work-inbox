@@ -1,12 +1,14 @@
 """
-Outlook Inbox Setup
+Outlook Inbox Setup v3
 Creates folder structure and rules per docs/INBOX_ORGANISATION.md
 Governance: pull from GitHub, run via Setup_Inbox.bat
 """
 import win32com.client
 
+VERSION = "v3-incremental"
+
 def main():
-    print("Outlook Inbox Setup")
+    print(f"Outlook Inbox Setup {VERSION}")
     print("===================")
 
     outlook = win32com.client.Dispatch("Outlook.Application")
@@ -57,48 +59,45 @@ def main():
     # -- Phase 2: Rules (incremental saves to identify failures) --
     print("\nPhase 2 - Creating rules...")
 
-    rules = ns.DefaultStore.GetRules()
+    rules_obj = ns.DefaultStore.GetRules()
 
     existing = set()
-    for i in range(1, rules.Count + 1):
+    for i in range(1, rules_obj.Count + 1):
         try:
-            existing.add(rules.Item(i).Name)
+            existing.add(rules_obj.Item(i).Name)
         except Exception:
             pass
 
-    created = skipped = failed = 0
+    counts = {"created": 0, "skipped": 0, "failed": 0}
 
     def save_one(name):
-        """Try to save ruleset. If rejected, remove this rule and restore."""
-        nonlocal created, failed
+        """Try to save. If rejected, remove this rule and restore clean state."""
         try:
-            rules.Save()
-            created += 1
+            rules_obj.Save()
+            counts["created"] += 1
             print(f"  created: {name}")
-        except Exception:
-            # Remove the rule we just added and save the clean state
-            for i in range(rules.Count, 0, -1):
+        except Exception as se:
+            for i in range(rules_obj.Count, 0, -1):
                 try:
-                    if rules.Item(i).Name == name:
-                        rules.Remove(i)
+                    if rules_obj.Item(i).Name == name:
+                        rules_obj.Remove(i)
                         try:
-                            rules.Save()
+                            rules_obj.Save()
                         except Exception:
                             pass
                         break
                 except Exception:
                     pass
-            failed += 1
+            counts["failed"] += 1
             print(f"  FAIL (Outlook rejected): {name}")
 
     def rule_delete(name, addresses=None, subjects=None, headers=None):
-        nonlocal skipped
         if name in existing:
-            skipped += 1
+            counts["skipped"] += 1
             print(f"  skip (exists): {name}")
             return
         try:
-            r = rules.Create(name, 0)
+            r = rules_obj.Create(name, 0)
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
                 r.Conditions.SenderAddress.Enabled = True
@@ -111,18 +110,16 @@ def main():
             r.Actions.Delete.Enabled = True
             save_one(name)
         except Exception as e:
-            nonlocal failed
-            failed += 1
-            print(f"  FAIL: {name} - {e}")
+            counts["failed"] += 1
+            print(f"  FAIL (create error): {name} - {e}")
 
     def rule_file(name, dest, addresses=None, subjects=None, headers=None, cc=False):
-        nonlocal skipped
         if name in existing:
-            skipped += 1
+            counts["skipped"] += 1
             print(f"  skip (exists): {name}")
             return
         try:
-            r = rules.Create(name, 0)
+            r = rules_obj.Create(name, 0)
             if addresses:
                 r.Conditions.SenderAddress.Address = addresses
                 r.Conditions.SenderAddress.Enabled = True
@@ -138,43 +135,44 @@ def main():
             r.Actions.MoveToFolder.Enabled = True
             save_one(name)
         except Exception as e:
-            nonlocal failed
-            failed += 1
-            print(f"  FAIL: {name} - {e}")
+            counts["failed"] += 1
+            print(f"  FAIL (create error): {name} - {e}")
 
     # Auto-delete rules
-    rule_delete("Del - Teams notifications",    addresses=["no-reply@teams.mail.microsoft"])
-    rule_delete("Del - GitHub",                 addresses=["notifications@github.com", "noreply@github.com"])
-    rule_delete("Del - Access Group marketing", headers=["@go.theaccessgroup.com", "@surveys.theaccessgroup.com"])
+    rule_delete("Del - Teams notifications",      addresses=["no-reply@teams.mail.microsoft"])
+    rule_delete("Del - GitHub",                   addresses=["notifications@github.com", "noreply@github.com"])
+    rule_delete("Del - Access Group marketing",   headers=["@go.theaccessgroup.com", "@surveys.theaccessgroup.com"])
     rule_delete("Del - New Vacancy Notification", subjects=["New Vacancy Notification"])
-    rule_delete("Del - Cority status alerts",   addresses=["csn@mail.status.cority.com"])
-    rule_delete("Del - DistroKid",              headers=["@hello.distrokid.com"])
-    rule_delete("Del - Anthropic/Claude",       addresses=["no-reply@email.claude.com"])
-    rule_delete("Del - Descript marketing",     headers=["@marketing.descript.com"])
-    rule_delete("Del - Accessplanit",           headers=["@accessplanit.com"])
-    rule_delete("Del - Skype voicemail",        addresses=["no-reply@emails.skype.com"])
-    rule_delete("Del - MetaCompliance",         headers=["@metacompliance.com"])
-    rule_delete("Del - Annual Leave system",    subjects=["ANNUAL LEAVE request submitted"])
+    rule_delete("Del - Cority status alerts",     addresses=["csn@mail.status.cority.com"])
+    rule_delete("Del - DistroKid",                headers=["@hello.distrokid.com"])
+    rule_delete("Del - Anthropic/Claude",         addresses=["no-reply@email.claude.com"])
+    rule_delete("Del - Descript marketing",       headers=["@marketing.descript.com"])
+    rule_delete("Del - Accessplanit",             headers=["@accessplanit.com"])
+    rule_delete("Del - Skype voicemail",          addresses=["no-reply@emails.skype.com"])
+    rule_delete("Del - MetaCompliance",           headers=["@metacompliance.com"])
+    rule_delete("Del - Annual Leave system",      subjects=["ANNUAL LEAVE request submitted"])
 
     # Auto-file rules
-    rule_file("File - Reports - ITSRVXT",           dest=fld("Reports"),                          addresses=["itservxt@ox.ac.uk"])
-    rule_file("File - Reports - PeopleXD Reports",  dest=fld("Reports"),                          addresses=["PeopleXDReports@theaccessgroup.com"])
-    rule_file("File - Access Support - Team Cases", dest=fld("Access Group", "Team Cases"),       addresses=["support.access@theaccessgroup.com"], cc=True)
-    rule_file("File - Access Support - My Cases",   dest=fld("Access Group", "My Cases"),         addresses=["support.access@theaccessgroup.com"])
-    rule_file("File - PeopleXD System",             dest=fld("PeopleXD System"),                  addresses=["peoplexd@accessacloud.com"])
-    rule_file("File - Cority",                      dest=fld("H&S", "Cority"),                    headers=["@cority.com"])
-    rule_file("File - HR Broadcast",                dest=fld("Reference", "HR Broadcast"),        addresses=["hris@admin.ox.ac.uk"])
-    rule_file("File - ICT subject tag",             dest=fld("Reference", "ICT Mailing Lists"),   subjects=["[ict-a]"])
-    rule_file("File - ICT senders",                dest=fld("Reference", "ICT Mailing Lists"),   addresses=["changenotifications@it.ox.ac.uk", "skills@it.ox.ac.uk"])
-    rule_file("File - Bodleian & Sector",          dest=fld("Reference", "Bodleian & Sector"),   headers=["@bodleian.ox.ac.uk", "@jiscmail.ac.uk"])
-    rule_file("File - Team James",                 dest=fld("Team", "James Salas Guillen"),       addresses=["james.salas-guillen@admin.ox.ac.uk"])
-    rule_file("File - Team Michael",               dest=fld("Team", "Michael O'Sullivan"),        addresses=["michael.osullivan@admin.ox.ac.uk"])
-    rule_file("File - Team Asta",                  dest=fld("Team", "Asta Palmer"),              addresses=["asta.palmer@admin.ox.ac.uk"])
+    rule_file("File - Reports - ITSRVXT",           dest=fld("Reports"),                         addresses=["itservxt@ox.ac.uk"])
+    rule_file("File - Reports - PeopleXD Reports",  dest=fld("Reports"),                         addresses=["PeopleXDReports@theaccessgroup.com"])
+    rule_file("File - Access Support - Team Cases", dest=fld("Access Group", "Team Cases"),      addresses=["support.access@theaccessgroup.com"], cc=True)
+    rule_file("File - Access Support - My Cases",   dest=fld("Access Group", "My Cases"),        addresses=["support.access@theaccessgroup.com"])
+    rule_file("File - PeopleXD System",             dest=fld("PeopleXD System"),                 addresses=["peoplexd@accessacloud.com"])
+    rule_file("File - Cority",                      dest=fld("H&S", "Cority"),                   headers=["@cority.com"])
+    rule_file("File - HR Broadcast",                dest=fld("Reference", "HR Broadcast"),       addresses=["hris@admin.ox.ac.uk"])
+    rule_file("File - ICT subject tag",             dest=fld("Reference", "ICT Mailing Lists"),  subjects=["[ict-a]"])
+    rule_file("File - ICT senders",                 dest=fld("Reference", "ICT Mailing Lists"),  addresses=["changenotifications@it.ox.ac.uk", "skills@it.ox.ac.uk"])
+    rule_file("File - Bodleian & Sector",           dest=fld("Reference", "Bodleian & Sector"),  headers=["@bodleian.ox.ac.uk", "@jiscmail.ac.uk"])
+    rule_file("File - Team James",                  dest=fld("Team", "James Salas Guillen"),      addresses=["james.salas-guillen@admin.ox.ac.uk"])
+    rule_file("File - Team Michael",                dest=fld("Team", "Michael O'Sullivan"),       addresses=["michael.osullivan@admin.ox.ac.uk"])
+    rule_file("File - Team Asta",                   dest=fld("Team", "Asta Palmer"),             addresses=["asta.palmer@admin.ox.ac.uk"])
 
-    print(f"\nPhase 2 done - created:{created}  skipped:{skipped}  failed:{failed}")
+    c = counts
+    print(f"\nPhase 2 done - created:{c['created']}  skipped:{c['skipped']}  failed:{c['failed']}")
     print("\nSetup complete.")
-    if failed:
-        print(f"  {failed} rule(s) were rejected by Outlook - see FAIL lines above.")
+    if c['failed']:
+        print(f"  {c['failed']} rule(s) rejected - see FAIL lines above for which ones.")
+        print("  Add those rules manually via Outlook Rules and Alerts.")
     print("  To apply rules to existing emails:")
     print("    Outlook > Home > Rules > Manage Rules & Alerts > Run Rules Now")
 
