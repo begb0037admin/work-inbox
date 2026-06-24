@@ -28,6 +28,7 @@ def main():
     mkf(ag, "My Cases")
     mkf(ag, "Team Cases")
     mkf(inbox, "PeopleXD System")
+    mkf(inbox, "Reports")
     team = mkf(inbox, "Team")
     mkf(team, "Michael O'Sullivan")
     mkf(team, "Asta Palmer")
@@ -157,6 +158,14 @@ def main():
         subjects=["ANNUAL LEAVE request submitted"])
 
     # Auto-file rules
+    rule_file("File - Reports - ITSRVXT",
+        dest=fld("Reports"),
+        addresses=["itservxt@ox.ac.uk"])
+
+    rule_file("File - Reports - PeopleXD Reports",
+        dest=fld("Reports"),
+        addresses=["PeopleXDReports@theaccessgroup.com"])
+
     # Access Support: CC rule first (Team Cases), then primary recipient (My Cases)
     rule_file("File - Access Support - Team Cases",
         dest=fld("Access Group", "Team Cases"),
