@@ -5,6 +5,27 @@
 
 ---
 
+## Session 2026-06-25 — Command Centre updated from HR Systems Managers Meeting 24/06
+
+No changes to the work-inbox pipeline this session. The session focused on reviewing Granola notes from the HR Systems Managers Meeting (24 June 2026) and applying the resulting task updates to `begb0037admin/command-centre/data/tasks.json`.
+
+**Key items from the meeting that may surface in inbox or future briefings:**
+
+| Topic | Status | What to watch for |
+|---|---|---|
+| REF attributes via ESS | Active — scoping meeting to be set by Nathan | Invite from Nathan (Kevin, Simon, Michelle); avoid Thu 25 Jun |
+| SHSMS Evaluation (DTP1334) | Active — follow-up by 2 July | Evaluator briefing invites (14 Jul); scoring 65/30/5 confirmed |
+| Sickness Absence open bug | Active — Kevin investigating | Emails from Simon Burford re pay impact |
+| WFM / GLAM Rostering | Active — resolution meeting to be set | Calendar invite: Kevin, Simon, Marie, Michelle, Julie |
+| Holiday Records (case 69001638) | Active — scheduling to be agreed | Access Group consultant contact (within 3 weeks of 24 Jun) |
+| DPIA Stage 7 | Urgent — 30 Jun deadline | Chase from Kevin to Marie re signature |
+| HR Reporting SSO Migration | Active — VS2022 licensing blocker | No emails expected until licensing resolved |
+| Volunteering Hours | Active — Kevin to forward thread to Marie | Matt Thomas thread to forward |
+
+**tasks.json state after this session:** 30 active tasks. New SHA `cd0b540cfca6e22426fb2e46335cd8a10c1308d3`. Commit `fd675769ec40187cb9d71eaebac78503538a5d5a`.
+
+---
+
 ## Session 2026-06-25 — Roadmap Cleared
 
 All outstanding roadmap items confirmed resolved by Kevin:
