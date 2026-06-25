@@ -229,6 +229,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .pri-meta-label { font-size: 10px; font-weight: 700; color: var(--text-very-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 5px; }
 .pri-meta-notes { width: 100%; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
 .pri-notes-text { margin-top: 4px; }
+.pri-meta-lastupdate { width: 100%; font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 
 /* Priority drag-and-drop */
 .pri-drag-handle { font-size: 11px; color: var(--text-very-muted); cursor: grab; flex-shrink: 0; letter-spacing: -1px; user-select: none; }
@@ -803,9 +804,11 @@ function renderPriorityCards(priorities,key,sec){
     const _combined=titleSub?titleText+' – '+titleSub:titleText;
     const _oneLine=!titleSub||_tw(_combined,_titleFont)<=_availW;
     const summaryHtml=p.ai_summary?`<div class="pri-ai-summary">${sanitizeSub(p.ai_summary)}</div>`:'';
+    const _statusText=p.status||p.summary||null;
     const metaHtml=`<div class="pri-meta">
       ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
       ${p.dateAdded?`<span class="pri-meta-item"><span class="pri-meta-label">Added</span>${p.dateAdded}</span>`:''}
+      ${_statusText?`<div class="pri-meta-lastupdate"><span class="pri-meta-label">Status</span>${sanitizeSub(_statusText)}</div>`:''}
       ${p.notes?`<div class="pri-meta-notes"><span class="pri-meta-label">Notes</span><div class="pri-notes-text">${sanitizeSub(p.notes)}</div></div>`:''}
     </div>`;
     return `<div class="pri-card${ticked?' done':''}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
