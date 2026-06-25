@@ -7,6 +7,8 @@
 
 ## Session 2026-06-25 — Command Centre updated from HR Systems Managers Meeting 24/06
 
+**Note: Command Centre and Work Inbox work in tandem. Changes to tasks.json in CC are reflected here; inbox triage automation (Phase 3.6) writes back to CC. Both HANDOVERs must be kept in sync.**
+
 No changes to the work-inbox pipeline this session. The session focused on reviewing Granola notes from the HR Systems Managers Meeting (24 June 2026) and applying the resulting task updates to `begb0037admin/command-centre/data/tasks.json`.
 
 **Key items from the meeting that may surface in inbox or future briefings:**
@@ -22,7 +24,18 @@ No changes to the work-inbox pipeline this session. The session focused on revie
 | HR Reporting SSO Migration | Active — VS2022 licensing blocker | No emails expected until licensing resolved |
 | Volunteering Hours | Active — Kevin to forward thread to Marie | Matt Thomas thread to forward |
 
-**tasks.json state after this session:** 30 active tasks. New SHA `cd0b540cfca6e22426fb2e46335cd8a10c1308d3`. Commit `fd675769ec40187cb9d71eaebac78503538a5d5a`.
+**Follow-up cleanup pass (same session):** Several session corrections did not apply cleanly on the initial write (likely overwritten by inbox automation between writes). A second pass applied the following:
+
+| Change | Detail |
+|---|---|
+| t1781099880461 deleted | 10 Jun Holiday Records duplicate removed — 11 Jun task (t1781204987882) is the definitive record with full Managers Meeting context |
+| t028 deleted | UKVI Skilled Workers — Kevin confirmed not taking forward |
+| t015 updated | Web pages / URL linking — E-Form save bug (case 69001555) confirmed fixed by Maura McGlynn (AG) across Production, OXU, OXZ; URL updates now unblocked |
+| t025 title fixed | Corrected to "Support cover w/c 6 July" (was incorrectly showing 1 July) |
+| t003 closed | Flex Points Plan marked done |
+| t022 closed | Pop Notes to Chris — Cority PUG minutes sent to Christopher Sanders, resolved |
+
+**tasks.json state after cleanup pass:** 35 active tasks. Commit `b0326d0` (25 Jun 2026).
 
 ---
 
