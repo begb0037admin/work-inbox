@@ -18,6 +18,20 @@
 
 ---
 
+## Next — CC Task Cards in Work Inbox (t040) ⏳ (ready to build)
+
+**Summary:** Work Inbox fetches `command-centre/data/tasks.json` on load and renders Today and This Week CC tasks as cards in the priority panel — alongside inbox email cards. Closes the gap where CC tasks with emails older than 50 messages never appear in Work Inbox.
+
+**Card design:** Title + Status line + Email tag (openmail:// via entryId, only if set) + CC tag (links to command-centre task). Visually distinct from inbox email cards. Parked and done tasks excluded.
+
+**Status fields:** All active CC tasks now have `status` fields populated (25 Jun 2026 session). Status field is the one-liner shown on each card.
+
+**Also in this session:** Merge status-field changes from holding branch `claude/gifted-mendel-1c733f` to main after visual approval.
+
+**Prerequisite:** Visual approval (screenshot) from Kevin before push to main.
+
+---
+
 ## Planned — AI Chat Panel ⏳ (post command-centre migration)
 
 **Prerequisite:** command-centre file split & Cloudflare Pages migration complete and stable. work-inbox follows the same migration pattern once command-centre is proven (per migration plan dated 2026-06-25).
