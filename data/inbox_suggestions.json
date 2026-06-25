@@ -1,61 +1,61 @@
 {
-  "generated_at": "2026-06-24 08:30",
+  "generated_at": "2026-06-25 09:05",
   "new_tasks": [
     {
-      "title": "Provide reference for Nikolas Sharkey -- URGENT",
-      "tier": "today",
-      "description": "TSS Enquiries received urgent reference request on 23 June at 12:11 for Nikolas Sharkey being considered for temporary vacancies. Kevin is listed as referee. Now over 48 hours without response -- employment verification needed today.",
-      "email_subject": "Urgent Reference Request for Nikolas Sharkey",
-      "email_from": "TSS Enquiries",
-      "received": "2026-06-23 12:11",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C140000"
-    },
-    {
-      "title": "Review LOD agreement scope -- Task# 50960484 / Incident# 11687334",
-      "tier": "tomorrow",
-      "description": "Simon Burford asked whether there is an LOD agreement covering Incident #11687334. Michael O'Sullivan questioned whether original scope included a Talent Admin function in POD. Kevin needs to clarify what agreements exist and scope alignment.",
-      "email_subject": "RE: P5 Task assigned to you - Task# 50960484 for Incident# 11687334",
-      "email_from": "Simon Burford",
-      "received": "2026-06-17 11:18",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000783912D710000"
-    },
-    {
-      "title": "Review UKVI Skilled Workers update from CoreHR HEI Group",
+      "title": "Review UOX case 69001655 catch-up from Maura McGlynn",
       "tier": "week",
-      "description": "CoreHR HEI Group circulated email on 23 June regarding UKVI requirements for Skilled Workers -- likely changes to salary thresholds, employer reporting, or record-keeping. Kevin needs to read, assess impact on Oxford, and determine if action needed.",
-      "email_subject": "UKVI requirement for Skilled Workers",
-      "email_from": "CoreHR HEI Group",
-      "received": "2026-06-23 15:21",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1B0000"
+      "description": "Maura McGlynn sent a catch-up email on case 69001655 and indicated a Devs call may be arranged. Kevin needs to review the full email content and assess next steps, as this case has been escalated and is currently in progress with the development team.",
+      "email_subject": "UOX case 69001655 Catch-Up",
+      "email_from": "Maura McGlynn",
+      "received": "2026-06-24 16:20",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7120000"
     }
   ],
   "applied_updates": [
     {
+      "task_id": "t030",
+      "task_title": "Cority SFTP production feed error -- 22 June",
+      "note": "Cority SFTP connection error confirmed on 22 June at 17:15; CHI Team has been notified and is working on resolution.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-06-22 17:15",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-06-22 18:16",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663360000"
+    },
+    {
       "task_id": "t016",
       "task_title": "DSE data feed issues -- post go-live",
-      "note": "Tony Boydell has drafted and refined the change request (Azure CR 126017) excluding SBS users from DSE feed; Kevin's sign-off now requested.",
+      "note": "Kevin requested access to the Azure CR 126017 link from Tony Boydell to review the SBS user exclusion change.",
       "email_subject": "Re: DSE System - exclude SBS users ",
-      "email_from": "Tony Boydell",
-      "received": "2026-06-23 15:18",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1A0000"
+      "email_from": "Kevin (sent to: Tony Boydell; James Salas Guillen; Erika Braverman)",
+      "received": "2026-06-24 13:32",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EEB0000"
     },
     {
-      "task_id": "t021",
-      "task_title": "FP 68261303 -- Multi Company Setup",
-      "note": "Simon Burford updated Conor O'Brien on 23 June with the project team's post-design proposal for multi-company setup.",
-      "email_subject": "RE: Support cover for first two weeks in July",
-      "email_from": "Julie Hickman",
-      "received": "2026-06-23 15:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000"
+      "task_id": "t022",
+      "task_title": "Send POC meeting notes to Chris",
+      "note": "Kevin sent Cority Product User Group meeting minutes (16 June 2026) to Christopher Sanders, partially fulfilling the POC notes action.",
+      "email_subject": "Minutes – Cority Product User Group (PUG), 16 June 2026",
+      "email_from": "Kevin (sent to: Christopher Sanders)",
+      "received": "2026-06-24 08:51",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EE60000"
     },
     {
-      "task_id": "t025",
-      "task_title": "Support cover w/c 1 July -- plan needed today",
-      "note": "Julie Hickman confirmed on 23 June that both Michael O'Sullivan AND Emma are on leave w/c 1 July, leaving no first-line support cover for that week.",
-      "email_subject": "RE: Support cover for first two weeks in July",
-      "email_from": "Julie Hickman",
-      "received": "2026-06-23 15:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000"
+      "task_id": "t026",
+      "task_title": "Owner Required -- Task# 50959264 / ServiceReq# 30412906",
+      "note": "Kevin escalated case 69001655 to Sarah Murphy on 19 June, requesting assistance with the ownership/task assignment issue.",
+      "email_subject": "Escalation Request – Case 69001655",
+      "email_from": "Kevin (sent to: Sarah Murphy)",
+      "received": "2026-06-19 12:50",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000784F08A3A0000"
+    },
+    {
+      "task_id": "t026",
+      "task_title": "Owner Required -- Task# 50959264 / ServiceReq# 30412906",
+      "note": "Kevin updated the ticket for case 69001655 with information for the Dev team and asked Sarah Murphy to progress it further.",
+      "email_subject": "Re: #External# Escalation Request – Case 69001655",
+      "email_from": "Kevin (sent to: Sarah Murphy)",
+      "received": "2026-06-24 12:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EE90000"
     }
   ]
 }
