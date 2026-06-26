@@ -9,10 +9,11 @@ Run via PowerShell — always downloads latest from GitHub before running.
 import win32com.client
 from collections import defaultdict
 
-SAMPLE_SIZE = 5  # number of example subjects to show per year
+SAMPLE_SIZE = 5   # number of example subjects to show per year
+OL_MAIL_ITEM = 43  # Outlook mail item class constant
 
 
-def collect_items(folder, archive_entry_id, results, scanned, depth=0):
+def collect_items(folder, archive_entry_id, results, scanned, type_counts):
     """Recursively collect (year, subject) tuples, skipping _Archive."""
     if folder.EntryID == archive_entry_id:
         return
@@ -24,14 +25,17 @@ def collect_items(folder, archive_entry_id, results, scanned, depth=0):
     for i in range(1, count + 1):
         try:
             item = items[i]
-            year = item.ReceivedTime.year
-            subject = item.Subject
-            results[year].append(subject)
-        except Exception:
-            pass  # skip contacts, calendar items, corrupted entries
+            item_class = item.Class
+            type_counts[item_class] = type_counts.get(item_class, 0) + 1
+            if item_class == OL_MAIL_ITEM:
+                year = item.ReceivedTime.year
+                subject = item.Subject
+                results[year].append(subject)
+        except Exception as e:
+            type_counts["error"] = type_counts.get("error", 0) + 1
 
     for subfolder in folder.Folders:
-        collect_items(subfolder, archive_entry_id, results, scanned, depth + 1)
+        collect_items(subfolder, archive_entry_id, results, scanned, type_counts)
 
 
 def main():
@@ -53,16 +57,21 @@ def main():
     print("Scanning Inbox and all subfolders (read-only)...\n")
     results = defaultdict(list)
     scanned = [0]
-    collect_items(inbox, archive_entry_id, results, scanned)
+    type_counts = {}
+    collect_items(inbox, archive_entry_id, results, scanned, type_counts)
 
     print(f"Total items scanned: {scanned[0]}")
-    print(f"Total emails found with a ReceivedTime: {sum(len(v) for v in results.values())}")
-    print()
+    print(f"Total mail items (Class 43) found: {sum(len(v) for v in results.values())}")
+
+    print("\nItem type breakdown (Outlook class codes):")
+    print("  43=Mail  45=Appointment  46=Contact  48=Task  others=misc")
+    for cls in sorted(type_counts.keys(), key=lambda x: (str(x))):
+        print(f"  Class {cls}: {type_counts[cls]} items")
 
     if not results:
-        print("No emails found.")
+        print("\nNo mail items found.")
     else:
-        print("Breakdown by year:")
+        print("\nMail breakdown by year:")
         print("-" * 50)
         for year in sorted(results.keys(), reverse=True):
             subjects = results[year]
