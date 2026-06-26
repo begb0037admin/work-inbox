@@ -57,6 +57,7 @@ Set these to move to Deleted Items (gives a safety net for 30 days).
 | MetaCompliance | From: noreply@metacompliance.com |
 | Annual Leave system | Subject starts with: "ANNUAL LEAVE request submitted" |
 | Sonarworks marketing | From domain: sonarworks.com |
+| EcoOnline marketing | From domain: ecoonline.com |
 
 ---
 
@@ -116,6 +117,16 @@ Anything not matched by a rule above, plus these senders are never auto-filed:
 |---|---|
 | 24 Jun 2026 | Initial setup — 12 delete rules + 13 file rules created |
 | 26 Jun 2026 | Added Del - Sonarworks (sonarworks.com marketing) |
+| 26 Jun 2026 | Added Del - EcoOnline (ecoonline.com marketing) |
+
+---
+
+## Adding New Delete Rules
+Use `add_delete_rule.py` (in repo root). Download and run:
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/add_delete_rule.py?t=$(Get-Date -Format 'yyyyMMddHHmmss')" -OutFile "$env:TEMP\add_delete_rule.py"
+python "$env:TEMP\add_delete_rule.py" "Del - SenderName" "@domain.com"
+```
 
 ---
 
