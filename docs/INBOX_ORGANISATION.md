@@ -1,6 +1,6 @@
 # Inbox Organisation Reference
 > Based on analysis of 2,742 inbox + 377 sent emails, Dec 2025 – Jun 2026.
-> Last updated: 24 Jun 2026
+> Last updated: 26 Jun 2026
 
 ## Folder Structure
 
@@ -56,6 +56,7 @@ Set these to move to Deleted Items (gives a safety net for 30 days).
 | Skype voicemail | From: no-reply@emails.skype.com |
 | MetaCompliance | From: noreply@metacompliance.com |
 | Annual Leave system | Subject starts with: "ANNUAL LEAVE request submitted" |
+| Sonarworks marketing | From domain: sonarworks.com |
 
 ---
 
@@ -109,27 +110,12 @@ Anything not matched by a rule above, plus these senders are never auto-filed:
 
 ---
 
-## Next Steps
+## Rule Change Log
 
-### 1. Create folders in Outlook
-In Outlook, right-click your mailbox name > New Folder. Build the structure above. Do this before creating rules so the destinations exist.
-
-### 2. Set up rules (Outlook Rules Wizard)
-Home tab > Rules > Manage Rules & Alerts > New Rule. Work through the auto-delete list first, then auto-file. Apply each rule to existing messages when prompted — this will bulk-sort your current inbox immediately.
-
-Order matters — run auto-delete rules before auto-file rules so marketing/noise is gone before filing logic runs.
-
-### 3. Bulk-sort existing inbox
-After rules are created and applied to existing messages, your current inbox will be significantly smaller. Manually review what remains and move anything obvious to _Archive.
-
-### 4. Review after 2 weeks
-Check which auto-file folders are filling up and whether anything is landing in the wrong place. Adjust rules as needed.
-
-### 5. Update fetch_inbox.py VIP list (optional improvement)
-The VIP_NAMES and VIP_EMAILS lists in fetch_inbox.py can be tightened now that we know who your real signal senders are. Conor O'Brien and Mike West from Access Group are already high-read-rate contacts worth keeping on the VIP list.
-
-### 6. Clean up repo
-Once the organisation is done, delete `data/inbox_export.json` from this repo — it contains email metadata that does not need to be stored long-term.
+| Date | Change |
+|---|---|
+| 24 Jun 2026 | Initial setup — 12 delete rules + 13 file rules created |
+| 26 Jun 2026 | Added Del - Sonarworks (sonarworks.com marketing) |
 
 ---
 
