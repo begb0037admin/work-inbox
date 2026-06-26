@@ -1,5 +1,5 @@
 """
-scan_inbox_by_year.py
+scan_inbox_by_year.py  v4
 READ-ONLY diagnostic scan. Does NOT move or modify anything.
 Scans Inbox and all subfolders recursively.
 Reports email counts by year with sample subjects.
@@ -12,8 +12,10 @@ from collections import defaultdict
 SAMPLE_SIZE = 5    # number of example subjects to show per year
 OL_MAIL_ITEM = 43  # Outlook mail item class constant
 
+print("Script version: v4")
 
-def collect_items(folder, archive_entry_id, results, scanned, type_counts):
+
+def collect_items(folder, ns, archive_entry_id, results, scanned, type_counts):
     """Recursively collect (year, subject) tuples, skipping _Archive."""
     if folder.EntryID == archive_entry_id:
         return
@@ -21,22 +23,31 @@ def collect_items(folder, archive_entry_id, results, scanned, type_counts):
     items = folder.Items
     scanned[0] += items.Count
 
-    # Direct iteration holds the COM reference correctly (index access releases it)
+    # Collect EntryIDs first (lightweight — avoids full item download)
+    entry_ids = []
     for item in items:
         try:
-            item_class = item.Class
-            type_counts[item_class] = type_counts.get(item_class, 0) + 1
+            if item.Class == OL_MAIL_ITEM:
+                entry_ids.append(item.EntryID)
+            else:
+                type_counts[item.Class] = type_counts.get(item.Class, 0) + 1
+        except Exception:
+            type_counts["id_error"] = type_counts.get("id_error", 0) + 1
 
-            if item_class == OL_MAIL_ITEM:
-                year = item.ReceivedTime.year
-                subject = item.Subject
-                results[year].append(subject)
+    type_counts[OL_MAIL_ITEM] = type_counts.get(OL_MAIL_ITEM, 0) + len(entry_ids)
 
+    # Resolve each mail item via GetItemFromID to force full property load
+    for entry_id in entry_ids:
+        try:
+            mail = ns.GetItemFromID(entry_id)
+            year = mail.ReceivedTime.year
+            subject = mail.Subject
+            results[year].append(subject)
         except Exception as e:
-            type_counts["error"] = type_counts.get("error", 0) + 1
+            type_counts["resolve_error"] = type_counts.get("resolve_error", 0) + 1
 
     for subfolder in folder.Folders:
-        collect_items(subfolder, archive_entry_id, results, scanned, type_counts)
+        collect_items(subfolder, ns, archive_entry_id, results, scanned, type_counts)
 
 
 def main():
@@ -59,15 +70,15 @@ def main():
     results = defaultdict(list)
     scanned = [0]
     type_counts = {}
-    collect_items(inbox, archive_entry_id, results, scanned, type_counts)
+    collect_items(inbox, ns, archive_entry_id, results, scanned, type_counts)
 
     print(f"Total items scanned: {scanned[0]}")
-    print(f"Total mail items found: {sum(len(v) for v in results.values())}")
+    print(f"Total mail items resolved: {sum(len(v) for v in results.values())}")
 
-    print("\nItem type breakdown:")
+    print("\nItem type / error breakdown:")
     print("  43=Mail  45=Appointment  46=Contact  48=Task")
     for cls in sorted(type_counts.keys(), key=lambda x: str(x)):
-        print(f"  Class {cls}: {type_counts[cls]}")
+        print(f"  {cls}: {type_counts[cls]}")
 
     if not results:
         print("\nNo mail items found.")
