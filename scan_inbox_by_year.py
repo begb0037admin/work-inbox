@@ -9,8 +9,10 @@ Run via PowerShell — always downloads latest from GitHub before running.
 import win32com.client
 from collections import defaultdict
 
-SAMPLE_SIZE = 5   # number of example subjects to show per year
+SAMPLE_SIZE = 5    # number of example subjects to show per year
 OL_MAIL_ITEM = 43  # Outlook mail item class constant
+
+first_error_logged = [False]
 
 
 def collect_items(folder, archive_entry_id, results, scanned, type_counts):
@@ -27,12 +29,41 @@ def collect_items(folder, archive_entry_id, results, scanned, type_counts):
             item = items[i]
             item_class = item.Class
             type_counts[item_class] = type_counts.get(item_class, 0) + 1
+
             if item_class == OL_MAIL_ITEM:
-                year = item.ReceivedTime.year
-                subject = item.Subject
-                results[year].append(subject)
+                # Try ReceivedTime first, fall back to SentOn
+                received = None
+                try:
+                    received = item.ReceivedTime
+                except Exception as e:
+                    if not first_error_logged[0]:
+                        print(f"  [DEBUG] ReceivedTime failed on item {i}: {e}")
+                        try:
+                            print(f"  [DEBUG] Subject: {item.Subject}")
+                            print(f"  [DEBUG] SentOn: {item.SentOn}")
+                        except Exception as e2:
+                            print(f"  [DEBUG] SentOn also failed: {e2}")
+                        first_error_logged[0] = True
+                    try:
+                        received = item.SentOn
+                    except Exception:
+                        pass
+
+                if received is not None:
+                    try:
+                        year = received.year
+                        subject = item.Subject
+                        results[year].append(subject)
+                    except Exception as e:
+                        if not first_error_logged[0]:
+                            print(f"  [DEBUG] .year failed: {e}, type={type(received)}, value={received}")
+                            first_error_logged[0] = True
+                        type_counts["year_error"] = type_counts.get("year_error", 0) + 1
+                else:
+                    type_counts["no_date"] = type_counts.get("no_date", 0) + 1
+
         except Exception as e:
-            type_counts["error"] = type_counts.get("error", 0) + 1
+            type_counts["outer_error"] = type_counts.get("outer_error", 0) + 1
 
     for subfolder in folder.Folders:
         collect_items(subfolder, archive_entry_id, results, scanned, type_counts)
@@ -60,13 +91,12 @@ def main():
     type_counts = {}
     collect_items(inbox, archive_entry_id, results, scanned, type_counts)
 
-    print(f"Total items scanned: {scanned[0]}")
-    print(f"Total mail items (Class 43) found: {sum(len(v) for v in results.values())}")
+    print(f"\nTotal items scanned: {scanned[0]}")
+    print(f"Total mail items found: {sum(len(v) for v in results.values())}")
 
-    print("\nItem type breakdown (Outlook class codes):")
-    print("  43=Mail  45=Appointment  46=Contact  48=Task  others=misc")
-    for cls in sorted(type_counts.keys(), key=lambda x: (str(x))):
-        print(f"  Class {cls}: {type_counts[cls]} items")
+    print("\nItem type / error breakdown:")
+    for cls in sorted(type_counts.keys(), key=lambda x: str(x)):
+        print(f"  {cls}: {type_counts[cls]}")
 
     if not results:
         print("\nNo mail items found.")
@@ -76,7 +106,6 @@ def main():
         for year in sorted(results.keys(), reverse=True):
             subjects = results[year]
             print(f"\n  {year}: {len(subjects)} emails")
-            print(f"  Sample subjects:")
             for s in subjects[:SAMPLE_SIZE]:
                 print(f"    - {s}")
             if len(subjects) > SAMPLE_SIZE:
