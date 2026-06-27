@@ -1,9 +1,35 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-25
+**Last updated:** 2026-06-27 (file split complete — wi.lelitte.co.uk live)
 **Status:** Active — pipeline fully working, roadmap clear.
 
 ---
+
+---
+
+## Session 2026-06-27 — File split + Cloudflare custom domain
+
+**File split:** 65KB monolithic `index.html` split into 3 files via atomic Git Tree API commit.
+
+| File | SHA | Size |
+|---|---|---|
+| `index.html` (shell) | `94272f1b` | 13,957 chars |
+| `css/styles.css` | `1b1d1f60` | 18,481 chars |
+| `js/app.js` | `cc8a0a9d` | 32,615 chars |
+
+**Archive backup:** `Archive/index_backup_20260627.html` — SHA `9f168db4` (matches pre-split live file).
+
+**Atomic commit:** `450d5d62`
+
+**Cloudflare deployment:** `wi.lelitte.co.uk` — live and confirmed loading. Cloudflare Worker connected to `begb0037admin/work-inbox` (main branch), auto-deploys on push.
+
+**CORS:** `cc-tasks-writer` updated — `https://wi.lelitte.co.uk` added to `CORS_ORIGINS`.
+
+**CC link updated:** Tasks widget "Open command centre" link updated from GitHub Pages URL to `https://cc.lelitte.co.uk/`.
+
+**Unicode chars preserved:** 22 in JS, 7 in CSS, 3 in HTML — all handled correctly via Python binary base64 encoding. Mojibake constraint maintained.
+
+**Note:** Dashboard shows stale briefing on Mac — expected. `fetch_inbox.py` is Windows-only (Outlook COM). Dashboard display works on any browser.
 
 ## Session 2026-06-25 — Command Centre updated from HR Systems Managers Meeting 24/06
 
@@ -77,7 +103,9 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 | Component | Description |
 |-----------|-------------|
 | fetch_inbox.py | Outlook COM via pywin32. Pulls inbox → Anthropic triage (claude-haiku-4-5) → Python post-processing → pushes data/briefing.json to GitHub via Contents API |
-| index.html | Static GitHub Pages dashboard at begb0037admin.github.io/work-inbox/ |
+| index.html | Shell — HTML structure only. Loads css/styles.css → js/app.js. No framework, no build step. |
+| css/styles.css | All styles extracted from former monolithic index.html. |
+| js/app.js | All JS — briefing render, drag-and-drop, tick sync, archive, tasks widget. Both script blocks merged. |
 | open_email.py | Registered openmail:// protocol handler — strips prefix and trailing slash, opens exact email in classic Outlook via EntryID COM |
 
 ---
@@ -174,7 +202,10 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 |------|----------|
 | Repo | github.com/begb0037admin/work-inbox |
 | Proxy | github-proxy.lelitte.co.uk/work-inbox/ |
-| Dashboard | begb0037admin.github.io/work-inbox/ |
+| Dashboard (GitHub Pages) | begb0037admin.github.io/work-inbox/ |
+| Dashboard (primary) | wi.lelitte.co.uk |
+| Styles | work-inbox/css/styles.css |
+| JS | work-inbox/js/app.js |
 | Script | work-inbox/fetch_inbox.py |
 | Opener | work-inbox/open_email.py |
 | Briefing | work-inbox/data/briefing.json |
@@ -191,7 +222,7 @@ AG FlexPoints has its own repo: **begb0037admin/AG-FlexPoints** with its own HAN
 
 ## Roadmap
 
-All items resolved as of 2026-06-25. No outstanding work.
+All items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. No outstanding work.
 
 ---
 
