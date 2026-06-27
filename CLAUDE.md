@@ -64,6 +64,9 @@ Do NOT ask Kevin for a recap. The docs above are the recap.
 
 Do not re-investigate Graph API or Chrome-based email access.
 
+## Effort Level Governance
+Before any task where higher effort is warranted, signal to Kevin: what the task is, why higher effort is needed, and an explicit request to raise the effort level. Wait — do not proceed until Kevin raises it. Signal when the high-effort phase is done; Kevin decides when to return to normal. Never change effort level unilaterally. See CONSTITUTION.md Section 10 (v2.0, 2026-06-27).
+
 ## Hard Rules
 - Never commit raw email data or API keys
 - Never attempt Microsoft Graph API — Oxford blocks it
