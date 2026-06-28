@@ -1,9 +1,18 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-27 (file split complete — wi.lelitte.co.uk live)
+**Last updated:** 2026-06-28 (live clock added to WI sidebar — moved from CC)
 **Status:** Active — pipeline fully working, roadmap clear.
 
 ---
+
+## Session 2026-06-28 — Live clock added to sidebar
+
+- Added `<div class="wi-clock-time" id="wi-clock-time">` to the `date-block` in `index.html`, between the "Today" label and `sidebarDate` div
+- Added `updateWiClock()` function + `setInterval(updateWiClock, 1000)` to `js/app.js` — writes live HH:MM:SS to `wi-clock-time` and live day/date to `sidebarDate`, ticking every second
+- Removed static `document.getElementById('sidebarDate').textContent=data.date` from `renderBriefing()` — date is now driven by the live clock rather than the briefing JSON
+- Archive backup committed before write: `Archive/index_backup_20260628_0600.html` (full original index.html content)
+- Approved by Kevin 2026-06-28. Merged to main via PR #20 (squash commit `6cd84f0e`).
+- Clock moved from `begb0037admin/command-centre` — see CC HANDOVER.md for corresponding removal.
 
 ---
 
@@ -105,12 +114,12 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 | fetch_inbox.py | Outlook COM via pywin32. Pulls inbox → Anthropic triage (claude-haiku-4-5) → Python post-processing → pushes data/briefing.json to GitHub via Contents API |
 | index.html | Shell — HTML structure only. Loads css/styles.css → js/app.js. No framework, no build step. |
 | css/styles.css | All styles extracted from former monolithic index.html. |
-| js/app.js | All JS — briefing render, drag-and-drop, tick sync, archive, tasks widget. Both script blocks merged. |
+| js/app.js | All JS — briefing render, drag-and-drop, tick sync, archive, tasks widget, live sidebar clock. |
 | open_email.py | Registered openmail:// protocol handler — strips prefix and trailing slash, opens exact email in classic Outlook via EntryID COM |
 
 ---
 
-## Current State (fully working as of 2026-06-25)
+## Current State (fully working as of 2026-06-28)
 
 ### Working
 - fetch_inbox.py — all three phases confirmed working
@@ -125,6 +134,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 - Task Scheduler — WorkInbox-Briefing runs at 7am/9am/11am/1pm/3pm/5pm Mon-Fri; bat auto-pulls fetch_inbox.py before running
 - Dashboard loads live briefing.json from GitHub on load, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
+- **Live clock in sidebar** — `wi-clock-time` shows ticking HH:MM:SS above the live day/date in the Today block; driven by `updateWiClock()` + `setInterval(1000)` in js/app.js
 - Time-of-day greeting (Good morning/afternoon/evening, Kevin) — UK timezone
 - Archive panel — past briefings by date, Load arrow to restore
 - Yellow accent bar for Needs Response section
@@ -153,7 +163,7 @@ Task Scheduler, Registry (openmail://), and desktop bat all updated 2026-06-09.
 ## localStorage Keys (index.html)
 
 | Key | Purpose |
-|-----|---------|
+|-----|--------|
 | `workInbox_briefings_v1` | Archive of past briefing JSON objects, keyed by date string |
 | `workInbox_today_v1` | Key of the currently displayed briefing |
 | `workInbox_ticks_v1` | Tick (done) state for all cards |
@@ -222,7 +232,7 @@ AG FlexPoints has its own repo: **begb0037admin/AG-FlexPoints** with its own HAN
 
 ## Roadmap
 
-All items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. No outstanding work.
+All items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. Live clock added 2026-06-28. No outstanding work.
 
 ---
 
