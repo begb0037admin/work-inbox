@@ -280,7 +280,7 @@ function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbo
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
 function _priSetOrder(pt,ptom,pw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
-function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
+function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}  
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
@@ -432,7 +432,6 @@ function renderBriefing(data,key){
   // Header
   document.getElementById('pageTitle').textContent=getGreeting();
   document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
-  document.getElementById('sidebarDate').textContent=data.date||'';;
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
 
@@ -451,7 +450,7 @@ function renderBriefing(data,key){
   // Context bar
   const ctxEl=document.getElementById('contextBar');
   if(data.context){
-    const sentences=data.context.split(/(?<=\.)\ +/).filter(s=>s.trim().length>0);
+    const sentences=data.context.split(/(?<=\.)\s+/).filter(s=>s.trim().length>0);
     const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">—</span><span>${s.trim()}</span></div>`).join('');
     ctxEl.innerHTML=`<div class="context-bar"><div class="context-bar-title">Context</div>${items}</div>`;
   } else { ctxEl.innerHTML=''; }
@@ -565,3 +564,16 @@ async function loadTasksWidget(){
 }
 loadTasksWidget();
 setInterval(loadTasksWidget, 30000);
+
+/* CLOCK */
+function updateWiClock(){
+  var n=new Date();
+  var time=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var date=n.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var tel=document.getElementById('wi-clock-time');
+  if(tel) tel.textContent=time;
+  var del=document.getElementById('sidebarDate');
+  if(del) del.textContent=date;
+}
+updateWiClock();
+setInterval(updateWiClock,1000);
