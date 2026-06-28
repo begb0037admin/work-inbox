@@ -1,61 +1,43 @@
 {
-  "generated_at": "2026-06-25 09:05",
+  "generated_at": "2026-06-28 05:35",
   "new_tasks": [
     {
-      "title": "Review UOX case 69001655 catch-up from Maura McGlynn",
+      "title": "Update Laura Porter on IM Principles URL linking progress",
+      "tier": "tomorrow",
+      "description": "Laura Porter is chasing for an update on the Internal Mobility Principles URL change work (task t015). She is away today but back Monday. Kevin needs to provide a status update on the link updates to main ops intranet page, professional services search page, and vacancy application pages.",
+      "email_subject": "RE: IM Principles - change to URL",
+      "email_from": "Laura Porter",
+      "received": "2026-06-25 17:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE120000"
+    },
+    {
+      "title": "Arrange meeting on REF data disclosure to staff via ESS",
       "tier": "week",
-      "description": "Maura McGlynn sent a catch-up email on case 69001655 and indicated a Devs call may be arranged. Kevin needs to review the full email content and assess next steps, as this case has been escalated and is currently in progress with the development team.",
-      "email_subject": "UOX case 69001655 Catch-Up",
-      "email_from": "Maura McGlynn",
-      "received": "2026-06-24 16:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7120000"
+      "description": "Nathan Kirwan is organizing a meeting between 5 people to discuss how to record and communicate decisions to staff regarding REF research data items. This ties into the July end-of-month deadline for REF attributes via ESS (task t031). Kevin needs to confirm his availability and participate in this planning meeting.",
+      "email_subject": "Staff EES Information for HESA - Research Data Items (REF)",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-06-24 13:43",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70B0000"
     }
   ],
   "applied_updates": [
     {
-      "task_id": "t030",
-      "task_title": "Cority SFTP production feed error -- 22 June",
-      "note": "Cority SFTP connection error confirmed on 22 June at 17:15; CHI Team has been notified and is working on resolution.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-06-22 17:15",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-06-22 18:16",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663360000"
+      "task_id": "t023",
+      "task_title": "Respond to Support Call# 11688462 -- Ash VEA team",
+      "note": "Kevin replied to Cathy Hamer and Linda Pope on Support Call# 11688462 regarding the Ash VEA team issue, providing his response.",
+      "email_subject": "Re: Support Call# 11688462: Ash VEA team",
+      "email_from": "Kevin (sent to: Cathy Hamer; Linda Pope)",
+      "received": "2026-06-26 14:33",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EF60000"
     },
     {
-      "task_id": "t016",
-      "task_title": "DSE data feed issues -- post go-live",
-      "note": "Kevin requested access to the Azure CR 126017 link from Tony Boydell to review the SBS user exclusion change.",
-      "email_subject": "Re: DSE System - exclude SBS users ",
-      "email_from": "Kevin (sent to: Tony Boydell; James Salas Guillen; Erika Braverman)",
-      "received": "2026-06-24 13:32",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EEB0000"
-    },
-    {
-      "task_id": "t022",
-      "task_title": "Send POC meeting notes to Chris",
-      "note": "Kevin sent Cority Product User Group meeting minutes (16 June 2026) to Christopher Sanders, partially fulfilling the POC notes action.",
-      "email_subject": "Minutes – Cority Product User Group (PUG), 16 June 2026",
-      "email_from": "Kevin (sent to: Christopher Sanders)",
-      "received": "2026-06-24 08:51",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EE60000"
-    },
-    {
-      "task_id": "t026",
-      "task_title": "Owner Required -- Task# 50959264 / ServiceReq# 30412906",
-      "note": "Kevin escalated case 69001655 to Sarah Murphy on 19 June, requesting assistance with the ownership/task assignment issue.",
-      "email_subject": "Escalation Request – Case 69001655",
-      "email_from": "Kevin (sent to: Sarah Murphy)",
-      "received": "2026-06-19 12:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000784F08A3A0000"
-    },
-    {
-      "task_id": "t026",
-      "task_title": "Owner Required -- Task# 50959264 / ServiceReq# 30412906",
-      "note": "Kevin updated the ticket for case 69001655 with information for the Dev team and asked Sarah Murphy to progress it further.",
-      "email_subject": "Re: #External# Escalation Request – Case 69001655",
-      "email_from": "Kevin (sent to: Sarah Murphy)",
-      "received": "2026-06-24 12:17",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EE90000"
+      "task_id": "t025",
+      "task_title": "Support cover w/c 6 July -- plan needed today",
+      "note": "Kevin notified Marie Cooksey that Asta will be taking compassionate leave on 30 June, which further reduces support cover capacity during the critical transition week.",
+      "email_subject": "Compassionate leave for Asta on 30 June",
+      "email_from": "Kevin (sent to: Marie Cooksey)",
+      "received": "2026-06-26 13:16",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EF30000"
     }
   ]
 }
