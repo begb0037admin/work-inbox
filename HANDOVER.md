@@ -1,18 +1,19 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-29 (Task Scheduler lost — needs re-establishing)
-**Status:** Active — pipeline working; **Task Scheduler lost 2026-06-29, needs re-establishing.**
+**Last updated:** 2026-06-29 (Task Scheduler re-established)
+**Status:** Active — pipeline fully working. Task Scheduler re-established 2026-06-29.
 
 ---
 
-## Session 2026-06-29 — Task Scheduler lost
+## Session 2026-06-29 — Task Scheduler re-established
 
-- **Task Scheduler (WorkInbox-Briefing) was lost** — all tasks no longer present in Task Scheduler. Cause unknown.
-- Needs re-establishing manually via `taskschd.msc`. Use **Create Task** (not Basic Task).
+- **Task Scheduler (WorkInbox-Briefing) was lost** — all tasks were missing. Cause unknown.
+- Re-established via `create_inbox_tasks.bat` (committed to repo root). Must be run as Administrator.
 - New schedule: **3 tasks at 09:00 / 12:00 / 15:00 Mon–Fri** (reduced from 6 runs/day).
-- Bat file: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`
-- Arguments: `/c "C:\Users\admin\Desktop\Run Inbox Briefing.bat"` — tick "Run whether user is logged on or not."
-- After creating, right-click each task → Run to test. Confirm `briefing.json` updates within 2 minutes.
+- Tasks created: `WorkInbox-0900`, `WorkInbox-1200`, `WorkInbox-1500`
+- Command used: `schtasks /create` with `/sc weekly /d MON,TUE,WED,THU,FRI /rl highest`
+- Bat file target: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`
+- **If Task Scheduler is ever lost again:** download `create_inbox_tasks.bat` from repo root, right-click → Run as administrator.
 
 ---
 
@@ -130,7 +131,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 
 ---
 
-## Current State (pipeline working as of 2026-06-29; Task Scheduler needs re-establishing)
+## Current State (fully working as of 2026-06-29)
 
 ### Working
 - fetch_inbox.py — all three phases confirmed working
@@ -142,7 +143,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 - index.html — ALL garbled Unicode fully resolved (48 characters total across two passes)
 - Font sizes — increased throughout to match Command Centre scale
 - open_email.py — openmail:// protocol registered, confirmed working
-- Task Scheduler — **LOST 2026-06-29 — needs re-establishing.** Target: 3 tasks (09:00/12:00/15:00 Mon-Fri). Bat: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`. See Session 2026-06-29 above.
+- Task Scheduler — **Re-established 2026-06-29.** 3 tasks: `WorkInbox-0900`, `WorkInbox-1200`, `WorkInbox-1500` (Mon–Fri). Recovery: run `create_inbox_tasks.bat` from repo root as Administrator.
 - Dashboard loads live briefing.json from GitHub on load, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
 - **Live clock in sidebar** — `wi-clock-time` shows ticking HH:MM:SS above the live day/date in the Today block; driven by `updateWiClock()` + `setInterval(1000)` in js/app.js
@@ -232,7 +233,8 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 | Briefing | work-inbox/data/briefing.json |
 | Local | C:\Users\admin\Documents\Claude\Projects\work-inbox\ |
 | Registry | HKCU:\Software\Classes\openmail (points to new path) |
-| Scheduler | WorkInbox-Briefing (Task Scheduler) — LOST 2026-06-29, needs re-establishing |
+| Scheduler | WorkInbox-0900 / WorkInbox-1200 / WorkInbox-1500 (re-established 2026-06-29) |
+| Scheduler recovery | `create_inbox_tasks.bat` in repo root — run as Administrator |
 
 ---
 
@@ -243,11 +245,7 @@ AG FlexPoints has its own repo: **begb0037admin/AG-FlexPoints** with its own HAN
 
 ## Roadmap
 
-| Priority | Task |
-|----------|------|
-| 1 | **Re-establish Task Scheduler** — 3 tasks (09:00/12:00/15:00 Mon-Fri), bat: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`. Use Create Task (not Basic Task). Tick "Run whether user is logged on or not." Right-click → Run each to test after creating. |
-
-All other items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. Live clock added 2026-06-28.
+No outstanding items. Task Scheduler re-established 2026-06-29. All other items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. Live clock added 2026-06-28.
 
 ---
 
