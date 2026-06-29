@@ -1,7 +1,18 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-28 (live clock added to WI sidebar — moved from CC)
-**Status:** Active — pipeline fully working, roadmap clear.
+**Last updated:** 2026-06-29 (Task Scheduler lost — needs re-establishing)
+**Status:** Active — pipeline working; **Task Scheduler lost 2026-06-29, needs re-establishing.**
+
+---
+
+## Session 2026-06-29 — Task Scheduler lost
+
+- **Task Scheduler (WorkInbox-Briefing) was lost** — all tasks no longer present in Task Scheduler. Cause unknown.
+- Needs re-establishing manually via `taskschd.msc`. Use **Create Task** (not Basic Task).
+- New schedule: **3 tasks at 09:00 / 12:00 / 15:00 Mon–Fri** (reduced from 6 runs/day).
+- Bat file: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`
+- Arguments: `/c "C:\Users\admin\Desktop\Run Inbox Briefing.bat"` — tick "Run whether user is logged on or not."
+- After creating, right-click each task → Run to test. Confirm `briefing.json` updates within 2 minutes.
 
 ---
 
@@ -119,7 +130,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 
 ---
 
-## Current State (fully working as of 2026-06-28)
+## Current State (pipeline working as of 2026-06-29; Task Scheduler needs re-establishing)
 
 ### Working
 - fetch_inbox.py — all three phases confirmed working
@@ -131,7 +142,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 - index.html — ALL garbled Unicode fully resolved (48 characters total across two passes)
 - Font sizes — increased throughout to match Command Centre scale
 - open_email.py — openmail:// protocol registered, confirmed working
-- Task Scheduler — WorkInbox-Briefing runs at 7am/9am/11am/1pm/3pm/5pm Mon-Fri; bat auto-pulls fetch_inbox.py before running
+- Task Scheduler — **LOST 2026-06-29 — needs re-establishing.** Target: 3 tasks (09:00/12:00/15:00 Mon-Fri). Bat: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`. See Session 2026-06-29 above.
 - Dashboard loads live briefing.json from GitHub on load, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
 - **Live clock in sidebar** — `wi-clock-time` shows ticking HH:MM:SS above the live day/date in the Today block; driven by `updateWiClock()` + `setInterval(1000)` in js/app.js
@@ -146,7 +157,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 - Fuzzy EntryID matching — fallback if AI subject slightly differs
 - Badge CSS normalised — NEW (green) and UPDATED (blue) badges identical to Command Centre
 - "Open email" buttons — emoji removed from all instances
-- "Priority actions – next week" section (pnw drop zone) — sits between "this week" and "urgent"; teal dot accent
+- "Priority actions — next week" section (pnw drop zone) — sits between "this week" and "urgent"; teal dot accent
 - Drag-and-drop fully re-enabled and extended — email cards draggable into any priority section; custom priority items persisted in `workInbox_customPri_v1`
 - Multi-machine setup complete (begb0037.AD-OAK)
 
@@ -163,7 +174,7 @@ Task Scheduler, Registry (openmail://), and desktop bat all updated 2026-06-09.
 ## localStorage Keys (index.html)
 
 | Key | Purpose |
-|-----|--------|
+|-----|---------|
 | `workInbox_briefings_v1` | Archive of past briefing JSON objects, keyed by date string |
 | `workInbox_today_v1` | Key of the currently displayed briefing |
 | `workInbox_ticks_v1` | Tick (done) state for all cards |
@@ -185,11 +196,11 @@ Total: 48 instances fixed. Zero triple-encoding patterns remain.
 **Rule: Any future edit to index.html MUST use the binary atob()/btoa() approach — NEVER TextEncoder on the file content.** TextEncoder will re-encode the multi-byte Unicode chars and re-garble them.
 
 ### CSS Override Pattern
-Font size increases were added as CSS overrides at the end of the style block (before </style>). Safest pattern for future edits — existing rules untouched, cascade handles priority.
+Font size increases were added as CSS overrides at the end of the style block (before `</style>`). Safest pattern for future edits — existing rules untouched, cascade handles priority.
 
 ### Priority Drag-and-Drop Architecture
 - Five named sections: `pt` (today), `pw` (this week), `pnw` (next week), `ur` (urgent overlay), `nr` (needs overlay)
-- Sections always render — not gated by briefing data
+- Sections always render — content not gated by briefing data
 - Two drag types handled: priority cards (`_priDragState`) and email cards (`_emailDragData`)
 - Email card drop → `_addEmailCardToPriority()` → stores in `workInbox_customPri_v1` + sets override
 - `applyPriOverrides(data)` merges AI items (prioritiesToday/prioritiesWeek) + custom items, then applies overrides and order
@@ -209,7 +220,7 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 ## File Locations
 
 | File | Location |
-|------|----------|
+|------|---------|
 | Repo | github.com/begb0037admin/work-inbox |
 | Proxy | github-proxy.lelitte.co.uk/work-inbox/ |
 | Dashboard (GitHub Pages) | begb0037admin.github.io/work-inbox/ |
@@ -221,7 +232,7 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 | Briefing | work-inbox/data/briefing.json |
 | Local | C:\Users\admin\Documents\Claude\Projects\work-inbox\ |
 | Registry | HKCU:\Software\Classes\openmail (points to new path) |
-| Scheduler | WorkInbox-Briefing (Task Scheduler) |
+| Scheduler | WorkInbox-Briefing (Task Scheduler) — LOST 2026-06-29, needs re-establishing |
 
 ---
 
@@ -232,7 +243,11 @@ AG FlexPoints has its own repo: **begb0037admin/AG-FlexPoints** with its own HAN
 
 ## Roadmap
 
-All items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. Live clock added 2026-06-28. No outstanding work.
+| Priority | Task |
+|----------|------|
+| 1 | **Re-establish Task Scheduler** — 3 tasks (09:00/12:00/15:00 Mon-Fri), bat: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`. Use Create Task (not Basic Task). Tick "Run whether user is logged on or not." Right-click → Run each to test after creating. |
+
+All other items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. Live clock added 2026-06-28.
 
 ---
 
@@ -242,4 +257,4 @@ All items resolved as of 2026-06-25. File split and custom domain completed 2026
 - Every change committed immediately
 - Seat A never references local disk — all reads via GitHub proxy
 - Local machine must stay in sync: bat auto-pulls fetch_inbox.py from raw.githubusercontent.com before every run
-- index.html edits: always use binary atob()/btoa() — never TextEncoder on file content
+- index.html edits: always use binary atob()/btoa() — NEVER TextEncoder on file content
