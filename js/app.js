@@ -546,10 +546,10 @@ async function loadTasksWidget(){
     if(!res.ok)throw new Error('fetch failed');
     var data=await res.json();
     var tasks=Array.isArray(data)?data:(data.tasks||[]);
-    var todayCount=tasks.filter(function(t){return t.tier==='today';}).length;
-    var tomorrowCount=tasks.filter(function(t){return t.tier==='tomorrow';}).length;
-    var weekCount=tasks.filter(function(t){return t.tier==='week';}).length;
-    var todoCount=tasks.filter(function(t){return (t.actions||[]).some(function(a){return a.includes('[TODO]');});}).length;
+    var todayCount=tasks.filter(function(t){return t.tier==='today'&&!t.done;}).length;
+    var tomorrowCount=tasks.filter(function(t){return t.tier==='tomorrow'&&!t.done;}).length;
+    var weekCount=tasks.filter(function(t){return t.tier==='week'&&!t.done;}).length;
+    var todoCount=tasks.filter(function(t){return !t.done&&(t.actions||[]).some(function(a){return a.includes('[TODO]');});}).length;
     el.innerHTML=
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Today</span><span class="tasks-widget-count">'+todayCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
