@@ -546,6 +546,24 @@ async function loadTasksWidget(){
     if(!res.ok)throw new Error('fetch failed');
     var data=await res.json();
     var tasks=Array.isArray(data)?data:(data.tasks||[]);
+    /* Auto-tick WI priority items whose CC task is marked done */
+    if(currentData&&currentKey){
+      var ticks=getTicks();var changed=false;
+      var priMap=[['prioritiesToday','pt'],['prioritiesTomorrow','ptom'],['prioritiesWeek','pw']];
+      tasks.filter(function(t){return t.done;}).forEach(function(t){
+        for(var p=0;p<priMap.length;p++){
+          var arr=currentData[priMap[p][0]]||[];
+          for(var i=0;i<arr.length;i++){
+            if(arr[i].id===t.id){
+              var k=currentKey+'_pri_'+priMap[p][1]+'_'+i;
+              if(!ticks[k]){ticks[k]=true;changed=true;}
+              break;
+            }
+          }
+        }
+      });
+      if(changed){saveTicks(ticks);renderBriefing(currentData,currentKey);}
+    }
     var todayCount=tasks.filter(function(t){return t.tier==='today';}).length;
     var tomorrowCount=tasks.filter(function(t){return t.tier==='tomorrow';}).length;
     var weekCount=tasks.filter(function(t){return t.tier==='week';}).length;
