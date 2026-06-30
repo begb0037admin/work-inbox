@@ -1,7 +1,31 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-29 (Task Scheduler re-established)
-**Status:** Active — pipeline fully working. Task Scheduler re-established 2026-06-29.
+**Last updated:** 2026-06-30
+**Status:** Active — pipeline fully working. Task Scheduler confirmed working 2026-06-30.
+
+---
+
+## Session 2026-06-30 — fetch_inbox.py fixes
+
+### Phase 3.7 AI summaries (Unterminated string fix)
+- **Problem:** `max_tokens=1000` too low for 25 tasks — JSON response truncated mid-string, causing `json.JSONDecodeError: Unterminated string`.
+- **Fix:** `max_tokens` raised to `4096`. Input payload reduced: `description[:300]` (was `[:500]`), `actions[-5:]` (was `[-10:]`).
+- **Confirmed:** Phase 3.7 done — 24 summaries generated.
+
+### Calendar sort fix
+- **Problem:** Calendar items displayed in Outlook's arbitrary iteration order (e.g. 15:00 shown above 14:00).
+- **Fix:** `build_cal_items()` now sorts items by `start` ascending before rendering. Applies to calToday, calTomorrow, and calFull.
+
+### Recurring meetings fix
+- **Problem:** Recurring meetings (e.g. HR Systems team weekly) not appearing in calendar — raw `Items` iteration only returns the master record whose original start date is outside the lookback window.
+- **Fix:** `_cal_items.IncludeRecurrences = True` + `_cal_items.Sort("[Start]")` + `break` when `t.date() > week_end`. Expands recurring instances within the window without runaway iteration.
+- **Note:** The CLAUDE.md constraint "do NOT use Restrict() with IncludeRecurrences" still stands — the fix uses direct sorted iteration, not Restrict().
+
+### Task Scheduler / bat file
+- **Problem:** Scheduled tasks were running an old bat file on the desktop (BOM, wrong path `C:\Users\admin\work-inbox`, wrong wording "Updating inbox briefing..."). File had been renamed from a pre-existing version rather than freshly downloaded.
+- **Fix:** Fresh download via PowerShell: `Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/Run_Inbox_Briefing.bat" -OutFile "$env:USERPROFILE\Desktop\Run Inbox Briefing.bat"`
+- **Confirmed:** All three scheduled tasks (09:00, 12:00, 15:00) confirmed working.
+- **Rule:** Never rename an existing bat file — always download fresh from GitHub via PowerShell to avoid BOM and stale content.
 
 ---
 
@@ -106,7 +130,7 @@ All outstanding roadmap items confirmed resolved by Kevin:
 Full inbox organisation completed based on analysis of 2,742 inbox + 377 sent emails (Dec 2025 – Jun 2026).
 
 | Item | Status | Detail |
-|---|---|---|
+|------|--------|--------|
 | 19 folders created inside Inbox | ✅ Done | Access Group (My Cases, Team Cases), PeopleXD System, Reports, Team (Michael, Asta, James), H&S (Cority, DSE·IRIS·Risk Base), Projects (DTP1092, DTP1334, ePloy), Reference (HR Broadcast, ICT Mailing Lists, Bodleian & Sector), _Archive |
 | 12 auto-delete rules | ✅ Done | Created via Python COM. Del- prefix. Teams, GitHub, Access Group marketing, New Vacancy Notification, Cority status, DistroKid, Anthropic/Claude, Descript, Accessplanit, Skype voicemail, MetaCompliance, Annual Leave system |
 | 13 auto-file rules | ✅ Done | Created by Cowork via Outlook Rules Wizard UI (Python COM blocked by Oxford Exchange for MoveToFolder). Team James/Michael/Asta, Reports ITSRVXT/PeopleXD Reports, PeopleXD System, Cority, HR Broadcast, ICT subject/senders, Bodleian & Sector, Access My Cases/Team Cases |
@@ -131,11 +155,13 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 
 ---
 
-## Current State (fully working as of 2026-06-29)
+## Current State (fully working as of 2026-06-30)
 
 ### Working
-- fetch_inbox.py — all three phases confirmed working
-- Calendar pull — direct iteration with 30-day lookback + 6-day forward window (confirmed calendar:27 items); Restrict() approach abandoned
+- fetch_inbox.py — all phases confirmed working
+- Phase 3.7 AI summaries — `max_tokens=4096`, confirmed generating summaries for all priority tasks
+- Calendar pull — `IncludeRecurrences=True` + `Sort([Start])` + break at week_end; captures recurring meetings (e.g. HR Systems team weekly). Do NOT use `Restrict()` with `IncludeRecurrences`.
+- Calendar sort — `build_cal_items()` sorts by start time ascending; confirmed correct order
 - Python post-processing of calendar items — KNOWN_ABSENCES list cleared (Marie and James both returned)
 - Absence dedup — partial-name matching prevents duplicates when KNOWN_ABSENCE_DATES and calendar-detected names overlap
 - Email received date on tiles — safe pywintypes.datetime parsing → "9 Jun" format, right-aligned on card
@@ -143,10 +169,10 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 - index.html — ALL garbled Unicode fully resolved (48 characters total across two passes)
 - Font sizes — increased throughout to match Command Centre scale
 - open_email.py — openmail:// protocol registered, confirmed working
-- Task Scheduler — **Re-established 2026-06-29.** 3 tasks: `WorkInbox-0900`, `WorkInbox-1200`, `WorkInbox-1500` (Mon–Fri). Recovery: run `create_inbox_tasks.bat` from repo root as Administrator.
+- Task Scheduler — 3 tasks: `WorkInbox-0900`, `WorkInbox-1200`, `WorkInbox-1500` (Mon–Fri). Confirmed working 2026-06-30. Recovery: run `create_inbox_tasks.bat` from repo root as Administrator.
 - Dashboard loads live briefing.json from GitHub on load, falls back to localStorage archive
 - Oxford navy sidebar (#002147, 340px) with crest, branding, calendar, absences
-- **Live clock in sidebar** — `wi-clock-time` shows ticking HH:MM:SS above the live day/date in the Today block; driven by `updateWiClock()` + `setInterval(1000)` in js/app.js
+- **Live clock in sidebar** — `wi-clock-time` shows ticking HH:MM:SS above the live day/date in the Today block
 - Time-of-day greeting (Good morning/afternoon/evening, Kevin) — UK timezone
 - Archive panel — past briefings by date, Load arrow to restore
 - Yellow accent bar for Needs Response section
@@ -166,16 +192,19 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 Folder: `C:\Users\admin\Documents\Claude\Projects\work-inbox`
 Task Scheduler, Registry (openmail://), and desktop bat all updated 2026-06-09.
 
-### Critical Note — Local Script
-- Task Scheduler runs local fetch_inbox.py — must stay in sync with GitHub
-- Bat auto-pulls latest fetch_inbox.py from raw.githubusercontent.com (with `?t=` cache-buster) before every run — no git dependency
+### Critical Note — Desktop Bat File
+- Bat file target: `C:\Users\admin\Desktop\Run Inbox Briefing.bat`
+- **Never rename an existing bat file** — always download fresh from GitHub via PowerShell:
+  `Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/Run_Inbox_Briefing.bat" -OutFile "$env:USERPROFILE\Desktop\Run Inbox Briefing.bat"`
+- Renaming an existing file only changes the name, never the content — stale content (BOM, wrong path) will persist.
+- Bat auto-pulls latest fetch_inbox.py from raw.githubusercontent.com (with `?t=` cache-buster) before every run — no git dependency.
 
 ---
 
 ## localStorage Keys (index.html)
 
 | Key | Purpose |
-|-----|---------|
+|-----|--------|
 | `workInbox_briefings_v1` | Archive of past briefing JSON objects, keyed by date string |
 | `workInbox_today_v1` | Key of the currently displayed briefing |
 | `workInbox_ticks_v1` | Tick (done) state for all cards |
@@ -221,7 +250,7 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 ## File Locations
 
 | File | Location |
-|------|---------|
+|------|----------|
 | Repo | github.com/begb0037admin/work-inbox |
 | Proxy | github-proxy.lelitte.co.uk/work-inbox/ |
 | Dashboard (GitHub Pages) | begb0037admin.github.io/work-inbox/ |
@@ -233,8 +262,9 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 | Briefing | work-inbox/data/briefing.json |
 | Local | C:\Users\admin\Documents\Claude\Projects\work-inbox\ |
 | Registry | HKCU:\Software\Classes\openmail (points to new path) |
-| Scheduler | WorkInbox-0900 / WorkInbox-1200 / WorkInbox-1500 (re-established 2026-06-29) |
+| Scheduler | WorkInbox-0900 / WorkInbox-1200 / WorkInbox-1500 (confirmed working 2026-06-30) |
 | Scheduler recovery | `create_inbox_tasks.bat` in repo root — run as Administrator |
+| Desktop bat | `C:\Users\admin\Desktop\Run Inbox Briefing.bat` — download fresh via PowerShell, never rename |
 
 ---
 
@@ -245,7 +275,7 @@ AG FlexPoints has its own repo: **begb0037admin/AG-FlexPoints** with its own HAN
 
 ## Roadmap
 
-No outstanding items. Task Scheduler re-established 2026-06-29. All other items resolved as of 2026-06-25. File split and custom domain completed 2026-06-27. Live clock added 2026-06-28.
+No outstanding items as of 2026-06-30.
 
 ---
 
@@ -256,3 +286,4 @@ No outstanding items. Task Scheduler re-established 2026-06-29. All other items 
 - Seat A never references local disk — all reads via GitHub proxy
 - Local machine must stay in sync: bat auto-pulls fetch_inbox.py from raw.githubusercontent.com before every run
 - index.html edits: always use binary atob()/btoa() — NEVER TextEncoder on file content
+- Desktop bat: always download fresh via PowerShell — never rename an existing file
