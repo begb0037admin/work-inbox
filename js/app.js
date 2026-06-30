@@ -234,6 +234,8 @@ function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
+let _ccWindow=null;
+function openCC(id){var url='https://cc.lelitte.co.uk/#'+id;if(_ccWindow&&!_ccWindow.closed){_ccWindow.location.href=url;_ccWindow.focus();}else{_ccWindow=window.open(url,'command-centre');}}
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
@@ -417,7 +419,7 @@ function renderPriorityCards(priorities,key,sec){
         <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
-        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','command-centre');event.stopPropagation()">CC →</button>`:''}
+        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="openCC('${p.id}');event.stopPropagation()">CC →</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${metaHtml}</div>
