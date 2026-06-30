@@ -51,7 +51,7 @@ read_count   = 0
 MAX_UNREAD   = 50
 MAX_READ     = 30
 
-# VIP senders — always captured regardless of cap
+# VIP senders -- always captured regardless of cap
 VIP_NAMES = {
     'Athena Artuso','Marie Cooksey','Sarah Rowles','Simon Burford',
     'Asta Palmer','James Salas Guillen',"Michael O'Sullivan",
@@ -105,7 +105,7 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
 
 inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 
-# VIP sweep — pick up any VIP emails missed by the cap
+# VIP sweep -- pick up any VIP emails missed by the cap
 captured_ids = {e["entry_id"] for e in inbox}
 for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
@@ -301,7 +301,7 @@ def make_card(msg, category):
     subj    = msg.get("subject") or "(no subject)"
     sender  = msg.get("from") or ""
     preview = (msg.get("body_preview") or "").strip()
-    preview = re.sub(r"<?\ s*https?://\S+>?", "[link]", preview)
+    preview = re.sub(r"<?\s*https?://\S+>?", "[link]", preview)
     badge, badge_type = badge_for(msg, category)
 
     title = subj
@@ -498,7 +498,7 @@ try:
                 "subject":      m.get("subject", ""),
                 "from":         m.get("from", ""),
                 "received":     (m.get("received", "") or "")[:16],
-                "body_preview": re.sub(r"<?\ s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
+                "body_preview": re.sub(r"<?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
                 "entry_id":     m.get("entry_id", "")
             })
 
@@ -507,7 +507,7 @@ try:
             "subject":      s.get("subject", ""),
             "from":         "Kevin (sent to: " + (s.get("to") or "") + ")",
             "received":     (s.get("sent", "") or "")[:16],
-            "body_preview": re.sub(r"<?\ s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
+            "body_preview": re.sub(r"<?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
             "entry_id":     s.get("entry_id", ""),
             "direction":    "sent"
         })
@@ -695,7 +695,7 @@ if all_priorities:
         )
         s_resp = client.messages.create(
             model      = "claude-haiku-4-5",
-            max_tokens = 1000,
+            max_tokens = 2500,
             system     = SUMMARY_SYSTEM,
             messages   = [{"role": "user", "content": summary_user}]
         )
