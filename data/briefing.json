@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 30 June 2026",
-  "subtitle": "Awards deadline imminent; team absences create meeting gaps",
-  "context": "Michelle Williams sent an automatic reply on 29 June indicating she is absent, blocking progress on the Staff EES Information for HESA - Research Data Items meeting scheduled for 1 July at 11:00 with Nathan Kirwan. Asta Palmer is on compassionate leave today (30 June) and you confirmed this to Marie Cooksey on 26 June. The Awards for Excellence Scheme deadline is 3 July 2026 - you nominated Michael O'Sullivan on 29 June and need Marie Cooksey and Simon Burford to review it. An unread email from Jasmin Khokhra (26 June, 48+ hours old) confirms the UCEA Clinical pay uplift for April 2026 was completed by Tracy before leave. James Salas Guillen sent multiple unread emails about the Health Surveillance Review (24 June) and the Cority Product User Group minutes (24 June), both marked priority 1. Case 68974493 from Julie Hickman was actioned by you on 30 June morning and you confirmed it should be live. Open first: the Jasmin Khokhra email about UCEA Clinical pay uplift to understand what closure actions remain.",
+  "subtitle": "Awards deadline Thursday, Michelle away, P5 Task needs response",
+  "context": "Michelle Williams is away until 7 July 2026, blocking the Staff EES Information for HESA meeting scheduled for Wednesday 1 July and the HR Systems team meeting at 14:00. Simon Burford's email from 30 June on P5 Task #50958836 for Incident #11681780 awaiting your response on the proposed approach with Julie and Michelle copied in. Awards for Excellence Scheme nominations close Thursday 3 July 2026 - Michael O'Sullivan's nomination was sent by you on 29 June to Simon Burford and Marie Cooksey for their review. The EcoOnline IEX work request from Joanne Grant on 25 June (importance 2) has waited 5 days without response. Strategic H&S modular system project requirements from James Salas Guillen on 30 June requires urgent attention given the evaluation weightings meeting at 16:00 today and Health Surveillance priority flagged for the 9 September in-person session with Sharon. Open Simon Burford's P5 Task email first - it references your team's proposed approach that needs clarification before the afternoon meeting.",
   "urgent": [
     {
       "title": "Reference Request for Nikolas Sharkey",
@@ -46,8 +46,18 @@
   ],
   "needs": [
     {
+      "title": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
+      "sub": "From <strong>Simon Burford</strong>. Hi all,\r\n\r\n \r\n\r\nThis came up in our meeting this afternoon. I’m just copying Julie and Michelle in for their awareness o",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4EB0000",
+      "received": "30 Jun"
+    },
+    {
       "title": "New Boxsets: 'How to...' Conversations & Leading Culture Change",
-      "sub": "From <strong>Team @ inrehearsal</strong>. No images? Click here [link] \r\n\r\n \r\n \r\n [link]",
+      "sub": "From <strong>Team @ inrehearsal</strong>. No images? Click here &lt;https://inrehearsal.cmail19.com/t/t-e-wkdltht-tjuytkiulh-k/&gt; \r\n\r\n \r\n \r\n &lt;https://inrehearsal.cmai",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
       "subject": "New Boxsets: 'How to...' Conversations & Leading Culture Change",
@@ -451,21 +461,41 @@
   "low": [],
   "calToday": [
     {
-      "time": "15:00",
-      "title": "Strategic H&S Modular System requirements evaluation weightings",
-      "sub": "Helen Harbour"
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Azure Integration Platform Sprint Review",
+      "sub": "Erika Braverman"
+    },
+    {
+      "time": "13:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
     },
     {
       "time": "14:00",
       "title": "WFM Rostering — Internal Review Meeting",
       "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "15:00",
+      "title": "Strategic H&S Modular System requirements evaluation weightings",
+      "sub": "Helen Harbour"
+    },
+    {
+      "time": "15:00",
+      "title": "DTP1092 College staff in PXD",
+      "sub": "Crispin Muncaster"
     }
   ],
   "calTomorrow": [
     {
-      "time": "11:00",
-      "title": "Staff EES Information for HESA - Research Data Items (REF)",
-      "sub": "Nathan Kirwan"
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
     },
     {
       "time": "10:00",
@@ -473,9 +503,24 @@
       "sub": "Simon Burford"
     },
     {
+      "time": "11:00",
+      "title": "Staff EES Information for HESA - Research Data Items (REF)",
+      "sub": "Nathan Kirwan"
+    },
+    {
       "time": "12:30",
       "title": "Emergency planning",
       "sub": "Simon Burford"
+    },
+    {
+      "time": "13:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:00",
+      "title": "HR Systems team meeting",
+      "sub": "Michelle Williams"
     }
   ],
   "calFull": [
@@ -484,7 +529,22 @@
       "label": "Monday 29 Jun",
       "items": [
         {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
           "time": "10:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "H&S Roadmap",
+          "sub": "Christopher Sanders"
+        },
+        {
+          "time": "13:00",
           "title": "Busy",
           "sub": "Kevin Lelitte"
         }
@@ -496,14 +556,34 @@
       "label": "Tuesday 30 Jun",
       "items": [
         {
-          "time": "15:00",
-          "title": "Strategic H&S Modular System requirements evaluation weightings",
-          "sub": "Helen Harbour"
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "Azure Integration Platform Sprint Review",
+          "sub": "Erika Braverman"
+        },
+        {
+          "time": "13:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
         },
         {
           "time": "14:00",
           "title": "WFM Rostering — Internal Review Meeting",
           "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "15:00",
+          "title": "Strategic H&S Modular System requirements evaluation weightings",
+          "sub": "Helen Harbour"
+        },
+        {
+          "time": "15:00",
+          "title": "DTP1092 College staff in PXD",
+          "sub": "Crispin Muncaster"
         }
       ],
       "isToday": true
@@ -513,9 +593,9 @@
       "label": "Wednesday 1 Jul",
       "items": [
         {
-          "time": "11:00",
-          "title": "Staff EES Information for HESA - Research Data Items (REF)",
-          "sub": "Nathan Kirwan"
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
         },
         {
           "time": "10:00",
@@ -523,9 +603,24 @@
           "sub": "Simon Burford"
         },
         {
+          "time": "11:00",
+          "title": "Staff EES Information for HESA - Research Data Items (REF)",
+          "sub": "Nathan Kirwan"
+        },
+        {
           "time": "12:30",
           "title": "Emergency planning",
           "sub": "Simon Burford"
+        },
+        {
+          "time": "13:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:00",
+          "title": "HR Systems team meeting",
+          "sub": "Michelle Williams"
         }
       ],
       "isToday": false
@@ -533,7 +628,23 @@
     {
       "date": "2026-07-02",
       "label": "Thursday 2 Jul",
-      "items": [],
+      "items": [
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "12:00",
+          "title": "Michael O'Sullivan - 1-1 Session",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "13:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        }
+      ],
       "isToday": false
     },
     {
@@ -541,9 +652,29 @@
       "label": "Friday 3 Jul",
       "items": [
         {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
           "time": "09:45",
           "title": "Company 90 - Status Update",
           "sub": "Crispin Muncaster"
+        },
+        {
+          "time": "10:00",
+          "title": "Roadmap review",
+          "sub": "Marie Cooksey"
+        },
+        {
+          "time": "12:00",
+          "title": "Asta Siautiaite - 1-1 Session",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "13:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
         }
       ],
       "isToday": false
@@ -562,7 +693,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "red",
-      "ai_summary": "Three areas (SBS, PEDS, GLAM) blocking Sarah's UC dashboards after GLAM failed to load rostering data. Next: set up resolution meeting with Kevin, Simon, Marie, Michelle, and potentially Julie to understand what wasn't loaded, agree approach, and produce action list."
+      "ai_summary": "WFM/GLAM rostering: three areas (SBS, PEDS, GLAM) blocking Sarah's UC dashboards. Next: set up resolution meeting with Kevin, Simon, Marie, Michelle, Julie to understand what wasn't loaded, agree approach, and produce action list."
     },
     {
       "id": "t029",
@@ -577,7 +708,7 @@
       ],
       "source": "Helen Harbour 17-18/06",
       "dateType": "red",
-      "ai_summary": "Helen Harbour's DTP1334 SHSMS Evaluation Briefing and weightings spreadsheet received 17-18 Jun (now overdue RED item). Next: review both documents and use to inform POC meeting notes before sending to Chris."
+      "ai_summary": "DTP1334 SHSMS evaluation: Helen Harbour's briefing (17 Jun) and weightings (18 Jun) are RED and now overdue. Next: review both documents and use to inform POC meeting notes before sending to Chris."
     },
     {
       "id": "t023",
@@ -590,7 +721,7 @@
       ],
       "source": "Email 22/06 Marie Cooksey / Anna Carter-Windle",
       "dateType": "red",
-      "ai_summary": "Support Call# 11688462 from Marie Cooksey and Anna Carter-Windle on 22 Jun named Kevin and expects response. Next: open thread, read full context, and respond."
+      "ai_summary": "Support Call# 11688462 (Ash VEA team): emails from Marie Cooksey and Anna Carter-Windle on 22 Jun named Kevin and expect response. Triage incorrectly classified as FYI. Next: open thread, read context, and respond."
     },
     {
       "id": "t025",
@@ -605,7 +736,7 @@
       ],
       "source": "Julie Hickman 23/06",
       "dateType": "red",
-      "ai_summary": "Michael O'Sullivan and Emma both absent w/c 6 Jul -- no first-line support cover in place. Next: identify cover, notify Simon and/or Marie, and confirm arrangements to team."
+      "ai_summary": "Support cover w/c 6 Jul: Michael O'Sullivan and Emma both absent with no first-line cover in place. Next: identify cover (Simon or Marie), notify relevant parties, and confirm arrangements with team."
     },
     {
       "id": "t026",
@@ -617,7 +748,7 @@
       ],
       "source": "Marie Cooksey 17/06",
       "dateType": "red",
-      "ai_summary": "Marie Cooksey forwarded OSM Owner Required notification 17 Jun for Task# 50959264 / ServiceReq# 30412906. Next: open email, review task in OSM, accept or reassign ownership."
+      "ai_summary": "OSM Task# 50959264 / ServiceReq# 30412906: owner required notification from Marie on 17 Jun. Next: open email, review task in OSM, and accept or reassign ownership."
     },
     {
       "id": "t034",
@@ -631,7 +762,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06 (Simon Burford)",
       "dateType": "red",
-      "ai_summary": "Sickness absence report not picking up open-ended absences, causing staff to go into half pay; issue raised 24 Jun by Simon Burford. Next: retrieve task number from meeting notes, investigate root cause (report fix vs PeopleXD data issue), confirm fix approach and communicate to Simon."
+      "ai_summary": "Sickness absence reporting: open-ended absences not being picked up, causing individuals to go into half pay. Task number shared at 24 Jun meeting but not logged. Next: retrieve task number, investigate root cause (report fix vs. PeopleXD data issue), and confirm fix approach with Simon."
     },
     {
       "id": "t036",
@@ -646,7 +777,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "red",
-      "ai_summary": "Matt Thomas raised inability to self-log volunteering hours in PeopleXD on 10 and 19 Jun; Marie to respond reiterating it's not possible. Next: forward Matt's email thread to Marie to enable her response."
+      "ai_summary": "Volunteering hours: Matt Thomas raised inability to self-log in PeopleXD on 10 Jun and 19 Jun. Raised at 24 Jun meeting with Marie to respond. Next: Kevin to forward email thread to Marie to enable her response."
     },
     {
       "id": "task-1782599630157",
@@ -655,7 +786,7 @@
       "actions": [],
       "source": "Maura McGlynn",
       "dateType": "red",
-      "ai_summary": "Maura McGlynn sent catch-up email on case 69001655 with potential Devs call to arrange. Next: review full email content and assess next steps for escalated case in progress with development team."
+      "ai_summary": "UOX case 69001655: Maura McGlynn sent catch-up email and indicated Devs call may be arranged. Kevin escalated to Sarah Murphy on 25 Jun for further progress. Next: monitor for Devs call arrangement and next update from Sarah Murphy."
     },
     {
       "id": "t014",
@@ -671,7 +802,7 @@
       ],
       "source": "Case 68974493",
       "dateType": "red",
-      "ai_summary": "Chemistry bulk delete (5,568 staff from '(DO NOT USE) CDR2025Chemistry' cycle) approved and live as of 30 Jun. Status: completed and confirmed to Julie Hickman."
+      "ai_summary": "Chemistry bulk delete: Kevin signed off UAT on 23 Jun and instructed Reenu to proceed to live. Confirmed live on 30 Jun. Status: COMPLETE."
     }
   ],
   "prioritiesTomorrow": [
@@ -688,7 +819,7 @@
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange",
-      "ai_summary": "40 Pay Administered By codes for REF2029 need setup in UOXU; Division Code linkage config done 12 Jun, draft load file sent to Conor O'Brien 17 Jun. Next: complete all 40 codes setup pending Division Code resolution confirmation."
+      "ai_summary": "REF2029 pay admin codes: draft load file sent to Conor O'Brien on 17 Jun pending Division Code linkage resolution from 12 Jun config session. Next: set up all 40 Pay Administered By codes in UOXU once Division Code resolution confirmed."
     },
     {
       "id": "t030",
@@ -702,7 +833,7 @@
       ],
       "source": "Cority Integration Platform 22/06",
       "dateType": "orange",
-      "ai_summary": "Cority SFTP connection error reported 22 Jun at 17:15 during scheduled employee import; James Salas Guillen managing correspondence with Cority. Next: check with James that error is resolved and production feed running correctly."
+      "ai_summary": "Cority SFTP error: connection error on 22 Jun at 17:15 during scheduled employee import. James Salas Guillen managing with Edward Demetillo. Next: confirm with James that 22 Jun SFTP error is resolved and feed is running correctly."
     }
   ],
   "prioritiesWeek": [
@@ -719,7 +850,7 @@
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "orange",
-      "ai_summary": "Cority smart notes cannot be edited after save/close (ticket 00476764, dev ref CCC-19664); Cority confirmed 8 Jun this is INTENDED behaviour, not on roadmap. Kevin escalated at Cority PUG 16 Jun; no premium support or named account manager. Next: chase Cority for firm delivery date on CCC-19664 or decide whether to pursue via sales/account route."
+      "ai_summary": "Cority smart notes (ticket 00476764, dev ref CCC-19664): Cority confirmed 08 Jun this is INTENDED behaviour, not on roadmap, no timeline. Escalated at PUG 16 Jun with Christopher Sanders. Next: chase Cority for firm delivery date on draft/save functionality or decide whether to accept as known limitation."
     },
     {
       "id": "t015",
@@ -737,7 +868,7 @@
       ],
       "source": "Meeting with Laura Porter 03/06",
       "dateType": "orange",
-      "ai_summary": "Internal Mobility Principles URL migration completed: Login screen updated 25 Jun, but Current Job Vacancies and Job Search screens on UOXU still pending dev team. Next: await Maura McGlynn Teams message when remaining screens ready for Kevin to validate before going LIVE."
+      "ai_summary": "IM Principles URL: confirmed live 3 Jun, old page retired 23-24 Jun. Login screen updated 25 Jun. Current Job Vacancies and Job Search screens blocked pending dev work. Next: await Maura McGlynn Teams message when remaining UOXU screens ready, then validate before LIVE."
     },
     {
       "id": "t006",
@@ -767,7 +898,7 @@
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "orange",
-      "ai_summary": "DSE feed went live 3 Jun; Azure CR 126017 (exclude SBS users) reviewed and approved 26 Jun. Status: SBS exclusion approved for Sprint 45; contractors and email-less users still pending James's resolution with supplier. Next: monitor James's progress on contractor and email-less user issues."
+      "ai_summary": "DSE data feed (live 3 Jun): three issues emerging. Kevin reviewed Azure CR 126017 on 26 Jun (SBS exclusion from DSE feed) -- state: Approved, Sprint 45. Next: await James to resolve contractor manual addition and email-less user issues."
     },
     {
       "id": "t1781204987882",
@@ -786,7 +917,7 @@
       ],
       "source": "Inbox 2026-06-11 15:01 / Quote 24/06",
       "dateType": "orange",
-      "ai_summary": "Access Group Project (case 69001638) approved 24 Jun: 3 Holiday Records reports (2.5 + 1.5 days, 2,800 flex points total). Deadline ~29 Sep flex point expiry. Next: reach out to team to agree delivery timing collectively factoring HEAT, July leave, and statutory returns season; confirm Asta Palmer involvement and Marie Cooksey sign-off."
+      "ai_summary": "Holiday Records (case 69001638): 3 reports approved 24 Jun, total 2,800 flex points. Statutory deadline and July resource constraints identified. Next: Kevin to reach out to team to agree delivery timing collectively, factor in HEAT, July leave, and ~29 Sep flex point expiry; confirm Asta Palmer involvement and Marie Cooksey sign-off."
     },
     {
       "id": "t020",
@@ -801,7 +932,7 @@
       ],
       "source": "Michael 1-1 15/06",
       "dateType": "orange",
-      "ai_summary": "COREPORTAL_ADMIN menu options for org hierarchy migration (DTP1092); change notification 20020472 received 20 Jun. Next: await Asta Palmer's comparison of enabled vs needed options, then enable on UOXU first and produce Portal-specific How-To guidance."
+      "ai_summary": "COREPORTAL_ADMIN org hierarchy migration (change 20020472): Asta Palmer running comparison of enabled menu options. Next: await Asta's confirmed list, then enable options in UOXU first, then all environments; produce Portal-specific How-To guidance."
     },
     {
       "id": "t031",
@@ -817,7 +948,7 @@
       ],
       "source": "Sarah Rowles 24/06",
       "dateType": "orange",
-      "ai_summary": "REF attributes via ESS by end July 2026 (attributes: qualifying contract, Unit of Assessment, academic employment function; RES explicitly excluded). Scoping meeting to be arranged by Nathan. Next: attend scoping meeting, confirm with Nathan/Athena if existing UDFs suffice, assess FA resource capacity (thin in July esp w/c 6 Jul), ensure Michelle engaged for business change support."
+      "ai_summary": "REF attributes via ESS: end of July deadline. Scoping meeting needed with Nathan, Kevin, Simon, Michelle. Key attributes confirmed (contract, UoA, academic function). Next: attend scoping meeting, confirm UDF coverage, assess FA input/testing resource required given thin July (especially w/c 6 Jul), ensure Michelle engaged for user instructions."
     },
     {
       "id": "t032",
@@ -832,7 +963,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "orange",
-      "ai_summary": "DTP1334 SHSMS Evaluation underway; implementation expected to start 20 Jul. Scoring: Requirements 65%, Price 30%, References 5%. Key dates: follow-up by 2 Jul, evaluator briefings 14 Jul, supplier responses ~21 Jul. Kevin raised dedicated project resource requirement 30 Jun. Next: follow-up with evaluation team by 2 Jul, raise dedicated resource requirement formally with Marie before mid-Jul evaluation window."
+      "ai_summary": "DTP1334 SHSMS evaluation: implementation expected 20 Jul. Kevin raised need for dedicated project resource (not BAU absorption) on 30 Jun to Christopher Sanders and James Salas Guillen. Scoring: Requirements 65%, Price 30%, References 5%. Next: follow up with evaluation team by 2 Jul; raise dedicated resource requirement formally with Marie before mid-July evaluation window."
     },
     {
       "id": "t033",
@@ -851,7 +982,7 @@
       ],
       "source": "Email thread Jan-Jun 2026 / HR Systems Managers Meeting 24/06",
       "dateType": "orange",
-      "ai_summary": "HR Reporting SSO Migration (Roadmap 179) paused: Visual Studio 2022 identified as fix for compatibility issue; currently trial licence only. Trial users: Simon Burford ADMN2716, David Sanders UOHS0054, Asta Palmer OUIT0422. Next: confirm VS2022 licensing with IT, confirm trial user status with Asta, agree revised delivery timeline with Desktop Services, update guidance and support docs."
+      "ai_summary": "HR Reporting SSO migration (Roadmap 179): Visual Studio 2022 licensing identified as blocker on 24 Jun. Currently trial licence only, do not migrate further users until licensing confirmed. Next: confirm VS2022 licensing with Desktop Services; confirm status of trial users (Simon, David, Asta); agree revised timeline once licensing sorted."
     },
     {
       "id": "t037",
@@ -864,7 +995,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "orange",
-      "ai_summary": "Ultrix licence for Nathan progressing but Anne's cost confirmation still outstanding; fee increased significantly. Next: chase Anne for confirmation she will cover Nathan's Ultrix licence if no response within a few days."
+      "ai_summary": "Ultrix license for Nathan: cost confirmation outstanding from Anne despite significant fee increase since earlier in year. Next: chase Anne if no confirmation received within a few days."
     },
     {
       "id": "t039",
@@ -877,7 +1008,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "orange",
-      "ai_summary": "Julie Hickman on two-week annual leave; training check cover needed. Esther flagged as possible option. Morgan building Power Automate training check tool (presenting at People Conference 25 Jun). Next: confirm Esther's availability or identify alternative cover; Marie to ask Morgan to connect with Julie after 25 Jun conference re Power Automate tool."
+      "ai_summary": "Summer support cover: Julie on two-week leave, training check cover needed. Esther flagged as option. Morgan building Power Automate training check tool (presenting at People Conference 25 Jun). Next: confirm Esther availability to cover two weeks; Marie to ask Morgan to connect with Julie after 25 Jun re Power Automate tool."
     },
     {
       "id": "t040",
@@ -895,7 +1026,7 @@
       ],
       "source": "Kevin 25/06",
       "dateType": "orange",
-      "ai_summary": "Work Inbox enhancement: render CC Today/This Week tasks as cards in priority panel even when no current email linked (e.g. t015 email 22 days old, outside 50-email fetch window). Next: build rendering logic for Today/This Week tiers, add Email and CC tags, exclude done and Parked tasks, get Kevin approval before pushing to main."
+      "ai_summary": "Work Inbox priority panel: CC Today/This Week tasks with no current email (e.g. t015) not rendering as cards. Next: render Today-tier CC tasks in Today section, This Week-tier in This Week section with title, status, Email tag, CC tag, CC-sourced label; exclude done tasks and Parked tier; screenshot and get Kevin approval before pushing to main."
     },
     {
       "id": "task-1782599584762",
@@ -906,7 +1037,7 @@
       ],
       "source": "manual",
       "dateType": "orange",
-      "ai_summary": "Gate 2.0 equivalence test task; Kevin updated case 69001655 with Dev team info and asked Sarah Murphy to escalate 30 Jun. Status: escalation in progress."
+      "ai_summary": "Gate 2.0 equivalence test task: Kevin updated case 69001655 with Dev team info and asked Sarah Murphy to escalate on 30 Jun. Status: AWAITING Sarah Murphy escalation."
     },
     {
       "id": "t046",
@@ -919,8 +1050,8 @@
       ],
       "source": "Teams -- Simon Burford, 29 Jun 2026",
       "dateType": "orange",
-      "ai_summary": "Katherine Corr (PACS) proposing to move Colleges from L2 to L3 in org structure to enable researcher data recording for REF and DARS. Simon Burford asked Kevin 29 Jun to assess impact with James and Chris. Next: assess PeopleXD and H&S systems impact, report back to Simon so management team can formulate response to Katherine Corr."
+      "ai_summary": "PACS org structure: Katherine Corr proposes moving Colleges from L2 to L3 to enable REF personal data recording in PXD and DARS system. Simon asked Kevin to assess impact with James and Chris on 29 Jun. Next: work with James and Chris to assess PeopleXD and H&S systems impact; report back to Simon for formal response to Katherine Corr."
     }
   ],
-  "refreshed_at": "Tuesday 30 June · 13:40"
+  "refreshed_at": "Tuesday 30 June · 15:22"
 }
