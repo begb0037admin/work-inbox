@@ -10,7 +10,7 @@ echo.
 echo Running inbox briefing...
 echo.
 python fetch_inbox.py
-if %%errorlevel%% equ 0 (
+if %errorlevel% equ 0 (
     echo.
     echo Done. Refresh your dashboard.
     timeout /t 4 /nobreak >nul
