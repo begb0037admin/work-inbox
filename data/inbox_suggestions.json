@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-06-30 15:21",
+  "generated_at": "2026-06-30 15:29",
   "new_tasks": [
     {
       "title": "Review P5 Task# 50958836 / Incident# 11681780 approach",
       "tier": "week",
-      "description": "Simon Burford copied Julie and Michelle on an approach discussion from this afternoon's meeting regarding P5 Task# 50958836 linked to Incident# 11681780. Kevin needs to review the thread and confirm alignment on the proposed approach.",
+      "description": "Simon Burford raised this in a meeting and is copying Julie and Michelle on Kevin's proposed approach. Kevin needs to review the full thread and confirm the approach is sound before proceeding.",
       "email_subject": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
       "email_from": "Simon Burford",
       "received": "2026-06-30 15:08",
@@ -13,13 +13,13 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t040",
-      "task_title": "Work Inbox -- render CC Today/This Week tasks as cards in priority panel",
-      "note": "Kevin has raised a support portal email update request with Sarah Murphy, likely related to Work Inbox priority panel rendering.",
-      "email_subject": "Request for support portal email update",
+      "task_id": "task-1782599630157",
+      "task_title": "Review UOX case 69001655 catch-up from Maura McGlynn",
+      "note": "Kevin updated case 69001655 ticket with information for the Dev team and is awaiting Sarah Murphy's next steps.",
+      "email_subject": "Re: #External# Escalation Request – Case 69001655",
       "email_from": "Kevin (sent to: Sarah Murphy)",
-      "received": "2026-06-24 12:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EEA0000"
+      "received": "2026-06-24 12:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EE90000"
     }
   ]
 }
