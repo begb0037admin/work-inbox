@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 30 June 2026",
-  "subtitle": "Awards deadline looms; Health Surveillance priorities; team coverage gaps",
-  "context": "Michelle Williams sent an automatic reply on 29 June indicating she is away, blocking the Staff EES Information for HESA meeting scheduled for tomorrow 1 July at 11:00 with Nathan Kirwan and the Research Data Items project. An unread email from James Salas Guillen on 24 June regarding the Health Surveillance Review mentions Sharon requested an in-person session on 9 September to discuss detailed Health Surveillance issues. Jasmin Khokhra's unread email from 26 June thanks Michael and Tracy for completing the UCEA Clinical pay uplift work before Tracy's leave. The Awards for Excellence Scheme deadline is 3 July 2026 - you nominated Michael O'Sullivan on 29 June and Marie Cooksey has reviewed it, but this remains your most time-critical deadline this week. Support Call #11688462 for the Ash VEA team has been escalating and requires follow-up with Marie Cooksey and Anna Carter-Windle. Open first the unread Health Surveillance Review email from James Salas Guillen on 24 June as it flags Sharon's September session requirement and contains attached materials you have not reviewed.",
+  "subtitle": "Absences blocking H&S meetings; Awards deadline 3 July",
+  "context": "Michelle Williams sent an automatic reply on 29 June indicating she is away, blocking progress on the Staff EES Information for HESA meeting scheduled for 1 July at 11:00 with Nathan Kirwan, Anne Mortimer, and Sarah Rowles. Support Case #11688462 for the Ash VEA team remains unresolved with Marie Cooksey waiting on Marie Cooksey (Head of HR Systems) to action your concerns raised on 23 June - now 7 days overdue. The Awards for Excellence Scheme deadline is 3 July 2026 (4 days away), and you submitted a nomination for Michael O'Sullivan on 29 June that Marie Cooksey approved the same day. Access Support Team case 68974493 was actioned by you on 30 June at 09:15 but Julie Hickman's follow-up at 11:41 today suggests verification is still needed. James Salas Guillen's Health Surveillance Review email from 24 June remains unread with Sharon requesting an in-person session on 9 September. Open first: the unread Jasmin Khokhra email from 26 June regarding UCEA Clinical pay uplift and Michael's work before he goes on leave, as this relates to completed compensation work requiring your awareness.",
   "urgent": [
     {
       "title": "Reference Request for Nikolas Sharkey",
@@ -42,16 +42,6 @@
       "from": "Joanne Grant",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE0E0000",
       "received": "25 Jun"
-    },
-    {
-      "title": "Urgent Reference Request for Nikolas Sharkey",
-      "sub": "From <strong>TSS Enquiries</strong>.",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Urgent Reference Request for Nikolas Sharkey",
-      "from": "TSS Enquiries",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C140000",
-      "received": "23 Jun"
     }
   ],
   "needs": [
@@ -97,6 +87,16 @@
     }
   ],
   "fyi": [
+    {
+      "title": "RE: Access Support Team | 68974493 - New Case",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Access Support Team | 68974493 - New Case",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E80000",
+      "received": "30 Jun"
+    },
     {
       "title": "FW: Strategic H&S modular system project requirements",
       "sub": "From <strong>James Salas Guillen</strong>.",
@@ -554,17 +554,17 @@
       "dateType": "red"
     },
     {
-      "id": "t014",
-      "text": "Chemistry bulk delete -- get details from Julie, pass to Reenu",
-      "description": "Bulk deletion of appraisal cycle assignments in PeopleXD for Chemistry department. Appraisal cycle name: '(DO NOT USE) CDR2025Chemistry'. 5,568 staff incorrectly assigned and need to be removed. AG contact: Reenu Delaney (cases 68974493 / 67938206). Payment via flex points (£525, approved by Marie).",
+      "id": "t029",
+      "text": "DTP1334 SHSMS Evaluation -- review Helen Harbour briefing and weightings",
+      "description": "Helen Harbour sent two emails in the week of 17-18 June related to DTP1334: a SHSMS Evaluation Briefing placeholder document and a Strategic H&S Modular System requirements evaluation weightings spreadsheet (Sonhal Mistry also involved). Both are directly relevant to the POC work Kevin needs to do with Christopher Sanders (t022).",
       "actions": [
-        "[Oct 2025] Case 67938206 raised -- Chemistry bulk delete of appraisal assignments.",
-        "[02 Jun 2026] Marie handed case to Kevin as lead.",
-        "[10 Jun 2026] Julie shared OneDrive export of affected employee list. Forwarded to Reenu Delaney at AG.",
-        "[23 Jun 2026] Kevin signed off UAT — changes confirmed good, instructed Reenu to proceed to live.",
-        "[AWAITING] Reenu Delaney to confirm live deployment complete and email Kevin."
+        "[17 Jun 2026] Helen Harbour sent DTP1334 SHSMS Evaluation Briefing placeholder -- RED, act today (now overdue).",
+        "[18 Jun 2026] Helen Harbour sent Strategic H&S Modular System requirements evaluation weightings (Sonhal Mistry also on thread).",
+        "[TODO] Review Helen's evaluation briefing document.",
+        "[TODO] Review the evaluation weightings spreadsheet.",
+        "[TODO] Use both to inform POC meeting notes before sending to Chris (t022)."
       ],
-      "source": "Case 68974493",
+      "source": "Helen Harbour 17-18/06",
       "dateType": "red"
     },
     {
@@ -638,6 +638,21 @@
       "actions": [],
       "source": "Maura McGlynn",
       "dateType": "red"
+    },
+    {
+      "id": "t014",
+      "text": "Chemistry bulk delete -- get details from Julie, pass to Reenu",
+      "description": "Bulk deletion of appraisal cycle assignments in PeopleXD for Chemistry department. Appraisal cycle name: '(DO NOT USE) CDR2025Chemistry'. 5,568 staff incorrectly assigned and need to be removed. AG contact: Reenu Delaney (cases 68974493 / 67938206). Payment via flex points (£525, approved by Marie).",
+      "actions": [
+        "[Oct 2025] Case 67938206 raised -- Chemistry bulk delete of appraisal assignments.",
+        "[02 Jun 2026] Marie handed case to Kevin as lead.",
+        "[10 Jun 2026] Julie shared OneDrive export of affected employee list. Forwarded to Reenu Delaney at AG.",
+        "[23 Jun 2026] Kevin signed off UAT — changes confirmed good, instructed Reenu to proceed to live.",
+        "[AWAITING] Reenu Delaney to confirm live deployment complete and email Kevin.",
+        "[30 Jun 2026] Kevin confirmed to Julie that Chemistry bulk deletion has been actioned and is now live. (email: Kevin (sent to: Julie Hickman) - Re: Access Support Team | 68974493 - New Case)"
+      ],
+      "source": "Case 68974493",
+      "dateType": "red"
     }
   ],
   "prioritiesTomorrow": [
@@ -646,27 +661,13 @@
       "text": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
       "description": "Pay admin buy codes need to be set up in PeopleXD for DTP1092. Simon created Division 901, ZSD901, Z90101, Z901, Z902 in UOXU on 10 Jun. Division Code linkage to Company Code was blocked pending Conor O'Brien config session (happened 12 Jun). Draft load file sent to Conor 17 Jun. 40 Pay Administered By codes still need setting up in UOXU.",
       "actions": [
-        "[10 Jun 2026] Simon created Division 901, ZSD901, Z90101, Z901 (Colleges), Z902 (Permanent Private Halls) in UOXU.",
+        "[10 Jun 2026] Simon created Division 901, ZSD901, Z90101, Z90101 (Colleges), Z902 (Permanent Private Halls) in UOXU.",
         "[12 Jun 2026] Config session with Conor O'Brien re Division Code blocker.",
         "[17 Jun 2026] Kevin sent draft REF2029 load file to Conor O'Brien.",
         "[TODO] Set up all 40 Pay Administered By codes in UOXU (list in docs/REF2029_pay_admin_codes.md).",
         "[AWAITING] Division Code resolution confirmed before proceeding."
       ],
       "source": "SK 1-1 08/06",
-      "dateType": "orange"
-    },
-    {
-      "id": "t029",
-      "text": "DTP1334 SHSMS Evaluation -- review Helen Harbour briefing and weightings",
-      "description": "Helen Harbour sent two emails in the week of 17-18 June related to DTP1334: a SHSMS Evaluation Briefing placeholder document and a Strategic H&S Modular System requirements evaluation weightings spreadsheet (Sonhal Mistry also involved). Both are directly relevant to the POC work Kevin needs to do with Christopher Sanders (t022).",
-      "actions": [
-        "[17 Jun 2026] Helen Harbour sent DTP1334 SHSMS Evaluation Briefing placeholder -- RED, act today (now overdue).",
-        "[18 Jun 2026] Helen Harbour sent Strategic H&S Modular System requirements evaluation weightings (Sonhal Mistry also on thread).",
-        "[TODO] Review Helen's evaluation briefing document.",
-        "[TODO] Review the evaluation weightings spreadsheet.",
-        "[TODO] Use both to inform POC meeting notes before sending to Chris (t022)."
-      ],
-      "source": "Helen Harbour 17-18/06",
       "dateType": "orange"
     },
     {
@@ -709,7 +710,8 @@
         "[25 Jun 2026] Kevin updated case 69001655 with Dev team information and asked Sarah Murphy to progress further. (email: Kevin (sent to: Sarah Murphy) - Re: #External# Escalation Request – Case 69001655)",
         "[25 Jun 2026] Kevin updated Login screen on UOXU successfully -- 'Internal Mobility Principles' hyperlinked, spacing added after 'Existing University Staff' and 'New Applicants:' headings.",
         "[25 Jun 2026] Unable to update Current Job Vacancies and Job Search screens on UOXU -- devs now handling remaining UOXU screens.",
-        "[AWAITING] Maura McGlynn (AG) to send Teams message when remaining UOXU screens are ready for Kevin to validate before going LIVE."
+        "[AWAITING] Maura McGlynn (AG) to send Teams message when remaining UOXU screens are ready for Kevin to validate before going LIVE.",
+        "[30 Jun 2026] Kevin confirmed to Laura Porter that IM Principles URL changes have been made and verified on test environment. (email: Kevin (sent to: Laura Porter) - Re: IM Principles - change to URL)"
       ],
       "source": "Meeting with Laura Porter 03/06",
       "dateType": "orange"
@@ -866,10 +868,24 @@
       "id": "task-1782599584762",
       "text": "Gate 2.0 equivalence test task",
       "description": "",
-      "actions": [],
+      "actions": [
+        "[30 Jun 2026] Kevin updated the ticket (case 69001655) with information for the Dev team and asked Sarah Murphy to escalate. (email: Kevin (sent to: Sarah Murphy) - Re: #External# Escalation Request – Case 69001655)"
+      ],
       "source": "manual",
+      "dateType": "orange"
+    },
+    {
+      "id": "t046",
+      "text": "PACS org structure -- college entities L2 to L3 impact assessment",
+      "description": "Katherine Corr (PACS team) is proposing to adjust how Oxford Colleges are recorded in the org structure -- moving them from L2 to L3 (with an appropriate L2 parent) so they can be used in PXD to record researcher personal data for REF and in the new DARS system. Currently Colleges, Societies and Halls are all set up at L2. Simon Burford asked Kevin on 29 Jun to work with James and Chris to establish the impact from a PeopleXD / H&S Systems point of view, then report back so the management team can pull together a formal response. Martin McGovern (ORMS) and Robert Bradley (IAM) have both confirmed the change would be fine for their respective systems.",
+      "actions": [
+        "[29 Jun 2026] Simon Burford asked Kevin to assess the impact with James and Chris. Kevin confirmed he would pick it up.",
+        "[TODO] Work with James and Chris to assess impact on PeopleXD and H&S systems of moving Colleges from L2 to L3 in org structure.",
+        "[TODO] Report back to Simon so the management team can pull together a formal response to Katherine Corr (PACS)."
+      ],
+      "source": "Teams -- Simon Burford, 29 Jun 2026",
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Tuesday 30 June · 10:59"
+  "refreshed_at": "Tuesday 30 June · 12:25"
 }
