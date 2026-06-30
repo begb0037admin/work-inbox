@@ -1,43 +1,52 @@
 {
-  "generated_at": "2026-06-28 05:35",
+  "generated_at": "2026-06-30 10:59",
   "new_tasks": [
     {
-      "title": "Update Laura Porter on IM Principles URL linking progress",
-      "tier": "tomorrow",
-      "description": "Laura Porter is chasing for an update on the Internal Mobility Principles URL change work (task t015). She is away today but back Monday. Kevin needs to provide a status update on the link updates to main ops intranet page, professional services search page, and vacancy application pages.",
-      "email_subject": "RE: IM Principles - change to URL",
-      "email_from": "Laura Porter",
-      "received": "2026-06-25 17:18",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE120000"
-    },
-    {
-      "title": "Arrange meeting on REF data disclosure to staff via ESS",
-      "tier": "week",
-      "description": "Nathan Kirwan is organizing a meeting between 5 people to discuss how to record and communicate decisions to staff regarding REF research data items. This ties into the July end-of-month deadline for REF attributes via ESS (task t031). Kevin needs to confirm his availability and participate in this planning meeting.",
-      "email_subject": "Staff EES Information for HESA - Research Data Items (REF)",
-      "email_from": "Nathan Kirwan",
-      "received": "2026-06-24 13:43",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70B0000"
+      "title": "Reference for Nikolas Sharkey — confirm submission received",
+      "tier": "today",
+      "description": "Kevin submitted a reference for Nikolas Sharkey on 29 June at 17:10 via link. Todd Graf's follow-up email on 29 June at 15:08 may indicate confirmation or further action needed. Verify that TSS Enquiries received and processed the submission.",
+      "email_subject": "Reference Request for Nikolas Sharkey",
+      "email_from": "Todd Graf",
+      "received": "2026-06-29 15:08",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DF0000"
     }
   ],
   "applied_updates": [
     {
-      "task_id": "t023",
-      "task_title": "Respond to Support Call# 11688462 -- Ash VEA team",
-      "note": "Kevin replied to Cathy Hamer and Linda Pope on Support Call# 11688462 regarding the Ash VEA team issue, providing his response.",
-      "email_subject": "Re: Support Call# 11688462: Ash VEA team",
-      "email_from": "Kevin (sent to: Cathy Hamer; Linda Pope)",
-      "received": "2026-06-26 14:33",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EF60000"
+      "task_id": "task-1782599584762",
+      "task_title": "Gate 2.0 equivalence test task",
+      "note": "Kevin updated the ticket (case 69001655) with information for the Dev team and asked Sarah Murphy to escalate.",
+      "email_subject": "Re: #External# Escalation Request – Case 69001655",
+      "email_from": "Kevin (sent to: Sarah Murphy)",
+      "received": "2026-06-24 12:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EE90000"
     },
     {
-      "task_id": "t025",
-      "task_title": "Support cover w/c 6 July -- plan needed today",
-      "note": "Kevin notified Marie Cooksey that Asta will be taking compassionate leave on 30 June, which further reduces support cover capacity during the critical transition week.",
-      "email_subject": "Compassionate leave for Asta on 30 June",
-      "email_from": "Kevin (sent to: Marie Cooksey)",
-      "received": "2026-06-26 13:16",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EF30000"
+      "task_id": "t014",
+      "task_title": "Chemistry bulk delete -- get details from Julie, pass to Reenu",
+      "note": "Kevin confirmed to Julie that Chemistry bulk deletion has been actioned and is now live.",
+      "email_subject": "Re: Access Support Team | 68974493 - New Case",
+      "email_from": "Kevin (sent to: Julie Hickman)",
+      "received": "2026-06-30 09:15",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078B270AF50000"
+    },
+    {
+      "task_id": "t024",
+      "task_title": "Provide reference for Nikolas Sharkey -- URGENT",
+      "note": "Kevin submitted the reference for Nikolas Sharkey via link after the 48-hour delay.",
+      "email_subject": "Re: Reference Request for Nikolas Sharkey",
+      "email_from": "Kevin (sent to: Todd Graf)",
+      "received": "2026-06-29 17:10",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078B270AF40000"
+    },
+    {
+      "task_id": "t015",
+      "task_title": "Web pages and URL linking -- job posting updates",
+      "note": "Kevin confirmed to Laura Porter that IM Principles URL changes have been made and verified on test environment.",
+      "email_subject": "Re: IM Principles - change to URL",
+      "email_from": "Kevin (sent to: Laura Porter)",
+      "received": "2026-06-29 16:41",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078B270AF30000"
     }
   ]
 }
