@@ -1,7 +1,25 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-30
+**Last updated:** 2026-06-30 (evening) — CC→ button window reuse; hashchange card selection in CC
 **Status:** Active — pipeline fully working. Task Scheduler confirmed working 2026-06-30.
+
+---
+
+## Session 2026-06-30 (evening) — CC→ button window reuse; hashchange listener in CC
+
+**CC→ button window reuse fix (this repo — js/app.js):**
+- Problem: `window.open(url, 'command-centre')` opened a new CC tab on every click, even when CC was already open.
+- Root cause: named-window reuse only works for tabs opened via `window.open` — a tab the user navigated to manually has no window name.
+- Fix: added module-level `_ccWindow` variable. `openCC(id)` checks `_ccWindow && !_ccWindow.closed`; if true, navigates in place via `_ccWindow.location.href` + `.focus()`; otherwise opens new tab and stores reference. Button onclick updated to call `openCC(id)`.
+- Backup before write: `Archive/app_js_backup_20260630_2110.js` (commit `2d9833d5`)
+- js/app.js SHA after fix: `44867d67`. Confirmed working by Kevin.
+
+**hashchange listener (command-centre/js/app.js):**
+- Problem: CC card not selected/animated when CC→ button used while CC is already open.
+- Root cause: CC reads `window.location.hash` once on page load. Navigating an already-open tab via `_ccWindow.location.href` fires `hashchange` in the CC tab — but CC had no listener.
+- Fix: `window.addEventListener('hashchange', function(){ var id=window.location.hash.replace('#',''); if(id) goToCard(id); });` appended to CC `js/app.js`.
+- CC backup before write: `Archive/app_js_backup_20260630_2115.js` (commit `8e3d84dd`)
+- CC `js/app.js` new SHA: `12e0b1be` (commit `8b3c880`). Confirmed working by Kevin.
 
 ---
 
@@ -150,7 +168,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 | fetch_inbox.py | Outlook COM via pywin32. Pulls inbox → Anthropic triage (claude-haiku-4-5) → Python post-processing → pushes data/briefing.json to GitHub via Contents API |
 | index.html | Shell — HTML structure only. Loads css/styles.css → js/app.js. No framework, no build step. |
 | css/styles.css | All styles extracted from former monolithic index.html. |
-| js/app.js | All JS — briefing render, drag-and-drop, tick sync, archive, tasks widget, live sidebar clock. |
+| js/app.js | All JS — briefing render, drag-and-drop, tick sync, archive, tasks widget, live sidebar clock, CC→ button window reuse (`_ccWindow`). |
 | open_email.py | Registered openmail:// protocol handler — strips prefix and trailing slash, opens exact email in classic Outlook via EntryID COM |
 
 ---
@@ -187,6 +205,7 @@ Cowork brief: `docs/COWORK_BRIEF_INBOX_RULES.md`
 - "Priority actions — next week" section (pnw drop zone) — sits between "this week" and "urgent"; teal dot accent
 - Drag-and-drop fully re-enabled and extended — email cards draggable into any priority section; custom priority items persisted in `workInbox_customPri_v1`
 - Multi-machine setup complete (begb0037.AD-OAK)
+- **CC→ button window reuse (2026-06-30):** `_ccWindow` variable stores CC window reference; navigates existing tab in-place rather than opening a new one every click.
 
 ### Local Path
 Folder: `C:\Users\admin\Documents\Claude\Projects\work-inbox`
