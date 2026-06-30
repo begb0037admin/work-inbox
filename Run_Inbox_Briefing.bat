@@ -13,7 +13,7 @@ python fetch_inbox.py
 if %errorlevel% equ 0 (
     echo.
     echo Done. Refresh your dashboard.
-    timeout /t 4 /nobreak >nul
+    pause
 ) else (
     echo.
     echo ERROR - check output above.
