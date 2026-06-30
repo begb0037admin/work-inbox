@@ -1,15 +1,25 @@
 {
-  "generated_at": "2026-06-30 13:39",
+  "generated_at": "2026-06-30 15:21",
   "new_tasks": [
     {
-      "title": "Provide reference for Nikolas Sharkey",
-      "tier": "today",
-      "description": "TSS has requested an urgent reference for Nikolas Sharkey. Kevin received the request on 23 June and has now submitted the reference on 29 June, but the original task t024 should be marked complete as the action has been taken (email n24 shows Kevin replied with submission confirmation).",
-      "email_subject": "Reference Request for Nikolas Sharkey",
-      "email_from": "Todd Graf",
-      "received": "2026-06-29 15:08",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DF0000"
+      "title": "Review P5 Task# 50958836 / Incident# 11681780 approach",
+      "tier": "week",
+      "description": "Simon Burford copied Julie and Michelle on an approach discussion from this afternoon's meeting regarding P5 Task# 50958836 linked to Incident# 11681780. Kevin needs to review the thread and confirm alignment on the proposed approach.",
+      "email_subject": "RE: P5 Task assigned to your team - Task# 50958836 for Incident# 11681780",
+      "email_from": "Simon Burford",
+      "received": "2026-06-30 15:08",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4EB0000"
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t040",
+      "task_title": "Work Inbox -- render CC Today/This Week tasks as cards in priority panel",
+      "note": "Kevin has raised a support portal email update request with Sarah Murphy, likely related to Work Inbox priority panel rendering.",
+      "email_subject": "Request for support portal email update",
+      "email_from": "Kevin (sent to: Sarah Murphy)",
+      "received": "2026-06-24 12:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF535000788481EEA0000"
+    }
+  ]
 }
