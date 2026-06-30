@@ -1,27 +1,37 @@
 {
-  "date": "Sunday 28 June 2026",
-  "subtitle": "Leave coverage gaps & 5-day-old unresponded tickets",
-  "context": "Good morning Kevin. You have 24 unread emails from the past week requiring attention. Critical: Michael is on leave during the week commencing 1 July, and Emma is also absent that same week per Julie Hickman's email from 23 June - both their absences are blocking support coverage, and you need to confirm arrangements with Julie Hickman immediately. Tracy is noted as going on leave in Jasmin Khokhra's email regarding UCEA Clinical pay uplift work completed before her departure. Laura Porter's email about IM Principles URL change has been waiting 4 days since 25 June without a response - this is blocking progress on that initiative. Michelle Williams' email from 24 June about Task# 50945166 for ServiceReq# 30404938 has been unresponded for 5 days and requires owner assignment. Your most time-critical deadline is Monday 1 July for the Awards for Excellence Scheme nominations (deadline 3 July 2026), and you also have a meeting with Nathan Kirwan tomorrow (Monday 29 June) at 11:00 on Microsoft Teams regarding Staff EES Information for HESA Research Data Items. Open first: Laura Porter's IM Principles email to provide the update she requested before she goes on leave tomorrow.",
+  "date": "Tuesday 30 June 2026",
+  "subtitle": "Awards deadline looms; Health Surveillance priorities; team coverage gaps",
+  "context": "Michelle Williams sent an automatic reply on 29 June indicating she is away, blocking the Staff EES Information for HESA meeting scheduled for tomorrow 1 July at 11:00 with Nathan Kirwan and the Research Data Items project. An unread email from James Salas Guillen on 24 June regarding the Health Surveillance Review mentions Sharon requested an in-person session on 9 September to discuss detailed Health Surveillance issues. Jasmin Khokhra's unread email from 26 June thanks Michael and Tracy for completing the UCEA Clinical pay uplift work before Tracy's leave. The Awards for Excellence Scheme deadline is 3 July 2026 - you nominated Michael O'Sullivan on 29 June and Marie Cooksey has reviewed it, but this remains your most time-critical deadline this week. Support Call #11688462 for the Ash VEA team has been escalating and requires follow-up with Marie Cooksey and Anna Carter-Windle. Open first the unread Health Surveillance Review email from James Salas Guillen on 24 June as it flags Sharon's September session requirement and contains attached materials you have not reviewed.",
   "urgent": [
     {
+      "title": "Reference Request for Nikolas Sharkey",
+      "sub": "From <strong>Todd Graf</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "Reference Request for Nikolas Sharkey",
+      "from": "Todd Graf",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DF0000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "FW: Nominations open for this year’s Awards for Excellence Scheme (deadline: 3 July 2026)",
+      "sub": "From <strong>Jonathan Roger</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "FW: Nominations open for this year’s Awards for Excellence Scheme (deadline: 3 July 2026)",
+      "from": "Jonathan Roger",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DC0000",
+      "received": "29 Jun"
+    },
+    {
       "title": "DTP1092 College Staff into PXD - Weekly Team Meeting notes - 23-Jun-26",
-      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nSome notes from our team meeting earlier in the week. Apologies for the delay in getting these to you. ",
+      "sub": "From <strong>Crispin Muncaster</strong>.",
       "badge": "Act today",
       "badgeType": "red",
       "subject": "DTP1092 College Staff into PXD - Weekly Team Meeting notes - 23-Jun-26",
       "from": "Crispin Muncaster",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE180000",
       "received": "26 Jun"
-    },
-    {
-      "title": "Urgent Reference Request for Nikolas Sharkey",
-      "sub": "From <strong>TSS Enquiries</strong>. Dear Kevin Lelitte,\r\n \r\nNikolas Sharkey is being considered for temporary vacancies at the University of Oxford and has ",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "Urgent Reference Request for Nikolas Sharkey",
-      "from": "TSS Enquiries",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C140000",
-      "received": "23 Jun"
     },
     {
       "title": "RE: EcoOnline /University of Oxford - IEX work request ",
@@ -32,68 +42,28 @@
       "from": "Joanne Grant",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE0E0000",
       "received": "25 Jun"
+    },
+    {
+      "title": "Urgent Reference Request for Nikolas Sharkey",
+      "sub": "From <strong>TSS Enquiries</strong>.",
+      "badge": "Act today",
+      "badgeType": "red",
+      "subject": "Urgent Reference Request for Nikolas Sharkey",
+      "from": "TSS Enquiries",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C140000",
+      "received": "23 Jun"
     }
   ],
   "needs": [
     {
-      "title": "College Staff Structure",
-      "sub": "From <strong>Simon Burford</strong>. Hi all,\r\n\r\n \r\n\r\nI have been made aware of Katherine Corr’s message below:\r\n\r\n \r\n\r\nCan I please check; does this impact t",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "College Staff Structure",
-      "from": "Simon Burford",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE1E0000",
-      "received": "26 Jun"
-    },
-    {
-      "title": "RE: DSE System - exclude SBS users ",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Erika, \r\n\r\n \r\n\r\nThank you for this. Could you please confirm whether this is a one‑off implementation cost, or an add",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: DSE System - exclude SBS users ",
-      "from": "James Salas Guillen",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE1D0000",
-      "received": "26 Jun"
-    },
-    {
       "title": "RE: UCEA Clinical pay uplift - April 2026",
       "sub": "From <strong>Jasmin Khokhra</strong>. Thanks for the update Michael and all your work on this. Also thank you to Tracy for getting this over the line before y",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "RE: UCEA Clinical pay uplift - April 2026",
       "from": "Jasmin Khokhra",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE130000",
       "received": "26 Jun"
-    },
-    {
-      "title": "RE: IM Principles - change to URL",
-      "sub": "From <strong>Laura Porter</strong>. Hi Kevin,\r\n\r\n \r\n\r\nDo you have any update on the below? I’m away tomorrow but back Monday. Hope you enjoyed the conferenc",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: IM Principles - change to URL",
-      "from": "Laura Porter",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE120000",
-      "received": "25 Jun"
-    },
-    {
-      "title": "RE: Owner Required - Task# 50945166 for ServiceReq# 30404938",
-      "sub": "From <strong>Michelle Williams</strong>. Hi Kevin,\r\n\r\n \r\n\r\nI had previously queried this with Michael, please see response below – I will go back to the user tha",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Owner Required - Task# 50945166 for ServiceReq# 30404938",
-      "from": "Michelle Williams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7110000",
-      "received": "24 Jun"
-    },
-    {
-      "title": "Staff EES Information for HESA - Research Data Items (REF)",
-      "sub": "From <strong>Nathan Kirwan</strong>. HI All,\r\n\r\n \r\n\r\nI’ve been asked to organise a meeting between the 5 of us to discuss how best to record and communicate ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Staff EES Information for HESA - Research Data Items (REF)",
-      "from": "Nathan Kirwan",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70B0000",
-      "received": "24 Jun"
     },
     {
       "title": "FW: Health Surveillance Review ",
@@ -116,16 +86,6 @@
       "received": "24 Jun"
     },
     {
-      "title": "RE: Support cover for first two weeks in July",
-      "sub": "From <strong>Julie Hickman</strong>. Hello all,\r\n\r\n \r\n\r\nJust a further update from me.\r\n\r\n \r\n\r\nI wanted to make you aware that both Michael and Emma are on l",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Support cover for first two weeks in July",
-      "from": "Julie Hickman",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000",
-      "received": "23 Jun"
-    },
-    {
       "title": "Support Call# 11688462: Ash VEA team",
       "sub": "From <strong>HR Systems Support</strong>. Dear Cathy\r\n\r\n \r\n\r\nThank you for your email.\r\n\r\n \r\n\r\nI have raised your concerns with Marie Cooksey, Head of HR Systems.",
       "badge": "Overdue",
@@ -134,29 +94,229 @@
       "from": "HR Systems Support",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE0D0000",
       "received": "23 Jun"
-    },
-    {
-      "title": "Business rules for Data Warehouse",
-      "sub": "From <strong>Simon Burford</strong>. Hi Ewan,\r\n\r\n \r\n\r\nIn our meeting this morning we agreed that I would confirm the rules that would need to be put in place",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Business rules for Data Warehouse",
-      "from": "Simon Burford",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C060000",
-      "received": "22 Jun"
-    },
-    {
-      "title": "RE: #External# Unexpected Case Creation Emails Following New Starter Setup",
-      "sub": "From <strong>Michelle Williams</strong>. Hi Marie, \r\n\r\n \r\n\r\nYes, leave it with me — I’ll send something to them today.\r\n\r\n \r\n\r\nKind regards\r\n\r\nMichelle \r\n\r\nFrom:",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: #External# Unexpected Case Creation Emails Following New Starter Setup",
-      "from": "Michelle Williams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663270000",
-      "received": "22 Jun"
     }
   ],
   "fyi": [
+    {
+      "title": "FW: Strategic H&S modular system project requirements",
+      "sub": "From <strong>James Salas Guillen</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "FW: Strategic H&S modular system project requirements",
+      "from": "James Salas Guillen",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E60000",
+      "received": "30 Jun"
+    },
+    {
+      "title": "FW: DSE System - exclude SBS users ",
+      "sub": "From <strong>James Salas Guillen</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "FW: DSE System - exclude SBS users ",
+      "from": "James Salas Guillen",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E50000",
+      "received": "30 Jun"
+    },
+    {
+      "title": "RE: Awards for Excellence — Michael O'Sullivan nomination — please review",
+      "sub": "From <strong>Marie Cooksey</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Awards for Excellence — Michael O'Sullivan nomination — please review",
+      "from": "Marie Cooksey",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E40000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: Reference Request for Nikolas Sharkey",
+      "sub": "From <strong>Todd Graf</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Reference Request for Nikolas Sharkey",
+      "from": "Todd Graf",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E30000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: IM Principles - change to URL",
+      "sub": "From <strong>Laura Porter</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: IM Principles - change to URL",
+      "from": "Laura Porter",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E20000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "sub": "From <strong>Conor O'Brien</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
+      "from": "Conor O'Brien",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E10000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Accepted: WFM Rostering — Internal Review Meeting",
+      "sub": "From <strong>Anna Carter-Windle</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Accepted: WFM Rostering — Internal Review Meeting",
+      "from": "Anna Carter-Windle",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E00000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Emergency planning",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Emergency planning",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DE0000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Re: EcoOnline /University of Oxford - IEX work request ",
+      "sub": "From <strong>John Grant</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Re: EcoOnline /University of Oxford - IEX work request ",
+      "from": "John Grant",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DB0000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "University Bulletin: 29 June 2026",
+      "sub": "From <strong>Internal Communications</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "University Bulletin: 29 June 2026",
+      "from": "Internal Communications",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DA0000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Accepted: WFM Rostering — Internal Review Meeting",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Accepted: WFM Rostering — Internal Review Meeting",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D90000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: College Staff on PXD",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: College Staff on PXD",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D70000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Accepted: WFM Rostering — Internal Review Meeting",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Accepted: WFM Rostering — Internal Review Meeting",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D60000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: Access Support Team | 68974493 - New Case",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Access Support Team | 68974493 - New Case",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D50000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Accepted: WFM Rostering — Internal Review Meeting",
+      "sub": "From <strong>Michelle Williams</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Accepted: WFM Rostering — Internal Review Meeting",
+      "from": "Michelle Williams",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D30000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Accepted: James Salas Guillen 1-1 Session",
+      "sub": "From <strong>James Salas Guillen</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Accepted: James Salas Guillen 1-1 Session",
+      "from": "James Salas Guillen",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D20000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: College Staff on PXD",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: College Staff on PXD",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D10000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Staff EES Information for HESA - Research Data Items (REF)",
+      "sub": "From <strong>Nathan Kirwan</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Staff EES Information for HESA - Research Data Items (REF)",
+      "from": "Nathan Kirwan",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4D00000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: College Staff Structure",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: College Staff Structure",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4CF0000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "College Staff on PXD",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "College Staff on PXD",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4CE0000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "RE: College Staff Structure",
+      "sub": "From <strong>Anne Mortimer</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: College Staff Structure",
+      "from": "Anne Mortimer",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4CD0000",
+      "received": "29 Jun"
+    },
+    {
+      "title": "Automatic reply: Staff EES Information for HESA - Research Data Items (REF)",
+      "sub": "From <strong>Michelle Williams</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Automatic reply: Staff EES Information for HESA - Research Data Items (REF)",
+      "from": "Michelle Williams",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4CC0000",
+      "received": "29 Jun"
+    },
     {
       "title": "Re: DSE System - exclude SBS users ",
       "sub": "From <strong>Tony Boydell</strong>.",
@@ -178,13 +338,23 @@
       "received": "26 Jun"
     },
     {
-      "title": "Fw: Nominations open for this year’s Awards for Excellence Scheme (deadline: 3 July 2026)",
-      "sub": "From <strong>Kevin Lelitte</strong>.",
+      "title": "College Staff Structure",
+      "sub": "From <strong>Simon Burford</strong>.",
       "badge": "FYI",
       "badgeType": "gray",
-      "subject": "Fw: Nominations open for this year’s Awards for Excellence Scheme (deadline: 3 July 2026)",
-      "from": "Kevin Lelitte",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE200000",
+      "subject": "College Staff Structure",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE1E0000",
+      "received": "26 Jun"
+    },
+    {
+      "title": "RE: DSE System - exclude SBS users ",
+      "sub": "From <strong>James Salas Guillen</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: DSE System - exclude SBS users ",
+      "from": "James Salas Guillen",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE1D0000",
       "received": "26 Jun"
     },
     {
@@ -208,14 +378,24 @@
       "received": "26 Jun"
     },
     {
-      "title": "FW: Strategic H&S modular system project requirements",
-      "sub": "From <strong>Christopher Sanders</strong>.",
+      "title": "RE: IM Principles - change to URL",
+      "sub": "From <strong>Laura Porter</strong>.",
       "badge": "FYI",
       "badgeType": "gray",
-      "subject": "FW: Strategic H&S modular system project requirements",
-      "from": "Christopher Sanders",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE150000",
-      "received": "26 Jun"
+      "subject": "RE: IM Principles - change to URL",
+      "from": "Laura Porter",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE120000",
+      "received": "25 Jun"
+    },
+    {
+      "title": "RE: Owner Required - Task# 50945166 for ServiceReq# 30404938",
+      "sub": "From <strong>Michelle Williams</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Owner Required - Task# 50945166 for ServiceReq# 30404938",
+      "from": "Michelle Williams",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7110000",
+      "received": "24 Jun"
     },
     {
       "title": "USS valuation 2026: what you need to know",
@@ -225,6 +405,16 @@
       "subject": "USS valuation 2026: what you need to know",
       "from": "Clive Poole - Head of Pensions and Payroll",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70E0000",
+      "received": "24 Jun"
+    },
+    {
+      "title": "Staff EES Information for HESA - Research Data Items (REF)",
+      "sub": "From <strong>Nathan Kirwan</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Staff EES Information for HESA - Research Data Items (REF)",
+      "from": "Nathan Kirwan",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70B0000",
       "received": "24 Jun"
     },
     {
@@ -238,97 +428,131 @@
       "received": "23 Jun"
     },
     {
-      "title": "RE: Support Call# 11688462: Ash VEA team",
-      "sub": "From <strong>Anna Carter-Windle</strong>.",
+      "title": "RE: Support cover for first two weeks in July",
+      "sub": "From <strong>Julie Hickman</strong>.",
       "badge": "FYI",
       "badgeType": "gray",
-      "subject": "RE: Support Call# 11688462: Ash VEA team",
-      "from": "Anna Carter-Windle",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007871663330000",
-      "received": "22 Jun"
+      "subject": "RE: Support cover for first two weeks in July",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000787628C1C0000",
+      "received": "23 Jun"
     }
   ],
   "low": [],
-  "calToday": [],
+  "calToday": [
+    {
+      "time": "15:00",
+      "title": "Strategic H&S Modular System requirements evaluation weightings",
+      "sub": "Helen Harbour"
+    },
+    {
+      "time": "14:00",
+      "title": "WFM Rostering — Internal Review Meeting",
+      "sub": "Kevin Lelitte"
+    }
+  ],
   "calTomorrow": [
     {
       "time": "11:00",
       "title": "Staff EES Information for HESA - Research Data Items (REF)",
       "sub": "Nathan Kirwan"
+    },
+    {
+      "time": "10:00",
+      "title": "Considerations around the implementation of EVO",
+      "sub": "Simon Burford"
+    },
+    {
+      "time": "12:30",
+      "title": "Emergency planning",
+      "sub": "Simon Burford"
     }
   ],
   "calFull": [
     {
-      "date": "2026-06-22",
-      "label": "Monday 22 Jun",
+      "date": "2026-06-29",
+      "label": "Monday 29 Jun",
+      "items": [
+        {
+          "time": "10:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        }
+      ],
+      "isToday": false
+    },
+    {
+      "date": "2026-06-30",
+      "label": "Tuesday 30 Jun",
       "items": [
         {
           "time": "15:00",
-          "title": "Clinical pay uplift 2026 check ins",
-          "sub": "Jasmin Khokhra"
+          "title": "Strategic H&S Modular System requirements evaluation weightings",
+          "sub": "Helen Harbour"
         },
+        {
+          "time": "14:00",
+          "title": "WFM Rostering — Internal Review Meeting",
+          "sub": "Kevin Lelitte"
+        }
+      ],
+      "isToday": true
+    },
+    {
+      "date": "2026-07-01",
+      "label": "Wednesday 1 Jul",
+      "items": [
         {
           "time": "11:00",
-          "title": "Cority - Applicant Merge Review",
-          "sub": "Kevin Lelitte"
-        }
-      ],
-      "isToday": false
-    },
-    {
-      "date": "2026-06-23",
-      "label": "Tuesday 23 Jun",
-      "items": [
-        {
-          "time": "11:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
+          "title": "Staff EES Information for HESA - Research Data Items (REF)",
+          "sub": "Nathan Kirwan"
         },
         {
           "time": "10:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
+          "title": "Considerations around the implementation of EVO",
+          "sub": "Simon Burford"
         },
         {
-          "time": "15:00",
-          "title": "69001655",
-          "sub": "Robert Slejiuc"
+          "time": "12:30",
+          "title": "Emergency planning",
+          "sub": "Simon Burford"
         }
       ],
       "isToday": false
     },
     {
-      "date": "2026-06-24",
-      "label": "Wednesday 24 Jun",
+      "date": "2026-07-02",
+      "label": "Thursday 2 Jul",
       "items": [],
       "isToday": false
     },
     {
-      "date": "2026-06-25",
-      "label": "Thursday 25 Jun",
+      "date": "2026-07-03",
+      "label": "Friday 3 Jul",
       "items": [
         {
-          "time": "All day",
-          "title": "People Conference",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "10:00",
-          "title": "UOX case 69001655 Catch-Up",
-          "sub": "Maura McGlynn"
+          "time": "09:45",
+          "title": "Company 90 - Status Update",
+          "sub": "Crispin Muncaster"
         }
       ],
-      "isToday": false
-    },
-    {
-      "date": "2026-06-26",
-      "label": "Friday 26 Jun",
-      "items": [],
       "isToday": false
     }
   ],
   "absences": [],
   "prioritiesToday": [
+    {
+      "id": "t035",
+      "text": "WFM / GLAM Rostering -- set up resolution meeting",
+      "description": "GLAM decided at the last minute they did not have capacity to load rostering data into WFM. One wave was loaded, one was not. Three areas are now outstanding: SBS, PEDS, GLAM. This is blocking Sarah from running UC dashboards and reports. Handover notes from Michael were shared on 23 June. A separate resolution meeting is needed to establish what wasn't loaded and why, agree an approach, and produce an action plan. Meeting attendees: Kevin, Simon, Marie, Michelle, and potentially Julie given her proximity to the project. Note: WFM adoption is split -- staff who never used TeamSeer are positive; those who did are making direct comparisons, but TeamSeer was never calculating correctly. The recommendation is to bring vocal blockers like Steph Sparks into future system procurement from the start.",
+      "actions": [
+        "[23 Jun 2026] Michael shared handover notes on WFM rostering status.",
+        "[24 Jun 2026] Raised at HR Systems Managers Meeting -- three areas outstanding (SBS, PEDS, GLAM). GLAM did not load rostering data at last minute. Blocking Sarah's UC dashboards and reports.",
+        "[TODO] Set up resolution meeting -- Kevin, Simon, Marie, Michelle, and potentially Julie. Agenda: understand what wasn't loaded and why, agree approach, produce action list, address GLAM rostering."
+      ],
+      "source": "HR Systems Managers Meeting 24/06",
+      "dateType": "red"
+    },
     {
       "id": "t014",
       "text": "Chemistry bulk delete -- get details from Julie, pass to Reenu",
@@ -353,17 +577,6 @@
         "[TODO] Open thread, read full context, and respond to Support Call# 11688462."
       ],
       "source": "Email 22/06 Marie Cooksey / Anna Carter-Windle",
-      "dateType": "red"
-    },
-    {
-      "id": "t024",
-      "text": "Provide reference for Nikolas Sharkey -- URGENT",
-      "description": "TSS Enquiries (Temporary Staffing Service) has requested an urgent reference from Kevin for Nikolas Sharkey, who is being considered for temporary vacancies at the University of Oxford. Kevin is listed as a referee. Received 23 June at 12:11. Now over 48 hours without a response -- employment verification references are time-critical and can block the candidate's placement.",
-      "actions": [
-        "[23 Jun 2026] Reference request received from TSS Enquiries for Nikolas Sharkey -- 48+ hours outstanding.",
-        "[TODO] Open email, complete and return reference for Nikolas Sharkey to TSS Enquiries immediately."
-      ],
-      "source": "TSS Enquiries 23/06",
       "dateType": "red"
     },
     {
@@ -467,18 +680,6 @@
         "[25 Jun 2026] Cority SFTP connection error confirmed on 22 June at 17:15; CHI Team has been notified and is working on resolution. (email: Cority_Integration_Platform_Notifications@Cority.com - [ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-06-22 17:15)"
       ],
       "source": "Cority Integration Platform 22/06",
-      "dateType": "orange"
-    },
-    {
-      "id": "t035",
-      "text": "WFM / GLAM Rostering -- set up resolution meeting",
-      "description": "GLAM decided at the last minute they did not have capacity to load rostering data into WFM. One wave was loaded, one was not. Three areas are now outstanding: SBS, PEDS, GLAM. This is blocking Sarah from running UC dashboards and reports. Handover notes from Michael were shared on 23 June. A separate resolution meeting is needed to establish what wasn't loaded and why, agree an approach, and produce an action plan. Meeting attendees: Kevin, Simon, Marie, Michelle, and potentially Julie given her proximity to the project. Note: WFM adoption is split -- staff who never used TeamSeer are positive; those who did are making direct comparisons, but TeamSeer was never calculating correctly. The recommendation is to bring vocal blockers like Steph Sparks into future system procurement from the start.",
-      "actions": [
-        "[23 Jun 2026] Michael shared handover notes on WFM rostering status.",
-        "[24 Jun 2026] Raised at HR Systems Managers Meeting -- three areas outstanding (SBS, PEDS, GLAM). GLAM did not load rostering data at last minute. Blocking Sarah's UC dashboards and reports.",
-        "[TODO] Set up resolution meeting -- Kevin, Simon, Marie, Michelle, and potentially Julie. Agenda: understand what wasn't loaded and why, agree approach, produce action list, address GLAM rostering."
-      ],
-      "source": "HR Systems Managers Meeting 24/06",
       "dateType": "orange"
     }
   ],
@@ -670,5 +871,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Sunday 28 June · 05:35"
+  "refreshed_at": "Tuesday 30 June · 10:59"
 }
