@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 30 June 2026",
-  "subtitle": "Absences blocking H&S meetings; Awards deadline 3 July",
-  "context": "Michelle Williams sent an automatic reply on 29 June indicating she is away, blocking progress on the Staff EES Information for HESA meeting scheduled for 1 July at 11:00 with Nathan Kirwan, Anne Mortimer, and Sarah Rowles. Support Case #11688462 for the Ash VEA team remains unresolved with Marie Cooksey waiting on Marie Cooksey (Head of HR Systems) to action your concerns raised on 23 June - now 7 days overdue. The Awards for Excellence Scheme deadline is 3 July 2026 (4 days away), and you submitted a nomination for Michael O'Sullivan on 29 June that Marie Cooksey approved the same day. Access Support Team case 68974493 was actioned by you on 30 June at 09:15 but Julie Hickman's follow-up at 11:41 today suggests verification is still needed. James Salas Guillen's Health Surveillance Review email from 24 June remains unread with Sharon requesting an in-person session on 9 September. Open first: the unread Jasmin Khokhra email from 26 June regarding UCEA Clinical pay uplift and Michael's work before he goes on leave, as this relates to completed compensation work requiring your awareness.",
+  "subtitle": "Awards deadline Friday, Michelle away, payroll completion needed",
+  "context": "Michelle Williams sent an automatic reply on 29 June indicating she is away, blocking the Staff EES Information for HESA meeting scheduled for tomorrow 1 July at 11:00 with Nathan Kirwan and others. The Awards for Excellence Scheme has a critical deadline of 3 July 2026 (four days away), and you nominated Michael O'Sullivan on 29 June pending final review from Simon Burford and Marie Cooksey. James Salas Guillen flagged on 24 June that Sharon has requested an in-person Health Surveillance review session on 9 September to discuss detailed issues with the Cority Product User Group (PUG). An unread email from Jasmin Khokhra on 26 June about the UCEA Clinical pay uplift mentions Tracy's work before leave, suggesting staff absence affects payroll processing. Case 68974493 with Access Support Team required your action on 30 June morning, which you resolved by 09:15 today. Open first: the unread email from Jasmin Khokhra about UCEA Clinical pay uplift to clarify any pending payroll deadlines before the week ends.",
   "urgent": [
     {
       "title": "Reference Request for Nikolas Sharkey",
@@ -74,16 +74,6 @@
       "from": "James Salas Guillen",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7070000",
       "received": "24 Jun"
-    },
-    {
-      "title": "Support Call# 11688462: Ash VEA team",
-      "sub": "From <strong>HR Systems Support</strong>. Dear Cathy\r\n\r\n \r\n\r\nThank you for your email.\r\n\r\n \r\n\r\nI have raised your concerns with Marie Cooksey, Head of HR Systems.",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Support Call# 11688462: Ash VEA team",
-      "from": "HR Systems Support",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE0D0000",
-      "received": "23 Jun"
     }
   ],
   "fyi": [
@@ -95,6 +85,16 @@
       "subject": "RE: Access Support Team | 68974493 - New Case",
       "from": "Julie Hickman",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E80000",
+      "received": "30 Jun"
+    },
+    {
+      "title": "RE: College Staff on PXD",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: College Staff on PXD",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4E70000",
       "received": "30 Jun"
     },
     {
@@ -800,7 +800,8 @@
         "[24 Jun 2026] Raised at HR Systems Managers Meeting. Scoring methodology agreed: Requirements 65%, Price 30%, References 5%. Key dates: follow-up by 2 July, evaluator briefings 14 July, supplier responses ~21 July. Marie aware; rough recruit timeline end Sep/Oct. Kevin raised dedicated resource concern -- not to be absorbed into BAU.",
         "[25 Jun 2026] PUG meeting minutes (16 Jun) sent to Christopher Sanders.",
         "[TODO] Follow-up with evaluation team by 2 July -- confirm what is required.",
-        "[TODO] Raise dedicated project resource requirement formally with Marie before mid-July evaluation window opens."
+        "[TODO] Raise dedicated project resource requirement formally with Marie before mid-July evaluation window opens.",
+        "[30 Jun 2026] Kevin sent his position on DTP1334 SHSMS resourcing to Christopher Sanders and James Salas Guillen on 30 June ahead of the meeting, emphasizing need for dedicated project resource rather than BAU absorption. (email: Kevin (sent to: Christopher Sanders; James Salas Guillen) - Re: Strategic H&S modular system project requirements)"
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "orange"
@@ -887,5 +888,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Tuesday 30 June · 12:25"
+  "refreshed_at": "Tuesday 30 June · 12:32"
 }
