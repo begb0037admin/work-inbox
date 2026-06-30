@@ -417,7 +417,7 @@ function renderPriorityCards(priorities,key,sec){
         <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
-        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC →</button>`:''}
+        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','command-centre');event.stopPropagation()">CC →</button>`:''}
         <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${metaHtml}</div>
