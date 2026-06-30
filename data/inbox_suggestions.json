@@ -1,25 +1,15 @@
 {
-  "generated_at": "2026-06-30 12:24",
+  "generated_at": "2026-06-30 12:31",
   "new_tasks": [
     {
-      "title": "Provide reference for Nikolas Sharkey",
-      "tier": "today",
-      "description": "Kevin has already submitted the reference on 29 June at 17:10 (email n24 sent). However, Todd Graf's follow-up on 29 June at 15:08 (email n4) shows the original request. Since Kevin has completed this action (confirmed in sent email n24), this is resolved and no new task is needed. No new task.",
-      "email_subject": "Reference Request for Nikolas Sharkey",
-      "email_from": "Todd Graf",
-      "received": "2026-06-29 15:08",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DF0000"
+      "title": "Schedule Health Surveillance Review session with Sharon",
+      "tier": "week",
+      "description": "James Salas Guillen has forwarded notification that Sharon has requested an in-person session on 9 September 2026 to review Health Surveillance issues in detail. Kevin needs to coordinate scheduling and preparation for this session.",
+      "email_subject": "FW: Health Surveillance Review ",
+      "email_from": "James Salas Guillen",
+      "received": "2026-06-24 13:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7090000"
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t032",
-      "task_title": "DTP1334 SHSMS Evaluation -- ongoing post-meeting (resourcing, scoring, key dates)",
-      "note": "Kevin sent his position on DTP1334 SHSMS resourcing to Christopher Sanders and James Salas Guillen on 30 June ahead of the meeting, emphasizing need for dedicated project resource rather than BAU absorption.",
-      "email_subject": "Re: Strategic H&S modular system project requirements",
-      "email_from": "Kevin (sent to: Christopher Sanders; James Salas Guillen)",
-      "received": "2026-06-30 12:22",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078B270AF60000"
-    }
-  ]
+  "task_updates": []
 }
