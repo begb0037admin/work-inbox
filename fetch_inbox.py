@@ -412,7 +412,6 @@ for ka in KNOWN_ABSENCE_DATES:
     ka_start = datetime.strptime(ka["from"], "%Y-%m-%d").date()
     ka_end   = datetime.strptime(ka["to"],   "%Y-%m-%d").date()
     if ka_start <= today <= ka_end:
-        # Remove partial matches so full name replaces partial calendar extract
         absences = [a for a in absences if not ka["name"].startswith(a) and not a.startswith(ka["name"])]
         absences.append(ka["name"])
 absences = sorted(absences)
@@ -677,8 +676,8 @@ if all_priorities:
             {
                 "id":          e["id"],
                 "title":       e["text"],
-                "description": (e.get("description") or "")[:500],
-                "actions":     e.get("actions", [])[-10:]
+                "description": (e.get("description") or "")[:300],
+                "actions":     e.get("actions", [])[-5:]
             }
             for e in all_priorities if e.get("id")
         ]
@@ -695,7 +694,7 @@ if all_priorities:
         )
         s_resp = client.messages.create(
             model      = "claude-haiku-4-5",
-            max_tokens = 2500,
+            max_tokens = 4096,
             system     = SUMMARY_SYSTEM,
             messages   = [{"role": "user", "content": summary_user}]
         )
