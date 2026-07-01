@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 1 July 2026",
-  "subtitle": "Awards deadline Thursday, Michelle Williams absent, systems review needed",
-  "context": "Open Nathan Kirwan's HR Systems Team Meeting reminder first (09:25 today) - you have presentations this afternoon. Michelle Williams sent an automatic reply on 29 June confirming she is absent; she is away and her inbox is unmonitored, blocking Task# 50945166 for ServiceReq# 30404938 which requires owner assignment. The Awards for Excellence Scheme deadline is Thursday 3 July 2026 - you nominated Michael O'Sullivan on 29 June and Simon Burford and Marie Cooksey have both reviewed it, but Jonathan Roger's original call on 29 June needs your final action before the 3 July close. Julie Hickman's email on 01 July about REF college staff input from Simon Burford is unread with attachments and may require your response. The Report from OSM Administration (07:01 today) shows all open tasks by the HRIS Analysis and HRIS Sys Admin teams - review this against your blocked items. James Salas Guillen's Health Surveillance Review item from 24 June is set for 9 September in-person session with Sharon, but the Strategic H&S modular system project requirements thread (updated 30 June by Christopher Sanders) needs your continued attention alongside the DSE System SBS user exclusion discussions involving Tony Boydell and Erika Braverman.",
+  "subtitle": "Birthday greeting, compliance review, and award deadline convergence",
+  "context": "Emma is on annual leave and Julie Hickman needs your Kudoboard signature by 2pm Thursday 2 July for her birthday celebration. Christopher Sanders sent the weightings spreadsheet at 2:53pm today with legal compliance requirements that need review. Nathan Kirwan's HR Systems Team Meeting reminder arrived this morning and the team report from OSM Administration shows open tasks across HRIS Analysis and HRIS Sys Admin teams requiring attention. The Awards for Excellence Scheme deadline is Thursday 3 July 2026 - you have already nominated Michael O'Sullivan and it needs final sign-off from Simon Burford and Marie Cooksey before submission. Athena Artuso sent an unread leave notification at 1:06pm today. Open Christopher Sanders' weightings email first as it contains time-sensitive legal compliance items and blocks downstream project work.",
   "urgent": [
     {
       "title": "Reference Request for Nikolas Sharkey",
@@ -46,6 +46,36 @@
   ],
   "needs": [
     {
+      "title": "RE: Weightings spreadsheet",
+      "sub": "From <strong>Christopher Sanders</strong>. Hi all,\r\n\r\n \r\n\r\nFollowing on from yesterday’s session, see below requirements we picked out as relating to legal complia",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Weightings spreadsheet",
+      "from": "Christopher Sanders",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F60000",
+      "received": "1 Jul"
+    },
+    {
+      "title": "Emma's birthday - please sign Kudoboard by 2pm tomorrow",
+      "sub": "From <strong>Julie Hickman</strong>. Hello all,\r\n\r\n \r\n\r\nSorry for the very short notice!\r\n\r\n \r\n\r\nIt’s Emma’s birthday whilst she’s on annual leave, please ca",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Emma's birthday - please sign Kudoboard by 2pm tomorrow",
+      "from": "Julie Hickman",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F50000",
+      "received": "1 Jul"
+    },
+    {
+      "title": "Athena A/L",
+      "sub": "From <strong>Athena Artuso</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Athena A/L",
+      "from": "Athena Artuso",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F40000",
+      "received": "1 Jul"
+    },
+    {
       "title": "RE: New post/people input for REF college staff",
       "sub": "From <strong>Julie Hickman</strong>. That sounds fairly straightforward, thank you for the update Simon.\r\n\r\n \r\n\r\nMany thanks\r\n\r\nJulie\r\n\r\n \r\n\r\nFrom: Simon Bur",
       "badge": "Reply within 48hrs",
@@ -84,26 +114,6 @@
       "from": "Jasmin Khokhra",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE130000",
       "received": "26 Jun"
-    },
-    {
-      "title": "FW: Health Surveillance Review ",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Kevin, \r\n\r\n \r\n\r\nJust for your awareness, Sharon has asked for an in‑person session on 9th September to review Health ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "FW: Health Surveillance Review ",
-      "from": "James Salas Guillen",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7090000",
-      "received": "24 Jun"
-    },
-    {
-      "title": "RE: Minutes – Cority Product User Group (PUG), 16 June 2026",
-      "sub": "From <strong>James Salas Guillen</strong>. Hi Kevin, \r\n\r\n \r\n\r\nThanks for sharing this. \r\n\r\n \r\n\r\nI still think Health Surveillance should remain a priority at this ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Minutes – Cority Product User Group (PUG), 16 June 2026",
-      "from": "James Salas Guillen",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7070000",
-      "received": "24 Jun"
     }
   ],
   "fyi": [
@@ -486,16 +496,6 @@
       "from": "Clive Poole - Head of Pensions and Payroll",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70E0000",
       "received": "24 Jun"
-    },
-    {
-      "title": "Staff EES Information for HESA - Research Data Items (REF)",
-      "sub": "From <strong>Nathan Kirwan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Staff EES Information for HESA - Research Data Items (REF)",
-      "from": "Nathan Kirwan",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70B0000",
-      "received": "24 Jun"
     }
   ],
   "low": [
@@ -688,6 +688,11 @@
       "label": "Friday 3 Jul",
       "items": [
         {
+          "time": "All day",
+          "title": "Athena A/L",
+          "sub": "Athena Artuso"
+        },
+        {
           "time": "09:30",
           "title": "FA Team Daily Catchup",
           "sub": "Kevin Lelitte"
@@ -720,5 +725,5 @@
   "prioritiesToday": [],
   "prioritiesTomorrow": [],
   "prioritiesWeek": [],
-  "refreshed_at": "Wednesday 01 July · 12:00"
+  "refreshed_at": "Wednesday 01 July · 15:00"
 }
