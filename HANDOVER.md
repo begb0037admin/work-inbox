@@ -1,7 +1,53 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-30 (evening) — CC→ button window reuse; hashchange card selection in CC
+**Last updated:** 2026-07-01 (Hope session, failover — Kevin unavailable, see command-centre AGENT_MODEL.md Section 6) — sidebar redesign BUILT on branch (both dashboards); approved mockups confirmed (wi-full-v5.html / cc-full-v5.html); main-area redesign NOT YET BUILT
 **Status:** Active — pipeline fully working. Task Scheduler confirmed working 2026-06-30.
+
+---
+
+## Session 2026-07-01 (Hope, failover) — Daily Focus / cross-dashboard sidebar redesign
+
+**Full spec lives in command-centre repo:** `command-centre/docs/DAILY_FOCUS_CROSS_DASHBOARD_REDESIGN.md` — read this before touching any sidebar/main-area code for this feature.
+**Approved mockups (final, confirmed by Hope 2026-07-01):** `docs/mockups/wi-full-v5.html` (this repo) and `command-centre/docs/mockups/cc-full-v5.html`. These are the reference artefacts. Do not use any other mockup file.
+
+**One-line summary:** Both dashboards move to one shared sidebar template. Work Inbox's Daily Focus widget shows Command Centre task data (tier counts + stalled-task metrics). Command Centre's Daily Focus widget shows Work Inbox briefing data. Absences stays as its own widget on both sidebars, sourced from this repo's `data/briefing.json`. Both sidebars gain a "From your inbox" badge widget sourced from `command-centre/data/inbox_suggestions.json`.
+
+### Sidebar — COMPLETE on branch
+
+The sidebar redesign is fully implemented on `claude/session-handoff-kevin-x0s645` for both `work-inbox` and `command-centre`. Nothing is on main yet — UI approval gate applies before any merge.
+
+Sidebar elements built (identical structure, both apps):
+- User block (kevin.lelitte@admin.ox.ac.uk)
+- Live clock + date
+- Filter dropdown (All tiers / Today / Tomorrow / This Week / Parked)
+- Daily Focus ticker (cross-dashboard data — WI shows CC task data, CC shows WI briefing data)
+- From your inbox widget + badge
+- Absences section
+- Links section
+
+Backups committed to Archive/ before any changes:
+- `Archive/index_backup_20260701_1552.html`, `styles_backup_20260701_1552.css`, `app_js_backup_20260701_1552.js`
+
+### Main area — NOT YET BUILT
+
+The main briefing area is still the old layout. This is the next piece of work.
+
+| What is needed | Approved reference |
+|---|---|
+| Add 3-block `.main-cal-panel` (Today cal / Tomorrow cal / mini month grids for current + next month) above main content | `docs/mockups/wi-full-v5.html` |
+| Restyle priority cards to match CC card style (drag handle ⠿, circular done-checkbox, coloured badges) | `docs/mockups/wi-full-v5.html` |
+
+Full detail in `command-centre/docs/DAILY_FOCUS_CROSS_DASHBOARD_REDESIGN.md` Section 5.
+
+### Governance for next session
+
+- **Signal effort level** to operator before starting main-area work — it is multi-file, structurally invasive, cross-repo. Per CONSTITUTION.md Section 10, signal and wait for explicit go-ahead.
+- **UI approval gate** — screenshot every visual change, show operator, wait for explicit "approved" before any push to main.
+- **Backup/verify protocol** — mandatory before every write to `index.html`, `css/styles.css`, `js/app.js`. Today's backups exist; create new timestamped ones before next write.
+- **One change at a time.** Verify before the next.
+- **Branch:** all work on `claude/session-handoff-kevin-x0s645`. Do not push to main without visual approval.
+
+**Cloudflare CI fix (2026-07-01):** The "Workers Builds: work-inbox" check was failing on non-production branches. Root cause matched the exact issue command-centre hit and fixed on 2026-06-30: "Builds for non-production branches: Enabled" in Cloudflare Workers settings. Fix: Hope disabled "Builds for non-production branches" via Cloudflare Settings → Branch Control. Confirmed fixed.
 
 ---
 
@@ -279,6 +325,7 @@ Copy exact email subject verbatim. Fuzzy matching fallback in Python if slight d
 | Script | work-inbox/fetch_inbox.py |
 | Opener | work-inbox/open_email.py |
 | Briefing | work-inbox/data/briefing.json |
+| Approved mockup | work-inbox/docs/mockups/wi-full-v5.html |
 | Local | C:\Users\admin\Documents\Claude\Projects\work-inbox\ |
 | Registry | HKCU:\Software\Classes\openmail (points to new path) |
 | Scheduler | WorkInbox-0900 / WorkInbox-1200 / WorkInbox-1500 (confirmed working 2026-06-30) |

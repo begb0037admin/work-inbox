@@ -538,10 +538,11 @@ async function init(){
 
 init();
 
-// Daily Focus ticker (cross-dashboard: shows Command Centre data)
-function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+// Tasks widget
 async function loadTasksWidget(){
+  var el=document.getElementById('tasksWidget');
   var dot=document.getElementById('tasksLiveDot');
+  if(!el)return;
   try{
     var res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/tasks.json?t='+Date.now(),{cache:'no-store'});
     if(!res.ok)throw new Error('fetch failed');
@@ -565,63 +566,24 @@ async function loadTasksWidget(){
       });
       if(changed){saveTicks(ticks);renderBriefing(currentData,currentKey);}
     }
-    setText('cc-today',tasks.filter(function(t){return t.tier==='today';}).length);
-    setText('cc-tomorrow',tasks.filter(function(t){return t.tier==='tomorrow';}).length);
-    setText('cc-week',tasks.filter(function(t){return t.tier==='week';}).length);
-    setText('cc-parked',tasks.filter(function(t){return t.tier==='parked';}).length);
-    /* Stalled-in-Today calc -- mirrors command-centre/js/app.js renderStaleBanner() exactly */
-    var nowMs=new Date().setHours(0,0,0,0);
-    var todayTasks=tasks.filter(function(t){return t.tier==='today'&&!t.done;});
-    var stale=todayTasks.filter(function(t){return t.dateAdded&&Math.floor((nowMs-new Date(t.dateAdded))/86400000)>3;});
-    var ages=stale.map(function(t){return Math.floor((nowMs-new Date(t.dateAdded))/86400000);});
-    if(stale.length){
-      var maxAge=Math.max.apply(null,ages);
-      var avgAge=Math.round(ages.reduce(function(s,a){return s+a;},0)/ages.length);
-      var over2w=ages.filter(function(a){return a>=14;}).length;
-      setText('cc-stalled',stale.length+' task'+(stale.length!==1?'s':''));
-      setText('cc-oldest',maxAge+' day'+(maxAge!==1?'s':''));
-      setText('cc-avgage',avgAge+' day'+(avgAge!==1?'s':''));
-      setText('cc-2weeks',over2w+' task'+(over2w!==1?'s':''));
-    } else {
-      setText('cc-stalled','0 tasks');
-      setText('cc-oldest','—');
-      setText('cc-avgage','—');
-      setText('cc-2weeks','0 tasks');
-    }
+    var todayCount=tasks.filter(function(t){return t.tier==='today';}).length;
+    var tomorrowCount=tasks.filter(function(t){return t.tier==='tomorrow';}).length;
+    var weekCount=tasks.filter(function(t){return t.tier==='week';}).length;
+    var todoCount=tasks.filter(function(t){return (t.actions||[]).some(function(a){return a.includes('[TODO]');});}).length;
+    el.innerHTML=
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Today</span><span class="tasks-widget-count">'+todayCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
+      '<a class="tasks-widget-link" href="https://cc.lelitte.co.uk/" target="_blank">→ Open command centre</a>';
     if(dot){dot.style.background='#4ade80';dot.classList.add('pulsing');setTimeout(function(){dot.classList.remove('pulsing');},700);}
   }catch(e){
+    el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';
     if(dot)dot.style.background='#f87171';
   }
 }
 loadTasksWidget();
 setInterval(loadTasksWidget, 30000);
-
-/* From your inbox widget -- shows Command Centre's inbox_suggestions.json count */
-async function loadInboxSuggestionsBadge(){
-  try{
-    var res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/inbox_suggestions.json?t='+Date.now(),{cache:'no-store'});
-    if(!res.ok)throw new Error('fetch failed');
-    var data=await res.json();
-    var n=(data.new_tasks||[]).length;
-    setText('cc-suggestions-badge',n);
-    setText('cc-suggestions-text',n+' new suggestion'+(n!==1?'s':''));
-  }catch(e){
-    setText('cc-suggestions-badge','—');
-    setText('cc-suggestions-text','unavailable');
-  }
-}
-loadInboxSuggestionsBadge();
-setInterval(loadInboxSuggestionsBadge, 30000);
-
-/* Tier filter dropdown (sidebar) -- filters the main-area priority grid cells */
-function applyPriorityFilter(val){
-  var map={today:'pt',tomorrow:'ptom',week:'pw',parked:'pfyi'};
-  document.querySelectorAll('.inbox-grid-cell').forEach(function(cell){
-    var zone=cell.querySelector('.pri-drop-zone');
-    var sec=zone?zone.getAttribute('data-sec'):null;
-    cell.style.display=(val==='all'||map[val]===sec)?'':'none';
-  });
-}
 
 /* CLOCK */
 function updateWiClock(){

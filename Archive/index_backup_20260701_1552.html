@@ -34,53 +34,18 @@
       <div class="date-val" id="sidebarDate"></div>
     </div>
 
-    <div class="filter-block">
-      <select class="filter-select" id="tierSelect" onchange="applyPriorityFilter(this.value)">
-        <option value="all">All tiers</option>
-        <option value="today">Today</option>
-        <option value="tomorrow">Tomorrow</option>
-        <option value="week">This Week</option>
-        <option value="parked">Parked</option>
-      </select>
-    </div>
-
-    <div class="inbox-ticker">
-      <div class="ticker-label">Daily Focus<span class="tasks-live-dot" id="tasksLiveDot"></span></div>
-      <div class="ticker-stats">
-        <div class="ticker-stat"><span class="ticker-num red" id="cc-today">0</span><span class="ticker-sub">Today</span></div>
-        <div class="ticker-stat"><span class="ticker-num gold" id="cc-tomorrow">0</span><span class="ticker-sub">Tmrw</span></div>
-        <div class="ticker-stat"><span class="ticker-num green" id="cc-week">0</span><span class="ticker-sub">Week</span></div>
-        <div class="ticker-stat"><span class="ticker-num" id="cc-parked">0</span><span class="ticker-sub">Parked</span></div>
-      </div>
-      <div class="ticker-divider"></div>
-      <div class="ticker-age-row"><span class="ticker-age-label">Stalled in Today</span><span class="ticker-age-val red" id="cc-stalled">— tasks</span></div>
-      <div class="ticker-age-row"><span class="ticker-age-label">Oldest</span><span class="ticker-age-val gold" id="cc-oldest">—</span></div>
-      <div class="ticker-age-row"><span class="ticker-age-label">Avg age</span><span class="ticker-age-val gold" id="cc-avgage">—</span></div>
-      <div class="ticker-age-row"><span class="ticker-age-label">2+ weeks</span><span class="ticker-age-val" id="cc-2weeks">— tasks</span></div>
-    </div>
-
-    <a class="inbox-widget" href="https://cc.lelitte.co.uk/" target="_blank">
-      <div class="inbox-widget-left"><span class="inbox-widget-label">From your inbox</span><span class="inbox-widget-val" id="cc-suggestions-text">— new suggestions</span></div>
-      <span class="inbox-widget-badge" id="cc-suggestions-badge">0</span>
-    </a>
-
-    <div class="sb-section">Absences</div>
-    <div class="abs-wrap" id="absencesSidebar"></div>
-
     <div class="sb-section">Calendar – today</div>
     <div id="calTodaySidebar"></div>
 
     <div class="sb-section" id="calTomorrowLabel">Calendar – tomorrow</div>
     <div id="calTomorrowSidebar"></div>
 
-    <div class="sb-section">Links</div>
-    <div class="sb-links">
-      <a href="https://cc.lelitte.co.uk/" target="_blank" class="sb-link">Command Centre</a>
-      <a href="https://begb0037admin.github.io/hris-dashboard/" target="_blank" class="sb-link">HRIS Dashboard</a>
-      <a href="https://begb0037admin.github.io/hris-launcher/" target="_blank" class="sb-link">HRIS Launcher</a>
-      <a href="https://myaccess.theaccessgroup.com/dashboard/" target="_blank" class="sb-link">Access Group Support</a>
-      <a href="https://begb0037admin.github.io/hr-fa-knowledge-base/" target="_blank" class="sb-link">FA Knowledge Base</a>
-      <a href="https://oxford.saasiteu.com/Account/SelectRole?returnUrl=%2fModules%2fSelfService%2f%23home&NoDefaultProvider=True" target="_blank" class="sb-link">OSM IT Services</a>
+    <div class="sb-section">Absences</div>
+    <div class="abs-wrap" id="absencesSidebar"></div>
+
+    <div class="tasks-widget-section">Tasks<span class="tasks-live-dot" id="tasksLiveDot"></span></div>
+    <div class="tasks-widget-panel" id="tasksWidget">
+      <div class="tasks-widget-unavailable">Loading...</div>
     </div>
   </div>
 
