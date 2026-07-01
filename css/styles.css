@@ -110,6 +110,46 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .abs-list { list-style: none; padding: 0; margin: 0; }
 .abs-list li { font-size: 12px; color: #eab308; padding: 3px 0; line-height: 1.4; padding-left: 14px; text-indent: -14px; }
 .abs-list li::before { content: "\2022"; color: rgba(255,255,255,0.4); margin-right: 7px; }
+.abs-none { font-size: 11px; color: rgba(255,255,255,0.3); font-style: italic; padding: 0 22px 4px; display: block; }
+
+/* FILTER DROPDOWN */
+.filter-block { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 8px; align-items: center; }
+.filter-select { flex: 1; font-family: inherit; font-size: 13px; font-weight: 500; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px; padding: 7px 28px 7px 10px; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+.filter-select option { background: #002147; color: #fff; }
+.filter-select:focus { outline: none; border-color: rgba(255,255,255,0.35); }
+
+/* DAILY FOCUS TICKER (cross-dashboard widget, shows Command Centre data) */
+.inbox-ticker { margin: 12px 16px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; }
+.ticker-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.ticker-label::before { content: '\2714'; font-size: 10px; }
+.ticker-stats { display: flex; gap: 0; }
+.ticker-stat { flex: 1; text-align: center; padding: 6px 2px; border-right: 1px solid rgba(255,255,255,0.1); }
+.ticker-stat:last-child { border-right: none; }
+.ticker-num { font-size: 18px; font-weight: 700; color: #fff; line-height: 1; display: block; }
+.ticker-num.red { color: #f87171; }
+.ticker-num.gold { color: #fbbf24; }
+.ticker-num.green { color: #4ade80; }
+.ticker-sub { font-size: 9px; color: rgba(255,255,255,0.45); display: block; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+.ticker-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0 8px; }
+.ticker-age-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; }
+.ticker-age-label { font-size: 11px; color: rgba(255,255,255,0.5); }
+.ticker-age-val { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.75); }
+.ticker-age-val.red { color: #f87171; }
+.ticker-age-val.gold { color: #fbbf24; }
+
+/* FROM YOUR INBOX WIDGET */
+.inbox-widget { margin: 0 16px 4px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background .15s; text-decoration: none; }
+.inbox-widget:hover { background: rgba(255,255,255,0.11); }
+.inbox-widget-left { display: flex; flex-direction: column; gap: 2px; }
+.inbox-widget-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.09em; }
+.inbox-widget-val { font-size: 13px; font-weight: 600; color: #fff; }
+.inbox-widget-badge { font-size: 11px; font-weight: 700; background: #3b82f6; color: #fff; border-radius: 20px; padding: 3px 10px; }
+
+/* LINKS */
+.sb-links { padding: 4px 22px 16px; }
+.sb-link { display: block; font-size: 13px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.07); transition: color 0.15s; }
+.sb-link:hover { color: #60a5fa; }
+.sb-link:last-child { border-bottom: none; }
 
 /* Main */
 .main { margin-left: var(--sidebar-width); flex: 1; padding: 28px 36px 60px; min-width: 0; overflow-x: hidden; }
