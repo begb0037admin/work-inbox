@@ -16,6 +16,8 @@
 
 **Next action:** wait for approval, then implement per the spec doc in command-centre.
 
+**Cloudflare CI fix (2026-07-01):** The "Workers Builds: work-inbox" check was failing on this PR's docs-only commit. Root cause matched the exact issue command-centre hit and fixed on 2026-06-30 (see `command-centre/HANDOVER.md` "2026-06-30 — Cloudflare CI fix"): "Builds for non-production branches: Enabled" in Cloudflare Workers settings ran `npx wrangler versions upload` on every branch push; branches other than the auto-managed `cloudflare/workers-autoconfig` branch lack `wrangler.jsonc`, so every non-production build failed. Fix: Kevin disabled "Builds for non-production branches" via Cloudflare Settings → Branch Control for the work-inbox Workers project (same fix already applied to command-centre's project on 2026-06-30, just not previously mirrored here). This commit verifies the fix by triggering a fresh build.
+
 ---
 
 ## Session 2026-06-30 (evening) — CC→ button window reuse; hashchange listener in CC
