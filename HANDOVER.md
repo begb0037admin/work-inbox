@@ -1,7 +1,20 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-06-30 (evening) — CC→ button window reuse; hashchange card selection in CC
+**Last updated:** 2026-07-01 (Hope session, failover — Kevin unavailable, see command-centre AGENT_MODEL.md Section 6) — Daily Focus / cross-dashboard sidebar redesign: mockups approved, not yet implemented
 **Status:** Active — pipeline fully working. Task Scheduler confirmed working 2026-06-30.
+
+---
+
+## Session 2026-07-01 (Hope, failover) — Daily Focus / cross-dashboard sidebar redesign — MOCKUPS APPROVED, AWAITING GO-AHEAD TO IMPLEMENT
+
+**Full spec lives in command-centre repo:** `command-centre/docs/DAILY_FOCUS_CROSS_DASHBOARD_REDESIGN.md` — read this before touching any sidebar/main-area code for this feature.
+**Approved mockup (final, reference artefact, not live code):** `docs/mockups/wi-full-v5.html` (this repo), `command-centre/docs/mockups/cc-full-v5.html`.
+
+**One-line summary:** Both dashboards move to one shared sidebar template. Work Inbox's Daily Focus widget becomes cross-dashboard — it will show Command Centre's tier/stalled-task data instead of (or in addition to) its own inbox stats; Command Centre's Daily Focus widget will show Work Inbox data. Absences (already exists here, `#absencesSidebar` / `js/app.js:445-447`) stays as its own widget and gets added to Command Centre's sidebar too, sourced from this repo's `data/briefing.json`. Work Inbox also gains a new "From your inbox" badge widget (mirroring the one that already exists on Command Centre, sourced from `command-centre/data/inbox_suggestions.json`). Main-area layout also changes on both dashboards (separate, larger piece of work — see spec doc Section 5).
+
+**Status: NOT IMPLEMENTED.** No changes have been made to `index.html` or `js/app.js`. **Do not begin implementation without Kevin's (or an authorised failover operator's) explicit go-ahead.**
+
+**Next action:** wait for approval, then implement per the spec doc in command-centre.
 
 ---
 
