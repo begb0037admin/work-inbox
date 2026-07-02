@@ -267,6 +267,60 @@ function renderSidebarCal(items, containerId){
   el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div>`).join('');
 }
 
+function renderMainCal(data){
+  const el=document.getElementById('contextBar');
+  if(!el) return;
+  const now=new Date();
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const todayDate=now.getDate(), todayMonth=now.getMonth(), todayYear=now.getFullYear();
+
+  function parseTimeMins(t){
+    if(!t) return -1;
+    const p=t.split(':');
+    return p.length<2?-1:parseInt(p[0])*60+parseInt(p[1]);
+  }
+
+  function renderBlock(items,headerHtml,isToday){
+    if(!items||!items.length) return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="main-cal-none">No meetings</div></div>`;
+    let nextFound=false;
+    const rows=items.map(c=>{
+      const mins=parseTimeMins(c.time);
+      const isPast=isToday&&mins>=0&&mins<nowMins;
+      const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
+      if(isNext) nextFound=true;
+      const cls=isPast?' past':isNext?' next':'';
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}</div></div>`;
+    }).join('');
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
+  }
+
+  function renderMiniCal(){
+    const monthName=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    const firstDay=new Date(todayYear,todayMonth,1);
+    const daysInMonth=new Date(todayYear,todayMonth+1,0).getDate();
+    let startDow=firstDay.getDay()-1; if(startDow<0) startDow=6;
+    const tom=new Date(now); tom.setDate(tom.getDate()+1);
+    const tomDate=tom.getDate();
+    const hasTodayMtg=data.calToday&&data.calToday.length>0;
+    const hasTomMtg=data.calTomorrow&&data.calTomorrow.length>0;
+    const dayNames=['M','T','W','T','F','S','S'];
+    let cells=dayNames.map(d=>`<div class="mini-cal-day-name">${d}</div>`).join('');
+    for(let i=0;i<startDow;i++) cells+='<div class="mini-cal-day other-month"></div>';
+    for(let d=1;d<=daysInMonth;d++){
+      const isT=d===todayDate, isTom=d===tomDate;
+      const hasMtg=(isT&&hasTodayMtg)||(isTom&&hasTomMtg);
+      const cls='mini-cal-day'+(isT?' today':hasMtg?' has-meeting':'');
+      cells+=`<div class="${cls}">${d}</div>`;
+    }
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${monthName}</div><div class="mini-cal-grid">${cells}</div></div>`;
+  }
+
+  const todayHeader='Today &mdash; '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const tom=new Date(now); tom.setDate(tom.getDate()+1);
+  const tomHeader='Tomorrow &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}${renderMiniCal()}</div>`;
+}
+
 function togglePriCard(i){
   const body=document.getElementById('pribody_'+i);
   const arrow=document.getElementById('priarrow_'+i);
@@ -437,9 +491,8 @@ function renderBriefing(data,key){
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
 
-  // Sidebar calendar
-  renderSidebarCal(data.calToday,'calTodaySidebar');
-  renderSidebarCal(data.calTomorrow,'calTomorrowSidebar');
+  // Main calendar panel (replaces sidebar cal + context bar)
+  renderMainCal(data);
 
   // Absences
   const absEl=document.getElementById('absencesSidebar');
@@ -449,13 +502,6 @@ function renderBriefing(data,key){
     absEl.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None recorded</span>';
   }
 
-  // Context bar
-  const ctxEl=document.getElementById('contextBar');
-  if(data.context){
-    const sentences=data.context.split(/(?<=\.)\s+/).filter(s=>s.trim().length>0);
-    const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">—</span><span>${s.trim()}</span></div>`).join('');
-    ctxEl.innerHTML=`<div class="context-bar"><div class="context-bar-title">Context</div>${items}</div>`;
-  } else { ctxEl.innerHTML=''; }
 
   // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
@@ -574,8 +620,7 @@ async function loadTasksWidget(){
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Today</span><span class="tasks-widget-count">'+todayCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
-      '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
-      '<a class="tasks-widget-link" href="https://cc.lelitte.co.uk/" target="_blank">→ Open command centre</a>';
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>';
     if(dot){dot.style.background='#4ade80';dot.classList.add('pulsing');setTimeout(function(){dot.classList.remove('pulsing');},700);}
   }catch(e){
     el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';
