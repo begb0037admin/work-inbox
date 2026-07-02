@@ -1,7 +1,24 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-02 — v5 full redesign on branch `claude/inbox-briefing-script-errors-i8qmtk` (PR #24), pending merge to main.
+**Last updated:** 2026-07-02 — v5 design corrections: flat cards, sidebar links, email removal. Pushed to main (commit `12ff90d`).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
+
+---
+
+## Session 2026-07-02 — v5 design corrections (commit `12ff90d`)
+
+Three files changed: `index.html`, `css/styles.css`, `js/app.js`. Pushed directly to main.
+
+### What changed
+- **Removed** email address (`kevin.lelitte@admin.ox.ac.uk`) from sidebar `<div class="user-block">`
+- **Links updated**: sidebar now has all 6 approved links (Command Centre, HRIS Dashboard, HRIS Launcher, Access Group Support, FA Knowledge Base, OSM IT Services). OSM IT Services URL is `#` placeholder — Kevin to provide real URL.
+- **Cards redesigned**: priority cards switched from old expandable `.pri-card` design to approved flat `.card-ph` design (drag handle, circle done button, title + action sub-text, small email + CC→ icon buttons)
+- **Layout corrected**: inbox grid is stacked left/right — left col = Today + Tomorrow, right col = Week + Parked
+- **CSS added**: `.card-ph`, `.card-drag`, `.card-done-btn`, `.card-ph-body`, `.card-ph-title`, `.card-ph-sub`, `.card-ph-actions`, `.card-icon`, `.card-icon-cc`
+
+### Pending
+- OSM IT Services URL: placeholder `#` — Kevin to provide
+- Cloudflare cache purge for wi.lelitte.co.uk (or use begb0037admin.github.io/work-inbox/ to verify)
 
 ---
 
