@@ -427,6 +427,73 @@ function renderPriorityCards(priorities,key,sec){
   }).join('');
 }
 
+function renderMiniMonth(y,m,todayY,todayM,todayD){
+  // Monday-start calendar (0=Mon ... 6=Sun)
+  var dayNames=['M','T','W','T','F','S','S'];
+  var html=dayNames.map(function(h){return '<div class="mini-cal-day-name">'+h+'</div>';}).join('');
+  var firstDow=new Date(y,m,1).getDay(); // 0=Sun
+  var monStart=(firstDow===0)?6:firstDow-1; // offset to make Mon=0
+  var days=new Date(y,m+1,0).getDate();
+  for(var i=0;i<monStart;i++) html+='<div class="mini-cal-day other-month"></div>';
+  for(var d=1;d<=days;d++){
+    var isToday=(d===todayD&&m===todayM&&y===todayY);
+    var cls='mini-cal-day'+(isToday?' today':'');
+    html+='<div class="'+cls+'">'+d+'</div>';
+  }
+  // Trailing blanks to complete grid
+  var total=monStart+days;
+  var rem=total%7;
+  if(rem>0){for(var i=0;i<7-rem;i++) html+='<div class="mini-cal-day other-month"></div>';}
+  return html;
+}
+
+function renderMainCalPanel(data){
+  var panel=document.getElementById('mainCalPanel');
+  if(!panel) return;
+  var now=new Date();
+  var todayY=now.getFullYear(),todayM=now.getMonth(),todayD=now.getDate();
+
+  function fmtItems(items,isToday){
+    if(!items||!items.length) return '<div style="font-size:11px;color:#94a3b8;font-style:italic;padding:6px 0">No meetings</div>';
+    var nowMs=now.getTime();
+    return items.map(function(ev){
+      var cls='main-cal-item';
+      if(isToday){
+        if(ev.start&&ev.end){
+          var s=new Date(ev.start).getTime(),e=new Date(ev.end).getTime();
+          if(nowMs>=s&&nowMs<=e) cls+=' next';
+          else if(e<nowMs) cls+=' past';
+        }
+      }
+      var time=ev.time||'';
+      var organiser=ev.organiser||ev.organizer||'';
+      var sub=organiser?'<div class="main-cal-sub">'+organiser+'</div>':'';
+      return '<div class="'+cls+'"><span class="main-cal-time">'+time+'</span><div><div class="main-cal-title">'+ev.title+'</div>'+sub+'</div></div>';
+    }).join('');
+  }
+
+  var monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var todayLabel='Today — '+dayNames[now.getDay()]+' '+todayD+' '+months[todayM];
+  var tom=new Date(now); tom.setDate(tom.getDate()+1);
+  var tomLabel='Tomorrow — '+dayNames[tom.getDay()]+' '+tom.getDate()+' '+months[tom.getMonth()];
+
+  var nextM=todayM===11?0:todayM+1;
+  var nextY=todayM===11?todayY+1:todayY;
+
+  panel.innerHTML=
+    '<div class="main-cal-block"><div class="main-cal-block-header">'+todayLabel+'</div>'+fmtItems(data.calToday,true)+'</div>'+
+    '<div class="main-cal-block"><div class="main-cal-block-header">'+tomLabel+'</div>'+fmtItems(data.calTomorrow,false)+'</div>'+
+    '<div class="main-cal-block">'
+      +'<div class="main-cal-block-header">'+monthNames[todayM]+' '+todayY+'</div>'
+      +'<div class="mini-cal-grid">'+renderMiniMonth(todayY,todayM,todayY,todayM,todayD)+'</div>'
+      +'<hr class="mini-cal-divider">'
+      +'<div class="main-cal-block-header">'+monthNames[nextM]+' '+nextY+'</div>'
+      +'<div class="mini-cal-grid">'+renderMiniMonth(nextY,nextM,todayY,todayM,todayD)+'</div>'
+    +'</div>';
+}
+
 function renderBriefing(data,key){
   currentData=data; currentKey=key;
   window._wipData=data; window._wipKey=key;
@@ -456,6 +523,9 @@ function renderBriefing(data,key){
     const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">—</span><span>${s.trim()}</span></div>`).join('');
     ctxEl.innerHTML=`<div class="context-bar"><div class="context-bar-title">Context</div>${items}</div>`;
   } else { ctxEl.innerHTML=''; }
+
+  // Main calendar panel
+  renderMainCalPanel(data);
 
   // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
