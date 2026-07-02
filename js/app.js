@@ -461,10 +461,10 @@ function renderPriorityCards(priorities,key,sec){
       <span class="card-drag" onclick="event.stopPropagation()">&#10783;</span>
       <button class="card-done-btn${ticked?' done':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()" aria-label="Mark done"></button>
       <div class="card-ph-body">
-        <div class="card-ph-title${ticked?' done':''}">${titleText}${theBadge}</div>
+        <div class="card-ph-title${ticked?' done':''}">${titleText}</div>
         ${subLine?`<div class="card-ph-sub">${sanitizeSub(subLine)}</div>`:''}
       </div>
-      <div class="card-ph-actions">${emailBtn}${ccBtn}</div>
+      <div class="card-ph-actions">${theBadge}${emailBtn}${ccBtn}</div>
     </div>`;
   }).join('');
 }
