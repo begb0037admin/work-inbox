@@ -532,20 +532,22 @@ function renderCalPanel(data){
     }).join('');
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
   }
-  function renderMiniCal(){
-    const monthName=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-    const firstDay=new Date(todayYear,todayMonth,1);
-    const daysInMonth=new Date(todayYear,todayMonth+1,0).getDate();
-    let startDow=firstDay.getDay()-1; if(startDow<0) startDow=6;
+  function renderMiniCal(monthOffset){
+    const calDate=new Date(todayYear,todayMonth+(monthOffset||0),1);
+    const calYear=calDate.getFullYear(), calMonth=calDate.getMonth();
+    const monthName=calDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+    let startDow=calDate.getDay()-1; if(startDow<0) startDow=6;
     const tom=new Date(now); tom.setDate(tom.getDate()+1);
-    const tomDate=tom.getDate();
+    const tomDate=tom.getDate(), tomMonth=tom.getMonth(), tomYear=tom.getFullYear();
     const hasTodayMtg=data.calToday&&data.calToday.length>0;
     const hasTomMtg=data.calTomorrow&&data.calTomorrow.length>0;
     const dayNames=['M','T','W','T','F','S','S'];
     let cells=dayNames.map(d=>`<div class="mini-cal-day-name">${d}</div>`).join('');
     for(let i=0;i<startDow;i++) cells+='<div class="mini-cal-day other-month"></div>';
     for(let d=1;d<=daysInMonth;d++){
-      const isT=d===todayDate, isTom=d===tomDate;
+      const isT=(d===todayDate&&calMonth===todayMonth&&calYear===todayYear);
+      const isTom=(d===tomDate&&calMonth===tomMonth&&calYear===tomYear);
       const hasMtg=(isT&&hasTodayMtg)||(isTom&&hasTomMtg);
       const cls='mini-cal-day'+(isT?' today':hasMtg?' has-meeting':'');
       cells+=`<div class="${cls}">${d}</div>`;
@@ -555,7 +557,7 @@ function renderCalPanel(data){
   const todayHeader='Today &mdash; '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   const tom=new Date(now); tom.setDate(tom.getDate()+1);
   const tomHeader='Tomorrow &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}${renderMiniCal()}</div>`;
+  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}<div class="mini-cal-col">${renderMiniCal(0)}${renderMiniCal(1)}</div></div>`;
 }
 
 let _ctxSentences=[], _ctxIdx=0, _ctxTimer=null, _ctxPaused=false;
