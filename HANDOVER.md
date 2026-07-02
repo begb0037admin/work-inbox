@@ -1,7 +1,7 @@
 # work-inbox — Living Handover Document
 
 **Last updated:** 2026-07-02 (Kevin session) — v5 main-area redesign COMPLETE and LIVE on main. Both CC and WI v5 redesigns approved by Kevin and merged to main.
-**Status:** Active — pipeline fully working. Task Scheduler confirmed working 2026-06-30.
+**Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/. Task Scheduler confirmed working 2026-06-30.
 
 ---
 
