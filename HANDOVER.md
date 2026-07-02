@@ -1,24 +1,21 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-02 — end of session. Three fixes outstanding for next session (see below).
+**Last updated:** 2026-07-02 — end of session. One fix outstanding for next session (see below).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
 
-## NEXT SESSION — Fix list (priority order)
+## NEXT SESSION — Fix list
 
-1. **Badge position broken** — Attempted to move NEW/UPDATED badges from inside `.card-ph-title` to `.card-ph-actions` (right side, next to CC→). Change was pushed (`js/app.js`, commit `2d39b9e`) but did not work on live site. Investigate and fix. The badge is rendered as `theBadge` in `renderPriorityCards()` — currently placed inside `<div class="card-ph-actions">` but not displaying correctly there. Revert or fix.
-
-2. **Drag reorder animation** — Cards currently show no visual feedback during drag. Kevin needs: as you drag a card down, the card below should flip up above it in real time; as you drag up, the card above should move down. Requires rewriting drag handlers to insert a live placeholder element into the DOM during `dragover`, shifting surrounding cards visually. This is a meaningful piece of work — plan before coding.
-
-3. **OSM IT Services URL** — sidebar link is `#` placeholder. Kevin to provide the real URL.
+1. **Drag reorder animation** — Cards currently show no visual feedback during drag. Kevin needs: as you drag a card down, the card below should flip up above it in real time; as you drag up, the card above should move down. Requires rewriting drag handlers to insert a live placeholder element into the DOM during `dragover`, shifting surrounding cards visually. This is a meaningful piece of work — plan before coding.
 
 ---
 
 ## Session 2026-07-02 (end) — small fixes pushed to main
 
 - **`ctx-strip` label restored** — `setupCtxTicker()` was missing `<div class="ctx-label">Briefing context</div>`. Added back. Commit `fb178b5`.
-- **Badge move attempted** — `theBadge` moved from `.card-ph-title` to `.card-ph-actions` in `renderPriorityCards()`. Commit `2d39b9e`. **Did not work on live site — needs fixing next session.**
+- **Badge position fixed** — NEW/UPDATED badges moved from inside `.card-ph-title` to `.card-ph-actions` (right side, next to CC→). Commit `2d39b9e`. Confirmed working.
+- **OSM IT Services URL** — sidebar link updated to `https://oxford.saasiteu.com/Modules/SelfService/#home`. Commit `e4cc1fd`.
 
 ---
 
@@ -35,8 +32,8 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 ## Session 2026-07-02 — v5 design corrections (commit `12ff90d`)
 
 - **Removed** email address from sidebar
-- **Links updated**: 6 approved links (OSM IT Services = `#` placeholder — Kevin to provide URL)
-- **Cards redesigned**: flat `.card-ph` design (drag handle, circle done button, title + sub, email + CC→ icons)
+- **Links updated**: 6 approved links, all now populated (OSM IT Services = `https://oxford.saasiteu.com/Modules/SelfService/#home`)
+- **Cards redesigned**: flat `.card-ph` design (drag handle, circle done button, title + sub, email + CC→ icons, NEW/UPDATED badges on right)
 - **Layout corrected**: left col = Today + Tomorrow, right col = Week + Parked
 - **Oxford crest**: restored as external file `images/oxford-crest.jpg` — NEVER embed as base64, NEVER delete, NEVER change the `src` attribute
 
@@ -90,16 +87,15 @@ All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, sh
 - fetch_inbox.py — all phases confirmed working
 - Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri). Recovery: run `create_inbox_tasks.bat` as Administrator.
 - Dashboard loads live briefing.json on load, falls back to localStorage archive
-- Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, inbox widget, absences, links
+- Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, inbox widget, absences, all 6 links populated
 - 3-column calendar panel (Today `7fr` | Tomorrow `7fr` | July+August mini-cals in one card `4fr`)
 - Rotating context strip with "Briefing context" label, dot nav
-- 2×2 priority grid with tier filter — flat `.card-ph` design
+- 2×2 priority grid with tier filter — flat `.card-ph` design, NEW/UPDATED badges on right
 - CC ticker reads live from CC tasks.json every 60s
 - drag-and-drop, tick sync, archive, show done, openmail:// all working
 - Multi-machine setup complete (begb0037.AD-OAK)
 
 ### Known issues (fix next session)
-- NEW/UPDATED badge position broken — see fix list above
 - Drag reorder has no visual animation — see fix list above
 
 ### Critical Note — Desktop Bat File
