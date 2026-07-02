@@ -68,6 +68,7 @@ Do not re-investigate Graph API or Chrome-based email access.
 Before any task where higher effort is warranted, signal to Kevin: what the task is, why higher effort is needed, and an explicit request to raise the effort level. Wait — do not proceed until Kevin raises it. Signal when the high-effort phase is done; Kevin decides when to return to normal. Never change effort level unilaterally. See CONSTITUTION.md Section 10 (v2.0, 2026-06-27).
 
 ## Hard Rules
+- **NEVER touch `images/oxford-crest.jpg` or the `<img class="sidebar-crest">` src attribute** — the crest is an external file; do not embed it as base64, do not delete it, do not move it. A Claude session deleted it on 28 Jun 2026 against Kevin's explicit decision. This rule exists to prevent that happening again.
 - Never commit raw email data or API keys
 - Never attempt Microsoft Graph API — Oxford blocks it
 - Always pull fetch_inbox.py from GitHub before running
