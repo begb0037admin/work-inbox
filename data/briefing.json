@@ -1,7 +1,7 @@
 {
   "date": "Thursday 2 July 2026",
-  "subtitle": "Absences, award deadline tomorrow, unread vendor quote",
-  "context": "Alan Quirke from The Access Group sent an unread message this morning about PeopleXD Insight Reporting quote request for Holiday Records Reports with attachments awaiting your response. Athena Artuso is on annual leave (two notifications received 1-2 July), and Emma is also on annual leave during her birthday - Julie Hickman needs Kudoboard signatures by 2pm tomorrow (3 July). Nathan Kirwan's unread draft UDF for recording REF outcomes 2025/26 is blocking progress on HESA staff population validation work. Christopher Sanders' unread Weightings spreadsheet email from 1 July contains legal compliance requirements that have been pending over 48 hours. The Awards for Excellence Scheme deadline is tomorrow, 3 July 2026 - Jonathan Roger's nomination message requires your immediate attention as Michael O'Sullivan's nomination needs final review before submission. Open Alan Quirke's PeopleXD email first as it's the newest unread item requiring action on the three reports allocation.",
+  "subtitle": "Awards deadline tomorrow, REF outcomes UDF review needed, team absences impact blocking tasks",
+  "context": "Open the unread email from Alan Quirke at The Access Group (received 08:12 today) about PeopleXD Insight Reporting quote request - this is blocking progress on three holiday records reports and needs immediate response on delivery dates. Athena Artuso is absent on annual leave (two notifications received 19:59 on 1 July and 13:06 on 1 July, return date not specified in subject line). Nathan Kirwan sent two unread emails about the REF outcomes UDF (Draft UDF for recording REF outcomes 2025/26 and Copy of Test UDF for REF Outcomes, both received 15:10-15:16 on 1 July) requiring your review of the user-defined field structure. The Awards for Excellence nominations deadline is tomorrow, 3 July 2026, and you have pending review tasks from Jonathan Roger's 29 June email. Two daily task reports from OSM Administration (received 07:00 and 07:01 on 1-2 July) show all open tasks owned by HRIS Analysis and HRIS Sys Admin teams - these reports require your attention to track team capacity. Julie Hickman's unread Kudoboard reminder for Emma's birthday requires your signature by 2pm tomorrow (3 July 2026). Start with Alan Quirke's message about the PeopleXD project quote to confirm resource allocation and delivery timeline.",
   "urgent": [
     {
       "title": "Reference Request for Nikolas Sharkey",
@@ -56,6 +56,16 @@
       "received": "2 Jul"
     },
     {
+      "title": "Report: All Open Tasks by Team",
+      "sub": "From <strong>reports-prd-ldz@saasiteu.com</strong>. Dear Kevin,\r\n\r\nPlease find attached a list of all open Tasks owned by the HRIS Analysis and HRIS Sys Admin teams.\r\n\r\nReg",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Report: All Open Tasks by Team",
+      "from": "reports-prd-ldz@saasiteu.com",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EA80000",
+      "received": "2 Jul"
+    },
+    {
       "title": "Athena A/L",
       "sub": "From <strong>Athena Artuso</strong>.",
       "badge": "Reply within 48hrs",
@@ -66,6 +76,16 @@
       "received": "1 Jul"
     },
     {
+      "title": "Copy of Test UDF for REF Outcomes",
+      "sub": "From <strong>Nathan Kirwan</strong>. Hi Kevin,\r\n\r\n \r\n\r\n \r\n\r\nHere is a copy of the draft UDF as it stands for review as needed. \r\n\r\n \r\n\r\nBest wishes\r\n\r\n \r\n\r\nN",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Copy of Test UDF for REF Outcomes",
+      "from": "Nathan Kirwan",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F90000",
+      "received": "1 Jul"
+    },
+    {
       "title": "Draft UDF for recording REF outcomes 2025/26",
       "sub": "From <strong>Nathan Kirwan</strong>. HI Kevin,\r\n\r\n \r\n\r\n \r\n\r\nI’ve done some checks on the HESA staff population and haven’t managed to spot any one person hav",
       "badge": "Reply within 48hrs",
@@ -73,6 +93,16 @@
       "subject": "Draft UDF for recording REF outcomes 2025/26",
       "from": "Nathan Kirwan",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F80000",
+      "received": "1 Jul"
+    },
+    {
+      "title": "Non-clinical pay uplift kick-off",
+      "sub": "From <strong>Jasmin Khokhra</strong>. Dear all,\r\n\r\n \r\n\r\nWe have not received any official communication from UCEA as yet, but with main holiday season approac",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Non-clinical pay uplift kick-off",
+      "from": "Jasmin Khokhra",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000",
       "received": "1 Jul"
     },
     {
@@ -147,16 +177,6 @@
     }
   ],
   "fyi": [
-    {
-      "title": "Copy of Test UDF for REF Outcomes",
-      "sub": "From <strong>Nathan Kirwan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Copy of Test UDF for REF Outcomes",
-      "from": "Nathan Kirwan",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F90000",
-      "received": "1 Jul"
-    },
     {
       "title": "RE: Awards for Excellence — Michael O'Sullivan nomination — please review",
       "sub": "From <strong>Simon Burford</strong>.",
@@ -537,6 +557,16 @@
       "sub": "Kevin Lelitte"
     },
     {
+      "time": "10:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "11:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
       "time": "12:00",
       "title": "Michael O'Sullivan - 1-1 Session",
       "sub": "Kevin Lelitte"
@@ -562,6 +592,11 @@
       "time": "10:00",
       "title": "Roadmap review",
       "sub": "Marie Cooksey"
+    },
+    {
+      "time": "11:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
     },
     {
       "time": "12:00",
@@ -686,6 +721,16 @@
           "sub": "Kevin Lelitte"
         },
         {
+          "time": "10:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "11:30",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
           "time": "12:00",
           "title": "Michael O'Sullivan - 1-1 Session",
           "sub": "Kevin Lelitte"
@@ -718,6 +763,11 @@
           "sub": "Marie Cooksey"
         },
         {
+          "time": "11:30",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
           "time": "12:00",
           "title": "Asta Siautiaite - 1-1 Session",
           "sub": "Kevin Lelitte"
@@ -735,5 +785,5 @@
   "prioritiesToday": [],
   "prioritiesTomorrow": [],
   "prioritiesWeek": [],
-  "refreshed_at": "Thursday 02 July · 08:35"
+  "refreshed_at": "Thursday 02 July · 09:00"
 }
