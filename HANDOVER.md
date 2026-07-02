@@ -1,7 +1,22 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-02 — v5 design corrections: flat cards, sidebar links, email removal. Pushed to main (commit `12ff90d`).
+**Last updated:** 2026-07-02 — v5 calendar panel corrections: equal columns, July+August in one card, AI summaries. Pushed to main.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
+
+---
+
+## Session 2026-07-02 (continued) — calendar panel corrections
+
+Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da688d` (combined mini-cals into one card, narrowed calendar column).
+
+### What changed
+- **`css/styles.css`**: `.main-cal-panel` grid changed to `7fr 7fr 4fr` — Today and Tomorrow take equal wider columns; mini-cal column is narrower (≈22% of row).
+- **`js/app.js`**: `renderMiniCal(monthOffset)` now returns inner content only (no wrapping block). Both months rendered inside a single `.main-cal-block` with a `.mini-cal-divider` `<hr>` between them. AI summaries (`c.summary`) shown on Today/Tomorrow entries as `.main-cal-summary` divs.
+
+### Still to do — next session
+- **Ticker / priority action cards** — Kevin confirmed this is the next item. Today/Tomorrow sections still show old design in Kevin's earlier screenshots (need to verify current state first).
+- **OSM IT Services URL** — sidebar link is `#` placeholder. Kevin to provide real URL.
+- **PR #24 / branch** — branch `claude/inbox-briefing-script-errors-i8qmtk` is open; changes have been cherry-picked to main throughout the session.
 
 ---
 
