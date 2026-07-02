@@ -427,73 +427,6 @@ function renderPriorityCards(priorities,key,sec){
   }).join('');
 }
 
-function renderMiniMonth(y,m,todayY,todayM,todayD){
-  // Monday-start calendar (0=Mon ... 6=Sun)
-  var dayNames=['M','T','W','T','F','S','S'];
-  var html=dayNames.map(function(h){return '<div class="mini-cal-day-name">'+h+'</div>';}).join('');
-  var firstDow=new Date(y,m,1).getDay(); // 0=Sun
-  var monStart=(firstDow===0)?6:firstDow-1; // offset to make Mon=0
-  var days=new Date(y,m+1,0).getDate();
-  for(var i=0;i<monStart;i++) html+='<div class="mini-cal-day other-month"></div>';
-  for(var d=1;d<=days;d++){
-    var isToday=(d===todayD&&m===todayM&&y===todayY);
-    var cls='mini-cal-day'+(isToday?' today':'');
-    html+='<div class="'+cls+'">'+d+'</div>';
-  }
-  // Trailing blanks to complete grid
-  var total=monStart+days;
-  var rem=total%7;
-  if(rem>0){for(var i=0;i<7-rem;i++) html+='<div class="mini-cal-day other-month"></div>';}
-  return html;
-}
-
-function renderMainCalPanel(data){
-  var panel=document.getElementById('mainCalPanel');
-  if(!panel) return;
-  var now=new Date();
-  var todayY=now.getFullYear(),todayM=now.getMonth(),todayD=now.getDate();
-
-  function fmtItems(items,isToday){
-    if(!items||!items.length) return '<div style="font-size:11px;color:#94a3b8;font-style:italic;padding:6px 0">No meetings</div>';
-    var nowMs=now.getTime();
-    return items.map(function(ev){
-      var cls='main-cal-item';
-      if(isToday){
-        if(ev.start&&ev.end){
-          var s=new Date(ev.start).getTime(),e=new Date(ev.end).getTime();
-          if(nowMs>=s&&nowMs<=e) cls+=' next';
-          else if(e<nowMs) cls+=' past';
-        }
-      }
-      var time=ev.time||'';
-      var organiser=ev.organiser||ev.organizer||'';
-      var sub=organiser?'<div class="main-cal-sub">'+organiser+'</div>':'';
-      return '<div class="'+cls+'"><span class="main-cal-time">'+time+'</span><div><div class="main-cal-title">'+ev.title+'</div>'+sub+'</div></div>';
-    }).join('');
-  }
-
-  var monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var todayLabel='Today — '+dayNames[now.getDay()]+' '+todayD+' '+months[todayM];
-  var tom=new Date(now); tom.setDate(tom.getDate()+1);
-  var tomLabel='Tomorrow — '+dayNames[tom.getDay()]+' '+tom.getDate()+' '+months[tom.getMonth()];
-
-  var nextM=todayM===11?0:todayM+1;
-  var nextY=todayM===11?todayY+1:todayY;
-
-  panel.innerHTML=
-    '<div class="main-cal-block"><div class="main-cal-block-header">'+todayLabel+'</div>'+fmtItems(data.calToday,true)+'</div>'+
-    '<div class="main-cal-block"><div class="main-cal-block-header">'+tomLabel+'</div>'+fmtItems(data.calTomorrow,false)+'</div>'+
-    '<div class="main-cal-block">'
-      +'<div class="main-cal-block-header">'+monthNames[todayM]+' '+todayY+'</div>'
-      +'<div class="mini-cal-grid">'+renderMiniMonth(todayY,todayM,todayY,todayM,todayD)+'</div>'
-      +'<hr class="mini-cal-divider">'
-      +'<div class="main-cal-block-header">'+monthNames[nextM]+' '+nextY+'</div>'
-      +'<div class="mini-cal-grid">'+renderMiniMonth(nextY,nextM,todayY,todayM,todayD)+'</div>'
-    +'</div>';
-}
-
 function renderBriefing(data,key){
   currentData=data; currentKey=key;
   window._wipData=data; window._wipKey=key;
@@ -523,9 +456,6 @@ function renderBriefing(data,key){
     const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">—</span><span>${s.trim()}</span></div>`).join('');
     ctxEl.innerHTML=`<div class="context-bar"><div class="context-bar-title">Context</div>${items}</div>`;
   } else { ctxEl.innerHTML=''; }
-
-  // Main calendar panel
-  renderMainCalPanel(data);
 
   // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
@@ -608,10 +538,11 @@ async function init(){
 
 init();
 
-// Daily Focus ticker (cross-dashboard: shows Command Centre data)
-function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+// Tasks widget
 async function loadTasksWidget(){
+  var el=document.getElementById('tasksWidget');
   var dot=document.getElementById('tasksLiveDot');
+  if(!el)return;
   try{
     var res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/tasks.json?t='+Date.now(),{cache:'no-store'});
     if(!res.ok)throw new Error('fetch failed');
@@ -635,63 +566,24 @@ async function loadTasksWidget(){
       });
       if(changed){saveTicks(ticks);renderBriefing(currentData,currentKey);}
     }
-    setText('cc-today',tasks.filter(function(t){return t.tier==='today';}).length);
-    setText('cc-tomorrow',tasks.filter(function(t){return t.tier==='tomorrow';}).length);
-    setText('cc-week',tasks.filter(function(t){return t.tier==='week';}).length);
-    setText('cc-parked',tasks.filter(function(t){return t.tier==='parked';}).length);
-    /* Stalled-in-Today calc -- mirrors command-centre/js/app.js renderStaleBanner() exactly */
-    var nowMs=new Date().setHours(0,0,0,0);
-    var todayTasks=tasks.filter(function(t){return t.tier==='today'&&!t.done;});
-    var stale=todayTasks.filter(function(t){return t.dateAdded&&Math.floor((nowMs-new Date(t.dateAdded))/86400000)>3;});
-    var ages=stale.map(function(t){return Math.floor((nowMs-new Date(t.dateAdded))/86400000);});
-    if(stale.length){
-      var maxAge=Math.max.apply(null,ages);
-      var avgAge=Math.round(ages.reduce(function(s,a){return s+a;},0)/ages.length);
-      var over2w=ages.filter(function(a){return a>=14;}).length;
-      setText('cc-stalled',stale.length+' task'+(stale.length!==1?'s':''));
-      setText('cc-oldest',maxAge+' day'+(maxAge!==1?'s':''));
-      setText('cc-avgage',avgAge+' day'+(avgAge!==1?'s':''));
-      setText('cc-2weeks',over2w+' task'+(over2w!==1?'s':''));
-    } else {
-      setText('cc-stalled','0 tasks');
-      setText('cc-oldest','—');
-      setText('cc-avgage','—');
-      setText('cc-2weeks','0 tasks');
-    }
+    var todayCount=tasks.filter(function(t){return t.tier==='today';}).length;
+    var tomorrowCount=tasks.filter(function(t){return t.tier==='tomorrow';}).length;
+    var weekCount=tasks.filter(function(t){return t.tier==='week';}).length;
+    var todoCount=tasks.filter(function(t){return (t.actions||[]).some(function(a){return a.includes('[TODO]');});}).length;
+    el.innerHTML=
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Today</span><span class="tasks-widget-count">'+todayCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
+      '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
+      '<a class="tasks-widget-link" href="https://cc.lelitte.co.uk/" target="_blank">→ Open command centre</a>';
     if(dot){dot.style.background='#4ade80';dot.classList.add('pulsing');setTimeout(function(){dot.classList.remove('pulsing');},700);}
   }catch(e){
+    el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';
     if(dot)dot.style.background='#f87171';
   }
 }
 loadTasksWidget();
 setInterval(loadTasksWidget, 30000);
-
-/* From your inbox widget -- shows Command Centre's inbox_suggestions.json count */
-async function loadInboxSuggestionsBadge(){
-  try{
-    var res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/inbox_suggestions.json?t='+Date.now(),{cache:'no-store'});
-    if(!res.ok)throw new Error('fetch failed');
-    var data=await res.json();
-    var n=(data.new_tasks||[]).length;
-    setText('cc-suggestions-badge',n);
-    setText('cc-suggestions-text',n+' new suggestion'+(n!==1?'s':''));
-  }catch(e){
-    setText('cc-suggestions-badge','—');
-    setText('cc-suggestions-text','unavailable');
-  }
-}
-loadInboxSuggestionsBadge();
-setInterval(loadInboxSuggestionsBadge, 30000);
-
-/* Tier filter dropdown (sidebar) -- filters the main-area priority grid cells */
-function applyPriorityFilter(val){
-  var map={today:'pt',tomorrow:'ptom',week:'pw',parked:'pfyi'};
-  document.querySelectorAll('.inbox-grid-cell').forEach(function(cell){
-    var zone=cell.querySelector('.pri-drop-zone');
-    var sec=zone?zone.getAttribute('data-sec'):null;
-    cell.style.display=(val==='all'||map[val]===sec)?'':'none';
-  });
-}
 
 /* CLOCK */
 function updateWiClock(){
