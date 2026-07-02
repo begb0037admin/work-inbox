@@ -568,6 +568,7 @@ function setupCtxTicker(context){
   if(!_ctxSentences.length){el.innerHTML='';return;}
   _ctxIdx=0;
   el.innerHTML=`<div class="ctx-strip" onmouseenter="_ctxPaused=true" onmouseleave="_ctxPaused=false" onclick="_jumpCtx(_ctxIdx+1)">
+    <div class="ctx-label">Briefing context</div>
     <div class="ctx-text" id="ctxText"></div>
     <div class="ctx-dots" id="ctxDots"></div>
   </div>`;
