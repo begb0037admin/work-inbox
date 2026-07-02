@@ -1,5 +1,70 @@
 {
-  "generated_at": "2026-07-02 09:00",
-  "new_tasks": [],
-  "task_updates": []
+  "generated_at": "2026-07-02 10:25",
+  "new_tasks": [
+    {
+      "title": "Schedule Holiday Records reports work with Access Group",
+      "tier": "tomorrow",
+      "description": "Alan Quirke (Access Group) is asking when to schedule the 3 Holiday Records reports project (case 69001638, approved 24 June, 2,800 flex points). Kevin needs to confirm dates with Alan and coordinate scheduling with the Payroll and WFM consultants.",
+      "email_subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "email_from": "Alan Quirke",
+      "received": "2026-07-02 08:12",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EA90000"
+    },
+    {
+      "title": "Prepare for non-clinical pay uplift project kickoff",
+      "tier": "week",
+      "description": "Jasmin Khokhra is initiating a non-clinical pay uplift project and asking for early coordination before official UCEA communication arrives. Kevin should confirm availability and discuss resourcing / timeline for the HR Systems team's involvement.",
+      "email_subject": "Non-clinical pay uplift kick-off",
+      "email_from": "Jasmin Khokhra",
+      "received": "2026-07-01 15:03",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000"
+    },
+    {
+      "title": "Review Christopher Sanders' legal compliance weightings list",
+      "tier": "week",
+      "description": "Christopher Sanders has sent a revised list of requirements identified as relating to legal compliance from yesterday's SHSMS evaluation session, split into categories. Kevin needs to review these for the DTP1334 evaluation process.",
+      "email_subject": "RE: Weightings spreadsheet",
+      "email_from": "Christopher Sanders",
+      "received": "2026-07-01 14:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F60000"
+    }
+  ],
+  "applied_updates": [
+    {
+      "task_id": "t031",
+      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
+      "note": "Nathan Kirwan has sent a draft UDF for recording REF outcomes 2025/26 for Kevin's review as needed.",
+      "email_subject": "Copy of Test UDF for REF Outcomes",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-07-01 15:16",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F90000"
+    },
+    {
+      "task_id": "t031",
+      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
+      "note": "Nathan has completed HESA staff population checks and confirmed no person has greater than 4 appointments, supporting the REF attributes design.",
+      "email_subject": "Draft UDF for recording REF outcomes 2025/26",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-07-01 15:10",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F80000"
+    },
+    {
+      "task_id": "t015",
+      "task_title": "Web pages and URL linking -- job posting updates",
+      "note": "Kevin confirmed to Laura Porter that the IM Principles URL changes are now live.",
+      "email_subject": "Re: IM Principles - change to URL",
+      "email_from": "Kevin (sent to: Laura Porter)",
+      "received": "2026-06-30 16:16",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078B270AF70000"
+    },
+    {
+      "task_id": "t029",
+      "task_title": "DTP1334 SHSMS Evaluation -- review Helen Harbour briefing and weightings",
+      "note": "Kevin sent written comments on the H&S Management System project requirements to Christopher Sanders and James Salas Guillen ahead of the meeting he could not attend.",
+      "email_subject": "Re: Strategic H&S modular system project requirements",
+      "email_from": "Kevin (sent to: Christopher Sanders; James Salas Guillen)",
+      "received": "2026-06-30 12:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078B270AF60000"
+    }
+  ]
 }
