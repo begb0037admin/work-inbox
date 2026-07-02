@@ -120,7 +120,7 @@ function renderArchiveList(){
     return `<div class="archive-day">
       <div class="archive-day-header" onclick="toggleArchiveDay(${di})">
         <div><div class="archive-day-date">${e.dateStr}</div><div class="archive-day-meta">${items.length} items · ${tickedCount} done</div></div>
-        <span class="archive-day-arrow" id="arch-arrow-${di}">–</span>
+        <span class="archive-day-arrow" id="arch-arrow-${di}">&ndash;</span>
       </div>
       <div class="archive-day-items" id="arch-items-${di}">${itemsHtml}</div>
     </div>`;
@@ -234,8 +234,6 @@ function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
-let _ccWindow=null;
-function openCC(id){var url='https://cc.lelitte.co.uk/#'+id;if(_ccWindow&&!_ccWindow.closed){_ccWindow.location.href=url;_ccWindow.focus();}else{_ccWindow=window.open(url,'command-centre');}}
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
@@ -264,7 +262,7 @@ function renderSidebarCal(items, containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   if(!items||!items.length){el.innerHTML='<div style="padding:4px 18px 8px;font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None</div>';return;}
-  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div>`).join('');
+  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">` + (c.time?`<div class="cal-time">${c.time}</div>`:'') + `<div class="cal-title">${c.title}</div>` + (c.sub?`<div class="cal-sub">${c.sub}</div>`:'') + (c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:'') + `</div>`).join('');
 }
 
 function togglePriCard(i){
@@ -282,7 +280,7 @@ function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbo
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
 function _priSetOrder(pt,ptom,pw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
-function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}  
+function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
@@ -375,7 +373,6 @@ function priZoneDrop(e,sec){
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
   const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  // Canvas text measurement for smart one-line vs two-line decision
   if(!renderPriorityCards._canvas){renderPriorityCards._canvas=document.createElement('canvas');renderPriorityCards._ctx=renderPriorityCards._canvas.getContext('2d');}
   const _mctx=renderPriorityCards._ctx;
   function _tw(t,f){_mctx.font=f;return _mctx.measureText(t).width;}
@@ -399,7 +396,6 @@ function renderPriorityCards(priorities,key,sec){
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
-    // Measure whether combined title fits on one line
     const _badgeW=theBadge?82:0;
     const _btnW=(p.entry_id||p.entryId)?118:0;
     const _ccBtnW=p.id?96:0;
@@ -419,8 +415,8 @@ function renderPriorityCards(priorities,key,sec){
         <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
-        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="openCC('${p.id}');event.stopPropagation()">CC →</button>`:''}
-        <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
+        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','command-centre');event.stopPropagation()">CC →</button>`:''}
+        <span class="pri-arrow" id="priarrow_${sec}_${i}">&ndash;</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${metaHtml}</div>
     </div>`;
@@ -431,17 +427,14 @@ function renderBriefing(data,key){
   currentData=data; currentKey=key;
   window._wipData=data; window._wipKey=key;
 
-  // Header
   document.getElementById('pageTitle').textContent=getGreeting();
   document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
 
-  // Sidebar calendar
   renderSidebarCal(data.calToday,'calTodaySidebar');
   renderSidebarCal(data.calTomorrow,'calTomorrowSidebar');
 
-  // Absences
   const absEl=document.getElementById('absencesSidebar');
   if(data.absences&&data.absences.length){
     absEl.innerHTML='<ul class="abs-list">'+data.absences.map(a=>`<li>${a}</li>`).join('')+'</ul>';
@@ -449,15 +442,13 @@ function renderBriefing(data,key){
     absEl.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None recorded</span>';
   }
 
-  // Context bar
   const ctxEl=document.getElementById('contextBar');
   if(data.context){
-    const sentences=data.context.split(/(?<=\.)\s+/).filter(s=>s.trim().length>0);
-    const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">—</span><span>${s.trim()}</span></div>`).join('');
+    const sentences=data.context.split(/(?<=\.\s+)/).filter(s=>s.trim().length>0);
+    const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">&mdash;</span><span>${s.trim()}</span></div>`).join('');
     ctxEl.innerHTML=`<div class="context-bar"><div class="context-bar-title">Context</div>${items}</div>`;
   } else { ctxEl.innerHTML=''; }
 
-  // Main inbox — 2×2 grid
   const priSecs=applyPriOverrides(data);
   const left=`<div class="inbox-grid">
     <div class="inbox-grid-cell">
@@ -538,7 +529,6 @@ async function init(){
 
 init();
 
-// Tasks widget
 async function loadTasksWidget(){
   var el=document.getElementById('tasksWidget');
   var dot=document.getElementById('tasksLiveDot');
@@ -548,7 +538,6 @@ async function loadTasksWidget(){
     if(!res.ok)throw new Error('fetch failed');
     var data=await res.json();
     var tasks=Array.isArray(data)?data:(data.tasks||[]);
-    /* Auto-tick WI priority items whose CC task is marked done */
     if(currentData&&currentKey){
       var ticks=getTicks();var changed=false;
       var priMap=[['prioritiesToday','pt'],['prioritiesTomorrow','ptom'],['prioritiesWeek','pw']];
@@ -575,7 +564,7 @@ async function loadTasksWidget(){
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
       '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
-      '<a class="tasks-widget-link" href="https://cc.lelitte.co.uk/" target="_blank">→ Open command centre</a>';
+      '<a class="tasks-widget-link" href="https://cc.lelitte.co.uk/" target="_blank">&rarr; Open command centre</a>';
     if(dot){dot.style.background='#4ade80';dot.classList.add('pulsing');setTimeout(function(){dot.classList.remove('pulsing');},700);}
   }catch(e){
     el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';
@@ -585,7 +574,6 @@ async function loadTasksWidget(){
 loadTasksWidget();
 setInterval(loadTasksWidget, 30000);
 
-/* CLOCK */
 function updateWiClock(){
   var n=new Date();
   var time=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});

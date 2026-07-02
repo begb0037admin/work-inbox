@@ -429,7 +429,7 @@ COMMAND_CENTRE_PATH = "data/tasks.json"
 priorities_today    = []
 priorities_tomorrow = []
 priorities_week     = []
-cc_content = {"tasks": []}
+cc_content = []
 try:
     cc_url     = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
     cc_headers = {
@@ -441,7 +441,8 @@ try:
     with urllib.request.urlopen(cc_req) as r:
         cc_data    = json.loads(r.read())
         cc_content = json.loads(base64.b64decode(cc_data["content"]).decode("utf-8"))
-    for task in cc_content.get("tasks", []):
+    task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+    for task in task_list:
         if task.get("done"):
             continue
         tier = task.get("tier", "")
@@ -487,7 +488,8 @@ if GITHUB_PAT:
         pass
 try:
     task_summaries = []
-    for t in cc_content.get("tasks", []):
+    task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+    for t in task_list:
         task_summaries.append({
             "id":          t.get("id", ""),
             "title":       t.get("title", ""),
@@ -644,8 +646,9 @@ if GITHUB_PAT and suggestions["task_updates"]:
 
         stamp   = datetime.now().strftime("%d %b %Y")
         applied = 0
-        for upd in suggestions["task_updates"]:
-            for task in tasks_doc.get("tasks", []):
+        task_list = tasks_doc if isinstance(tasks_doc, list) else tasks_doc.get("tasks", [])
+        for task in task_list:
+            for upd in suggestions["task_updates"]:
                 if task.get("id") == upd["task_id"]:
                     task.setdefault("actions", []).append(
                         f"[{stamp}] {upd['note']} (email: {upd['email_from']} - {upd['email_subject']})")
