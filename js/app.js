@@ -552,12 +552,12 @@ function renderCalPanel(data){
       const cls='mini-cal-day'+(isT?' today':hasMtg?' has-meeting':'');
       cells+=`<div class="${cls}">${d}</div>`;
     }
-    return `<div class="main-cal-block"><div class="main-cal-block-header">${monthName}</div><div class="mini-cal-grid">${cells}</div></div>`;
+    return `<div class="main-cal-block-header">${monthName}</div><div class="mini-cal-grid">${cells}</div>`;
   }
   const todayHeader='Today &mdash; '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   const tom=new Date(now); tom.setDate(tom.getDate()+1);
   const tomHeader='Tomorrow &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}<div class="mini-cal-col">${renderMiniCal(0)}${renderMiniCal(1)}</div></div>`;
+  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}<div class="main-cal-block">${renderMiniCal(0)}<hr class="mini-cal-divider">${renderMiniCal(1)}</div></div>`;
 }
 
 let _ctxSentences=[], _ctxIdx=0, _ctxTimer=null, _ctxPaused=false;
