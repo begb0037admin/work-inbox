@@ -1,8 +1,8 @@
 # CONSTITUTION.md
 # The Operating Constitution
 
-Version : 2.0
-Status  : Published — amended 2026-06-27
+Version : 2.1
+Status  : Published — amended 2026-07-02
 Ratified: 2026-06-06
 Author  : Kevin Lelitte, HR Systems, University of Oxford
 
@@ -225,6 +225,32 @@ a reasoning seat violation of this constitution.
 
 ---
 
+## Section 11 — Mockup and Visual Design Standard
+
+All mockups, visual designs, and prototype interfaces are produced
+as Claude Artifacts. They are never committed to any repository as
+HTML files or any other design files during the design process.
+
+An Artifact is the correct and only delivery surface for mockup
+work. It provides a live, shareable, version-labelled preview that
+can be iterated within a session without polluting repository
+history or creating ambiguity between production code and
+exploratory design.
+
+A file committed to a repository signals production intent. Mockup
+files pushed to a repository violate this boundary and create
+permanent governance debt.
+
+**The rule is absolute:**
+- Mockup and design work → Claude Artifact, updated in place
+- Production code → repository commit, after Kevin's explicit approval
+
+No exception exists for "quick" mockups, holding branches, or
+interim snapshots. If it is not approved, production-ready code,
+it does not enter the repository.
+
+---
+
 ## Version History
 
 | Version | Date       | Change                              |
@@ -242,3 +268,13 @@ a reasoning seat violation of this constitution.
 |         |            | reasoning seat proceeding at        |
 |         |            | assumed effort without signalling.  |
 |         |            | Decision: Kevin Lelitte 2026-06-27. |
+| 2.1     | 2026-07-02 | Section 11 added — Mockup and       |
+|         |            | Visual Design Standard. Rationale:  |
+|         |            | mockup HTML files were being        |
+|         |            | committed to repositories during    |
+|         |            | design iteration, violating         |
+|         |            | production intent boundaries.       |
+|         |            | All mockups must be produced as     |
+|         |            | Claude Artifacts and never          |
+|         |            | committed until production-ready.   |
+|         |            | Decision: Kevin Lelitte 2026-07-02. |
