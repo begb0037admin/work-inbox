@@ -1,7 +1,36 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-02 — v5 full redesign on branch `claude/inbox-briefing-script-errors-i8qmtk` (PR #24), pending merge to main.
+**Last updated:** 2026-07-02 — v5 calendar panel corrections: equal columns, July+August in one card, AI summaries. Pushed to main.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
+
+---
+
+## Session 2026-07-02 (continued) — calendar panel corrections
+
+Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da688d` (combined mini-cals into one card, narrowed calendar column).
+
+### What changed
+- **`css/styles.css`**: `.main-cal-panel` grid changed to `7fr 7fr 4fr` — Today and Tomorrow take equal wider columns; mini-cal column is narrower (≈22% of row).
+- **`js/app.js`**: `renderMiniCal(monthOffset)` now returns inner content only (no wrapping block). Both months rendered inside a single `.main-cal-block` with a `.mini-cal-divider` `<hr>` between them. AI summaries (`c.summary`) shown on Today/Tomorrow entries as `.main-cal-summary` divs.
+
+### Still to do — next session
+- **Ticker / priority action cards** — Kevin confirmed this is the next item. Verify current card design on live site first, then align with approved v5 mockup.
+- **OSM IT Services URL** — sidebar link is `#` placeholder. Kevin to provide real URL.
+- **Branch `claude/inbox-briefing-script-errors-i8qmtk`** — still open; all changes have been cherry-picked to main throughout the session.
+
+---
+
+## Session 2026-07-02 — v5 design corrections (commit `12ff90d`)
+
+Three files changed: `index.html`, `css/styles.css`, `js/app.js`. Pushed directly to main.
+
+### What changed
+- **Removed** email address (`kevin.lelitte@admin.ox.ac.uk`) from sidebar `<div class="user-block">`
+- **Links updated**: sidebar now has all 6 approved links (Command Centre, HRIS Dashboard, HRIS Launcher, Access Group Support, FA Knowledge Base, OSM IT Services). OSM IT Services URL is `#` placeholder — Kevin to provide real URL.
+- **Cards redesigned**: priority cards switched from old expandable `.pri-card` design to approved flat `.card-ph` design (drag handle, circle done button, title + action sub-text, small email + CC→ icon buttons)
+- **Layout corrected**: inbox grid is stacked left/right — left col = Today + Tomorrow, right col = Week + Parked
+- **CSS added**: `.card-ph`, `.card-drag`, `.card-done-btn`, `.card-ph-body`, `.card-ph-title`, `.card-ph-sub`, `.card-ph-actions`, `.card-icon`, `.card-icon-cc`
+- **Oxford crest**: restored as external file `images/oxford-crest.jpg` — NEVER embed as base64, NEVER delete, NEVER change the `src` attribute
 
 ---
 
@@ -95,10 +124,10 @@ All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, sh
 - fetch_inbox.py — all phases confirmed working (calendar sort, IncludeRecurrences, max_tokens=4096 for summaries)
 - Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri). Recovery: run `create_inbox_tasks.bat` as Administrator.
 - Dashboard loads live briefing.json from GitHub on load, falls back to localStorage archive
-- Oxford navy sidebar — crest, branding, live clock, filter, CC ticker, inbox widget, absences, links
-- 3-column calendar panel (today | tomorrow | mini-month)
+- Oxford navy sidebar — crest (external file `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, inbox widget, absences, links
+- 3-column calendar panel (Today `7fr` | Tomorrow `7fr` | July+August mini-cals in one card `4fr`)
 - Rotating context strip (pale blue, Oxford navy text, dot nav)
-- 2×2 priority grid with tier filter
+- 2×2 priority grid with tier filter — flat `.card-ph` design
 - CC ticker reads live from CC tasks.json every 60s
 - All drag-and-drop, tick sync, archive, show done preserved
 - openmail:// click-through — confirmed working
@@ -155,3 +184,4 @@ All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, sh
 - `index.html` edits: always use binary `atob()`/`btoa()` — NEVER `TextEncoder`
 - Desktop bat: always download fresh via PowerShell — never rename an existing file
 - Every raw.githubusercontent.com fetch MUST include `?t=<timestamp>` cache-buster
+- **NEVER touch `images/oxford-crest.jpg` or the `<img class="sidebar-crest">` src attribute** — external file only, never base64
