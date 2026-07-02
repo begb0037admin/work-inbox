@@ -285,18 +285,23 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .user-link{font-size:15px;}
 .date-val{font-size:15px;}
 
-/* -- TASKS WIDGET -- */
-.tasks-widget-section{padding:14px 22px 6px;font-size:13px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:7px}
-.tasks-live-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;transition:opacity .2s}
-@keyframes tasksPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
-.tasks-live-dot.pulsing{animation:tasksPulse .6s ease-in-out}
-.tasks-widget-panel{padding:4px 22px 14px}
-.tasks-widget-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)}
-.tasks-widget-name{color:rgba(255,255,255,.7)}
-.tasks-widget-count{font-weight:700;color:rgba(255,255,255,.9)}
-.tasks-widget-link{display:block;margin-top:8px;font-size:12px;color:#60a5fa;text-decoration:none}
-.tasks-widget-link:hover{text-decoration:underline}
-.tasks-widget-unavailable{font-size:11px;color:rgba(255,255,255,.3);font-style:italic}
+/* -- COMMAND CENTRE FOCUS WIDGET -- */
+.cc-focus-block { margin: 12px 16px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: 12px 14px; }
+.cc-focus-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 8px; }
+.cc-focus-stats { display: flex; }
+.cc-stat { flex: 1; text-align: center; padding: 6px 2px; border-right: 1px solid rgba(255,255,255,0.1); }
+.cc-stat:last-child { border-right: none; }
+.cc-stat-num { font-size: 18px; font-weight: 700; color: #fff; line-height: 1; display: block; }
+.cc-stat-num.cc-red { color: #f87171; }
+.cc-stat-num.cc-gold { color: #fbbf24; }
+.cc-stat-num.cc-green { color: #4ade80; }
+.cc-stat-sub { font-size: 9px; color: rgba(255,255,255,0.45); display: block; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+.cc-focus-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0 8px; }
+.cc-age-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; }
+.cc-age-label { font-size: 11px; color: rgba(255,255,255,0.5); }
+.cc-age-val { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.75); }
+.cc-age-val.cc-red { color: #f87171; }
+.cc-age-val.cc-gold { color: #fbbf24; }
 /* ── 2×2 grid layout ── */
 .inbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
 .inbox-grid-cell {}
