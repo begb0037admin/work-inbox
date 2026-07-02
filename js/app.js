@@ -65,11 +65,11 @@ function toggleShowDone(){
   const btn=document.getElementById('btn-show-done');
   showingDoneItems=!showingDoneItems;
   if(showingDoneItems){
-    document.querySelectorAll('.card.done, .card-link.done, .pri-card.done').forEach(el=>el.classList.remove('card-hidden'));
+    document.querySelectorAll('.card.done,.card-link.done,.pri-card.done,.card-ph.done').forEach(el=>el.classList.remove('card-hidden'));
     document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='flex');
     btn.textContent='Hide done';
   } else {
-    document.querySelectorAll('.card.done, .card-link.done, .pri-card.done').forEach(el=>el.classList.add('card-hidden'));
+    document.querySelectorAll('.card.done,.card-link.done,.pri-card.done,.card-ph.done').forEach(el=>el.classList.add('card-hidden'));
     document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='none');
     btn.textContent='Show done';
   }
@@ -208,11 +208,16 @@ function toggleTick(id){
   const cb=document.getElementById('cb_'+id);
   const item=document.getElementById('item_'+id);
   const prow=document.getElementById('prow_'+id);
-  if(cb) cb.classList.toggle('checked',ticks[k]);
+  if(cb){
+    if(cb.classList.contains('card-done-btn')) cb.classList.toggle('done',ticks[k]);
+    else cb.classList.toggle('checked',ticks[k]);
+  }
   if(item){
     const wrapper=item.closest('.card-link');
     if(ticks[k]){
       item.classList.add('done');
+      const titleEl=item.querySelector('.card-ph-title');
+      if(titleEl) titleEl.classList.add('done');
       if(!showingDoneItems) item.classList.add('card-hidden');
       else item.classList.remove('card-hidden');
       if(wrapper){
@@ -222,6 +227,8 @@ function toggleTick(id){
       }
     } else {
       item.classList.remove('done','card-hidden');
+      const titleEl=item.querySelector('.card-ph-title');
+      if(titleEl) titleEl.classList.remove('done');
       if(wrapper) wrapper.classList.remove('done','card-hidden');
     }
   }
@@ -427,14 +434,6 @@ function priZoneDrop(e,sec){
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
   const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  // Canvas text measurement for smart one-line vs two-line decision
-  if(!renderPriorityCards._canvas){renderPriorityCards._canvas=document.createElement('canvas');renderPriorityCards._ctx=renderPriorityCards._canvas.getContext('2d');}
-  const _mctx=renderPriorityCards._ctx;
-  function _tw(t,f){_mctx.font=f;return _mctx.measureText(t).width;}
-  const _titleFont='600 15px Inter,sans-serif';
-  const _gridCellW=Math.max(280,(window.innerWidth-340-72-24)/2);
-  const _cardInnerW=_gridCellW-32;
-  const _fixedW=55;
   const _recentPfxs4=Array.from({length:4},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return'['+String(d.getDate()).padStart(2,'0')+' '+_mo[d.getMonth()]+' '+d.getFullYear()+']';});
   const _cutoff=new Date();_cutoff.setDate(_cutoff.getDate()-4);_cutoff.setHours(0,0,0,0);
   const _mo2={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
@@ -442,39 +441,30 @@ function renderPriorityCards(priorities,key,sec){
   return priorities.map((p,i)=>{
     const priKey=p._priKey||_priGetKey(p);
     const id='pri_'+sec+'_'+i, ticked=isTicked(id);
-    const _rawTitle=p.title||p.text||'(untitled)';
-    const _titleParts=_rawTitle.split(' -- ');
-    const titleText=_titleParts[0];
-    const titleSub=_titleParts.length>1?_titleParts.slice(1).join(' -- '):'';
+    const titleText=(p.title||p.text||'(untitled)').replace(' -- ',' — ');
     const aiBadge=(p.badge&&sec!=='pfyi')?badge(p.badge,p.badgeType||'gray'):'';
     const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
-    // Measure whether combined title fits on one line
-    const _badgeW=theBadge?82:0;
-    const _btnW=(p.entry_id||p.entryId)?118:0;
-    const _ccBtnW=p.id?96:0;
-    const _availW=_cardInnerW-_fixedW-_badgeW-_btnW-_ccBtnW;
-    const _combined=titleSub?titleText+' – '+titleSub:titleText;
-    const _oneLine=!titleSub||_tw(_combined,_titleFont)<=_availW;
-    const summaryHtml=p.ai_summary?`<div class="pri-ai-summary">${sanitizeSub(p.ai_summary)}</div>`:'';
-    const metaHtml=`<div class="pri-meta">
-      ${p.source?`<span class="pri-meta-item"><span class="pri-meta-label">Source</span>${p.source}</span>`:''}
-      ${p.dateAdded?`<span class="pri-meta-item"><span class="pri-meta-label">Added</span>${p.dateAdded}</span>`:''}
-      ${p.notes?`<div class="pri-meta-notes"><span class="pri-meta-label">Notes</span><div class="pri-notes-text">${sanitizeSub(p.notes)}</div></div>`:''}
-    </div>`;
-    return `<div class="pri-card${ticked?' done':''}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
-      <div class="pri-card-header" onclick="togglePriCard('${sec}_${i}')">
-        <div class="pri-drag-handle" onclick="event.stopPropagation()">⣿⣿</div>
-        <div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div>
-        <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
-        ${theBadge}
-        ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
-        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC →</button>`:''}
-        <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
+    // Sub: next action or last action, prefixed with source
+    let subText='';
+    if(p.actions&&p.actions.length){
+      const todo=p.actions.find(a=>a.startsWith('[TODO]')||a.startsWith('[AWAITING]'));
+      const latest=todo||p.actions[p.actions.length-1];
+      if(latest) subText=latest.replace(/^\[[^\]]+\]\s*/,'');
+    }
+    const subLine=(p.source&&subText)?p.source+' · '+subText:p.source||subText;
+    const emailBtn=(p.entry_id||p.entryId)?`<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`:'';
+    const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC&#8594;</span>`:'';
+    return `<div class="card-ph${ticked?' done':''}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
+      <span class="card-drag" onclick="event.stopPropagation()">&#10783;</span>
+      <button class="card-done-btn${ticked?' done':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()" aria-label="Mark done"></button>
+      <div class="card-ph-body">
+        <div class="card-ph-title${ticked?' done':''}">${titleText}${theBadge}</div>
+        ${subLine?`<div class="card-ph-sub">${sanitizeSub(subLine)}</div>`:''}
       </div>
-      <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${metaHtml}</div>
+      <div class="card-ph-actions">${emailBtn}${ccBtn}</div>
     </div>`;
   }).join('');
 }
@@ -499,21 +489,25 @@ function renderBriefing(data,key){
   }
   const priSecs=applyPriOverrides(data);
   document.getElementById('inboxCol').innerHTML=`<div class="inbox-grid" id="inboxGrid">
-    <div id="sec-today-wrap">
-      <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pt.length}</span></div>
-      <div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+    <div id="col-left">
+      <div id="sec-today-wrap">
+        <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pt.length}</span></div>
+        <div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+      </div>
+      <div id="sec-tomorrow-wrap" style="margin-top:18px">
+        <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – tomorrow</span><span class="sec-rule"></span><span class="sec-count">${priSecs.ptom.length}</span></div>
+        <div class="pri-drop-zone" data-sec="ptom" ondragover="priZoneDragOver(event,'ptom')" ondragleave="priZoneDragLeave(event,'ptom')" ondrop="priZoneDrop(event,'ptom')">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+      </div>
     </div>
-    <div id="sec-tomorrow-wrap">
-      <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – tomorrow</span><span class="sec-rule"></span><span class="sec-count">${priSecs.ptom.length}</span></div>
-      <div class="pri-drop-zone" data-sec="ptom" ondragover="priZoneDragOver(event,'ptom')" ondragleave="priZoneDragLeave(event,'ptom')" ondrop="priZoneDrop(event,'ptom')">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
-    </div>
-    <div id="sec-week-wrap">
-      <div class="sec-head"><span class="sec-dot dot-green"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pw.length}</span></div>
-      <div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
-    </div>
-    <div id="sec-parked-wrap">
-      <div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">FYI / Parked</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pfyi.length}</span></div>
-      <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
+    <div id="col-right">
+      <div id="sec-week-wrap">
+        <div class="sec-head"><span class="sec-dot dot-green"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pw.length}</span></div>
+        <div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+      </div>
+      <div id="sec-parked-wrap" style="margin-top:18px">
+        <div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">FYI / Parked</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pfyi.length}</span></div>
+        <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
+      </div>
     </div>
   </div>`;
 }
@@ -609,14 +603,21 @@ function applyFilter(val){
   if(!grid) return;
   const sel=document.getElementById('tierSelect');
   if(sel) sel.value=val;
+  const cl=document.getElementById('col-left'), cr=document.getElementById('col-right');
   if(val==='all'){
     Object.values(map).forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+    if(cl)cl.style.display=''; if(cr)cr.style.display='';
     grid.style.gridTemplateColumns='';
   } else {
     Object.entries(map).forEach(([tier,id])=>{
       const el=document.getElementById(id);
       if(el) el.style.display=(tier===val)?'':'none';
     });
+    if(val==='today'||val==='tomorrow'){
+      if(cl)cl.style.display=''; if(cr)cr.style.display='none';
+    } else {
+      if(cl)cl.style.display='none'; if(cr)cr.style.display='';
+    }
     grid.style.gridTemplateColumns='1fr';
   }
 }

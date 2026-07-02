@@ -383,3 +383,24 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .ctx-dot.active{background:var(--oxford)}
 /* ── Section count ── */
 .sec-count{font-size:12px;font-weight:700;color:var(--text-muted);margin-left:4px}
+/* ── card-ph — flat priority cards (v5 approved design) ── */
+.card-ph{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 14px 11px 10px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,33,71,.04);display:flex;align-items:flex-start;gap:9px;transition:opacity .2s}
+.card-ph.done{opacity:.38}
+.card-ph.card-hidden{display:none}
+.card-ph.done .card-ph-title{text-decoration:line-through;color:var(--text-muted);font-weight:500}
+.card-ph:hover{border-color:#b0b8c8}
+.card-drag{flex-shrink:0;width:14px;color:#c8d0dc;cursor:grab;font-size:15px;line-height:1;padding-top:2px;letter-spacing:-1px;user-select:none}
+.card-drag:hover{color:#94a3b8}
+.card-drag:active{cursor:grabbing}
+.card-done-btn{flex-shrink:0;width:18px;height:18px;border-radius:50%;border:2px solid #d1d9e6;background:transparent;cursor:pointer;margin-top:2px;transition:background .15s,border-color .15s;appearance:none;-webkit-appearance:none;outline:none;display:flex;align-items:center;justify-content:center;position:relative;padding:0}
+.card-done-btn:hover{border-color:#22c55e}
+.card-done-btn.done{background:#22c55e;border-color:#22c55e}
+.card-done-btn.done::after{content:'✓';color:#fff;font-size:9px;font-weight:800;line-height:1;display:block}
+.card-ph-body{flex:1;min-width:0}
+.card-ph-title{font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:4px;line-height:1.4}
+.card-ph-sub{font-size:11.5px;color:var(--text-muted);line-height:1.45}
+.card-ph-actions{display:flex;flex-shrink:0;gap:5px;align-items:center;padding-top:1px}
+.card-icon{width:26px;height:26px;border-radius:5px;border:1px solid #e5e9f2;background:#f8fafc;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;font-size:12px;transition:background .15s,color .15s,border-color .15s;flex-shrink:0;text-decoration:none}
+.card-icon:hover{background:#eff6ff;color:#3b82f6;border-color:#bfdbfe}
+.card-icon-cc{width:auto;padding:0 7px;font-size:10px;font-weight:700;height:26px;border-radius:5px;border:1px solid #e5e9f2;background:#f8fafc;display:flex;align-items:center;cursor:pointer;color:#94a3b8;transition:background .15s,color .15s,border-color .15s;flex-shrink:0}
+.card-icon-cc:hover{background:#eff6ff;color:#3b82f6;border-color:#bfdbfe}
