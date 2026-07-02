@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Inbox Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="shell">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <img class="sidebar-crest" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEBUSExEWFhUXFxoXFhgYGR8eFxkbHxoXHhYWHyEbHSkgHh8lGx0eITEjJSstLzEuHx8zODMsNygtLisBCgoKDg0OGxAQGy4lHyUrKzUrLS8tNSstLSstLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tLS0tLf/AABEIAOAA4AMBIgACEQEDEQH/xAAbAAEBAAMBAQEAAAAAAAAAAAAABgQFBwMCAf/EAEwQAAIBAwIEAgcDBwgIBQUAAAECAwAEEQUhBhIxQRNRBxQiMmFxgRUiMzNCUmFxgRWRoSMzQlJyscFDVXKClLLS8DZTY3SSosTRNVSTo+EWFyQlNP/EABkBAQEBAQEBAAAAAAAAAAAAAAACAwEEBf/EACgRAAICAgEDBAICAwAAAAAAAAABAhEhMRIDQVEyYXGBEyKx8JGh4f/aAAwDAQACEQMRAD8A5LSlK+oeAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSveys5JnEcUbSOeiopZvuHb41WQ+ji5Vee8nt7JP9tIC/wBFU/xqXJLZ1RbIylWn2XocW0mo3Nww6iCHkX75Af30a90AdLO+f4tKq/3WrnPwmVw8si6VZi+0A9bO+T4rMrf3mr9Ol6HL+b1C5tyenjw86j5mMD99Ofsxw8Mi6VZy+jm4dS9nPb3qj/UyASf8LH+NSl9ZSwuY5onjcfoupU/j1Hxrqmno44tGPSlKokUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFbzhzi28stoJj4Z96JxzRNnrlT0z5jBrR0rjSezqbWje8R8XXl7tPNlBjESDliGOnsjr9c1oqUokloNtilKV04KUpQClKUApSlAKUpQClKUB//9k=" alt="University of Oxford crest">
+      <div class="sidebar-brand-text">
+        <span class="sb-univ-of">University of</span>
+        <span class="sb-oxford">Oxford</span>
+        <span class="sb-app-name">Work Inbox</span>
+      </div>
+    </div>
+
+    <div class="user-block">
+      <a class="user-link" href="mailto:kevin.lelitte@admin.ox.ac.uk">kevin.lelitte@admin.ox.ac.uk</a>
+    </div>
+
+    <div class="date-block">
+      <div class="date-label">Today</div>
+      <div class="date-val" id="sidebarDate"></div>
+    </div>
+
+    <div class="sb-section">Calendar – today</div>
+    <div id="calTodaySidebar"></div>
+
+    <div class="sb-section" id="calTomorrowLabel">Calendar – tomorrow</div>
+    <div id="calTomorrowSidebar"></div>
+
+    <div class="sb-section">Absences</div>
+    <div class="abs-wrap" id="absencesSidebar"></div>
+
+    <div class="tasks-widget-section">Tasks<span class="tasks-live-dot" id="tasksLiveDot"></span></div>
+    <div class="tasks-widget-panel" id="tasksWidget">
+      <div class="tasks-widget-unavailable">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="pageTitle">Inbox briefing</div>
+        <div class="header-date" id="headerDate"></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="btn-show-done" onclick="toggleShowDone()">Show done</button>
+        <button class="btn" onclick="toggleArchive()">Archive</button>
+      </div>
+    </div>
+
+    <div id="contextBar"></div>
+    <div id="inboxCol"></div>
+    <div class="footer">All outgoing communication requires Kevin's review and sign-off before sending</div>
+  </div>
+</div>
+
+<!-- Import panel -->
+<div class="import-panel" id="importPanel">
+  <label>Paste JSON briefing and click Load</label>
+  <textarea id="importInput" placeholder='{"date":"Monday 9 June 2026","urgent":[...],...}'></textarea>
+  <div class="import-actions">
+    <button class="btn btn-primary" onclick="loadFromImport()">Load briefing</button>
+    <button class="btn" onclick="toggleImport()">Cancel</button>
+  </div>
+  <div class="import-error" id="importError">Invalid JSON – please check and try again.</div>
+</div>
+
+<!-- Archive panel -->
+<div class="archive-panel" id="archivePanel">
+  <div class="archive-panel-title">Archive</div>
+  <div id="archiveList"></div>
+  <div class="archive-actions" id="archiveActions" style="display:none">
+    <button class="btn btn-primary" onclick="exportArchiveMd()">Export .md</button>
+    <div class="archive-purge-row">
+      <span>Purge older than</span>
+      <input type="number" id="purgeDays" value="30" min="1">
+      <span>days</span>
+      <button class="btn" style="color:var(--red);border-color:var(--red-border)" onclick="purgeOldTicks()">Purge</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script></body>
+</html>

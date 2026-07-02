@@ -723,51 +723,6 @@ if all_priorities:
         print(f"WARNING: Phase 3.7 AI summaries failed - {e}")
 
 
-# Pre-build cal items so Phase 3.8 can annotate them before briefing dict is assembled
-cal_today_items    = build_cal_items(cal_today)
-cal_tomorrow_items = build_cal_items(cal_tomorrow)
-
-# -- Phase 3.8 -- AI prep summaries for today/tomorrow calendar items --
-_cal_for_summary = [
-    {"idx": i, "day": "today",    "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")}
-    for i, c in enumerate(cal_today_items) if not c.get("time", "").lower() == "all day"
-] + [
-    {"idx": i, "day": "tomorrow", "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")}
-    for i, c in enumerate(cal_tomorrow_items) if not c.get("time", "").lower() == "all day"
-]
-if _cal_for_summary:
-    try:
-        CAL_SUM_SYSTEM = (
-            "You are Kevin's briefing assistant at Oxford University HR Systems.\n"
-            "For each meeting, write ONE short sentence of prep context Kevin needs before walking in.\n"
-            "Focus on: what decision or output is expected, who the key person is, any live issue to watch.\n"
-            "Plain ASCII punctuation only. No filler like 'This meeting is about...'. Be direct and specific.\n"
-            "Return ONLY valid JSON: {\"day_idx\": \"one sentence\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
-            "Example: {\"today_0\": \"Bring the scoring sheet -- Helen needs a steer on evaluation weightings today.\"}"
-        )
-        _cal_user = (
-            f"Today is {today_str}.\n\n"
-            f"MEETINGS:\n{json.dumps(_cal_for_summary, indent=1, ensure_ascii=True)}"
-        )
-        _cs_resp = client.messages.create(
-            model      = "claude-haiku-4-5",
-            max_tokens = 400,
-            system     = CAL_SUM_SYSTEM,
-            messages   = [{"role": "user", "content": _cal_user}]
-        )
-        _cs_raw = _cs_resp.content[0].text.strip()
-        if _cs_raw.startswith("```"): _cs_raw = "\n".join(_cs_raw.split("\n")[1:])
-        if _cs_raw.endswith("```"):   _cs_raw = "\n".join(_cs_raw.split("\n")[:-1])
-        _cs_map = json.loads(_cs_raw)
-        for item in _cal_for_summary:
-            key = f"{item['day']}_{item['idx']}"
-            if key in _cs_map:
-                target = cal_today_items if item["day"] == "today" else cal_tomorrow_items
-                target[item["idx"]]["summary"] = _cs_map[key]
-        print(f"Phase 3.8 done - {len(_cs_map)} calendar summaries generated")
-    except Exception as e:
-        print(f"WARNING: Phase 3.8 calendar summaries failed - {e}")
-
 # Build calFull -- Mon through Fri of the current working week
 def _week_workdays(ref):
     mon = ref - timedelta(days=ref.weekday())
@@ -791,8 +746,8 @@ briefing = {
     "needs":        needs,
     "fyi":          fyi,
     "low":          low,
-    "calToday":     cal_today_items,
-    "calTomorrow":  cal_tomorrow_items,
+    "calToday":     build_cal_items(cal_today),
+    "calTomorrow":  build_cal_items(cal_tomorrow),
     "calFull":      calFull,
     "absences":     absences,
     "prioritiesToday":    priorities_today,

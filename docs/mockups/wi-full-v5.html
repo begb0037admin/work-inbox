@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Inbox — Full page mockup v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --oxford: #002147;
+  --main-bg: #f5f7fb;
+  --card-bg: #fff;
+  --text-dark: #1a2740;
+  --text-muted: #7a8a9e;
+  --text-very-muted: #b0b8c8;
+  --border: rgba(0,33,71,0.07);
+  --sidebar-width: 310px;
+  --font: 'Inter', sans-serif;
+  --radius: 6px;
+  --radius-lg: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font); background: var(--main-bg); color: var(--text-dark); font-size: 15px; }
+.shell { display: flex; min-height: 100vh; }
+
+/* SIDEBAR — unified house style, matches Command Centre exactly */
+.sidebar { width: var(--sidebar-width); flex-shrink: 0; background: var(--oxford); color: #fff; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; }
+.sidebar-logo { padding: 18px 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 14px; }
+.crest-circle { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.sb-brand { display: flex; flex-direction: column; }
+.sb-univ { font-size: 9px; font-weight: 400; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+.sb-oxford { font-size: 22px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: #fff; line-height: 1.1; }
+.sb-app { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; margin-top: 3px; }
+.user-block { padding: 11px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.user-link { font-size: 12px; color: #60a5fa; text-decoration: none; }
+.date-block { padding: 10px 20px 11px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.wi-clock { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+.date-val { font-size: 12px; color: rgba(255,255,255,0.62); margin-top: 2px; }
+.filter-block { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; gap: 8px; align-items: center; }
+.filter-select { flex: 1; font-family: var(--font); font-size: 13px; font-weight: 500; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: var(--radius); padding: 7px 28px 7px 10px; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+.filter-select option { background: #002147; color: #fff; }
+.filter-select:focus { outline: none; border-color: rgba(255,255,255,0.35); }
+.inbox-ticker { margin: 12px 16px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: 12px 14px; }
+.ticker-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.ticker-label::before { content: '✔'; font-size: 10px; }
+.ticker-stats { display: flex; gap: 0; }
+.ticker-stat { flex: 1; text-align: center; padding: 6px 2px; border-right: 1px solid rgba(255,255,255,0.1); cursor: pointer; border-radius: 6px; transition: background .15s; }
+.ticker-stat:last-child { border-right: none; }
+.ticker-stat:hover { background: rgba(255,255,255,0.06); }
+.ticker-stat.selected { background: rgba(255,255,255,0.14); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25); }
+.ticker-num { font-size: 18px; font-weight: 700; color: #fff; line-height: 1; display: block; }
+.ticker-num.red { color: #f87171; } .ticker-num.gold { color: #fbbf24; } .ticker-num.green { color: #4ade80; }
+.ticker-sub { font-size: 9px; color: rgba(255,255,255,0.45); display: block; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+.ticker-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0 8px; }
+.ticker-age-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; }
+.ticker-age-label { font-size: 11px; color: rgba(255,255,255,0.5); }
+.ticker-age-val { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.75); }
+.ticker-age-val.red { color: #f87171; } .ticker-age-val.gold { color: #fbbf24; }
+.inbox-widget { margin: 0 16px 4px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-lg); padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background .15s; }
+.inbox-widget:hover { background: rgba(255,255,255,0.11); }
+.inbox-widget-left { display: flex; flex-direction: column; gap: 2px; }
+.inbox-widget-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.09em; }
+.inbox-widget-val { font-size: 13px; font-weight: 600; color: #fff; }
+.inbox-widget-badge { font-size: 11px; font-weight: 700; background: #3b82f6; color: #fff; border-radius: 20px; padding: 3px 10px; }
+.sb-section { padding: 12px 20px 5px; font-size: 10.5px; font-weight: 700; color: rgba(255,255,255,0.32); text-transform: uppercase; letter-spacing: 0.09em; display: flex; align-items: center; gap: 7px; }
+.sb-links { padding: 4px 20px 16px; }
+.sb-link { display: block; font-size: 13px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.07); transition: color .15s; }
+.sb-link:hover { color: #60a5fa; }
+.sb-link:last-child { border-bottom: none; }
+.data-flag { position: fixed; top: 12px; right: 12px; background: #1a2740; color: #fbbf24; font-size: 11px; padding: 6px 10px; border-radius: 6px; font-family: monospace; z-index: 999; }
+
+/* MAIN */
+.main { margin-left: var(--sidebar-width); flex: 1; padding: 24px 32px 60px; min-width: 0; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--oxford); }
+.header-date { font-size: 13px; color: var(--text-muted); }
+.header-actions { display: flex; gap: 8px; }
+.btn { font-family: var(--font); font-size: 12px; padding: 7px 14px; border-radius: var(--radius); border: 1px solid #d1d9e6; background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-weight: 500; }
+
+.main-cal-panel { display: grid; grid-template-columns: 1fr 1fr 195px; gap: 14px; margin-bottom: 20px; }
+.mini-cal-divider { border: none; border-top: 1px solid #e5e9f2; margin: 14px 0 10px; }
+.main-cal-block { background: #fff; border: 1px solid #e5e9f2; border-radius: var(--radius-lg); padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,33,71,.05); overflow: hidden; }
+.main-cal-block-header { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .09em; margin-bottom: 12px; padding-bottom: 9px; border-bottom: 1px solid #e5e9f2; }
+.main-cal-item { display: flex; gap: 11px; padding: 7px 0; border-bottom: 1px solid #f0f3f8; align-items: flex-start; }
+.main-cal-item:last-child { border-bottom: none; }
+.main-cal-item.past { opacity: .32; }
+.main-cal-item.next { background: #eff6ff; margin: 0 -18px; padding: 7px 18px; border-left: 3px solid #3b82f6; border-bottom-color: #dbeafe; }
+.main-cal-time { font-size: 10.5px; font-weight: 600; color: var(--text-muted); min-width: 32px; padding-top: 2px; flex-shrink: 0; }
+.main-cal-title { font-size: 12.5px; font-weight: 600; color: var(--text-dark); line-height: 1.3; }
+.main-cal-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; margin-top: 2px; }
+.mini-cal-day-name { font-size: 8.5px; font-weight: 700; color: var(--text-very-muted); text-align: center; padding: 2px 0 5px; text-transform: uppercase; }
+.mini-cal-day { font-size: 10.5px; text-align: center; padding: 4px 1px; color: var(--text-muted); line-height: 1; }
+.mini-cal-day.today { background: var(--oxford); color: #fff; font-weight: 700; border-radius: 4px; }
+.mini-cal-day.has-meeting { color: var(--text-dark); font-weight: 600; }
+.mini-cal-day.other-month { color: #e5e9f2; }
+
+.inbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+.sec-head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+.sec-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dot-r { background: #ef4444; } .dot-g { background: #eab308; } .dot-grn { background: #22c55e; } .dot-sl { background: #888780; }
+.sec-lbl { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+.sec-rule { flex: 1; height: 1px; background: #d1d9e6; }
+.sec-count { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-left: 4px; }
+.card-ph { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 11px 14px 11px 10px; margin-bottom: 7px; box-shadow: 0 1px 3px rgba(0,33,71,.04); display: flex; align-items: flex-start; gap: 9px; }
+.card-drag { flex-shrink: 0; width: 14px; color: #c8d0dc; cursor: grab; font-size: 15px; line-height: 1; padding-top: 2px; letter-spacing: -1px; user-select: none; }
+.card-drag:hover { color: #94a3b8; }
+.card-drag:active { cursor: grabbing; }
+.card-done { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d1d9e6; background: transparent; cursor: pointer; margin-top: 2px; transition: background .15s, border-color .15s; appearance: none; -webkit-appearance: none; outline: none; display: flex; align-items: center; justify-content: center; position: relative; padding: 0; }
+.card-done:hover { border-color: #22c55e; }
+.card-done.done { background: #22c55e; border-color: #22c55e; }
+.card-done.done::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 800; line-height: 1; }
+.card-body { flex: 1; min-width: 0; }
+.card-title { font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px; transition: color .15s; }
+.card-title.done { text-decoration: line-through; color: var(--text-muted); font-weight: 500; }
+.card-sub { font-size: 11.5px; color: var(--text-muted); }
+.card-actions { display: flex; flex-shrink: 0; gap: 6px; align-items: center; padding-top: 1px; }
+.card-icon { width: 26px; height: 26px; border-radius: 5px; border: 1px solid #e5e9f2; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #94a3b8; font-size: 12px; transition: background .15s, color .15s, border-color .15s; flex-shrink: 0; }
+.card-icon:hover { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+.badge-red { background: #fcebeb; color: #a32d2d; }
+.badge-gold { background: #fefce8; color: #854d0e; }
+
+.abs-wrap { padding: 6px 22px 12px; }
+.abs-list { list-style: none; padding: 0; margin: 0; }
+.abs-list li { font-size: 12px; color: #eab308; padding: 3px 0; line-height: 1.4; padding-left: 14px; text-indent: -14px; }
+.abs-list li::before { content: "\2022"; color: rgba(255,255,255,0.4); margin-right: 7px; }
+.abs-none { font-size: 11px; color: rgba(255,255,255,0.3); font-style: italic; padding: 0 22px 4px; display: block; }
+
+.save-toast { position: fixed; bottom: 24px; right: 28px; background: #16a34a; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 18px 10px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(22,163,74,.3); display: flex; align-items: center; gap: 8px; opacity: 0; transform: translateY(6px); transition: opacity .22s, transform .22s; pointer-events: none; z-index: 9999; }
+.save-toast.show { opacity: 1; transform: translateY(0); }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR — Daily Focus shows COMMAND CENTRE data (placeholder, wiring deferred) -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="crest-circle">🎓</div>
+      <div class="sb-brand"><span class="sb-univ">University of</span><span class="sb-oxford">Oxford</span><span class="sb-app">Work Inbox</span></div>
+    </div>
+    <div class="user-block"><a class="user-link" href="#">kevin.lelitte@admin.ox.ac.uk</a></div>
+    <div class="date-block"><div class="wi-clock" id="clock">14:56:51</div><div class="date-val">Wednesday, 1 July 2026</div></div>
+
+    <div class="filter-block">
+      <select class="filter-select" id="tierSelect" onchange="applyFilter(this.value)">
+        <option value="all">All tiers</option>
+        <option value="today">Today</option>
+        <option value="tomorrow">Tomorrow</option>
+        <option value="week">This Week</option>
+        <option value="parked">Parked</option>
+      </select>
+    </div>
+
+    <div class="inbox-ticker">
+      <div class="ticker-label">Daily Focus</div>
+      <div class="ticker-stats">
+        <div class="ticker-stat" data-tier="today" onclick="clickStat('today')"><span class="ticker-num red">5</span><span class="ticker-sub">Today</span></div>
+        <div class="ticker-stat" data-tier="tomorrow" onclick="clickStat('tomorrow')"><span class="ticker-num gold">3</span><span class="ticker-sub">Tmrw</span></div>
+        <div class="ticker-stat" data-tier="week" onclick="clickStat('week')"><span class="ticker-num green">8</span><span class="ticker-sub">Week</span></div>
+        <div class="ticker-stat" data-tier="parked" onclick="clickStat('parked')"><span class="ticker-num">4</span><span class="ticker-sub">Parked</span></div>
+      </div>
+      <div class="ticker-divider"></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">Stalled in Today</span><span class="ticker-age-val red">5 tasks</span></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">Oldest</span><span class="ticker-age-val gold">7 days</span></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">Avg age</span><span class="ticker-age-val gold">6 days</span></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">2+ weeks</span><span class="ticker-age-val">0 tasks</span></div>
+    </div>
+
+    <div class="inbox-widget">
+      <div class="inbox-widget-left"><span class="inbox-widget-label">From your inbox</span><span class="inbox-widget-val">3 new suggestions</span></div>
+      <span class="inbox-widget-badge">3</span>
+    </div>
+
+    <div class="sb-section">Absences</div>
+    <div class="abs-wrap">
+      <ul class="abs-list">
+        <li>James Salas Guillen - returns Thursday 5 June</li>
+        <li>Sarah Rowles - returns Friday 6 June</li>
+      </ul>
+    </div>
+
+    <div class="sb-section">Links</div>
+    <div class="sb-links">
+      <a href="#" class="sb-link">Command Centre</a>
+      <a href="#" class="sb-link">HRIS Dashboard</a>
+      <a href="#" class="sb-link">HRIS Launcher</a>
+      <a href="#" class="sb-link">Access Group Support</a>
+      <a href="#" class="sb-link">FA Knowledge Base</a>
+      <a href="#" class="sb-link">OSM IT Services</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="page-header">
+      <div><div class="page-title">Inbox briefing</div><div class="header-date">Wednesday, 1 July 2026 &mdash; Last refreshed: 14:00</div></div>
+    </div>
+
+    <div class="main-cal-panel">
+      <div class="main-cal-block">
+        <div class="main-cal-block-header">Today &mdash; Wednesday 1 July</div>
+        <div class="main-cal-item past"><span class="main-cal-time">09:30</span><div><div class="main-cal-title">FA Team Daily Catchup</div><div class="main-cal-sub">Kevin Lelitte</div></div></div>
+        <div class="main-cal-item past"><span class="main-cal-time">10:00</span><div><div class="main-cal-title">Azure Integration Platform Sprint Review</div><div class="main-cal-sub">Erika Braverman</div></div></div>
+        <div class="main-cal-item past"><span class="main-cal-time">13:00</span><div><div class="main-cal-title">Busy</div><div class="main-cal-sub">Kevin Lelitte</div></div></div>
+        <div class="main-cal-item next"><span class="main-cal-time">14:00</span><div><div class="main-cal-title">WFM Rostering — Internal Review Meeting</div><div class="main-cal-sub">Kevin Lelitte</div></div></div>
+        <div class="main-cal-item"><span class="main-cal-time">15:00</span><div><div class="main-cal-title">Strategic H&amp;S Modular System evaluation</div><div class="main-cal-sub">Helen Harbour</div></div></div>
+        <div class="main-cal-item"><span class="main-cal-time">15:00</span><div><div class="main-cal-title">DTP1092 College staff in PXD</div><div class="main-cal-sub">Crispin Muncaster</div></div></div>
+      </div>
+      <div class="main-cal-block">
+        <div class="main-cal-block-header">Tomorrow &mdash; Thursday 2 July</div>
+        <div class="main-cal-item"><span class="main-cal-time">09:30</span><div><div class="main-cal-title">FA Team Daily Catchup</div><div class="main-cal-sub">Kevin Lelitte</div></div></div>
+        <div class="main-cal-item"><span class="main-cal-time">10:00</span><div><div class="main-cal-title">Considerations around the implementation of EVO</div><div class="main-cal-sub">Simon Burford</div></div></div>
+        <div class="main-cal-item"><span class="main-cal-time">11:00</span><div><div class="main-cal-title">Staff EES Information for HESA — Research Data Items (REF)</div><div class="main-cal-sub">Nathan Kirwan</div></div></div>
+        <div class="main-cal-item"><span class="main-cal-time">12:30</span><div><div class="main-cal-title">Emergency planning</div><div class="main-cal-sub">Simon Burford</div></div></div>
+        <div class="main-cal-item"><span class="main-cal-time">13:00</span><div><div class="main-cal-title">Busy</div><div class="main-cal-sub">Kevin Lelitte</div></div></div>
+        <div class="main-cal-item"><span class="main-cal-time">14:00</span><div><div class="main-cal-title">HR Systems team meeting</div><div class="main-cal-sub">Michelle Williams</div></div></div>
+      </div>
+      <div class="main-cal-block">
+        <div class="main-cal-block-header">July 2026</div>
+        <div class="mini-cal-grid">
+          <div class="mini-cal-day-name">M</div><div class="mini-cal-day-name">T</div><div class="mini-cal-day-name">W</div><div class="mini-cal-day-name">T</div><div class="mini-cal-day-name">F</div><div class="mini-cal-day-name">S</div><div class="mini-cal-day-name">S</div>
+          <div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div>
+          <div class="mini-cal-day today">1</div><div class="mini-cal-day has-meeting">2</div>
+          <div class="mini-cal-day">3</div><div class="mini-cal-day">4</div><div class="mini-cal-day">5</div>
+          <div class="mini-cal-day">6</div><div class="mini-cal-day">7</div><div class="mini-cal-day">8</div><div class="mini-cal-day">9</div><div class="mini-cal-day">10</div><div class="mini-cal-day">11</div><div class="mini-cal-day">12</div>
+          <div class="mini-cal-day">13</div><div class="mini-cal-day">14</div><div class="mini-cal-day">15</div><div class="mini-cal-day">16</div><div class="mini-cal-day">17</div><div class="mini-cal-day">18</div><div class="mini-cal-day">19</div>
+          <div class="mini-cal-day">20</div><div class="mini-cal-day">21</div><div class="mini-cal-day">22</div><div class="mini-cal-day">23</div><div class="mini-cal-day">24</div><div class="mini-cal-day">25</div><div class="mini-cal-day">26</div>
+          <div class="mini-cal-day">27</div><div class="mini-cal-day">28</div><div class="mini-cal-day">29</div><div class="mini-cal-day">30</div><div class="mini-cal-day">31</div>
+          <div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div>
+        </div>
+        <hr class="mini-cal-divider">
+        <div class="main-cal-block-header">August 2026</div>
+        <div class="mini-cal-grid">
+          <div class="mini-cal-day-name">M</div><div class="mini-cal-day-name">T</div><div class="mini-cal-day-name">W</div><div class="mini-cal-day-name">T</div><div class="mini-cal-day-name">F</div><div class="mini-cal-day-name">S</div><div class="mini-cal-day-name">S</div>
+          <div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div>
+          <div class="mini-cal-day">1</div><div class="mini-cal-day">2</div>
+          <div class="mini-cal-day">3</div><div class="mini-cal-day">4</div><div class="mini-cal-day">5</div><div class="mini-cal-day">6</div><div class="mini-cal-day">7</div><div class="mini-cal-day">8</div><div class="mini-cal-day">9</div>
+          <div class="mini-cal-day">10</div><div class="mini-cal-day">11</div><div class="mini-cal-day">12</div><div class="mini-cal-day">13</div><div class="mini-cal-day">14</div><div class="mini-cal-day">15</div><div class="mini-cal-day">16</div>
+          <div class="mini-cal-day">17</div><div class="mini-cal-day">18</div><div class="mini-cal-day">19</div><div class="mini-cal-day">20</div><div class="mini-cal-day">21</div><div class="mini-cal-day">22</div><div class="mini-cal-day">23</div>
+          <div class="mini-cal-day">24</div><div class="mini-cal-day">25</div><div class="mini-cal-day">26</div><div class="mini-cal-day">27</div><div class="mini-cal-day">28</div><div class="mini-cal-day">29</div><div class="mini-cal-day">30</div>
+          <div class="mini-cal-day">31</div><div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div><div class="mini-cal-day other-month"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:12px;">
+      <button class="btn" onclick="toggleShowDone(this)">Show done (0)</button>
+      <button class="btn">Archive</button>
+    </div>
+
+    <div class="inbox-grid" id="inboxGrid">
+      <div id="col-left">
+        <div class="sec-head" id="sec-today"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span><span class="sec-count">3</span></div>
+        <div id="cards-today">
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">DSE go-live sign-off — get confirmation from Simon <span class="badge badge-red">Urgent</span></div><div class="card-sub">H&S Roadmap 01/06 · Awaiting written confirmation</div></div>
+            <div class="card-actions"><span class="card-icon" title="Open email">✉</span><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">FlexPoints allocation — Chemistry and Holiday Records <span class="badge badge-red">Urgent</span></div><div class="card-sub">Inbox 2026-06-01 · Awaiting quote from Mike West at AG</div></div>
+            <div class="card-actions"><span class="card-icon" title="Open email">✉</span><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">P1 incident — OSM data feed failure</div><div class="card-sub">Incident Log · Escalate if not resolved by COB</div></div>
+            <div class="card-actions"><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+        </div>
+        <div class="sec-head" id="sec-tomorrow" style="margin-top:18px"><span class="sec-dot dot-g"></span><span class="sec-lbl">Priority actions – tomorrow</span><span class="sec-rule"></span><span class="sec-count">1</span></div>
+        <div id="cards-tomorrow">
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">EVO implementation brief — prep for 10:00 meeting <span class="badge badge-gold">Needs action</span></div><div class="card-sub">Simon Burford meeting · Review proposal doc before call</div></div>
+            <div class="card-actions"><span class="card-icon" title="Open email">✉</span><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="col-right">
+        <div class="sec-head" id="sec-week"><span class="sec-dot dot-grn"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span><span class="sec-count">2</span></div>
+        <div id="cards-week">
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">SharePoint documentation — written response and alignment <span class="badge badge-gold">Needs action</span></div><div class="card-sub">SK 1-1 08/06 · Schedule team alignment meeting</div></div>
+            <div class="card-actions"><span class="card-icon" title="Open email">✉</span><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">HWP archived users — one-off DSC upload cover</div><div class="card-sub">James handover · Two open HWP tickets with Gail Miller</div></div>
+            <div class="card-actions"><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+        </div>
+        <div class="sec-head" id="sec-parked" style="margin-top:18px"><span class="sec-dot dot-sl"></span><span class="sec-lbl">FYI / Parked</span><span class="sec-rule"></span><span class="sec-count">2</span></div>
+        <div id="cards-parked">
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">Vacancy alert email retest — case 68388326</div><div class="card-sub">Conor to pick up on return from leave</div></div>
+            <div class="card-actions"><span class="card-icon" title="Open email">✉</span><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+          <div class="card-ph"><span class="card-drag">⠿</span><button class="card-done" onclick="toggleDone(this)"></button>
+            <div class="card-body"><div class="card-title">Iris enhancements on hold</div><div class="card-sub">Pending H&S funding approval · New AE contact: Michael Hanson</div></div>
+            <div class="card-actions"><span class="card-icon" title="Edit">✎</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="data-flag">DATA SOURCE: sidebar Daily Focus = command-centre (placeholder) · main briefing = work-inbox (own)</div>
+
+<div class="save-toast" id="toast"><span class="toast-dot"></span><span id="toast-msg">Saved</span></div>
+
+<script>
+function tick(){ const n=new Date(); document.getElementById('clock').textContent=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+setInterval(tick,1000); tick();
+
+let toastTimer;
+function showToast(msg){ const t=document.getElementById('toast'); document.getElementById('toast-msg').textContent=msg||'Saved'; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200); }
+
+let doneCount=0; let showingDone=false;
+function toggleDone(btn){
+  btn.classList.toggle('done');
+  const title=btn.nextElementSibling.querySelector('.card-title');
+  const isDone=btn.classList.contains('done');
+  title.classList.toggle('done',isDone);
+  doneCount=document.querySelectorAll('.card-done.done').length;
+  const showBtn=document.querySelector('.btn');
+  showBtn.textContent=(showingDone?'Hide done':'Show done')+' ('+doneCount+')';
+  showToast(isDone?'✓ Saved — marked done':'↩ Saved — unmarked');
+}
+function toggleShowDone(btn){
+  showingDone=!showingDone;
+  btn.textContent=(showingDone?'Hide done':'Show done')+' ('+doneCount+')';
+  document.querySelectorAll('.card-ph').forEach(card=>{
+    const circle=card.querySelector('.card-done');
+    if(circle&&circle.classList.contains('done')) card.style.display=showingDone?'':'none';
+  });
+}
+
+/* Tier filter — dropdown/ticker drive the main priority-card columns (same logic as wimockup_v.4.html's applyFilter) */
+function applyFilter(val){
+  document.getElementById('tierSelect').value=val;
+  const grid=document.getElementById('inboxGrid');
+  const left=document.getElementById('col-left');
+  const right=document.getElementById('col-right');
+  const leftSecs=['today','tomorrow'];
+  const allSecs=['today','tomorrow','week','parked'];
+  allSecs.forEach(s=>{
+    const hide=val!=='all'&&val!==s;
+    const head=document.getElementById('sec-'+s);
+    const cards=document.getElementById('cards-'+s);
+    if(head) head.style.display=hide?'none':'';
+    if(cards) cards.style.display=hide?'none':'';
+  });
+  if(val==='all'){
+    grid.style.gridTemplateColumns='1fr 1fr';
+    left.style.display=''; right.style.display='';
+    document.getElementById('sec-tomorrow').style.marginTop='18px';
+    document.getElementById('sec-parked').style.marginTop='18px';
+  } else {
+    grid.style.gridTemplateColumns='1fr';
+    if(leftSecs.includes(val)){
+      left.style.display=''; right.style.display='none';
+      document.getElementById('sec-tomorrow').style.marginTop=val==='tomorrow'?'0':'18px';
+    } else {
+      right.style.display=''; left.style.display='none';
+      document.getElementById('sec-parked').style.marginTop=val==='parked'?'0':'18px';
+    }
+  }
+  clearTickerSelection();
+  if(val!=='all') document.querySelector('.ticker-stat[data-tier="'+val+'"]').classList.add('selected');
+}
+function clearTickerSelection(){ document.querySelectorAll('.ticker-stat.selected').forEach(el=>el.classList.remove('selected')); }
+function clickStat(tier){
+  const el=document.querySelector('.ticker-stat[data-tier="'+tier+'"]');
+  const already=el.classList.contains('selected');
+  applyFilter(already?'all':tier);
+}
+</script>
+</body>
+</html>
