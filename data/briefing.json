@@ -1,7 +1,7 @@
 {
-  "date": "Wednesday 1 July 2026",
-  "subtitle": "Birthday greeting, compliance review, and award deadline convergence",
-  "context": "Emma is on annual leave and Julie Hickman needs your Kudoboard signature by 2pm Thursday 2 July for her birthday celebration. Christopher Sanders sent the weightings spreadsheet at 2:53pm today with legal compliance requirements that need review. Nathan Kirwan's HR Systems Team Meeting reminder arrived this morning and the team report from OSM Administration shows open tasks across HRIS Analysis and HRIS Sys Admin teams requiring attention. The Awards for Excellence Scheme deadline is Thursday 3 July 2026 - you have already nominated Michael O'Sullivan and it needs final sign-off from Simon Burford and Marie Cooksey before submission. Athena Artuso sent an unread leave notification at 1:06pm today. Open Christopher Sanders' weightings email first as it contains time-sensitive legal compliance items and blocks downstream project work.",
+  "date": "Thursday 2 July 2026",
+  "subtitle": "Absences, award deadline tomorrow, unread vendor quote",
+  "context": "Alan Quirke from The Access Group sent an unread message this morning about PeopleXD Insight Reporting quote request for Holiday Records Reports with attachments awaiting your response. Athena Artuso is on annual leave (two notifications received 1-2 July), and Emma is also on annual leave during her birthday - Julie Hickman needs Kudoboard signatures by 2pm tomorrow (3 July). Nathan Kirwan's unread draft UDF for recording REF outcomes 2025/26 is blocking progress on HESA staff population validation work. Christopher Sanders' unread Weightings spreadsheet email from 1 July contains legal compliance requirements that have been pending over 48 hours. The Awards for Excellence Scheme deadline is tomorrow, 3 July 2026 - Jonathan Roger's nomination message requires your immediate attention as Michael O'Sullivan's nomination needs final review before submission. Open Alan Quirke's PeopleXD email first as it's the newest unread item requiring action on the three reports allocation.",
   "urgent": [
     {
       "title": "Reference Request for Nikolas Sharkey",
@@ -45,6 +45,36 @@
     }
   ],
   "needs": [
+    {
+      "title": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "sub": "From <strong>Alan Quirke</strong>. Hi Kevin and Marie,\r\n\r\n \r\n\r\nI understand we have now been allocated the hours to complete this work on the 3 reports. \r\n",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "from": "Alan Quirke",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EA90000",
+      "received": "2 Jul"
+    },
+    {
+      "title": "Athena A/L",
+      "sub": "From <strong>Athena Artuso</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Athena A/L",
+      "from": "Athena Artuso",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4FA0000",
+      "received": "1 Jul"
+    },
+    {
+      "title": "Draft UDF for recording REF outcomes 2025/26",
+      "sub": "From <strong>Nathan Kirwan</strong>. HI Kevin,\r\n\r\n \r\n\r\n \r\n\r\nI’ve done some checks on the HESA staff population and haven’t managed to spot any one person hav",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Draft UDF for recording REF outcomes 2025/26",
+      "from": "Nathan Kirwan",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F80000",
+      "received": "1 Jul"
+    },
     {
       "title": "RE: Weightings spreadsheet",
       "sub": "From <strong>Christopher Sanders</strong>. Hi all,\r\n\r\n \r\n\r\nFollowing on from yesterday’s session, see below requirements we picked out as relating to legal complia",
@@ -117,6 +147,16 @@
     }
   ],
   "fyi": [
+    {
+      "title": "Copy of Test UDF for REF Outcomes",
+      "sub": "From <strong>Nathan Kirwan</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Copy of Test UDF for REF Outcomes",
+      "from": "Nathan Kirwan",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F90000",
+      "received": "1 Jul"
+    },
     {
       "title": "RE: Awards for Excellence — Michael O'Sullivan nomination — please review",
       "sub": "From <strong>Simon Burford</strong>.",
@@ -476,26 +516,6 @@
       "from": "Laura Porter",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078848EE120000",
       "received": "25 Jun"
-    },
-    {
-      "title": "RE: Owner Required - Task# 50945166 for ServiceReq# 30404938",
-      "sub": "From <strong>Michelle Williams</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Owner Required - Task# 50945166 for ServiceReq# 30404938",
-      "from": "Michelle Williams",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C7110000",
-      "received": "24 Jun"
-    },
-    {
-      "title": "USS valuation 2026: what you need to know",
-      "sub": "From <strong>Clive Poole - Head of Pensions and Payroll</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "USS valuation 2026: what you need to know",
-      "from": "Clive Poole - Head of Pensions and Payroll",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078847C70E0000",
-      "received": "24 Jun"
     }
   ],
   "low": [
@@ -517,29 +537,14 @@
       "sub": "Kevin Lelitte"
     },
     {
-      "time": "10:00",
-      "title": "Considerations around the implementation of EVO",
-      "sub": "Simon Burford"
-    },
-    {
-      "time": "11:00",
-      "title": "Staff EES Information for HESA - Research Data Items (REF)",
-      "sub": "Nathan Kirwan"
-    },
-    {
-      "time": "12:30",
-      "title": "Emergency planning",
-      "sub": "Simon Burford"
+      "time": "12:00",
+      "title": "Michael O'Sullivan - 1-1 Session",
+      "sub": "Kevin Lelitte"
     },
     {
       "time": "13:00",
       "title": "Busy",
       "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "14:00",
-      "title": "HR Systems team meeting",
-      "sub": "Michelle Williams"
     }
   ],
   "calTomorrow": [
@@ -549,8 +554,18 @@
       "sub": "Kevin Lelitte"
     },
     {
+      "time": "09:45",
+      "title": "Company 90 - Status Update",
+      "sub": "Crispin Muncaster"
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey"
+    },
+    {
       "time": "12:00",
-      "title": "Michael O'Sullivan - 1-1 Session",
+      "title": "Asta Siautiaite - 1-1 Session",
       "sub": "Kevin Lelitte"
     },
     {
@@ -659,7 +674,7 @@
           "sub": "Michelle Williams"
         }
       ],
-      "isToday": true
+      "isToday": false
     },
     {
       "date": "2026-07-02",
@@ -681,17 +696,12 @@
           "sub": "Kevin Lelitte"
         }
       ],
-      "isToday": false
+      "isToday": true
     },
     {
       "date": "2026-07-03",
       "label": "Friday 3 Jul",
       "items": [
-        {
-          "time": "All day",
-          "title": "Athena A/L",
-          "sub": "Athena Artuso"
-        },
         {
           "time": "09:30",
           "title": "FA Team Daily Catchup",
@@ -725,5 +735,5 @@
   "prioritiesToday": [],
   "prioritiesTomorrow": [],
   "prioritiesWeek": [],
-  "refreshed_at": "Wednesday 01 July · 15:00"
+  "refreshed_at": "Thursday 02 July · 08:35"
 }
