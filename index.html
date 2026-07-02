@@ -16,7 +16,7 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-logo">
-      <img class="sidebar-crest" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEBUSExEWFhUXFxoXFhgYGR8eFxkbHxoXHhYWHyEbHSkgHh8lGx0eITEjJSstLzEuHx8zODMsNygtLisBCgoKDg0OGxAQGy4lHyUrKzUrLS8tNSstLSstLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tLS0tLf/AABEIAOAA4AMBIgACEQEDEQH/xAAbAAEBAAMBAQEAAAAAAAAAAAAABgQFBwMCAf/EAEwQAAIBAwIEAgcDBwgIBQUAAAECAwAEEQUhBhIxQRNRBxQiMmFxgRUiMzNCUmFxgRWRoSMzQlJyscFDVXKClLLS8DZTY3SSosTRNVSTo+EWFyQlNP/EABkBAQEBAQEBAAAAAAAAAAAAAAACAwEEBf/EACgRAAICAgEDBAICAwAAAAAAAAABAhEhMRIDQVEyYXGBEyKx8JGh4f/aAAwDAQACEQMRAD8A5LSlK+oeAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSveys5JnEcUbSOeiopZvuHb41WQ+ji5Vee8nt7JP9tIC/wBFU/xqXJLZ1RbIylWn2XocW0mo3Nww6iCHkX75Af30a90AdLO+f4tKq/3WrnPwmVw8si6VZi+0A9bO+T4rMrf3mr9Ol6HL+b1C5tyenjw86j5mMD99Ofsxw8Mi6VZy+jm4dS9nPb3qj/UyASf8LH+NSl9ZSwuY5onjcfoupU/j1Hxrqmno44tGPSlKokUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFbzhzi28stoJj4Z96JxzRNnrlT0z5jBrR0rjSezqbWje8R8XXl7tPNlBjESDliGOnsjr9c1oqUokloNtilKV04KUpQClKUApSlAKUpQClKUB//9k=" alt="University of Oxford crest">
+      <img class="sidebar-crest" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEBUSExEWFhUXFxoXFhgYGR8eFxkbHxoXHhYWHyEbHSkgHh8lGx0eITEjJSstLzEuHx8zODMsNygtLisBCgoKDg0OGxAQGy4lHyUrKzUrLS8tNSstLSstLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tLS0tLf/AABEIAOAA4AMBIgACEQEDEQH/xAAbAAEBAAMBAQEAAAAAAAAAAAAABgQFBwMCAf/EAEwQAAIBAwIEAgcDBwgIBQUAAAECAwAEEQUhBhIxQRNRBxQiMmFxgRWRoSMzQlJiscFDVXKClLLS8DZTY3SSosTRNVSTo+EWFyQlNP/EABkBAQEBAQEBAAAAAAAAAAAAAAACAwEEBf/EACgRAAICAgEDBAICAwAAAAAAAAABAhEhMRIDQVEyYXGBEyKx8JGh4f/aAAwDAQACEQMRAD8A5LSlK+oeAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKUoBSveys5JnEcUbSOeiopZvuHb41WQ+ji5Vee8nt7JP9tIC/wBFU/xqXJLZ1RbIylWn2XocW0mo3Nww6iCHkX75Af30a90AdLO+f4tKq/3WrnPwmVw8si6VZi+0A9bO+T4rMrf3mr9Ol6HL+b1C5tyenjw86j5mMD99Ofsxw8Mi6VZy+jm4dS9nPb3qj/UyASf8LH+NSl9ZSwuY5onjcfoupU/j1Hxrqmno44tGPSlKokUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFKVl6VpstzMkEKF5HOFUfiT5AdzTogobNf6RzJX2+kFI+VQ8qi5mMD99OfsxwcSy6VZ0ujm4dWa2nt71R/qZAJP8AhY/xqUvLKWFzHNE8bj9F1Kn8eo+NdU09HHFJB6lKVRI5SlKAUpSgFKUoBSlKAUpSgFKUoBSlKAUpSgFbzhji27stoJj4Z96JxzRNnrlT0z5jBrR0rjSezqbWje8R8XXl7tPNlBjESDliGOnsjr9c1oqUokloNtilKV04KUpQClKUApSlAKUpQClKUB//9k=" alt="University of Oxford crest">
       <div class="sidebar-brand-text">
         <span class="sb-univ-of">University of</span>
         <span class="sb-oxford">Oxford</span>
@@ -30,21 +30,59 @@
 
     <div class="date-block">
       <div class="date-label">Today</div>
+      <div class="wi-clock-time" id="wi-clock-time"></div>
       <div class="date-val" id="sidebarDate"></div>
     </div>
 
-    <div class="sb-section">Calendar – today</div>
-    <div id="calTodaySidebar"></div>
+    <div class="filter-block">
+      <select class="filter-select" id="tierSelect" onchange="applyFilter(this.value)">
+        <option value="all">All tiers</option>
+        <option value="today">Today</option>
+        <option value="tomorrow">Tomorrow</option>
+        <option value="week">This Week</option>
+        <option value="parked">Parked</option>
+      </select>
+    </div>
 
-    <div class="sb-section" id="calTomorrowLabel">Calendar – tomorrow</div>
-    <div id="calTomorrowSidebar"></div>
+    <div class="inbox-ticker">
+      <div class="ticker-label">Command Centre Focus</div>
+      <div class="ticker-stats">
+        <div class="ticker-stat" data-tier="today" onclick="clickStat('today')">
+          <span class="ticker-num red" id="cc-today-count">&mdash;</span><span class="ticker-sub">Today</span>
+        </div>
+        <div class="ticker-stat" data-tier="tomorrow" onclick="clickStat('tomorrow')">
+          <span class="ticker-num gold" id="cc-tmrw-count">&mdash;</span><span class="ticker-sub">Tmrw</span>
+        </div>
+        <div class="ticker-stat" data-tier="week" onclick="clickStat('week')">
+          <span class="ticker-num green" id="cc-week-count">&mdash;</span><span class="ticker-sub">Week</span>
+        </div>
+        <div class="ticker-stat" data-tier="parked" onclick="clickStat('parked')">
+          <span class="ticker-num" id="cc-parked-count">&mdash;</span><span class="ticker-sub">Parked</span>
+        </div>
+      </div>
+      <div class="ticker-divider"></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">Stalled in Today</span><span class="ticker-age-val" id="cc-stalled">&mdash;</span></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">Oldest task</span><span class="ticker-age-val" id="cc-oldest">&mdash;</span></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">Avg age</span><span class="ticker-age-val" id="cc-avg">&mdash;</span></div>
+      <div class="ticker-age-row"><span class="ticker-age-label">2+ weeks old</span><span class="ticker-age-val" id="cc-twoweeks">&mdash;</span></div>
+    </div>
+
+    <div class="inbox-widget">
+      <div class="inbox-widget-left">
+        <span class="inbox-widget-label">From your inbox</span>
+        <span class="inbox-widget-val" id="inbox-widget-val">Loading&hellip;</span>
+      </div>
+      <span class="inbox-widget-badge" id="inbox-widget-badge" style="display:none">0</span>
+    </div>
 
     <div class="sb-section">Absences</div>
     <div class="abs-wrap" id="absencesSidebar"></div>
 
-    <div class="tasks-widget-section">Tasks<span class="tasks-live-dot" id="tasksLiveDot"></span></div>
-    <div class="tasks-widget-panel" id="tasksWidget">
-      <div class="tasks-widget-unavailable">Loading...</div>
+    <div class="sb-section">Links</div>
+    <div class="sb-links">
+      <a href="https://cc.lelitte.co.uk/" target="_blank" class="sb-link">Command Centre</a>
+      <a href="https://begb0037admin.github.io/hris-launcher/" target="_blank" class="sb-link">HRIS Launcher</a>
+      <a href="https://begb0037admin.github.io/hr-fa-knowledge-base/" target="_blank" class="sb-link">FA Knowledge Base</a>
     </div>
   </div>
 
@@ -61,6 +99,7 @@
       </div>
     </div>
 
+    <div id="calPanel"></div>
     <div id="contextBar"></div>
     <div id="inboxCol"></div>
     <div class="footer">All outgoing communication requires Kevin's review and sign-off before sending</div>
@@ -75,7 +114,7 @@
     <button class="btn btn-primary" onclick="loadFromImport()">Load briefing</button>
     <button class="btn" onclick="toggleImport()">Cancel</button>
   </div>
-  <div class="import-error" id="importError">Invalid JSON – please check and try again.</div>
+  <div class="import-error" id="importError">Invalid JSON &ndash; please check and try again.</div>
 </div>
 
 <!-- Archive panel -->

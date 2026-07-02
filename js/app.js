@@ -120,7 +120,7 @@ function renderArchiveList(){
     return `<div class="archive-day">
       <div class="archive-day-header" onclick="toggleArchiveDay(${di})">
         <div><div class="archive-day-date">${e.dateStr}</div><div class="archive-day-meta">${items.length} items · ${tickedCount} done</div></div>
-        <span class="archive-day-arrow" id="arch-arrow-${di}">&ndash;</span>
+        <span class="archive-day-arrow" id="arch-arrow-${di}">–</span>
       </div>
       <div class="archive-day-items" id="arch-items-${di}">${itemsHtml}</div>
     </div>`;
@@ -262,7 +262,61 @@ function renderSidebarCal(items, containerId){
   const el=document.getElementById(containerId);
   if(!el) return;
   if(!items||!items.length){el.innerHTML='<div style="padding:4px 18px 8px;font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None</div>';return;}
-  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">` + (c.time?`<div class="cal-time">${c.time}</div>`:'') + `<div class="cal-title">${c.title}</div>` + (c.sub?`<div class="cal-sub">${c.sub}</div>`:'') + (c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:'') + `</div>`).join('');
+  el.innerHTML=items.map((c,i)=>`<div class="cal-item${i===0?' active':''}">${c.time?`<div class="cal-time">${c.time}</div>`:''}<div class="cal-title">${c.title}</div>${c.sub?`<div class="cal-sub">${c.sub}</div>`:''}${c.alert?`<div class="cal-alert">⚠ ${c.alert}</div>`:''}</div>`).join('');
+}
+
+function renderMainCal(data){
+  const el=document.getElementById('contextBar');
+  if(!el) return;
+  const now=new Date();
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const todayDate=now.getDate(), todayMonth=now.getMonth(), todayYear=now.getFullYear();
+
+  function parseTimeMins(t){
+    if(!t) return -1;
+    const p=t.split(':');
+    return p.length<2?-1:parseInt(p[0])*60+parseInt(p[1]);
+  }
+
+  function renderBlock(items,headerHtml,isToday){
+    if(!items||!items.length) return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="main-cal-none">No meetings</div></div>`;
+    let nextFound=false;
+    const rows=items.map(c=>{
+      const mins=parseTimeMins(c.time);
+      const isPast=isToday&&mins>=0&&mins<nowMins;
+      const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
+      if(isNext) nextFound=true;
+      const cls=isPast?' past':isNext?' next':'';
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary">${c.summary}</div>`:''}</div></div>`;
+    }).join('');
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
+  }
+
+  function renderMiniCal(){
+    const monthName=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    const firstDay=new Date(todayYear,todayMonth,1);
+    const daysInMonth=new Date(todayYear,todayMonth+1,0).getDate();
+    let startDow=firstDay.getDay()-1; if(startDow<0) startDow=6;
+    const tom=new Date(now); tom.setDate(tom.getDate()+1);
+    const tomDate=tom.getDate();
+    const hasTodayMtg=data.calToday&&data.calToday.length>0;
+    const hasTomMtg=data.calTomorrow&&data.calTomorrow.length>0;
+    const dayNames=['M','T','W','T','F','S','S'];
+    let cells=dayNames.map(d=>`<div class="mini-cal-day-name">${d}</div>`).join('');
+    for(let i=0;i<startDow;i++) cells+='<div class="mini-cal-day other-month"></div>';
+    for(let d=1;d<=daysInMonth;d++){
+      const isT=d===todayDate, isTom=d===tomDate;
+      const hasMtg=(isT&&hasTodayMtg)||(isTom&&hasTomMtg);
+      const cls='mini-cal-day'+(isT?' today':hasMtg?' has-meeting':'');
+      cells+=`<div class="${cls}">${d}</div>`;
+    }
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${monthName}</div><div class="mini-cal-grid">${cells}</div></div>`;
+  }
+
+  const todayHeader='Today &mdash; '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const tom=new Date(now); tom.setDate(tom.getDate()+1);
+  const tomHeader='Tomorrow &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}${renderMiniCal()}</div>`;
 }
 
 function togglePriCard(i){
@@ -280,7 +334,7 @@ function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbo
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
 function _priSetOrder(pt,ptom,pw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
-function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
+function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}  
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
@@ -373,6 +427,7 @@ function priZoneDrop(e,sec){
 function renderPriorityCards(priorities,key,sec){
   if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
   const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Canvas text measurement for smart one-line vs two-line decision
   if(!renderPriorityCards._canvas){renderPriorityCards._canvas=document.createElement('canvas');renderPriorityCards._ctx=renderPriorityCards._canvas.getContext('2d');}
   const _mctx=renderPriorityCards._ctx;
   function _tw(t,f){_mctx.font=f;return _mctx.measureText(t).width;}
@@ -396,6 +451,7 @@ function renderPriorityCards(priorities,key,sec){
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
+    // Measure whether combined title fits on one line
     const _badgeW=theBadge?82:0;
     const _btnW=(p.entry_id||p.entryId)?118:0;
     const _ccBtnW=p.id?96:0;
@@ -415,8 +471,8 @@ function renderPriorityCards(priorities,key,sec){
         <div class="pri-card-title-wrap">${_oneLine?`<div class="pri-card-title">${_combined}</div>`:`<div class="pri-card-title-main">${titleText}</div><div class="pri-card-title-sub">${titleSub}</div>`}</div>
         ${theBadge}
         ${(p.entry_id||p.entryId)?`<button class="sg-btn" onclick="openEmail('${p.entry_id||p.entryId}',event)">Open email</button>`:''}
-        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','command-centre');event.stopPropagation()">CC →</button>`:''}
-        <span class="pri-arrow" id="priarrow_${sec}_${i}">&ndash;</span>
+        ${p.id?`<button class="sg-btn sg-btn-cc" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC →</button>`:''}
+        <span class="pri-arrow" id="priarrow_${sec}_${i}">–</span>
       </div>
       <div class="pri-card-body" id="pribody_${sec}_${i}">${summaryHtml}${metaHtml}</div>
     </div>`;
@@ -426,49 +482,157 @@ function renderPriorityCards(priorities,key,sec){
 function renderBriefing(data,key){
   currentData=data; currentKey=key;
   window._wipData=data; window._wipKey=key;
-
   document.getElementById('pageTitle').textContent=getGreeting();
   document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
-
-  renderSidebarCal(data.calToday,'calTodaySidebar');
-  renderSidebarCal(data.calTomorrow,'calTomorrowSidebar');
-
+  renderCalPanel(data);
+  updateInboxWidget(data);
+  setupCtxTicker(data.context);
   const absEl=document.getElementById('absencesSidebar');
-  if(data.absences&&data.absences.length){
-    absEl.innerHTML='<ul class="abs-list">'+data.absences.map(a=>`<li>${a}</li>`).join('')+'</ul>';
-  } else {
-    absEl.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None recorded</span>';
+  if(absEl){
+    if(data.absences&&data.absences.length){
+      absEl.innerHTML='<ul class="abs-list">'+data.absences.map(a=>`<li>${a}</li>`).join('')+'</ul>';
+    } else {
+      absEl.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None recorded</span>';
+    }
   }
-
-  const ctxEl=document.getElementById('contextBar');
-  if(data.context){
-    const sentences=data.context.split(/(?<=\.\s+)/).filter(s=>s.trim().length>0);
-    const items=sentences.map(s=>`<div class="context-bar-item"><span class="context-bar-bullet">&mdash;</span><span>${s.trim()}</span></div>`).join('');
-    ctxEl.innerHTML=`<div class="context-bar"><div class="context-bar-title">Context</div>${items}</div>`;
-  } else { ctxEl.innerHTML=''; }
-
   const priSecs=applyPriOverrides(data);
-  const left=`<div class="inbox-grid">
-    <div class="inbox-grid-cell">
-      <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span></div>
+  document.getElementById('inboxCol').innerHTML=`<div class="inbox-grid" id="inboxGrid">
+    <div id="sec-today-wrap">
+      <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pt.length}</span></div>
       <div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
     </div>
-    <div class="inbox-grid-cell">
-      <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – tomorrow</span><span class="sec-rule"></span></div>
+    <div id="sec-tomorrow-wrap">
+      <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – tomorrow</span><span class="sec-rule"></span><span class="sec-count">${priSecs.ptom.length}</span></div>
       <div class="pri-drop-zone" data-sec="ptom" ondragover="priZoneDragOver(event,'ptom')" ondragleave="priZoneDragLeave(event,'ptom')" ondrop="priZoneDrop(event,'ptom')">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
     </div>
-    <div class="inbox-grid-cell">
-      <div class="sec-head"><span class="sec-dot dot-green"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span></div>
+    <div id="sec-week-wrap">
+      <div class="sec-head"><span class="sec-dot dot-green"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pw.length}</span></div>
       <div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
     </div>
-    <div class="inbox-grid-cell">
-      <div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">FYI – no action needed</span><span class="sec-rule"></span></div>
+    <div id="sec-parked-wrap">
+      <div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">FYI / Parked</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pfyi.length}</span></div>
       <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
     </div>
   </div>`;
-  document.getElementById('inboxCol').innerHTML=left;
+}
+
+function renderCalPanel(data){
+  const el=document.getElementById('calPanel');
+  if(!el) return;
+  const now=new Date();
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const todayDate=now.getDate(), todayMonth=now.getMonth(), todayYear=now.getFullYear();
+  function parseTimeMins(t){if(!t)return -1;const p=t.split(':');return p.length<2?-1:parseInt(p[0])*60+parseInt(p[1]);}
+  function renderBlock(items,headerHtml,isToday){
+    if(!items||!items.length) return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="main-cal-none">No meetings</div></div>`;
+    let nextFound=false;
+    const rows=items.map(c=>{
+      const mins=parseTimeMins(c.time);
+      const isPast=isToday&&mins>=0&&mins<nowMins;
+      const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
+      if(isNext) nextFound=true;
+      const cls=isPast?' past':isNext?' next':'';
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary">${c.summary}</div>`:''}</div></div>`;
+    }).join('');
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
+  }
+  function renderMiniCal(){
+    const monthName=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    const firstDay=new Date(todayYear,todayMonth,1);
+    const daysInMonth=new Date(todayYear,todayMonth+1,0).getDate();
+    let startDow=firstDay.getDay()-1; if(startDow<0) startDow=6;
+    const tom=new Date(now); tom.setDate(tom.getDate()+1);
+    const tomDate=tom.getDate();
+    const hasTodayMtg=data.calToday&&data.calToday.length>0;
+    const hasTomMtg=data.calTomorrow&&data.calTomorrow.length>0;
+    const dayNames=['M','T','W','T','F','S','S'];
+    let cells=dayNames.map(d=>`<div class="mini-cal-day-name">${d}</div>`).join('');
+    for(let i=0;i<startDow;i++) cells+='<div class="mini-cal-day other-month"></div>';
+    for(let d=1;d<=daysInMonth;d++){
+      const isT=d===todayDate, isTom=d===tomDate;
+      const hasMtg=(isT&&hasTodayMtg)||(isTom&&hasTomMtg);
+      const cls='mini-cal-day'+(isT?' today':hasMtg?' has-meeting':'');
+      cells+=`<div class="${cls}">${d}</div>`;
+    }
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${monthName}</div><div class="mini-cal-grid">${cells}</div></div>`;
+  }
+  const todayHeader='Today &mdash; '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const tom=new Date(now); tom.setDate(tom.getDate()+1);
+  const tomHeader='Tomorrow &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}${renderMiniCal()}</div>`;
+}
+
+let _ctxSentences=[], _ctxIdx=0, _ctxTimer=null, _ctxPaused=false;
+function setupCtxTicker(context){
+  const el=document.getElementById('contextBar');
+  if(!el||!context){if(el)el.innerHTML='';return;}
+  _ctxSentences=context.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>4);
+  if(!_ctxSentences.length){el.innerHTML='';return;}
+  _ctxIdx=0;
+  el.innerHTML=`<div class="ctx-strip" onmouseenter="_ctxPaused=true" onmouseleave="_ctxPaused=false" onclick="_jumpCtx(_ctxIdx+1)">
+    <div class="ctx-text" id="ctxText"></div>
+    <div class="ctx-dots" id="ctxDots"></div>
+  </div>`;
+  _renderCtx();
+  if(_ctxTimer) clearInterval(_ctxTimer);
+  _ctxTimer=setInterval(()=>{if(!_ctxPaused){_ctxIdx=(_ctxIdx+1)%_ctxSentences.length;_renderCtx();}},4500);
+}
+function _renderCtx(){
+  const txt=document.getElementById('ctxText');
+  const dots=document.getElementById('ctxDots');
+  if(txt){txt.style.animation='none';txt.offsetHeight;txt.style.animation='ctxFlipIn .35s ease';txt.textContent=_ctxSentences[_ctxIdx];}
+  if(dots) dots.innerHTML=_ctxSentences.map((_,i)=>`<div class="ctx-dot${i===_ctxIdx?' active':''}" onclick="event.stopPropagation();_jumpCtx(${i})"></div>`).join('');
+}
+function _jumpCtx(i){
+  _ctxIdx=((i%_ctxSentences.length)+_ctxSentences.length)%_ctxSentences.length;
+  _renderCtx();
+}
+
+function updateInboxWidget(data){
+  const val=document.getElementById('inbox-widget-val');
+  const bdg=document.getElementById('inbox-widget-badge');
+  if(!val) return;
+  const urgent=(data.urgent||[]).length;
+  const needs=(data.needs||[]).length;
+  const total=urgent+needs+(data.fyi||[]).length+(data.low||[]).length;
+  if(total===0){val.textContent='No new items';if(bdg)bdg.style.display='none';return;}
+  val.textContent=total+' item'+(total!==1?'s':'')+' — '+urgent+' urgent, '+needs+' need'+(needs!==1?'s':'')+' response';
+  if(bdg&&urgent>0){bdg.textContent=urgent;bdg.style.display='inline-flex';}
+  else if(bdg) bdg.style.display='none';
+}
+
+function applyFilter(val){
+  const map={today:'sec-today-wrap',tomorrow:'sec-tomorrow-wrap',week:'sec-week-wrap',parked:'sec-parked-wrap'};
+  const grid=document.getElementById('inboxGrid');
+  if(!grid) return;
+  const sel=document.getElementById('tierSelect');
+  if(sel) sel.value=val;
+  if(val==='all'){
+    Object.values(map).forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+    grid.style.gridTemplateColumns='';
+  } else {
+    Object.entries(map).forEach(([tier,id])=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display=(tier===val)?'':'none';
+    });
+    grid.style.gridTemplateColumns='1fr';
+  }
+}
+function clearSel(){
+  document.querySelectorAll('.ticker-stat.selected').forEach(el=>el.classList.remove('selected'));
+}
+function clickStat(tier){
+  const stat=document.querySelector(`.ticker-stat[data-tier="${tier}"]`);
+  const wasSelected=stat&&stat.classList.contains('selected');
+  clearSel();
+  if(!wasSelected){
+    if(stat) stat.classList.add('selected');
+    applyFilter(tier);
+  } else {
+    applyFilter('all');
+  }
 }
 
 function getGreeting(){
@@ -529,51 +693,42 @@ async function init(){
 
 init();
 
-async function loadTasksWidget(){
-  var el=document.getElementById('tasksWidget');
-  var dot=document.getElementById('tasksLiveDot');
-  if(!el)return;
+// CC ticker — reads Command Centre tasks.json
+async function loadCcTicker(){
   try{
-    var res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/tasks.json?t='+Date.now(),{cache:'no-store'});
-    if(!res.ok)throw new Error('fetch failed');
-    var data=await res.json();
-    var tasks=Array.isArray(data)?data:(data.tasks||[]);
-    if(currentData&&currentKey){
-      var ticks=getTicks();var changed=false;
-      var priMap=[['prioritiesToday','pt'],['prioritiesTomorrow','ptom'],['prioritiesWeek','pw']];
-      tasks.filter(function(t){return t.done;}).forEach(function(t){
-        for(var p=0;p<priMap.length;p++){
-          var arr=currentData[priMap[p][0]]||[];
-          for(var i=0;i<arr.length;i++){
-            if(arr[i].id===t.id){
-              var k=currentKey+'_pri_'+priMap[p][1]+'_'+i;
-              if(!ticks[k]){ticks[k]=true;changed=true;}
-              break;
-            }
-          }
-        }
-      });
-      if(changed){saveTicks(ticks);renderBriefing(currentData,currentKey);}
+    const res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/tasks.json?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok) throw new Error('fetch failed');
+    const d=await res.json();
+    const tasks=Array.isArray(d)?d:(d.tasks||[]);
+    const now=new Date(); now.setHours(0,0,0,0);
+    function ageDays(t){
+      if(!t.dateAdded) return 0;
+      const dd=new Date(t.dateAdded); dd.setHours(0,0,0,0);
+      return Math.max(0,Math.round((now-dd)/86400000));
     }
-    var todayCount=tasks.filter(function(t){return t.tier==='today';}).length;
-    var tomorrowCount=tasks.filter(function(t){return t.tier==='tomorrow';}).length;
-    var weekCount=tasks.filter(function(t){return t.tier==='week';}).length;
-    var todoCount=tasks.filter(function(t){return (t.actions||[]).some(function(a){return a.includes('[TODO]');});}).length;
-    el.innerHTML=
-      '<div class="tasks-widget-row"><span class="tasks-widget-name">Today</span><span class="tasks-widget-count">'+todayCount+'</span></div>'+
-      '<div class="tasks-widget-row"><span class="tasks-widget-name">Tomorrow</span><span class="tasks-widget-count">'+tomorrowCount+'</span></div>'+
-      '<div class="tasks-widget-row"><span class="tasks-widget-name">This week</span><span class="tasks-widget-count">'+weekCount+'</span></div>'+
-      '<div class="tasks-widget-row"><span class="tasks-widget-name">Actions due</span><span class="tasks-widget-count">'+todoCount+'</span></div>'+
-      '<a class="tasks-widget-link" href="https://cc.lelitte.co.uk/" target="_blank">&rarr; Open command centre</a>';
-    if(dot){dot.style.background='#4ade80';dot.classList.add('pulsing');setTimeout(function(){dot.classList.remove('pulsing');},700);}
+    const todayTasks=tasks.filter(t=>t.tier==='today');
+    const ages=tasks.map(t=>ageDays(t));
+    function setEl(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+    setEl('cc-today-count',todayTasks.length);
+    setEl('cc-tmrw-count',tasks.filter(t=>t.tier==='tomorrow').length);
+    setEl('cc-week-count',tasks.filter(t=>t.tier==='week').length);
+    setEl('cc-parked-count',tasks.filter(t=>t.tier==='parked').length);
+    const stalled=todayTasks.filter(t=>ageDays(t)>=5).length;
+    const oldest=ages.length?Math.max(...ages):0;
+    const avg=ages.length?Math.round(ages.reduce((a,b)=>a+b,0)/ages.length):0;
+    const twoWeeks=tasks.filter(t=>ageDays(t)>=14).length;
+    setEl('cc-stalled',stalled||'—');
+    setEl('cc-oldest',oldest?oldest+'d':'—');
+    setEl('cc-avg',avg?avg+'d':'—');
+    setEl('cc-twoweeks',twoWeeks||'—');
   }catch(e){
-    el.innerHTML='<div class="tasks-widget-unavailable">Tasks unavailable</div>';
-    if(dot)dot.style.background='#f87171';
+    console.warn('CC ticker fetch failed',e);
   }
 }
-loadTasksWidget();
-setInterval(loadTasksWidget, 30000);
+loadCcTicker();
+setInterval(loadCcTicker, 60000);
 
+/* CLOCK */
 function updateWiClock(){
   var n=new Date();
   var time=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
