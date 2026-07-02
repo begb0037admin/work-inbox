@@ -287,7 +287,7 @@ function renderMainCal(data){
       const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
       if(isNext) nextFound=true;
       const cls=isPast?' past':isNext?' next':'';
-      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}</div></div>`;
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary">${c.summary}</div>`:''}</div></div>`;
     }).join('');
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
   }
@@ -534,7 +534,7 @@ function renderCalPanel(data){
       const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
       if(isNext) nextFound=true;
       const cls=isPast?' past':isNext?' next':'';
-      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}</div></div>`;
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary">${c.summary}</div>`:''}</div></div>`;
     }).join('');
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
   }
