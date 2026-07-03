@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-02 — end of session. Three items outstanding for next session (see below).
+**Last updated:** 2026-07-03 — brief session aborted (GitHub MCP disconnected). No code changes. Two items added to fix list.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -16,6 +16,16 @@
    - This is a significant enhancement to `fetch_inbox.py` Phase 2 — plan carefully before coding.
 
 3. **Drag reorder animation** — No visual feedback during drag. Kevin needs cards to visually shift in real time as he drags: card below flips up as he drags down, card above moves down as he drags up. Requires rewriting drag handlers to insert a live placeholder into the DOM during `dragover`. Meaningful piece of work — plan before coding.
+
+4. **Add Oxford crest hard rule to all repo CLAUDE.md files** — Identified 2026-07-03. The hard rule protecting the crest only existed in work-inbox CLAUDE.md. Needs propagating to hris-launcher (`<img class="sidebar-crest">`), command-centre (`<img class="sb-crest">`), and hr-fa-knowledge-base (`<img class="crest">`). hris-dashboard uses an emoji; ag-flexpoints has no crest.
+
+5. **Verify no crests showing grey squares on live dashboards** — Source inspection on 2026-07-03 confirmed all base64 crests had valid JPEG headers, but visual verification on live dashboards still needed before closing this item.
+
+---
+
+## Session 2026-07-03 (aborted — GitHub MCP disconnected)
+
+GitHub MCP server disconnected before handover could be pushed. No code changes this session. Reminder trigger set for 2026-07-04 07:00 UTC (subsequently deleted when session resumed manually on 2026-07-04). Two new items identified and added to fix list: crest rule propagation (#4) and grey square verification (#5).
 
 ---
 
