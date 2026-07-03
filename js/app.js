@@ -513,6 +513,7 @@ function renderBriefing(data,key){
 }
 
 function toggleSum(id,btn){const el=document.getElementById(id);const exp=el.classList.toggle('expanded');btn.textContent=exp?'Show less':'Show more';}
+function toggleCalExpand(bodyId){const body=document.getElementById(bodyId);const btn=document.getElementById(bodyId+'Btn');if(!body||!btn)return;const exp=body.classList.toggle('expanded');btn.innerHTML=exp?'&#9650; Show less':'&#9660; Show all';}
 
 function renderCalPanel(data){
   const el=document.getElementById('calPanel');
@@ -533,7 +534,8 @@ function renderCalPanel(data){
       const sumId=c.id?'sum_'+c.id:(isToday?'st':'sm')+i;
       return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${c.summary}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button><a class="summary-cc-link" href="https://cc.lelitte.co.uk" target="_blank">CC &#8594;</a></div></div>`:''}</div></div>`;
     }).join('');
-    return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
+    const bodyId=isToday?'calBodyToday':'calBodyTom';
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="cal-col-body" id="${bodyId}">${rows}</div><div class="cal-expand-footer"><button class="cal-expand-btn" id="${bodyId}Btn" onclick="toggleCalExpand('${bodyId}')">&#9660; Show all</button></div></div>`;
   }
   function renderMiniCal(monthOffset){
     const calDate=new Date(todayYear,todayMonth+(monthOffset||0),1);
