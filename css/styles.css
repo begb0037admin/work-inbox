@@ -222,9 +222,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 /* Priority drag-and-drop */
 .pri-drag-handle { font-size: 11px; color: var(--text-very-muted); cursor: grab; flex-shrink: 0; letter-spacing: -1px; user-select: none; }
 .pri-drag-handle:active { cursor: grabbing; }
-.pri-card.pri-dragging { opacity: 0.35; }
-.pri-card.pri-drop-before { border-top: 2px solid var(--blue); }
-.pri-card.pri-drop-after { border-bottom: 2px solid var(--blue); }
+.card-ph.pri-dragging { opacity: 0.55; border: 2px solid #3b82f6 !important; background: #eff6ff !important; box-shadow: 0 4px 12px rgba(59,130,246,0.25) !important; }
 .pri-drop-zone { min-height: 4px; border-radius: var(--radius-lg); transition: background 0.12s; }
 .pri-drop-zone.pri-zone-active { background: rgba(55,138,221,0.06); outline: 2px dashed rgba(55,138,221,0.3); outline-offset: 2px; }
 .pri-zone-empty { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 8px 4px; }

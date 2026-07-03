@@ -335,7 +335,7 @@ function togglePriCard(i){
 }
 
 // Priority drag-and-drop helpers
-let _priDragState=null;
+let _priDragState=null,_priDragEl=null,_priDragDropped=false;
 function _priGetKey(p){return(p.title||p.text||p.subject||'').toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,40)||'item';}
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
@@ -357,15 +357,23 @@ function applyPriOverrides(data){
 
 function priDragStart(e,sec,priKey){
   _priDragState={sec,priKey};
+  _priDragEl=e.currentTarget;
+  _priDragDropped=false;
   e.dataTransfer.effectAllowed='move';
   e.dataTransfer.setData('text/plain',priKey);
-  setTimeout(()=>{const el=document.querySelector(`.pri-card[data-prikey="${priKey}"]`);if(el)el.classList.add('pri-dragging');},0);
+  setTimeout(()=>{if(_priDragEl)_priDragEl.classList.add('pri-dragging');},0);
 }
 function priDragEnd(e){
-  document.querySelectorAll('.pri-card.pri-dragging').forEach(el=>el.classList.remove('pri-dragging'));
-  document.querySelectorAll('.pri-card.pri-drop-before,.pri-card.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));
+  if(_priDragEl)_priDragEl.classList.remove('pri-dragging');
   document.querySelectorAll('.pri-drop-zone.pri-zone-active').forEach(el=>el.classList.remove('pri-zone-active'));
-  _priDragState=null;
+  if(_priDragDropped){
+    const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
+    const sk={};
+    allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .card-ph`)).map(c=>c.dataset.prikey);});
+    _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
+  }
+  if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
+  _priDragState=null;_priDragEl=null;_priDragDropped=false;
 }
 let _emailDragData=null;
 function emailCardDragStart(e,cls,idx){
@@ -383,33 +391,32 @@ function emailCardDragEnd(e){
 function priCardDragOver(e,sec,priKey){
   if(!_priDragState&&!_emailDragData)return;
   e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect='move';
-  if(_priDragState){document.querySelectorAll('.pri-card.pri-drop-before,.pri-card.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));const r=e.currentTarget.getBoundingClientRect();e.currentTarget.classList.add(e.clientY<r.top+r.height/2?'pri-drop-before':'pri-drop-after');}
+  if(_priDragState&&_priDragEl){
+    const target=e.currentTarget;
+    if(target===_priDragEl)return;
+    const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
+    if(!zone)return;
+    const r=target.getBoundingClientRect();
+    const before=e.clientY<r.top+r.height/2;
+    zone.insertBefore(_priDragEl,before?target:target.nextSibling);
+  }
 }
-function priCardDragLeave(e,priKey){
-  if(e.relatedTarget&&e.currentTarget.contains(e.relatedTarget))return;
-  e.currentTarget.classList.remove('pri-drop-before','pri-drop-after');
-}
+function priCardDragLeave(e,priKey){}
 function priCardDrop(e,sec,priKey){
   e.preventDefault();e.stopPropagation();
   if(_emailDragData){const{item,cls}=_emailDragData;_addEmailCardToPriority(item,cls,sec);emailCardDragEnd(e);if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);return;}
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
-  const before=e.currentTarget.classList.contains('pri-drop-before');
-  const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
-  const sk={};
-  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
-  allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
-  const ti=sk[sec].indexOf(priKey);
-  sk[sec].splice(ti>=0?(before?ti:ti+1):sk[sec].length,0,fromKey);
-  _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
-  priDragEnd(e);
-  if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
+  _priDragDropped=true;
 }
 function priZoneDragOver(e,sec){
   if(!_priDragState&&!_emailDragData)return;
   e.preventDefault();e.dataTransfer.dropEffect='move';
-  document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`)?.classList.add('pri-zone-active');
+  const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
+  if(!zone)return;
+  zone.classList.add('pri-zone-active');
+  if(_priDragState&&_priDragEl&&!zone.contains(_priDragEl))zone.appendChild(_priDragEl);
 }
 function priZoneDragLeave(e,sec){
   const z=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
@@ -421,14 +428,7 @@ function priZoneDrop(e,sec){
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
-  const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
-  const sk={};
-  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
-  allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
-  sk[sec].push(fromKey);
-  _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
-  priDragEnd(e);
-  if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
+  _priDragDropped=true;
 }
 
 function renderPriorityCards(priorities,key,sec){
