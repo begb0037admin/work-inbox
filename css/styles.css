@@ -410,3 +410,9 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .card-icon:hover{background:#eff6ff;color:#3b82f6;border-color:#bfdbfe}
 .card-icon-cc{width:auto;padding:0 7px;font-size:10px;font-weight:700;height:26px;border-radius:5px;border:1px solid #e5e9f2;background:#f8fafc;display:flex;align-items:center;cursor:pointer;color:#94a3b8;transition:background .15s,color .15s,border-color .15s;flex-shrink:0}
 .card-icon-cc:hover{background:#eff6ff;color:#3b82f6;border-color:#bfdbfe}
+/* ── Calendar column expand/collapse ── */
+.cal-col-body{max-height:260px;overflow:hidden;transition:max-height 0.35s ease}
+.cal-col-body.expanded{max-height:2000px}
+.cal-expand-footer{padding-top:7px;margin-top:2px;border-top:1px solid #f0f3f8}
+.cal-expand-btn{background:none;border:none;font-family:inherit;font-size:10.5px;font-weight:600;color:#3b82f6;cursor:pointer;padding:2px 0;line-height:1}
+.cal-expand-btn:hover{text-decoration:underline}
