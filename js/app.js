@@ -512,6 +512,8 @@ function renderBriefing(data,key){
   </div>`;
 }
 
+function toggleSum(id,btn){const el=document.getElementById(id);const exp=el.classList.toggle('expanded');btn.textContent=exp?'Show less':'Show more';}
+
 function renderCalPanel(data){
   const el=document.getElementById('calPanel');
   if(!el) return;
@@ -522,13 +524,14 @@ function renderCalPanel(data){
   function renderBlock(items,headerHtml,isToday){
     if(!items||!items.length) return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="main-cal-none">No meetings</div></div>`;
     let nextFound=false;
-    const rows=items.map(c=>{
+    const rows=items.map((c,i)=>{
       const mins=parseTimeMins(c.time);
       const isPast=isToday&&mins>=0&&mins<nowMins;
       const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
       if(isNext) nextFound=true;
       const cls=isPast?' past':isNext?' next':'';
-      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary">${c.summary}</div>`:''}</div></div>`;
+      const sumId=c.id?'sum_'+c.id:(isToday?'st':'sm')+i;
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${c.summary}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button><a class="summary-cc-link" href="https://cc.lelitte.co.uk" target="_blank">CC &#8594;</a></div></div>`:''}</div></div>`;
     }).join('');
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
   }
