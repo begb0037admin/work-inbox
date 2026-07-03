@@ -727,23 +727,85 @@ if all_priorities:
 cal_today_items    = build_cal_items(cal_today)
 cal_tomorrow_items = build_cal_items(cal_tomorrow)
 
+# -- Phase 3.7 -- Fetch recent Granola meeting notes for calendar context --
+GRANOLA_API_KEY = os.environ.get("GRANOLA_API_KEY", "")
+_granola_context = {}  # "day_idx" -> {"note_title": str, "summary": str}
+
+def _granola_keywords(title):
+    t = re.sub(r'\b\d{1,2}/\d{2}\b', '', title)   # remove DD/MM dates
+    t = re.sub(r'\b\d{4}\b', '', t)                # remove years
+    t = re.sub(r'[—\-&]', ' ', t)                  # dashes and ampersands to spaces
+    t = re.sub(r'[^\w\s]', '', t)                  # strip remaining punctuation
+    return set(w.lower() for w in t.split() if len(w) >= 2)
+
+def _granola_fetch(url):
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {GRANOLA_API_KEY}"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.loads(r.read().decode())
+
+if GRANOLA_API_KEY:
+    try:
+        _lookback = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        _g_data   = _granola_fetch(f"https://public-api.granola.ai/v1/notes?created_after={_lookback}")
+        _g_notes  = _g_data.get("notes", [])
+
+        # Build the calendar items list for matching (today + tomorrow non-all-day)
+        _cal_candidates = [
+            {"idx": i, "day": "today",    "title": c["title"]}
+            for i, c in enumerate(cal_today_items) if c.get("time", "").lower() != "all day"
+        ] + [
+            {"idx": i, "day": "tomorrow", "title": c["title"]}
+            for i, c in enumerate(cal_tomorrow_items) if c.get("time", "").lower() != "all day"
+        ]
+
+        for cal_item in _cal_candidates:
+            cal_kw = _granola_keywords(cal_item["title"])
+            if not cal_kw:
+                continue
+            best_note, best_score = None, 0
+            for note in _g_notes:
+                score = len(cal_kw & _granola_keywords(note.get("title", "")))
+                if score > best_score:
+                    best_score, best_note = score, note
+            if best_note and best_score >= 1:
+                detail  = _granola_fetch(f"https://public-api.granola.ai/v1/notes/{best_note['id']}")
+                summary = (detail.get("summary") or "").strip()
+                if summary:
+                    key = f"{cal_item['day']}_{cal_item['idx']}"
+                    _granola_context[key] = {"note_title": best_note.get("title", ""), "summary": summary[:500]}
+
+        print(f"Phase 3.7 done - Granola context for {len(_granola_context)} meetings")
+    except Exception as e:
+        print(f"WARNING: Phase 3.7 Granola fetch failed - {e}")
+else:
+    print("Phase 3.7 skipped - GRANOLA_API_KEY not set")
+
 # -- Phase 3.8 -- AI prep summaries for today/tomorrow calendar items --
 _cal_for_summary = [
-    {"idx": i, "day": "today",    "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")}
-    for i, c in enumerate(cal_today_items) if not c.get("time", "").lower() == "all day"
+    {
+        "idx": i, "day": "today", "time": c["time"], "title": c["title"],
+        "organizer": c.get("sub", ""),
+        "prev_meeting_notes": _granola_context.get(f"today_{i}", {}).get("summary", "")
+    }
+    for i, c in enumerate(cal_today_items) if c.get("time", "").lower() != "all day"
 ] + [
-    {"idx": i, "day": "tomorrow", "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")}
-    for i, c in enumerate(cal_tomorrow_items) if not c.get("time", "").lower() == "all day"
+    {
+        "idx": i, "day": "tomorrow", "time": c["time"], "title": c["title"],
+        "organizer": c.get("sub", ""),
+        "prev_meeting_notes": _granola_context.get(f"tomorrow_{i}", {}).get("summary", "")
+    }
+    for i, c in enumerate(cal_tomorrow_items) if c.get("time", "").lower() != "all day"
 ]
 if _cal_for_summary:
     try:
         CAL_SUM_SYSTEM = (
             "You are Kevin's briefing assistant at Oxford University HR Systems.\n"
             "For each meeting, write ONE short sentence of prep context Kevin needs before walking in.\n"
-            "Focus on: what decision or output is expected, who the key person is, any live issue to watch.\n"
+            "Where 'prev_meeting_notes' is provided, use it as your primary source -- it is the AI summary from the last time this meeting ran.\n"
+            "Prioritise: carry-forwards and open actions from last time, any live decision or blocker, who Kevin needs to speak to.\n"
             "Plain ASCII punctuation only. No filler like 'This meeting is about...'. Be direct and specific.\n"
             "Return ONLY valid JSON: {\"day_idx\": \"one sentence\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
-            "Example: {\"today_0\": \"Bring the scoring sheet -- Helen needs a steer on evaluation weightings today.\"}"
+            "Example: {\"today_0\": \"Pick up the evaluation scoring from last week -- Helen still needs a decision on weightings.\"}"
         )
         _cal_user = (
             f"Today is {today_str}.\n\n"
