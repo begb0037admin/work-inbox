@@ -341,7 +341,7 @@ function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbo
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
 function _priSetOrder(pt,ptom,pw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
-function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}  
+function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
@@ -359,11 +359,11 @@ function priDragStart(e,sec,priKey){
   _priDragState={sec,priKey};
   e.dataTransfer.effectAllowed='move';
   e.dataTransfer.setData('text/plain',priKey);
-  setTimeout(()=>{const el=document.querySelector(`.pri-card[data-prikey="${priKey}"]`);if(el)el.classList.add('pri-dragging');},0);
+  setTimeout(()=>{const el=document.querySelector(`.card-ph[data-prikey="${priKey}"]`);if(el)el.classList.add('pri-dragging');},0);
 }
 function priDragEnd(e){
-  document.querySelectorAll('.pri-card.pri-dragging').forEach(el=>el.classList.remove('pri-dragging'));
-  document.querySelectorAll('.pri-card.pri-drop-before,.pri-card.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));
+  document.querySelectorAll('.card-ph.pri-dragging').forEach(el=>el.classList.remove('pri-dragging'));
+  document.querySelectorAll('.card-ph.pri-drop-before,.card-ph.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));
   document.querySelectorAll('.pri-drop-zone.pri-zone-active').forEach(el=>el.classList.remove('pri-zone-active'));
   _priDragState=null;
 }
@@ -383,7 +383,7 @@ function emailCardDragEnd(e){
 function priCardDragOver(e,sec,priKey){
   if(!_priDragState&&!_emailDragData)return;
   e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect='move';
-  if(_priDragState){document.querySelectorAll('.pri-card.pri-drop-before,.pri-card.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));const r=e.currentTarget.getBoundingClientRect();e.currentTarget.classList.add(e.clientY<r.top+r.height/2?'pri-drop-before':'pri-drop-after');}
+  if(_priDragState){document.querySelectorAll('.card-ph.pri-drop-before,.card-ph.pri-drop-after').forEach(el=>el.classList.remove('pri-drop-before','pri-drop-after'));const r=e.currentTarget.getBoundingClientRect();e.currentTarget.classList.add(e.clientY<r.top+r.height/2?'pri-drop-before':'pri-drop-after');}
 }
 function priCardDragLeave(e,priKey){
   if(e.relatedTarget&&e.currentTarget.contains(e.relatedTarget))return;
@@ -397,7 +397,7 @@ function priCardDrop(e,sec,priKey){
   const before=e.currentTarget.classList.contains('pri-drop-before');
   const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
   const sk={};
-  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
+  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .card-ph`)).map(c=>c.dataset.prikey);});
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   const ti=sk[sec].indexOf(priKey);
@@ -423,7 +423,7 @@ function priZoneDrop(e,sec){
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
   const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
   const sk={};
-  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .pri-card`)).map(c=>c.dataset.prikey);});
+  allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .card-ph`)).map(c=>c.dataset.prikey);});
   allSecs.forEach(s=>{sk[s]=sk[s].filter(k=>k!==fromKey);});
   sk[sec].push(fromKey);
   _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
