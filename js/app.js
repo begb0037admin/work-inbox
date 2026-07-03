@@ -341,7 +341,7 @@ function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbo
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
 function _priSetOrder(pt,ptom,pw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
-function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}  
+function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
@@ -513,7 +513,6 @@ function renderBriefing(data,key){
 }
 
 function toggleSum(id,btn){const el=document.getElementById(id);const exp=el.classList.toggle('expanded');btn.textContent=exp?'Show less':'Show more';}
-function toggleCalExpand(bodyId){const body=document.getElementById(bodyId);const btn=document.getElementById(bodyId+'Btn');if(!body||!btn)return;const exp=body.classList.toggle('expanded');btn.innerHTML=exp?'&#9650; Show less':'&#9660; Show all';}
 
 function renderCalPanel(data){
   const el=document.getElementById('calPanel');
@@ -535,7 +534,7 @@ function renderCalPanel(data){
       return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${c.summary}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button><a class="summary-cc-link" href="https://cc.lelitte.co.uk" target="_blank">CC &#8594;</a></div></div>`:''}</div></div>`;
     }).join('');
     const bodyId=isToday?'calBodyToday':'calBodyTom';
-    return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="cal-col-body" id="${bodyId}">${rows}</div><div class="cal-expand-footer"><button class="cal-expand-btn" id="${bodyId}Btn" onclick="toggleCalExpand('${bodyId}')">&#9660; Show all</button></div></div>`;
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="cal-col-body" id="${bodyId}">${rows}</div></div>`;
   }
   function renderMiniCal(monthOffset){
     const calDate=new Date(todayYear,todayMonth+(monthOffset||0),1);
