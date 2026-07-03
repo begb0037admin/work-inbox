@@ -539,6 +539,7 @@ function renderCalPanel(data){
     const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
     let startDow=calDate.getDay()-1; if(startDow<0) startDow=6;
     const tom=new Date(now); tom.setDate(tom.getDate()+1);
+    while(tom.getDay()===0||tom.getDay()===6) tom.setDate(tom.getDate()+1);
     const tomDate=tom.getDate(), tomMonth=tom.getMonth(), tomYear=tom.getFullYear();
     const hasTodayMtg=data.calToday&&data.calToday.length>0;
     const hasTomMtg=data.calTomorrow&&data.calTomorrow.length>0;
@@ -556,7 +557,9 @@ function renderCalPanel(data){
   }
   const todayHeader='Today &mdash; '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   const tom=new Date(now); tom.setDate(tom.getDate()+1);
-  const tomHeader='Tomorrow &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const skippedWeekend=tom.getDay()===0||tom.getDay()===6;
+  while(tom.getDay()===0||tom.getDay()===6) tom.setDate(tom.getDate()+1);
+  const tomHeader=(skippedWeekend?'Next Week':'Tomorrow')+' &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}<div class="main-cal-block">${renderMiniCal(0)}<hr class="mini-cal-divider">${renderMiniCal(1)}</div></div>`;
 }
 
