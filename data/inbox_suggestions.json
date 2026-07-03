@@ -1,52 +1,43 @@
 {
-  "generated_at": "2026-07-03 12:19",
+  "generated_at": "2026-07-03 15:00",
   "new_tasks": [
     {
-      "title": "Non-clinical pay uplift -- plan HR Systems involvement",
+      "title": "Non-clinical pay uplift -- scoping and planning",
       "tier": "week",
-      "description": "Jasmin Khokhra initiated kick-off for non-clinical pay uplift with main holiday season approaching. Kevin needs to assess HR Systems' involvement in the uplift implementation and coordinate resource planning given team leave patterns.",
+      "description": "Jasmin Khokhra has initiated a non-clinical pay uplift kick-off with main holiday season approaching. Kevin needs to review the scope, identify resource requirements, and plan HR Systems involvement before calendars fill further.",
       "email_subject": "Non-clinical pay uplift kick-off",
       "email_from": "Jasmin Khokhra",
       "received": "2026-07-01 15:03",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000"
     },
     {
-      "title": "DTP1334 SHSMS Evaluation -- review Christopher Sanders' legal compliance requirements",
-      "tier": "week",
-      "description": "Christopher Sanders has identified and split legal compliance requirements from yesterday's session evaluation. Kevin needs to review these requirements and incorporate them into the evaluation scoring and decision-making process.",
+      "title": "DTP1092 College staff in PXD -- reschedule meeting with Crispin",
+      "tier": "tomorrow",
+      "description": "Crispin Muncaster has requested to move a DTP1092 College staff meeting to an earlier slot. Kevin needs to coordinate and confirm a new meeting time.",
+      "email_subject": "DTP1092 College staff in PXD",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-07-03 14:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EBB0000"
+    }
+  ],
+  "applied_updates": [
+    {
+      "task_id": "t029",
+      "task_title": "DTP1334 SHSMS Evaluation -- review Helen Harbour briefing and weightings",
+      "note": "Christopher Sanders sent follow-up requirements relating to legal compliance from the SHSMS evaluation session, with weightings split by category.",
       "email_subject": "RE: Weightings spreadsheet",
       "email_from": "Christopher Sanders",
       "received": "2026-07-01 14:53",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F60000"
     },
     {
-      "title": "DTP1092 PXD Company 90 Testing -- provide clarification and testing guidance",
-      "tier": "tomorrow",
-      "description": "Crispin Muncaster is requesting clarification and guidance on Company 10/Company 90 user scenario testing for DTP1092. Kevin needs to provide technical guidance on the testing approach and accept criteria.",
+      "task_id": "t005",
+      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
+      "note": "Crispin Muncaster flagged clarification and guidance needed on DTP1092 Company 90 testing; requests meeting slot.",
       "email_subject": "DTP1092 PXD Company 90 Testing",
       "email_from": "Crispin Muncaster",
       "received": "2026-07-03 11:35",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EB80000"
-    }
-  ],
-  "applied_updates": [
-    {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Tony Boydell sent Acceptance Criteria for Company 10/Company 90 User Scenarios, advancing the testing phase of the DTP1092 PXD Company 90 setup work.",
-      "email_subject": "Re: DTP1092 PXD Company 90 Testing",
-      "email_from": "Tony Boydell",
-      "received": "2026-07-03 12:12",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EB90000"
-    },
-    {
-      "task_id": "t034",
-      "task_title": "Sickness Absence Reporting -- open absence bug",
-      "note": "Sarah Rowles' email to Henry about OSM request for manager access to UOXU is linked to the sickness absence reporting investigation that Kevin flagged at the HR Systems Managers Meeting.",
-      "email_subject": "Manager access in UOXU for Insight reporting investigation",
-      "email_from": "Sarah Rowles",
-      "received": "2026-07-03 11:07",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EB70000"
     }
   ]
 }
