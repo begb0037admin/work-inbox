@@ -748,7 +748,6 @@ if GRANOLA_API_KEY:
         _lookback = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
         _g_data   = _granola_fetch(f"https://public-api.granola.ai/v1/notes?created_after={_lookback}")
         _g_notes  = _g_data.get("notes", [])
-        print(f"Phase 3.7 debug - API keys: {list(_g_data.keys())}, notes: {len(_g_notes)}")
 
         # Build the calendar items list for matching (today + tomorrow non-all-day)
         _cal_candidates = [
@@ -758,8 +757,6 @@ if GRANOLA_API_KEY:
             {"idx": i, "day": "tomorrow", "title": c["title"]}
             for i, c in enumerate(cal_tomorrow_items) if c.get("time", "").lower() != "all day"
         ]
-        print(f"Phase 3.7 debug - note titles: {[n.get('title','') for n in _g_notes]}")
-        print(f"Phase 3.7 debug - cal candidates: {[c['title'] for c in _cal_candidates]}")
 
         for cal_item in _cal_candidates:
             cal_kw = _granola_keywords(cal_item["title"])
@@ -771,8 +768,13 @@ if GRANOLA_API_KEY:
                 if score > best_score:
                     best_score, best_note = score, note
             if best_note and best_score >= 1:
-                detail  = _granola_fetch(f"https://public-api.granola.ai/v1/notes/{best_note['id']}")
-                summary = (detail.get("summary") or "").strip()
+                # ?include=transcript required for the API to return the summary field
+                detail   = _granola_fetch(f"https://public-api.granola.ai/v1/notes/{best_note['id']}?include=transcript")
+                _raw_sum = detail.get("summary") or ""
+                if isinstance(_raw_sum, dict):
+                    summary = (_raw_sum.get("text") or _raw_sum.get("content") or "").strip()
+                else:
+                    summary = str(_raw_sum).strip()
                 if summary:
                     key = f"{cal_item['day']}_{cal_item['idx']}"
                     _granola_context[key] = {"note_title": best_note.get("title", ""), "summary": summary[:500]}
