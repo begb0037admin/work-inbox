@@ -748,6 +748,7 @@ if GRANOLA_API_KEY:
         _lookback = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
         _g_data   = _granola_fetch(f"https://public-api.granola.ai/v1/notes?created_after={_lookback}")
         _g_notes  = _g_data.get("notes", [])
+        print(f"Phase 3.7 debug - API keys: {list(_g_data.keys())}, notes: {len(_g_notes)}")
 
         # Build the calendar items list for matching (today + tomorrow non-all-day)
         _cal_candidates = [
