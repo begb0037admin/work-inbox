@@ -1,34 +1,43 @@
 {
-  "generated_at": "2026-07-03 17:46",
+  "generated_at": "2026-07-03 18:42",
   "new_tasks": [
     {
-      "title": "Non-clinical pay uplift -- confirm readiness and timeline",
+      "title": "Non-clinical pay uplift -- prepare for UCEA communication",
       "tier": "week",
-      "description": "Jasmin Khokhra has initiated a non-clinical pay uplift kick-off meeting. Kevin needs to assess the impact on HR Systems, confirm any system changes or data loads required, and coordinate with the team on timeline and resource allocation before the main holiday season.",
+      "description": "Jasmin Khokhra has initiated a non-clinical pay uplift kick-off meeting ahead of official UCEA communication and the main holiday season. Kevin needs to understand the scope and prepare for the impact on HR Systems and payroll processes.",
       "email_subject": "Non-clinical pay uplift kick-off",
       "email_from": "Jasmin Khokhra",
       "received": "2026-07-01 15:03",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000"
     },
     {
-      "title": "DTP1092 College staff in PXD -- reschedule Crispin's meeting",
-      "tier": "tomorrow",
-      "description": "Crispin Muncaster has requested to move his DTP1092 College staff meeting to an earlier slot (currently scheduled for Friday afternoon). Kevin needs to confirm availability and reschedule to accommodate Crispin's request.",
-      "email_subject": "DTP1092 College staff in PXD",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-07-03 14:17",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EBB0000"
+      "title": "DTP1334 SHSMS Evaluation -- review Christopher Sanders legal compliance requirements",
+      "tier": "week",
+      "description": "Christopher Sanders has sent requirements relating to legal compliance identified in yesterday's evaluation session, split into categories. Kevin needs to review and assess how these align with the POC work and system evaluation weightings.",
+      "email_subject": "RE: Weightings spreadsheet",
+      "email_from": "Christopher Sanders",
+      "received": "2026-07-01 14:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F60000"
     }
   ],
   "applied_updates": [
     {
-      "task_id": "t032",
-      "task_title": "DTP1334 SHSMS Evaluation -- ongoing post-meeting (resourcing, scoring, key dates)",
-      "note": "Kevin clarified to Marie and Simon his view on resource requirement for Evo/PeopleXD in response to today's discussion, directly relevant to DTP1334 resourcing concerns.",
-      "email_subject": "Subject: Evo / PeopleXD — resource requirement",
-      "email_from": "Kevin (sent to: Marie Cooksey; Simon Burford)",
-      "received": "2026-07-03 16:32",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078D895C0F0000"
+      "task_id": "t005",
+      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
+      "note": "Crispin Muncaster has requested to move an earlier meeting slot for DTP1092 College staff in PXD work.",
+      "email_subject": "DTP1092 College staff in PXD",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-07-03 14:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EBB0000"
+    },
+    {
+      "task_id": "t005",
+      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
+      "note": "Crispin acknowledges receipt of Tony Boydell's Acceptance Criteria for Company 10/Company 90 User Scenarios testing.",
+      "email_subject": "RE: DTP1092 PXD Company 90 Testing",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-07-03 13:25",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EBA0000"
     }
   ]
 }
