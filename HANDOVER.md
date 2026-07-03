@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-03 — brief session aborted (GitHub MCP disconnected). No code changes. Two items added to fix list.
+**Last updated:** 2026-07-04 — end of session. Three items outstanding (unchanged from 2026-07-02). Crest rule propagation complete.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -17,15 +17,27 @@
 
 3. **Drag reorder animation** — No visual feedback during drag. Kevin needs cards to visually shift in real time as he drags: card below flips up as he drags down, card above moves down as he drags up. Requires rewriting drag handlers to insert a live placeholder into the DOM during `dragover`. Meaningful piece of work — plan before coding.
 
-4. **Add Oxford crest hard rule to all repo CLAUDE.md files** — Identified 2026-07-03. The hard rule protecting the crest only existed in work-inbox CLAUDE.md. Needs propagating to hris-launcher (`<img class="sidebar-crest">`), command-centre (`<img class="sb-crest">`), and hr-fa-knowledge-base (`<img class="crest">`). hris-dashboard uses an emoji; ag-flexpoints has no crest.
+---
 
-5. **Verify no crests showing grey squares on live dashboards** — Source inspection on 2026-07-03 confirmed all base64 crests had valid JPEG headers, but visual verification on live dashboards still needed before closing this item.
+## Session 2026-07-04 — Crest rule propagation
+
+No code changes to work-inbox this session. Cross-repo maintenance only.
+
+- **Crest audit completed** — all dashboards inspected for Oxford crest usage:
+  - work-inbox: external file `images/oxford-crest.jpg` — intact ✅
+  - hris-launcher: base64 JPEG `<img class="sidebar-crest">` — intact ✅
+  - command-centre: base64 JPEG `<img class="sb-crest">` — intact ✅
+  - hr-fa-knowledge-base: base64 JPEG `<img class="crest">` — intact ✅
+  - hris-dashboard: emoji 🎓 (no image) — N/A
+  - ag-flexpoints: no crest — N/A
+- **Hard rule propagated** — added to CLAUDE.md for hris-launcher, command-centre, hr-fa-knowledge-base (matching the rule already in work-inbox CLAUDE.md). Visual verification on live dashboards is Kevin's to confirm — no grey squares expected based on source inspection.
+- **Reminder trigger** (set 2026-07-03, trig_01U3X2rbvpD1aR7V32DYW7N4) deleted — session resumed manually.
 
 ---
 
 ## Session 2026-07-03 (aborted — GitHub MCP disconnected)
 
-GitHub MCP server disconnected before handover could be pushed. No code changes this session. Reminder trigger set for 2026-07-04 07:00 UTC (subsequently deleted when session resumed manually on 2026-07-04). Two new items identified and added to fix list: crest rule propagation (#4) and grey square verification (#5).
+GitHub MCP server disconnected before handover could be pushed. No code changes this session. Reminder trigger set for 2026-07-04 07:00 UTC. Two new items identified (crest rule propagation, grey square verification) — both addressed in 2026-07-04 session above.
 
 ---
 
