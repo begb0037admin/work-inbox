@@ -1,55 +1,45 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-03 — Granola 0-matches bug. Debug lines pushed (commit `2026f36`). Awaiting Kevin's script output to identify title mismatch.
+**Last updated:** 2026-07-03 — Calendar column expand/collapse replaced with independent vertical scroll on Today and Tomorrow columns.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
 
 ## NEXT SESSION — START HERE
 
-### 1. Granola 0-matches bug — ACTIVE (highest priority)
+### 1. Granola 0-matches bug — PARKED
 
-**Problem:** Phase 3.7 fetches 10 Granola notes successfully but matches 0 of them to the 11 calendar candidates. `_granola_context` stays empty. Phase 3.8 runs blind — AI summaries for calendar items have no prior-meeting context.
+**Problem:** Phase 3.7 fetches 10 Granola notes successfully but matches 0 of them to calendar candidates. `_granola_context` stays empty. Phase 3.8 runs blind.
 
-**Confirmed so far:**
-- API call works: response shape is `{"notes": [...], "hasMore": bool, "cursor": "..."}`, 10 notes returned
-- Calendar candidates exist: 11 non-all-day items built from `cal_today_items` + `cal_tomorrow_items`
-- 0 keyword matches between note titles and calendar item titles
+**Status:** Investigation paused by Kevin on 2026-07-03. Do not re-open without Kevin's instruction.
 
-**Root cause: unknown.** Most likely one of:
-- Granola note titles use a different format than Outlook calendar titles (e.g. Granola: `"FA Team Catch-up — 03/07"` vs Outlook: `"FA Team Daily Catchup"` — note `Daily` vs nothing, and hyphen vs em-dash)
-- Granola notes from the last 10 days are all from meetings not on today's/tomorrow's calendar
-- A subtle normalisation mismatch in `_granola_keywords()`
-
-**What's been done:** Two diagnostic debug lines pushed to `fetch_inbox.py` main (commit `2026f36`). Now in the Granola block, immediately after `_cal_candidates` is built:
+**Debug lines still in `fetch_inbox.py` main** (commit `2026f36`) — remove once the fix is confirmed:
 ```python
 print(f"Phase 3.7 debug - note titles: {[n.get('title','') for n in _g_notes]}")
 print(f"Phase 3.7 debug - cal candidates: {[c['title'] for c in _cal_candidates]}")
 ```
 
-**Next step:** Kevin runs the script. Script output will show both lists. Compare them — find the title mismatch. Then fix `_granola_keywords()` or the matching logic to bridge the gap. Once the fix is confirmed working (context > 0 meetings), remove all three debug print lines in one clean commit.
-
-**The `_granola_keywords()` function (current):**
-```python
-def _granola_keywords(title):
-    t = re.sub(r'\b\d{1,2}/\d{2}\b', '', title)   # remove DD/MM dates
-    t = re.sub(r'\b\d{4}\b', '', t)                # remove years
-    t = re.sub(r'[—\-&]', ' ', t)                  # dashes and ampersands to spaces
-    t = re.sub(r'[^\w\s]', '', t)                  # strip remaining punctuation
-    return set(w.lower() for w in t.split() if len(w) >= 2)
-```
-
-**Matching logic:** score = keyword intersection count; match requires score ≥ 1; best-scoring note wins per calendar item.
-
 ---
 
-## Fix list (after Granola is resolved)
+## Fix list
 
-2. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member is on leave tomorrow. The `fetch_inbox.py` triage needs to detect upcoming absences from calendar events and include them in `briefing.json` `absences[]` with forward notice (at least 1 day prior).
+2. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member is on leave tomorrow. `fetch_inbox.py` triage needs to detect upcoming absences from calendar events and include them in `briefing.json` `absences[]` with forward notice (at least 1 day prior).
 
 3. **AI calendar summaries are too generic** — Phase 3.8 runs blind without Granola context (blocked by item 1 above). Once Granola matching is fixed, summaries should use prior-meeting notes as primary source and surface carry-forwards, open actions, live decisions.
 
 4. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+
+---
+
+## Session 2026-07-03 — Calendar scroll (approved, pushed to main)
+
+**Scope:** Replace expand/collapse toggle on Today and Tomorrow calendar columns with independent vertical scrolling. Keep fixed height (260px), same size and position.
+
+**What changed:**
+- **`css/styles.css`** (commit `dc3544b`): Removed expand/collapse styles (`.cal-col-body` with `overflow:hidden`, `.cal-expand-footer`, `.cal-expand-btn`). Added scroll styles — `.cal-col-body { max-height: 260px; overflow-y: auto; overflow-x: hidden }` with 4px webkit scrollbar (`#d1d9e6` thumb, hover `#94a3b8`).
+- **`js/app.js`** (commit `6589384`): `renderBlock()` inside `renderCalPanel()` — return statement no longer includes `cal-expand-footer` div. `toggleCalExpand()` function removed entirely. Both Today (`calBodyToday`) and Tomorrow (`calBodyTom`) columns now scroll independently via the same `renderBlock` code path.
+
+**Kevin approval:** "perfect, approved ensure that it's on both columns today and tomorrow."
 
 ---
 
@@ -58,11 +48,10 @@ def _granola_keywords(title):
 **Scope:** Diagnosing why Phase 3.7 Granola fetch returns 10 notes but matches 0 calendar items.
 
 **What happened:**
-- First debug line added and pushed (earlier commit, SHA `6bc0941`): `print(f"Phase 3.7 debug - API keys: ..., notes: {len(_g_notes)}")`.
-- Kevin ran the script. Output confirmed: `API keys: ['notes', 'hasMore', 'cursor'], notes: 10` and `Granola context for 0 meetings`. API works; shape correct; 0 matches.
-- Root cause unresolved — need to see the actual titles on both sides.
+- First debug line added and pushed (commit `6bc0941`): confirmed API shape (`notes`, `hasMore`, `cursor`) and 10 notes returned, 0 matched.
 - Two additional debug lines pushed (commit `2026f36`): print note titles list and cal candidates titles list.
-- Session ended before Kevin could run the updated script.
+- Kevin ran the script — output confirmed `Granola context for 0 meetings`.
+- Investigation paused by Kevin: "no, we are going to stop. This doesn't seem to be working."
 
 **Current `fetch_inbox.py` SHA on main:** `5dd6f684ba69c959e32d84c8ed248e142b83dfb4`
 
@@ -132,11 +121,12 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 ## Current State
 
 ### Working
-- fetch_inbox.py — all phases confirmed working (Phase 3.7 Granola matching broken — see fix list)
+- fetch_inbox.py — all phases confirmed working (Phase 3.7 Granola matching broken — parked)
 - Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri)
 - Dashboard loads live briefing.json on load, falls back to localStorage archive
 - Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, inbox widget, absences, all 6 links populated
 - 3-column calendar panel (Today `7fr` | Tomorrow `7fr` | July+August mini-cals in one card `4fr`)
+- **Calendar columns scroll independently** — Today and Tomorrow each have `max-height: 260px; overflow-y: auto` with 4px scrollbar. Expand/collapse removed.
 - Rotating context strip with "Briefing context" label, dot nav
 - 2×2 priority grid with tier filter — flat `.card-ph` design, NEW/UPDATED badges on right
 - CC ticker reads live from CC tasks.json every 60s
@@ -144,7 +134,7 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 - Multi-machine setup complete (begb0037.AD-OAK)
 
 ### Known issues (fix next session)
-- **Granola 0-matches** — see NEXT SESSION above (highest priority)
+- **Granola 0-matches** — parked by Kevin (debug lines still in fetch_inbox.py)
 - Absences not showing tomorrow's leave
 - AI calendar summaries too generic (blocked by Granola fix)
 - Drag reorder has no visual animation
