@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-07-03 15:00",
+  "generated_at": "2026-07-03 17:46",
   "new_tasks": [
     {
-      "title": "Non-clinical pay uplift -- scoping and planning",
+      "title": "Non-clinical pay uplift -- confirm readiness and timeline",
       "tier": "week",
-      "description": "Jasmin Khokhra has initiated a non-clinical pay uplift kick-off with main holiday season approaching. Kevin needs to review the scope, identify resource requirements, and plan HR Systems involvement before calendars fill further.",
+      "description": "Jasmin Khokhra has initiated a non-clinical pay uplift kick-off meeting. Kevin needs to assess the impact on HR Systems, confirm any system changes or data loads required, and coordinate with the team on timeline and resource allocation before the main holiday season.",
       "email_subject": "Non-clinical pay uplift kick-off",
       "email_from": "Jasmin Khokhra",
       "received": "2026-07-01 15:03",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000"
     },
     {
-      "title": "DTP1092 College staff in PXD -- reschedule meeting with Crispin",
+      "title": "DTP1092 College staff in PXD -- reschedule Crispin's meeting",
       "tier": "tomorrow",
-      "description": "Crispin Muncaster has requested to move a DTP1092 College staff meeting to an earlier slot. Kevin needs to coordinate and confirm a new meeting time.",
+      "description": "Crispin Muncaster has requested to move his DTP1092 College staff meeting to an earlier slot (currently scheduled for Friday afternoon). Kevin needs to confirm availability and reschedule to accommodate Crispin's request.",
       "email_subject": "DTP1092 College staff in PXD",
       "email_from": "Crispin Muncaster",
       "received": "2026-07-03 14:17",
@@ -22,22 +22,13 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t029",
-      "task_title": "DTP1334 SHSMS Evaluation -- review Helen Harbour briefing and weightings",
-      "note": "Christopher Sanders sent follow-up requirements relating to legal compliance from the SHSMS evaluation session, with weightings split by category.",
-      "email_subject": "RE: Weightings spreadsheet",
-      "email_from": "Christopher Sanders",
-      "received": "2026-07-01 14:53",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F60000"
-    },
-    {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Crispin Muncaster flagged clarification and guidance needed on DTP1092 Company 90 testing; requests meeting slot.",
-      "email_subject": "DTP1092 PXD Company 90 Testing",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-07-03 11:35",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EB80000"
+      "task_id": "t032",
+      "task_title": "DTP1334 SHSMS Evaluation -- ongoing post-meeting (resourcing, scoring, key dates)",
+      "note": "Kevin clarified to Marie and Simon his view on resource requirement for Evo/PeopleXD in response to today's discussion, directly relevant to DTP1334 resourcing concerns.",
+      "email_subject": "Subject: Evo / PeopleXD — resource requirement",
+      "email_from": "Kevin (sent to: Marie Cooksey; Simon Burford)",
+      "received": "2026-07-03 16:32",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078D895C0F0000"
     }
   ]
 }
