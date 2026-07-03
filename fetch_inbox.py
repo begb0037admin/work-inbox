@@ -387,7 +387,7 @@ def build_cal_items(items):
         result.append(cal_item)
     return result
 
-# Detect absences from calendar -- all-day leave events spanning today
+# Detect absences from calendar -- all-day leave events spanning today or starting tomorrow
 ABSENCE_KEYWORDS = ["annual leave", "a/l", "on leave", "out of office", "holiday"]
 absence_set = set()
 for item in calendar:
@@ -401,13 +401,21 @@ for item in calendar:
         item_end   = datetime.fromisoformat(item["end"]).date()
         # Outlook all-day end date is exclusive (midnight next day), so use < not <=
         if item_start <= today < item_end:
-            # Extract name from subject -- strip the keyword portion
+            # Absent today
             name = item.get("subject", "")
             for kw in ["- Annual Leave", "- A/L", "- On Leave", "- Out of Office", "- Holiday",
                        "Annual Leave -", "A/L -", "Annual Leave", "A/L"]:
                 name = name.replace(kw, "").strip()
             if name:
                 absence_set.add(name)
+        elif item_start == tomorrow and item_end > tomorrow:
+            # Leave starts tomorrow -- flag it so Kevin sees it today
+            name = item.get("subject", "")
+            for kw in ["- Annual Leave", "- A/L", "- On Leave", "- Out of Office", "- Holiday",
+                       "Annual Leave -", "A/L -", "Annual Leave", "A/L"]:
+                name = name.replace(kw, "").strip()
+            if name:
+                absence_set.add(name + " (from tomorrow)")
     except:
         continue
 

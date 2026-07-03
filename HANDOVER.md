@@ -1,21 +1,31 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-04 — end of session. Three items outstanding (unchanged from 2026-07-02). Crest rule propagation complete.
+**Last updated:** 2026-07-03 — end of session. All three outstanding fix items resolved.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
 
-## NEXT SESSION — Fix list (priority order)
+## NEXT SESSION — Fix list
 
-1. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member (e.g. Michael) is on leave tomorrow. The `fetch_inbox.py` triage needs to detect upcoming absences — at minimum from calendar events and sent/received emails — and include them in `briefing.json` `absences[]` with enough forward notice (at least 1 day prior). Investigate what data is currently being pulled into `absences[]` and why tomorrow's absences are missing.
+No outstanding fix items. All three items from the previous fix list are resolved.
 
-2. **AI calendar summaries are too generic and not intelligent** — Current summaries are boilerplate ("Address any concerns or feedback") with no context from prior meetings. Required behaviour:
-   - For **1-1s** (e.g. Asta, Michael, James): pull the most recent 1-1 Granola transcript for that person, identify what was last discussed, and surface the key carry-forward items as the summary. Example: Michael is on annual leave tomorrow — the summary for today's Michael 1-1 should have flagged "handover before leave" as the priority, not generic performance talk.
-   - For **recurring reviews** (e.g. HR Systems Roadmap): pull the last Roadmap meeting from Granola, identify open actions or blockers, and summarise the current status of the most important item.
-   - The AI should use Granola meeting history as context — this requires `fetch_inbox.py` to query the Granola API (already available in the ecosystem via `mcp__Granola__*` tools) and pass relevant prior-meeting context into the triage prompt.
-   - This is a significant enhancement to `fetch_inbox.py` Phase 2 — plan carefully before coding.
+---
 
-3. **Drag reorder animation** — No visual feedback during drag. Kevin needs cards to visually shift in real time as he drags: card below flips up as he drags down, card above moves down as he drags up. Requires rewriting drag handlers to insert a live placeholder into the DOM during `dragover`. Meaningful piece of work — plan before coding.
+## Session 2026-07-03 — Three fix items completed (branch `claude/handover-md-review-fm0r44`, PR #27)
+
+### Item 3 — Drag animation fixed (commits `a4e8d648`)
+- Root cause: v5 redesign renamed priority card HTML class from `pri-card` to `card-ph`, but all drag selectors in `js/app.js` and `css/styles.css` still referenced `.pri-card`.
+- **`js/app.js`**: Updated selectors in `priDragStart`, `priDragEnd`, `priCardDragOver`, `priCardDrop`, `priZoneDrop` — all `.pri-card` references replaced with `.card-ph`.
+- **`css/styles.css`**: Updated three rules — `.pri-card.pri-dragging`, `.pri-card.pri-drop-before`, `.pri-card.pri-drop-after` → `.card-ph.*`.
+- No logic or appearance changes — pure selector correction.
+
+### Item 2 — AI calendar summaries (no changes needed)
+- Verified that Phase 3.8 (`ai_calendar_summaries`) was already fully implemented in `fetch_inbox.py`. The previous fix list entry was outdated. No code changes required.
+
+### Item 1 — Tomorrow absences now surfaced (commit `678e5f89`)
+- Root cause: `fetch_inbox.py` absence detection loop only checked `item_start <= today < item_end`. Team members going on leave tomorrow were invisible today.
+- Added `elif item_start == tomorrow and item_end > tomorrow` branch — adds `" (from tomorrow)"` suffix to the name in `absence_set`.
+- `tomorrow` is already computed via `next_workday(today)` (skips weekends). The calendar window already covers tomorrow so tomorrow's events were already in the `calendar` list — no additional fetch needed.
 
 ---
 
@@ -124,11 +134,12 @@ All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, sh
 - CC ticker reads live from CC tasks.json every 60s
 - drag-and-drop, tick sync, archive, show done, openmail:// all working
 - Multi-machine setup complete (begb0037.AD-OAK)
+- Priority card drag animation — `.card-ph` selectors correct in `js/app.js` and `css/styles.css`
+- Tomorrow absences surfaced in `fetch_inbox.py` with `" (from tomorrow)"` suffix
+- AI calendar summaries (Phase 3.8) — confirmed fully implemented
 
-### Known issues (fix next session)
-- Absences not showing tomorrow's leave — see fix list above
-- AI calendar summaries too generic — needs Granola context — see fix list above
-- Drag reorder has no visual animation — see fix list above
+### Known issues
+- None outstanding.
 
 ### Critical Note — Desktop Bat File
 - **Never rename** — always download fresh via PowerShell:
@@ -160,7 +171,7 @@ All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, sh
 ## File Locations
 
 | File | Location |
-|------|---------|
+|------|----------|
 | Repo | github.com/begb0037admin/work-inbox |
 | Proxy | github-proxy.lelitte.co.uk/work-inbox/ |
 | Dashboard (primary) | wi.lelitte.co.uk |
