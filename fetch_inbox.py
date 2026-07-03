@@ -758,6 +758,8 @@ if GRANOLA_API_KEY:
             {"idx": i, "day": "tomorrow", "title": c["title"]}
             for i, c in enumerate(cal_tomorrow_items) if c.get("time", "").lower() != "all day"
         ]
+        print(f"Phase 3.7 debug - note titles: {[n.get('title','') for n in _g_notes]}")
+        print(f"Phase 3.7 debug - cal candidates: {[c['title'] for c in _cal_candidates]}")
 
         for cal_item in _cal_candidates:
             cal_kw = _granola_keywords(cal_item["title"])
