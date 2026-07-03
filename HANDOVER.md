@@ -1,21 +1,70 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-04 — end of session. Three items outstanding (unchanged from 2026-07-02). Crest rule propagation complete.
+**Last updated:** 2026-07-03 — Granola 0-matches bug. Debug lines pushed (commit `2026f36`). Awaiting Kevin's script output to identify title mismatch.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
 
-## NEXT SESSION — Fix list (priority order)
+## NEXT SESSION — START HERE
 
-1. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member (e.g. Michael) is on leave tomorrow. The `fetch_inbox.py` triage needs to detect upcoming absences — at minimum from calendar events and sent/received emails — and include them in `briefing.json` `absences[]` with enough forward notice (at least 1 day prior). Investigate what data is currently being pulled into `absences[]` and why tomorrow's absences are missing.
+### 1. Granola 0-matches bug — ACTIVE (highest priority)
 
-2. **AI calendar summaries are too generic and not intelligent** — Current summaries are boilerplate ("Address any concerns or feedback") with no context from prior meetings. Required behaviour:
-   - For **1-1s** (e.g. Asta, Michael, James): pull the most recent 1-1 Granola transcript for that person, identify what was last discussed, and surface the key carry-forward items as the summary. Example: Michael is on annual leave tomorrow — the summary for today's Michael 1-1 should have flagged "handover before leave" as the priority, not generic performance talk.
-   - For **recurring reviews** (e.g. HR Systems Roadmap): pull the last Roadmap meeting from Granola, identify open actions or blockers, and summarise the current status of the most important item.
-   - The AI should use Granola meeting history as context — this requires `fetch_inbox.py` to query the Granola API (already available in the ecosystem via `mcp__Granola__*` tools) and pass relevant prior-meeting context into the triage prompt.
-   - This is a significant enhancement to `fetch_inbox.py` Phase 2 — plan carefully before coding.
+**Problem:** Phase 3.7 fetches 10 Granola notes successfully but matches 0 of them to the 11 calendar candidates. `_granola_context` stays empty. Phase 3.8 runs blind — AI summaries for calendar items have no prior-meeting context.
 
-3. **Drag reorder animation** — No visual feedback during drag. Kevin needs cards to visually shift in real time as he drags: card below flips up as he drags down, card above moves down as he drags up. Requires rewriting drag handlers to insert a live placeholder into the DOM during `dragover`. Meaningful piece of work — plan before coding.
+**Confirmed so far:**
+- API call works: response shape is `{"notes": [...], "hasMore": bool, "cursor": "..."}`, 10 notes returned
+- Calendar candidates exist: 11 non-all-day items built from `cal_today_items` + `cal_tomorrow_items`
+- 0 keyword matches between note titles and calendar item titles
+
+**Root cause: unknown.** Most likely one of:
+- Granola note titles use a different format than Outlook calendar titles (e.g. Granola: `"FA Team Catch-up — 03/07"` vs Outlook: `"FA Team Daily Catchup"` — note `Daily` vs nothing, and hyphen vs em-dash)
+- Granola notes from the last 10 days are all from meetings not on today's/tomorrow's calendar
+- A subtle normalisation mismatch in `_granola_keywords()`
+
+**What's been done:** Two diagnostic debug lines pushed to `fetch_inbox.py` main (commit `2026f36`). Now in the Granola block, immediately after `_cal_candidates` is built:
+```python
+print(f"Phase 3.7 debug - note titles: {[n.get('title','') for n in _g_notes]}")
+print(f"Phase 3.7 debug - cal candidates: {[c['title'] for c in _cal_candidates]}")
+```
+
+**Next step:** Kevin runs the script. Script output will show both lists. Compare them — find the title mismatch. Then fix `_granola_keywords()` or the matching logic to bridge the gap. Once the fix is confirmed working (context > 0 meetings), remove all three debug print lines in one clean commit.
+
+**The `_granola_keywords()` function (current):**
+```python
+def _granola_keywords(title):
+    t = re.sub(r'\b\d{1,2}/\d{2}\b', '', title)   # remove DD/MM dates
+    t = re.sub(r'\b\d{4}\b', '', t)                # remove years
+    t = re.sub(r'[—\-&]', ' ', t)                  # dashes and ampersands to spaces
+    t = re.sub(r'[^\w\s]', '', t)                  # strip remaining punctuation
+    return set(w.lower() for w in t.split() if len(w) >= 2)
+```
+
+**Matching logic:** score = keyword intersection count; match requires score ≥ 1; best-scoring note wins per calendar item.
+
+---
+
+## Fix list (after Granola is resolved)
+
+2. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member is on leave tomorrow. The `fetch_inbox.py` triage needs to detect upcoming absences from calendar events and include them in `briefing.json` `absences[]` with forward notice (at least 1 day prior).
+
+3. **AI calendar summaries are too generic** — Phase 3.8 runs blind without Granola context (blocked by item 1 above). Once Granola matching is fixed, summaries should use prior-meeting notes as primary source and surface carry-forwards, open actions, live decisions.
+
+4. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+
+---
+
+## Session 2026-07-03 — Granola 0-matches investigation
+
+**Scope:** Diagnosing why Phase 3.7 Granola fetch returns 10 notes but matches 0 calendar items.
+
+**What happened:**
+- First debug line added and pushed (earlier commit, SHA `6bc0941`): `print(f"Phase 3.7 debug - API keys: ..., notes: {len(_g_notes)}")`.
+- Kevin ran the script. Output confirmed: `API keys: ['notes', 'hasMore', 'cursor'], notes: 10` and `Granola context for 0 meetings`. API works; shape correct; 0 matches.
+- Root cause unresolved — need to see the actual titles on both sides.
+- Two additional debug lines pushed (commit `2026f36`): print note titles list and cal candidates titles list.
+- Session ended before Kevin could run the updated script.
+
+**Current `fetch_inbox.py` SHA on main:** `5dd6f684ba69c959e32d84c8ed248e142b83dfb4`
 
 ---
 
@@ -30,14 +79,13 @@ No code changes to work-inbox this session. Cross-repo maintenance only.
   - hr-fa-knowledge-base: base64 JPEG `<img class="crest">` — intact ✅
   - hris-dashboard: emoji 🎓 (no image) — N/A
   - ag-flexpoints: no crest — N/A
-- **Hard rule propagated** — added to CLAUDE.md for hris-launcher, command-centre, hr-fa-knowledge-base (matching the rule already in work-inbox CLAUDE.md). Visual verification on live dashboards is Kevin's to confirm — no grey squares expected based on source inspection.
-- **Reminder trigger** (set 2026-07-03, trig_01U3X2rbvpD1aR7V32DYW7N4) deleted — session resumed manually.
+- **Hard rule propagated** — added to CLAUDE.md for hris-launcher, command-centre, hr-fa-knowledge-base.
 
 ---
 
 ## Session 2026-07-03 (aborted — GitHub MCP disconnected)
 
-GitHub MCP server disconnected before handover could be pushed. No code changes this session. Reminder trigger set for 2026-07-04 07:00 UTC. Two new items identified (crest rule propagation, grey square verification) — both addressed in 2026-07-04 session above.
+GitHub MCP server disconnected before handover could be pushed. No code changes. Reminder trigger set for 2026-07-04 07:00 UTC. Two new items identified (crest rule propagation, grey square verification) — both addressed in 2026-07-04 session above.
 
 ---
 
@@ -62,40 +110,10 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 ## Session 2026-07-02 — v5 design corrections (commit `12ff90d`)
 
 - **Removed** email address from sidebar
-- **Links updated**: 6 approved links, all now populated (OSM IT Services = `https://oxford.saasiteu.com/Modules/SelfService/#home`)
+- **Links updated**: 6 approved links, all now populated
 - **Cards redesigned**: flat `.card-ph` design (drag handle, circle done button, title + sub, email + CC→ icons, NEW/UPDATED badges on right)
 - **Layout corrected**: left col = Today + Tomorrow, right col = Week + Parked
 - **Oxford crest**: restored as external file `images/oxford-crest.jpg` — NEVER embed as base64, NEVER delete, NEVER change the `src` attribute
-
----
-
-## Session 2026-07-02 — v5 full redesign (PR #24)
-
-Three files changed: `index.html`, `css/styles.css`, `js/app.js`. Approved by Kevin, cherry-picked to main throughout session.
-
-**`js/app.js`** — functions added: `renderCalPanel`, `setupCtxTicker`, `_renderCtx`, `_jumpCtx`, `updateInboxWidget`, `applyFilter`, `clearSel`, `clickStat`, `loadCcTicker`. `renderBriefing()` updated. `loadTasksWidget()` replaced by `loadCcTicker()`.
-
-All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, show done, priority overrides.
-
----
-
-## Session 2026-06-29 — Task Scheduler re-established
-
-- Re-established via `create_inbox_tasks.bat` (repo root). Run as Administrator.
-- Schedule: `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` Mon–Fri.
-
----
-
-## Session 2026-06-28 — Live clock added to sidebar
-
-- `updateWiClock()` + `setInterval` added to `js/app.js`. Merged to main via PR #20.
-
----
-
-## Session 2026-06-27 — File split + Cloudflare custom domain
-
-- 65KB monolithic `index.html` split into `index.html` (shell) + `css/styles.css` + `js/app.js`.
-- `wi.lelitte.co.uk` live via Cloudflare. Auto-deploys from main.
 
 ---
 
@@ -114,8 +132,8 @@ All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, sh
 ## Current State
 
 ### Working
-- fetch_inbox.py — all phases confirmed working
-- Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri). Recovery: run `create_inbox_tasks.bat` as Administrator.
+- fetch_inbox.py — all phases confirmed working (Phase 3.7 Granola matching broken — see fix list)
+- Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri)
 - Dashboard loads live briefing.json on load, falls back to localStorage archive
 - Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, inbox widget, absences, all 6 links populated
 - 3-column calendar panel (Today `7fr` | Tomorrow `7fr` | July+August mini-cals in one card `4fr`)
@@ -126,13 +144,10 @@ All existing mechanics preserved: drag/drop, openmail://, tick sync, archive, sh
 - Multi-machine setup complete (begb0037.AD-OAK)
 
 ### Known issues (fix next session)
-- Absences not showing tomorrow's leave — see fix list above
-- AI calendar summaries too generic — needs Granola context — see fix list above
-- Drag reorder has no visual animation — see fix list above
-
-### Critical Note — Desktop Bat File
-- **Never rename** — always download fresh via PowerShell:
-  `Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/Run_Inbox_Briefing.bat" -OutFile "$env:USERPROFILE\Desktop\Run Inbox Briefing.bat"`
+- **Granola 0-matches** — see NEXT SESSION above (highest priority)
+- Absences not showing tomorrow's leave
+- AI calendar summaries too generic (blocked by Granola fix)
+- Drag reorder has no visual animation
 
 ---
 
