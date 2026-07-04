@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-04 - Granola calendar context phase closed.
+**Last updated:** 2026-07-04 - Absence tomorrow-detection with weekend-aware labelling applied.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -28,9 +28,22 @@
 
 ## Fix list
 
-2. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member is on leave tomorrow. `fetch_inbox.py` triage needs to detect upcoming absences from calendar events and include them in `briefing.json` `absences[]` with forward notice (at least 1 day prior).
-
 3. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+
+---
+
+## Session 2026-07-04 — Absence tomorrow-detection fix (commit `3aab85c`)
+
+**Scope:** `fetch_inbox.py` absence detection extended to surface tomorrow's leave in the sidebar absences panel. Weekend-aware labelling added.
+
+**What changed:**
+- Absence detection block replaced with version that scans both today and next working day.
+- Today's absences on weekends/Sundays show `"(next week)"` suffix — avoids "today" implying a working day when today is Saturday.
+- Absences starting on `tomorrow` (= `next_workday(today)`) labelled `"(tomorrow)"` on Mon–Thu, `"(next week)"` on Fri/Sat/Sun.
+- Shared `_extract_absence_name()` helper removes duplication from the name-stripping logic.
+- No duplicate checking needed: date logic naturally prevents double-listing the same person.
+
+**Kevin approval:** "Yep, approved."
 
 ---
 
@@ -143,6 +156,7 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 ### Working
 - fetch_inbox.py — all phases confirmed working
 - **Granola calendar context (Phase 3.7b + 3.8)** — COMPLETE. Matching via keyword overlap; summary extracted from `summary_text`/`summary_markdown`. Do not modify.
+- **Absence detection** — today's leave + tomorrow's leave (weekend-aware labelling). Commit `3aab85c`.
 - Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri)
 - Dashboard loads live briefing.json on load, falls back to localStorage archive
 - Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, absences, all 6 links populated
@@ -155,7 +169,6 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 - Multi-machine setup complete (begb0037.AD-OAK)
 
 ### Known issues (fix next session)
-- Absences not showing tomorrow's leave
 - Drag reorder has no visual animation
 
 ---
@@ -163,7 +176,7 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 ## localStorage Keys
 
 | Key | Purpose |
-|-----|---------|
+|-----|--------|
 | `workInbox_briefings_v1` | Archive of past briefing JSON objects, keyed by date string |
 | `workInbox_today_v1` | Key of the currently displayed briefing |
 | `workInbox_ticks_v1` | Tick (done) state for all cards |
