@@ -1,19 +1,28 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-04 - Granola calendar context fixed and richer meeting prep summaries rolled out.
+**Last updated:** 2026-07-04 - Granola calendar context phase closed.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
 
 ## NEXT SESSION — START HERE
 
-### 1. Granola calendar context - FIXED 2026-07-04
+### 1. Granola calendar context — CLOSED 2026-07-04 ✅
 
-**Problem fixed:** Phase 3.7 fetched Granola notes and found title candidates, but `_granola_context` stayed empty because `fetch_inbox.py` only read `detail["summary"]`. Granola note detail responses return usable content in `summary_text` and `summary_markdown`.
+**DO NOT reopen.** Do not refactor, retune, or alter Phase 3.7b or Phase 3.8.
 
-**Production fix:** `fetch_inbox.py` now falls back to `summary_text` / `summary_markdown`, passes up to 1500 characters of Granola context into Phase 3.8, and asks for 2-3 concise prep sentences rather than one short sentence.
+**Root cause (fixed):** `fetch_inbox.py` only read `detail["summary"]`. Granola note detail responses return usable content in `summary_text` and `summary_markdown`.
 
-**Important:** Title matching behaviour was not changed. Do not reintroduce summary-only extraction. Debug-only files, forced smoke-test matches, preview writes, and phase skip flags were not part of the production rollout.
+**Production fix (commits `7bc621f`, `cf6ca85`, `48e57ea`):**
+- `fetch_inbox.py` now falls back to `summary_text` / `summary_markdown`.
+- Granola context passed into Phase 3.8 increased to 1500 characters.
+- Phase 3.8 asks for 2-3 concise prep sentences with a 900 token response budget.
+- Title matching behaviour deliberately unchanged.
+- No debug logging, forced matches, phase-skip flags, or dry-run mode in production.
+
+**Future proposals (separate phases only):**
+- A first-class DRY_RUN mode for safer diagnostics may be proposed later.
+- Any title matching changes require a separate approved phase.
 
 ---
 
@@ -21,13 +30,9 @@
 
 2. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member is on leave tomorrow. `fetch_inbox.py` triage needs to detect upcoming absences from calendar events and include them in `briefing.json` `absences[]` with forward notice (at least 1 day prior).
 
-3. **AI calendar summaries** - Granola-backed summaries are now enabled and intentionally richer. Future tuning should preserve the `summary_text` / `summary_markdown` fallback and avoid changing title matching without a separate review.
-
-4. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+3. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
 
 ---
-
-
 
 ## Session 2026-07-04 - Pipeline hardening review follow-ups
 
@@ -43,7 +48,7 @@
 
 ---
 
-## Session 2026-07-04 - Granola calendar context fix (approved, pushed to main)
+## Session 2026-07-04 - Granola calendar context fix (CLOSED — do not reopen)
 
 **Scope:** Fix Phase 3.7 Granola context and improve Phase 3.8 meeting prep summaries.
 
@@ -70,17 +75,11 @@
 
 ---
 
-## Session 2026-07-03 — Granola 0-matches investigation
+## Session 2026-07-03 — Granola 0-matches investigation (superseded — see CLOSED phase above)
 
 **Scope:** Diagnosing why Phase 3.7 Granola fetch returns 10 notes but matches 0 calendar items.
 
-**What happened:**
-- First debug line added and pushed (commit `6bc0941`): confirmed API shape (`notes`, `hasMore`, `cursor`) and 10 notes returned, 0 matched.
-- Two additional debug lines pushed (commit `2026f36`): print note titles list and cal candidates titles list.
-- Kevin ran the script — output confirmed `Granola context for 0 meetings`.
-- Investigation paused by Kevin: "no, we are going to stop. This doesn't seem to be working."
-
-**Current `fetch_inbox.py` SHA on main:** `5dd6f684ba69c959e32d84c8ed248e142b83dfb4`
+**Resolution:** Fixed 2026-07-04. Root cause was `summary_text`/`summary_markdown` fallback missing. See CLOSED phase entry above.
 
 ---
 
@@ -96,12 +95,6 @@ No code changes to work-inbox this session. Cross-repo maintenance only.
   - hris-dashboard: emoji 🎓 (no image) — N/A
   - ag-flexpoints: no crest — N/A
 - **Hard rule propagated** — added to CLAUDE.md for hris-launcher, command-centre, hr-fa-knowledge-base.
-
----
-
-## Session 2026-07-03 (aborted — GitHub MCP disconnected)
-
-GitHub MCP server disconnected before handover could be pushed. No code changes. Reminder trigger set for 2026-07-04 07:00 UTC. Two new items identified (crest rule propagation, grey square verification) — both addressed in 2026-07-04 session above.
 
 ---
 
@@ -148,10 +141,11 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 ## Current State
 
 ### Working
-- fetch_inbox.py — all phases confirmed working (Phase 3.7 Granola matching broken — parked)
+- fetch_inbox.py — all phases confirmed working
+- **Granola calendar context (Phase 3.7b + 3.8)** — COMPLETE. Matching via keyword overlap; summary extracted from `summary_text`/`summary_markdown`. Do not modify.
 - Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri)
 - Dashboard loads live briefing.json on load, falls back to localStorage archive
-- Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, inbox widget, absences, all 6 links populated
+- Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, absences, all 6 links populated
 - 3-column calendar panel (Today `7fr` | Tomorrow `7fr` | July+August mini-cals in one card `4fr`)
 - **Calendar columns scroll independently** — Today and Tomorrow each have `max-height: 260px; overflow-y: auto` with 4px scrollbar. Expand/collapse removed.
 - Rotating context strip with "Briefing context" label, dot nav
@@ -161,9 +155,7 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 - Multi-machine setup complete (begb0037.AD-OAK)
 
 ### Known issues (fix next session)
-- **Granola 0-matches** — parked by Kevin (debug lines still in fetch_inbox.py)
 - Absences not showing tomorrow's leave
-- AI calendar summaries too generic (blocked by Granola fix)
 - Drag reorder has no visual animation
 
 ---
@@ -214,3 +206,4 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 - Desktop bat: always download fresh via PowerShell — never rename an existing file
 - Every raw.githubusercontent.com fetch MUST include `?t=<timestamp>` cache-buster
 - **NEVER touch `images/oxford-crest.jpg` or the `<img class="sidebar-crest">` src attribute** — external file only, never base64
+- **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
