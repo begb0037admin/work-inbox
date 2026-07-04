@@ -351,7 +351,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .inbox-widget-left{display:flex;flex-direction:column;gap:2px}
 .inbox-widget-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.38);text-transform:uppercase;letter-spacing:0.09em}
 .inbox-widget-val{font-size:13px;font-weight:600;color:#fff}
-.inbox-widget-badge{font-size:11px;font-weight:700;background:#ef4444;color:#fff;border-radius:20px;padding:3px 10px}
+.inbox-widget-badge{display:none}
 /* ── v5 main calendar (override previous) ── */
 .main-cal-panel{display:grid;grid-template-columns:7fr 7fr 4fr;gap:14px;margin-bottom:16px}
 .main-cal-block{background:#fff;border:1px solid #e5e9f2;border-radius:var(--radius-lg);padding:16px 18px;box-shadow:0 1px 3px rgba(0,33,71,.05);overflow:hidden}
