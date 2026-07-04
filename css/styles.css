@@ -373,15 +373,11 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .mini-cal-day{font-size:10.5px;text-align:center;padding:4px 1px;color:var(--text-muted);line-height:1}
 .mini-cal-day.today{background:var(--oxford);color:#fff;font-weight:700;border-radius:4px}
 .mini-cal-day.other-month{color:#e5e9f2}
-/* ── Context strip (replaces .context-bar) ── */
-.ctx-strip{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-lg);padding:11px 18px 13px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,33,71,.05);position:relative;overflow:hidden}
+/* ── Context strip ── */
+.ctx-strip{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-lg);padding:11px 18px 13px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,33,71,.05)}
 .ctx-label{font-size:10px;font-weight:700;color:rgba(0,33,71,0.5);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:5px}
-.ctx-text{font-size:13px;color:var(--oxford);font-weight:700;line-height:1.45}
-.ctx-flip{animation:ctxFlipIn 0.32s ease}
-@keyframes ctxFlipIn{0%{transform:translateY(10px);opacity:0}100%{transform:translateY(0);opacity:1}}
-.ctx-dots{display:flex;gap:5px;margin-top:9px}
-.ctx-dot{width:5px;height:5px;border-radius:50%;background:rgba(0,33,71,0.2);transition:background .25s;cursor:pointer}
-.ctx-dot.active{background:var(--oxford)}
+.ctx-text{font-size:13px;color:var(--oxford);font-weight:700;overflow:hidden;white-space:nowrap;position:relative;height:1.5em}
+#ctxSpan{position:absolute;white-space:nowrap;top:0;left:0;will-change:transform,opacity}
 /* ── Section count ── */
 .sec-count{font-size:12px;font-weight:700;color:var(--text-muted);margin-left:4px}
 /* ── card-ph — flat priority cards (v5 approved design) ── */
