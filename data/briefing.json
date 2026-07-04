@@ -1,7 +1,7 @@
 {
   "date": "Saturday 4 July 2026",
-  "subtitle": "Three colleagues absent Monday; two urgent unread requests over 48 hours old",
-  "context": "Michelle Williams is out of office and will return Monday 6 July, working only Mondays and Wednesdays, blocking progress on Evo / PeopleXD resource requirements that you raised on 3 July. Julie Hickman returns Monday 6 July after out-of-office and has redirected urgent queries to hris@admin.ox.ac.uk, affecting DTP1092 College staff in PXD work and PXD Company 90 Testing clarifications that Crispin Muncaster needs from you. The DTP1092 College staff in PXD email from Crispin on 3 July (unread) needs an earlier meeting slot scheduled. Sarah Rowles sent an unread request on 3 July asking you to raise an OSM request for manager access to UOXU for an Insight reporting investigation - this has waited over 48 hours. The Non-clinical pay uplift kick-off from Jasmin Khokhra (1 July, unread) flagged resource planning before holiday season, now becoming urgent as your calendar shows Clinical pay uplift 2026 check-ins meeting on Monday 6 July at 15:00. Open the unread email from Crispin Muncaster about DTP1092 College staff in PXD first - it requests schedule changes and blocks downstream PeopleXD work. Christopher Sanders' Weightings spreadsheet email (1 July, unread) lists legal compliance requirements that need your review before the H&S Roadmap meeting tomorrow at 10:00.",
+  "subtitle": "Return-to-work crunch: Two team members back Monday with blocked projects",
+  "context": "Julie Hickman returns Monday 6 July after out-of-office on 3 July, blocking responses on PeopleXD resource requirements and general HRIS queries redirected to hris@admin.ox.ac.uk. Michelle Williams is out of office working only Monday and Wednesday, delaying feedback on Evo/PeopleXD resource needs sent 3 July. Crispin Muncaster's DTP1092 College staff in PXD project needs rescheduling and Company 90 testing clarification from Tony Boydell's acceptance criteria. Sarah Rowles' manager access request for UOXU Insight reporting investigation requires OSM action. Christopher Sanders' Strategic H&S modular system requirements need legal compliance review completed. The Awards for Excellence Scheme deadline is 3 July 2026 (passed) and your nomination for Michael O'Sullivan was submitted 2 July. Open first: Crispin Muncaster's DTP1092 testing coordination emails from 3 July requiring immediate rescheduling confirmation before Monday 6 July meetings with Christopher Sanders and James Salas Guillen.",
   "urgent": [
     {
       "title": "DTP1092 College staff in PXD",
@@ -576,31 +576,31 @@
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Michael is on annual leave; James and Chris own PACS org structure impact for Monday's H&S meeting. Enforce OSM ticket discipline: all work must be logged regardless of delivery method, as the queue is primary evidence for resource pressure reports to Marie."
+      "summary": "Michael is on annual leave; James and Chris own PACS org structure impact for Monday's health and safety meeting. Enforce OSM ticket discipline: all work (including face-to-face occupational health sessions) must be logged in OSM; future face-to-face needs Marie's approval each time. Team at capacity across BAU, REF, and new projects; fire safety and Access Group Evo incoming."
     },
     {
       "time": "10:00",
       "title": "H&S Roadmap",
       "sub": "Christopher Sanders",
-      "summary": "No prior notes available; check with Christopher Sanders on agenda beforehand."
+      "summary": "Company 90 filtering fix is dev-complete on BizTalk/Azure platform -- filter now requires active Company 10 appointment, not just department exclusion. Three previously unseen staff found in testing; no removals needed. Confirm with David Hickman that the five test scenarios are locked and ready for full validation before rollout."
     },
     {
       "time": "12:00",
       "title": " James Salas Guillen 1-1 Session",
       "sub": "Kevin Lelitte",
-      "summary": "James resolved several occupational health items face-to-face on Wednesday without OSM tickets; use 1-1 to reinforce ticketing requirement and discuss resource capacity across BAU, REF, and new projects."
+      "summary": "No prior notes available; check in on James's workload, OSM ticket compliance, and any blockers from PACS org structure prep for Monday."
     },
     {
       "time": "14:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "No context provided for this meeting."
+      "summary": "Blocked time or placeholder -- confirm content with organizer if needed."
     },
     {
       "time": "15:00",
       "title": "Clinical pay uplift 2026 check ins",
       "sub": "Jasmin Khokhra",
-      "summary": "No prior notes available; confirm scope and attendees with Jasmin Khokhra."
+      "summary": "Clinical pay uplift 2026 check-ins with Jasmin -- clarify scope, timeline, and any decisions needed from your side before the meeting."
     }
   ],
   "calFull": [

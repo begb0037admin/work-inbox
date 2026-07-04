@@ -12,6 +12,50 @@ GITHUB_PATH = "data/briefing.json"
 GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
 GITHUB_TIMEOUT = 30
 
+def load_existing_briefing():
+    if GITHUB_PAT:
+        try:
+            url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
+            headers = {
+                "Authorization": f"token {GITHUB_PAT}",
+                "Content-Type":  "application/json",
+                "User-Agent":    "work-inbox-script"
+            }
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
+                data = json.loads(r.read())
+            return json.loads(base64.b64decode(data["content"]).decode("utf-8"))
+        except Exception as e:
+            print(f"WARNING: Could not load existing briefing from GitHub for AI preservation - {e}")
+    try:
+        local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), GITHUB_PATH)
+        with open(local_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"WARNING: Could not load existing briefing locally for AI preservation - {e}")
+        return {}
+
+def same_briefing_date(existing, date_label):
+    return existing.get("date") == date_label
+
+def cal_summary_key(item):
+    return ((item.get("time") or "").strip().lower(),
+            (item.get("title") or "").strip().lower())
+
+def preserve_existing_calendar_summaries(existing, key, items):
+    previous = {
+        cal_summary_key(item): item.get("summary", "")
+        for item in existing.get(key, [])
+        if item.get("summary")
+    }
+    preserved = 0
+    for item in items:
+        summary = previous.get(cal_summary_key(item))
+        if summary:
+            item["summary"] = summary
+            preserved += 1
+    return preserved
+
 outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
 cutoff  = datetime.now() - timedelta(days=7)
@@ -186,6 +230,7 @@ print("Phase 2 - calling Anthropic API for context...")
 now          = datetime.now()
 today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
 tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorrow.strftime("%B %Y")
+existing_briefing = load_existing_briefing()
 
 cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == today]
 cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
@@ -219,22 +264,33 @@ CALENDAR TOMORROW:
 """
 
 client   = anthropic.Anthropic(timeout=60.0)
-response = client.messages.create(
-    model      = "claude-haiku-4-5",
-    max_tokens = 1024,
-    system     = SYSTEM,
-    messages   = [{"role": "user", "content": USER}]
-)
+context  = ""
+subtitle = ""
+try:
+    response = client.messages.create(
+        model      = "claude-haiku-4-5",
+        max_tokens = 1024,
+        system     = SYSTEM,
+        messages   = [{"role": "user", "content": USER}]
+    )
 
-raw_text = response.content[0].text.strip()
-if raw_text.startswith("```"):
-    raw_text = "\n".join(raw_text.split("\n")[1:])
-if raw_text.endswith("```"):
-    raw_text = "\n".join(raw_text.split("\n")[:-1])
+    raw_text = response.content[0].text.strip()
+    if raw_text.startswith("```"):
+        raw_text = "\n".join(raw_text.split("\n")[1:])
+    if raw_text.endswith("```"):
+        raw_text = "\n".join(raw_text.split("\n")[:-1])
 
-ai_output = json.loads(raw_text)
-context  = ai_output.get("context", "")
-subtitle = ai_output.get("subtitle", "")
+    ai_output = json.loads(raw_text)
+    context  = ai_output.get("context", "")
+    subtitle = ai_output.get("subtitle", "")
+except Exception as e:
+    print(f"WARNING: Phase 2 context failed - {e}")
+if same_briefing_date(existing_briefing, today_str):
+    if existing_briefing.get("context"):
+        context = existing_briefing["context"]
+        print("Phase 2 preservation - reused existing same-day context")
+    if existing_briefing.get("subtitle"):
+        subtitle = existing_briefing["subtitle"]
 print("Phase 2 done - context written")
 
 # -- Phase 3 -- Python builds every card --
@@ -818,6 +874,14 @@ if _cal_for_summary:
         print(f"Phase 3.8 done - {len(_cs_map)} calendar summaries generated")
     except Exception as e:
         print(f"WARNING: Phase 3.8 calendar summaries failed - {e}")
+
+if same_briefing_date(existing_briefing, today_str):
+    _preserved_cal = (
+        preserve_existing_calendar_summaries(existing_briefing, "calToday", cal_today_items) +
+        preserve_existing_calendar_summaries(existing_briefing, "calTomorrow", cal_tomorrow_items)
+    )
+    if _preserved_cal:
+        print(f"Phase 3.8 preservation - reused {_preserved_cal} existing same-day calendar summaries")
 
 # Build calFull -- Mon through Fri of the current working week
 def _week_workdays(ref):
