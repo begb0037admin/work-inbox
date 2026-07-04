@@ -388,52 +388,19 @@ def build_cal_items(items):
         result.append(cal_item)
     return result
 
-# Detect absences from calendar -- today's leave and next working day
-ABSENCE_KEYWORDS = ["annual leave", "a/l", "on leave", "out of office", "holiday"]
+# Detect absences from OOO emails
 absence_set = set()
-is_weekend = today.weekday() >= 5
-today_suffix = " (next week)" if is_weekend else ""
-tomorrow_label = "tomorrow" if tomorrow == today + timedelta(days=1) else "next week"
-
-def _extract_absence_name(subject):
-    name = subject
-    for kw in ["- Annual Leave", "- A/L", "- On Leave", "- Out of Office", "- Holiday",
-               "Annual Leave -", "A/L -", "Annual Leave", "A/L"]:
-        name = name.replace(kw, "").strip()
-    return name
-
-for item in calendar:
-    if not item.get("all_day"):
-        continue
-    subj_lower = (item.get("subject") or "").lower()
-    if not any(kw in subj_lower for kw in ABSENCE_KEYWORDS):
-        continue
-    try:
-        item_start = datetime.fromisoformat(item["start"]).date()
-        item_end   = datetime.fromisoformat(item["end"]).date()
-        # Outlook all-day end date is exclusive (midnight next day), so use < not <=
-        if item_start <= today < item_end:
-            name = _extract_absence_name(item.get("subject", ""))
-            if name:
-                absence_set.add(name + today_suffix)
-        elif item_start == tomorrow:
-            name = _extract_absence_name(item.get("subject", ""))
-            if name:
-                absence_set.add(f"{name} ({tomorrow_label})")
-    except:
-        continue
+ooo_keywords = ["out of office", "annual leave", "on leave", "away until", "a/l"]
+for msg in inbox:
+    subj    = (msg.get("subject") or "").lower()
+    preview = (msg.get("body_preview") or "").lower()
+    sender  = msg.get("from", "")
+    for kw in ooo_keywords:
+        if kw in subj or kw in preview:
+            absence_set.add(sender)
+            break
 
 absences = sorted(list(absence_set))
-
-# Always include hardcoded known absences if their date range covers today
-KNOWN_ABSENCE_DATES = []
-for ka in KNOWN_ABSENCE_DATES:
-    ka_start = datetime.strptime(ka["from"], "%Y-%m-%d").date()
-    ka_end   = datetime.strptime(ka["to"],   "%Y-%m-%d").date()
-    if ka_start <= today <= ka_end:
-        absences = [a for a in absences if not ka["name"].startswith(a) and not a.startswith(ka["name"])]
-        absences.append(ka["name"])
-absences = sorted(absences)
 
 # Priority actions -- pulled from Command Centre tasks.json
 COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
