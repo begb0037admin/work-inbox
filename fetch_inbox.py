@@ -42,6 +42,23 @@ def cal_summary_key(item):
     return ((item.get("time") or "").strip().lower(),
             (item.get("title") or "").strip().lower())
 
+WEAK_CALENDAR_SUMMARY_PHRASES = [
+    "no prep notes available",
+    "confirm agenda",
+    "confirm scope",
+    "no details provided",
+    "check calendar context",
+    "blocked time or placeholder",
+]
+
+def weak_calendar_summary(summary):
+    text = (summary or "").strip().lower()
+    if not text:
+        return True
+    if len(text) < 45:
+        return True
+    return any(phrase in text for phrase in WEAK_CALENDAR_SUMMARY_PHRASES)
+
 def preserve_existing_calendar_summaries(existing, key, items):
     previous = {
         cal_summary_key(item): item.get("summary", "")
@@ -52,9 +69,61 @@ def preserve_existing_calendar_summaries(existing, key, items):
     for item in items:
         summary = previous.get(cal_summary_key(item))
         if summary:
+            current = item.get("summary", "")
+            if current and not weak_calendar_summary(current) and weak_calendar_summary(summary):
+                continue
             item["summary"] = summary
             preserved += 1
     return preserved
+
+def calendar_summary_count(briefing_doc):
+    return sum(
+        1
+        for key in ("calToday", "calTomorrow")
+        for item in briefing_doc.get(key, [])
+        if item.get("summary")
+    )
+
+def weak_calendar_summary_count(briefing_doc):
+    return sum(
+        1
+        for key in ("calToday", "calTomorrow")
+        for item in briefing_doc.get(key, [])
+        if item.get("summary") and weak_calendar_summary(item.get("summary"))
+    )
+
+def validate_briefing_update(new_doc, old_doc):
+    fatal = []
+    warnings = []
+    context_text = (new_doc.get("context") or "").strip()
+    if len(context_text) < 80:
+        fatal.append("context is missing or too short")
+
+    if not old_doc:
+        return fatal, warnings
+
+    same_day = same_briefing_date(old_doc, new_doc.get("date", ""))
+    old_context = (old_doc.get("context") or "").strip()
+    if same_day and old_context and len(context_text) < max(80, len(old_context) // 3):
+        fatal.append("same-day context would be substantially degraded")
+
+    old_summaries = calendar_summary_count(old_doc)
+    new_summaries = calendar_summary_count(new_doc)
+    if same_day and old_summaries and new_summaries == 0:
+        fatal.append("same-day calendar summaries would be removed")
+    elif same_day and old_summaries >= 3 and new_summaries < max(1, old_summaries // 2):
+        fatal.append(f"calendar summaries dropped from {old_summaries} to {new_summaries}")
+
+    old_absences = len(old_doc.get("absences") or [])
+    new_absences = len(new_doc.get("absences") or [])
+    if same_day and old_absences and new_absences == 0:
+        fatal.append("same-day absences would be cleared")
+
+    weak_count = weak_calendar_summary_count(new_doc)
+    if weak_count:
+        warnings.append(f"{weak_count} calendar summaries look generic or weak")
+
+    return fatal, warnings
 
 outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
@@ -657,6 +726,20 @@ def _gh_put(url, headers, message, content_bytes, sha=None):
     with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
         return json.loads(r.read())
 
+def _backup_briefing_before_write(remote_meta, headers):
+    if not remote_meta or not remote_meta.get("content"):
+        return
+    backup_bytes = base64.b64decode(remote_meta["content"])
+    backup_path = f"data/archive/briefing_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    backup_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{backup_path}"
+    _gh_put(
+        backup_url,
+        headers,
+        f"backup: briefing before refresh {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        backup_bytes
+    )
+    print(f"Phase 4 backup created - {backup_path}")
+
 if GITHUB_PAT and suggestions["task_updates"]:
     try:
         gh_headers = {"Authorization": f"token {GITHUB_PAT}",
@@ -898,6 +981,10 @@ for _wd in _week_workdays(today):
         "isToday": _wd == today
     })
 
+if same_briefing_date(existing_briefing, today_str) and not absences and existing_briefing.get("absences"):
+    absences = sorted(existing_briefing.get("absences", []))
+    print(f"Absence preservation - reused {len(absences)} existing same-day absence(s)")
+
 briefing = {
     "date":         today_str,
     "subtitle":     subtitle,
@@ -930,13 +1017,26 @@ else:
             "User-Agent":    "work-inbox-script"
         }
         sha = None
+        remote_meta = None
+        remote_briefing = existing_briefing
         try:
-            req = urllib.request.Request(api_url, headers=headers)
-            with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
-                sha = json.loads(r.read()).get("sha")
+            remote_meta = _gh_get(api_url, headers)
+            sha = remote_meta.get("sha")
+            if remote_meta.get("content"):
+                remote_bytes = base64.b64decode(remote_meta["content"])
+                remote_briefing = json.loads(remote_bytes.decode("utf-8"))
         except urllib.error.HTTPError as e:
             if e.code != 404:
                 raise
+
+        fatal, warnings = validate_briefing_update(briefing, remote_briefing)
+        for warning in warnings:
+            print(f"Phase 4 safe-write warning - {warning}")
+        if fatal:
+            raise Exception("Safe write blocked briefing update: " + "; ".join(fatal))
+
+        _backup_briefing_before_write(remote_meta, headers)
+
         content_b64 = base64.b64encode(
             json.dumps(briefing, indent=2, ensure_ascii=False).encode("utf-8")
         ).decode("ascii")
