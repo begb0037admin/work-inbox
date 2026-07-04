@@ -775,9 +775,11 @@ if GRANOLA_API_KEY:
                     summary = (_raw_sum.get("text") or _raw_sum.get("content") or "").strip()
                 else:
                     summary = str(_raw_sum).strip()
+                if not summary:
+                    summary = (detail.get("summary_text") or detail.get("summary_markdown") or "").strip()
                 if summary:
                     key = f"{cal_item['day']}_{cal_item['idx']}"
-                    _granola_context[key] = {"note_title": best_note.get("title", ""), "summary": summary[:500]}
+                    _granola_context[key] = {"note_title": best_note.get("title", ""), "summary": summary[:1500]}
 
         print(f"Phase 3.7 done - Granola context for {len(_granola_context)} meetings")
     except Exception as e:
@@ -805,12 +807,12 @@ if _cal_for_summary:
     try:
         CAL_SUM_SYSTEM = (
             "You are Kevin's briefing assistant at Oxford University HR Systems.\n"
-            "For each meeting, write ONE short sentence of prep context Kevin needs before walking in.\n"
+            "For each meeting, write 2-3 concise sentences of prep context Kevin needs before walking in.\n"
             "Where 'prev_meeting_notes' is provided, use it as your primary source -- it is the AI summary from the last time this meeting ran.\n"
-            "Prioritise: carry-forwards and open actions from last time, any live decision or blocker, who Kevin needs to speak to.\n"
+            "Prioritise: carry-forwards and open actions from last time, any live decision or blocker, who Kevin needs to speak to, and the most useful detail Kevin should remember.\n"
             "Plain ASCII punctuation only. No filler like 'This meeting is about...'. Be direct and specific.\n"
-            "Return ONLY valid JSON: {\"day_idx\": \"one sentence\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
-            "Example: {\"today_0\": \"Pick up the evaluation scoring from last week -- Helen still needs a decision on weightings.\"}"
+            "Return ONLY valid JSON: {\"day_idx\": \"2-3 concise sentences\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
+            "Example: {\"today_0\": \"Pick up the evaluation scoring from last week -- Helen still needs a decision on weightings. Confirm whether James has resolved the reporting extract and agree the next owner before Friday.\"}"
         )
         _cal_user = (
             f"Today is {today_str}.\n\n"
@@ -818,7 +820,7 @@ if _cal_for_summary:
         )
         _cs_resp = client.messages.create(
             model      = "claude-haiku-4-5",
-            max_tokens = 400,
+            max_tokens = 900,
             system     = CAL_SUM_SYSTEM,
             messages   = [{"role": "user", "content": _cal_user}]
         )

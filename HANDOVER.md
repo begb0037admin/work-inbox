@@ -1,23 +1,19 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-03 — Calendar column expand/collapse replaced with independent vertical scroll on Today and Tomorrow columns.
+**Last updated:** 2026-07-04 - Granola calendar context fixed and richer meeting prep summaries rolled out.
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
 
 ## NEXT SESSION — START HERE
 
-### 1. Granola 0-matches bug — PARKED
+### 1. Granola calendar context - FIXED 2026-07-04
 
-**Problem:** Phase 3.7 fetches 10 Granola notes successfully but matches 0 of them to calendar candidates. `_granola_context` stays empty. Phase 3.8 runs blind.
+**Problem fixed:** Phase 3.7 fetched Granola notes and found title candidates, but `_granola_context` stayed empty because `fetch_inbox.py` only read `detail["summary"]`. Granola note detail responses return usable content in `summary_text` and `summary_markdown`.
 
-**Status:** Investigation paused by Kevin on 2026-07-03. Do not re-open without Kevin's instruction.
+**Production fix:** `fetch_inbox.py` now falls back to `summary_text` / `summary_markdown`, passes up to 1500 characters of Granola context into Phase 3.8, and asks for 2-3 concise prep sentences rather than one short sentence.
 
-**Debug lines still in `fetch_inbox.py` main** (commit `2026f36`) — remove once the fix is confirmed:
-```python
-print(f"Phase 3.7 debug - note titles: {[n.get('title','') for n in _g_notes]}")
-print(f"Phase 3.7 debug - cal candidates: {[c['title'] for c in _cal_candidates]}")
-```
+**Important:** Title matching behaviour was not changed. Do not reintroduce summary-only extraction. Debug-only files, forced smoke-test matches, preview writes, and phase skip flags were not part of the production rollout.
 
 ---
 
