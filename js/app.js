@@ -244,6 +244,16 @@ function openEmail(entryId,ev){
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
+function escapeHtml(text){
+  if(text===undefined||text===null) return '';
+  return String(text)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
 function sanitizeSub(text){
   if(!text) return '';
   return text
@@ -294,7 +304,7 @@ function renderMainCal(data){
       const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
       if(isNext) nextFound=true;
       const cls=isPast?' past':isNext?' next':'';
-      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary">${c.summary}</div>`:''}</div></div>`;
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${escapeHtml(c.time||'')}</span><div><div class="main-cal-title">${escapeHtml(c.title)}</div>${c.sub?`<div class="main-cal-sub">${escapeHtml(c.sub)}</div>`:''}${c.summary?`<div class="main-cal-summary">${escapeHtml(c.summary)}</div>`:''}</div></div>`;
     }).join('');
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div>${rows}</div>`;
   }
@@ -529,7 +539,7 @@ function renderCalPanel(data){
       if(isNext) nextFound=true;
       const cls=isPast?' past':isNext?' next':'';
       const sumId=c.id?'sum_'+c.id:(isToday?'st':'sm')+i;
-      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${c.time||''}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${c.title}</div>${c.sub?`<div class="main-cal-sub">${c.sub}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${c.summary}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button><a class="summary-cc-link" href="https://cc.lelitte.co.uk" target="_blank">CC &#8594;</a></div></div>`:''}</div></div>`;
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${escapeHtml(c.time||'')}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${escapeHtml(c.title)}</div>${c.sub?`<div class="main-cal-sub">${escapeHtml(c.sub)}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${escapeHtml(c.summary)}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button><a class="summary-cc-link" href="https://cc.lelitte.co.uk" target="_blank">CC &#8594;</a></div></div>`:''}</div></div>`;
     }).join('');
     const bodyId=isToday?'calBodyToday':'calBodyTom';
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="cal-col-body" id="${bodyId}">${rows}</div></div>`;

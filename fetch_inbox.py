@@ -10,6 +10,7 @@ subprocess.run(["git", "config", "gc.auto", "0"], capture_output=True,
 GITHUB_REPO = "begb0037admin/work-inbox"
 GITHUB_PATH = "data/briefing.json"
 GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
+GITHUB_TIMEOUT = 30
 
 outlook = win32com.client.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
@@ -438,7 +439,7 @@ try:
         "User-Agent":    "work-inbox-script"
     }
     cc_req = urllib.request.Request(cc_url, headers=cc_headers)
-    with urllib.request.urlopen(cc_req) as r:
+    with urllib.request.urlopen(cc_req, timeout=GITHUB_TIMEOUT) as r:
         cc_data    = json.loads(r.read())
         cc_content = json.loads(base64.b64decode(cc_data["content"]).decode("utf-8"))
     task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
@@ -609,7 +610,7 @@ except Exception as e:
 # Phase 3.6 - apply task updates directly to Command Centre tasks.json
 def _gh_get(url, headers):
     req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req) as r:
+    with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
         return json.loads(r.read())
 
 def _gh_put(url, headers, message, content_bytes, sha=None):
@@ -619,7 +620,7 @@ def _gh_put(url, headers, message, content_bytes, sha=None):
         payload["sha"] = sha
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"),
                                  headers=headers, method="PUT")
-    with urllib.request.urlopen(req) as r:
+    with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
         return json.loads(r.read())
 
 if GITHUB_PAT and suggestions["task_updates"]:
@@ -650,8 +651,11 @@ if GITHUB_PAT and suggestions["task_updates"]:
         for task in task_list:
             for upd in suggestions["task_updates"]:
                 if task.get("id") == upd["task_id"]:
-                    task.setdefault("actions", []).append(
-                        f"[{stamp}] {upd['note']} (email: {upd['email_from']} - {upd['email_subject']})")
+                    action_text = f"[{stamp}] {upd['note']} (email: {upd['email_from']} - {upd['email_subject']})"
+                    actions = task.setdefault("actions", [])
+                    if action_text in actions:
+                        break
+                    actions.append(action_text)
                     task["entryId"] = upd["entry_id"]
                     applied += 1
                     break
@@ -727,7 +731,7 @@ if all_priorities:
 cal_today_items    = build_cal_items(cal_today)
 cal_tomorrow_items = build_cal_items(cal_tomorrow)
 
-# -- Phase 3.7 -- Fetch recent Granola meeting notes for calendar context --
+# -- Phase 3.7b -- Fetch recent Granola meeting notes for calendar context --
 GRANOLA_API_KEY = os.environ.get("GRANOLA_API_KEY", "")
 _granola_context = {}  # "day_idx" -> {"note_title": str, "summary": str}
 
@@ -886,7 +890,7 @@ else:
         sha = None
         try:
             req = urllib.request.Request(api_url, headers=headers)
-            with urllib.request.urlopen(req) as r:
+            with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
                 sha = json.loads(r.read()).get("sha")
         except urllib.error.HTTPError as e:
             if e.code != 404:
@@ -902,7 +906,7 @@ else:
             payload["sha"] = sha
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(api_url, data=data, headers=headers, method="PUT")
-        with urllib.request.urlopen(req) as r:
+        with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
             result = json.loads(r.read())
             print(f"Phase 4 done - briefing pushed to GitHub (commit: {result.get('commit',{}).get('sha','?')[:7]})")
     except Exception as e:
@@ -922,7 +926,7 @@ if GITHUB_PAT:
         sha = None
         try:
             req = urllib.request.Request(sug_url, headers=headers)
-            with urllib.request.urlopen(req) as r:
+            with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
                 sha = json.loads(r.read()).get("sha")
         except urllib.error.HTTPError as e:
             if e.code != 404:
@@ -938,7 +942,7 @@ if GITHUB_PAT:
             payload["sha"] = sha
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(sug_url, data=data, headers=headers, method="PUT")
-        with urllib.request.urlopen(req) as r:
+        with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
             result = json.loads(r.read())
             print(f"Phase 5 done - suggestions pushed (commit: {result.get('commit',{}).get('sha','?')[:7]})")
     except Exception as e:

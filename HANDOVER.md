@@ -28,6 +28,21 @@
 ---
 
 
+
+## Session 2026-07-04 - Pipeline hardening review follow-ups
+
+**Scope:** Apply quick review follow-ups after Granola rollout.
+
+**What changed:**
+- `fetch_inbox.py`: Added a shared GitHub API timeout for script GitHub reads/writes.
+- `fetch_inbox.py`: Made Phase 3.6 task action append idempotent by skipping exact duplicate action text.
+- `fetch_inbox.py`: Renamed the Granola comment to Phase 3.7b to reduce diagnostic ambiguity; behaviour unchanged.
+- `js/app.js`: Added HTML escaping for calendar times, titles, organisers, and summaries before rendering.
+
+**Remaining non-blocking improvement:** A first-class DRY_RUN mode would still make future diagnostics safer because Phase 3.6, Phase 4, and Phase 5 can write to GitHub.
+
+---
+
 ## Session 2026-07-04 - Granola calendar context fix (approved, pushed to main)
 
 **Scope:** Fix Phase 3.7 Granola context and improve Phase 3.8 meeting prep summaries.
