@@ -447,7 +447,6 @@ function renderPriorityCards(priorities,key,sec){
     const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
     const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
     const theBadge=aiBadge||newBadge||updBadge;
-    // Sub: next action or last action, prefixed with source
     let subText='';
     if(p.actions&&p.actions.length){
       const todo=p.actions.find(a=>a.startsWith('[TODO]')||a.startsWith('[AWAITING]'));
@@ -477,7 +476,6 @@ function renderBriefing(data,key){
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
   renderCalPanel(data);
-  updateInboxWidget(data);
   setupCtxTicker(data.context);
   const absEl=document.getElementById('absencesSidebar');
   if(absEl){
@@ -592,19 +590,6 @@ function _renderCtx(){
 function _jumpCtx(i){
   _ctxIdx=((i%_ctxSentences.length)+_ctxSentences.length)%_ctxSentences.length;
   _renderCtx();
-}
-
-function updateInboxWidget(data){
-  const val=document.getElementById('inbox-widget-val');
-  const bdg=document.getElementById('inbox-widget-badge');
-  if(!val) return;
-  const urgent=(data.urgent||[]).length;
-  const needs=(data.needs||[]).length;
-  const total=urgent+needs+(data.fyi||[]).length+(data.low||[]).length;
-  if(total===0){val.textContent='No new items';if(bdg)bdg.style.display='none';return;}
-  val.textContent=total+' item'+(total!==1?'s':'')+' — '+urgent+' urgent, '+needs+' need'+(needs!==1?'s':'')+' response';
-  if(bdg&&urgent>0){bdg.textContent=urgent;bdg.style.display='inline-flex';}
-  else if(bdg) bdg.style.display='none';
 }
 
 function applyFilter(val){
