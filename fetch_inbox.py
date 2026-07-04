@@ -388,9 +388,20 @@ def build_cal_items(items):
         result.append(cal_item)
     return result
 
-# Detect absences from calendar -- all-day leave events spanning today
+# Detect absences from calendar -- today's leave and next working day
 ABSENCE_KEYWORDS = ["annual leave", "a/l", "on leave", "out of office", "holiday"]
 absence_set = set()
+is_weekend = today.weekday() >= 5
+today_suffix = " (next week)" if is_weekend else ""
+tomorrow_label = "tomorrow" if tomorrow == today + timedelta(days=1) else "next week"
+
+def _extract_absence_name(subject):
+    name = subject
+    for kw in ["- Annual Leave", "- A/L", "- On Leave", "- Out of Office", "- Holiday",
+               "Annual Leave -", "A/L -", "Annual Leave", "A/L"]:
+        name = name.replace(kw, "").strip()
+    return name
+
 for item in calendar:
     if not item.get("all_day"):
         continue
@@ -402,13 +413,13 @@ for item in calendar:
         item_end   = datetime.fromisoformat(item["end"]).date()
         # Outlook all-day end date is exclusive (midnight next day), so use < not <=
         if item_start <= today < item_end:
-            # Extract name from subject -- strip the keyword portion
-            name = item.get("subject", "")
-            for kw in ["- Annual Leave", "- A/L", "- On Leave", "- Out of Office", "- Holiday",
-                       "Annual Leave -", "A/L -", "Annual Leave", "A/L"]:
-                name = name.replace(kw, "").strip()
+            name = _extract_absence_name(item.get("subject", ""))
             if name:
-                absence_set.add(name)
+                absence_set.add(name + today_suffix)
+        elif item_start == tomorrow:
+            name = _extract_absence_name(item.get("subject", ""))
+            if name:
+                absence_set.add(f"{name} ({tomorrow_label})")
     except:
         continue
 
@@ -738,7 +749,7 @@ _granola_context = {}  # "day_idx" -> {"note_title": str, "summary": str}
 def _granola_keywords(title):
     t = re.sub(r'\b\d{1,2}/\d{2}\b', '', title)   # remove DD/MM dates
     t = re.sub(r'\b\d{4}\b', '', t)                # remove years
-    t = re.sub(r'[—\-&]', ' ', t)                  # dashes and ampersands to spaces
+    t = re.sub(r'[—\-&]', ' ', t)             # dashes and ampersands to spaces
     t = re.sub(r'[^\w\s]', '', t)                  # strip remaining punctuation
     return set(w.lower() for w in t.split() if len(w) >= 2)
 
