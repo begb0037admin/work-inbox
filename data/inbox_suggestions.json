@@ -1,24 +1,25 @@
 {
-  "generated_at": "2026-07-04 13:16",
+  "generated_at": "2026-07-04 15:40",
   "new_tasks": [
     {
-      "title": "Non-clinical pay uplift -- coordinate team input",
+      "title": "Non-clinical pay uplift project kick-off",
       "tier": "week",
-      "description": "Jasmin Khokhra has initiated a non-clinical pay uplift kick-off meeting to align on timing before UCEA communication arrives and summer holidays fill calendars. Kevin needs to review the meeting details and confirm his team's availability and input requirements.",
+      "description": "Jasmin Khokhra is starting a non-clinical pay uplift project and needs the HR Systems team to engage. Main holiday season is approaching and calendars are filling up, so early coordination is required to plan resource allocation and timeline.",
       "email_subject": "Non-clinical pay uplift kick-off",
       "email_from": "Jasmin Khokhra",
       "received": "2026-07-01 15:03",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000"
-    },
-    {
-      "title": "DTP1334 SHSMS -- review legal compliance requirements from Christopher Sanders",
-      "tier": "week",
-      "description": "Christopher Sanders has sent follow-up on the H&S Management System evaluation with a breakdown of legal compliance-related requirements identified in yesterday's session. Kevin needs to review and incorporate these into the POC evaluation work.",
-      "email_subject": "RE: Weightings spreadsheet",
-      "email_from": "Christopher Sanders",
-      "received": "2026-07-01 14:53",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F60000"
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t022",
+      "task_title": "Send POC meeting notes to Chris",
+      "note": "Kevin sent the Strategic H&S modular system project requirements to Christopher Sanders and James Salas Guillen on 30 June as advance notice since he could not attend the meeting.",
+      "email_subject": "Re: Strategic H&S modular system project requirements",
+      "email_from": "Kevin (sent to: Christopher Sanders; James Salas Guillen)",
+      "received": "2026-06-30 12:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078B270AF60000"
+    }
+  ]
 }
