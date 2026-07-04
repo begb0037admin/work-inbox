@@ -21,9 +21,25 @@
 
 2. **Absences not showing tomorrow's absences** — Sidebar absences panel is blank even when a team member is on leave tomorrow. `fetch_inbox.py` triage needs to detect upcoming absences from calendar events and include them in `briefing.json` `absences[]` with forward notice (at least 1 day prior).
 
-3. **AI calendar summaries are too generic** — Phase 3.8 runs blind without Granola context (blocked by item 1 above). Once Granola matching is fixed, summaries should use prior-meeting notes as primary source and surface carry-forwards, open actions, live decisions.
+3. **AI calendar summaries** - Granola-backed summaries are now enabled and intentionally richer. Future tuning should preserve the `summary_text` / `summary_markdown` fallback and avoid changing title matching without a separate review.
 
 4. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+
+---
+
+
+## Session 2026-07-04 - Granola calendar context fix (approved, pushed to main)
+
+**Scope:** Fix Phase 3.7 Granola context and improve Phase 3.8 meeting prep summaries.
+
+**What changed:**
+- `fetch_inbox.py`: Granola note detail extraction now falls back from `summary` to `summary_text` / `summary_markdown`.
+- `fetch_inbox.py`: Granola context passed into Phase 3.8 increased from 500 to 1500 characters.
+- `fetch_inbox.py`: Phase 3.8 now asks for 2-3 concise prep sentences and has a 900 token response budget.
+
+**Validation:** Local debug smoke test confirmed `FA Team Daily Catchup` matched `FA Team Catch-up - 03/07`; dashboard smoke test used `Company 90 - Status Update` and confirmed the calendar summary display works.
+
+**Not included:** No title matching changes, no forced debug matches, no diagnostic logging spam, no phase skip flags, and no `fetch_inbox_debug.py` changes in production.
 
 ---
 
