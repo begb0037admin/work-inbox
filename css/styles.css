@@ -106,10 +106,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .cal-sub { font-size: 12px; color: rgba(255,255,255,0.9); margin-top: 3px; line-height: 1.4; }
 
 .cal-alert { font-size: 12px; color: #fbbf24; margin-top: 4px; font-weight: 600; line-height: 1.4; }
-.abs-wrap { padding: 6px 22px 12px; }
-.abs-list { list-style: none; padding: 0; margin: 0; }
-.abs-list li { font-size: 12px; color: #eab308; padding: 3px 0; line-height: 1.4; padding-left: 14px; text-indent: -14px; }
-.abs-list li::before { content: "\2022"; color: rgba(255,255,255,0.4); margin-right: 7px; }
+.abs-wrap { padding: 6px 18px 14px; }
+.abs-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
+.abs-list li { position: relative; font-size: 12px; font-weight: 500; color: #eab308; line-height: 1.45; padding: 8px 10px 8px 22px; background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow-wrap: anywhere; }
+.abs-list li::before { content: "\2022"; position: absolute; left: 10px; top: 8px; color: rgba(255,255,255,0.38); }
 
 /* Main */
 .main { margin-left: var(--sidebar-width); flex: 1; padding: 28px 36px 60px; min-width: 0; overflow-x: hidden; }
@@ -274,7 +274,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .cal-title{font-size:15px;}
 .cal-sub,.cal-alert{font-size:13px;}
 .cal-time{font-size:12px;}
-.abs-list li{font-size:14px;}
+.abs-list li{font-size:13px;}
 .sec-lbl{font-size:14px;letter-spacing:0.05em;}
 .card-title{font-size:16px;}
 .card-sub{font-size:14px;}

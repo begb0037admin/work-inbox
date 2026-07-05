@@ -513,19 +513,114 @@ def build_cal_items(items):
         result.append(cal_item)
     return result
 
-# Detect absences from OOO emails
-absence_set = set()
-ooo_keywords = ["out of office", "annual leave", "on leave", "away until", "a/l"]
+# Detect absences from calendar first, with OOO emails as a fallback.
+ABSENCE_KEYWORDS = [
+    "annual leave", "a/l", "on leave", "out of office", "ooo",
+    "holiday", "away", "sick leave"
+]
+ABSENCE_NOISE = [
+    "annual leave", "a/l", "on leave", "out of office", "ooo",
+    "holiday", "away", "sick leave", "leave"
+]
+absence_map = {}
+
+def _parse_iso_date(value):
+    try:
+        return datetime.fromisoformat(str(value)).date()
+    except:
+        return None
+
+def _fmt_absence_date(d):
+    return d.strftime("%A ") + str(d.day) + d.strftime(" %B")
+
+def _absence_key(name):
+    return " ".join((name or "").lower().split())
+
+def _clean_absence_name(text):
+    name = (text or "").strip()
+    if "<" in name:
+        name = name.split("<", 1)[0].strip()
+    for sep in [" - ", " -- ", ":", "|"]:
+        parts = [p.strip() for p in name.split(sep) if p.strip()]
+        if len(parts) == 2:
+            left_l = parts[0].lower()
+            right_l = parts[1].lower()
+            if any(kw in left_l for kw in ABSENCE_NOISE):
+                name = parts[1]
+            elif any(kw in right_l for kw in ABSENCE_NOISE):
+                name = parts[0]
+            break
+    lower_name = name.lower()
+    for kw in ABSENCE_NOISE:
+        lower_name = lower_name.replace(kw, " ")
+    cleaned = []
+    for token in lower_name.replace("(", " ").replace(")", " ").split():
+        if token in ("is", "on", "until", "from", "to", "for"):
+            continue
+        cleaned.append(token)
+    if cleaned:
+        name = " ".join(cleaned).title()
+    return " ".join(name.split()).strip(" -:")
+
+def _absence_label(start_date, last_absent_date, all_day):
+    if not start_date:
+        return "out of office"
+
+    next_week_start = today + timedelta(days=(7 - today.weekday()))
+    if start_date <= today <= last_absent_date:
+        label = "off next week" if today.weekday() >= 5 else "off today"
+    elif start_date == tomorrow:
+        label = "off next week" if today.weekday() >= 4 else "off tomorrow"
+    elif start_date >= next_week_start:
+        label = "off next week"
+    else:
+        label = "off " + _fmt_absence_date(start_date)
+
+    return_date = next_workday(last_absent_date) if all_day else None
+    if return_date and return_date > today:
+        label += ", returns " + _fmt_absence_date(return_date)
+    return label
+
+def _add_absence(name, label):
+    name = _clean_absence_name(name)
+    key = _absence_key(name)
+    if not key or len(name) < 3:
+        return
+    text = name + " - " + label if label else name
+    existing = absence_map.get(key)
+    if not existing or "date unknown" in existing:
+        absence_map[key] = text
+
+week_absence_end = today + timedelta(days=8)
+for item in calendar:
+    subj = item.get("subject") or ""
+    subj_lower = subj.lower()
+    if not any(kw in subj_lower for kw in ABSENCE_KEYWORDS):
+        continue
+    if "absence reporting" in subj_lower or "sickness absence report" in subj_lower:
+        continue
+
+    start_date = _parse_iso_date(item.get("start"))
+    end_date = _parse_iso_date(item.get("end")) or start_date
+    if not start_date:
+        continue
+
+    all_day = bool(item.get("all_day"))
+    last_absent_date = (end_date - timedelta(days=1)) if all_day and end_date > start_date else end_date
+    if last_absent_date < today or start_date > week_absence_end:
+        continue
+
+    _add_absence(subj, _absence_label(start_date, last_absent_date, all_day))
+
+ooo_keywords = ["out of office", "annual leave", "on leave", "away until", "a/l", "ooo"]
 for msg in inbox:
     subj    = (msg.get("subject") or "").lower()
     preview = (msg.get("body_preview") or "").lower()
     sender  = msg.get("from", "")
-    for kw in ooo_keywords:
-        if kw in subj or kw in preview:
-            absence_set.add(sender)
-            break
+    if sender and any(kw in subj or kw in preview for kw in ooo_keywords):
+        _add_absence(sender, "out of office - date unknown")
 
-absences = sorted(list(absence_set))
+absences = sorted(absence_map.values())
 
 # Priority actions -- pulled from Command Centre tasks.json
 COMMAND_CENTRE_REPO = "begb0037admin/command-centre"

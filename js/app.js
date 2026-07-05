@@ -490,7 +490,14 @@ function renderBriefing(data,key){
   const absEl=document.getElementById('absencesSidebar');
   if(absEl){
     if(data.absences&&data.absences.length){
-      absEl.innerHTML='<ul class="abs-list">'+data.absences.map(a=>`<li>${a}</li>`).join('')+'</ul>';
+      const fmtAbsence=a=>{
+        let text=String(a).trim();
+        if(text&&!/ - |returns|today|tomorrow|next week|date unknown/i.test(text)){
+          text+=' - date unknown';
+        }
+        return text.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      };
+      absEl.innerHTML='<ul class="abs-list">'+data.absences.map(a=>`<li>${fmtAbsence(a)}</li>`).join('')+'</ul>';
     } else {
       absEl.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None recorded</span>';
     }
