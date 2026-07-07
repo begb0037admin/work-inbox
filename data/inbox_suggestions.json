@@ -1,24 +1,25 @@
 {
-  "generated_at": "2026-07-06 15:00",
+  "generated_at": "2026-07-07 09:00",
   "new_tasks": [
     {
-      "title": "Non-clinical pay uplift - prepare for UCEA communication",
+      "title": "Review volunteer leave recording options from Access Group",
       "tier": "week",
-      "description": "Jasmin Khokhra has kicked off coordination for the non-clinical pay uplift with main holiday season approaching. Kevin needs to understand the timeline, any PeopleXD configuration changes required, and coordinate with payroll on implementation readiness.",
-      "email_subject": "Non-clinical pay uplift kick-off",
-      "email_from": "Jasmin Khokhra",
-      "received": "2026-07-01 15:03",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000"
-    },
-    {
-      "title": "Access Group call - volunteering hours recording options",
-      "tier": "week",
-      "description": "Simon Burford has raised a formal call with Access Group to get confirmation on options for allowing employees to record volunteer leave on PeopleXD. Kevin needs to review the outcome and provide guidance on the feasible solution.",
+      "description": "Simon Burford has raised a call with Access Group to get confirmation in writing about options for allowing employees to record volunteer leave in PeopleXD. This follows up on the earlier concern Matt Thomas raised about staff inability to log volunteering hours. Kevin needs to review the Access Group response once received.",
       "email_subject": "Recording volunteer leave on PeopleXD by Employees",
       "email_from": "Simon Burford",
       "received": "2026-07-06 09:53",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EBF0000"
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t031",
+      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
+      "note": "Kevin created the REF Outcomes UDF in UOXU and notified Nathan, flagging an important caveat about system behavior that Nathan should be aware of.",
+      "email_subject": "Re: Copy of Test UDF for REF Outcomes",
+      "email_from": "Kevin (sent to: Nathan Kirwan)",
+      "received": "2026-07-06 15:38",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078D895C140000"
+    }
+  ]
 }
