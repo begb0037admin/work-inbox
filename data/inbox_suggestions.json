@@ -1,25 +1,61 @@
 {
-  "generated_at": "2026-07-07 09:00",
+  "generated_at": "2026-07-07 12:00",
   "new_tasks": [
     {
-      "title": "Review volunteer leave recording options from Access Group",
+      "title": "Non-clinical pay uplift project kick-off",
       "tier": "week",
-      "description": "Simon Burford has raised a call with Access Group to get confirmation in writing about options for allowing employees to record volunteer leave in PeopleXD. This follows up on the earlier concern Matt Thomas raised about staff inability to log volunteering hours. Kevin needs to review the Access Group response once received.",
-      "email_subject": "Recording volunteer leave on PeopleXD by Employees",
-      "email_from": "Simon Burford",
-      "received": "2026-07-06 09:53",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EBF0000"
+      "description": "Jasmin Khokhra has initiated a non-clinical pay uplift kick-off meeting coordination. UCEA communication is pending but calendars are filling up ahead of the main holiday season. Kevin needs to engage with the project planning and resource allocation.",
+      "email_subject": "Non-clinical pay uplift kick-off",
+      "email_from": "Jasmin Khokhra",
+      "received": "2026-07-01 15:03",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F70000"
     }
   ],
   "applied_updates": [
     {
       "task_id": "t031",
       "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
-      "note": "Kevin created the REF Outcomes UDF in UOXU and notified Nathan, flagging an important caveat about system behavior that Nathan should be aware of.",
-      "email_subject": "Re: Copy of Test UDF for REF Outcomes",
-      "email_from": "Kevin (sent to: Nathan Kirwan)",
-      "received": "2026-07-06 15:38",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500078D895C140000"
+      "note": "Nathan Kirwan confirmed that REF attributes UDF fields are now displaying correctly in UOXU following Kevin's activation of data labels.",
+      "email_subject": "RE: Copy of Test UDF for REF Outcomes",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-07-07 11:58",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888ED50000"
+    },
+    {
+      "task_id": "t032",
+      "task_title": "DTP1334 SHSMS Evaluation -- ongoing post-meeting (resourcing, scoring, key dates)",
+      "note": "Christopher Sanders sent legal compliance requirements identified from the SHSMS evaluation meeting, with split lists for Kevin's review and input.",
+      "email_subject": "RE: Weightings spreadsheet",
+      "email_from": "Christopher Sanders",
+      "received": "2026-07-01 14:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4F60000"
+    },
+    {
+      "task_id": "t032",
+      "task_title": "DTP1334 SHSMS Evaluation -- ongoing post-meeting (resourcing, scoring, key dates)",
+      "note": "Marie Cooksey replied to Kevin regarding approval of underspend for H&S minor system improvements, relevant to DTP1334 resource planning.",
+      "email_subject": "RE: URGENT - Approval of use of underspend for H&S minor system improvements",
+      "email_from": "Marie Cooksey",
+      "received": "2026-07-06 16:36",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EC80000"
+    },
+    {
+      "task_id": "t021",
+      "task_title": "FP 68261303 -- Multi Company Setup",
+      "note": "Crispin Muncaster provided an update on DTP1092 PXD Company 90 testing, relevant to multi-company setup (FP 68261303).",
+      "email_subject": "RE: DTP1092 PXD Company 90 Testing",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-07-03 13:25",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EBA0000"
+    },
+    {
+      "task_id": "t013",
+      "task_title": "Insight module update -- Lindsey Spriggs",
+      "note": "Sarah Rowles requested manager access in UOXU for Insight reporting investigation, related to automated reminder functionality confirmation.",
+      "email_subject": "Manager access in UOXU for Insight reporting investigation",
+      "email_from": "Sarah Rowles",
+      "received": "2026-07-03 11:07",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078D888EB70000"
     }
   ]
 }
