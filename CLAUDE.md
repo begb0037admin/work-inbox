@@ -58,7 +58,7 @@ Do NOT ask Kevin for a recap. The docs above are the recap.
 | Approach | Reason |
 |---|---|
 | Claude in Chrome | Too slow, too many tokens |
-| Microsoft Graph API | Oxford blocks — AADSTS errors across all attempts |
+| Microsoft Graph API | Oxford MDM blocks the AADSTS consent flow across all app registration approaches — AADSTS errors across all attempts. Outlook COM (local Windows script) is the only reliable path to inbox/calendar data at Oxford. |
 | Microsoft Graph PowerShell | Oxford blocks — needs admin consent |
 | `Restrict()` for calendar | Combined with IncludeRecurrences returns empty on UK locale — direct iteration is the only reliable approach |
 
