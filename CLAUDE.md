@@ -64,6 +64,14 @@ Do NOT ask Kevin for a recap. The docs above are the recap.
 
 Do not re-investigate Graph API or Chrome-based email access.
 
+## Related Workflow — Copilot Task Research (lives in command-centre)
+Kevin has Microsoft 365 Copilot built into Outlook, separate from this pipeline. It has one
+narrow manual use case: recovering a specific overlooked task when Kevin knows the sender
+but not the exact email. That routine is documented in `begb0037admin/command-centre`'s
+`docs/COPILOT_TASK_RESEARCH.md` (writes land in Command Centre's `tasks.json`, so it lives
+there). Do not build a Copilot integration into `fetch_inbox.py` — see "What Was Tried and
+Abandoned" above; Copilot's backend hits the same Graph API wall.
+
 ## Effort Level Governance
 Before any task where higher effort is warranted, signal to Kevin: what the task is, why higher effort is needed, and an explicit request to raise the effort level. Wait — do not proceed until Kevin raises it. Signal when the high-effort phase is done; Kevin decides when to return to normal. Never change effort level unilaterally. See CONSTITUTION.md Section 10 (v2.0, 2026-06-27).
 
