@@ -1,9 +1,9 @@
 # AGENT_MODEL.md
 # Runtime Operating Model
 
-Version : 2.5
+Version : 2.7
 Status  : Ratified
-Updated : 2026-07-02 (v2.5 — mockup delivery standard)
+Updated : 2026-07-12 (v2.7 — brief-converge added to Section 8)
 Author  : Kevin Lelitte, HR Systems, University of Oxford
 
 Governed by: CONSTITUTION.md
@@ -248,22 +248,33 @@ The following repositories are currently governed by this model.
 This table reflects current governance scope and may change
 without constitutional amendment.
 
-| Repository           | Status         | Notes                                        |
-|----------------------|----------------|----------------------------------------------|
-| clockify             | Active         | Gold standard / template                     |
-| command-centre       | Active         | Task dashboard (Module 1)                    |
-| work-inbox           | Active         | Inbox briefing pipeline                      |
-| hris-dashboard       | Active         | Complex — handle last                        |
-| hris-launcher        | Active         |                                              |
-| hr-fa-knowledge-base | Active         |                                              |
-| meeting-records      | Active         |                                              |
-| hr-projects          | Active         |                                              |
-| hris-change-requests | Active         |                                              |
-| ag-flexpoints        | Active         |                                              |
-| desktop-tutorial     | Decommissioned | Deletion pending                             |
-| aimm                 | Active         | Personal domain — governed independently     |
-|                      |                | (own CONSTITUTION.md + AGENT_MODEL.md v1.0)  |
-| personal-finance     | Out of scope   | Personal domain — Hope                       |
+| Repository               | Status         | Notes                                        |
+|--------------------------|----------------|----------------------------------------------|
+| clockify                 | Active         | Gold standard / template                     |
+| command-centre           | Active         | Task dashboard (Module 1)                    |
+| work-inbox               | Active         | Inbox briefing pipeline                      |
+| hris-dashboard           | Active         | Complex — handle last                        |
+| hris-launcher            | Active         |                                              |
+| hr-fa-knowledge-base     | Active         |                                              |
+| knowledge-base-playbook  | Active         | HR FA Knowledge Base build and replication playbook |
+| meeting-records          | Active         |                                              |
+| hr-projects              | Active         |                                              |
+| hris-change-requests     | Active         |                                              |
+| ag-flexpoints            | Active         |                                              |
+| desktop-tutorial         | Decommissioned | Deletion pending                             |
+| aimm                     | Active         | Personal domain — governed independently     |
+|                          |                | (own CONSTITUTION.md + AGENT_MODEL.md v1.0)  |
+| personal-finance         | Out of scope   | Personal domain — Hope                       |
+| brief-converge           | Active         | Worker/Checker convergence loop (Claude Code |
+|                          |                | + Codex CLI) for implementation briefs. Runs |
+|                          |                | locally by necessity — shells out to local   |
+|                          |                | claude/codex CLIs, unreachable via GitHub    |
+|                          |                | API — same local-execution category as the   |
+|                          |                | Section 1 Outlook COM exception. GitHub      |
+|                          |                | remains sole source of truth: local          |
+|                          |                | execution pulls latest before each run and   |
+|                          |                | pushes after each commit, rather than        |
+|                          |                | operating as a hand-edited standing clone.    |
 
 ---
 
@@ -312,3 +323,22 @@ without constitutional amendment.
 |         |            | committed to any repository. See    |
 |         |            | CONSTITUTION.md Section 11.         |
 |         |            | Decision: Kevin Lelitte 2026-07-02. |
+| 2.6     | 2026-07-07 | Section 8: knowledge-base-playbook  |
+|         |            | added as Active. HR FA Knowledge    |
+|         |            | Base build and replication playbook.|
+|         |            | Decision: Kevin Lelitte 2026-07-07. |
+| 2.7     | 2026-07-12 | Section 8: brief-converge added as  |
+|         |            | Active. Worker/Checker convergence  |
+|         |            | loop (Claude Code + Codex CLI) for  |
+|         |            | implementation briefs. Necessarily  |
+|         |            | runs locally (shells out to local   |
+|         |            | claude/codex CLIs) — treated as the |
+|         |            | same local-execution exception      |
+|         |            | category as Section 1's Outlook COM |
+|         |            | carve-out: GitHub stays sole source |
+|         |            | of truth: local execution pulls     |
+|         |            | latest before each run and pushes   |
+|         |            | after each commit, rather than      |
+|         |            | operating as a hand-edited standing |
+|         |            | local clone. Decision: Kevin        |
+|         |            | Lelitte 2026-07-12.                 |
