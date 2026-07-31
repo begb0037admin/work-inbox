@@ -1,7 +1,7 @@
 {
-  "date": "Wednesday 29 July 2026",
-  "subtitle": "32 unread messages - Outlook-only refresh",
-  "context": "Outlook has 32 unread messages from the last seven days, including 2 marked high importance. Review FW: Creation of your 6 PeopleXD data access groups in Entra ID from Simon Burford. Review Canceled: Azure Integration Platform Sprint Review from Erika Braverman. Review 🔥 NEW: Our Long-Awaited C-Pop Voices Are Here! from Anita from Sonarworks. Outlook shows 4 timed meeting(s) today: FA Team Daily Catchup, Keep free, HR Systems team meeting. Outlook shows 3 timed meeting(s) tomorrow: FA Team Daily Catchup, Keep free, Busy. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation.",
+  "date": "Friday 31 July 2026",
+  "subtitle": "Critical absences: Simon (leave until Aug 4), Michael and Beth sick; Julie awaiting response since Thu",
+  "context": "Simon Burford is on annual leave until 4 August and sent an auto-reply on 31 July, blocking access to his approvals on the DSE System SBS user exclusion project that James Salas Guillen is progressing with Marie Cooksey. Michael is off sick today (30 July) leaving the second-line team understaffed, and a separate report indicates Beth is unwell and not working as of 30 July. Julie Hickman's email from 27 July regarding Development Insight reports remains unanswered after 4 days - she referenced outstanding actions with Ilona that need attention. The most time-critical deadline is the HR Systems Team Meeting scheduled for Monday 3 August at 10:00 for the H&S Roadmap catch-up with Christopher Sanders covering open support tickets and backlog items. Open the email from Julie Hickman about My Development Insight reports first, as it contains overdue action items that may be blocking downstream work for Ilona and the broader team.",
   "urgent": [
     {
       "title": "DTP1092 College staff into PXD Team meeting",
@@ -52,19 +52,109 @@
       "from": "Erika Braverman",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACA0000",
       "received": "28 Jul"
-    },
-    {
-      "title": "DTP1092 College Staff into PXD - Weekly team meeting notes - 21-Jul-26",
-      "sub": "From <strong>Crispin Muncaster</strong>. Dear All\r\n\r\n \r\n\r\nA few notes from our last team meeting:\r\n\r\n \r\n\r\n*\tNathan needs a back-office account set up and access ",
-      "badge": "Act today",
-      "badgeType": "red",
-      "subject": "DTP1092 College Staff into PXD - Weekly team meeting notes - 21-Jul-26",
-      "from": "Crispin Muncaster",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382910000",
-      "received": "23 Jul"
     }
   ],
   "needs": [
+    {
+      "title": "Automatic reply: Surgery update - Sign off another week",
+      "sub": "From <strong>Simon Burford</strong>. I am currently out of the office. \r\n\r\n \r\n\r\nIn my absence the following useful contacts may be able to answer your query:",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Automatic reply: Surgery update - Sign off another week",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A0EB8DE20000",
+      "received": "31 Jul"
+    },
+    {
+      "title": "Help shape our USS 2026 valuation communications",
+      "sub": "From <strong>Clive Poole - Head of Pensions and Payroll</strong>. USS 2026 valuation - message to all eligible staff members\t  \t View newsletter online &lt;https://newsletter.admin.ox.ac.uk",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Help shape our USS 2026 valuation communications",
+      "from": "Clive Poole - Head of Pensions and Payroll",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490950000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "Getting started on your AI Journey in Operations (Part 3)",
+      "sub": "From <strong>Marie Cooksey</strong>. Hello everyone,\r\n\r\n \r\n\r\nThe final session of our introduction to AI journey is planned for next week. This session will ",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Getting started on your AI Journey in Operations (Part 3)",
+      "from": "Marie Cooksey",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490940000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "Cority Consultancy Hours - Proposed Allocation and Next Steps",
+      "sub": "From <strong>James Salas Guillen</strong>. Hi Rob,\r\n\r\n \r\n\r\nI am pleased to confirm that funding for the Cority consultancy hours has now been approved.\r\n\r\n \r\n\r\nCor",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Cority Consultancy Hours - Proposed Allocation and Next Steps",
+      "from": "James Salas Guillen",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490930000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "RE: DSE System - exclude SBS users ",
+      "sub": "From <strong>James Salas Guillen</strong>. Hi Tony, \r\n\r\n \r\n\r\nThat&#x27;s great news, thank you.\r\n\r\n \r\n\r\nI&#x27;ve reviewed the sample outputs in the TEST folder and can conf",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: DSE System - exclude SBS users ",
+      "from": "James Salas Guillen",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490910000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "Beth unwell",
+      "sub": "From <strong>Emma Fitz-Gibbon</strong>. Hi all\r\n\r\n \r\n\r\nJust to let you know that Beth is not feeling good today so will not be working.\r\n\r\n \r\n\r\nBest wishes\r\n\r\nE",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Beth unwell",
+      "from": "Emma Fitz-Gibbon",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908E0000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "RE: DSE System - exclude SBS users ",
+      "sub": "From <strong>James Salas Guillen</strong>. Hi Erika, \r\n\r\n \r\n\r\nI wanted to let you know that funding has now been approved to progress the exclusion of SBS users fr",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: DSE System - exclude SBS users ",
+      "from": "James Salas Guillen",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908D0000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "DSE - SBS email exclusion",
+      "sub": "From <strong>Marie Cooksey</strong>. Hi James\r\n\r\n \r\n\r\nIt has been confirmed that we did receive the funding to progress with the exclusion of SBS from the em",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "DSE - SBS email exclusion",
+      "from": "Marie Cooksey",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908C0000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "RE: Michael - Sick",
+      "sub": "From <strong>Simon Burford</strong>. Hi Michael,\r\n\r\n \r\n\r\nSorry to hear that, it seems to be doing the rounds! Look after yourself!\r\n\r\n \r\n\r\nI will log the sic",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Michael - Sick",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908B0000",
+      "received": "30 Jul"
+    },
+    {
+      "title": "Michael off sick today",
+      "sub": "From <strong>Simon Burford</strong>. Hi everyone,\r\n\r\n \r\n\r\nUnfortunately, Michael is unwell so won’t be working today, so we don’t have a second line team tod",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Michael off sick today",
+      "from": "Simon Burford",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908A0000",
+      "received": "30 Jul"
+    },
     {
       "title": "🔥 NEW: Our Long-Awaited C-Pop Voices Are Here!",
       "sub": "From <strong>Anita from Sonarworks</strong>. Create more with our newest VoiceAI expansion.  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ",
@@ -98,8 +188,8 @@
     {
       "title": "1 Day to Go: The Hidden Risks Behind Utility Disruption",
       "sub": "From <strong>Alyssa Fishwick</strong>. Join tomorrow&#x27;s live debate in The Situation Room on the true range of risks that utilities must prepare for ͏  ͏  ͏  ͏ ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "1 Day to Go: The Hidden Risks Behind Utility Disruption",
       "from": "Alyssa Fishwick",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079F8345CD0000",
@@ -108,8 +198,8 @@
     {
       "title": "Webinar | ERA reforms – are your managers ready?",
       "sub": "From <strong>Moorepay</strong>. Join the first ERA Blueprint Series session and build your managers’ confidence for the reforms ahead. ͏  ͏  ͏  ͏  ͏  ͏ ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "Webinar | ERA reforms – are your managers ready?",
       "from": "Moorepay",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079F8345CC0000",
@@ -118,8 +208,8 @@
     {
       "title": "What's new this month ✨",
       "sub": "From <strong>ElevenReader</strong>. Sir Michael Caine reads The Odyssey, plus a free book every week. ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "What's new this month ✨",
       "from": "ElevenReader",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACE0000",
@@ -128,8 +218,8 @@
     {
       "title": "🚀 New Features in EcoOne: Real-Time AI Insights",
       "sub": "From <strong>Megan Cliffe</strong>. Discover EcoOnline&#x27;s latest updates for July 2026 ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "🚀 New Features in EcoOne: Real-Time AI Insights",
       "from": "Megan Cliffe",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACD0000",
@@ -138,8 +228,8 @@
     {
       "title": "HR Systems Team Meeting – Catch-up on missed sessions/miscellaneous",
       "sub": "From <strong>susan.pratt@admin.ox.ac.uk</strong>. Morning all,\r\n\r\n \r\n\r\nTomorrow’s team meeting is the 5th of the month, which is ‘Catch-up on missed sessions/miscellaneou",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
+      "badge": "Overdue",
+      "badgeType": "red",
       "subject": "HR Systems Team Meeting – Catch-up on missed sessions/miscellaneous",
       "from": "susan.pratt@admin.ox.ac.uk",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC90000",
@@ -214,76 +304,6 @@
       "from": "Helen Harbour",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382970000",
       "received": "24 Jul"
-    },
-    {
-      "title": "RE: Timeline for implementation of uplift",
-      "sub": "From <strong>Jessica Oldershaw</strong>. Yes we did discuss. Please do only include realistic dates. We will need to represent to Senior Leadership why November ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Timeline for implementation of uplift",
-      "from": "Jessica Oldershaw",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382960000",
-      "received": "23 Jul"
-    },
-    {
-      "title": "RE: REF29 UDF",
-      "sub": "From <strong>Nathan Kirwan</strong>. HI Kevin,\r\n\r\n \r\n\r\n \r\n\r\nI’ve been able to demonstrate the REF29 UDF in action with Anne and my Research Services colleagu",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: REF29 UDF",
-      "from": "Nathan Kirwan",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382950000",
-      "received": "23 Jul"
-    },
-    {
-      "title": "RE: Timeline for implementation of uplift",
-      "sub": "From <strong>Athena Artuso</strong>. Hi all,\r\n\r\n \r\n\r\nJust to echo Sarah’s comments here – it would be very, very difficult to implement an uplift in October.",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Timeline for implementation of uplift",
-      "from": "Athena Artuso",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382940000",
-      "received": "23 Jul"
-    },
-    {
-      "title": "RE: Timeline for implementation of uplift",
-      "sub": "From <strong>Sarah Rowles</strong>. Hi Jess,\r\n\r\n \r\n\r\nI think I’m right in remembering we already discussed during the planning meeting last week how diffecu",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Timeline for implementation of uplift",
-      "from": "Sarah Rowles",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382930000",
-      "received": "23 Jul"
-    },
-    {
-      "title": "Timeline for implementation of uplift",
-      "sub": "From <strong>Jessica Oldershaw</strong>. Hi all,\r\n\r\n \r\n\r\nFollowing this week’s update on the delay with national pay negotiations, it looks like it would be prud",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Timeline for implementation of uplift",
-      "from": "Jessica Oldershaw",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382920000",
-      "received": "23 Jul"
-    },
-    {
-      "title": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi Alan\r\n\r\n \r\n\r\nKevin will be leading on this activity, but he is out of the business until the end of July. So, if we c",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "from": "Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B7382900000",
-      "received": "23 Jul"
-    },
-    {
-      "title": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "sub": "From <strong>Alan Quirke</strong>. Hi Kevin and Marie,\r\n\r\n \r\n\r\nI’m following up on the previous email.\r\n\r\n \r\n\r\nThe work has been assigned and approved on y",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "from": "Alan Quirke",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B73828F0000",
-      "received": "23 Jul"
     }
   ],
   "fyi": [],
@@ -327,23 +347,45 @@
       "from": "Wispr Flow",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079CCE7DFD0000",
       "received": "25 Jul"
+    },
+    {
+      "title": "CONNECT Password expiration notification for begb0037",
+      "sub": "From <strong>Password Manager</strong>.",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "CONNECT Password expiration notification for begb0037",
+      "from": "Password Manager",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490960000",
+      "received": "31 Jul"
     }
   ],
   "calToday": [
     {
+      "time": "All day",
+      "title": "Simon - Annual Leave",
+      "sub": "Simon Burford"
+    },
+    {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte",
+      "summary": "Marie is leading a roadmap review, likely property-focused given the detailed marketing performance notes on file. Property at £550k has had only 3 viewings in 2 months; agreed plan is price drop to £535k end of August, remove drone photos, retouch front exterior to golden-hour lighting, and refresh listing copy. Confirm Marie's focus is aligned with executing this relaunch."
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey",
+      "summary": "1-1 session with Asta; no prior notes on agenda or standing issues."
+    },
+    {
+      "time": "12:00",
+      "title": "Asta Siautiaite - 1-1 Session",
       "sub": "Kevin Lelitte"
     },
     {
       "time": "12:30",
       "title": "Keep free",
       "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "14:00",
-      "title": "HR Systems team meeting",
-      "sub": "Michelle Williams"
     },
     {
       "time": "16:00",
@@ -355,7 +397,14 @@
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "No prior notes available for this daily catchup."
+    },
+    {
+      "time": "10:00",
+      "title": "H&S Roadmap",
+      "sub": "Christopher Sanders",
+      "summary": "H&S Roadmap with Christopher Sanders; no prior context provided."
     },
     {
       "time": "12:30",
@@ -463,7 +512,7 @@
           "sub": "Kevin Lelitte"
         }
       ],
-      "isToday": true
+      "isToday": false
     },
     {
       "date": "2026-07-30",
@@ -522,12 +571,12 @@
           "sub": "Kevin Lelitte"
         }
       ],
-      "isToday": false
+      "isToday": true
     }
   ],
   "absences": [
     "Sarahr - off today, returns Monday 3 August",
-    "Simon - off Friday 31 July, returns Tuesday 4 August"
+    "Simon - off today, returns Tuesday 4 August"
   ],
   "prioritiesToday": [
     {
@@ -540,7 +589,8 @@
         "[TODO] Set up resolution meeting -- Kevin, Simon, Marie, Michelle, and potentially Julie. Agenda: understand what wasn't loaded and why, agree approach, produce action list, address GLAM rostering."
       ],
       "source": "HR Systems Managers Meeting 24/06",
-      "dateType": "red"
+      "dateType": "red",
+      "ai_summary": "WFM rostering data not loaded for SBS, PEDS, GLAM since 23 Jun, blocking Sarah's UC dashboards. Next: set up resolution meeting with Kevin, Simon, Marie, Michelle, and potentially Julie to agree approach and produce action list."
     },
     {
       "id": "t026",
@@ -551,7 +601,8 @@
         "[TODO] Open email, review Task# 50959264 in OSM, and accept or reassign ownership."
       ],
       "source": "Marie Cooksey 17/06",
-      "dateType": "red"
+      "dateType": "red",
+      "ai_summary": "OSM Task# 50959264 / ServiceReq# 30412906 forwarded 17 Jun by Marie Cooksey awaiting Kevin ownership decision. Next: open email, review task in OSM, accept or reassign ownership."
     },
     {
       "id": "t023",
@@ -563,7 +614,8 @@
         "[TODO] Open thread, read full context, and respond to Support Call# 11688462."
       ],
       "source": "Email 22/06 Marie Cooksey / Anna Carter-Windle",
-      "dateType": "red"
+      "dateType": "red",
+      "ai_summary": "Support Call# 11688462 (Ash VEA team) received 22 Jun from Marie and Anna, response expected; incorrectly triaged as FYI. Next: open thread, read full context, and respond."
     },
     {
       "id": "t034",
@@ -577,7 +629,8 @@
         "[03 Jul 2026] Sarah Rowles' email to Henry about OSM request for manager access to UOXU is linked to the sickness absence reporting investigation that Kevin flagged at the HR Systems Managers Meeting. (email: Sarah Rowles - Manager access in UOXU for Insight reporting investigation)"
       ],
       "source": "HR Systems Managers Meeting 24/06 (Simon Burford)",
-      "dateType": "red"
+      "dateType": "red",
+      "ai_summary": "Sickness absence report not picking up open-ended absences since 24 Jun, causing staff to go into half pay; root cause investigation needed (report fix vs PeopleXD data issue). Next: retrieve task number from meeting notes and investigate; confirm fix approach with Simon Burford."
     },
     {
       "id": "t036",
@@ -591,7 +644,8 @@
         "[AWAITING] Marie to respond to Matt Thomas directly."
       ],
       "source": "HR Systems Managers Meeting 24/06",
-      "dateType": "red"
+      "dateType": "red",
+      "ai_summary": "Matt Thomas emailed twice (10 Jun, 19 Jun) about inability to self-log volunteering hours in PeopleXD; raised at 24 Jun meeting. Next: Kevin to forward email thread to Marie so she can respond to Matt directly."
     }
   ],
   "prioritiesTomorrow": [
@@ -606,7 +660,8 @@
         "[25 Jun 2026] Cority SFTP connection error confirmed on 22 June at 17:15; CHI Team has been notified and is working on resolution. (email: Cority_Integration_Platform_Notifications@Cority.com - [ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-06-22 17:15)"
       ],
       "source": "Cority Integration Platform 22/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Cority SFTP production feed error occurred 22 Jun at 17:15 during employee import; James managing correspondence with Edward Demetillo. Next: check with James that error is resolved and feed running correctly."
     },
     {
       "id": "t025",
@@ -620,7 +675,8 @@
         "[TODO] Confirm cover arrangements and communicate to team."
       ],
       "source": "Julie Hickman 23/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Michael O'Sullivan and Emma both on leave w/c 6 Jul with no first-line HR Systems support cover in place; raised 24 Jun. Next: identify cover, notify Simon and/or Marie, confirm arrangements with team."
     },
     {
       "id": "t040",
@@ -638,7 +694,8 @@
         "[30 Jun 2026] Kevin has raised a support portal email update request with Sarah Murphy, likely related to Work Inbox priority panel rendering. (email: Kevin (sent to: Sarah Murphy) - Request for support portal email update)"
       ],
       "source": "Kevin 25/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Work Inbox priority panel gap: CC Today/This Week tasks without current emails not rendering as cards; Kevin approval needed before pushing to main. Next: build card rendering with title, status, Email and CC tags, screenshot for Kevin approval."
     },
     {
       "id": "t046",
@@ -650,7 +707,8 @@
         "[TODO] Report back to Simon so the management team can pull together a formal response to Katherine Corr (PACS)."
       ],
       "source": "Teams -- Simon Burford, 29 Jun 2026",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Katherine Corr (PACS) proposing to move Colleges from L2 to L3 in org structure for REF/DARS use; Simon asked Kevin to assess impact 29 Jun. Next: work with James and Chris on PeopleXD and H&S impact assessment, report back to Simon."
     }
   ],
   "prioritiesWeek": [
@@ -666,7 +724,8 @@
         "[TODO] Decide whether to pursue via sales/account route or accept as a known limitation and communicate to stakeholders."
       ],
       "source": "H&S Roadmap 08/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Cority smart notes CCC-19664 (no edit after save) confirmed as intended feature not on roadmap by Mehran Riaz 08 Jun; escalated at PUG 16 Jun with Christopher Sanders. Next: chase Cority for firm delivery date or decide whether to accept as known limitation."
     },
     {
       "id": "t006",
@@ -680,7 +739,8 @@
         "[TODO] Touch base with Michael separately on this."
       ],
       "source": "SK 1-1 08/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Shared drive moved to SharePoint 08 Jun but guidance documentation not updated; team unaware of new location. Next: write response to Simon confirming documents are accessible, recommend alignment meeting on SharePoint structure."
     },
     {
       "id": "t016",
@@ -696,7 +756,8 @@
         "[04 Jul 2026] Kevin submitted his nomination for Michael O'Sullivan to the Awards for Excellence scheme, following his earlier draft email. (email: Kevin (sent to: Jonathan Roger) - Re: Nominations open for this year’s Awards for Excellence Scheme (deadline: 3 July 2026))"
       ],
       "source": "H&S Roadmap 08/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "DSE feed live 03 Jun with three issues: SBS opt-out not respected (CR 126017 approved Sprint 45), contractors missing, users without university emails. Next: James progressing contractor manual addition and email-less user resolution with supplier."
     },
     {
       "id": "t1781204987882",
@@ -714,7 +775,8 @@
         "[AWAITING] Access Group consultant to make contact and agree delivery timeline (within 3 weeks of approval)."
       ],
       "source": "Inbox 2026-06-11 15:01 / Quote 24/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Access Group Holiday Records scope approved 24 Jun (3 reports, 2,800 flex points, ~29 Sep expiry); delivery timing not yet confirmed. Next: Kevin to reach out to team and agree delivery date factoring in HEAT, July leave, and statutory season; confirm Asta Palmer involvement and Marie Cooksey sign-off."
     },
     {
       "id": "t031",
@@ -734,7 +796,8 @@
         "[07 Jul 2026] Kevin activated all data labels in UOXU to ensure the 12 fields required for REF attributes are displaying correctly for Nathan's testing. (email: Kevin (sent to: Nathan Kirwan) - Re: Copy of Test UDF for REF Outcomes)"
       ],
       "source": "Sarah Rowles 24/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "REF attributes UDF created 07 Jul and data labels activated in UOXU; 12 fields displaying correctly for Nathan's testing. Next: confirm ESS deployment ready for end-of-July deadline with Nathan, Anne Mortimer, Sarah Rowles, and Michelle Williams."
     },
     {
       "id": "t039",
@@ -746,7 +809,8 @@
         "[TODO] Marie to ask Morgan to connect with Julie after People Conference (25 Jun) re Power Automate training check tool."
       ],
       "source": "HR Systems Managers Meeting 24/06",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Julie Hickman on two-week leave; training check cover needed and Esther flagged as option. Next: confirm Esther's availability; Marie to ask Morgan to connect with Julie after People Conference (25 Jun) re Power Automate training check tool."
     },
     {
       "id": "task-1782599584762",
@@ -756,8 +820,9 @@
         "[30 Jun 2026] Kevin updated the ticket (case 69001655) with information for the Dev team and asked Sarah Murphy to escalate. (email: Kevin (sent to: Sarah Murphy) - Re: #External# Escalation Request – Case 69001655)"
       ],
       "source": "manual",
-      "dateType": "orange"
+      "dateType": "orange",
+      "ai_summary": "Gate 2.0 equivalence test case 69001655 updated 30 Jun with dev team info; Kevin asked Sarah Murphy to escalate. Next: await Sarah Murphy escalation response."
     }
   ],
-  "refreshed_at": "Wednesday 29 July · 20:52"
+  "refreshed_at": "Friday 31 July · 11:31"
 }
