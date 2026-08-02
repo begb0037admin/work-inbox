@@ -729,6 +729,11 @@ absences = sorted(absence_map.values())
 # Priority actions -- pulled from Command Centre tasks.json
 COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
 COMMAND_CENTRE_PATH = "data/tasks.json"
+# Auto-create Command Centre tasks from inbox suggestions without review.
+# Left OFF deliberately: command-centre/CLAUDE.md reserves new-task creation as
+# Kevin's approval authority, so this stays dormant until he turns it on.
+# With it off, new tasks still surface in the dashboard's suggestion panel.
+AUTO_PROMOTE_NEW_TASKS = False
 priorities_today    = []
 priorities_tomorrow = []
 priorities_week     = []
@@ -778,7 +783,7 @@ suggestions = {
     "task_updates": []
 }
 # Dedupe ledger - emails already applied to Command Centre tasks
-ledger = {"applied": {}}
+ledger = {"applied": {}, "promoted": {}}
 if GITHUB_PAT:
     try:
         _lurl = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
@@ -787,6 +792,8 @@ if GITHUB_PAT:
             ledger = json.loads(base64.b64decode(json.loads(r.read())["content"]).decode("utf-8"))
         if "applied" not in ledger:
             ledger["applied"] = {}
+        if "promoted" not in ledger:
+            ledger["promoted"] = {}
     except Exception:
         pass
 try:
@@ -834,9 +841,11 @@ try:
         "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
         "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
         "Identify:\n"
-        "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Be selective. Max 5. "
+        "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Max 12. "
+        "Do not be over-cautious: if an email asks Kevin for something, or commits him to something, and no existing task covers it, propose it. "
+        "It is better to propose a task Kevin dismisses in one click than to leave real work invisible.\n"
         "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
-        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 8. "
+        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 20. "
         "A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
         "If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
         "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
@@ -861,7 +870,7 @@ try:
 
     t_resp = client.messages.create(
         model      = "claude-haiku-4-5",
-        max_tokens = 1500,
+        max_tokens = 8000,
         system     = TRIAGE_SYSTEM,
         messages   = [{"role": "user", "content": triage_user}]
     )
@@ -873,7 +882,7 @@ try:
     t_out = json.loads(t_raw)
 
     task_by_id = {t["id"]: t for t in task_summaries}
-    for nt in t_out.get("new_tasks", [])[:5]:
+    for nt in t_out.get("new_tasks", [])[:12]:
         i = nt.get("email_n")
         if not isinstance(i, int) or not (0 <= i < len(email_candidates)):
             continue
@@ -887,7 +896,7 @@ try:
             "received":      src["received"],
             "entry_id":      src["entry_id"]
         })
-    for tu in t_out.get("task_updates", [])[:8]:
+    for tu in t_out.get("task_updates", [])[:20]:
         i   = tu.get("email_n")
         tid = tu.get("task_id", "")
         if not isinstance(i, int) or not (0 <= i < len(email_candidates)) or tid not in task_by_id:
@@ -944,7 +953,7 @@ def _backup_briefing_before_write(remote_meta, headers):
     )
     print(f"Phase 4 backup created - {backup_path}")
 
-if GITHUB_PAT and suggestions["task_updates"]:
+if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
     try:
         gh_headers = {"Authorization": f"token {GITHUB_PAT}",
                       "Content-Type":  "application/json",
@@ -980,14 +989,54 @@ if GITHUB_PAT and suggestions["task_updates"]:
                     task["entryId"] = upd["entry_id"]
                     applied += 1
                     break
-        if applied:
+
+        # Auto-promote new task suggestions straight into tasks.json.
+        # Guarded three ways so a task is never created twice: the promoted
+        # ledger, an existing task already carrying that entryId, and a
+        # case-insensitive title match against the current list.
+        existing_entry_ids = {t.get("entryId") for t in task_list if t.get("entryId")}
+        existing_titles    = {(t.get("title") or "").strip().lower() for t in task_list}
+        promoted = 0
+        for nt in (suggestions["new_tasks"] if AUTO_PROMOTE_NEW_TASKS else []):
+            eid = nt.get("entry_id", "")
+            if not eid or eid in ledger.get("promoted", {}) or eid in existing_entry_ids:
+                continue
+            if (nt.get("title") or "").strip().lower() in existing_titles:
+                continue
+            new_id = "t" + datetime.now().strftime("%y%m%d%H%M%S") + str(promoted)
+            task_list.append({
+                "id":          new_id,
+                "title":       nt["title"],
+                "tier":        nt["tier"],
+                "source":      f"Inbox - {nt['email_from']}, {nt['received']}",
+                "emailRef":    nt.get("email_subject", ""),
+                "entryId":     eid,
+                "summary":     "",
+                "description": nt.get("description", ""),
+                "origin":      "inbox-auto",
+                "actions":     [f"[{stamp}] Auto-created from inbox triage (email: {nt['email_from']} - {nt.get('email_subject','')})."]
+            })
+            existing_entry_ids.add(eid)
+            existing_titles.add((nt.get("title") or "").strip().lower())
+            nt["auto_promoted"] = True
+            promoted += 1
+
+        if applied or promoted:
+            bits = []
+            if applied:
+                bits.append(f"apply {applied} task update(s)")
+            if promoted:
+                bits.append(f"add {promoted} new task(s)")
             _gh_put(cc_tasks_url, gh_headers,
-                    f"inbox: apply {applied} task update(s) {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                    f"inbox: {' + '.join(bits)} {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                     json.dumps(tasks_doc, indent=2, ensure_ascii=False).encode("utf-8"),
                     cc_meta["sha"])
-            print(f"Phase 3.6 done - {applied} update(s) applied to Command Centre")
+            print(f"Phase 3.6 done - {applied} update(s), {promoted} new task(s) applied to Command Centre")
             for u in suggestions["task_updates"]:
                 ledger["applied"][u["entry_id"] + "_" + u["task_id"]] = datetime.now().strftime("%Y-%m-%d")
+            for nt in suggestions["new_tasks"]:
+                if nt.get("auto_promoted"):
+                    ledger["promoted"][nt["entry_id"]] = datetime.now().strftime("%Y-%m-%d")
             ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
             l_sha = None
             try:
@@ -1274,13 +1323,36 @@ if GITHUB_PAT:
             "User-Agent":    "work-inbox-script"
         }
         sha = None
+        prev_suggestions = None
         try:
             req = urllib.request.Request(sug_url, headers=headers)
             with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
-                sha = json.loads(r.read()).get("sha")
+                _prev_meta = json.loads(r.read())
+                sha = _prev_meta.get("sha")
+                prev_suggestions = json.loads(base64.b64decode(_prev_meta["content"]).decode("utf-8"))
         except urllib.error.HTTPError as e:
             if e.code != 404:
                 raise
+        except Exception:
+            prev_suggestions = None
+
+        # Carry forward any earlier suggestion that never became a task, so an
+        # unactioned suggestion is not silently lost when this file is
+        # rewritten (the script now runs five times a day).
+        if prev_suggestions:
+            seen = {s.get("entry_id") for s in suggestions["new_tasks"] if s.get("entry_id")}
+            carried = 0
+            for old in prev_suggestions.get("new_tasks", []):
+                oid = old.get("entry_id")
+                if not oid or oid in seen or oid in ledger.get("promoted", {}):
+                    continue
+                old["carried_forward"] = True
+                suggestions["new_tasks"].append(old)
+                seen.add(oid)
+                carried += 1
+            if carried:
+                print(f"Phase 5 - carried forward {carried} unactioned suggestion(s)")
+
         content_b64 = base64.b64encode(
             json.dumps(suggestions, indent=2, ensure_ascii=False).encode("utf-8")
         ).decode("ascii")
