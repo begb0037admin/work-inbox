@@ -803,23 +803,24 @@ async function loadCcTicker(){
     if(!res.ok) throw new Error('fetch failed');
     const d=await res.json();
     const tasks=Array.isArray(d)?d:(d.tasks||[]);
+    const openTasks=tasks.filter(t=>!t.done);
     const now=new Date(); now.setHours(0,0,0,0);
     function ageDays(t){
       if(!t.dateAdded) return 0;
       const dd=new Date(t.dateAdded); dd.setHours(0,0,0,0);
       return Math.max(0,Math.round((now-dd)/86400000));
     }
-    const todayTasks=tasks.filter(t=>t.tier==='today');
-    const ages=tasks.map(t=>ageDays(t));
+    const todayTasks=openTasks.filter(t=>t.tier==='today');
+    const ages=openTasks.map(t=>ageDays(t));
     function setEl(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
     setEl('cc-today-count',todayTasks.length);
-    setEl('cc-tmrw-count',tasks.filter(t=>t.tier==='tomorrow').length);
-    setEl('cc-week-count',tasks.filter(t=>t.tier==='week').length);
-    setEl('cc-parked-count',tasks.filter(t=>t.tier==='parked').length);
+    setEl('cc-tmrw-count',openTasks.filter(t=>t.tier==='tomorrow').length);
+    setEl('cc-week-count',openTasks.filter(t=>t.tier==='week').length);
+    setEl('cc-parked-count',openTasks.filter(t=>t.tier==='parked').length);
     const stalled=todayTasks.filter(t=>ageDays(t)>=5).length;
     const oldest=ages.length?Math.max(...ages):0;
     const avg=ages.length?Math.round(ages.reduce((a,b)=>a+b,0)/ages.length):0;
-    const twoWeeks=tasks.filter(t=>ageDays(t)>=14).length;
+    const twoWeeks=openTasks.filter(t=>ageDays(t)>=14).length;
     setEl('cc-stalled',stalled||'—');
     setEl('cc-oldest',oldest?oldest+'d':'—');
     setEl('cc-avg',avg?avg+'d':'—');
