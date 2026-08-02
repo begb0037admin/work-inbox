@@ -125,7 +125,48 @@ def validate_briefing_update(new_doc, old_doc):
 
     return fatal, warnings
 
-outlook = win32com.client.Dispatch("Outlook.Application")
+def _plain_text(value):
+    text = re.sub(r"\s+", " ", str(value or "")).strip()
+    return text.replace(" - ", ": ")
+
+def build_fallback_context(inbox_items, today_items, tomorrow_items):
+    unread = [item for item in inbox_items if not item.get("is_read", True)]
+    high_importance = [item for item in unread if item.get("importance", 1) == 2]
+    sentences = [
+        f"Outlook has {len(unread)} unread messages from the last seven days, "
+        f"including {len(high_importance)} marked high importance."
+    ]
+
+    candidates = high_importance + [item for item in unread if item not in high_importance]
+    for item in candidates[:3]:
+        sender = _plain_text(item.get("from")) or "an unknown sender"
+        subject = _plain_text(item.get("subject")) or "no subject"
+        sentences.append(f"Review {subject} from {sender}.")
+
+    def meeting_sentence(label, items):
+        timed = [item for item in items if not item.get("all_day")]
+        if not timed:
+            return f"There are no timed meetings in Outlook {label}."
+        names = ", ".join(
+            _plain_text(item.get("subject")) or "untitled meeting"
+            for item in timed[:3]
+        )
+        return f"Outlook shows {len(timed)} timed meeting(s) {label}: {names}."
+
+    sentences.append(meeting_sentence("today", today_items))
+    sentences.append(meeting_sentence("tomorrow", tomorrow_items))
+    sentences.append(
+        "AI enrichment is temporarily unavailable, so email cards and calendar data "
+        "have been refreshed directly from Outlook without generated interpretation."
+    )
+    return " ".join(sentences)
+
+def build_fallback_subtitle(inbox_items):
+    unread = sum(1 for item in inbox_items if not item.get("is_read", True))
+    return f"{unread} unread messages - Outlook-only refresh"
+
+# Late binding avoids failures caused by a corrupt win32com.gen_py cache.
+outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
 mapi    = outlook.GetNamespace("MAPI")
 cutoff  = datetime.now() - timedelta(days=7)
 today   = datetime.now().date()
@@ -333,6 +374,7 @@ CALENDAR TOMORROW:
 """
 
 client   = anthropic.Anthropic(timeout=60.0)
+anthropic_available = True
 context  = ""
 subtitle = ""
 try:
@@ -353,6 +395,7 @@ try:
     context  = ai_output.get("context", "")
     subtitle = ai_output.get("subtitle", "")
 except Exception as e:
+    anthropic_available = False
     print(f"WARNING: Phase 2 context failed - {e}")
 if same_briefing_date(existing_briefing, today_str):
     if existing_briefing.get("context"):
@@ -360,6 +403,11 @@ if same_briefing_date(existing_briefing, today_str):
         print("Phase 2 preservation - reused existing same-day context")
     if existing_briefing.get("subtitle"):
         subtitle = existing_briefing["subtitle"]
+if not context:
+    context = build_fallback_context(inbox, cal_today, cal_tomorrow)
+    print("Phase 2 fallback - generated context directly from Outlook data")
+if not subtitle:
+    subtitle = build_fallback_subtitle(inbox)
 print("Phase 2 done - context written")
 
 # -- Phase 3 -- Python builds every card --
@@ -478,6 +526,62 @@ for msg in inbox:
         low.append(card)
 
 print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
+
+# -- Phase 3.2 - AI summaries for urgent/needs email cards --
+# Same pattern as Phase 3.7's priority-task summaries, applied to raw email
+# cards instead - so Urgent/Needs show a genuine one-sentence summary rather
+# than the first ~150 characters of the email body verbatim (card["sub"]).
+print("Phase 3.2 - generating AI email summaries...")
+summary_candidates = [c for c in (urgent + needs) if c.get("entry_id")]
+if summary_candidates and anthropic_available:
+    try:
+        emails_for_summary = [
+            {
+                "id":      c["entry_id"],
+                "subject": c["subject"],
+                "from":    c["from"],
+                "preview": (c.get("sub") or "")[:250]
+            }
+            for c in summary_candidates
+        ]
+        EMAIL_SUMMARY_SYSTEM = (
+            "You are Kevin's inbox briefing assistant at Oxford University Personnel Services.\n"
+            "For each email, write ONE concise sentence summarising what it is actually about and "
+            "what, if anything, Kevin needs to do. Do not just repeat the subject line or copy the "
+            "opening words verbatim - genuinely summarise the content. Be specific - use names, "
+            "dates and case numbers where present. Plain ASCII punctuation only.\n"
+            "Return ONLY a valid JSON object mapping email id to summary string - no preamble, no markdown.\n"
+            'Example: {"00abc123": "Marie confirms funding approved for SBS exclusion from the DSE feed; no action needed from Kevin."}'
+        )
+        email_summary_user = (
+            f"Today is {today_str}.\n\n"
+            f"EMAILS:\n{json.dumps(emails_for_summary, indent=1, ensure_ascii=True)}"
+        )
+        es_resp = client.messages.create(
+            model      = "claude-haiku-4-5",
+            max_tokens = 4096,
+            system     = EMAIL_SUMMARY_SYSTEM,
+            messages   = [{"role": "user", "content": email_summary_user}]
+        )
+        es_raw = es_resp.content[0].text.strip()
+        if es_raw.startswith("```"):
+            es_raw = "\n".join(es_raw.split("\n")[1:])
+        if es_raw.endswith("```"):
+            es_raw = "\n".join(es_raw.split("\n")[:-1])
+        email_summaries = json.loads(es_raw)
+        applied = 0
+        for c in summary_candidates:
+            sid = c.get("entry_id", "")
+            if sid in email_summaries:
+                c["ai_summary"] = email_summaries[sid]
+                applied += 1
+        print(f"Phase 3.2 done - {applied} email summaries generated")
+    except Exception as e:
+        print(f"WARNING: Phase 3.2 AI email summaries failed - {e}")
+elif summary_candidates:
+    print("Phase 3.2 skipped - Anthropic is unavailable")
+else:
+    print("Phase 3.2 skipped - no urgent/needs emails")
 
 # -- Calendar post-processing --
 KNOWN_ABSENCES = []
@@ -686,6 +790,8 @@ if GITHUB_PAT:
     except Exception:
         pass
 try:
+    if not anthropic_available:
+        raise RuntimeError("skipped because Anthropic is unavailable")
     task_summaries = []
     task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
     for t in task_list:
@@ -800,7 +906,10 @@ try:
         })
     print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} updates:{len(suggestions['task_updates'])}")
 except Exception as e:
-    print(f"WARNING: Phase 3.5 triage failed - {e}")
+    if anthropic_available:
+        print(f"WARNING: Phase 3.5 triage failed - {e}")
+    else:
+        print("Phase 3.5 skipped - Anthropic is unavailable")
 
 
 # -- Assemble final briefing --
@@ -896,7 +1005,7 @@ if GITHUB_PAT and suggestions["task_updates"]:
 # Phase 3.7 - AI summaries for priority tasks
 print("Phase 3.7 - generating AI task summaries...")
 all_priorities = priorities_today + priorities_tomorrow + priorities_week
-if all_priorities:
+if all_priorities and anthropic_available:
     try:
         tasks_for_summary = [
             {
@@ -937,6 +1046,8 @@ if all_priorities:
         print(f"Phase 3.7 done - {len(summaries)} summaries generated")
     except Exception as e:
         print(f"WARNING: Phase 3.7 AI summaries failed - {e}")
+elif all_priorities:
+    print("Phase 3.7 skipped - Anthropic is unavailable")
 
 
 # Pre-build cal items so Phase 3.8 can annotate them before briefing dict is assembled
@@ -1019,7 +1130,7 @@ _cal_for_summary = [
     }
     for i, c in enumerate(cal_tomorrow_items) if c.get("time", "").lower() != "all day"
 ]
-if _cal_for_summary:
+if _cal_for_summary and anthropic_available:
     try:
         CAL_SUM_SYSTEM = (
             "You are Kevin's briefing assistant at Oxford University HR Systems.\n"
@@ -1052,6 +1163,8 @@ if _cal_for_summary:
         print(f"Phase 3.8 done - {len(_cs_map)} calendar summaries generated")
     except Exception as e:
         print(f"WARNING: Phase 3.8 calendar summaries failed - {e}")
+elif _cal_for_summary:
+    print("Phase 3.8 skipped - Anthropic is unavailable")
 
 if same_briefing_date(existing_briefing, today_str):
     _preserved_cal = (
