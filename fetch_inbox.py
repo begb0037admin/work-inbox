@@ -730,10 +730,12 @@ absences = sorted(absence_map.values())
 COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
 COMMAND_CENTRE_PATH = "data/tasks.json"
 # Auto-create Command Centre tasks from inbox suggestions without review.
-# Left OFF deliberately: command-centre/CLAUDE.md reserves new-task creation as
-# Kevin's approval authority, so this stays dormant until he turns it on.
-# With it off, new tasks still surface in the dashboard's suggestion panel.
-AUTO_PROMOTE_NEW_TASKS = False
+# Enabled 2026-08-02 by Kevin's explicit instruction, overriding the default-off
+# stance taken because command-centre/CLAUDE.md reserves new-task creation as
+# his approval authority. Each promoted task still carries an
+# "origin": "inbox-auto" tag and an auto-created action-log entry so promoted
+# tasks stay distinguishable from ones Kevin created directly.
+AUTO_PROMOTE_NEW_TASKS = True
 priorities_today    = []
 priorities_tomorrow = []
 priorities_week     = []
