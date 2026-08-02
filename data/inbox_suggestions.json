@@ -9,24 +9,6 @@
       "email_from": "Julie Hickman",
       "received": "2026-07-27 10:58",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000"
-    },
-    {
-      "title": "TEST - promote flow check (safe to delete)",
-      "tier": "week",
-      "description": "Test suggestion so the promote flow can be exercised end to end after the rollback fix. Not real work - promote it or dismiss it, either is fine. Safe to delete at any time.",
-      "email_subject": "TEST - not a real email",
-      "email_from": "Test Harness",
-      "received": "2026-08-02 22:00",
-      "entry_id": "TEST-PROMOTE-0001"
-    },
-    {
-      "title": "TEST - second promote check (safe to delete)",
-      "tier": "today",
-      "description": "Spare test suggestion in case the first errors on save. Different tier (today) so tier routing gets checked too. Not real work - safe to delete at any time.",
-      "email_subject": "TEST - not a real email",
-      "email_from": "Test Harness",
-      "received": "2026-08-02 22:00",
-      "entry_id": "TEST-PROMOTE-0002"
     }
   ],
   "applied_updates": [
