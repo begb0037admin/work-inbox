@@ -463,7 +463,7 @@ function renderPriorityCards(priorities,key,sec){
       const latest=todo||p.actions[p.actions.length-1];
       if(latest) subText=latest.replace(/^\[[^\]]+\]\s*/,'');
     }
-    const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.sub||'');
+    const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.ai_summary||p.sub||'');
     const emailBtn=(p.entry_id||p.entryId)?`<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`:'';
     const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC&#8594;</span>`:'';
     return `<div class="card-ph${ticked?' done':''}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
