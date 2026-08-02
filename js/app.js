@@ -564,33 +564,57 @@ function renderBriefing(data,key){
   document.getElementById('inboxCol').innerHTML=`<div class="inbox-grid" id="inboxGrid">
     <div id="col-left">
       <div id="sec-today-wrap">
-        <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Priority actions – today</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pt.length}</span></div>
+        ${_secHeadHtml('pt','dot-r','Priority actions – today',priSecs.pt.length)}
         <div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-tomorrow-wrap" style="margin-top:18px">
-        <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Priority actions – tomorrow</span><span class="sec-rule"></span><span class="sec-count">${priSecs.ptom.length}</span></div>
+        ${_secHeadHtml('ptom','dot-o','Priority actions – tomorrow',priSecs.ptom.length)}
         <div class="pri-drop-zone" data-sec="ptom" ondragover="priZoneDragOver(event,'ptom')" ondragleave="priZoneDragLeave(event,'ptom')" ondrop="priZoneDrop(event,'ptom')">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-urgent-wrap" style="margin-top:18px">
-        <div class="sec-head"><span class="sec-dot dot-r"></span><span class="sec-lbl">Urgent – action required today</span><span class="sec-rule"></span><span class="sec-count">${priSecs.ur.length}</span></div>
+        ${_secHeadHtml('ur','dot-r','Urgent – action required today',priSecs.ur.length)}
         <div class="pri-drop-zone" data-sec="ur" ondragover="priZoneDragOver(event,'ur')" ondragleave="priZoneDragLeave(event,'ur')" ondrop="priZoneDrop(event,'ur')">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
     </div>
     <div id="col-right">
       <div id="sec-week-wrap">
-        <div class="sec-head"><span class="sec-dot dot-green"></span><span class="sec-lbl">Priority actions – this week</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pw.length}</span></div>
+        ${_secHeadHtml('pw','dot-green','Priority actions – this week',priSecs.pw.length)}
         <div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-needs-wrap" style="margin-top:18px">
-        <div class="sec-head"><span class="sec-dot dot-o"></span><span class="sec-lbl">Needs response – within 24–48 hrs</span><span class="sec-rule"></span><span class="sec-count">${priSecs.nr.length}</span></div>
+        ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priSecs.nr.length)}
         <div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-parked-wrap" style="margin-top:18px">
-        <div class="sec-head"><span class="sec-dot dot-g"></span><span class="sec-lbl">FYI / Parked</span><span class="sec-rule"></span><span class="sec-count">${priSecs.pfyi.length}</span></div>
+        ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length)}
         <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
       </div>
     </div>
   </div>`;
+  ['pt','ptom','ur','pw','nr','pfyi'].forEach(sec=>applySecCollapse(sec,!!getCollapsedSecs()[sec]));
+}
+
+// Collapse/expand per section (Urgent, Needs response, etc.) - state persists
+// across reloads via localStorage, since these lists (Needs response
+// especially) can grow long enough that always-expanded becomes unwieldy.
+function getCollapsedSecs(){try{return JSON.parse(localStorage.getItem('workInbox_collapsedSecs_v1')||'{}');}catch(e){return{};}}
+function setCollapsedSecs(o){localStorage.setItem('workInbox_collapsedSecs_v1',JSON.stringify(o));}
+function toggleSecCollapse(sec){
+  const o=getCollapsedSecs();
+  o[sec]=!o[sec];
+  setCollapsedSecs(o);
+  applySecCollapse(sec,o[sec]);
+}
+function applySecCollapse(sec,collapsed){
+  const zone=document.querySelector('.pri-drop-zone[data-sec="'+sec+'"]');
+  const chev=document.getElementById('chev_'+sec);
+  if(zone) zone.style.display=collapsed?'none':'';
+  if(chev) chev.innerHTML=collapsed?'&#9656;':'&#9662;';
+}
+function _secHeadHtml(sec,dotClass,label,count){
+  return '<div class="sec-head" onclick="toggleSecCollapse(\''+sec+'\')" style="cursor:pointer;user-select:none">'
+    +'<span class="sec-chev" id="chev_'+sec+'" style="display:inline-block;width:14px;color:var(--text-muted);font-size:11px">&#9662;</span>'
+    +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+count+'</span></div>';
 }
 
 function toggleSum(id,btn){const el=document.getElementById(id);const exp=el.classList.toggle('expanded');btn.textContent=exp?'Show less':'Show more';}
