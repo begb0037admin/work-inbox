@@ -478,11 +478,69 @@ function renderPriorityCards(priorities,key,sec){
   }).join('');
 }
 
+// Staleness banner: fetch_inbox.py is scheduled Mon-Fri at 06:00, 09:00,
+// 12:00, 15:00, 18:00. Rather than a blunt "older than N hours" check (which
+// would falsely fire every weekend, since nothing runs Sat/Sun by design),
+// compute the most recent run time that should already have happened as of
+// right now, and compare that against data.refreshed_at. A 90-minute grace
+// period covers the run's own execution time before flagging it as missed.
+const SCHEDULE_RUN_HOURS=[6,9,12,15,18];
+const SCHEDULE_GRACE_MINUTES=90;
+
+function _mostRecentExpectedRun(now){
+  for(let dayOffset=0; dayOffset<9; dayOffset++){
+    const day=new Date(now.getFullYear(),now.getMonth(),now.getDate()-dayOffset);
+    const dow=day.getDay(); // 0=Sun .. 6=Sat
+    if(dow===0||dow===6) continue;
+    for(let i=SCHEDULE_RUN_HOURS.length-1;i>=0;i--){
+      const runTime=new Date(day.getFullYear(),day.getMonth(),day.getDate(),SCHEDULE_RUN_HOURS[i],0,0);
+      const withGrace=new Date(runTime.getTime()+SCHEDULE_GRACE_MINUTES*60000);
+      if(withGrace<=now) return runTime;
+    }
+  }
+  return null;
+}
+
+function _parseRefreshedAt(str,refYear){
+  if(!str) return null;
+  const m=str.match(/(\d{1,2})\s+(\w+)\s*[·\-]\s*(\d{1,2}):(\d{2})/);
+  if(!m) return null;
+  const MONTHS=['january','february','march','april','may','june','july','august','september','october','november','december'];
+  const monIdx=MONTHS.indexOf(m[2].toLowerCase());
+  if(monIdx<0) return null;
+  return new Date(refYear,monIdx,parseInt(m[1]),parseInt(m[3]),parseInt(m[4]),0);
+}
+
+function renderStaleBanner(data){
+  let el=document.getElementById('staleBanner');
+  if(!el){
+    el=document.createElement('div');
+    el.id='staleBanner';
+    const headerDate=document.getElementById('headerDate');
+    if(headerDate&&headerDate.parentNode) headerDate.parentNode.insertBefore(el,headerDate.nextSibling);
+    else document.body.insertBefore(el,document.body.firstChild);
+  }
+  const now=new Date();
+  const refreshed=_parseRefreshedAt(data.refreshed_at,now.getFullYear());
+  const expected=_mostRecentExpectedRun(now);
+  if(!refreshed||!expected||refreshed>=expected){
+    el.style.display='none';
+    el.innerHTML='';
+    return;
+  }
+  const hoursBehind=Math.round((now-refreshed)/3600000);
+  el.style.cssText='display:block;background:#a3271f;color:#fff;padding:10px 18px;border-radius:8px;margin:10px 0 4px;font-size:13px;font-weight:600;';
+  el.innerHTML='&#9888; Data may be out of date &mdash; last refreshed '+escapeHtml(data.refreshed_at||'unknown')+
+    ' ('+hoursBehind+'h ago). A refresh was expected by '+escapeHtml(expected.toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}))+
+    '. Run "Run Inbox Briefing.bat" manually if this persists.';
+}
+
 function renderBriefing(data,key){
   currentData=data; currentKey=key;
   window._wipData=data; window._wipKey=key;
   document.getElementById('pageTitle').textContent=getGreeting();
   document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
+  renderStaleBanner(data);
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
   renderCalPanel(data);
