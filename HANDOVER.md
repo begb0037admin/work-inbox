@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-07-04 - Absence tomorrow-detection with weekend-aware labelling applied.
+**Last updated:** 2026-08-02 - CC ticker done-task filtering bug fixed (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -29,6 +29,32 @@
 ## Fix list
 
 3. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+
+---
+
+## Session 2026-08-02 — CC ticker done-task filtering fix (Drew's first task)
+
+**Scope:** Fix bug where the "Command Centre Focus" sidebar ticker (`loadCcTicker()` in `js/app.js`) counted ALL Command Centre tasks per tier, including tasks marked `done: true`, so it disagreed with Command Centre's own "Daily Focus" tile, which correctly counts only open (`!t.done`) tasks per tier.
+
+**Confirmed against live `command-centre/data/tasks.json` before the fix:** 39 tasks total, 13 marked done. All-tasks counts (old, wrong) vs. open-only counts (new, correct — matches CC's own tile):
+| Tier | All (old) | Open only (new/CC) |
+|---|---|---|
+| Today | 10 | 5 |
+| Tomorrow | 6 | 4 |
+| Week | 13 | 8 |
+| Parked | 10 | 9 |
+
+**Root cause:** none of the four `tasks.filter(t=>t.tier===...)` calls in `loadCcTicker()` excluded `t.done`. Command Centre's own `js/app.js` `renderBoard()` does `tasks.filter(t=>t.tier==='today'&&!t.done)` — work-inbox's ticker didn't match that.
+
+**Fix (commit `8582608`):** added `const openTasks=tasks.filter(t=>!t.done);` right after the tasks array is built, and switched all four tier-count filters (`cc-today-count`, `cc-tmrw-count`, `cc-week-count`, `cc-parked-count`) plus the age-based stats (`ages`, `stalled`, `oldest`, `avg`, `twoWeeks` — i.e. `cc-stalled`, `cc-oldest`, `cc-avg`, `cc-twoweeks`) to run over `openTasks` instead of the full `tasks` array. Judgement call, not explicitly requested by Kevin: extended the fix to the age stats too, for consistency — a completed-but-old task shouldn't be able to drag "Oldest task"/"Avg age" up or count toward "stalled"/"2+ weeks old", since those exist to flag *open* work going stale. Worth Kevin's explicit confirmation if this reads wrong once he's looking at real numbers.
+
+**Verification:** pushed via GitHub Contents API PUT, base SHA `cbf52b72a7b84ceed9df287ceb9d5436d55ccc09` → new SHA `d07b6c97b65d5b9496466d011dbd4fa2071f1f55`. Re-fetched the pushed blob via `git/blobs/{sha}` (not `raw.githubusercontent.com`, which caches) and diffed byte-for-byte against the intended patched file — exact match. Re-fetched live `command-centre/data/tasks.json` after the fix and simulated the new `loadCcTicker()` logic: Today 5 / Tomorrow 4 / Week 8 / Parked 9 — matches Command Centre's own `renderBoard()` tier-count logic (`tier===x && !done`) exactly on the same live data. `node --check` confirmed the pushed file is syntactically valid JS.
+
+**Diff scope confirmed minimal:** the only changes in the file are inside `loadCcTicker()` — one added line (`openTasks`) and eight filter calls switched from `tasks` to `openTasks`. Nothing else in `js/app.js` touched.
+
+**Also flagged to Kevin, not actioned this session (his call to prioritize):**
+- **Command Centre "Save failed — HTTP 502" + no way to exit inbox-suggestions view** — worker-side 502 from `cc-tasks-writer.kevinlelitte.workers.dev` on `persistTasks()`, cause not yet confirmed (possibly inbox auto-promotion write frequency, possibly cold start). Separately, `showView('inbox')` in command-centre's `js/app.js` has no matching `showView('board')` control in the markup — clicking "From your inbox" strands the user on the Inbox Suggestions view with no way back except F5. Kevin previously asked to hold other command-centre work until this is resolved — likely next in line.
+- **Work Inbox "Command Centre Focus" ticker redesign (6-across / drop Parked, widen to show Urgent + Needs response)** — dropped entirely by Kevin mid-session, 2026-08-02: the two tiles (CC's own Daily Focus vs. work-inbox's cross-reference into CC) are supposed to show different things by design; the redesign ask was based on a misunderstanding, not a real gap. Nothing from that thread was ever pushed to GitHub — it only existed as unapproved scratchpad edits (`wi_app_fresh.js`, `wi_index_fresh.html`, `wi_styles_fresh.css`) — so there is nothing to revert on the live site. Do not resurrect this thread without Kevin raising it again.
 
 ---
 
