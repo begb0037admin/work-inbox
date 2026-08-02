@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-07-31 11:30",
+  "generated_at": "2026-08-02 14:01",
   "new_tasks": [
     {
-      "title": "Cority consultancy hours allocation and onboarding",
+      "title": "Review SHSMS evaluation -- supplementary documents guidance from Helen Harbour",
       "tier": "week",
-      "description": "Funding for Cority consultancy hours has been approved. James has provided an indicative allocation from Cority and Kevin needs to review the proposal, confirm allocation across team members, and arrange onboarding/scheduling for the consultancy work.",
-      "email_subject": "Cority Consultancy Hours - Proposed Allocation and Next Steps",
-      "email_from": "James Salas Guillen",
-      "received": "2026-07-30 14:06",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490930000"
+      "description": "Helen Harbour has sent updated guidance on supplier supplementary documents for the SHSMS evaluation (DTP1334). Kevin needs to review this guidance and ensure it is incorporated into the evaluation process and any scoring/weightings already in progress.",
+      "email_subject": "Re: SH&SMS project supplier requirements evaluation template",
+      "email_from": "Helen Harbour",
+      "received": "2026-07-30 12:14",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490920000"
     },
     {
-      "title": "Outstanding Development Insight reports actions with Ilona",
+      "title": "Follow up on My Development Insight reports with Julie and Ilona",
       "tier": "week",
-      "description": "Julie Hickman has flagged outstanding actions from conversations with Ilona regarding Development Insight reports. Kevin needs to review the details Julie references and follow up on the specific items requiring completion.",
+      "description": "Julie Hickman has flagged outstanding actions related to Development Insight reports and referenced conversation with Ilona. Kevin needs to establish what these outstanding items are and what follow-up is required.",
       "email_subject": "Re: My Development Insight reports",
       "email_from": "Julie Hickman",
       "received": "2026-07-27 10:58",
@@ -24,29 +24,11 @@
     {
       "task_id": "t016",
       "task_title": "DSE data feed issues -- post go-live",
-      "note": "James confirms SBS user exclusion from DSE has been successfully tested in TEST environment with sample outputs verified.",
+      "note": "James confirms funding approval for SBS exclusion from DSE upload and references progress on the change.",
       "email_subject": "RE: DSE System - exclude SBS users ",
       "email_from": "James Salas Guillen",
-      "received": "2026-07-30 11:58",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490910000"
-    },
-    {
-      "task_id": "t016",
-      "task_title": "DSE data feed issues -- post go-live",
-      "note": "Marie confirms funding has been approved to progress with SBS email exclusion from DSE; James is coordinating next steps with Erika.",
-      "email_subject": "DSE - SBS email exclusion",
-      "email_from": "Marie Cooksey",
-      "received": "2026-07-30 09:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908C0000"
-    },
-    {
-      "task_id": "t001",
-      "task_title": "Brief team directly",
-      "note": "Kevin sent Simon a personal update on his phased return status and physiotherapy progress (action log entry only).",
-      "email_subject": "Re: Surgery update - Sign off another week",
-      "email_from": "Kevin (sent to: Simon Burford)",
-      "received": "2026-07-31 09:15",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007A0EB860F0000"
+      "received": "2026-07-30 09:47",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908D0000"
     }
   ]
 }
