@@ -1,6 +1,16 @@
 {
-  "generated_at": "2026-08-03 12:00",
+  "generated_at": "2026-08-03 15:00",
   "new_tasks": [
+    {
+      "title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
+      "tier": "week",
+      "description": "Crispin Muncaster is requesting confirmation that integrations testing for the College Staff into PXD project can be completed by Friday 14 August 2026. This is a key deliverable for DTP1092 with Guy Williams and Simon involved on the IT side.",
+      "email_subject": "DTP1092 College Staff into PXD - Integrations testing",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-03 14:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F9D0000",
+      "auto_promoted": true
+    },
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
       "tier": "week",
@@ -12,15 +22,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t013",
-      "task_title": "Insight module update -- Lindsey Spriggs",
-      "note": "Lindsey Spriggs has sent draft agenda for CDR/PD working group meeting on 11 Aug; this is the forum where Kevin's action on Insight automated reminder functionality (originally due 17 Feb, chased 13 Apr) will be discussed or expected.",
-      "email_subject": "Bi-monthly CDR/PD working group - 11 Aug",
-      "email_from": "Lindsey Spriggs",
-      "received": "2026-08-03 10:28",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F9A0000"
-    }
-  ]
+  "applied_updates": []
 }
