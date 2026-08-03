@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-03 08:57",
+  "generated_at": "2026-08-03 12:00",
   "new_tasks": [
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
@@ -8,46 +8,19 @@
       "email_subject": "Re: My Development Insight reports",
       "email_from": "Julie Hickman",
       "received": "2026-07-27 10:58",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000"
-    },
-    {
-      "title": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
-      "tier": "week",
-      "description": "Christopher Sanders has sent two emails (pt. 1 and pt. 2) with Microsoft Teams meeting links for SH&SM Project HR Systems Tender Evaluation Response. Kevin needs to participate in this evaluation discussion related to the Health & Safety Management System (DTP1334) project.",
-      "email_subject": "SH&SM Project - HR Systems Tender Evaluation Response (pt. 2)",
-      "email_from": "Christopher Sanders",
-      "received": "2026-07-27 11:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC60000",
-      "auto_promoted": true
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000",
+      "carried_forward": true
     }
   ],
   "applied_updates": [
     {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Crispin Muncaster forwards DTP1092 College Staff into PXD Integrations testing update from Guy Williams regarding progress on the college data project.",
-      "email_subject": "FW: DTP1092 College Staff into PXD - Integrations testing",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-07-28 13:29",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACC0000"
-    },
-    {
-      "task_id": "t033",
-      "task_title": "HR Reporting SSO Migration -- Managed Desktop (Roadmap 179)",
-      "note": "Simon Burford reports Nexus team have populated six PeopleXD data access groups in Entra ID with user lists provided by Asta on 16 July, advancing the SSO migration work.",
-      "email_subject": "FW: Creation of your 6 PeopleXD data access groups in Entra ID",
-      "email_from": "Simon Burford",
-      "received": "2026-07-28 10:35",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACB0000"
-    },
-    {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Crispin Muncaster extends the College Staff into PXD team meeting to early September, pushing back project timeline.",
-      "email_subject": "DTP1092 College staff into PXD Team meeting",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-07-28 15:17",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACF0000"
+      "task_id": "t013",
+      "task_title": "Insight module update -- Lindsey Spriggs",
+      "note": "Lindsey Spriggs has sent draft agenda for CDR/PD working group meeting on 11 Aug; this is the forum where Kevin's action on Insight automated reminder functionality (originally due 17 Feb, chased 13 Apr) will be discussed or expected.",
+      "email_subject": "Bi-monthly CDR/PD working group - 11 Aug",
+      "email_from": "Lindsey Spriggs",
+      "received": "2026-08-03 10:28",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F9A0000"
     }
   ]
 }
