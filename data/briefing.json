@@ -12,7 +12,7 @@
       "from": "Crispin Muncaster",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACF0000",
       "received": "28 Jul",
-      "ai_summary": "Crispin Muncaster is rescheduling the 'College Staff into PXD' team meeting to early September; no action required from Kevin."
+      "ai_summary": "Crispin Muncaster is rescheduling the College Staff into PXD team meeting to early September; Kevin should check his calendar for the new date."
     },
     {
       "title": "FW: DTP1092 College Staff into PXD - Integrations testing",
@@ -23,7 +23,7 @@
       "from": "Crispin Muncaster",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACC0000",
       "received": "28 Jul",
-      "ai_summary": "Guy Williams has begun integration testing for DTP1092 College Staff into PXD project; informational only."
+      "ai_summary": "Guy Williams reports integration testing status for DTP1092 College Staff into PXD; forwarded by Crispin for information only."
     },
     {
       "title": "FW: Creation of your 6 PeopleXD data access groups in Entra ID",
@@ -34,7 +34,7 @@
       "from": "Simon Burford",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACB0000",
       "received": "28 Jul",
-      "ai_summary": "Six PeopleXD data access groups have been created in Entra ID and populated with the user list provided by Asta; no action needed."
+      "ai_summary": "Simon Burford reports that the Nexus team has created 6 PeopleXD data access security groups in Entra ID populated with user lists from Asta; no action needed."
     },
     {
       "title": "Canceled: Azure Integration Platform Sprint Review",
@@ -45,7 +45,7 @@
       "from": "Erika Braverman",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACA0000",
       "received": "28 Jul",
-      "ai_summary": "Erika Braverman has cancelled the Azure Integration Platform Sprint Review; no action required."
+      "ai_summary": "Erika Braverman has cancelled the Azure Integration Platform Sprint Review meeting."
     },
     {
       "title": "DTP1092 College staff into PXD Team meeting",
@@ -56,10 +56,21 @@
       "from": "Crispin Muncaster",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AD00000",
       "received": "28 Jul",
-      "ai_summary": "Meeting notification for DTP1092 College staff into PXD Team meeting from Crispin Muncaster; details not provided in preview."
+      "ai_summary": "Duplicate notification from Crispin Muncaster about rescheduling the College Staff into PXD team meeting."
     }
   ],
   "needs": [
+    {
+      "title": "Bi-monthly CDR/PD working group - 11 Aug",
+      "sub": "From <strong>Lindsey Spriggs</strong>. Hi all\r\n\r\n \r\n\r\nPlease find attached a draft agenda for next Tuesday’s CDR/PD working group. I have tentatively reduced t",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Bi-monthly CDR/PD working group - 11 Aug",
+      "from": "Lindsey Spriggs",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F9A0000",
+      "received": "3 Aug",
+      "ai_summary": "Lindsey Spriggs sends draft agenda for CDR/PD working group meeting on 11 August 2026; Kevin should review and prepare."
+    },
     {
       "title": "Cority Product User Group (PUG)",
       "sub": "From <strong>Christopher Sanders</strong>. Please note the actions, decisions and slides from the previous meeting - Cority PUG &lt;https://teams.microsoft.com/l/chan",
@@ -69,7 +80,7 @@
       "from": "Christopher Sanders",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A0EB8DE30000",
       "received": "31 Jul",
-      "ai_summary": "Christopher Sanders shares actions, decisions and slides from the Cority Product User Group meeting; informational only."
+      "ai_summary": "Christopher Sanders shares actions, decisions and slides from the previous Cority Product User Group meeting; for information only."
     },
     {
       "title": "Automatic reply: Surgery update - Sign off another week",
@@ -80,7 +91,7 @@
       "from": "Simon Burford",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A0EB8DE20000",
       "received": "31 Jul",
-      "ai_summary": "Simon Burford has sent an automatic out-of-office reply indicating he is unavailable due to surgery recovery."
+      "ai_summary": "Simon Burford is out of office for surgery recovery and has set automatic reply with alternative contacts."
     },
     {
       "title": "Help shape our USS 2026 valuation communications",
@@ -91,18 +102,7 @@
       "from": "Clive Poole - Head of Pensions and Payroll",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490950000",
       "received": "30 Jul",
-      "ai_summary": "Clive Poole is seeking input to shape communications regarding the USS 2026 valuation for eligible staff members."
-    },
-    {
-      "title": "Getting started on your AI Journey in Operations (Part 3)",
-      "sub": "From <strong>Marie Cooksey</strong>. Hello everyone,\r\n\r\n \r\n\r\nThe final session of our introduction to AI journey is planned for next week. This session will ",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Getting started on your AI Journey in Operations (Part 3)",
-      "from": "Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490940000",
-      "received": "30 Jul",
-      "ai_summary": "Marie Cooksey is inviting participation in the final session of an AI in Operations introduction series scheduled for next week."
+      "ai_summary": "Clive Poole invites eligible staff to shape communications for the USS 2026 valuation; Kevin may need to review if relevant to his role."
     },
     {
       "title": "RE: DSE System - exclude SBS users ",
@@ -113,7 +113,7 @@
       "from": "James Salas Guillen",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490910000",
       "received": "30 Jul",
-      "ai_summary": "James Salas Guillen has reviewed DSE system test outputs for SBS user exclusion and confirmed the results are satisfactory."
+      "ai_summary": "James Salas Guillen confirms TEST folder outputs for SBS user exclusion from DSE system look good and can progress to production."
     },
     {
       "title": "Telephony Replacement: Upcoming changes ",
@@ -124,7 +124,7 @@
       "from": "Daniel Wickham-Jones",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490900000",
       "received": "30 Jul",
-      "ai_summary": "Daniel Wickham-Jones forwards information about the Chorus telephony system switch-off for telephone coordinators."
+      "ai_summary": "Daniel Wickham-Jones informs Telephone Coordinators about Chorus switch-off and upcoming telephony system changes; Kevin should take note if affected."
     },
     {
       "title": "Re: DSE System - exclude SBS users ",
@@ -135,18 +135,7 @@
       "from": "Tony Boydell",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908F0000",
       "received": "30 Jul",
-      "ai_summary": "Tony Boydell confirms the DSE system change to exclude SBS users has already been completed with sample outputs posted to TEST."
-    },
-    {
-      "title": "Beth unwell",
-      "sub": "From <strong>Emma Fitz-Gibbon</strong>. Hi all\r\n\r\n \r\n\r\nJust to let you know that Beth is not feeling good today so will not be working.\r\n\r\n \r\n\r\nBest wishes\r\n\r\nE",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Beth unwell",
-      "from": "Emma Fitz-Gibbon",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908E0000",
-      "received": "30 Jul",
-      "ai_summary": "Emma Fitz-Gibbon notifies the team that Beth is unwell and not working today."
+      "ai_summary": "Tony Boydell confirms SBS user exclusion change for DSE system is complete with sample outputs posted to TEST file share."
     },
     {
       "title": "RE: DSE System - exclude SBS users ",
@@ -157,7 +146,7 @@
       "from": "James Salas Guillen",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908D0000",
       "received": "30 Jul",
-      "ai_summary": "James Salas Guillen informs that funding has been approved to proceed with excluding SBS users from the DSE system."
+      "ai_summary": "James Salas Guillen notifies Erika that funding has been approved to progress exclusion of SBS users from DSE system."
     },
     {
       "title": "DSE - SBS email exclusion",
@@ -168,7 +157,7 @@
       "from": "Marie Cooksey",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908C0000",
       "received": "30 Jul",
-      "ai_summary": "Marie Cooksey confirms funding has been received to progress with exclusion of SBS from the DSE email system."
+      "ai_summary": "Marie Cooksey confirms funding received to progress SBS exclusion from DSE email system; no action needed from Kevin."
     },
     {
       "title": "RE: Michael - Sick",
@@ -179,7 +168,7 @@
       "from": "Simon Burford",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908B0000",
       "received": "30 Jul",
-      "ai_summary": "Simon Burford acknowledges Michael's sick leave notification and offers to log the sickness absence."
+      "ai_summary": "Simon Burford acknowledges Michael's sick notification and confirms he will log the sickness absence."
     },
     {
       "title": "Michael off sick today",
@@ -190,7 +179,7 @@
       "from": "Simon Burford",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908A0000",
       "received": "30 Jul",
-      "ai_summary": "Simon Burford notifies the team that Michael is unwell and unable to work today, affecting second line support."
+      "ai_summary": "Simon Burford notifies team that Michael is off sick today and second line team is unavailable."
     },
     {
       "title": "🔥 NEW: Our Long-Awaited C-Pop Voices Are Here!",
@@ -201,7 +190,7 @@
       "from": "Anita from Sonarworks",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079F8345D00000",
       "received": "29 Jul",
-      "ai_summary": "Sonarworks marketing email announcing new C-Pop voices for VoiceAI expansion; spam/promotional content."
+      "ai_summary": "Promotional marketing email from Sonarworks about new C-Pop VoiceAI features; delete or ignore."
     },
     {
       "title": "RE: P5 Task assigned to your team - Task# 50969697 for Incident# 11693608",
@@ -212,7 +201,7 @@
       "from": "Julie Hickman",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079F8345CF0000",
       "received": "29 Jul",
-      "ai_summary": "Julie Hickman thanks both Simon and Michael for completing Task 50969697 for Incident 11693608, noting Maths department appreciation."
+      "ai_summary": "Julie Hickman thanks Simon and Michael for their dashboard work on Task 50969697 for Incident 11693608 and notes Maths department gratitude."
     },
     {
       "title": "RE: P5 Task assigned to your team - Task# 50969697 for Incident# 11693608",
@@ -223,7 +212,7 @@
       "from": "Simon Burford",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079F8345CE0000",
       "received": "29 Jul",
-      "ai_summary": "Simon Burford confirms the new dashboard includes UDF details and is being used to filter people effectively for Task 50969697."
+      "ai_summary": "Simon Burford confirms new dashboard includes UDF details being used for filtering on Task 50969697; for information only."
     },
     {
       "title": "1 Day to Go: The Hidden Risks Behind Utility Disruption",
@@ -234,7 +223,7 @@
       "from": "Alyssa Fishwick",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079F8345CD0000",
       "received": "29 Jul",
-      "ai_summary": "Marketing email from Alyssa Fishwick promoting a live debate on utility disruption risks; promotional content."
+      "ai_summary": "Alyssa Fishwick promotes webinar on utility disruption risks; delete or ignore if not relevant."
     },
     {
       "title": "Webinar | ERA reforms – are your managers ready?",
@@ -245,7 +234,7 @@
       "from": "Moorepay",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079F8345CC0000",
       "received": "29 Jul",
-      "ai_summary": "Moorepay promotional webinar inviting managers to the first ERA Blueprint Series session on employment reforms."
+      "ai_summary": "Moorepay promotes webinar on ERA reforms for managers; delete or ignore if not relevant."
     },
     {
       "title": "What's new this month ✨",
@@ -256,7 +245,7 @@
       "from": "ElevenReader",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACE0000",
       "received": "28 Jul",
-      "ai_summary": "ElevenReader promotional email featuring Sir Michael Caine reading The Odyssey and free weekly book offers."
+      "ai_summary": "ElevenReader promotional newsletter about audiobook features; delete or ignore."
     },
     {
       "title": "🚀 New Features in EcoOne: Real-Time AI Insights",
@@ -267,7 +256,7 @@
       "from": "Megan Cliffe",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8ACD0000",
       "received": "28 Jul",
-      "ai_summary": "EcoOnline product update email announcing new features and real-time AI insights for July 2026; informational."
+      "ai_summary": "Megan Cliffe announces EcoOnline July 2026 feature updates; review if applicable to Kevin's work."
     },
     {
       "title": "HR Systems Team Meeting – Catch-up on missed sessions/miscellaneous",
@@ -278,7 +267,7 @@
       "from": "susan.pratt@admin.ox.ac.uk",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC90000",
       "received": "28 Jul",
-      "ai_summary": "Susan Pratt reminds the HR Systems team that tomorrow's 5 August meeting is a catch-up session for missed sessions."
+      "ai_summary": "Susan Pratt reminds team that tomorrow's HR Systems Team Meeting (5 August) is the monthly catch-up on missed sessions and miscellaneous items."
     },
     {
       "title": "University Bulletin: 27 July 2026",
@@ -289,65 +278,20 @@
       "from": "Internal Communications",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC70000",
       "received": "27 Jul",
-      "ai_summary": "University bulletin from 27 July 2026 containing updates on annual pay award, VC Council blogs and Professional Services Programme."
-    },
-    {
-      "title": "SH&SM Project - HR Systems Tender Evaluation Response (pt. 2)",
-      "sub": "From <strong>Christopher Sanders</strong>. ________________________________________________________________________________\r\n\r\nMicrosoft Teams meeting \r\n\r\nJoin: ht",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "SH&SM Project - HR Systems Tender Evaluation Response (pt. 2)",
-      "from": "Christopher Sanders",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC60000",
-      "received": "27 Jul",
-      "ai_summary": "Christopher Sanders convenes part 2 of the SH&SM Project HR Systems Tender Evaluation Response meeting via Teams."
-    },
-    {
-      "title": "SH&SM Project - HR Systems Tender Evaluation Response (pt. 1)",
-      "sub": "From <strong>Christopher Sanders</strong>. ________________________________________________________________________________\r\n\r\nMicrosoft Teams meeting \r\n\r\nJoin: ht",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "SH&SM Project - HR Systems Tender Evaluation Response (pt. 1)",
-      "from": "Christopher Sanders",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC50000",
-      "received": "27 Jul",
-      "ai_summary": "Christopher Sanders convenes part 1 of the SH&SM Project HR Systems Tender Evaluation Response meeting via Teams."
-    },
-    {
-      "title": "Re: My Development Insight reports",
-      "sub": "From <strong>Julie Hickman</strong>. Hello Kevin,\r\n\r\n \r\n\r\nHope all is well with you.\r\n\r\n \r\n\r\nI’ve recently been in conversation with Ilona and I remembered t",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Re: My Development Insight reports",
-      "from": "Julie Hickman",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000",
-      "received": "27 Jul",
-      "ai_summary": "Julie Hickman is asking Kevin about Development Insight reports and mentions a recent conversation with Ilona."
-    },
-    {
-      "title": "Re: Completed: Complete with Docusign: EcoOnline Statement of Work_The University of Oxford Incident Applicati...",
-      "sub": "From <strong>John Grant</strong>. Information classification: Public\r\n\r\n\r\n\r\nHi Marie,\r\n\r\nYes the technical team will be in contact early this week to prog",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "Re: Completed: Complete with Docusign: EcoOnline Statement of Work_The University of Oxford Incident Applicati...",
-      "from": "John Grant",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC30000",
-      "received": "27 Jul",
-      "ai_summary": "John Grant confirms the technical team will contact Marie early this week to progress the signed EcoOnline Statement of Work."
-    },
-    {
-      "title": "RE: Completed: Complete with Docusign: EcoOnline Statement of Work_The University of Oxford Incident Applicati...",
-      "sub": "From <strong>Marie Cooksey</strong>. Hi John\r\n\r\n \r\n\r\nGlad this is now signed off. I assume the invoice will be shortly issued? It would be good if you or the",
-      "badge": "Overdue",
-      "badgeType": "red",
-      "subject": "RE: Completed: Complete with Docusign: EcoOnline Statement of Work_The University of Oxford Incident Applicati...",
-      "from": "Marie Cooksey",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC20000",
-      "received": "27 Jul",
-      "ai_summary": "Marie Cooksey asks John Grant when the invoice will be issued following the signed EcoOnline Statement of Work."
+      "ai_summary": "Internal Communications shares University Bulletin for 27 July 2026 covering annual pay award, VC Council updates and Professional Services Programme; for information."
     }
   ],
   "fyi": [
+    {
+      "title": "Meeting Forward Notification: HR Systems Managers Meeting",
+      "sub": "From <strong>Microsoft Outlook</strong>. Your meeting was forwarded\r\n\r\nSarah Rowles &lt;mailto:sarah.rowles@admin.ox.ac.uk&gt;   has forwarded your meeting request to ",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Meeting Forward Notification: HR Systems Managers Meeting",
+      "from": "Microsoft Outlook",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F990000",
+      "received": "3 Aug"
+    },
     {
       "title": "RE: Preventing users archiving",
       "sub": "From <strong>James Salas Guillen</strong>.",
@@ -357,6 +301,16 @@
       "from": "James Salas Guillen",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A0EB8DE40000",
       "received": "31 Jul"
+    },
+    {
+      "title": "Getting started on your AI Journey in Operations (Part 3)",
+      "sub": "From <strong>Marie Cooksey</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Getting started on your AI Journey in Operations (Part 3)",
+      "from": "Marie Cooksey",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490940000",
+      "received": "30 Jul"
     },
     {
       "title": "Cority Consultancy Hours - Proposed Allocation and Next Steps",
@@ -377,9 +331,29 @@
       "from": "Helen Harbour",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A03490920000",
       "received": "30 Jul"
+    },
+    {
+      "title": "Beth unwell",
+      "sub": "From <strong>Emma Fitz-Gibbon</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Beth unwell",
+      "from": "Emma Fitz-Gibbon",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A034908E0000",
+      "received": "30 Jul"
     }
   ],
   "low": [
+    {
+      "title": "CONNECT Password expiration notification for begb0037",
+      "sub": "From <strong>Password Manager</strong>. Dear connect.ox.ac.uk\\begb0037,\r\n\r\nYour CONNECT password will expire in 3 days. \r\n\r\nTo change a password,  open the CONN",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "CONNECT Password expiration notification for begb0037",
+      "from": "Password Manager",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A19EE1500000",
+      "received": "3 Aug"
+    },
     {
       "title": "CONNECT Password expiration notification for begb0037",
       "sub": "From <strong>Password Manager</strong>. Dear connect.ox.ac.uk\\begb0037,\r\n\r\nYour CONNECT password will expire in 4 days. \r\n\r\nTo change a password,  open the CONN",
@@ -723,7 +697,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "red",
-      "ai_summary": "GLAM rostering data load incomplete as of 24 Jun; three areas outstanding (SBS, PEDS, GLAM) blocking Sarah's UC dashboards. Next: set up resolution meeting with Kevin, Simon, Marie, Michelle, and potentially Julie to understand what wasn't loaded, agree approach, and address GLAM rostering."
+      "ai_summary": "GLAM rostering data not loaded; blocking Sarah's UC dashboards. Next: set up resolution meeting with Kevin, Simon, Marie, Michelle, and potentially Julie to understand what wasn't loaded, why, and agree approach."
     },
     {
       "id": "t026",
@@ -735,7 +709,7 @@
       ],
       "source": "Marie Cooksey 17/06",
       "dateType": "red",
-      "ai_summary": "Owner Required notification for Task# 50959264 / ServiceReq# 30412906 received 17 Jun from Marie Cooksey; Kevin must accept or reassign ownership. Next: open email, review task in OSM, and take ownership action."
+      "ai_summary": "OSM Task# 50959264 / ServiceReq# 30412906 owner required since 17 Jun. Next: open email, review task in OSM, and accept or reassign ownership."
     },
     {
       "id": "t023",
@@ -748,7 +722,7 @@
       ],
       "source": "Email 22/06 Marie Cooksey / Anna Carter-Windle",
       "dateType": "red",
-      "ai_summary": "Support Call# 11688462 (Ash VEA team) requires response from Kevin; emails received 22 Jun from Marie Cooksey and Anna Carter-Windle but inbox triage misclassified as FYI. Next: open thread, read full context, and respond."
+      "ai_summary": "Support Call# 11688462 from Ash VEA team (22 Jun) incorrectly triaged as FYI; response expected from Kevin. Next: read full email thread context and respond."
     }
   ],
   "prioritiesTomorrow": [
@@ -763,7 +737,7 @@
       ],
       "source": "Teams -- Simon Burford, 29 Jun 2026",
       "dateType": "orange",
-      "ai_summary": "Simon Burford asked Kevin (29 Jun) to assess with James and Chris the impact on PeopleXD and H&S systems of moving Colleges from L2 to L3 in org structure per Katherine Corr's proposal (PACS). Next: complete impact assessment and report back to Simon for formal response to PACS."
+      "ai_summary": "Impact assessment pending on moving Colleges from L2 to L3 in org structure (PACS proposal). Next: work with James and Chris to assess PeopleXD and H&S system impacts, then report back to Simon Burford."
     },
     {
       "id": "t034",
@@ -778,7 +752,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06 (Simon Burford)",
       "dateType": "orange",
-      "ai_summary": "Sickness absence report not picking up open-ended absences since 24 Jun; individuals gone into half pay; task number shared at HR Systems Managers Meeting. Next: retrieve task number, investigate root cause (report fix or PeopleXD data issue), and communicate resolution to Simon Burford."
+      "ai_summary": "Sickness absence report not picking up open-ended absences; individuals gone into half pay (issue raised 24 Jun). Next: retrieve task number from meeting notes, investigate root cause (report fix vs data issue), confirm fix approach, and communicate to Simon Burford."
     }
   ],
   "prioritiesWeek": [
@@ -795,7 +769,7 @@
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "orange",
-      "ai_summary": "Cority smart notes cannot be edited after save/close (ticket 00476764, dev ref CCC-19664); Cority confirmed 08 Jun this is INTENDED behaviour, not on roadmap, no timeline. Next: chase Cority for firm delivery date on CCC-19664 or decide whether to pursue via sales/account route or accept as known limitation."
+      "ai_summary": "Cority ticket 00476764 (smart notes edit issue) confirmed as intended feature, not on roadmap. Next: chase Cority for firm delivery date on CCC-19664 or decide whether to accept as limitation and communicate to stakeholders."
     },
     {
       "id": "t006",
@@ -810,7 +784,7 @@
       ],
       "source": "SK 1-1 08/06",
       "dateType": "orange",
-      "ai_summary": "SharedPoint migration for org hierarchy documentation completed but guidance not updated (08 Jun); only Kevin and Lee knew location. Next: write response to Simon confirming documents are accessible, recommend alignment meeting for team up-to-speed on SharePoint structure, and touch base with Michael separately."
+      "ai_summary": "SharePoint migration documentation not updated; team unaware of new location. Next: write response to Simon confirming documents are accessible, recommend alignment meeting on SharePoint structure, and touch base with Michael."
     },
     {
       "id": "t016",
@@ -830,7 +804,7 @@
       ],
       "source": "H&S Roadmap 08/06",
       "dateType": "orange",
-      "ai_summary": "DSE data feed went live 03 Jun; SBS exclusion (CR 126017) successfully tested in TEST environment as of 31 Jul with sample outputs verified; Tony Boydell confirmed change completed 02 Aug. Next: confirm contractors missing from PXD feed manual addition and resolve issue with users without university emails (James investigating)."
+      "ai_summary": "DSE data feed live since 03 Jun; SBS exclusion tested successfully in TEST (31 Jul) and completed in production (02 Aug). Status: CR 126017 approved and implemented; contractors and non-university email issues remain for James to investigate."
     },
     {
       "id": "t1781204987882",
@@ -849,7 +823,7 @@
       ],
       "source": "Inbox 2026-06-11 15:01 / Quote 24/06",
       "dateType": "orange",
-      "ai_summary": "3 Holiday Records reports approved 24 Jun (case 69001638); 2,800 flex points total; deadline ~29 Sep; third week Aug blocked by Marie Kay absence and statutory returns season. Next: reach out to team to agree delivery timing, confirm Asta Palmer involvement, confirm Marie Cooksey sign-off, and await Access Group consultant contact."
+      "ai_summary": "3 Holiday Records reports approved 24 Jun (case 69001638); 2,800 flex points, ~29 Sep expiry. Next: reach out to team to agree delivery timing (factor in HEAT, July leave, statutory returns), confirm Asta Palmer involvement, confirm Marie Cooksey sign-off, and await Access Group contact."
     },
     {
       "id": "t031",
@@ -870,7 +844,7 @@
       ],
       "source": "Sarah Rowles 24/06",
       "dateType": "orange",
-      "ai_summary": "REF attributes UDF created in UOXU 07 Jul; Nathan Kirwan confirmed data labels now displaying correctly as of 07 Jul for 12 required fields; end of July deadline for ESS sharing per Sarah Rowles. Next: confirm ESS display live and complete testing for REF appeals process."
+      "ai_summary": "REF attributes UDF created and tested in UOXU (07 Jul); end of July deadline for ESS display. Status: fields displaying correctly following Kevin's data label activation on 07 Jul; Nathan testing confirmed working."
     },
     {
       "id": "t039",
@@ -883,7 +857,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "orange",
-      "ai_summary": "Julie Hickman on two-week leave; training check cover needed; Esther flagged as option (24 Jun). Next: confirm Esther's availability to cover two weeks of training checks, and have Marie ask Morgan to connect with Julie post-People Conference (25 Jun) re Power Automate training check tool."
+      "ai_summary": "Julie on two-week leave; training check cover needed. Next: confirm Esther availability to cover full two weeks, and have Marie ask Morgan to connect with Julie post-People Conference (25 Jun) re Power Automate training check tool."
     },
     {
       "id": "task-1782599584762",
@@ -894,7 +868,7 @@
       ],
       "source": "manual",
       "dateType": "orange",
-      "ai_summary": "Kevin updated case 69001655 with Dev team information and asked Sarah Murphy to escalate 30 Jun. Next: follow up on escalation status and Dev team response."
+      "ai_summary": "Gate 2.0 equivalence test task (case 69001655) updated 30 Jun with info for Dev team; escalation requested. Status: awaiting response from Sarah Murphy on escalation."
     },
     {
       "id": "task-1785700344174",
@@ -903,7 +877,7 @@
       "actions": [],
       "source": "Julie Hickman",
       "dateType": "orange",
-      "ai_summary": "Julie Hickman has flagged outstanding actions related to Development Insight reports following conversation with Ilona; no details provided. Next: review with Julie to understand what actions are outstanding and what work is required."
+      "ai_summary": "Julie flagged outstanding Development Insight reports actions (per conversation with Ilona). Next: review with Julie to understand what actions and work are required."
     },
     {
       "id": "task-1785704715215",
@@ -912,8 +886,19 @@
       "actions": [],
       "source": "Julie Hickman",
       "dateType": "orange",
-      "ai_summary": "Julie Hickman has flagged outstanding actions related to Development Insight reports following conversation with Ilona; no details provided. Next: review with Julie to understand what actions are outstanding and what work is required."
+      "ai_summary": "Julie flagged outstanding Development Insight reports actions (per conversation with Ilona). Next: review with Julie to understand what actions and work are required."
+    },
+    {
+      "id": "t2608030857560",
+      "text": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
+      "description": "Christopher Sanders has sent two emails (pt. 1 and pt. 2) with Microsoft Teams meeting links for SH&SM Project HR Systems Tender Evaluation Response. Kevin needs to participate in this evaluation discussion related to the Health & Safety Management System (DTP1334) project.",
+      "actions": [
+        "[03 Aug 2026] Auto-created from inbox triage (email: Christopher Sanders - SH&SM Project - HR Systems Tender Evaluation Response (pt. 2))."
+      ],
+      "source": "Inbox - Christopher Sanders, 2026-07-27 11:00",
+      "dateType": "orange",
+      "ai_summary": "SH&SM Project HR Systems Tender Evaluation Response meeting scheduled (email from Christopher Sanders 03 Aug). Next: attend Teams meeting and participate in DTP1334 Health & Safety Management System tender evaluation discussion."
     }
   ],
-  "refreshed_at": "Monday 03 August · 08:58"
+  "refreshed_at": "Monday 03 August · 12:01"
 }
