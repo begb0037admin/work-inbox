@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-02 - CC ticker done-task filtering bug fixed (Drew).
+**Last updated:** 2026-08-04 - Phase 3.8 calendar-summary offset bug investigated, root cause confirmed, not fixed (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -29,6 +29,24 @@
 ## Fix list
 
 3. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+
+4. **Phase 3.8 calendar-summary mismatch on days starting with an all-day event** — investigated by Drew 2026-08-04, root cause confirmed, NOT fixed (Phase 3.8 is closed — needs Kevin to explicitly reopen it before any code change). See "Session 2026-08-04" below for full detail and full writeup in `begb0037admin/drew` repo, `memory/calendar-summary-offset-bug.md`.
+
+---
+
+## Session 2026-08-04 — Calendar-summary offset bug investigated, NOT fixed (Drew)
+
+**Scope:** Flagged during unrelated meeting-records work — live `data/briefing.json` `calTomorrow` items had AI-generated `summary` text describing a *different* meeting than the one it was attached to. Investigated whether this is a Python index bug in `fetch_inbox.py` Phase 3.8.
+
+**Confirmed against live `data/briefing.json` (Wednesday 5 August briefing), pulled fresh with a cache-buster:**
+- `calToday` (9 items, first item is a real 09:30 meeting, no preceding all-day item): zero mismatches, every summary correctly self-referential.
+- `calTomorrow` (9 items, idx 0 is an all-day event — "Simon out of the office - funeral"): idx 1, 2, 3 each carry the summary content that rightfully belongs to the *next* item (idx 1 shows idx 2's title, idx 2 shows idx 3's title, idx 3 shows idx 4's actual topic while idx 4 itself is left with no summary). idx 6 and 7 are correctly self-referential — the mismatch does not persist for the whole day.
+
+**Root cause (confirmed, not guessed):** the Python index bookkeeping in Phase 3.8 (`_cal_for_summary` construction and the `target[item["idx"]] = ...` write-back, ~line 1168 onward) is correct — re-read line by line, positions match. The mismatch correlates exactly with whether the day's `idx` sequence fed to the model starts at 0 or not. `calToday` starts at idx 0 (no shift). `calTomorrow`'s first non-all-day item carries idx 1 (idx 0 was filtered out as an all-day event) — and the model's own generation of the `"day_idx"` JSON response keys (`tomorrow_1`, `tomorrow_2`, ...) mismatches the content it writes for the first few real items before self-correcting by idx 6. This is a **prompt/model reliability issue** (claude-haiku-4-5, the model Phase 3.8 is locked to, appears to fall back to counting output position from 0 rather than reliably echoing the literal `idx` value whenever that value doesn't start at 0) — not a deterministic code bug.
+
+**Proposed fix (not applied):** decouple the index shown to the model from the index used for write-back — renumber the `idx` sent to the model to always start at 0 within `_cal_for_summary` (sequential by array position), and keep the original `cal_today_items`/`cal_tomorrow_items` position in a separate field never exposed to the model, used only for the write-back. Small, contained diff, same file.
+
+**Why this was not pushed:** Phase 3.8 is marked closed in this file and in `CLAUDE.md` — "do not modify without Kevin explicitly opening a new approved phase." No message in the task that surfaced this constituted that explicit reopening, so this was investigated and root-caused only, not fixed. Full writeup: `begb0037admin/drew` repo, `memory/calendar-summary-offset-bug.md`.
 
 ---
 
@@ -196,6 +214,7 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 ### Known issues (fix next session)
 - Drag reorder has no visual animation
+- Phase 3.8 calendar-summary mismatch on days starting with an all-day event (see Fix list item 4 and Session 2026-08-04 above) — root cause confirmed, fix scoped, awaiting Kevin's explicit reopening of Phase 3.8
 
 ---
 
