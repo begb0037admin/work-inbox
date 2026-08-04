@@ -1,16 +1,6 @@
 {
-  "generated_at": "2026-08-04 15:00",
+  "generated_at": "2026-08-04 18:00",
   "new_tasks": [
-    {
-      "title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "tier": "tomorrow",
-      "description": "Crispin Muncaster needs to discuss testing assumptions and steps for DTP1092 College Staff into PXD integrations testing. A specific meeting is required to align on approach before the 14 August deadline.",
-      "email_subject": "DTP1092 College Staff into PXD - Testing",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-04 10:31",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000",
-      "auto_promoted": true
-    },
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
       "tier": "week",
@@ -22,5 +12,33 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t009",
+      "task_title": "DPIA -- awaiting Marie's signature",
+      "note": "Marie's email acknowledges the DPIA work completed; Kevin should await her final sign-off to proceed to Information Compliance Team.",
+      "email_subject": "RE: draft DPIA for college record to PXD",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-04 16:32",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A381525B0000"
+    },
+    {
+      "task_id": "t2608041500480",
+      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
+      "note": "Crispin has sent the discussion request for testing assumptions and steps for integrations testing.",
+      "email_subject": "DTP1092 College Staff into PXD - Testing",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-04 10:31",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000"
+    },
+    {
+      "task_id": "t2608030857560",
+      "task_title": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
+      "note": "Crispin has confirmed the 14 August deadline for integrations testing completion.",
+      "email_subject": "DTP1092 College Staff into PXD - Integrations testing",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-03 14:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F9D0000"
+    }
+  ]
 }
