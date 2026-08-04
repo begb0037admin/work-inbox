@@ -1,6 +1,16 @@
 {
-  "generated_at": "2026-08-04 12:00",
+  "generated_at": "2026-08-04 15:00",
   "new_tasks": [
+    {
+      "title": "Schedule DTP1092 integrations testing discussion with Crispin",
+      "tier": "tomorrow",
+      "description": "Crispin Muncaster needs to discuss testing assumptions and steps for DTP1092 College Staff into PXD integrations testing. A specific meeting is required to align on approach before the 14 August deadline.",
+      "email_subject": "DTP1092 College Staff into PXD - Testing",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-04 10:31",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000",
+      "auto_promoted": true
+    },
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
       "tier": "week",
@@ -12,5 +22,5 @@
       "carried_forward": true
     }
   ],
-  "task_updates": []
+  "applied_updates": []
 }
