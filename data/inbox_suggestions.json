@@ -1,6 +1,15 @@
 {
-  "generated_at": "2026-08-05 18:00",
+  "generated_at": "2026-08-06 08:39",
   "new_tasks": [
+    {
+      "title": "Attend DTP1092 integrations testing meeting - Friday 7 August",
+      "tier": "tomorrow",
+      "description": "Crispin Muncaster has scheduled a testing meeting for tomorrow (Friday) to discuss integrations testing assumptions and steps for DTP1092 College Staff into PXD project. Ben Hill has provided the integration links. Kevin's attendance is needed to confirm approach before the 14 August deadline.",
+      "email_subject": "DTP1092 College Staff to PXD - testing meeting",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-05 09:20",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A43D86D10000"
+    },
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
       "tier": "week",
@@ -12,5 +21,5 @@
       "carried_forward": true
     }
   ],
-  "task_updates": []
+  "applied_updates": []
 }
