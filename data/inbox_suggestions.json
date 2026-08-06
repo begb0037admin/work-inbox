@@ -1,16 +1,6 @@
 {
-  "generated_at": "2026-08-06 09:00",
+  "generated_at": "2026-08-06 12:00",
   "new_tasks": [
-    {
-      "title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
-      "tier": "tomorrow",
-      "description": "Crispin Muncaster has sent the integrations link for tomorrow's testing meeting in readiness for the 14 August deadline. Kevin needs to attend and participate in the DTP1092 College Staff to PXD testing discussion.",
-      "email_subject": "DTP1092 College Staff to PXD - testing meeting",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-05 09:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A43D86D10000",
-      "auto_promoted": true
-    },
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
       "tier": "week",
@@ -24,13 +14,22 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608041500480",
-      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Simon confirmed he can support Asta on Friday 7 August and is expecting Kevin to be back for the testing discussion.",
-      "email_subject": "RE: Michael - Annual Leave",
-      "email_from": "Simon Burford",
-      "received": "2026-08-04 16:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A381525A0000"
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "Crispin sent the integrations link for tomorrow's testing meeting (Friday 7 August).",
+      "email_subject": "DTP1092 College Staff to PXD - testing meeting",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-05 09:20",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A43D86D10000"
+    },
+    {
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "Nathan Kirwan confirmed he has set up roles and people in UOXU to cover the 7 scenarios for testing.",
+      "email_subject": "RE: DTP1092 College Staff to PXD - testing meeting",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-08-06 11:10",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43170000"
     }
   ]
 }
