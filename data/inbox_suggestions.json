@@ -1,34 +1,43 @@
 {
-  "generated_at": "2026-08-07 15:00",
+  "generated_at": "2026-08-07 18:00",
   "new_tasks": [
     {
-      "title": "Confirm availability for Multi Company Setup discussion with Conor (FP 68261303)",
-      "tier": "tomorrow",
-      "description": "Simon Burford is on leave next week and has indicated Kevin will be back. Conor O'Brien (Access Group) needs confirmation of Kevin's availability to continue the multi-company configuration work for DTP1092. This is a continuation of existing task t021 but requires immediate confirmation of readiness.",
-      "email_subject": "RE: Multi Company Setup",
+      "title": "Review volunteering leave pay code configuration work",
+      "tier": "week",
+      "description": "Simon Burford has been working on moving volunteering leave from 'Other Leave' reason code to its own standalone leave type. Kevin needs to review Simon's analysis and determine next steps for implementation in PeopleXD.",
+      "email_subject": "Volunteering Leave",
       "email_from": "Simon Burford",
-      "received": "2026-08-07 12:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998610000",
+      "received": "2026-08-07 16:21",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000",
       "auto_promoted": true
     },
     {
-      "title": "Respond to Occupational Health appointment offer",
-      "tier": "tomorrow",
-      "description": "Occupational Health (enquiries@uohs.ox.ac.uk) has offered a revised appointment. Kevin needs to respond with his availability to confirm or reschedule.",
-      "email_subject": "PRIVATE & CONFIDENTIAL - Occupational Health",
-      "email_from": "enquiries@uohs.ox.ac.uk",
-      "received": "2026-08-07 11:54",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A569985F0000",
+      "title": "Investigate team calendar config issue with Asta",
+      "tier": "week",
+      "description": "Simon encountered a missing option when trying to configure the Volunteering Leave pay code in UOXU. Kevin needs to work with Asta to diagnose and resolve the team calendar configuration problem.",
+      "email_subject": "Team Calendar Config",
+      "email_from": "Simon Burford",
+      "received": "2026-08-07 15:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998640000",
       "auto_promoted": true
     },
     {
-      "title": "Confirm availability for Confidential OH Consultation with Maria Ignat",
-      "tier": "tomorrow",
-      "description": "Maria Ignat has sent a Teams meeting link for a confidential occupational health consultation. Kevin needs to confirm his attendance or reschedule if necessary.",
-      "email_subject": "Confidential - OH Consultation ",
-      "email_from": "Maria Ignat",
-      "received": "2026-08-07 11:54",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A569985E0000",
+      "title": "Review business rules for data warehouse with Ewan/Matt/Marie",
+      "tier": "week",
+      "description": "Simon is following up with Ewan and Matt on data warehouse feed amendments to ensure only Company 90 data is included. Kevin needs to review the discussion and confirm approach.",
+      "email_subject": "RE: Business rules for Data Warehouse",
+      "email_from": "Simon Burford",
+      "received": "2026-08-06 17:05",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000"
+    },
+    {
+      "title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
+      "tier": "week",
+      "description": "Simon is discussing with Michael O'Sullivan whether to refresh UOXU and UOXC environments with a new clone of UOXP for DTP1092 Company 90 configuration and testing. Kevin needs to confirm this approach.",
+      "email_subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
+      "email_from": "Simon Burford",
+      "received": "2026-08-06 14:49",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431D0000",
       "auto_promoted": true
     },
     {
@@ -44,76 +53,40 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t013",
-      "task_title": "Insight module update -- Lindsey Spriggs",
-      "note": "Lindsey Spriggs has sent a Teams meeting link for the bi-monthly CDR/PD working group, likely including the Insight module reminder functionality item (action #6 originally due 17 Feb 2026).",
-      "email_subject": "Bi-monthly CDR/PD working group",
-      "email_from": "Lindsey Spriggs",
-      "received": "2026-08-07 13:48",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998630000"
+      "task_id": "t021",
+      "task_title": "FP 68261303 -- Multi Company Setup",
+      "note": "Conor O'Brien has additional work to discuss on multi-company setup and is awaiting confirmation of Kevin's availability next week.",
+      "email_subject": "RE: #External# RE: Multi Company Setup",
+      "email_from": "Conor O'Brien",
+      "received": "2026-08-07 12:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
     },
     {
-      "task_id": "t2608071200560",
-      "task_title": "Attend sickness absence survey working group catch-up",
-      "note": "Simon Burford has scheduled the sickness absence survey working group catch-up meeting; Kevin needs to attend.",
-      "email_subject": "Sickness Absence Survey working group",
+      "task_id": "t2608071501070",
+      "task_title": "Confirm availability for Multi Company Setup discussion with Conor (FP 68261303)",
+      "note": "Simon confirmed Kevin will be back next week and can continue multi-company setup discussions with Conor.",
+      "email_subject": "RE: Multi Company Setup",
       "email_from": "Simon Burford",
-      "received": "2026-08-07 11:04",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A569985D0000"
+      "received": "2026-08-07 12:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998610000"
     },
     {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Simon Burford's email to Ewan and Matt references June discussions with Marie about data warehouse feeds for Company 90 configuration, directly relevant to REF2029 pay admin codes setup in UOXU.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-06 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000"
+      "task_id": "t2608071501071",
+      "task_title": "Respond to Occupational Health appointment offer",
+      "note": "Occupational Health has sent a revised appointment offer for Kevin to respond to with availability.",
+      "email_subject": "PRIVATE & CONFIDENTIAL - Occupational Health",
+      "email_from": "enquiries@uohs.ox.ac.uk",
+      "received": "2026-08-07 11:54",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A569985F0000"
     },
     {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Simon Burford's email confirms Company 90 configuration and testing is part of DTP1092 in both UOXC and UOXU; references environment clone discussion relevant to pay admin codes setup.",
-      "email_subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
-      "email_from": "Simon Burford",
-      "received": "2026-08-06 14:49",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431D0000"
-    },
-    {
-      "task_id": "t012",
-      "task_title": "Vacancy alert email retest -- case 68388326",
-      "note": "Julie Hickman has follow-up points on Patch Release 28.0.157 UAT update, including NI Number column addition to Employee Search; may be relevant to vacancy alert retest if UI changes affect the email config.",
-      "email_subject": "RE: Patch Release 28.0.157 – UAT Update",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-06 14:43",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431C0000"
-    },
-    {
-      "task_id": "t2608060900570",
-      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
-      "note": "Crispin Muncaster has confirmed integrations testing meeting is set up with Nathan's test data in place for tomorrow's meeting.",
-      "email_subject": "RE: DTP1092 College Staff to PXD - testing meeting",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-06 11:17",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43180000"
-    },
-    {
-      "task_id": "t037",
-      "task_title": "Ultrix Licenses -- chase Anne re Nathan's license",
-      "note": "Sarah Rowles has forwarded information about Clockify Free plan changes and options; this may be related to resource planning discussions but forwarded to Marie, not directly actionable for Kevin at this stage.",
-      "email_subject": "FW: Clockify: Upcoming Free plan changes & options for your team",
-      "email_from": "Sarah Rowles",
-      "received": "2026-08-06 10:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43160000"
-    },
-    {
-      "task_id": "t2608060900570",
-      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
-      "note": "Simon Burford confirms he will support Asta on Friday 7th and indicates Kevin will be back to handle DTP1092 testing.",
-      "email_subject": "RE: Michael - Annual Leave",
-      "email_from": "Simon Burford",
-      "received": "2026-08-04 16:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A381525A0000"
+      "task_id": "t2608071501072",
+      "task_title": "Confirm availability for Confidential OH Consultation with Maria Ignat",
+      "note": "Maria Ignat has sent Teams meeting link for confidential occupational health consultation requiring Kevin's confirmation.",
+      "email_subject": "Confidential - OH Consultation ",
+      "email_from": "Maria Ignat",
+      "received": "2026-08-07 11:54",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A569985E0000"
     }
   ]
 }
