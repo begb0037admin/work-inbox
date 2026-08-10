@@ -774,10 +774,29 @@ def _absence_label(start_date, last_absent_date, all_day):
         label += ", returns " + _fmt_absence_date(return_date)
     return label
 
+# Defense-in-depth, not a substitute for the organizer-placeholder check
+# above: after cleaning, reject anything that still reads as a department/
+# system name rather than a person. Caught live, 10 Aug 2026 -- a real
+# production run produced "People Department - Hr Systems" as a bogus
+# absent "person" despite the organizer-placeholder pre-check, and a
+# same-session, same-logic replication immediately after could NOT
+# reproduce it (most likely an Outlook COM quirk specific to expanding a
+# recurring series via IncludeRecurrences, not a pinned-down logic bug) --
+# rather than keep chasing a non-reproducible trigger, this output-side
+# check guards against the whole class of "organizer/name resolved to
+# something obviously not a person" regardless of which mechanism causes it.
+_NON_PERSON_NAME_TERMS = ["department", "systems", " team", "hr systems"]
+
+def _looks_like_a_person(name):
+    lower = name.lower()
+    return not any(term in lower for term in _NON_PERSON_NAME_TERMS)
+
 def _add_absence(name, label):
     name = _clean_absence_name(name)
     key = _absence_key(name)
     if not key or len(name) < 3:
+        return
+    if not _looks_like_a_person(name):
         return
     text = name + " - " + label if label else name
     existing = absence_map.get(key)
