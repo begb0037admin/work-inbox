@@ -795,6 +795,29 @@ async function init(){
   renderBriefing(data, currentKey);
 }
 
+// Tabs -- added 10 Aug 2026 once Drafted Replies joined Calendar + Priorities
+// on one long scroll and it got too crowded. Persisted per-browser via
+// localStorage so a refresh doesn't silently reset which tab was open.
+const ACTIVE_TAB_KEY='workInbox_activeTab_v1';
+const VALID_TABS=['priorities','calendar','drafted'];
+
+function switchTab(tab){
+  if(VALID_TABS.indexOf(tab)===-1) tab='priorities';
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-tab')===tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(function(el){el.classList.remove('active');});
+  const contentEl=document.getElementById('tabContent'+tab.charAt(0).toUpperCase()+tab.slice(1));
+  if(contentEl) contentEl.classList.add('active');
+  localStorage.setItem(ACTIVE_TAB_KEY, tab);
+}
+
+function initTabs(){
+  const saved=localStorage.getItem(ACTIVE_TAB_KEY);
+  switchTab(VALID_TABS.indexOf(saved)!==-1 ? saved : 'priorities');
+}
+initTabs();
+
 init();
 
 // CC ticker — reads Command Centre tasks.json
@@ -884,10 +907,18 @@ function markDraft(id,sourceEntryId,status,ev){
   refreshDraftedRepliesCount();
 }
 
+function _updateDraftedTabBadge(count){
+  const tabBadge=document.getElementById('tabDraftedCount');
+  if(!tabBadge) return;
+  if(count>0){tabBadge.textContent=count;tabBadge.style.display='';}
+  else{tabBadge.style.display='none';}
+}
+
 function refreshDraftedRepliesCount(){
   const remaining=document.querySelectorAll('.dr-card').length;
   const badgeEl=document.getElementById('drCountBadge');
   if(badgeEl) badgeEl.textContent=remaining;
+  _updateDraftedTabBadge(remaining);
   const panel=document.getElementById('draftedRepliesPanel');
   if(panel&&remaining===0){
     const list=document.getElementById('drList');
@@ -903,6 +934,7 @@ function renderDraftedReplies(payload){
 
   if(pending.length===0){
     panel.innerHTML=`<div class="dr-header"><div class="dr-title">Drafted Replies</div></div><div class="dr-empty">No drafts waiting for review.</div>`;
+    _updateDraftedTabBadge(0);
     return;
   }
 
@@ -946,6 +978,7 @@ function renderDraftedReplies(payload){
   }).join('');
 
   panel.innerHTML=`<div class="dr-header"><div class="dr-title">Drafted Replies <span class="dr-count-badge" id="drCountBadge">${pending.length}</span></div></div><div class="dr-subtitle">Drafted by Lauren in Kevin's style — review, copy, and send from Outlook yourself. Nothing here sends anything automatically.</div><div id="drList">${cards}</div>`;
+  _updateDraftedTabBadge(pending.length);
 }
 
 async function loadDraftedReplies(){
