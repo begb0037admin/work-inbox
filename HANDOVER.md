@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-04 - Phase 3.8 calendar-summary offset bug investigated, root cause confirmed, not fixed (Drew).
+**Last updated:** 2026-08-10 - sent_corpus_pull.py added (bulk Sent-Mail corpus tool for agent-commons style-learning pipeline, issue #3) — built, not yet run against real data (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -23,6 +23,20 @@
 **Future proposals (separate phases only):**
 - A first-class DRY_RUN mode for safer diagnostics may be proposed later.
 - Any title matching changes require a separate approved phase.
+
+---
+
+## Session 2026-08-10 — sent_corpus_pull.py built (Drew) — not yet run against real data
+
+**Scope:** `begb0037admin/agent-commons` issue #3 (cross-agent email/Teams style-learning pipeline), item 3/4 — bulk-ingest Kevin's own Sent items as the initial style corpus, via Graph API originally, redirected mid-task to reusing work-inbox's proven Outlook COM access instead.
+
+**What was added:** `tools/sent_corpus_pull.py` — a new, separate script, NOT a change to `fetch_inbox.py` or the live 6x/day pipeline. Reuses the identical COM connection pattern already in production (`win32com.client.dynamic.Dispatch("Outlook.Application")` → `GetNamespace("MAPI")` → `GetDefaultFolder(5)` for Sent Mail), but pulls full body text over a month-chunked historical `[SentOn]` window (existing `fetch_inbox.py` Sent read is 7-day/100-char-preview only, feeding ephemeral AI-triage context — never persisted, and not touched by this addition).
+
+**Redaction pass (automated, per Kevin's decision):** keyword/pattern-based, 4 categories (`health`, `bereavement`, `hr_case`, `absence`) — any match anywhere in subject+body excludes the whole message from the corpus. Redaction ledger records only `entry_id`/date/category/known-name-flag, never matched text. Tested against 13 synthetic cases (all 4 categories + 2 negative controls, including a "leave" false-positive check) — 13/13 passed. Chunking logic separately verified for gaps/overlaps across a year boundary.
+
+**Not done yet:** no real pull has been run against live Outlook — this session's environment didn't have Outlook running, and starting it to pull real historical mail was treated as past the "build and report" checkpoint, needing Kevin's explicit go-ahead first. Proposed durable output location: `begb0037admin/agent-commons` `corpus/sent-items/` (scaffold README pushed there, no real corpus data yet).
+
+Full writeup and open questions (recipient-PII in the `to` field, redaction being pattern-based not NLP): `begb0037admin/drew` `memory/sent-items-corpus-investigation.md` and `begb0037admin/agent-commons` issue #3 comments.
 
 ---
 
