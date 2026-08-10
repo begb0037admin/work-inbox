@@ -163,18 +163,29 @@ def restrict_sent(folder, start_dt, end_dt):
 def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
     import win32com.client.dynamic
 
-    os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "sent_corpus_clean.json")
-    log_path = os.path.join(out_dir, "sent_corpus_redaction_log.json")
+    if not dry_run_stats_only:
+        os.makedirs(out_dir, exist_ok=True)
+        out_path = os.path.join(out_dir, "sent_corpus_clean.json")
+        log_path = os.path.join(out_dir, "sent_corpus_redaction_log.json")
 
     outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
     mapi = outlook.GetNamespace("MAPI")
     sent_folder = mapi.GetDefaultFolder(5)  # olFolderSentMail
 
+    OL_MAIL_CLASS = 43  # olMail -- Sent Items also holds meeting
+    # requests/responses/cancellations (Class 53/54/55/56/57) Kevin has sent,
+    # which have neither a mail-style Body nor a real "To" the same way and
+    # aren't email correspondence anyway -- filter them explicitly instead of
+    # letting them fall through as an unclassified exception.
+
     clean_entries = []
     redaction_log = []
     failed_chunks = []
     total_seen = 0
+    # Diagnostics only -- item Class (COM integer constant) and exception
+    # type name are safe metadata, never message content.
+    skipped_non_mail_by_class = {}
+    skipped_by_exc = {}
 
     for chunk_start, chunk_end in month_ranges(start_date, end_date):
         items = restrict_sent(sent_folder, chunk_start, chunk_end)
@@ -183,7 +194,15 @@ def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
             continue
         for msg in items:
             try:
-                total_seen += 1
+                item_class = msg.Class
+            except Exception:
+                item_class = None
+            if item_class != OL_MAIL_CLASS:
+                skipped_non_mail_by_class[item_class] = skipped_non_mail_by_class.get(item_class, 0) + 1
+                continue
+
+            total_seen += 1
+            try:
                 subject = msg.Subject or ""
                 body = msg.Body or ""
                 sent_on = str(msg.SentOn)
@@ -207,7 +226,8 @@ def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
                     "sent": sent_on,
                     "body": body,
                 })
-            except Exception:
+            except Exception as e:
+                skipped_by_exc[type(e).__name__] = skipped_by_exc.get(type(e).__name__, 0) + 1
                 continue
 
     stats = {
@@ -220,6 +240,9 @@ def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
             for cat in REDACTION_PATTERNS
         },
         "failed_chunks": failed_chunks,
+        "skipped_non_mail_count": sum(skipped_non_mail_by_class.values()),
+        "skipped_non_mail_by_item_class": {str(k): v for k, v in skipped_non_mail_by_class.items()},
+        "unexpected_errors_on_mail_items": skipped_by_exc,
     }
 
     if not dry_run_stats_only:
