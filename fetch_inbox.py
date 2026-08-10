@@ -535,14 +535,26 @@ print("Phase 3.2 - generating AI email summaries...")
 summary_candidates = [c for c in (urgent + needs) if c.get("entry_id")]
 if summary_candidates and anthropic_available:
     try:
+        # Use short sequential ids in the API exchange, not the raw ~140-char
+        # Outlook EntryID -- confirmed live, 10 Aug 2026: with 157 real
+        # urgent+needs candidates, using entry_id as the JSON key hit
+        # stop_reason="max_tokens" at the full 8000-token budget (hex strings
+        # tokenize far less efficiently than English text, so the KEYS alone
+        # were consuming most of the budget before the model reached the
+        # actual summaries). Switching to "0","1","2"... as the wire-format
+        # id and mapping back to entry_id locally resolved it completely on
+        # the identical real payload: stop_reason="end_turn", only 5947/8000
+        # tokens used, all 157 entries parsed. Root cause was token-inefficient
+        # keys, not response size -- raising max_tokens further would not
+        # have fixed this on its own.
         emails_for_summary = [
             {
-                "id":      c["entry_id"],
+                "id":      str(i),
                 "subject": c["subject"],
                 "from":    c["from"],
                 "preview": (c.get("sub") or "")[:250]
             }
-            for c in summary_candidates
+            for i, c in enumerate(summary_candidates)
         ]
         EMAIL_SUMMARY_SYSTEM = (
             "You are Kevin's inbox briefing assistant at Oxford University Personnel Services.\n"
@@ -555,10 +567,10 @@ if summary_candidates and anthropic_available:
             "needs him to read it, take an offline action, or do nothing at all (e.g. a system "
             "notification, an FYI, a failed-import alert, a case update that doesn't ask him anything "
             "directly).\n"
-            "Return ONLY a valid JSON object mapping email id to an object with 'summary' and "
-            "'needs_reply' - no preamble, no markdown.\n"
-            'Example: {"00abc123": {"summary": "Marie confirms funding approved for SBS exclusion from '
-            'the DSE feed; no action needed from Kevin.", "needs_reply": false}, "00def456": '
+            "Return ONLY a valid JSON object mapping the given short id to an object with 'summary' "
+            "and 'needs_reply' - no preamble, no markdown.\n"
+            'Example: {"0": {"summary": "Marie confirms funding approved for SBS exclusion from '
+            'the DSE feed; no action needed from Kevin.", "needs_reply": false}, "1": '
             '{"summary": "James is asking whether the FA KPI meeting can move to Thursday.", '
             '"needs_reply": true}}'
         )
@@ -568,13 +580,6 @@ if summary_candidates and anthropic_available:
         )
         es_resp = client.messages.create(
             model      = "claude-haiku-4-5",
-            # Was 4096 (fine for the old bare-string-per-email shape). Adding
-            # needs_reply turned each entry into a nested object, growing the
-            # response enough that a real run with 157 urgent+needs candidates
-            # truncated mid-JSON and failed outright (caught live, 10 Aug
-            # 2026, before this reached the unattended scheduled run) -- bumped
-            # to match the budget Phase 3.7's own per-item summary loop
-            # already uses successfully at this candidate-count scale.
             max_tokens = 8000,
             system     = EMAIL_SUMMARY_SYSTEM,
             messages   = [{"role": "user", "content": email_summary_user}]
@@ -587,9 +592,8 @@ if summary_candidates and anthropic_available:
         email_summaries = json.loads(es_raw)
         applied = 0
         needs_reply_count = 0
-        for c in summary_candidates:
-            sid = c.get("entry_id", "")
-            entry = email_summaries.get(sid)
+        for i, c in enumerate(summary_candidates):
+            entry = email_summaries.get(str(i))
             if entry is None:
                 continue
             # Defensive: accept either the new {summary, needs_reply} shape or,
