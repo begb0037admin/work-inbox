@@ -90,10 +90,23 @@
       </div>
     </div>
 
-    <div id="draftedRepliesPanel"></div>
-    <div id="calPanel"></div>
-    <div id="contextBar"></div>
-    <div id="inboxCol"></div>
+    <div class="tab-bar" id="tabBar">
+      <button class="tab-btn" data-tab="priorities" onclick="switchTab('priorities')">Priorities</button>
+      <button class="tab-btn" data-tab="calendar" onclick="switchTab('calendar')">Calendar</button>
+      <button class="tab-btn" data-tab="drafted" onclick="switchTab('drafted')">Drafted Replies<span class="tab-count-badge" id="tabDraftedCount" style="display:none">0</span></button>
+    </div>
+
+    <div class="tab-content" id="tabContentPriorities">
+      <div id="contextBar"></div>
+      <div id="inboxCol"></div>
+    </div>
+    <div class="tab-content" id="tabContentCalendar">
+      <div id="calPanel"></div>
+    </div>
+    <div class="tab-content" id="tabContentDrafted">
+      <div id="draftedRepliesPanel"></div>
+    </div>
+
     <div class="footer">All outgoing communication requires Kevin's review and sign-off before sending</div>
   </div>
 </div>
