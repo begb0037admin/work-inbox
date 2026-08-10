@@ -79,7 +79,7 @@ def preserve_existing_calendar_summaries(existing, key, items):
 def calendar_summary_count(briefing_doc):
     return sum(
         1
-        for key in ("calToday", "calTomorrow")
+        for key in ("calToday", "calTomorrow", "calDay2", "calDay3")
         for item in briefing_doc.get(key, [])
         if item.get("summary")
     )
@@ -87,7 +87,7 @@ def calendar_summary_count(briefing_doc):
 def weak_calendar_summary_count(briefing_doc):
     return sum(
         1
-        for key in ("calToday", "calTomorrow")
+        for key in ("calToday", "calTomorrow", "calDay2", "calDay3")
         for item in briefing_doc.get(key, [])
         if item.get("summary") and weak_calendar_summary(item.get("summary"))
     )
@@ -408,8 +408,42 @@ today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B 
 tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorrow.strftime("%B %Y")
 existing_briefing = load_existing_briefing()
 
-cal_today    = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == today]
-cal_tomorrow = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == tomorrow]
+# Calendar day-view now covers 4 rolling working days (today, tomorrow, +2,
+# +3) instead of just today/tomorrow -- Kevin's explicit request, 10 Aug
+# 2026 ("today, tomorrow, day after that, and day after that... when
+# tomorrow comes, it will drop and get Friday"). Day+2/Day+3 use the same
+# next_workday() weekend-skipping semantics "tomorrow" already used, for
+# consistency -- a Thursday's day+2/day+3 are Monday/Tuesday, not a blank
+# Saturday/Sunday.
+day2 = next_workday(tomorrow)
+day3 = next_workday(day2)
+
+# Leave/absence calendar entries are deliberately excluded from the day-view
+# columns -- Kevin's explicit call, same request: "I have the annual leave
+# on the sidebar so I don't actually need the annual leave to display in my
+# calendar." Duplicates the term list ABSENCE_KEYWORDS uses later in this
+# file (defined further down, for the sidebar Absences panel) rather than
+# reordering the whole file to share one constant -- keep both lists in sync
+# if either changes.
+_DAY_VIEW_EXCLUDE_KEYWORDS = [
+    "annual leave", "a/l", "on leave", "out of office", "ooo",
+    "holiday", "away", "sick leave"
+]
+
+def _is_leave_item(c):
+    subj_lower = (c.get("subject") or "").lower()
+    return any(kw in subj_lower for kw in _DAY_VIEW_EXCLUDE_KEYWORDS)
+
+def _cal_for_date(target_date):
+    return [
+        c for c in calendar
+        if datetime.fromisoformat(c["start"]).date() == target_date and not _is_leave_item(c)
+    ]
+
+cal_today    = _cal_for_date(today)
+cal_tomorrow = _cal_for_date(tomorrow)
+cal_day2     = _cal_for_date(day2)
+cal_day3     = _cal_for_date(day3)
 
 inbox_for_api = [{k: v for k, v in m.items() if k != "entry_id"} for m in inbox]
 
@@ -1284,6 +1318,8 @@ elif all_priorities:
 # Pre-build cal items so Phase 3.8 can annotate them before briefing dict is assembled
 cal_today_items    = build_cal_items(cal_today)
 cal_tomorrow_items = build_cal_items(cal_tomorrow)
+cal_day2_items     = build_cal_items(cal_day2)
+cal_day3_items     = build_cal_items(cal_day3)
 
 # -- Phase 3.7b -- Fetch recent Granola meeting notes for calendar context --
 GRANOLA_API_KEY = os.environ.get("GRANOLA_API_KEY", "")
@@ -1301,20 +1337,55 @@ def _granola_fetch(url):
     with urllib.request.urlopen(req, timeout=15) as r:
         return json.loads(r.read().decode())
 
+# Shared candidate builder for Phase 3.7b (Granola) and Phase 3.8 (AI prep
+# summaries) -- fixes the calendar-summary offset bug root-caused 4 Aug 2026
+# (memory/calendar-summary-offset-bug.md) but left unfixed since Phase 3.8
+# was closed pending Kevin explicitly reopening it. He did, 10 Aug 2026, by
+# asking to extend this exact phase to 4 days -- fixing it now rather than
+# extending the same bug across twice as many columns.
+#
+# Root cause: the old code did `enumerate(cal_X_items)` THEN filtered out
+# all-day items -- so if item 0 of a day is an all-day event (now much more
+# likely now leave items are filtered separately upstream, and any other
+# all-day entry), the surviving non-all-day items keep indices 1,2,3...
+# instead of starting at 0. claude-haiku-4-5 (the model both phases are
+# locked to) was found to sometimes echo output-position (0,1,2...) instead
+# of the literal idx value whenever it doesn't start at 0, silently writing
+# a summary onto the wrong meeting.
+#
+# Fix: every candidate now carries TWO indices -- "idx" (sequential 0-based
+# within its day, the ONLY index ever shown to the model, for both the
+# Granola match keys and the Phase 3.8 AI call) and "real_idx" (the true
+# position in cal_X_items, used ONLY for the final local write-back, never
+# sent to or read from the model).
+def _non_all_day_candidates(items, day_label):
+    candidates = []
+    model_idx = 0
+    for real_idx, c in enumerate(items):
+        if c.get("time", "").lower() == "all day":
+            continue
+        candidates.append({
+            "idx": model_idx, "real_idx": real_idx, "day": day_label,
+            "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")
+        })
+        model_idx += 1
+    return candidates
+
+_all_day_candidates = (
+    _non_all_day_candidates(cal_today_items, "today") +
+    _non_all_day_candidates(cal_tomorrow_items, "tomorrow") +
+    _non_all_day_candidates(cal_day2_items, "day2") +
+    _non_all_day_candidates(cal_day3_items, "day3")
+)
+
 if GRANOLA_API_KEY:
     try:
         _lookback = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
         _g_data   = _granola_fetch(f"https://public-api.granola.ai/v1/notes?created_after={_lookback}")
         _g_notes  = _g_data.get("notes", [])
 
-        # Build the calendar items list for matching (today + tomorrow non-all-day)
-        _cal_candidates = [
-            {"idx": i, "day": "today",    "title": c["title"]}
-            for i, c in enumerate(cal_today_items) if c.get("time", "").lower() != "all day"
-        ] + [
-            {"idx": i, "day": "tomorrow", "title": c["title"]}
-            for i, c in enumerate(cal_tomorrow_items) if c.get("time", "").lower() != "all day"
-        ]
+        # Reuse the same idx-fixed candidate list built above for matching.
+        _cal_candidates = _all_day_candidates
 
         for cal_item in _cal_candidates:
             cal_kw = _granola_keywords(cal_item["title"])
@@ -1345,21 +1416,15 @@ if GRANOLA_API_KEY:
 else:
     print("Phase 3.7 skipped - GRANOLA_API_KEY not set")
 
-# -- Phase 3.8 -- AI prep summaries for today/tomorrow calendar items --
+# -- Phase 3.8 -- AI prep summaries for all 4 calendar day-view columns --
+# Reuse the same idx-fixed candidate list -- "idx" (sequential, model-facing)
+# is what gets sent to and read back from the AI; "real_idx" (true position
+# in cal_X_items) is only used for the write-back below, never sent to the
+# model. Fixes the calendar-summary offset bug -- see comment above
+# _non_all_day_candidates().
 _cal_for_summary = [
-    {
-        "idx": i, "day": "today", "time": c["time"], "title": c["title"],
-        "organizer": c.get("sub", ""),
-        "prev_meeting_notes": _granola_context.get(f"today_{i}", {}).get("summary", "")
-    }
-    for i, c in enumerate(cal_today_items) if c.get("time", "").lower() != "all day"
-] + [
-    {
-        "idx": i, "day": "tomorrow", "time": c["time"], "title": c["title"],
-        "organizer": c.get("sub", ""),
-        "prev_meeting_notes": _granola_context.get(f"tomorrow_{i}", {}).get("summary", "")
-    }
-    for i, c in enumerate(cal_tomorrow_items) if c.get("time", "").lower() != "all day"
+    dict(c, prev_meeting_notes=_granola_context.get(f"{c['day']}_{c['idx']}", {}).get("summary", ""))
+    for c in _all_day_candidates
 ]
 if _cal_for_summary and anthropic_available:
     try:
@@ -1386,11 +1451,15 @@ if _cal_for_summary and anthropic_available:
         if _cs_raw.startswith("```"): _cs_raw = "\n".join(_cs_raw.split("\n")[1:])
         if _cs_raw.endswith("```"):   _cs_raw = "\n".join(_cs_raw.split("\n")[:-1])
         _cs_map = json.loads(_cs_raw)
+        _CAL_DAY_TARGETS = {
+            "today": cal_today_items, "tomorrow": cal_tomorrow_items,
+            "day2": cal_day2_items, "day3": cal_day3_items,
+        }
         for item in _cal_for_summary:
             key = f"{item['day']}_{item['idx']}"
             if key in _cs_map:
-                target = cal_today_items if item["day"] == "today" else cal_tomorrow_items
-                target[item["idx"]]["summary"] = _cs_map[key]
+                target = _CAL_DAY_TARGETS[item["day"]]
+                target[item["real_idx"]]["summary"] = _cs_map[key]
         print(f"Phase 3.8 done - {len(_cs_map)} calendar summaries generated")
     except Exception as e:
         print(f"WARNING: Phase 3.8 calendar summaries failed - {e}")
@@ -1400,7 +1469,9 @@ elif _cal_for_summary:
 if same_briefing_date(existing_briefing, today_str):
     _preserved_cal = (
         preserve_existing_calendar_summaries(existing_briefing, "calToday", cal_today_items) +
-        preserve_existing_calendar_summaries(existing_briefing, "calTomorrow", cal_tomorrow_items)
+        preserve_existing_calendar_summaries(existing_briefing, "calTomorrow", cal_tomorrow_items) +
+        preserve_existing_calendar_summaries(existing_briefing, "calDay2", cal_day2_items) +
+        preserve_existing_calendar_summaries(existing_briefing, "calDay3", cal_day3_items)
     )
     if _preserved_cal:
         print(f"Phase 3.8 preservation - reused {_preserved_cal} existing same-day calendar summaries")
@@ -1434,6 +1505,8 @@ briefing = {
     "low":          low,
     "calToday":     cal_today_items,
     "calTomorrow":  cal_tomorrow_items,
+    "calDay2":      cal_day2_items,
+    "calDay3":      cal_day3_items,
     "calFull":      calFull,
     "absences":     absences,
     "prioritiesToday":    priorities_today,
