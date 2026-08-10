@@ -1,15 +1,14 @@
 {
-  "generated_at": "2026-08-10 18:03",
+  "generated_at": "2026-08-10 20:34",
   "new_tasks": [
     {
       "title": "Investigate Clockify role consolidation for Beth",
       "tier": "week",
-      "description": "Marie Cooksey is asking whether it is possible to combine Beth's two Clockify roles (HR Systems and Biology) into one. Kevin needs to investigate the Clockify platform capabilities and advise Marie on feasibility.",
+      "description": "Marie Cooksey is asking whether it is possible to combine Beth's two Clockify roles (HR Systems and Biology) into one role. Kevin needs to investigate the Clockify platform capabilities and advise Marie on feasibility and any implications.",
       "email_subject": "Clockify",
       "email_from": "Marie Cooksey",
       "received": "2026-08-10 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995660000",
-      "auto_promoted": true
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995660000"
     },
     {
       "title": "Confirm DTP1092 integrations testing completion by 14 Aug",
@@ -42,15 +41,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t019",
-      "task_title": "Pay Code 121 / PAYPAY25 -- add to HR Reporting SQL",
-      "note": "Julie requesting follow-up on NI Number Column addition and other UAT points from Patch Release 28.0.157; appears to be progress update on development work.",
-      "email_subject": "RE: Patch Release 28.0.157 – UAT Update",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-06 14:43",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431C0000"
-    }
-  ]
+  "applied_updates": []
 }
