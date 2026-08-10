@@ -752,6 +752,7 @@ async function init(){
   if(titleEl) titleEl.textContent=getGreeting();
 
   await loadRemoteTicks();
+  loadDraftedReplies();
 
   let data=null;
 
@@ -831,6 +832,120 @@ async function loadCcTicker(){
 }
 loadCcTicker();
 setInterval(loadCcTicker, 60000);
+
+// Drafted Replies — agent-commons issue #3, item 4 (4B, dashboard-only review).
+// Reads work-inbox's own data/drafted_replies.json, a mirror publish_drafted_replies.py
+// keeps in sync from agent-commons/pending-email-drafts/drafts.json (agent-commons is
+// private -- the browser never talks to it directly; this file is the public,
+// already-redacted, already-safe copy). Nothing here writes to a mailbox or sends
+// anything -- "Mark sent"/"Discard" are bookkeeping only, riding the exact same
+// tick-sync mechanism (getTicks/saveTicks/pushTicks) already used for email cards,
+// just under a 'draft_' key prefix so it doesn't collide with per-day briefing ticks.
+const DRAFTED_REPLIES_API='https://github-proxy.lelitte.co.uk/work-inbox/data/drafted_replies.json';
+
+function draftTickKey(sourceEntryId){return 'draft_'+sourceEntryId;}
+function draftStatus(sourceEntryId){return getTicks()[draftTickKey(sourceEntryId)]||null;}
+function setDraftStatus(sourceEntryId,status){
+  const ticks=getTicks();
+  ticks[draftTickKey(sourceEntryId)]=status;
+  saveTicks(ticks);
+}
+
+function drTierBadge(tier){
+  const label=tier==='senior-management'?'Senior mgmt':tier==='direct-report'?'Direct report':'Other';
+  return `<span class="dr-tier-badge dr-tier-${escapeHtml(tier||'other')}">${label}</span>`;
+}
+
+function toggleDraftExpand(id,ev){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const el=document.getElementById('drtext_'+id);
+  if(el) el.classList.toggle('expanded');
+  const hint=document.getElementById('drhint_'+id);
+  if(hint) hint.textContent=el&&el.classList.contains('expanded')?'Show less':'Show more';
+}
+
+async function copyDraftText(id,ev){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const el=document.getElementById('drtext_'+id);
+  if(!el) return;
+  try{
+    await navigator.clipboard.writeText(el.dataset.raw||el.textContent);
+    wiNotify('Draft copied to clipboard.');
+  }catch(e){
+    wiNotify('Copy failed — select and copy manually.');
+  }
+}
+
+function markDraft(id,sourceEntryId,status,ev){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  setDraftStatus(sourceEntryId,status);
+  const card=document.getElementById('drcard_'+id);
+  if(card) card.remove();
+  refreshDraftedRepliesCount();
+}
+
+function refreshDraftedRepliesCount(){
+  const remaining=document.querySelectorAll('.dr-card').length;
+  const badgeEl=document.getElementById('drCountBadge');
+  if(badgeEl) badgeEl.textContent=remaining;
+  const panel=document.getElementById('draftedRepliesPanel');
+  if(panel&&remaining===0){
+    const list=document.getElementById('drList');
+    if(list) list.innerHTML='<div class="dr-empty">No drafts waiting for review.</div>';
+  }
+}
+
+function renderDraftedReplies(payload){
+  const panel=document.getElementById('draftedRepliesPanel');
+  if(!panel) return;
+  const entries=(payload&&payload.entries)||[];
+  const pending=entries.filter(e=>!draftStatus(e.source_entry_id));
+
+  if(pending.length===0){
+    panel.innerHTML=`<div class="dr-header"><div class="dr-title">Drafted Replies</div></div><div class="dr-empty">No drafts waiting for review.</div>`;
+    return;
+  }
+
+  const cards=pending.map((e,i)=>{
+    const id='dr'+i;
+    const draftEsc=escapeHtml(e.draft_text||'');
+    const hasSource=e.source_entry_id&&e.source_entry_id.length>0;
+    const openLink=hasSource?`<a href="javascript:void(0)" class="dr-btn" onclick="openEmail('${e.source_entry_id}',event)">Open original</a>`:'';
+    return `<div class="dr-card" id="drcard_${id}">
+      <div class="dr-card-top">
+        <div class="dr-subject">${escapeHtml(e.subject||'(no subject)')}</div>
+        <div class="dr-meta">${drTierBadge(e.sender_tier)}<span class="dr-timestamp">${escapeHtml(e.drafted_at||'')}</span></div>
+      </div>
+      <div class="dr-draft-text" id="drtext_${id}" data-raw="${draftEsc}" onclick="toggleDraftExpand('${id}',event)">${draftEsc}</div>
+      <span class="dr-expand-hint" id="drhint_${id}" onclick="toggleDraftExpand('${id}',event)">Show more</span>
+      <div class="dr-actions">
+        <button class="dr-btn dr-btn-primary" onclick="copyDraftText('${id}',event)">Copy to clipboard</button>
+        ${openLink}
+        <button class="dr-btn" onclick="markDraft('${id}','${e.source_entry_id}','sent',event)">Mark sent</button>
+        <button class="dr-btn dr-btn-danger" onclick="markDraft('${id}','${e.source_entry_id}','discarded',event)">Discard</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML=`<div class="dr-header"><div class="dr-title">Drafted Replies <span class="dr-count-badge" id="drCountBadge">${pending.length}</span></div></div><div class="dr-subtitle">Drafted by Lauren in Kevin's style — review, copy, and send from Outlook yourself. Nothing here sends anything automatically.</div><div id="drList">${cards}</div>`;
+}
+
+async function loadDraftedReplies(){
+  try{
+    const res=await fetch(DRAFTED_REPLIES_API+'?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok) throw new Error('fetch failed');
+    const payload=await res.json();
+    renderDraftedReplies(payload);
+  }catch(e){
+    console.warn('Drafted replies fetch failed',e);
+    const panel=document.getElementById('draftedRepliesPanel');
+    if(panel&&!panel.innerHTML) panel.innerHTML='<div class="dr-header"><div class="dr-title">Drafted Replies</div></div><div class="dr-empty">Unable to load right now.</div>';
+  }
+}
+// First call happens from init(), after loadRemoteTicks() resolves -- calling
+// it here unconditionally would race remote-tick loading and could briefly
+// re-show a draft Kevin already marked sent/discarded on another machine.
+setInterval(loadDraftedReplies, 60000);
 
 /* CLOCK */
 function updateWiClock(){
