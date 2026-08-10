@@ -446,3 +446,18 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .dr-btn-primary:hover{background:var(--purple-border)}
 .dr-btn-danger{color:var(--red-text)}
 .dr-btn-danger:hover{background:var(--red-bg)}
+
+/* Confidence + inline flags -- deliberately always visible, never a tooltip
+   (Lauren's own design requirement: "impossible to miss"). */
+.dr-confidence{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:11.5px;margin:2px 0 8px;padding:5px 9px;border-radius:6px}
+.dr-confidence-low{background:var(--yellow-bg);border:1px solid var(--yellow-border)}
+.dr-confidence-medium{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.dr-confidence-high{background:var(--purple-bg);border:1px solid var(--purple-border)}
+.dr-confidence-label{font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.dr-confidence-low .dr-confidence-label{color:var(--yellow-text)}
+.dr-confidence-medium .dr-confidence-label{color:var(--blue-text)}
+.dr-confidence-high .dr-confidence-label{color:var(--purple-text)}
+.dr-confidence-reason{color:var(--text-muted);font-size:11px}
+.dr-flags{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:6px;padding:8px 11px;margin:8px 0}
+.dr-flags-title{font-size:11.5px;font-weight:700;color:var(--yellow-text);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.dr-flags-list{margin:0;padding-left:18px;font-size:12.5px;color:var(--text-dark);line-height:1.5}
