@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-10 - Absences fixed (Organizer-field name reconciliation + best-effort OOO date extraction), drafted_replies mirror schema fixed with real Lauren content live, needs_reply precision root-caused (Drew).
+**Last updated:** 2026-08-10 - Absences switched to calendar-only sourcing (Kevin's Calendar + People Department - HR Systems), OOO-email fallback removed entirely per Kevin's explicit decision; one production-only edge case (bogus department-name entry) found and fixed with a defensive guard (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -148,6 +148,25 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 - `needs_reply` precision investigated (Lauren found ~20/24 flagged entries were false positives) -- root cause: no cc-vs-primary-recipient signal and no staleness signal reach Phase 3.2's classifier at all (neither is captured/passed). Proposed fix posted to issue #3, not yet built -- needs Kevin's sign-off on staleness-cutoff specifics first.
 
 Full detail on all of the above: `begb0037admin/agent-commons` issue #3.
+
+---
+
+## Session 2026-08-10 (final, continued) -- Absences: calendar-only sourcing per Kevin's decision (Drew)
+
+**Scope:** Kevin corrected the earlier absences fix -- he doesn't want OOO-email-guessed dates at all; his own Calendar plus the "People Department - HR Systems" calendar (confirmed real and enumerable earlier this session) are the absence source of truth. If someone's leave isn't logged in either, he does not want it surfaced.
+
+**Built:** Phase 1 now also pulls the "People Department - HR Systems" calendar (an "Other Calendar" nested under Kevin's own primary mailbox, reached via the same COM session, wrapped in try/except so a folder-structure change degrades gracefully rather than failing Phase 1). Its items merge into the same `calendar` list Kevin's own primary calendar already populates, so the existing (Organizer-based) absence-detection logic picks them up with no separate code path. The OOO-auto-reply-email fallback -- and the best-effort date-guessing built for it earlier the same day -- were deliberately deleted, not just left unused: with calendar-only sourcing, every remaining absence entry has a real calendar-verified date by construction, so "date unknown" can no longer appear at all.
+
+**A real, production-only edge case was caught and fixed.** A live run produced a bogus absence entry -- "People Department - Hr Systems - off today..." -- where a calendar item's `Organizer` field held the department's own name rather than a real person (likely how a particular admin-booked half-day/full-day entry was created). The existing organizer-placeholder pre-check should have caught this but didn't reproduce when replicated with identical logic moments later in the same session -- most likely a non-deterministic Outlook COM quirk specific to expanding a recurring series via `IncludeRecurrences`, not a pinned-down logic bug. Rather than keep chasing an intermittent trigger, added a defense-in-depth output-side guard in `_add_absence()`: reject any cleaned name that still contains obviously-non-person terms ("department", "systems", "team"), regardless of which mechanism produced it. Re-ran production after this fix: the bogus entry is gone, correctly replaced by "Kevin" (the real underlying person, via subject-derived fallback).
+
+**Verified, real production data, three consecutive real runs today:**
+- Run 1 (calendar-only sourcing, no fallback): 7 real entries, zero "date unknown", but included the bogus department-name entry.
+- Run 2 (first placeholder-organizer fix attempt): bogus entry persisted -- confirmed the first fix attempt was insufficient on its own.
+- Run 3 (defense-in-depth guard added): bogus entry gone, replaced by the real person ("Kevin"). Final live state: `Athena Artuso`, `David Johnson`, `Henry Acheampong`, `Julie Hickman`, `Kevin`, `Simon Burford`, `Susan Pratt` -- all real, calendar-verified dates, zero "date unknown", zero non-person entries.
+
+One observation, not acted on unilaterally: Kevin's own leave now legitimately appears in his own Absences panel ("Kevin - off today..."), since he's tracked in the same calendar as everyone else. Not something he asked to exclude -- flagging it as a minor, possibly-odd-but-correct side effect rather than silently filtering it.
+
+Full detail: `begb0037admin/agent-commons` issue #3.
 
 ---
 
