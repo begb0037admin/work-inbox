@@ -1,0 +1,23 @@
+{
+  "generated": "2026-08-10T16:18:01.163954",
+  "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
+  "source_missing": false,
+  "entries": [
+    {
+      "source_entry_id": "TEST-ENTRY-ID-1",
+      "subject": "[TEST] Question re Volunteer reporting",
+      "sender_tier": "senior-management",
+      "draft_text": "Hi Marie,\n\nThanks for flagging this - yes, volunteer reporting is now possible in PeopleXD. I'll confirm the exact steps for the Pay & Conditions programme response by end of week.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-10T15:00:00",
+      "based_on": "bulk_corpus"
+    },
+    {
+      "source_entry_id": "TEST-ENTRY-ID-2",
+      "subject": "[TEST] FA KPI meeting timing",
+      "sender_tier": "direct-report",
+      "draft_text": "Sure, Thursday works for me. I'll move the invite.",
+      "drafted_at": "2026-08-10T15:05:00",
+      "based_on": "both"
+    }
+  ]
+}
