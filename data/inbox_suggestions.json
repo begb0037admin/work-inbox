@@ -1,6 +1,15 @@
 {
-  "generated_at": "2026-08-10 09:01",
+  "generated_at": "2026-08-10 12:01",
   "new_tasks": [
+    {
+      "title": "Review and respond to Conor's Multi Company Setup work (FP 68261303)",
+      "tier": "week",
+      "description": "Conor O'Brien has sent updated work on the Multi Company Setup and notes that both Simon and Kevin are on leave next week. Kevin needs to review Conor's progress on this DTP1092 configuration work and confirm next steps are aligned.",
+      "email_subject": "RE: #External# RE: Multi Company Setup",
+      "email_from": "Conor O'Brien",
+      "received": "2026-08-07 12:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
+    },
     {
       "title": "Review DTP1092 testing scenarios and HRIS Staging imports",
       "tier": "week",
@@ -8,17 +17,8 @@
       "email_subject": "DTP1092 College Staff into PXD - Testing HRIS Staging imports",
       "email_from": "Crispin Muncaster",
       "received": "2026-08-10 07:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000"
-    },
-    {
-      "title": "Review Conor's Multi Company Setup work and align on next steps",
-      "tier": "tomorrow",
-      "description": "Conor O'Brien has sent updated work on the Multi Company Setup (FP 68261303) and notes that both Simon and Kevin are on leave next week. Kevin needs to review Conor's progress and confirm availability to continue discussions next week.",
-      "email_subject": "RE: #External# RE: Multi Company Setup",
-      "email_from": "Conor O'Brien",
-      "received": "2026-08-07 12:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000",
-      "auto_promoted": true
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000",
+      "carried_forward": true
     },
     {
       "title": "Review business rules for Data Warehouse company filtering",
@@ -45,56 +45,38 @@
     {
       "task_id": "t2608030857560",
       "task_title": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
-      "note": "Crispin is out of office on annual leave until Monday 17 August, which may impact SH&SM Project meeting attendance.",
-      "email_subject": "Automatic reply: DTP1092 College staff into PXD Team meeting",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-10 07:49",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955C0000"
-    },
-    {
-      "task_id": "t2608031500570",
-      "task_title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
-      "note": "Crispin has sent detailed testing scenarios for Company 90 and HRIS Staging imports configuration.",
+      "note": "Crispin Muncaster is out of office on annual leave returning 17 August; testing work is proceeding with Guy Williams coordinating staging imports.",
       "email_subject": "DTP1092 College Staff into PXD - Testing HRIS Staging imports",
       "email_from": "Crispin Muncaster",
       "received": "2026-08-10 07:20",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000"
     },
     {
-      "task_id": "task-1785700344174",
-      "task_title": "Review outstanding Development Insight reports actions with Julie",
-      "note": "Lindsey Spriggs sent CDR/PD working group meeting reminder for tomorrow.",
-      "email_subject": "Bi-monthly CDR/PD working group",
-      "email_from": "Lindsey Spriggs",
-      "received": "2026-08-07 13:48",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998630000"
-    },
-    {
-      "task_id": "t2608071801052",
-      "task_title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
-      "note": "Simon is discussing with Michael O'Sullivan whether to refresh UOXU and UOXC environments with a new clone of UOXP for Company 90 testing.",
-      "email_subject": "RE: Business rules for Data Warehouse",
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "Guy Williams provided update on DTP1092 testing; Crispin is managing coordination of staging import scenarios with multiple platforms (INT-STG, BT, AIP) involved.",
+      "email_subject": "Volunteering Leave",
       "email_from": "Simon Burford",
-      "received": "2026-08-06 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000"
+      "received": "2026-08-07 16:21",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000"
     },
     {
-      "task_id": "task-1785700344174",
-      "task_title": "Review outstanding Development Insight reports actions with Julie",
-      "note": "Julie flagged outstanding actions on Development Insight reports following conversation with Ilona.",
-      "email_subject": "Re: My Development Insight reports",
-      "email_from": "Julie Hickman",
-      "received": "2026-07-27 10:58",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000"
+      "task_id": "t2608071501070",
+      "task_title": "Confirm availability for Multi Company Setup discussion with Conor (FP 68261303)",
+      "note": "Conor O'Brien sent follow-up noting he has additional work completed on Multi Company Setup and seeking availability for next week when Simon is on leave.",
+      "email_subject": "Multi Company Setup",
+      "email_from": "Conor O'Brien",
+      "received": "2026-08-07 12:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998600000"
     },
     {
-      "task_id": "t001",
-      "task_title": "Brief team directly",
-      "note": "Kevin sent confirmation to Marie that he is returning to work on Tuesday 11 August after leave.",
-      "email_subject": "Returning to Work",
-      "email_from": "Kevin (sent to: Marie Cooksey)",
-      "received": "2026-08-10 08:33",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007A6298D4F0000"
+      "task_id": "t2608041500480",
+      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
+      "note": "Crispin sent detailed email outlining testing scenarios and assumptions for DTP1092 College Staff into PXD integrations testing, confirming 14 August deadline.",
+      "email_subject": "Volunteering Leave",
+      "email_from": "Simon Burford",
+      "received": "2026-08-07 16:21",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000"
     }
   ]
 }
