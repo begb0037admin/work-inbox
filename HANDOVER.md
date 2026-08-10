@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-10 - Drew-to-Lauren wiring built and live: fetch_inbox.py Phase 3.2 needs_reply flag, work-inbox/data/needs_reply.json, Drafted Replies dashboard panel (4B, dashboard-only). Verified end-to-end via three real production runs (Drew).
+**Last updated:** 2026-08-10 - Absences fixed (Organizer-field name reconciliation + best-effort OOO date extraction), drafted_replies mirror schema fixed with real Lauren content live, needs_reply precision root-caused (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -128,6 +128,26 @@ One process-hygiene lesson from this session: nesting `run_in_background` (the B
 **Not done, on purpose:** nothing pushed to `agent-commons/corpus/draft-final-diffs/`-adjacent locations by this session; Lauren's own `pending-email-drafts/drafts.json` doesn't have real content yet, so the Drafted Replies panel is correctly empty in production right now -- that's expected, not a bug.
 
 Full detail: `begb0037admin/agent-commons` issue #3.
+
+---
+
+## Session 2026-08-10 (final) -- Absences bug fixed and verified live (Drew)
+
+**Scope:** Kevin reported the sidebar Absences list showing duplicates ("Simon" and "Simon Burford" as separate entries) and "date unknown" on 8 of 10 entries. Root-caused and proposed on agent-commons issue #3 before building.
+
+**Root cause:** two unreconciled detection passes feeding one dict. The calendar pass keyed entries by whatever's left in the calendar item's subject after stripping leave keywords (often just a first name); the email-OOO-fallback pass keyed by the full Outlook sender display name and was **hardcoded** to always label "date unknown" -- it never attempted any date extraction at all. Different string keys for the same real person produced duplicates; the hardcoded fallback explained the date-unknown rate.
+
+**Fix A -- name reconciliation via the Organizer field.** Calendar items already carry `item.Organizer` (was being pulled, just never read by absence-detection). Verified live before building: `Organizer` holds the exact same full display name Outlook uses as the email sender name (`'Simon Burford'`, `'Athena Artuso'`, confirmed against real calendar items in the detection window). Now used as the primary name source for calendar-derived entries, falling back to the subject-derived name only when Organizer is empty.
+
+**Fix B -- best-effort OOO-text date extraction**, explicitly non-exhaustive: tries a handful of common phrasings ("until 18 August", "back Monday", "returning 18/08") before falling back to "date unknown". Genuinely unparseable text still correctly falls back rather than guessing wrong. Guessed dates are labeled "(best guess from email text)" so they're never confused with a calendar-verified date.
+
+**Verified, real data, real production run:** live `briefing.json` absences count went from 10 (with duplicates) to 8 (deduplicated). "Athena"/"Athena Artuso" and "Simon"/"Simon Burford" each correctly merged into one real-dated entry. Two previously-"date unknown" entries (Crispin Muncaster, James Salas Guillen) now show best-effort guessed dates, clearly labeled. The remaining four (Christopher Sanders, Julie Hickman, Marie Cooksey, Sarah Rowles) genuinely have no extractable date and correctly stay honest about it rather than guessing.
+
+**Also this session (same production run, already reported separately on issue #3):**
+- `tools/publish_drafted_replies.py` schema bug fixed -- Lauren's real entries use `composed_at` not `drafted_at`, were being silently dropped; also now surfaces `confidence`/`inline_flags` on the dashboard, which the original design never accounted for. Verified with real content: 4/4 of Lauren's real drafts now publish and render correctly.
+- `needs_reply` precision investigated (Lauren found ~20/24 flagged entries were false positives) -- root cause: no cc-vs-primary-recipient signal and no staleness signal reach Phase 3.2's classifier at all (neither is captured/passed). Proposed fix posted to issue #3, not yet built -- needs Kevin's sign-off on staleness-cutoff specifics first.
+
+Full detail on all of the above: `begb0037admin/agent-commons` issue #3.
 
 ---
 
