@@ -430,9 +430,27 @@ _DAY_VIEW_EXCLUDE_KEYWORDS = [
     "holiday", "away", "sick leave"
 ]
 
+# Bare "AL" abbreviation (no slash) -- confirmed live, 10 Aug 2026: two real
+# entries titled exactly "Michael - AL" (7 Aug and 10 Aug) slipped through
+# both this day-view exclusion and the sidebar ABSENCE_KEYWORDS check below,
+# since the list only matched "a/l" with a slash. Kevin's explicit fix
+# request: "i dont want it to show." A plain substring match on "al" would
+# false-positive constantly (matches inside "annual", "practical", "Sal",
+# etc.), so this is a standalone-word regex instead -- \b requires a
+# non-word/word transition immediately either side, which "annual"/
+# "practical" never have around their trailing "al" (the preceding letter is
+# itself a word character), but "Michael - AL" does (bounded by a space and
+# a dash). Applied as an additional OR condition alongside the existing
+# substring keyword lists, not a replacement for them.
+_BARE_AL_RE = re.compile(r"\bal\b", re.IGNORECASE)
+
+def _has_bare_al(text):
+    return bool(_BARE_AL_RE.search(text or ""))
+
 def _is_leave_item(c):
-    subj_lower = (c.get("subject") or "").lower()
-    return any(kw in subj_lower for kw in _DAY_VIEW_EXCLUDE_KEYWORDS)
+    subj = c.get("subject") or ""
+    subj_lower = subj.lower()
+    return any(kw in subj_lower for kw in _DAY_VIEW_EXCLUDE_KEYWORDS) or _has_bare_al(subj)
 
 def _cal_for_date(target_date):
     return [
@@ -840,6 +858,13 @@ def _clean_absence_name(text):
     lower_name = name.lower()
     for kw in ABSENCE_NOISE:
         lower_name = lower_name.replace(kw, " ")
+    # Strip a standalone "AL" token too (e.g. "Michael - AL" -> "Michael")
+    # -- not added to ABSENCE_NOISE's plain substring loop above because a
+    # blind "al" substring replace would corrupt real names that merely
+    # contain "al" (Alan, Alison, Natalie, Malcolm...). _BARE_AL_RE only
+    # matches "al" as its own word (see the comment above its definition),
+    # so "Alan Smith" is untouched while "Michael - AL" -> "Michael - ".
+    lower_name = _BARE_AL_RE.sub(" ", lower_name)
     cleaned = []
     for token in lower_name.replace("(", " ").replace(")", " ").split():
         if token in ("is", "on", "until", "from", "to", "for"):
@@ -901,7 +926,12 @@ week_absence_end = today + timedelta(days=8)
 for item in calendar:
     subj = item.get("subject") or ""
     subj_lower = subj.lower()
-    if not any(kw in subj_lower for kw in ABSENCE_KEYWORDS):
+    # Bare "AL" (no slash) counts as a leave keyword here too -- see the
+    # _has_bare_al() comment above _DAY_VIEW_EXCLUDE_KEYWORDS for why this
+    # needs standalone-word regex matching rather than a plain substring.
+    # Fixes "Michael - AL" (and any future same-pattern entry) being
+    # invisible in the sidebar Absences panel, not just the day-view.
+    if not (any(kw in subj_lower for kw in ABSENCE_KEYWORDS) or _has_bare_al(subj)):
         continue
     if "absence reporting" in subj_lower or "sickness absence report" in subj_lower:
         continue
