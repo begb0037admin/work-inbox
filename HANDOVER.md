@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-10 - sent_corpus_pull.py added (bulk Sent-Mail corpus tool for agent-commons style-learning pipeline, issue #3) — built, not yet run against real data (Drew).
+**Last updated:** 2026-08-10 - sent_corpus_pull.py added and dry-run verified against real Sent Mail (bulk corpus tool for agent-commons style-learning pipeline, issue #3); one real item-filtering bug found and fixed during verification (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -36,7 +36,11 @@
 
 **Not done yet:** no real pull has been run against live Outlook — this session's environment didn't have Outlook running, and starting it to pull real historical mail was treated as past the "build and report" checkpoint, needing Kevin's explicit go-ahead first. Proposed durable output location: `begb0037admin/agent-commons` `corpus/sent-items/` (scaffold README pushed there, no real corpus data yet).
 
-Full writeup and open questions (recipient-PII in the `to` field, redaction being pattern-based not NLP): `begb0037admin/drew` `memory/sent-items-corpus-investigation.md` and `begb0037admin/agent-commons` issue #3 comments.
+**Update, same session — real dry run against live Outlook (Kevin started Outlook Classic mid-session):** ran in `--stats-only` mode (aggregate counts only, nothing written to disk) against the real last-90-days Sent folder. First run: `total_seen: 740` vs `clean_count(327) + redacted_count(76) = 403` — 337 items (45%) silently disappearing through a bare `except: continue`. Root cause: Sent Items also holds meeting requests/responses/cancellations (COM `Class` 53/54/55/56/57), which lack mail-style `Body`/`To` and threw an unhandled `AttributeError` indistinguishable from a real bug. Fixed by explicitly filtering to `Class == 43` (`olMail`) up front instead of relying on exception shape. Re-run fully reconciled: 403 = 327 clean + 76 redacted (health 60, hr_case 16, bereavement 3, absence 2), zero unexpected errors on real mail items. ~19% of real Sent Mail over 90 days matched a redaction category.
+
+Full writeup and open questions (recipient-PII in the `to` field, redaction being pattern-based not NLP): `begb0037admin/drew` `memory/sent-items-corpus-investigation.md` and `begb0037admin/agent-commons` issue #3 comments. Cross-agent Outlook COM gotcha (Sent Items non-mail Classes) also logged to `begb0037admin/agent-commons` `memory/index.json`.
+
+**Still not done, on purpose:** no content written to disk yet (all runs stats-only), nothing pushed to `agent-commons/corpus/sent-items/` beyond the design-doc README. Next: real (non-stats-only) pull to local staging, spot-check locally, then push only the reviewed redacted corpus.json.
 
 ---
 
