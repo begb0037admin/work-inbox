@@ -1,6 +1,16 @@
 {
-  "generated_at": "2026-08-10 16:47",
+  "generated_at": "2026-08-10 18:03",
   "new_tasks": [
+    {
+      "title": "Investigate Clockify role consolidation for Beth",
+      "tier": "week",
+      "description": "Marie Cooksey is asking whether it is possible to combine Beth's two Clockify roles (HR Systems and Biology) into one. Kevin needs to investigate the Clockify platform capabilities and advise Marie on feasibility.",
+      "email_subject": "Clockify",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-10 17:05",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995660000",
+      "auto_promoted": true
+    },
     {
       "title": "Confirm DTP1092 integrations testing completion by 14 Aug",
       "tier": "week",
@@ -8,16 +18,8 @@
       "email_subject": "DTP1092 College Staff into PXD - Testing HRIS Staging imports",
       "email_from": "Crispin Muncaster",
       "received": "2026-08-10 07:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000"
-    },
-    {
-      "title": "Review Conor's Multi Company Setup work and confirm next week availability",
-      "tier": "tomorrow",
-      "description": "Conor O'Brien has sent updated Multi Company Setup work (FP 68261303) and notes both Simon and Kevin are on leave next week. Kevin needs to review the attachments and confirm he will be available next week to continue discussions with Conor.",
-      "email_subject": "RE: #External# RE: Multi Company Setup",
-      "email_from": "Conor O'Brien",
-      "received": "2026-08-07 12:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000",
+      "carried_forward": true
     },
     {
       "title": "Review data warehouse business rules alignment for Company 90",
@@ -42,22 +44,13 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t031",
-      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
-      "note": "Sarah Rowles forwarding Clockify news about upcoming free plan changes relevant to September deadline investigation.",
-      "email_subject": "FW: Clockify: Upcoming Free plan changes & options for your team",
-      "email_from": "Sarah Rowles",
-      "received": "2026-08-06 10:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43160000"
-    },
-    {
-      "task_id": "t2608041500480",
-      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "DTP1092 College staff into PXD team meeting cancelled due to multiple invites being out of office.",
-      "email_subject": "Cancelled: DTP1092 College staff into PXD Team meeting",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-03 14:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F9C0000"
+      "task_id": "t019",
+      "task_title": "Pay Code 121 / PAYPAY25 -- add to HR Reporting SQL",
+      "note": "Julie requesting follow-up on NI Number Column addition and other UAT points from Patch Release 28.0.157; appears to be progress update on development work.",
+      "email_subject": "RE: Patch Release 28.0.157 – UAT Update",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-06 14:43",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431C0000"
     }
   ]
 }
