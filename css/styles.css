@@ -351,8 +351,15 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .ticker-age-val{font-size:11px;font-weight:700;color:rgba(255,255,255,0.75)}
 .ticker-age-val.red{color:#f87171}
 .ticker-age-val.gold{color:#fbbf24}
-/* ── v5 main calendar (override previous) ── */
-.main-cal-panel{display:grid;grid-template-columns:7fr 7fr 4fr;gap:14px;margin-bottom:16px}
+/* ── v5 main calendar (override previous) ──
+   Rolling 4-day window (today + next 3 working days) over a 4-month mini-cal
+   strip -- Kevin's explicit request, 10 Aug 2026. The old 3-column
+   today/tomorrow/mini-cal grid couldn't fit 4 day-columns and 4 months
+   side by side, so this is two full-width rows: 4 equal day-columns on
+   top, 4 equal month-blocks below. */
+.main-cal-panel{display:flex;flex-direction:column;gap:14px;margin-bottom:16px}
+.main-cal-days-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.main-cal-months-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .main-cal-block{background:#fff;border:1px solid #e5e9f2;border-radius:var(--radius-lg);padding:16px 18px;box-shadow:0 1px 3px rgba(0,33,71,.05);overflow:hidden}
 .main-cal-block-header{font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid #e5e9f2}
 .main-cal-item{display:flex;gap:11px;padding:7px 0;border-bottom:1px solid #f0f3f8;align-items:flex-start}
