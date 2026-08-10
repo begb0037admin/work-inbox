@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-10 - sent_corpus_pull.py added and dry-run verified against real Sent Mail (bulk corpus tool for agent-commons style-learning pipeline, issue #3); one real item-filtering bug found and fixed during verification (Drew).
+**Last updated:** 2026-08-10 - draft_final_diff_capture.py added (forward-going half of the style-learning corpus, issue #3), sent_corpus_pull.py refactored to share redaction logic via new style_corpus_common.py; real baseline established against live Outlook Drafts (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -41,6 +41,25 @@
 Full writeup and open questions (recipient-PII in the `to` field, redaction being pattern-based not NLP): `begb0037admin/drew` `memory/sent-items-corpus-investigation.md` and `begb0037admin/agent-commons` issue #3 comments. Cross-agent Outlook COM gotcha (Sent Items non-mail Classes) also logged to `begb0037admin/agent-commons` `memory/index.json`.
 
 **Still not done, on purpose:** no content written to disk yet (all runs stats-only), nothing pushed to `agent-commons/corpus/sent-items/` beyond the design-doc README. Next: real (non-stats-only) pull to local staging, spot-check locally, then push only the reviewed redacted corpus.json.
+
+---
+
+## Session 2026-08-10 (continued) -- draft_final_diff_capture.py built, real baseline established (Drew)
+
+**Scope:** `begb0037admin/agent-commons` issue #3, forward-going half of the corpus approach (item 3) -- capture principal's draft-to-final edits over time, not just the one-time Sent-items backfill.
+
+**Feasibility investigated first (read-only structural probe, no content read/stored):** Outlook's `EntryID` is NOT a safe key to correlate a Drafts-folder item with its eventual Sent-folder counterpart -- sending mints a new MAPI entry. `ConversationID` is: present on 40/40 sampled items in both Drafts (103 total) and Sent Items (1585 total).
+
+**Built:**
+- `tools/style_corpus_common.py` -- redaction classifier (health/bereavement/hr_case/absence), `recipient_tier` mapping, and the `OL_MAIL_CLASS` non-mail-item filter, factored out of `sent_corpus_pull.py` now that a second script needs the identical logic.
+- `tools/sent_corpus_pull.py` -- refactored to import the shared module instead of duplicating it. Re-ran the original 13-case synthetic redaction suite + chunking test against the refactor -- zero regression.
+- `tools/draft_final_diff_capture.py` -- periodic snapshot-and-correlate (not an event-driven listener -- considered `Application.ItemSend` for perfect fidelity, rejected for v1 since it needs a persistently-running process, a different architecture from every other script here). Snapshots Drafts each run, diffs against the previous run's local-only ledger to find vanished drafts, correlates against Sent Items by `ConversationID` within a 72h window (earliest match wins, no fallback guessing), applies the same whole-pair redaction exclusion as Sent-items (either side sensitive excludes both), computes `recipient_tier`, classifies `edit_type`/`note` via claude-haiku-4-5 on the redacted pair (confirmed OK with Kevin, same model `fetch_inbox.py` already uses).
+
+**Verification:** correlation logic -- 5 mocked-Outlook cases (window bounds, non-mail filtering, multiple-candidate tiebreak, no-match), 5/5 pass. Whole-pair redaction gate -- confirmed both directions (draft-only and final-only sensitivity both correctly exclude the pair) with the real classifier. `edit_type` classification -- 5 synthetic pairs against the real API, 5/5 valid enum, 4/5 exact intended match (1 legitimately ambiguous test case, not a classifier bug). **Real baseline run against live Outlook:** 96 drafts tracked into the local-only ledger (`C:/Users/admin/Documents/CorpusStaging/draft_watch/ledger.json`, confirmed outside any git working tree), 0 vanished/0 pairs -- expected and correct for a first run, not a bug (the mechanism is inherently forward-looking).
+
+**Not done, on purpose:** no diff pairs exist yet (need a real send to happen between two runs), nothing pushed to `agent-commons/corpus/draft-final-diffs/`. Not yet wired into Task Scheduler -- holding for confirmation given it makes live Anthropic API calls per pair on an unattended schedule.
+
+**Also this session:** Teams draft-staging design moved from proposal to concrete (surface confirmed as work-inbox by Kevin) -- new "Pending Teams Replies" panel, data cross-fetched from `agent-commons/pending-teams-drafts/drafts.json` (mirrors the existing CC-ticker cross-repo-fetch pattern; preserves the standing rule that Lauren never writes into work-inbox directly), reusing the existing `workInbox_ticks_v1` Cloudflare-Worker-synced tick mechanism for "mark as sent" rather than building new write-back infra. Design only -- still blocked on the separately-deferred Teams read-access question, not built. Full detail: `begb0037admin/agent-commons` issue #3.
 
 ---
 
