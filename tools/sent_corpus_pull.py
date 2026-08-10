@@ -44,86 +44,19 @@ Redaction approach (automated, not manual review, per Kevin's decision 10 Aug 20
 import argparse
 import json
 import os
-import re
 import sys
 from datetime import datetime, timedelta
 
-# ---------------------------------------------------------------------------
-# Redaction
-# ---------------------------------------------------------------------------
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from style_corpus_common import (
+    REDACTION_PATTERNS, is_sensitive, mentions_named_person, OL_MAIL_CLASS,
+)
 
-REDACTION_PATTERNS = {
-    "health": [
-        r"\bsick(?:ness)?\b", r"\bunwell\b", r"\bpoorly\b", r"\bsigned off\b",
-        r"\bfit note\b", r"\bsick note\b", r"\bGP appointment\b",
-        r"\bdoctor'?s? appointment\b", r"\bhospital\b", r"\bdiagnos(?:is|ed)\b",
-        r"\bsurgery\b", r"\boperation\b", r"\bmedical (?:condition|appointment|leave)\b",
-        r"\bmental health\b", r"\btherapy\b", r"\bcounsell?ing\b",
-        r"\boccupational health\b", r"\bstress leave\b", r"\banxiety\b",
-        r"\bdepression\b", r"\bmedication\b", r"\btreatment\b", r"\bcancer\b",
-        r"\bchemotherapy\b", r"\bdisabilit(?:y|ies)\b", r"\blong[- ]term sick\b",
-    ],
-    "bereavement": [
-        r"\bbereavement\b", r"\bcompassionate leave\b", r"\bfuneral\b",
-        r"\bpassed away\b", r"\bpassing of\b", r"\bcondolences?\b", r"\bloss of\b",
-        r"\bsadly died\b", r"\bdeath of\b", r"\bmemorial service\b", r"\bwake\b",
-        r"\bhospice\b", r"\bpalliative\b", r"\bterminally ill\b", r"\bsadly passed\b",
-    ],
-    "hr_case": [
-        r"\bdisciplinary\b", r"\bgrievance\b", r"\binvestigation\b",
-        r"\bsafeguarding\b", r"\bHR case\b", r"\bconfidential HR\b",
-        r"\bcapability process\b", r"\bperformance improvement plan\b", r"\bPIP\b",
-        r"\bwhistleblow(?:er|ing)?\b", r"\bsuspend(?:ed|sion)\b",
-        r"\bformal warning\b", r"\bmisconduct\b", r"\btribunal\b",
-        r"\bwithout prejudice\b", r"\bsettlement agreement\b", r"\bmediation\b",
-    ],
-    "absence": [
-        r"\breturn to work\b", r"\bphased return\b", r"\blong[- ]term absence\b",
-        r"\babsence review\b", r"\bwelfare meeting\b", r"\bwelfare check\b",
-        r"\boccupational health referral\b", r"\bfit for work\b",
-    ],
-}
-
-_COMPILED = {
-    cat: [re.compile(p, re.IGNORECASE) for p in pats]
-    for cat, pats in REDACTION_PATTERNS.items()
-}
-
-# Keep in sync with fetch_inbox.py's VIP_NAMES -- duplicated here rather than
-# imported because fetch_inbox.py is a top-level script, not a module.
-KNOWN_NAMES = {
-    'Athena Artuso', 'Marie Cooksey', 'Sarah Rowles', 'Simon Burford',
-    'Asta Palmer', 'James Salas Guillen', "Michael O'Sullivan",
-    'Anna Carter-Windle', 'Anthony Kong', 'Beth Gray', 'Christopher Sanders',
-    'David Johnson', 'Emma Fitz-Gibbon', 'Henry Acheampong', 'Iyanuloluwa Akinsanya',
-    'Julie Hickman', 'Marie King', 'Michelle Williams', 'Nathan Kirwan',
-    'Susan Pratt', 'Anne Mortimer', 'Nicholas Chandler', 'Steve McBrearty',
-}
-_GENERIC_NAME_RE = re.compile(r"\b[A-Z][a-z]+ [A-Z][a-z]+\b")
-
-
-def classify(text):
-    """Return the sorted set of category names whose pattern matched anywhere in text."""
-    hits = set()
-    for cat, patterns in _COMPILED.items():
-        for pat in patterns:
-            if pat.search(text):
-                hits.add(cat)
-                break
-    return sorted(hits)
-
-
-def mentions_named_person(text):
-    """Informational only -- does not gate redaction, just enriches the audit ledger."""
-    for name in KNOWN_NAMES:
-        if name in text:
-            return True
-    return bool(_GENERIC_NAME_RE.search(text))
-
-
-def is_sensitive(subject, body):
-    return classify(f"{subject}\n{body}")
-
+# Redaction patterns, entity list, and the Outlook item-Class constant now
+# live in style_corpus_common.py -- shared with draft_final_diff_capture.py,
+# which needs the identical classification logic. Was a reasonable duplication
+# when this was the only script; a second consumer made a shared import the
+# right call instead of a second "keep in sync" copy.
 
 # ---------------------------------------------------------------------------
 # Outlook COM pull (requires local Outlook desktop client + pywin32; same
@@ -172,11 +105,12 @@ def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
     mapi = outlook.GetNamespace("MAPI")
     sent_folder = mapi.GetDefaultFolder(5)  # olFolderSentMail
 
-    OL_MAIL_CLASS = 43  # olMail -- Sent Items also holds meeting
-    # requests/responses/cancellations (Class 53/54/55/56/57) Kevin has sent,
-    # which have neither a mail-style Body nor a real "To" the same way and
-    # aren't email correspondence anyway -- filter them explicitly instead of
-    # letting them fall through as an unclassified exception.
+    # OL_MAIL_CLASS (43, olMail) imported from style_corpus_common -- Sent
+    # Items also holds meeting requests/responses/cancellations (Class
+    # 53/54/55/56/57) Kevin has sent, which have neither a mail-style Body
+    # nor a real "To" the same way and aren't email correspondence anyway --
+    # filter them explicitly instead of letting them fall through as an
+    # unclassified exception.
 
     clean_entries = []
     redaction_log = []
