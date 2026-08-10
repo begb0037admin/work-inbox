@@ -1,0 +1,277 @@
+"""
+sent_corpus_pull.py
+--------------------
+Bulk Sent-Mail corpus pull for the cross-agent style-learning pipeline
+(begb0037admin/agent-commons issue #3, item 3 "corpus approach" + item 4 "mailbox access").
+
+Reuses the proven Outlook COM connection pattern from work-inbox/fetch_inbox.py
+(win32com.client.dynamic.Dispatch("Outlook.Application") -> GetNamespace("MAPI") ->
+GetDefaultFolder(5) for olFolderSentMail) but is intentionally a SEPARATE script,
+not a modification of the live 6x/day briefing pipeline:
+- fetch_inbox.py's existing Sent Mail read (line ~292) pulls only the last 7 days as
+  100-char previews, purely as ephemeral AI-triage context. This script pulls full
+  body text over an arbitrary historical window for a durable corpus -- a different
+  job with different performance/retention/sensitivity characteristics that has no
+  business being inside the live scheduled pipeline.
+
+HARD RULE -- read before running:
+  This script writes ONLY to a local-only staging directory that must never be
+  inside a git working copy and must never be committed. Nothing this script
+  produces (raw OR redacted) is pushed anywhere by the script itself. Pushing the
+  redacted corpus to its durable home (proposed: begb0037admin/agent-commons,
+  corpus/sent-items/) is a separate, explicit, reviewed step -- see the bottom of
+  this file for that hand-off note. This mirrors work-inbox's own standing rule
+  ("Never commit raw email data or API keys").
+
+Redaction approach (automated, not manual review, per Kevin's decision 10 Aug 2026):
+  Keyword/pattern-based, case-insensitive, on subject+body combined. ANY match in
+  any category means the WHOLE message is excluded from the corpus (not partially
+  redacted in-place) -- simplest, most conservative option: losing a few borderline
+  Sent items from a large corpus costs little; leaving a sensitive fragment in a
+  corpus that gets read by another agent costs a lot. Excluded items are logged to
+  a separate redaction ledger with category + entry_id + date only -- never with
+  the matched text or surrounding context, so the ledger itself carries no
+  sensitive content.
+
+  Categories: health, bereavement, hr_case, absence. See REDACTION_PATTERNS below
+  for the exact term lists. This is a keyword/pattern floor, not NLP/NER -- it will
+  have both false positives (excludes some genuinely clean mail, acceptable) and
+  false negatives (a message that references a real sensitive situation without
+  using any listed term will NOT be caught -- this is a real, inherent limit of a
+  pattern-based pass and should be stated plainly, not implied to be complete).
+"""
+
+import argparse
+import json
+import os
+import re
+import sys
+from datetime import datetime, timedelta
+
+# ---------------------------------------------------------------------------
+# Redaction
+# ---------------------------------------------------------------------------
+
+REDACTION_PATTERNS = {
+    "health": [
+        r"\bsick(?:ness)?\b", r"\bunwell\b", r"\bpoorly\b", r"\bsigned off\b",
+        r"\bfit note\b", r"\bsick note\b", r"\bGP appointment\b",
+        r"\bdoctor'?s? appointment\b", r"\bhospital\b", r"\bdiagnos(?:is|ed)\b",
+        r"\bsurgery\b", r"\boperation\b", r"\bmedical (?:condition|appointment|leave)\b",
+        r"\bmental health\b", r"\btherapy\b", r"\bcounsell?ing\b",
+        r"\boccupational health\b", r"\bstress leave\b", r"\banxiety\b",
+        r"\bdepression\b", r"\bmedication\b", r"\btreatment\b", r"\bcancer\b",
+        r"\bchemotherapy\b", r"\bdisabilit(?:y|ies)\b", r"\blong[- ]term sick\b",
+    ],
+    "bereavement": [
+        r"\bbereavement\b", r"\bcompassionate leave\b", r"\bfuneral\b",
+        r"\bpassed away\b", r"\bpassing of\b", r"\bcondolences?\b", r"\bloss of\b",
+        r"\bsadly died\b", r"\bdeath of\b", r"\bmemorial service\b", r"\bwake\b",
+        r"\bhospice\b", r"\bpalliative\b", r"\bterminally ill\b", r"\bsadly passed\b",
+    ],
+    "hr_case": [
+        r"\bdisciplinary\b", r"\bgrievance\b", r"\binvestigation\b",
+        r"\bsafeguarding\b", r"\bHR case\b", r"\bconfidential HR\b",
+        r"\bcapability process\b", r"\bperformance improvement plan\b", r"\bPIP\b",
+        r"\bwhistleblow(?:er|ing)?\b", r"\bsuspend(?:ed|sion)\b",
+        r"\bformal warning\b", r"\bmisconduct\b", r"\btribunal\b",
+        r"\bwithout prejudice\b", r"\bsettlement agreement\b", r"\bmediation\b",
+    ],
+    "absence": [
+        r"\breturn to work\b", r"\bphased return\b", r"\blong[- ]term absence\b",
+        r"\babsence review\b", r"\bwelfare meeting\b", r"\bwelfare check\b",
+        r"\boccupational health referral\b", r"\bfit for work\b",
+    ],
+}
+
+_COMPILED = {
+    cat: [re.compile(p, re.IGNORECASE) for p in pats]
+    for cat, pats in REDACTION_PATTERNS.items()
+}
+
+# Keep in sync with fetch_inbox.py's VIP_NAMES -- duplicated here rather than
+# imported because fetch_inbox.py is a top-level script, not a module.
+KNOWN_NAMES = {
+    'Athena Artuso', 'Marie Cooksey', 'Sarah Rowles', 'Simon Burford',
+    'Asta Palmer', 'James Salas Guillen', "Michael O'Sullivan",
+    'Anna Carter-Windle', 'Anthony Kong', 'Beth Gray', 'Christopher Sanders',
+    'David Johnson', 'Emma Fitz-Gibbon', 'Henry Acheampong', 'Iyanuloluwa Akinsanya',
+    'Julie Hickman', 'Marie King', 'Michelle Williams', 'Nathan Kirwan',
+    'Susan Pratt', 'Anne Mortimer', 'Nicholas Chandler', 'Steve McBrearty',
+}
+_GENERIC_NAME_RE = re.compile(r"\b[A-Z][a-z]+ [A-Z][a-z]+\b")
+
+
+def classify(text):
+    """Return the sorted set of category names whose pattern matched anywhere in text."""
+    hits = set()
+    for cat, patterns in _COMPILED.items():
+        for pat in patterns:
+            if pat.search(text):
+                hits.add(cat)
+                break
+    return sorted(hits)
+
+
+def mentions_named_person(text):
+    """Informational only -- does not gate redaction, just enriches the audit ledger."""
+    for name in KNOWN_NAMES:
+        if name in text:
+            return True
+    return bool(_GENERIC_NAME_RE.search(text))
+
+
+def is_sensitive(subject, body):
+    return classify(f"{subject}\n{body}")
+
+
+# ---------------------------------------------------------------------------
+# Outlook COM pull (requires local Outlook desktop client + pywin32; same
+# machine/account constraint as the rest of work-inbox)
+# ---------------------------------------------------------------------------
+
+def month_ranges(start_date, end_date):
+    cur = start_date.replace(day=1)
+    while cur <= end_date:
+        if cur.month == 12:
+            nxt = cur.replace(year=cur.year + 1, month=1)
+        else:
+            nxt = cur.replace(month=cur.month + 1)
+        chunk_start = max(cur, start_date)
+        chunk_end = min(nxt - timedelta(seconds=1), end_date)
+        yield (chunk_start, chunk_end)
+        cur = nxt
+
+
+def restrict_sent(folder, start_dt, end_dt):
+    filter_str = (
+        "[SentOn] >= '" + start_dt.strftime("%m/%d/%Y %I:%M %p") + "' AND "
+        "[SentOn] <= '" + end_dt.strftime("%m/%d/%Y %I:%M %p") + "'"
+    )
+    try:
+        restricted = folder.Items.Restrict(filter_str)
+        return list(restricted)
+    except Exception:
+        # Deliberately do NOT fall back to full-folder iteration inside a
+        # per-chunk loop -- unlike fetch_inbox.py's restrict_date() (safe for
+        # a single 7-day pull), doing that here once per month chunk over a
+        # multi-year backfill risks repeatedly walking the entire Sent folder.
+        # A failed chunk is skipped and reported, not silently masked.
+        return None
+
+
+def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
+    import win32com.client.dynamic
+
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, "sent_corpus_clean.json")
+    log_path = os.path.join(out_dir, "sent_corpus_redaction_log.json")
+
+    outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
+    mapi = outlook.GetNamespace("MAPI")
+    sent_folder = mapi.GetDefaultFolder(5)  # olFolderSentMail
+
+    clean_entries = []
+    redaction_log = []
+    failed_chunks = []
+    total_seen = 0
+
+    for chunk_start, chunk_end in month_ranges(start_date, end_date):
+        items = restrict_sent(sent_folder, chunk_start, chunk_end)
+        if items is None:
+            failed_chunks.append(chunk_start.strftime("%Y-%m"))
+            continue
+        for msg in items:
+            try:
+                total_seen += 1
+                subject = msg.Subject or ""
+                body = msg.Body or ""
+                sent_on = str(msg.SentOn)
+                to = msg.To or ""
+                entry_id = msg.EntryID
+
+                cats = is_sensitive(subject, body)
+                if cats:
+                    redaction_log.append({
+                        "entry_id": entry_id,
+                        "sent": sent_on,
+                        "categories": cats,
+                        "named_person_mentioned": mentions_named_person(f"{subject}\n{body}"),
+                    })
+                    continue
+
+                clean_entries.append({
+                    "entry_id": entry_id,
+                    "subject": subject,
+                    "to": to,
+                    "sent": sent_on,
+                    "body": body,
+                })
+            except Exception:
+                continue
+
+    stats = {
+        "date_range": [start_date.isoformat(), end_date.isoformat()],
+        "total_seen": total_seen,
+        "clean_count": len(clean_entries),
+        "redacted_count": len(redaction_log),
+        "redacted_by_category": {
+            cat: sum(1 for r in redaction_log if cat in r["categories"])
+            for cat in REDACTION_PATTERNS
+        },
+        "failed_chunks": failed_chunks,
+    }
+
+    if not dry_run_stats_only:
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(clean_entries, f, ensure_ascii=True, indent=2)
+        with open(log_path, "w", encoding="utf-8") as f:
+            json.dump(redaction_log, f, ensure_ascii=True, indent=2)
+        stats["out_path"] = out_path
+        stats["log_path"] = log_path
+    else:
+        # Aggregate-only mode: prove the pull + redaction pass work without
+        # writing any real content to disk at all -- used for verification
+        # runs against real mail before anything is trusted.
+        stats["out_path"] = None
+        stats["log_path"] = None
+
+    return stats
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--start", required=True, help="YYYY-MM-DD")
+    parser.add_argument("--end", required=True, help="YYYY-MM-DD")
+    parser.add_argument(
+        "--out-dir",
+        default=r"C:\Users\admin\Documents\CorpusStaging\sent_items",
+        help="Local-only staging directory. MUST NOT be inside any git working copy.",
+    )
+    parser.add_argument(
+        "--stats-only", action="store_true",
+        help="Dry run: pull and classify but write nothing to disk, print aggregate counts only.",
+    )
+    args = parser.parse_args()
+
+    start_date = datetime.strptime(args.start, "%Y-%m-%d")
+    end_date = datetime.strptime(args.end, "%Y-%m-%d")
+
+    result = pull_sent_corpus(start_date, end_date, args.out_dir, dry_run_stats_only=args.stats_only)
+    print(json.dumps(result, indent=2))
+
+# ---------------------------------------------------------------------------
+# Hand-off to durable storage (NOT done by this script):
+#
+# 1. Run this script locally (requires Outlook desktop client signed in --
+#    same admin / begb0037.AD-OAK machine constraint as fetch_inbox.py).
+# 2. Review sent_corpus_redaction_log.json's aggregate category counts --
+#    it contains no sensitive text, only entry_id/date/category/flag, so it
+#    is safe to review directly.
+# 3. Spot-check a sample of sent_corpus_clean.json locally (never paste
+#    real bodies into a chat transcript, ticket, or any durable memory file).
+# 4. Only after that review: push sent_corpus_clean.json's contents to the
+#    proposed durable home (begb0037admin/agent-commons, corpus/sent-items/)
+#    via the GitHub Contents API, per Kevin's explicit go-ahead -- this is a
+#    separate, reviewed step from running this script.
+# ---------------------------------------------------------------------------
