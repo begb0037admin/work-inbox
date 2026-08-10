@@ -729,6 +729,69 @@ def _add_absence(name, label):
     if not existing or "date unknown" in existing:
         absence_map[key] = text
 
+# Best-effort (explicitly non-exhaustive) date extraction from OOO auto-reply
+# text, so the email-fallback path isn't ALWAYS "date unknown" when the email
+# itself actually states a return date. Confirmed root cause, 10 Aug 2026:
+# the fallback previously never attempted this at all -- every email-only
+# absence (no matching calendar entry) was permanently "date unknown" by
+# design, not by parsing failure. This only covers a handful of common
+# phrasings; genuinely unparseable text still correctly falls back to "date
+# unknown" rather than guessing wrong.
+_OOO_MONTHS = {
+    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
+}
+_OOO_WEEKDAYS = {
+    "monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
+    "friday": 4, "saturday": 5, "sunday": 6,
+}
+_OOO_TRIGGER = r'(?:until|back on|back|returns? on|returning on|returns?|returning)'
+
+def _best_effort_ooo_date(text):
+    """Returns a date object if a common 'until/back/returning <date>' phrase
+    is found, else None. None means genuinely couldn't tell -- the honest,
+    correct outcome for unparseable text, not a bug."""
+    if not text:
+        return None
+    t = text.lower()
+
+    m = re.search(_OOO_TRIGGER + r'\s+(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)', t)
+    if m:
+        day = int(m.group(1))
+        month = _OOO_MONTHS.get(m.group(2))
+        if month and 1 <= day <= 31:
+            try:
+                d = datetime(today.year, month, day).date()
+                if d < today:
+                    d = datetime(today.year + 1, month, day).date()
+                return d
+            except ValueError:
+                pass
+
+    m = re.search(_OOO_TRIGGER + r'\s+([a-z]+day)\b', t)
+    if m and m.group(1) in _OOO_WEEKDAYS:
+        target_wd = _OOO_WEEKDAYS[m.group(1)]
+        d = today + timedelta(days=1)
+        while d.weekday() != target_wd:
+            d += timedelta(days=1)
+        return d
+
+    m = re.search(_OOO_TRIGGER + r'\D{0,15}?(\d{1,2})/(\d{1,2})(?:/(\d{2,4}))?', t)
+    if m:
+        day, month = int(m.group(1)), int(m.group(2))
+        year = int(m.group(3)) if m.group(3) else today.year
+        if year < 100:
+            year += 2000
+        try:
+            d = datetime(year, month, day).date()
+            if d < today:
+                d = datetime(year + 1, month, day).date()
+            return d
+        except ValueError:
+            pass
+
+    return None
+
 week_absence_end = today + timedelta(days=8)
 for item in calendar:
     subj = item.get("subject") or ""
@@ -748,15 +811,32 @@ for item in calendar:
     if last_absent_date < today or start_date > week_absence_end:
         continue
 
-    _add_absence(subj, _absence_label(start_date, last_absent_date, all_day))
+    # Use the calendar item's Organizer (the actual person whose leave this
+    # is) as the name source when available, not just whatever's left in the
+    # subject after stripping leave keywords -- confirmed live, 10 Aug 2026:
+    # Organizer holds the same full display name Outlook uses as the email
+    # sender name (e.g. "Simon Burford", "Athena Artuso"), so this makes the
+    # calendar pass's dict key naturally match the email-fallback pass's key
+    # instead of producing "Simon" / "Simon Burford" as two separate entries.
+    organizer = (item.get("organizer") or "").strip()
+    name_source = organizer if len(organizer) >= 3 else subj
+
+    _add_absence(name_source, _absence_label(start_date, last_absent_date, all_day))
 
 ooo_keywords = ["out of office", "annual leave", "on leave", "away until", "a/l", "ooo"]
 for msg in inbox:
-    subj    = (msg.get("subject") or "").lower()
-    preview = (msg.get("body_preview") or "").lower()
+    subj_raw = msg.get("subject") or ""
+    preview_raw = msg.get("body_preview") or ""
+    subj    = subj_raw.lower()
+    preview = preview_raw.lower()
     sender  = msg.get("from", "")
     if sender and any(kw in subj or kw in preview for kw in ooo_keywords):
-        _add_absence(sender, "out of office - date unknown")
+        guessed = _best_effort_ooo_date(subj_raw + " " + preview_raw)
+        if guessed:
+            label = "out of office, returns " + _fmt_absence_date(guessed) + " (best guess from email text)"
+        else:
+            label = "out of office - date unknown"
+        _add_absence(sender, label)
 
 absences = sorted(absence_map.values())
 
