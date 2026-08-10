@@ -911,13 +911,31 @@ function renderDraftedReplies(payload){
     const draftEsc=escapeHtml(e.draft_text||'');
     const hasSource=e.source_entry_id&&e.source_entry_id.length>0;
     const openLink=hasSource?`<a href="javascript:void(0)" class="dr-btn" onclick="openEmail('${e.source_entry_id}',event)">Open original</a>`:'';
+
+    // Confidence -- Lauren's own design explicitly calls this "impossible to
+    // miss, not a hover tooltip," so it renders as a visible badge + reason
+    // line in every card that has one, never hidden behind an expand/hover.
+    const conf=e.confidence;
+    const confHtml=(conf&&conf.level)?`<div class="dr-confidence dr-confidence-${escapeHtml(conf.level)}">
+        <span class="dr-confidence-label">${escapeHtml(conf.level)} confidence</span>
+        ${conf.reason?`<span class="dr-confidence-reason">${escapeHtml(conf.reason)}</span>`:''}
+      </div>`:'';
+
+    // Inline flags -- facts/figures Lauren couldn't verify. Per her own
+    // stated design this is "a hard requirement, not a nice-to-have" --
+    // rendered as its own visible callout, not folded into the draft text.
+    const flags=Array.isArray(e.inline_flags)?e.inline_flags:[];
+    const flagsHtml=flags.length?`<div class="dr-flags"><div class="dr-flags-title">Needs your confirmation</div><ul class="dr-flags-list">${flags.map(f=>`<li>${escapeHtml(f)}</li>`).join('')}</ul></div>`:'';
+
     return `<div class="dr-card" id="drcard_${id}">
       <div class="dr-card-top">
         <div class="dr-subject">${escapeHtml(e.subject||'(no subject)')}</div>
         <div class="dr-meta">${drTierBadge(e.sender_tier)}<span class="dr-timestamp">${escapeHtml(e.drafted_at||'')}</span></div>
       </div>
+      ${confHtml}
       <div class="dr-draft-text" id="drtext_${id}" data-raw="${draftEsc}" onclick="toggleDraftExpand('${id}',event)">${draftEsc}</div>
       <span class="dr-expand-hint" id="drhint_${id}" onclick="toggleDraftExpand('${id}',event)">Show more</span>
+      ${flagsHtml}
       <div class="dr-actions">
         <button class="dr-btn dr-btn-primary" onclick="copyDraftText('${id}',event)">Copy to clipboard</button>
         ${openLink}
