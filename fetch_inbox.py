@@ -331,8 +331,55 @@ for item in _cal_items:
     except:
         continue
 
+# Also pull the "People Department - HR Systems" shared calendar -- confirmed
+# live, 10 Aug 2026, that it's the department's real leave-tracking calendar
+# (279 real dated events with proper Organizer fields, reachable as an "Other
+# Calendar" nested under Kevin's own primary mailbox via the same COM
+# session). Per Kevin's explicit decision: his own Calendar plus this one are
+# the absence source of truth -- if someone's leave isn't in either, he does
+# not want it surfaced at all. Wrapped in try/except so a folder-structure
+# change (permissions, renaming) degrades to "this calendar contributes
+# nothing this run" rather than failing Phase 1 entirely.
+hr_calendar_count = 0
+try:
+    _kevin_store = None
+    for _store in mapi.Folders:
+        if _store.Name == "kevin.lelitte@admin.ox.ac.uk":
+            _kevin_store = _store
+            break
+    if _kevin_store is not None:
+        _hr_cal_folder = _kevin_store.Folders("Calendar").Folders("People Department - HR Systems")
+        _hr_items = _hr_cal_folder.Items
+        _hr_items.IncludeRecurrences = True
+        _hr_items.Sort("[Start]")
+        for item in _hr_items:
+            try:
+                t = dt(item.Start)
+                if not t:
+                    continue
+                if t.date() > week_end:
+                    break
+                if t.date() < lookback:
+                    continue
+                calendar.append({
+                    "subject":      item.Subject,
+                    "start":        str(item.Start),
+                    "end":          str(item.End),
+                    "location":     item.Location,
+                    "organizer":    item.Organizer,
+                    "body_preview": (item.Body or "")[:100],
+                    "all_day":      item.AllDayEvent
+                })
+                hr_calendar_count += 1
+            except:
+                continue
+    else:
+        print("WARNING: 'kevin.lelitte@admin.ox.ac.uk' store not found -- People Department - HR Systems calendar not pulled this run")
+except Exception as e:
+    print(f"WARNING: People Department - HR Systems calendar pull failed - {e}")
+
 unread_total = sum(1 for m in inbox if not m["is_read"])
-print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)}")
+print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)} (of which HR Systems calendar:{hr_calendar_count})")
 
 # -- Phase 2 -- AI writes context paragraph only --
 print("Phase 2 - calling Anthropic API for context...")
@@ -651,7 +698,15 @@ def build_cal_items(items):
         result.append(cal_item)
     return result
 
-# Detect absences from calendar first, with OOO emails as a fallback.
+# Detect absences from calendar sources only -- Kevin's Calendar plus the
+# "People Department - HR Systems" calendar pulled in Phase 1. Explicit
+# decision, 10 Aug 2026: these two calendars are the absence source of
+# truth; if someone's leave isn't logged in either, Kevin does not want it
+# surfaced at all. The previous OOO-auto-reply-email fallback (and the
+# best-effort date-guessing built for it the same day) is deliberately
+# removed, not just unused -- it was the source of both the "date unknown"
+# entries and cross-department noise (e.g. IT Services staff who were never
+# going to appear in a People Department leave calendar).
 ABSENCE_KEYWORDS = [
     "annual leave", "a/l", "on leave", "out of office", "ooo",
     "holiday", "away", "sick leave"
@@ -729,69 +784,6 @@ def _add_absence(name, label):
     if not existing or "date unknown" in existing:
         absence_map[key] = text
 
-# Best-effort (explicitly non-exhaustive) date extraction from OOO auto-reply
-# text, so the email-fallback path isn't ALWAYS "date unknown" when the email
-# itself actually states a return date. Confirmed root cause, 10 Aug 2026:
-# the fallback previously never attempted this at all -- every email-only
-# absence (no matching calendar entry) was permanently "date unknown" by
-# design, not by parsing failure. This only covers a handful of common
-# phrasings; genuinely unparseable text still correctly falls back to "date
-# unknown" rather than guessing wrong.
-_OOO_MONTHS = {
-    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
-    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
-}
-_OOO_WEEKDAYS = {
-    "monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
-    "friday": 4, "saturday": 5, "sunday": 6,
-}
-_OOO_TRIGGER = r'(?:until|back on|back|returns? on|returning on|returns?|returning)'
-
-def _best_effort_ooo_date(text):
-    """Returns a date object if a common 'until/back/returning <date>' phrase
-    is found, else None. None means genuinely couldn't tell -- the honest,
-    correct outcome for unparseable text, not a bug."""
-    if not text:
-        return None
-    t = text.lower()
-
-    m = re.search(_OOO_TRIGGER + r'\s+(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)', t)
-    if m:
-        day = int(m.group(1))
-        month = _OOO_MONTHS.get(m.group(2))
-        if month and 1 <= day <= 31:
-            try:
-                d = datetime(today.year, month, day).date()
-                if d < today:
-                    d = datetime(today.year + 1, month, day).date()
-                return d
-            except ValueError:
-                pass
-
-    m = re.search(_OOO_TRIGGER + r'\s+([a-z]+day)\b', t)
-    if m and m.group(1) in _OOO_WEEKDAYS:
-        target_wd = _OOO_WEEKDAYS[m.group(1)]
-        d = today + timedelta(days=1)
-        while d.weekday() != target_wd:
-            d += timedelta(days=1)
-        return d
-
-    m = re.search(_OOO_TRIGGER + r'\D{0,15}?(\d{1,2})/(\d{1,2})(?:/(\d{2,4}))?', t)
-    if m:
-        day, month = int(m.group(1)), int(m.group(2))
-        year = int(m.group(3)) if m.group(3) else today.year
-        if year < 100:
-            year += 2000
-        try:
-            d = datetime(year, month, day).date()
-            if d < today:
-                d = datetime(year + 1, month, day).date()
-            return d
-        except ValueError:
-            pass
-
-    return None
-
 week_absence_end = today + timedelta(days=8)
 for item in calendar:
     subj = item.get("subject") or ""
@@ -823,21 +815,10 @@ for item in calendar:
 
     _add_absence(name_source, _absence_label(start_date, last_absent_date, all_day))
 
-ooo_keywords = ["out of office", "annual leave", "on leave", "away until", "a/l", "ooo"]
-for msg in inbox:
-    subj_raw = msg.get("subject") or ""
-    preview_raw = msg.get("body_preview") or ""
-    subj    = subj_raw.lower()
-    preview = preview_raw.lower()
-    sender  = msg.get("from", "")
-    if sender and any(kw in subj or kw in preview for kw in ooo_keywords):
-        guessed = _best_effort_ooo_date(subj_raw + " " + preview_raw)
-        if guessed:
-            label = "out of office, returns " + _fmt_absence_date(guessed) + " (best guess from email text)"
-        else:
-            label = "out of office - date unknown"
-        _add_absence(sender, label)
-
+# No email-OOO fallback -- calendar-only sourcing per Kevin's explicit
+# decision, 10 Aug 2026 (see comment above ABSENCE_KEYWORDS). Every entry
+# below now has a real calendar-verified date; "date unknown" can no longer
+# appear in this list at all.
 absences = sorted(absence_map.values())
 
 # Priority actions -- pulled from Command Centre tasks.json
