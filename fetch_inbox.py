@@ -1351,6 +1351,56 @@ cal_tomorrow_items = build_cal_items(cal_tomorrow)
 cal_day2_items     = build_cal_items(cal_day2)
 cal_day3_items     = build_cal_items(cal_day3)
 
+# Attach a Command Centre task id to a calendar item, when one genuinely
+# exists, so the dashboard's "CC ->" link on that meeting can deep-link
+# straight to the matching task (command-centre's js/app.js already reads
+# window.location.hash and highlights/scrolls to '#card-'+hash -- confirmed
+# by reading that code, not assumed) instead of just landing on the CC
+# homepage with nothing highlighted. Kevin's explicit ask, 10 Aug 2026:
+# "it should high[light] the item so i can drill dowwn into the email if
+# required - one links to the other."
+#
+# Deliberately conservative: only an EXACT (case-insensitive) match against
+# a not-done task's emailRef counts -- confirmed live against real
+# tasks.json that several tasks carry the verbatim meeting title in
+# emailRef (e.g. "Sickness Absence Survey working group", "Confidential -
+# OH Consultation", "Oxford University Evo Pre project meeting"). task.source
+# also often names a meeting but with a trailing "DD/MM" date and no way to
+# tell which week's occurrence of a *recurring* meeting it refers to (e.g.
+# "HR Systems Managers Meeting 24/06" could easily be a stale prior
+# occurrence of a meeting that recurs weekly) -- deliberately NOT matched
+# against, to avoid deep-linking a real person to the wrong week's task.
+# If more than one not-done task shares the identical emailRef, that's
+# ambiguous and no link is attached rather than guessing.
+_cc_task_list_for_matching = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+
+def _match_cc_task_id(meeting_title):
+    title_lower = (meeting_title or "").strip().lower()
+    if not title_lower:
+        return None
+    matches = []
+    for t in _cc_task_list_for_matching:
+        if t.get("done"):
+            continue
+        email_ref = (t.get("emailRef") or "").strip().lower()
+        if email_ref and email_ref == title_lower:
+            tid = t.get("id")
+            if tid and tid not in matches:
+                matches.append(tid)
+    return matches[0] if len(matches) == 1 else None
+
+def _attach_cc_task_ids(items):
+    for it in items:
+        tid = _match_cc_task_id(it.get("title"))
+        if tid:
+            it["ccTaskId"] = tid
+    return items
+
+_attach_cc_task_ids(cal_today_items)
+_attach_cc_task_ids(cal_tomorrow_items)
+_attach_cc_task_ids(cal_day2_items)
+_attach_cc_task_ids(cal_day3_items)
+
 # -- Phase 3.7b -- Fetch recent Granola meeting notes for calendar context --
 GRANOLA_API_KEY = os.environ.get("GRANOLA_API_KEY", "")
 _granola_context = {}  # "day_idx" -> {"note_title": str, "summary": str}
