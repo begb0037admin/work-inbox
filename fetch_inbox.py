@@ -230,6 +230,23 @@ def is_vip(msg):
     except:
         return False
 
+# Kevin's own address, for the to-vs-cc primary-recipient signal (agent-commons
+# issue #3 step-3 brief, needs_reply precision fix -- Kevin was cc'd or the
+# thread was stale on ~20 of 24 flagged entries in the first real batch,
+# because the classifier had no visibility into either dimension before this).
+KEVIN_EMAIL = "kevin.lelitte@admin.ox.ac.uk"
+
+def _kevin_is_primary_recipient(msg):
+    """True if Kevin's address appears in To (addressed directly), False if
+    only in CC (or not found at all -- distribution lists/aliases mean this
+    can't be 100% certain, so it's a signal for the classifier to weigh, not
+    an absolute gate on its own)."""
+    try:
+        to_field = (msg.To or "").lower()
+        return KEVIN_EMAIL in to_field
+    except:
+        return True  # can't tell -- don't silently suppress a real email over a read failure
+
 for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
     try:
         if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
@@ -247,7 +264,8 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
             "is_read":         is_read,
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance,
-            "entry_id":        msg.EntryID
+            "entry_id":        msg.EntryID,
+            "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
         }
         if not is_read:
             entry["body_preview"] = (msg.Body or "")[:150]
@@ -277,7 +295,8 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
             "is_read":         is_read,
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance,
-            "entry_id":        msg.EntryID
+            "entry_id":        msg.EntryID,
+            "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
         }
         if not is_read:
             entry["body_preview"] = (msg.Body or "")[:150]
@@ -551,7 +570,9 @@ def make_card(msg, category):
         "subject":   subj,
         "from":      sender,
         "entry_id":  msg.get("entry_id", ""),
-        "received":  received_str
+        "received":  received_str,
+        "received_raw": msg.get("received", ""),
+        "kevin_is_primary_recipient": msg.get("kevin_is_primary_recipient", True)
     }
     return card
 
@@ -594,12 +615,28 @@ if summary_candidates and anthropic_available:
         # tokens used, all 157 entries parsed. Root cause was token-inefficient
         # keys, not response size -- raising max_tokens further would not
         # have fixed this on its own.
+        # Recipient-role + age signals -- confirmed root cause, 10 Aug 2026:
+        # Lauren's review of the first real needs_reply batch found ~20 of 24
+        # flagged entries were cc-only threads or clearly stale, and neither
+        # signal reached the classifier before this fix (no To/CC captured at
+        # all for received mail, no date passed in this payload even though
+        # it's one field away). Both now computed deterministically in Python
+        # and given to the model as explicit signals, not left for it to guess.
+        def _age_days(card):
+            try:
+                rec_dt = datetime.fromisoformat(card.get("received_raw", "").split("+")[0].split(" (")[0].strip())
+                return (datetime.now() - rec_dt).days
+            except:
+                return None
+
         emails_for_summary = [
             {
                 "id":      str(i),
                 "subject": c["subject"],
                 "from":    c["from"],
-                "preview": (c.get("sub") or "")[:250]
+                "preview": (c.get("sub") or "")[:250],
+                "kevin_is_primary_recipient": c.get("kevin_is_primary_recipient", True),
+                "age_days": _age_days(c)
             }
             for i, c in enumerate(summary_candidates)
         ]
@@ -614,6 +651,14 @@ if summary_candidates and anthropic_available:
             "needs him to read it, take an offline action, or do nothing at all (e.g. a system "
             "notification, an FYI, a failed-import alert, a case update that doesn't ask him anything "
             "directly).\n"
+            "Weigh two extra signals given for each email:\n"
+            "- kevin_is_primary_recipient: false means Kevin was only cc'd, not directly addressed. "
+            "Default toward needs_reply: false for cc-only threads UNLESS the content clearly still "
+            "asks Kevin himself something directly (e.g. someone names him and asks a question even "
+            "on a cc'd thread) - don't flip to false mechanically, use judgement.\n"
+            "- age_days: how many days old the email is. Default toward needs_reply: false for "
+            "anything genuinely old (multiple weeks+) - an unanswered thread that old is more likely "
+            "already resolved elsewhere than still genuinely awaiting Kevin's reply.\n"
             "Return ONLY a valid JSON object mapping the given short id to an object with 'summary' "
             "and 'needs_reply' - no preamble, no markdown.\n"
             'Example: {"0": {"summary": "Marie confirms funding approved for SBS exclusion from '
@@ -639,6 +684,15 @@ if summary_candidates and anthropic_available:
         email_summaries = json.loads(es_raw)
         applied = 0
         needs_reply_count = 0
+        # Deterministic staleness gate -- Kevin's explicit cutoff, 10 Aug
+        # 2026: 2 months. This is a hard override applied AFTER the AI's own
+        # judgement, not a replacement for it -- the AI still gets age_days
+        # as a soft signal above (for anything younger than the cutoff), but
+        # nothing older than 2 months can end up needs_reply=true regardless
+        # of what the model decides, since Kevin was explicit that this is
+        # his call to set, not the model's to infer.
+        STALENESS_CUTOFF_DAYS = 60
+        stale_overridden = 0
         for i, c in enumerate(summary_candidates):
             entry = email_summaries.get(str(i))
             if entry is None:
@@ -653,10 +707,16 @@ if summary_candidates and anthropic_available:
             else:
                 c["ai_summary"] = str(entry)
                 c["needs_reply"] = False
+
+            age = _age_days(c)
+            if c["needs_reply"] and age is not None and age > STALENESS_CUTOFF_DAYS:
+                c["needs_reply"] = False
+                stale_overridden += 1
+
             applied += 1
             if c["needs_reply"]:
                 needs_reply_count += 1
-        print(f"Phase 3.2 done - {applied} email summaries generated, {needs_reply_count} flagged needs_reply")
+        print(f"Phase 3.2 done - {applied} email summaries generated, {needs_reply_count} flagged needs_reply ({stale_overridden} overridden false for being older than {STALENESS_CUTOFF_DAYS} days)")
     except Exception as e:
         print(f"WARNING: Phase 3.2 AI email summaries failed - {e}")
 elif summary_candidates:
