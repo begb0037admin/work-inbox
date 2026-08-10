@@ -81,26 +81,87 @@ def gh_blob(owner, repo, sha, token):
         return base64.b64decode(json.load(r)["content"])
 
 
+def normalize_entry(e):
+    """Map Lauren's real field names onto the canonical shape the dashboard
+    renders, and pass through the richer fields (confidence, inline_flags)
+    that her actual output includes but the original mirror schema didn't
+    account for. Returns None if a truly essential field is missing --
+    logs exactly which one, rather than silently dropping."""
+    if not isinstance(e, dict):
+        return None, "not a dict"
+
+    core = {"source_entry_id", "subject", "sender_tier", "draft_text"}
+    missing_core = core - e.keys()
+    if missing_core:
+        return None, f"missing core field(s): {sorted(missing_core)}"
+
+    # Timestamp: Lauren's real output uses "composed_at" -- the original
+    # mirror required "drafted_at" and silently dropped every real entry as
+    # a result (caught live, 10 Aug 2026, all 4 of Lauren's first real
+    # drafts failed this check). Accept either, normalize the OUTPUT key to
+    # "drafted_at" so the already-built dashboard template doesn't need a
+    # matching rename.
+    timestamp = e.get("composed_at") or e.get("drafted_at") or ""
+    if not timestamp:
+        return None, "missing both composed_at and drafted_at"
+
+    normalized = {
+        "source_entry_id": e["source_entry_id"],
+        "subject": e["subject"],
+        "sender_tier": e["sender_tier"],
+        "draft_text": e["draft_text"],
+        "drafted_at": timestamp,
+    }
+    # Pass through optional richer fields as-is when present -- these are
+    # real content Lauren already produces (confidence level/reason,
+    # inline_flags for anything she couldn't verify) that the original
+    # dashboard design didn't render at all. Optional: absence doesn't drop
+    # the entry, just means the dashboard shows less detail for it.
+    for optional_field in ("confidence", "inline_flags", "received", "status", "draft_id"):
+        if optional_field in e:
+            normalized[optional_field] = e[optional_field]
+
+    return normalized, None
+
+
 def run(token, dry_run=False):
+    source_missing = False
+    read_error = None
     try:
         source = gh_get(AC_OWNER, AC_REPO, "pending-email-drafts/drafts.json", token)
         drafts = json.loads(base64.b64decode(source["content"]))
         entries = drafts.get("entries", []) if isinstance(drafts, dict) else drafts
-        source_missing = False
     except urllib.error.HTTPError as e:
+        entries = []
         if e.code == 404:
-            entries = []
             source_missing = True
         else:
-            raise
+            # Any non-404 failure (auth, rate limit, transient 5xx) is
+            # logged with its real status/body rather than silently folded
+            # into "source_missing" -- a 404 specifically can also mean the
+            # token lacks read access to a private repo (GitHub returns 404,
+            # not 403, to avoid revealing a private repo's existence), so
+            # even the 404 case is worth surfacing explicitly rather than
+            # treated as identical to "file genuinely doesn't exist yet."
+            try:
+                body = e.read().decode("utf-8", errors="replace")
+            except Exception:
+                body = "<could not read response body>"
+            read_error = f"HTTP {e.code}: {body[:500]}"
+            source_missing = True
 
-    # Schema check -- only pass through entries with the fields the panel
-    # needs, so a malformed upstream entry can't silently ship as an empty
-    # card. Not a redaction pass (that already happened on Lauren's side
-    # per the WATCH item) -- purely a defensive shape check on this mirror.
-    required = {"source_entry_id", "subject", "sender_tier", "draft_text", "drafted_at"}
-    clean_entries = [e for e in entries if isinstance(e, dict) and required.issubset(e.keys())]
-    dropped = len(entries) - len(clean_entries)
+    # Schema check -- normalize + validate each entry, logging exactly why
+    # anything gets dropped rather than a silent count. Not a redaction pass
+    # (that already happened on Lauren's side per the WATCH item) -- purely
+    # a defensive shape check plus field-name normalization on this mirror.
+    clean_entries = []
+    drop_reasons = []
+    for e in entries:
+        normalized, reason = normalize_entry(e)
+        if normalized is not None:
+            clean_entries.append(normalized)
+        else:
+            drop_reasons.append({"draft_id": e.get("draft_id") if isinstance(e, dict) else None, "reason": reason})
 
     payload = {
         "generated": __import__("datetime").datetime.now().isoformat(),
@@ -112,9 +173,11 @@ def run(token, dry_run=False):
 
     stats = {
         "source_missing": source_missing,
+        "read_error": read_error,
         "entries_found": len(entries),
         "entries_published": len(clean_entries),
-        "entries_dropped_bad_shape": dropped,
+        "entries_dropped_bad_shape": len(drop_reasons),
+        "drop_reasons": drop_reasons,
     }
 
     if dry_run:
