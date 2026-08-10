@@ -626,7 +626,15 @@ function renderCalPanel(data){
   const nowMins=now.getHours()*60+now.getMinutes();
   const todayDate=now.getDate(), todayMonth=now.getMonth(), todayYear=now.getFullYear();
   function parseTimeMins(t){if(!t)return -1;const p=t.split(':');return p.length<2?-1:parseInt(p[0])*60+parseInt(p[1]);}
-  function renderBlock(items,headerHtml,isToday){
+  // Same weekend-skipping semantics as the backend's next_workday() -- kept
+  // in sync deliberately, not shared code, since this is a small pure date
+  // helper duplicated across the Python/JS boundary.
+  function nextWorkday(d){
+    const n=new Date(d); n.setDate(n.getDate()+1);
+    while(n.getDay()===0||n.getDay()===6) n.setDate(n.getDate()+1);
+    return n;
+  }
+  function renderBlock(items,headerHtml,isToday,bodyId){
     if(!items||!items.length) return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="main-cal-none">No meetings</div></div>`;
     let nextFound=false;
     const rows=items.map((c,i)=>{
@@ -635,41 +643,58 @@ function renderCalPanel(data){
       const isNext=isToday&&!isPast&&!nextFound&&mins>=nowMins;
       if(isNext) nextFound=true;
       const cls=isPast?' past':isNext?' next':'';
-      const sumId=c.id?'sum_'+c.id:(isToday?'st':'sm')+i;
+      const sumId=c.id?'sum_'+c.id:bodyId+i;
       return `<div class="main-cal-item${cls}"><span class="main-cal-time">${escapeHtml(c.time||'')}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${escapeHtml(c.title)}</div>${c.sub?`<div class="main-cal-sub">${escapeHtml(c.sub)}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${escapeHtml(c.summary)}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button><a class="summary-cc-link" href="https://cc.lelitte.co.uk" target="_blank">CC &#8594;</a></div></div>`:''}</div></div>`;
     }).join('');
-    const bodyId=isToday?'calBodyToday':'calBodyTom';
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="cal-col-body" id="${bodyId}">${rows}</div></div>`;
   }
-  function renderMiniCal(monthOffset){
+  // mtgDates: real Date objects for each of the 4 rolling day-view columns
+  // that actually has at least one item -- used to mark "has-meeting" dots
+  // across however many of the 4 displayed months those dates fall in.
+  function renderMiniCal(monthOffset,mtgDates){
     const calDate=new Date(todayYear,todayMonth+(monthOffset||0),1);
     const calYear=calDate.getFullYear(), calMonth=calDate.getMonth();
     const monthName=calDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
     const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
     let startDow=calDate.getDay()-1; if(startDow<0) startDow=6;
-    const tom=new Date(now); tom.setDate(tom.getDate()+1);
-    while(tom.getDay()===0||tom.getDay()===6) tom.setDate(tom.getDate()+1);
-    const tomDate=tom.getDate(), tomMonth=tom.getMonth(), tomYear=tom.getFullYear();
-    const hasTodayMtg=data.calToday&&data.calToday.length>0;
-    const hasTomMtg=data.calTomorrow&&data.calTomorrow.length>0;
     const dayNames=['M','T','W','T','F','S','S'];
     let cells=dayNames.map(d=>`<div class="mini-cal-day-name">${d}</div>`).join('');
     for(let i=0;i<startDow;i++) cells+='<div class="mini-cal-day other-month"></div>';
     for(let d=1;d<=daysInMonth;d++){
       const isT=(d===todayDate&&calMonth===todayMonth&&calYear===todayYear);
-      const isTom=(d===tomDate&&calMonth===tomMonth&&calYear===tomYear);
-      const hasMtg=(isT&&hasTodayMtg)||(isTom&&hasTomMtg);
+      const hasMtg=mtgDates.some(md=>md.getDate()===d&&md.getMonth()===calMonth&&md.getFullYear()===calYear);
       const cls='mini-cal-day'+(isT?' today':hasMtg?' has-meeting':'');
       cells+=`<div class="${cls}">${d}</div>`;
     }
-    return `<div class="main-cal-block-header">${monthName}</div><div class="mini-cal-grid">${cells}</div>`;
+    return `<div class="main-cal-block"><div class="main-cal-block-header">${monthName}</div><div class="mini-cal-grid">${cells}</div></div>`;
   }
   const todayHeader='Today &mdash; '+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  const tom=new Date(now); tom.setDate(tom.getDate()+1);
-  const skippedWeekend=tom.getDay()===0||tom.getDay()===6;
-  while(tom.getDay()===0||tom.getDay()===6) tom.setDate(tom.getDate()+1);
+  const naiveTom=new Date(now); naiveTom.setDate(naiveTom.getDate()+1);
+  const skippedWeekend=naiveTom.getDay()===0||naiveTom.getDay()===6;
+  const tom=nextWorkday(now);
   const tomHeader=(skippedWeekend?'Next Week':'Tomorrow')+' &mdash; '+tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  el.innerHTML=`<div class="main-cal-panel">${renderBlock(data.calToday,todayHeader,true)}${renderBlock(data.calTomorrow,tomHeader,false)}<div class="main-cal-block">${renderMiniCal(0)}<hr class="mini-cal-divider">${renderMiniCal(1)}</div></div>`;
+  // Rolling 4-day window (today + next 3 working days) -- Kevin's explicit
+  // request, 10 Aug 2026: "today, tomorrow, day after that, and day after
+  // that... when tomorrow comes, it will drop and get Friday." Day2/Day3
+  // just carry their own weekday name as the header, same as how Kevin
+  // described them, rather than a "Today"/"Tomorrow"-style label.
+  const day2=nextWorkday(tom);
+  const day3=nextWorkday(day2);
+  const day2Header=day2.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const day3Header=day3.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+
+  const mtgDates=[];
+  if(data.calToday&&data.calToday.length) mtgDates.push(new Date(todayYear,todayMonth,todayDate));
+  if(data.calTomorrow&&data.calTomorrow.length) mtgDates.push(tom);
+  if(data.calDay2&&data.calDay2.length) mtgDates.push(day2);
+  if(data.calDay3&&data.calDay3.length) mtgDates.push(day3);
+
+  const daysRow=renderBlock(data.calToday,todayHeader,true,'calBodyToday')
+    +renderBlock(data.calTomorrow,tomHeader,false,'calBodyTom')
+    +renderBlock(data.calDay2,day2Header,false,'calBodyDay2')
+    +renderBlock(data.calDay3,day3Header,false,'calBodyDay3');
+  const monthsRow=renderMiniCal(0,mtgDates)+renderMiniCal(1,mtgDates)+renderMiniCal(2,mtgDates)+renderMiniCal(3,mtgDates);
+  el.innerHTML=`<div class="main-cal-panel"><div class="main-cal-days-row">${daysRow}</div><div class="main-cal-months-row">${monthsRow}</div></div>`;
 }
 
 let _ctxSentences=[], _ctxIdx=0, _ctxTimer=null, _ctxPaused=false;
