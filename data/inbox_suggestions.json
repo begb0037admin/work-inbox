@@ -1,14 +1,23 @@
 {
-  "generated_at": "2026-08-10 16:08",
+  "generated_at": "2026-08-10 16:14",
   "new_tasks": [
     {
       "title": "Confirm DTP1092 integrations testing completion by 14 August",
       "tier": "week",
-      "description": "Crispin Muncaster is requesting confirmation that integrations testing for College Staff into PXD can be completed by Friday 14 August. Kevin needs to confirm feasibility given current resource and testing assumptions, particularly as Crispin is now out until 17 August.",
+      "description": "Crispin Muncaster is requesting confirmation that integrations testing for College Staff into PXD (DTP1092) can be completed by Friday 14 August. Kevin needs to review the testing assumptions and confirm feasibility given that Crispin is now out of office until 17 August.",
       "email_subject": "DTP1092 College Staff into PXD - Testing HRIS Staging imports",
       "email_from": "Crispin Muncaster",
       "received": "2026-08-10 07:20",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000"
+    },
+    {
+      "title": "Review and respond to Conor on Multi Company Setup progress",
+      "tier": "week",
+      "description": "Conor O'Brien has sent updated work on FP 68261303 (Multi Company Setup) and notes that both Simon and Kevin are on leave next week. Kevin needs to review Conor's progress and confirm availability to continue discussions.",
+      "email_subject": "RE: #External# RE: Multi Company Setup",
+      "email_from": "Conor O'Brien",
+      "received": "2026-08-07 12:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
     },
     {
       "title": "Review business rules for Data Warehouse with Simon",
@@ -35,38 +44,56 @@
     {
       "task_id": "t2608060900570",
       "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
-      "note": "Guy Williams responded to Crispin about HRIS Staging testing, confirming integration platform status for the testing work.",
-      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Guy Williams",
-      "received": "2026-08-10 11:51",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995620000"
+      "note": "Crispin Muncaster is out of office on annual leave until Monday 17 August, affecting coordination of the DTP1092 testing meeting.",
+      "email_subject": "Automatic reply: DTP1092 College staff into PXD Team meeting",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-10 07:49",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955C0000"
     },
     {
       "task_id": "t2608071801050",
       "task_title": "Review volunteering leave pay code configuration work",
-      "note": "Simon Burford has completed analysis on moving volunteering leave from 'Other Leave' reason code to its own standalone leave type in PeopleXD.",
-      "email_subject": "Team Calendar Config",
-      "email_from": "Simon Burford",
-      "received": "2026-08-07 15:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998640000"
+      "note": "PA to HR Director is holding time for the next in-person People Forum; agenda to follow.",
+      "email_subject": "People Forum (In person)",
+      "email_from": "PA to HR Director",
+      "received": "2026-08-06 11:19",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43190000"
     },
     {
-      "task_id": "t036",
-      "task_title": "Volunteering Hours -- forward Matt Thomas thread to Marie",
-      "note": "Simon's volunteering leave analysis is directly relevant to the Matt Thomas issue about staff inability to log volunteering hours; Kevin should review this progress.",
-      "email_subject": "Team Calendar Config",
-      "email_from": "Simon Burford",
-      "received": "2026-08-07 15:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998640000"
+      "task_id": "t2608030857560",
+      "task_title": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
+      "note": "Nathan Kirwan confirmed that test scenarios for DTP1092 testing have been set up in UOXU.",
+      "email_subject": "RE: DTP1092 College Staff to PXD - testing meeting",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-06 11:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43180000"
     },
     {
-      "task_id": "t2608071801051",
-      "task_title": "Investigate team calendar config issue with Asta",
-      "note": "Simon Burford encountered a missing option when configuring Volunteering Leave pay code in UOXU; diagnosis and resolution needed with Asta on team calendar configuration.",
-      "email_subject": "Bi-monthly CDR/PD working group",
-      "email_from": "Lindsey Spriggs",
-      "received": "2026-08-07 13:48",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998630000"
+      "task_id": "t2608030857560",
+      "task_title": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
+      "note": "Nathan Kirwan has set up roles and people in UOXU to cover the 7 testing scenarios for DTP1092 College Staff to PXD.",
+      "email_subject": "RE: DTP1092 College Staff to PXD - testing meeting",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-08-06 11:10",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43170000"
+    },
+    {
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "The DTP1092 College Staff to PXD team meeting was cancelled due to multiple attendees being out of office.",
+      "email_subject": "Cancelled: DTP1092 College staff into PXD Team meeting",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-03 14:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A2EC0F9C0000"
+    },
+    {
+      "task_id": "task-1785704715215",
+      "task_title": "Review outstanding Development Insight reports actions with Julie",
+      "note": "Julie Hickman has reached out regarding outstanding actions on Development Insight reports following conversation with Ilona.",
+      "email_subject": "Re: My Development Insight reports",
+      "email_from": "Julie Hickman",
+      "received": "2026-07-27 10:58",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000"
     }
   ]
 }
