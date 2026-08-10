@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-10 - draft_final_diff_capture.py added (forward-going half of the style-learning corpus, issue #3), sent_corpus_pull.py refactored to share redaction logic via new style_corpus_common.py; real baseline established against live Outlook Drafts (Drew).
+**Last updated:** 2026-08-10 - draft_final_diff_capture.py hardened for unattended running and scheduled live: Task Scheduler "Draft Diff Capture", hourly 7am-7pm Mon-Fri (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -60,6 +60,36 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 **Not done, on purpose:** no diff pairs exist yet (need a real send to happen between two runs), nothing pushed to `agent-commons/corpus/draft-final-diffs/`. Not yet wired into Task Scheduler -- holding for confirmation given it makes live Anthropic API calls per pair on an unattended schedule.
 
 **Also this session:** Teams draft-staging design moved from proposal to concrete (surface confirmed as work-inbox by Kevin) -- new "Pending Teams Replies" panel, data cross-fetched from `agent-commons/pending-teams-drafts/drafts.json` (mirrors the existing CC-ticker cross-repo-fetch pattern; preserves the standing rule that Lauren never writes into work-inbox directly), reusing the existing `workInbox_ticks_v1` Cloudflare-Worker-synced tick mechanism for "mark as sent" rather than building new write-back infra. Design only -- still blocked on the separately-deferred Teams read-access question, not built. Full detail: `begb0037admin/agent-commons` issue #3.
+
+---
+
+## Session 2026-08-10 (continued again) -- draft_final_diff_capture.py hardened and scheduled (Drew)
+
+**Scope:** Kevin decided to schedule `draft_final_diff_capture.py` on Task Scheduler now rather than run it manually. Before scheduling anything that makes unattended, no-human-in-the-loop Anthropic API calls, hardened the script and verified the hardening, per Kevin's explicit ask to double-check error handling/rate-limit/cost safety first.
+
+**Hardening added:**
+- Decoupled correlation+redaction (cheap, local, must never be lost) from AI classification (has cost/rate considerations) into two phases. The ledger is now saved unconditionally before any AI-related code runs, so an Anthropic-side problem can never risk losing track of currently-open drafts.
+- New local-only backlog (`pending_classification.json`) holds pairs that have passed redaction but haven't been classified yet -- either because a run found more pairs than its per-run cap, or a classification attempt failed. Nothing is dropped just because the AI step had a bad run.
+- `--max-classifications-per-run` cap (default 25) bounds live Anthropic API calls per run -- protects against an unbounded cost/rate-limit spike if many drafts vanish at once (real burst, or a ledger bug). Overflow waits in the backlog for the next scheduled run.
+- Anthropic client instantiation itself wrapped in try/except (bad key, package issue) -- degrades to `ai_unavailable_this_run: true` and preserves the backlog, rather than crashing the whole run.
+- Each backlog item gets up to `MAX_CLASSIFICATION_RETRIES` (3) attempts across runs before being permanently logged to `draft_final_classification_failures.json` and dropped -- not retried forever.
+- Proper exit codes: the `__main__` block now wraps the whole run in try/except and exits 1 on any unhandled failure, so Task Scheduler's own restart/failure detection actually sees a real failure rather than a silent no-op.
+
+**Verified before trusting it (mocked Outlook + mocked Anthropic, no real data or real API calls):**
+- Cap + carryover: 3 pairs found with cap=2 -> 2 classified immediately, 1 carried to the backlog and classified on the very next run, all 3 eventually published, none lost.
+- Anthropic client init failure: run completes without crashing, `ai_unavailable_this_run: true`, the 1 pending pair correctly preserved in the backlog rather than lost.
+- Persistent classification failure: pair retried across exactly 3 runs (retry_count 1, 2, 3), then permanently logged to classification_failures on the 3rd, backlog correctly empty afterward -- confirmed it doesn't retry forever.
+- Re-ran against real live Outlook after hardening (`--stats-only`): 96 drafts tracked, 0 vanished/0 pairs -- consistent with the untouched baseline, no regression.
+
+**Scheduled live, `.bat` launcher mirrors the existing Work Inbox Briefing pattern exactly** (fresh-pull-from-GitHub with an integrity check on each downloaded file, timestamped backup before overwrite, single last-run log via `Tee-Object`, exit code propagated) -- `D:/OneDrive - lelitte.com/Desktop/Run Draft Diff Capture.bat`, downloads both `draft_final_diff_capture.py` and `style_corpus_common.py` fresh each run. One deliberate improvement over the copied pattern: added explicit early-exit guards for `/update` and `/run` invocations so an unattended Task Scheduler run can never land on the original pattern's interactive `choice` menu prompt at the end.
+
+**Task Scheduler task "Draft Diff Capture":** hourly, 7am-7pm, Mon-Fri (13 runs/weekday) -- picked to sit meaningfully more frequent than the existing 5x/day Work Inbox Briefing cadence, since this mechanism can only capture a draft if it's still open at the moment of a poll; hourly gives a real chance of catching messages that get genuine editing attention (which are also the most valuable ones for a style corpus) without over-polling for the many replies that are drafted and sent within minutes and were never going to be caught regardless of interval -- an inherent floor of the whole draft-snapshot approach, not something interval choice fully solves. Settings mirror Work Inbox Briefing (`StartWhenAvailable`, `RestartCount 2`, `RestartInterval 5min`, `ExecutionTimeLimit 15min`), plus `MultipleInstances IgnoreNew` so a slow run (e.g. many pairs to classify) can't stack overlapping runs.
+
+**Verified live end-to-end** by running the `.bat` in `/update` mode manually (the exact invocation Task Scheduler uses) before registering the task: real GitHub download with integrity check passed for both files, real run against live Outlook completed (96 drafts tracked, 0 pairs -- consistent, expected), exit code 0, log written to `C:/Users/admin/Documents/Claude/Projects/work-inbox/tools/draft_diff_capture_last_run.log`. Task registered and confirmed `State: Ready`, next run 12:00 today.
+
+**`sent_corpus_pull.py` stays manual** -- Kevin confirmed the one-time snapshot is sufficient, no scheduling needed there.
+
+Full detail: `begb0037admin/agent-commons` issue #3.
 
 ---
 
