@@ -28,6 +28,10 @@
   --gray-bg: #f1efe8;
   --gray-border: #d3d1c7;
   --gray-text: #5f5e5a;
+  --purple: #7c5cbf;
+  --purple-bg: #f2eefb;
+  --purple-border: #d9cdf0;
+  --purple-text: #4d3782;
   --sidebar-width: 340px;
   --font: 'Inter', sans-serif;
   --radius: 6px;
@@ -411,3 +415,34 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .cal-col-body::-webkit-scrollbar-track{background:transparent}
 .cal-col-body::-webkit-scrollbar-thumb{background:#d1d9e6;border-radius:2px}
 .cal-col-body::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+
+/* ── Drafted Replies panel (agent-commons issue #3 -- 4B, dashboard-only review) ──
+   Dashboard-only: this panel displays text and lets Kevin copy it. Nothing
+   here writes to a mailbox or sends anything -- "mark sent"/"discard" are
+   bookkeeping only, exactly like the existing email-card tick mechanism. */
+.drafted-replies-panel{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,33,71,0.05)}
+.dr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.dr-title{font-size:15px;font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px}
+.dr-count-badge{background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600}
+.dr-subtitle{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.dr-empty{font-size:13px;color:var(--text-very-muted);font-style:italic;padding:6px 0}
+.dr-card{background:var(--card-bg);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px}
+.dr-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+.dr-subject{font-size:13.5px;font-weight:600;color:var(--text-dark)}
+.dr-meta{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.dr-tier-badge{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.dr-tier-senior-management{background:var(--red-bg);color:var(--red-text);border:1px solid var(--red-border)}
+.dr-tier-direct-report{background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-border)}
+.dr-tier-other{background:var(--gray-bg);color:var(--gray-text);border:1px solid var(--gray-border)}
+.dr-timestamp{font-size:11px;color:var(--text-very-muted)}
+.dr-draft-text{font-size:13px;line-height:1.5;color:var(--text-dark);white-space:pre-wrap;background:var(--main-bg);border-radius:6px;padding:10px 12px;margin:6px 0;max-height:78px;overflow:hidden;position:relative;cursor:pointer}
+.dr-draft-text.expanded{max-height:none}
+.dr-draft-text:not(.expanded)::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;background:linear-gradient(transparent,var(--main-bg))}
+.dr-expand-hint{font-size:11px;color:var(--purple);cursor:pointer;margin-top:2px;display:inline-block}
+.dr-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.dr-btn{font-size:12px;font-weight:500;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-dark);cursor:pointer;transition:background .15s}
+.dr-btn:hover{background:var(--main-bg)}
+.dr-btn-primary{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.dr-btn-primary:hover{background:var(--purple-border)}
+.dr-btn-danger{color:var(--red-text)}
+.dr-btn-danger:hover{background:var(--red-bg)}
