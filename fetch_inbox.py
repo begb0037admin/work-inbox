@@ -807,11 +807,17 @@ for item in calendar:
     # is) as the name source when available, not just whatever's left in the
     # subject after stripping leave keywords -- confirmed live, 10 Aug 2026:
     # Organizer holds the same full display name Outlook uses as the email
-    # sender name (e.g. "Simon Burford", "Athena Artuso"), so this makes the
-    # calendar pass's dict key naturally match the email-fallback pass's key
-    # instead of producing "Simon" / "Simon Burford" as two separate entries.
+    # sender name (e.g. "Simon Burford", "Athena Artuso") for most entries.
+    # Some entries (confirmed live, e.g. a half-day "JS - Annual Leave" on
+    # 10 Aug) instead have Organizer set to the calendar/department's own
+    # name ("People Department - HR Systems") rather than a real person --
+    # likely how that entry was booked (an admin/shared process, not the
+    # individual themselves). Treat that placeholder as "no useful
+    # organizer" and fall back to the subject, which still names the real
+    # person via initials/short-name even when Organizer doesn't.
     organizer = (item.get("organizer") or "").strip()
-    name_source = organizer if len(organizer) >= 3 else subj
+    is_placeholder_organizer = "people department" in organizer.lower() or "hr systems" in organizer.lower()
+    name_source = organizer if (len(organizer) >= 3 and not is_placeholder_organizer) else subj
 
     _add_absence(name_source, _absence_label(start_date, last_absent_date, all_day))
 
