@@ -416,8 +416,17 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .card-icon:hover{background:#eff6ff;color:#3b82f6;border-color:#bfdbfe}
 .card-icon-cc{width:auto;padding:0 7px;font-size:10px;font-weight:700;height:26px;border-radius:5px;border:1px solid #e5e9f2;background:#f8fafc;display:flex;align-items:center;cursor:pointer;color:#94a3b8;transition:background .15s,color .15s,border-color .15s;flex-shrink:0}
 .card-icon-cc:hover{background:#eff6ff;color:#3b82f6;border-color:#bfdbfe}
-/* ── Calendar column scroll ── */
-.cal-col-body{max-height:260px;overflow-y:auto;overflow-x:hidden}
+/* ── Calendar column scroll ──
+   260px was tuned for the old layout, where the day columns sat beside a
+   mini-cal panel of the same fixed height. Now that the mini-cal months are
+   a separate full-width row below (see .main-cal-days-row above), the day
+   columns have no sibling height constraint and there's real spare vertical
+   space on the page below them -- Kevin's explicit ask, 10 Aug 2026: "we
+   have a scroll bar but we have quite a lot of real estate beneath... make
+   them longer so I have less to scroll." Raised substantially; kept as a
+   cap (not removed) so an exceptionally busy single day still scrolls
+   instead of blowing out the page layout. */
+.cal-col-body{max-height:560px;overflow-y:auto;overflow-x:hidden}
 .cal-col-body::-webkit-scrollbar{width:4px}
 .cal-col-body::-webkit-scrollbar-track{background:transparent}
 .cal-col-body::-webkit-scrollbar-thumb{background:#d1d9e6;border-radius:2px}
@@ -433,7 +442,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .dr-count-badge{background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600}
 .dr-subtitle{font-size:12px;color:var(--text-muted);margin-bottom:12px}
 .dr-empty{font-size:13px;color:var(--text-very-muted);font-style:italic;padding:6px 0}
-.dr-card{background:var(--card-bg);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px}
+.dr-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px}
 .dr-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
 .dr-subject{font-size:13.5px;font-weight:600;color:var(--text-dark)}
 .dr-meta{display:flex;align-items:center;gap:6px;flex-shrink:0}
