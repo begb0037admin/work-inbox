@@ -31,9 +31,21 @@ Flow:
      recipient_tier()'s exact mapping (direct-report/senior-management/
      other) -- same function, just read as "who's asking Kevin" instead of
      "who Kevin sent to."
-  6. Write work-inbox/data/needs_reply.json: entry_id, subject, sender_tier,
-     received, body (full, redaction-cleared only), ai_note (Phase 3.2's
-     existing one-sentence summary, reused, not regenerated).
+  6. Write work-inbox/data/needs_reply.json: entry_id, subject, sender
+     (real display name), sender_tier, received, body (full,
+     redaction-cleared only), ai_note (Phase 3.2's existing one-sentence
+     summary, reused, not regenerated).
+
+Real sender name included, not just sender_tier -- Kevin's explicit decision,
+10 Aug 2026, deliberately distinct from the tier-only-not-raw-name discipline
+used on the Sent-items/draft-final CORPORA (agent-commons/corpus/*). His
+reasoning: that minimization is for shared, durable, cross-agent data leaving
+Drew's own system boundary; needs_reply.json is internal work-inbox plumbing
+that never leaves it, and Kevin already sees the real sender the instant he
+opens the source email anyway (one click away via entry_id/openmail://). The
+two files intentionally follow different rules for different reasons -- don't
+"fix" this file to be tier-only later by analogy with the corpora without
+Kevin re-deciding it.
 
 This script does NOT push to GitHub itself when run as a library call from
 run() -- the CLI entry point does the push, with the same backup-and-verify
@@ -119,6 +131,7 @@ def build_needs_reply_entries(briefing, mapi, stats_only=False):
         entries.append({
             "entry_id": c["entry_id"],
             "subject": c.get("subject", ""),
+            "sender": c.get("from", ""),
             "sender_tier": recipient_tier(c.get("from", "")),
             "received": c.get("received", ""),
             "body": full_body,
