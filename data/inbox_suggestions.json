@@ -1,44 +1,14 @@
 {
-  "generated_at": "2026-08-07 18:00",
+  "generated_at": "2026-08-10 07:51",
   "new_tasks": [
     {
-      "title": "Review volunteering leave pay code configuration work",
+      "title": "Review business rules for Data Warehouse company filtering",
       "tier": "week",
-      "description": "Simon Burford has been working on moving volunteering leave from 'Other Leave' reason code to its own standalone leave type. Kevin needs to review Simon's analysis and determine next steps for implementation in PeopleXD.",
-      "email_subject": "Volunteering Leave",
-      "email_from": "Simon Burford",
-      "received": "2026-08-07 16:21",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000",
-      "auto_promoted": true
-    },
-    {
-      "title": "Investigate team calendar config issue with Asta",
-      "tier": "week",
-      "description": "Simon encountered a missing option when trying to configure the Volunteering Leave pay code in UOXU. Kevin needs to work with Asta to diagnose and resolve the team calendar configuration problem.",
-      "email_subject": "Team Calendar Config",
-      "email_from": "Simon Burford",
-      "received": "2026-08-07 15:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998640000",
-      "auto_promoted": true
-    },
-    {
-      "title": "Review business rules for data warehouse with Ewan/Matt/Marie",
-      "tier": "week",
-      "description": "Simon is following up with Ewan and Matt on data warehouse feed amendments to ensure only Company 90 data is included. Kevin needs to review the discussion and confirm approach.",
+      "description": "Simon has sent analysis of data warehouse feed rules to ensure only University of Oxford company data (not other entities) is included. Kevin needs to review Simon's email and confirm the business rules are correct before implementation.",
       "email_subject": "RE: Business rules for Data Warehouse",
       "email_from": "Simon Burford",
       "received": "2026-08-06 17:05",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000"
-    },
-    {
-      "title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
-      "tier": "week",
-      "description": "Simon is discussing with Michael O'Sullivan whether to refresh UOXU and UOXC environments with a new clone of UOXP for DTP1092 Company 90 configuration and testing. Kevin needs to confirm this approach.",
-      "email_subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
-      "email_from": "Simon Burford",
-      "received": "2026-08-06 14:49",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431D0000",
-      "auto_promoted": true
     },
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
@@ -53,40 +23,40 @@
   ],
   "applied_updates": [
     {
+      "task_id": "t2608071801050",
+      "task_title": "Review volunteering leave pay code configuration work",
+      "note": "Simon has completed analysis of moving volunteering leave from 'Other Leave' reason code to standalone leave type; Kevin to review and determine next steps.",
+      "email_subject": "Volunteering Leave",
+      "email_from": "Simon Burford",
+      "received": "2026-08-07 16:21",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000"
+    },
+    {
+      "task_id": "t2608071801051",
+      "task_title": "Investigate team calendar config issue with Asta",
+      "note": "Simon encountered missing configuration option when setting up Volunteering Leave pay code in UOXU; Kevin to investigate with Asta.",
+      "email_subject": "Team Calendar Config",
+      "email_from": "Simon Burford",
+      "received": "2026-08-07 15:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998640000"
+    },
+    {
       "task_id": "t021",
       "task_title": "FP 68261303 -- Multi Company Setup",
-      "note": "Conor O'Brien has additional work to discuss on multi-company setup and is awaiting confirmation of Kevin's availability next week.",
-      "email_subject": "RE: #External# RE: Multi Company Setup",
+      "note": "Conor O'Brien has initiated contact regarding multi-company setup progress and is ready to continue the work.",
+      "email_subject": "Multi Company Setup",
       "email_from": "Conor O'Brien",
-      "received": "2026-08-07 12:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
+      "received": "2026-08-07 12:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998600000"
     },
     {
-      "task_id": "t2608071501070",
-      "task_title": "Confirm availability for Multi Company Setup discussion with Conor (FP 68261303)",
-      "note": "Simon confirmed Kevin will be back next week and can continue multi-company setup discussions with Conor.",
-      "email_subject": "RE: Multi Company Setup",
+      "task_id": "t2608071801052",
+      "task_title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
+      "note": "Simon is discussing with Michael O'Sullivan whether to refresh UOXU and UOXC environments for Company 90 testing; Kevin to confirm approach.",
+      "email_subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
       "email_from": "Simon Burford",
-      "received": "2026-08-07 12:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998610000"
-    },
-    {
-      "task_id": "t2608071501071",
-      "task_title": "Respond to Occupational Health appointment offer",
-      "note": "Occupational Health has sent a revised appointment offer for Kevin to respond to with availability.",
-      "email_subject": "PRIVATE & CONFIDENTIAL - Occupational Health",
-      "email_from": "enquiries@uohs.ox.ac.uk",
-      "received": "2026-08-07 11:54",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A569985F0000"
-    },
-    {
-      "task_id": "t2608071501072",
-      "task_title": "Confirm availability for Confidential OH Consultation with Maria Ignat",
-      "note": "Maria Ignat has sent Teams meeting link for confidential occupational health consultation requiring Kevin's confirmation.",
-      "email_subject": "Confidential - OH Consultation ",
-      "email_from": "Maria Ignat",
-      "received": "2026-08-07 11:54",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A569985E0000"
+      "received": "2026-08-06 14:49",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431D0000"
     }
   ]
 }
