@@ -644,7 +644,17 @@ function renderCalPanel(data){
       if(isNext) nextFound=true;
       const cls=isPast?' past':isNext?' next':'';
       const sumId=c.id?'sum_'+c.id:bodyId+i;
-      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${escapeHtml(c.time||'')}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${escapeHtml(c.title)}</div>${c.sub?`<div class="main-cal-sub">${escapeHtml(c.sub)}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${escapeHtml(c.summary)}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button><a class="summary-cc-link" href="https://cc.lelitte.co.uk" target="_blank">CC &#8594;</a></div></div>`:''}</div></div>`;
+      // Only link to Command Centre when this meeting has a genuine matching
+      // task id (c.ccTaskId, attached server-side in fetch_inbox.py via an
+      // exact emailRef match -- see _match_cc_task_id() there). Command
+      // Centre's own js/app.js reads window.location.hash on load and
+      // scrolls to + highlights '#card-'+hash, so this deep-links straight
+      // to the real item instead of just landing on the CC homepage --
+      // Kevin's explicit ask, 10 Aug 2026: "it should high[light] the item
+      // so i can drill dowwn into the email if required." No matching task
+      // -> no CC link at all, rather than one that goes nowhere useful.
+      const ccLink=c.ccTaskId?`<a class="summary-cc-link" href="https://cc.lelitte.co.uk/#${encodeURIComponent(c.ccTaskId)}" target="_blank">CC &#8594;</a>`:'';
+      return `<div class="main-cal-item${cls}"><span class="main-cal-time">${escapeHtml(c.time||'')}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${escapeHtml(c.title)}</div>${c.sub?`<div class="main-cal-sub">${escapeHtml(c.sub)}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${escapeHtml(c.summary)}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button>${ccLink}</div></div>`:''}</div></div>`;
     }).join('');
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="cal-col-body" id="${bodyId}">${rows}</div></div>`;
   }
