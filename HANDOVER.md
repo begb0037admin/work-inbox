@@ -1,6 +1,6 @@
 # work-inbox — Living Handover Document
 
-**Last updated:** 2026-08-10 - draft_final_diff_capture.py hardened for unattended running and scheduled live: Task Scheduler "Draft Diff Capture", hourly 7am-7pm Mon-Fri (Drew).
+**Last updated:** 2026-08-10 - Drew-to-Lauren wiring built and live: fetch_inbox.py Phase 3.2 needs_reply flag, work-inbox/data/needs_reply.json, Drafted Replies dashboard panel (4B, dashboard-only). Verified end-to-end via three real production runs (Drew).
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 ---
@@ -88,6 +88,44 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 **Verified live end-to-end** by running the `.bat` in `/update` mode manually (the exact invocation Task Scheduler uses) before registering the task: real GitHub download with integrity check passed for both files, real run against live Outlook completed (96 drafts tracked, 0 pairs -- consistent, expected), exit code 0, log written to `C:/Users/admin/Documents/Claude/Projects/work-inbox/tools/draft_diff_capture_last_run.log`. Task registered and confirmed `State: Ready`, next run 12:00 today.
 
 **`sent_corpus_pull.py` stays manual** -- Kevin confirmed the one-time snapshot is sufficient, no scheduling needed there.
+
+Full detail: `begb0037admin/agent-commons` issue #3.
+
+---
+
+## Session 2026-08-10 (final) -- Drew-to-Lauren wiring built and live: needs_reply flagging, needs_reply.json, Drafted Replies panel (Drew)
+
+**Scope:** `begb0037admin/agent-commons` issue #3 step-3 brief, items 1/2/4 -- the actual drafting hand-off loop (Drew finds -> Lauren drafts -> Kevin reviews). Kevin gave final go-ahead after item 4 was decided as 4B (dashboard-only, no live-mailbox writes).
+
+### Item 1 -- Phase 3.2 extended to flag needs_reply, real bug found and fixed twice
+
+`fetch_inbox.py` Phase 3.2 (the existing per-email AI summary call over urgent+needs cards) now also returns `needs_reply: true/false`. Real production testing (not just unit tests) caught a genuine bug before it could reach the unattended scheduled run:
+
+1. **First real run**: Phase 3.2 failed outright -- `Expecting ',' delimiter` JSON parse error. Root cause looked like a size problem, so `max_tokens` was raised 4096 -> 8000. Still failed on retest (`Unterminated string`).
+2. **Root-caused properly** by reproducing the exact real 157-candidate payload with full diagnostics: `stop_reason: max_tokens`, `output_tokens: 8000` -- genuinely hitting the ceiling, but only 18KB of content, because the ~140-char raw Outlook EntryID used as the JSON map key for every entry was consuming most of the token budget before the model reached the actual summaries (hex strings tokenize far less efficiently than English text).
+3. **Real fix**: switched to short sequential ids ("0","1","2"...) in the API exchange, mapping back to the real EntryID locally by array position. Confirmed on the identical real payload: `stop_reason: end_turn`, only 5947/8000 tokens used, all 157 entries parsed.
+
+Verified against real live Outlook data across three full production `.bat` runs this session -- final state: 157/157 candidates get both `ai_summary` and `needs_reply`, 14-33 flagged true depending on the run (inbox contents change between runs).
+
+### Item 2 -- work-inbox/data/needs_reply.json, published by tools/publish_needs_reply.py
+
+New script, separate from `fetch_inbox.py` (keeps that script's single-file-pulled-fresh deployment model unchanged), fetches full body via Outlook COM for `needs_reply==true` entries only, applies the same redaction classifier already built for the corpora (`style_corpus_common.is_sensitive`), computes `sender_tier` (reusing `recipient_tier()` against the sender), writes `data/needs_reply.json`. Real runs this session: 20 flagged -> 16 published, 4 redacted; 21 flagged -> 16 published, 5 redacted -- redaction is doing real work, not a no-op. Self-consistency check (re-classifying every published entry) confirmed zero false negatives.
+
+### Item 4 -- Drafted Replies panel, 4B (dashboard-only), plus a real architecture correction
+
+Original design assumed the dashboard could cross-fetch `agent-commons/pending-email-drafts/drafts.json` the same way it already fetches `command-centre/data/tasks.json`. Tested empirically instead of assuming: `agent-commons` is a **private** repo (`gh api ... --jq .private` -> true), and the existing `github-proxy.lelitte.co.uk` Worker returned 404 for it (200 for the identical request against work-inbox) -- confirmed the shared proxy's own token can't read it. **Fix:** `tools/publish_drafted_replies.py`, a new script holding the real `GITHUB_PAT`, reads `agent-commons/pending-email-drafts/drafts.json` directly and mirrors only the already-redacted/tier-tagged content into `work-inbox/data/drafted_replies.json` -- the dashboard reads that as an ordinary same-repo file, agent-commons itself is never exposed to any client-side/anonymous reader.
+
+Dashboard changes (`index.html`, `css/styles.css`, `js/app.js`): new "Drafted Replies" panel, distinct purple accent (not merged into the Today/Tomorrow/Week/Parked grid), per-card subject/`sender_tier` badge/timestamp/expandable draft text/Copy-to-clipboard/"Open original" (reusing the existing `openmail://` handler)/Mark sent/Discard. Mark sent/discard is bookkeeping only -- rides the exact same tick-sync mechanism (`getTicks`/`saveTicks`/`pushTicks`, existing `inbox-state` Worker route) already used for email cards, under a `draft_` key prefix so it doesn't collide with per-day briefing ticks. No new Worker route, nothing writes to a mailbox or sends anything.
+
+Verified with a temporary synthetic seed pushed to `agent-commons/pending-email-drafts/drafts.json`: confirmed the mirror script correctly picks it up, and ran the actual `renderDraftedReplies()` function (not a reimplementation) in a Node DOM-stub harness against the real mirrored payload -- correct escaping (apostrophes/ampersands), correct tier badges, correct action wiring. No real browser was available in this environment to screenshot (Chrome extension not connected) -- flagged as a real limitation, not glossed over. Test seed reverted from agent-commons afterward; only Lauren's real content should live there.
+
+### Full chain verified live, three times, via the actual production `.bat`
+
+`Run Inbox Briefing.bat` now chains `fetch_inbox.py` -> `publish_needs_reply.py` -> `publish_drafted_replies.py` in one run (each downstream step non-fatal to the overall briefing if it fails). Final confirmed run: fetch_inbox.py succeeded, needs_reply.json published (16 entries, byte-identical verified), drafted_replies.json published (correctly empty, `source_missing: true`, since Lauren hasn't written anything yet), exit code 0 throughout.
+
+One process-hygiene lesson from this session: nesting `run_in_background` (the Bash tool) around a command that ALSO backgrounds itself with a trailing `&` produces an orphaned, untracked process -- it happened here and briefly locked `inbox_briefing_last_run.log` for a real still-running `fetch_inbox.py` instance. Resolved by waiting for the orphaned PID to exit naturally rather than killing it (it was doing real, legitimate work, just detached from the tool's own tracking).
+
+**Not done, on purpose:** nothing pushed to `agent-commons/corpus/draft-final-diffs/`-adjacent locations by this session; Lauren's own `pending-email-drafts/drafts.json` doesn't have real content yet, so the Drafted Replies panel is correctly empty in production right now -- that's expected, not a bug.
 
 Full detail: `begb0037admin/agent-commons` issue #3.
 
