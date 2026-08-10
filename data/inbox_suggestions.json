@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-10 21:06",
+  "generated_at": "2026-08-10 21:21",
   "new_tasks": [
     {
       "title": "Investigate Clockify role consolidation for Beth",
       "tier": "week",
-      "description": "Marie is asking whether Beth's two Clockify roles (HR Systems and Biology) can be combined into one role. Kevin needs to investigate the Clockify platform to determine if this consolidation is technically feasible and advise Marie.",
+      "description": "Marie Cooksey is asking whether it is possible to combine Beth's two Clockify roles (HR Systems and Biology) into one. Kevin needs to investigate the Clockify platform capabilities and advise on feasibility.",
       "email_subject": "Clockify",
       "email_from": "Marie Cooksey",
       "received": "2026-08-10 17:05",
@@ -41,15 +41,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608060900570",
-      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
-      "note": "Julie Hickman has flagged several follow-up points from Patch Release 28.0.157 UAT testing that may require Kevin's attention on related systems work.",
-      "email_subject": "RE: Patch Release 28.0.157 – UAT Update",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-06 14:43",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431C0000"
-    }
-  ]
+  "applied_updates": []
 }
