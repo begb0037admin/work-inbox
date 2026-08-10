@@ -550,8 +550,17 @@ if summary_candidates and anthropic_available:
             "what, if anything, Kevin needs to do. Do not just repeat the subject line or copy the "
             "opening words verbatim - genuinely summarise the content. Be specific - use names, "
             "dates and case numbers where present. Plain ASCII punctuation only.\n"
-            "Return ONLY a valid JSON object mapping email id to summary string - no preamble, no markdown.\n"
-            'Example: {"00abc123": "Marie confirms funding approved for SBS exclusion from the DSE feed; no action needed from Kevin."}'
+            "Also decide needs_reply: true if this email genuinely calls for Kevin to send a reply "
+            "(a question, a request, something someone is waiting to hear back on), false if it just "
+            "needs him to read it, take an offline action, or do nothing at all (e.g. a system "
+            "notification, an FYI, a failed-import alert, a case update that doesn't ask him anything "
+            "directly).\n"
+            "Return ONLY a valid JSON object mapping email id to an object with 'summary' and "
+            "'needs_reply' - no preamble, no markdown.\n"
+            'Example: {"00abc123": {"summary": "Marie confirms funding approved for SBS exclusion from '
+            'the DSE feed; no action needed from Kevin.", "needs_reply": false}, "00def456": '
+            '{"summary": "James is asking whether the FA KPI meeting can move to Thursday.", '
+            '"needs_reply": true}}'
         )
         email_summary_user = (
             f"Today is {today_str}.\n\n"
@@ -570,12 +579,26 @@ if summary_candidates and anthropic_available:
             es_raw = "\n".join(es_raw.split("\n")[:-1])
         email_summaries = json.loads(es_raw)
         applied = 0
+        needs_reply_count = 0
         for c in summary_candidates:
             sid = c.get("entry_id", "")
-            if sid in email_summaries:
-                c["ai_summary"] = email_summaries[sid]
-                applied += 1
-        print(f"Phase 3.2 done - {applied} email summaries generated")
+            entry = email_summaries.get(sid)
+            if entry is None:
+                continue
+            # Defensive: accept either the new {summary, needs_reply} shape or,
+            # if the model ever reverts to a bare string, treat that as
+            # needs_reply defaulting to False rather than crashing the phase.
+            if isinstance(entry, dict):
+                c["ai_summary"] = entry.get("summary", "")
+                nr = entry.get("needs_reply", False)
+                c["needs_reply"] = bool(nr) if isinstance(nr, bool) else False
+            else:
+                c["ai_summary"] = str(entry)
+                c["needs_reply"] = False
+            applied += 1
+            if c["needs_reply"]:
+                needs_reply_count += 1
+        print(f"Phase 3.2 done - {applied} email summaries generated, {needs_reply_count} flagged needs_reply")
     except Exception as e:
         print(f"WARNING: Phase 3.2 AI email summaries failed - {e}")
 elif summary_candidates:
