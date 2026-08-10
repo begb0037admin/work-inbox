@@ -568,7 +568,14 @@ if summary_candidates and anthropic_available:
         )
         es_resp = client.messages.create(
             model      = "claude-haiku-4-5",
-            max_tokens = 4096,
+            # Was 4096 (fine for the old bare-string-per-email shape). Adding
+            # needs_reply turned each entry into a nested object, growing the
+            # response enough that a real run with 157 urgent+needs candidates
+            # truncated mid-JSON and failed outright (caught live, 10 Aug
+            # 2026, before this reached the unattended scheduled run) -- bumped
+            # to match the budget Phase 3.7's own per-item summary loop
+            # already uses successfully at this candidate-count scale.
+            max_tokens = 8000,
             system     = EMAIL_SUMMARY_SYSTEM,
             messages   = [{"role": "user", "content": email_summary_user}]
         )
