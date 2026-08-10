@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-08-10 15:58",
+  "generated_at": "2026-08-10 16:01",
   "new_tasks": [
     {
       "title": "Confirm DTP1092 integrations testing completion by 14 August",
       "tier": "today",
-      "description": "Crispin Muncaster (now out of office until 17 August) sent testing scenarios for DTP1092 College Staff into PXD. Guy Williams has responded with integration platform readiness. Kevin needs to confirm that integrations testing can be completed by Friday 14 August as requested, or escalate blockers immediately.",
+      "description": "Crispin Muncaster (now on leave, returning 17 Aug) requested confirmation that integrations testing for College Staff into PXD can be completed by Friday 14 August 2026. This is a critical DTP1092 deliverable with Guy Williams and Simon involved. Kevin needs to confirm feasibility and coordinate the work.",
       "email_subject": "DTP1092 College Staff into PXD - Testing HRIS Staging imports",
       "email_from": "Crispin Muncaster",
       "received": "2026-08-10 07:20",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000"
     },
     {
-      "title": "Review Conor's Multi Company Setup (FP 68261303) work and confirm availability",
+      "title": "Review Conor O'Brien's Multi Company Setup work and confirm next week availability",
       "tier": "today",
-      "description": "Conor O'Brien (Access Group) has sent updated work on Multi Company Setup noting both Simon and Kevin are on leave next week. Kevin needs to review Conor's progress, confirm he is back and available to continue discussions, and align on next steps for DTP1092.",
+      "description": "Conor O'Brien has sent updated work on FP 68261303 (Multi Company Setup) and notes that both Simon and Kevin are on leave next week. Kevin needs to review Conor's progress and confirm availability to continue discussions, as this is blocking DTP1092 testing.",
       "email_subject": "RE: #External# RE: Multi Company Setup",
       "email_from": "Conor O'Brien",
       "received": "2026-08-07 12:30",
@@ -44,38 +44,65 @@
     {
       "task_id": "t2608030857560",
       "task_title": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
-      "note": "Guy Williams replied on 10 August confirming integration platforms (INT-STG, BT, AIP) are ready with current staging imports for testing.",
-      "email_subject": "Volunteering Leave",
+      "note": "Guy Williams confirms all integration platforms are current and ready; testing can proceed as planned for the 14 August deadline.",
+      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Guy Williams",
+      "received": "2026-08-10 11:51",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995620000"
+    },
+    {
+      "task_id": "t2608071200560",
+      "task_title": "Attend sickness absence survey working group catch-up",
+      "note": "Lindsey Spriggs has sent the Teams meeting link for the bi-monthly CDR/PD working group; Kevin needs to attend this meeting.",
+      "email_subject": "Bi-monthly CDR/PD working group",
+      "email_from": "Lindsey Spriggs",
+      "received": "2026-08-07 13:48",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998630000"
+    },
+    {
+      "task_id": "t012",
+      "task_title": "Vacancy alert email retest -- case 68388326",
+      "note": "Julie Hickman thanked Michael for an update on P5 Task 50969697 (Incident 11693608), confirming progress on Access Group work.",
+      "email_subject": "RE: P5 Task assigned to your team - Task# 50969697 for Incident# 11693608",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-06 14:34",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD431B0000"
+    },
+    {
+      "task_id": "t2608071200560",
+      "task_title": "Attend sickness absence survey working group catch-up",
+      "note": "PA to HR Director has sent hold notice for next in-person People Forum; Kevin should calendar this.",
+      "email_subject": "People Forum (In person)",
+      "email_from": "PA to HR Director",
+      "received": "2026-08-06 11:19",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43190000"
+    },
+    {
+      "task_id": "t017",
+      "task_title": "Iris / ECO Online -- enhancements, funding, new contact",
+      "note": "Sarah Rowles forwarded Clockify free plan changes notification; Marie is investigating future Clockify use ahead of September deadline.",
+      "email_subject": "FW: Clockify: Upcoming Free plan changes & options for your team",
+      "email_from": "Sarah Rowles",
+      "received": "2026-08-06 10:50",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43160000"
+    },
+    {
+      "task_id": "t2608071200560",
+      "task_title": "Attend sickness absence survey working group catch-up",
+      "note": "James Salas Guillen sent reminder that today's HR Systems Team Meeting will be held at Village Hall; Kevin should attend.",
+      "email_subject": "HR Systems Team Meeting - Village Hall",
+      "email_from": "James Salas Guillen",
+      "received": "2026-08-05 10:10",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A43D86D20000"
+    },
+    {
+      "task_id": "t2608061800540",
+      "task_title": "Attend Oxford University Evo Pre project meeting in Simon's absence",
+      "note": "Simon Burford confirmed to Michael that he can support Asta on Friday 7 August and hopes Kevin will be back to support the following week on DTP1092 work.",
+      "email_subject": "RE: Michael - Annual Leave",
       "email_from": "Simon Burford",
-      "received": "2026-08-07 16:21",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000"
-    },
-    {
-      "task_id": "t2608041500480",
-      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Crispin sent detailed testing scenarios and HRIS staging import details on 10 August, ready for discussion when Kevin returns.",
-      "email_subject": "DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-10 07:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000"
-    },
-    {
-      "task_id": "t2608041500480",
-      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Crispin's auto-reply confirms he is out of office on annual leave, returning Monday 17 August, after the 14 August testing deadline.",
-      "email_subject": "Automatic reply: DTP1092 College staff into PXD Team meeting",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-10 07:49",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955C0000"
-    },
-    {
-      "task_id": "t2608100901260",
-      "task_title": "Review Conor's Multi Company Setup work and align on next steps",
-      "note": "Crispin provided new testing details and scenarios email on 10 August with full technical breakdown for integrations testing.",
-      "email_subject": "Volunteering Leave",
-      "email_from": "Simon Burford",
-      "received": "2026-08-07 16:21",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000"
+      "received": "2026-08-04 16:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A381525A0000"
     }
   ]
 }
