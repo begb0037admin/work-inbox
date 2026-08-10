@@ -84,6 +84,25 @@ def save_ledger(path, ledger):
         json.dump(ledger, f, ensure_ascii=True, indent=2)
 
 
+def load_backlog(path):
+    """Pairs that have already passed correlation + redaction but haven't
+    been AI-classified yet -- either because a run found more pairs than its
+    per-run classification cap, or because classification failed and is
+    being retried. Kept separate from the ledger (which only tracks
+    currently-open drafts) so a slow/unavailable API never loses a real
+    pair -- it just waits for the next run."""
+    if not os.path.exists(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_backlog(path, backlog):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(backlog, f, ensure_ascii=True, indent=2)
+
+
 # ---------------------------------------------------------------------------
 # edit_type / note classification via claude-haiku-4-5 -- same model/pattern
 # fetch_inbox.py already uses for triage. Called only on already-redacted-
@@ -194,7 +213,12 @@ def find_sent_match(sent_folder, conversation_id, after_dt, window_hours):
 # Main run
 # ---------------------------------------------------------------------------
 
-def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False):
+MAX_CLASSIFICATION_RETRIES = 3  # give a transient API failure a few runs to
+# recover before giving up on a pair permanently
+
+
+def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
+        max_classifications_per_run=25):
     import win32com.client.dynamic
 
     outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
@@ -204,22 +228,27 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False):
 
     previous_ledger = load_ledger(ledger_path)
     current_snapshot = snapshot_drafts(drafts_folder)
-
     vanished_keys = set(previous_ledger.keys()) - set(current_snapshot.keys())
+
+    # Ledger update happens unconditionally, before anything AI-related --
+    # tracking currently-open drafts must never be at risk from an
+    # Anthropic-side problem (bad key, outage, rate limit). If the rest of
+    # this run fails outright, at minimum the next run still has an accurate
+    # picture of what's currently in Drafts.
+    save_ledger(ledger_path, dict(current_snapshot))
+
+    backlog_path = os.path.join(out_dir, "pending_classification.json")
+    backlog = load_backlog(backlog_path)
 
     pairs_found = 0
     pairs_redacted = 0
-    pairs_classification_failed = 0
-    diffs = []
-    redaction_log = []
-    classification_failures = []
     abandoned_count = 0
+    redaction_log = []
 
-    client = None
-    if use_ai and not stats_only:
-        import anthropic
-        client = anthropic.Anthropic(timeout=60.0)
-
+    # Phase 1 -- correlation + redaction only (cheap, local, no API calls).
+    # Every pair that clears redaction goes onto the backlog; classification
+    # is a separate phase below so a full backlog never loses a pair just
+    # because the AI step had a bad run.
     for conv_id in vanished_keys:
         draft = previous_ledger[conv_id]
         try:
@@ -255,40 +284,97 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False):
             })
             continue
 
-        tier = recipient_tier(final_to)
-
-        if stats_only:
-            diffs.append({"conversation_id": conv_id, "recipient_tier": tier, "stats_only": True})
-            continue
-
-        edit_type, note, err = (None, None, "AI classification disabled") if not use_ai \
-            else classify_edit(client, draft["body"], final_body)
-
-        if edit_type is None:
-            pairs_classification_failed += 1
-            classification_failures.append({
-                "conversation_id": conv_id, "final_entry_id": final_entry_id,
-                "sent": final_sent, "error": err,
-            })
-            continue
-
-        diffs.append({
-            "channel": "email",
-            "draft": draft["body"],
-            "final": final_body,
-            "edit_type": edit_type,
-            "note": note,
-            "recipient_tier": tier,
-            "confirmed_via": (
-                f"draft_final_diff_capture.py, matched via ConversationID + sent within "
-                f"{window_hours}h of last-seen draft snapshot (last_seen={draft['last_seen']}, "
-                f"sent={final_sent}), final_entry_id={final_entry_id}"
-            ),
+        backlog.append({
+            "conversation_id": conv_id,
+            "draft_body": draft["body"],
+            "final_body": final_body,
+            "final_entry_id": final_entry_id,
+            "final_sent": final_sent,
+            "last_seen": draft["last_seen"],
+            "recipient_tier": recipient_tier(final_to),
+            "window_hours": window_hours,
+            "retry_count": 0,
         })
 
-    # Update ledger: drop resolved (vanished) keys, refresh/add current drafts
-    new_ledger = dict(current_snapshot)
-    save_ledger(ledger_path, new_ledger)
+    if backlog:
+        save_backlog(backlog_path, backlog)
+
+    diffs = []
+    classification_failures = []
+    pairs_classified = 0
+    pairs_permanently_failed = 0
+    ai_unavailable = False
+
+    if stats_only:
+        stats = {
+            "run_time": datetime.now().isoformat(),
+            "drafts_tracked_now": len(current_snapshot),
+            "drafts_vanished_since_last_run": len(vanished_keys),
+            "abandoned_or_discarded": abandoned_count,
+            "draft_final_pairs_found": pairs_found,
+            "pairs_excluded_by_redaction": pairs_redacted,
+            "backlog_size_after_this_run": len(backlog),
+            "window_hours": window_hours,
+            "note": "stats-only: no AI calls made, nothing published",
+        }
+        return stats
+
+    # Phase 2 -- classify up to the per-run cap from the backlog (oldest
+    # first). Bounded so a burst of sends (or a ledger bug that makes many
+    # drafts "vanish" at once) can't trigger an unbounded number of live
+    # Anthropic API calls in one unattended run -- the overflow simply
+    # waits for the next scheduled run rather than being processed anyway.
+    client = None
+    if use_ai:
+        try:
+            import anthropic
+            client = anthropic.Anthropic(timeout=60.0, max_retries=2)
+        except Exception as e:
+            ai_unavailable = True
+            print(f"WARNING: Anthropic client unavailable this run ({type(e).__name__}: {e}) "
+                  f"-- {len(backlog)} pair(s) staying in the backlog for a future run.")
+
+    if use_ai and not ai_unavailable:
+        to_process = backlog[:max_classifications_per_run]
+        remaining_backlog = backlog[max_classifications_per_run:]
+
+        for item in to_process:
+            edit_type, note, err = classify_edit(client, item["draft_body"], item["final_body"])
+            if edit_type is None:
+                item["retry_count"] = item.get("retry_count", 0) + 1
+                if item["retry_count"] >= MAX_CLASSIFICATION_RETRIES:
+                    pairs_permanently_failed += 1
+                    classification_failures.append({
+                        "conversation_id": item["conversation_id"],
+                        "final_entry_id": item["final_entry_id"],
+                        "sent": item["final_sent"],
+                        "error": err,
+                        "retry_count": item["retry_count"],
+                    })
+                    # dropped, not re-added to remaining_backlog -- gave it
+                    # MAX_CLASSIFICATION_RETRIES real attempts across runs
+                else:
+                    remaining_backlog.append(item)  # try again next run
+                continue
+
+            pairs_classified += 1
+            diffs.append({
+                "channel": "email",
+                "draft": item["draft_body"],
+                "final": item["final_body"],
+                "edit_type": edit_type,
+                "note": note,
+                "recipient_tier": item["recipient_tier"],
+                "confirmed_via": (
+                    f"draft_final_diff_capture.py, matched via ConversationID + sent within "
+                    f"{item['window_hours']}h of last-seen draft snapshot "
+                    f"(last_seen={item['last_seen']}, sent={item['final_sent']}), "
+                    f"final_entry_id={item['final_entry_id']}"
+                ),
+            })
+
+        backlog = remaining_backlog
+        save_backlog(backlog_path, backlog)
 
     stats = {
         "run_time": datetime.now().isoformat(),
@@ -297,45 +383,49 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False):
         "abandoned_or_discarded": abandoned_count,
         "draft_final_pairs_found": pairs_found,
         "pairs_excluded_by_redaction": pairs_redacted,
-        "pairs_classification_failed": pairs_classification_failed,
-        "pairs_published": len(diffs) if not stats_only else 0,
+        "pairs_classified_this_run": pairs_classified,
+        "pairs_permanently_failed": pairs_permanently_failed,
+        "backlog_size_after_this_run": len(backlog),
+        "ai_unavailable_this_run": ai_unavailable,
+        "max_classifications_per_run": max_classifications_per_run,
         "window_hours": window_hours,
     }
 
-    if not stats_only:
-        os.makedirs(out_dir, exist_ok=True)
-        diffs_path = os.path.join(out_dir, "draft_final_diffs.json")
-        log_path = os.path.join(out_dir, "draft_final_redaction_log.json")
-        fail_path = os.path.join(out_dir, "draft_final_classification_failures.json")
+    # (stats_only already returned above -- everything below only runs for a
+    # real, writing run.)
+    os.makedirs(out_dir, exist_ok=True)
+    diffs_path = os.path.join(out_dir, "draft_final_diffs.json")
+    log_path = os.path.join(out_dir, "draft_final_redaction_log.json")
+    fail_path = os.path.join(out_dir, "draft_final_classification_failures.json")
 
-        # Append-not-overwrite: multiple runs accumulate pairs over time.
-        existing_diffs = []
-        if os.path.exists(diffs_path):
-            with open(diffs_path, "r", encoding="utf-8") as f:
-                existing_diffs = json.load(f)
-        existing_diffs.extend(diffs)
-        with open(diffs_path, "w", encoding="utf-8") as f:
-            json.dump(existing_diffs, f, ensure_ascii=True, indent=2)
+    # Append-not-overwrite: multiple runs accumulate pairs over time.
+    existing_diffs = []
+    if os.path.exists(diffs_path):
+        with open(diffs_path, "r", encoding="utf-8") as f:
+            existing_diffs = json.load(f)
+    existing_diffs.extend(diffs)
+    with open(diffs_path, "w", encoding="utf-8") as f:
+        json.dump(existing_diffs, f, ensure_ascii=True, indent=2)
 
-        existing_log = []
-        if os.path.exists(log_path):
-            with open(log_path, "r", encoding="utf-8") as f:
-                existing_log = json.load(f)
-        existing_log.extend(redaction_log)
-        with open(log_path, "w", encoding="utf-8") as f:
-            json.dump(existing_log, f, ensure_ascii=True, indent=2)
+    existing_log = []
+    if os.path.exists(log_path):
+        with open(log_path, "r", encoding="utf-8") as f:
+            existing_log = json.load(f)
+    existing_log.extend(redaction_log)
+    with open(log_path, "w", encoding="utf-8") as f:
+        json.dump(existing_log, f, ensure_ascii=True, indent=2)
 
-        if classification_failures:
-            existing_fail = []
-            if os.path.exists(fail_path):
-                with open(fail_path, "r", encoding="utf-8") as f:
-                    existing_fail = json.load(f)
-            existing_fail.extend(classification_failures)
-            with open(fail_path, "w", encoding="utf-8") as f:
-                json.dump(existing_fail, f, ensure_ascii=True, indent=2)
+    if classification_failures:
+        existing_fail = []
+        if os.path.exists(fail_path):
+            with open(fail_path, "r", encoding="utf-8") as f:
+                existing_fail = json.load(f)
+        existing_fail.extend(classification_failures)
+        with open(fail_path, "w", encoding="utf-8") as f:
+            json.dump(existing_fail, f, ensure_ascii=True, indent=2)
 
-        stats["diffs_path"] = diffs_path
-        stats["total_diffs_accumulated"] = len(existing_diffs)
+    stats["diffs_path"] = diffs_path
+    stats["total_diffs_accumulated"] = len(existing_diffs)
 
     return stats
 
@@ -347,15 +437,31 @@ if __name__ == "__main__":
     parser.add_argument("--window-hours", type=int, default=72)
     parser.add_argument("--no-ai", action="store_true", help="Skip edit_type/note classification (diagnostic only)")
     parser.add_argument("--stats-only", action="store_true", help="No writes, no AI calls, aggregate counts only")
+    parser.add_argument(
+        "--max-classifications-per-run", type=int, default=25,
+        help="Cap on live Anthropic API calls per run -- protects against an unbounded cost/rate-limit "
+             "spike if many drafts vanish at once (real burst or a ledger bug). Overflow waits in the "
+             "local backlog for the next scheduled run rather than being dropped.",
+    )
     args = parser.parse_args()
 
-    result = run(
-        args.ledger_path, args.out_dir,
-        window_hours=args.window_hours,
-        use_ai=not args.no_ai,
-        stats_only=args.stats_only,
-    )
-    print(json.dumps(result, indent=2))
+    # Unattended (Task Scheduler) safety: any unhandled exception here (e.g.
+    # Outlook COM not reachable, disk full) must exit non-zero so the .bat
+    # wrapper's own exit-code handling and Task Scheduler's failure/restart
+    # settings actually see it as a failure, not a silent no-op success.
+    try:
+        result = run(
+            args.ledger_path, args.out_dir,
+            window_hours=args.window_hours,
+            use_ai=not args.no_ai,
+            stats_only=args.stats_only,
+            max_classifications_per_run=args.max_classifications_per_run,
+        )
+        print(json.dumps(result, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        print(f"FATAL: draft_final_diff_capture.py run failed - {type(e).__name__}: {e}")
+        sys.exit(1)
 
 # ---------------------------------------------------------------------------
 # Hand-off to durable storage (NOT done by this script) -- same discipline as
