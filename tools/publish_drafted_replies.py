@@ -34,10 +34,31 @@ found by testing, not assumed -- 10 Aug 2026):
 If agent-commons/pending-email-drafts/drafts.json doesn't exist yet (Lauren
 hasn't written anything), this publishes an empty entries list rather than
 failing -- the dashboard should render a graceful "no drafts yet" state.
+
+FIX (11 Aug 2026, Drew): two real bugs found while chasing a report of
+"mirror ran after the source update but still shows stale data":
+  1. The `generated` field on the published payload used
+     `datetime.now().isoformat()` -- a timezone-naive LOCAL (BST, UTC+1)
+     timestamp -- sitting next to Lauren's timezone-aware UTC timestamps
+     in agent-commons. A mirror that actually ran at 12:32 UTC prints
+     "13:32", which visually looks *later* than a 13:12 UTC source push
+     even though it is 40 minutes *earlier* in absolute time. This was
+     the actual explanation for the "stale after a fresh run" report --
+     the mirror genuinely hadn't been re-run since the source update, the
+     timestamp just made it look like it had. Fixed to emit a proper UTC
+     ISO timestamp so this can't be misread again.
+  2. normalize_entry()'s optional-passthrough tuple did not include
+     `corpus_provenance` -- the object that actually contains
+     `content_precedent` (added 11 Aug 2026, agent-commons commit
+     eb7af377). Even a byte-fresh read would have silently dropped it.
+     `confidence` (including the new "medium" tier) was already a
+     whole-dict passthrough and did NOT need a fix -- its staleness in
+     the bug report was solely due to #1 above, not a shape-check drop.
 """
 
 import argparse
 import base64
+import datetime
 import json
 import os
 import sys
@@ -83,10 +104,11 @@ def gh_blob(owner, repo, sha, token):
 
 def normalize_entry(e):
     """Map Lauren's real field names onto the canonical shape the dashboard
-    renders, and pass through the richer fields (confidence, inline_flags)
-    that her actual output includes but the original mirror schema didn't
-    account for. Returns None if a truly essential field is missing --
-    logs exactly which one, rather than silently dropping."""
+    renders, and pass through the richer fields (confidence, inline_flags,
+    corpus_provenance) that her actual output includes but the original
+    mirror schema didn't account for. Returns None if a truly essential
+    field is missing -- logs exactly which one, rather than silently
+    dropping."""
     if not isinstance(e, dict):
         return None, "not a dict"
 
@@ -114,10 +136,14 @@ def normalize_entry(e):
     }
     # Pass through optional richer fields as-is when present -- these are
     # real content Lauren already produces (confidence level/reason,
-    # inline_flags for anything she couldn't verify) that the original
-    # dashboard design didn't render at all. Optional: absence doesn't drop
-    # the entry, just means the dashboard shows less detail for it.
-    for optional_field in ("confidence", "inline_flags", "received", "status", "draft_id"):
+    # inline_flags for anything she couldn't verify, corpus_provenance for
+    # the content-precedent search results added 11 Aug 2026) that the
+    # original dashboard design didn't render at all. Optional: absence
+    # doesn't drop the entry, just means the dashboard shows less detail
+    # for it. corpus_provenance is where content_precedent actually lives
+    # in the source shape -- passed through wholesale so the dashboard sees
+    # the exact same structure Lauren wrote, no reshaping in this mirror.
+    for optional_field in ("confidence", "inline_flags", "received", "status", "draft_id", "corpus_provenance"):
         if optional_field in e:
             normalized[optional_field] = e[optional_field]
 
@@ -164,7 +190,11 @@ def run(token, dry_run=False):
             drop_reasons.append({"draft_id": e.get("draft_id") if isinstance(e, dict) else None, "reason": reason})
 
     payload = {
-        "generated": __import__("datetime").datetime.now().isoformat(),
+        # Timezone-aware UTC, not datetime.now() (local/BST) -- a naive
+        # local timestamp sitting next to agent-commons' UTC timestamps is
+        # what made a genuinely-stale mirror LOOK like it had run after a
+        # source update it actually predated (11 Aug 2026 incident).
+        "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
         "source_missing": source_missing,
         "entries": clean_entries,
