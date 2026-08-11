@@ -1,23 +1,24 @@
 {
-  "generated_at": "2026-08-11 15:07",
+  "generated_at": "2026-08-11 17:19",
   "new_tasks": [
     {
-      "title": "Review Cority Applicant Data Import update from James",
+      "title": "Follow up on Oxford Uni Pre-project Authentication call",
       "tier": "week",
-      "description": "James Salas Guillen has sent an update on the Cority Applicant Data Import following several uploads/imports in Production. Kevin needs to review the full content and determine next steps or any actions required.",
-      "email_subject": "Cority - Applicant Data Import file",
-      "email_from": "James Salas Guillen",
-      "received": "2026-08-11 13:11",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995730000"
+      "description": "Alex Manton-Jones sent a follow-up email from an authentication call held on 11 August. Kevin needs to review the full content and determine what action items, if any, are required from this call.",
+      "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
+      "email_from": "Alex Manton-Jones",
+      "received": "2026-08-11 16:50",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629957D0000",
+      "auto_promoted": true
     },
     {
-      "title": "Advise on GLAM joining 38-day balance departments scheme",
+      "title": "Review updated DPIA and DPS documents for college record to PXD",
       "tier": "week",
-      "description": "Marie Cooksey is seeking Kevin's input on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Kevin needs to provide thoughts/advice to inform the decision.",
-      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-11 13:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995750000",
+      "description": "Anne Mortimer has provided updated access links to the current version of the DPIA and DPS documents. Kevin needs to review any changes that have been made since Marie's and Information Compliance's previous review.",
+      "email_subject": "FW: draft DPIA for college record to PXD",
+      "email_from": "Anne Mortimer",
+      "received": "2026-08-11 15:32",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995780000",
       "auto_promoted": true
     },
     {
@@ -53,13 +54,22 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608111331410",
-      "task_title": "Review Cority Applicant Data Import update from James",
-      "note": "James has provided an update on the Cority Applicant Data Import following Production uploads/imports; Kevin should review and action as needed.",
-      "email_subject": "Cority - Applicant Data Import file",
-      "email_from": "James Salas Guillen",
-      "received": "2026-08-11 13:11",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995730000"
+      "task_id": "t2608061800540",
+      "task_title": "Attend Oxford University Evo Pre project meeting in Simon's absence",
+      "note": "Meeting was held on 11 August at 15:25; follow-up action or notes from Mike West may require Kevin's response.",
+      "email_subject": "Oxford University Evo Pre project meeting ",
+      "email_from": "Mike West",
+      "received": "2026-08-11 15:25",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995770000"
+    },
+    {
+      "task_id": "t2608111507360",
+      "task_title": "Advise on GLAM joining 38-day balance departments scheme",
+      "note": "Julie is asking Marie for thoughts on GLAM joining the 38-day balance scheme; Marie has copied Kevin in for input.",
+      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-11 13:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995740000"
     }
   ]
 }
