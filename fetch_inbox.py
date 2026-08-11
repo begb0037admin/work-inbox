@@ -1,6 +1,7 @@
-import json, os, base64, html, re, urllib.request, urllib.error, subprocess
+import json, os, base64, html, re, urllib.request, urllib.error, subprocess, time
 from datetime import datetime, timedelta
 import win32com.client
+import pywintypes
 import anthropic
 
 # Suppress Windows git gc --auto interactive prompts
@@ -165,9 +166,39 @@ def build_fallback_subtitle(inbox_items):
     unread = sum(1 for item in inbox_items if not item.get("is_read", True))
     return f"{unread} unread messages - Outlook-only refresh"
 
-# Late binding avoids failures caused by a corrupt win32com.gen_py cache.
-outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
-mapi    = outlook.GetNamespace("MAPI")
+# Outlook's COM automation layer occasionally rejects the very first call of
+# a run with pywintypes.com_error (-2147418111, 'Call was rejected by
+# callee.', None, None) -- Outlook is momentarily busy (mid-sync, a modal
+# dialog open, etc.), not a real fault. Confirmed transient twice on
+# 2026-08-11: a manual retry a few minutes later succeeded cleanly both
+# times. Retry is scoped ONLY to this initial connection step (Dispatch +
+# GetNamespace + first folder handle) -- deliberately not applied to COM
+# calls later in the script, so a real error deeper in Phase 1+ still fails
+# immediately instead of being masked by a blind retry.
+def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
+    last_error = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            # Late binding avoids failures caused by a corrupt win32com.gen_py cache.
+            outlook_app = win32com.client.dynamic.Dispatch("Outlook.Application")
+            mapi_ns     = outlook_app.GetNamespace("MAPI")
+            # Touch the inbox folder now too -- today's real failures happened
+            # here, not at Dispatch/GetNamespace, so the probe has to reach
+            # this far to actually catch the busy-callee condition.
+            inbox_folder = mapi_ns.GetDefaultFolder(6)
+            if attempt > 1:
+                print(f"Phase 1 - Outlook COM connection succeeded on attempt {attempt}/{max_attempts}.")
+            return outlook_app, mapi_ns, inbox_folder
+        except pywintypes.com_error as e:
+            last_error = e
+            print(f"Phase 1 - Outlook COM connection attempt {attempt}/{max_attempts} failed: {e}")
+            if attempt < max_attempts:
+                print(f"Phase 1 - Outlook automation layer appears busy (transient). Waiting {retry_wait_seconds}s before retrying...")
+                time.sleep(retry_wait_seconds)
+    print(f"Phase 1 - Outlook COM connection failed after {max_attempts} attempts. Giving up.")
+    raise last_error
+
+outlook, mapi, _inbox_folder = connect_to_outlook()
 cutoff  = datetime.now() - timedelta(days=7)
 today   = datetime.now().date()
 
@@ -247,7 +278,10 @@ def _kevin_is_primary_recipient(msg):
     except:
         return True  # can't tell -- don't silently suppress a real email over a read failure
 
-for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
+# Reuses the folder handle connect_to_outlook() already opened (and retried)
+# above, rather than issuing a second unretried GetDefaultFolder(6) call --
+# this is exactly the call site both of today's real failures hit.
+for msg in restrict_date(_inbox_folder, cutoff):
     try:
         if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
             break
