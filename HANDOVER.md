@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-11 - Work Inbox Briefing hang bug: handed to Codex, no fix applied by Codex; Drew independently re-confirmed the hang live and drafted a proposed fix, posted to agent-commons issue #3 for Codex's review. NOT yet applied to the live .bat file — needs Kevin's explicit approval first. See session entries below.
+**Last updated:** 2026-08-11 - Work Inbox Briefing hang bug FIXED and verified live: two-line /run+/update early-exit guard applied to Run Inbox Briefing.bat (Kevin approved, didn't wait further on Codex). Real scheduled-task run exited cleanly in ~5m46s (LastTaskResult 0, was 267014), toast notification confirmed fired. Closed.
 
 
 
@@ -53,6 +53,31 @@
 
 
 
+
+## Session 2026-08-11 (continued) — Hang bug FIXED and verified live; issue #3 closed (Drew)
+
+**Scope:** Kevin approved applying the proposed fix from the previous session entry immediately, without waiting further on Codex's review of the issue #3 comment.
+
+**Applied:** backed up `Run Inbox Briefing.bat` first (`Run Inbox Briefing.bat.backup-20260811-205756`, pre-edit SHA256 `21E42234...` recorded), then inserted the two-line guard into `:run_script`, exactly as proposed and exactly matching `Run Draft Diff Capture.bat`'s existing proven pattern:
+```bat
+if /I "%~1"=="/run" exit /b %RUN_EXIT%
+if /I "%~1"=="/update" exit /b %RUN_EXIT%
+```
+placed immediately after the `if "%RUN_EXIT%"=="0" (...) else (...)` block and before the final `choice /c MQ` prompt. No other lines touched.
+
+**Regression check on the manual/interactive path — verified directly, not assumed:** built an isolated smoke-test harness (a copy of the actual post-edit file with only the real Outlook COM/python call stubbed to an instant fake success, avoiding a real 4-minute run or network side effects for this specific check).
+- No-argument invocation, chose `[R]`, ran to completion: still hit `Press M for the menu, or Q to quit:` exactly as before — confirms `%~1` stays empty across `goto run_script`, so the guard correctly does nothing for a manual double-click run. `Q` exited cleanly, code 0.
+- `/update` invocation, no stdin available: went straight to `update_script` as before, ran to completion, and this time **skipped the prompt entirely** — exited immediately, code 0, no blocking. Mirror-image proof the guard fires on the real Task Scheduler invocation path.
+
+**Real scheduled-task run — clean exit, no hang:** triggered `Start-ScheduledTask -TaskName "Work Inbox Briefing"` at 20:59:20 BST, polled every 15s. **Exited at 21:05:06 BST — ~5m46s total, `LastTaskResult: 0`.** No forced kill, first clean exit on this task after 6 consecutive hung runs today (06:00/12:00/15:00/18:00 scheduled + 17:17/19:35 manual, all `LastTaskResult 267014`). Real work confirmed genuine via the run log and live GitHub commits matching in timing: `f94a9bf`/`3f6c98f`/`96ee79d`/`5c29d1e`/`b17a2a0` (backup, briefing update, suggestions, needs_reply publish, drafted_replies mirror — the full chain).
+
+**Toast notification — confirmed fired:** BurntToast's per-AppId registry counter (`PeriodicNotificationCount`) read 10 immediately before the trigger, 11 immediately after — a clean +1 tied to this run. This is the first Work Inbox Briefing run where that's been true; every earlier hang left the counter unchanged because the VBS wrapper's notification call (which sits after `objShell.Run` returns from the batch) was never reached before the forced kill tore down the job.
+
+**Final confirmation posted to issue #3:** https://github.com/begb0037admin/agent-commons/issues/3#issuecomment-5258344987
+
+**Closes:** the Work Inbox Briefing process-exit hang, first surfaced when the task was switched to run fully hidden, root-caused and handed to Codex earlier the same day (no action taken), then fixed directly per Kevin's approval after re-confirming Codex hadn't acted.
+
+---
 
 ## Session 2026-08-11 (continued) — Hang bug NOT fixed by Codex; independently re-confirmed live, proposed fix drafted for review (Drew)
 
