@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-11 - needs_reply staleness cutoff revised 60->30 days per Kevin's final call; the kevin_is_primary_recipient/age_days precision-fix signals were already built and live from earlier the same overall thread (Drew).
+**Last updated:** 2026-08-11 - Outlook COM connection retry added after two live busy-callee failures the same day (Drew). See session entry below.
 
 
 
@@ -53,6 +53,26 @@
 
 
 
+
+## Session 2026-08-11 — Outlook COM connection retry (commit `3bd0649`, Drew)
+
+**Scope:** Kevin reported `fetch_inbox.py` had failed twice in one day with a hard exit-1 at the first Outlook COM call, each time confirmed transient by manual retry succeeding minutes later. Priority fix, not just a diagnosis.
+
+**Root cause:** `mapi.GetDefaultFolder(6)` (line 250 before this fix) intermittently raises `pywintypes.com_error (-2147418111, 'Call was rejected by callee.', None, None)` when Outlook's COM automation layer is momentarily busy (mid-sync, a dialog open, etc.). Confirmed from the real `inbox_briefing_last_run.log` in `C:\Users\admin\Documents\Claude\Projects\work-inbox\` — traceback pointed at exactly this line, both times.
+
+**What changed (`fetch_inbox.py`):**
+- New `connect_to_outlook(max_attempts=3, retry_wait_seconds=45)` wraps `Dispatch("Outlook.Application")` + `GetNamespace("MAPI")` + the first `GetDefaultFolder(6)` call (the exact call site of both real failures). On `pywintypes.com_error`, logs the attempt, waits 45s, retries — up to 3 total attempts — then re-raises (hard exit 1) only once exhausted.
+- The first inbox loop (Phase 1's main pull) now reuses the folder handle `connect_to_outlook()` already opened, instead of a second unretried `GetDefaultFolder(6)` call.
+- Deliberately scoped to this initial connection step only — no retry logic added anywhere else in the script, so a genuine error deeper in Phase 1+ still fails immediately instead of being masked.
+
+**Verification:**
+- Full live run against real Outlook (`python fetch_inbox.py` in the up-to-date clone) completed end-to-end in the normal ~3.5 min, exit code 0, all phases through Phase 5 completed and pushed to GitHub (commits `857f7b9`/`fbe9e86`). Phase 1 connected on the first attempt with no retry log lines — confirms zero added latency on the normal path.
+- Confirmed the pushed script downloads cleanly via the real production path (`raw.githubusercontent.com` with cache-buster) and still contains the `^def build_fallback_context` marker the Desktop batch script's download-validation step checks for.
+- Could **not** force-trigger the real busy-callee condition live to prove the retry path fires against genuine Outlook — noted as an honest limitation. Instead verified the exact shipped `connect_to_outlook()` control flow via a mocked-`pywintypes.com_error` test harness (4 scenarios: fails twice then succeeds, fails once then succeeds, fails all 3 and re-raises, and a clean zero-failure run) — all four behaved correctly, including confirming the exhausted-retries path still re-raises rather than swallowing the error.
+
+**Not touched:** hris-dashboard, SAASIT, SSO/MFA (explicitly out of scope) and no other COM call sites in the script.
+
+---
 
 ## NEXT SESSION — START HERE
 
