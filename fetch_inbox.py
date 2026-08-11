@@ -736,16 +736,17 @@ if summary_candidates and anthropic_available:
         email_summaries = json.loads(es_raw)
         applied = 0
         needs_reply_count = 0
-        # Deterministic staleness gate -- Kevin's explicit cutoff, originally
-        # set to 2 months (10 Aug 2026), revised down to 30 days (11 Aug
-        # 2026 -- his final call on this parameter). This is a hard override
-        # applied AFTER the AI's own judgement, not a replacement for it --
-        # the AI still gets age_days as a soft signal above (for anything
-        # younger than the cutoff), but nothing older than 30 days can end
-        # up needs_reply=true regardless of what the model decides, since
-        # Kevin was explicit that this is his call to set, not the model's
-        # to infer.
-        STALENESS_CUTOFF_DAYS = 30
+        # Deterministic staleness gate -- Kevin's explicit cutoff. Set to 2
+        # months/60 days (10 Aug 2026), briefly revised to 30 days (11 Aug
+        # 2026), then reverted back to 60 the same day -- 60 is his current
+        # final call on this parameter. This is a hard override applied
+        # AFTER the AI's own judgement, not a replacement for it -- the AI
+        # still gets age_days as a soft signal above (for anything younger
+        # than the cutoff), but nothing older than 60 days can end up
+        # needs_reply=true regardless of what the model decides, since
+        # Kevin was explicit that this is his call to set, not the
+        # model's to infer.
+        STALENESS_CUTOFF_DAYS = 60
         stale_overridden = 0
         for i, c in enumerate(summary_candidates):
             entry = email_summaries.get(str(i))
