@@ -50,6 +50,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from style_corpus_common import (
     REDACTION_PATTERNS, is_sensitive, mentions_named_person, OL_MAIL_CLASS,
+    recipient_tier,
 )
 
 # Redaction patterns, entity list, and the Outlook item-Class constant now
@@ -153,26 +154,42 @@ def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
                     })
                     continue
 
+                # Raw 'to' (real recipient names/emails) is deliberately NOT
+                # stored in the corpus -- confirmed live 10 Aug 2026, replaced
+                # with a coarse recipient_tier classification instead. This
+                # matches what's actually deployed at agent-commons
+                # corpus/sent-items/corpus.json; this script previously
+                # produced the raw-'to' shape and that corpus was hand-built
+                # from a one-off post-process, not from a run of this script
+                # as-written -- fixed here so the script itself is now the
+                # source of truth for the deployed format, not a manual step.
                 clean_entries.append({
                     "entry_id": entry_id,
                     "subject": subject,
-                    "to": to,
                     "sent": sent_on,
+                    "recipient_tier": recipient_tier(to),
                     "body": body,
                 })
             except Exception as e:
                 skipped_by_exc[type(e).__name__] = skipped_by_exc.get(type(e).__name__, 0) + 1
                 continue
 
+    redacted_by_category = {
+        cat: sum(1 for r in redaction_log if cat in r["categories"])
+        for cat in REDACTION_PATTERNS
+    }
+    recipient_tier_distribution = {}
+    for e in clean_entries:
+        t = e["recipient_tier"]
+        recipient_tier_distribution[t] = recipient_tier_distribution.get(t, 0) + 1
+
     stats = {
         "date_range": [start_date.isoformat(), end_date.isoformat()],
         "total_seen": total_seen,
         "clean_count": len(clean_entries),
         "redacted_count": len(redaction_log),
-        "redacted_by_category": {
-            cat: sum(1 for r in redaction_log if cat in r["categories"])
-            for cat in REDACTION_PATTERNS
-        },
+        "redacted_by_category": redacted_by_category,
+        "recipient_tier_distribution": recipient_tier_distribution,
         "failed_chunks": failed_chunks,
         "skipped_non_mail_count": sum(skipped_non_mail_by_class.values()),
         "skipped_non_mail_by_item_class": {str(k): v for k, v in skipped_non_mail_by_class.items()},
@@ -180,8 +197,37 @@ def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
     }
 
     if not dry_run_stats_only:
+        # Corpus output uses the same wrapper schema already live at
+        # agent-commons corpus/sent-items/corpus.json (generated/source/
+        # date_range/entry_count/redaction_summary/recipient_tier_distribution/
+        # recipient_tier_mapping/fields_excluded_for_privacy/entries) so this
+        # script's raw output can go straight to that destination without a
+        # manual reshape step.
+        import style_corpus_common as _scc
+        corpus_doc = {
+            "generated": datetime.now().isoformat(),
+            "source": "begb0037admin/work-inbox tools/sent_corpus_pull.py",
+            "date_range": [start_date.isoformat(), end_date.isoformat()],
+            "entry_count": len(clean_entries),
+            "redaction_summary": {
+                "total_mail_items_seen": total_seen,
+                "clean_count": len(clean_entries),
+                "redacted_count": len(redaction_log),
+                "redacted_by_category": redacted_by_category,
+            },
+            "recipient_tier_distribution": recipient_tier_distribution,
+            "recipient_tier_mapping": {
+                "direct-report": _scc.DIRECT_REPORTS,
+                "senior-management": _scc.SENIOR_MANAGEMENT,
+                "note": "peer/other not individually mapped -- no reliable peer name-list exists yet; mixed-audience 'to' fields (both a direct-report and senior-management name present) default to 'other' rather than guessing which register dominates",
+            },
+            "fields_excluded_for_privacy": [
+                "to (raw recipient names/emails) -- replaced by recipient_tier"
+            ],
+            "entries": clean_entries,
+        }
         with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(clean_entries, f, ensure_ascii=True, indent=2)
+            json.dump(corpus_doc, f, ensure_ascii=True, indent=2)
         with open(log_path, "w", encoding="utf-8") as f:
             json.dump(redaction_log, f, ensure_ascii=True, indent=2)
         stats["out_path"] = out_path
