@@ -1,24 +1,14 @@
 {
-  "generated_at": "2026-08-11 13:08",
+  "generated_at": "2026-08-11 13:31",
   "new_tasks": [
     {
-      "title": "Attend H&S Systems Supplier Reviews meeting",
+      "title": "Review Cority Applicant Data Import update from James",
       "tier": "week",
-      "description": "Marie Cooksey has sent a Microsoft Teams meeting link for H&S Systems Supplier Reviews. Kevin needs to attend this meeting to participate in the supplier evaluation process.",
-      "email_subject": "H&S Systems Supplier Reviews",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-11 11:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995700000",
-      "auto_promoted": true
-    },
-    {
-      "title": "Attend HR Systems Management meeting",
-      "tier": "week",
-      "description": "Marie Cooksey has sent a Microsoft Teams meeting link for HR Systems Management. Kevin needs to attend to participate in management discussions.",
-      "email_subject": "HR Systems Management",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-11 11:49",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629956F0000",
+      "description": "James Salas Guillen has sent an update on the Cority Applicant Data Import following several uploads/imports in Production. Kevin needs to review and action as needed.",
+      "email_subject": "Cority - Applicant Data Import file",
+      "email_from": "James Salas Guillen",
+      "received": "2026-08-11 13:11",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995730000",
       "auto_promoted": true
     },
     {
@@ -56,65 +46,47 @@
     {
       "task_id": "t2608101804010",
       "task_title": "Investigate Clockify role consolidation for Beth",
-      "note": "Marie has reviewed the Clockify query and is waiting until Simon's return to understand impact on roadmap before proceeding.",
+      "note": "Marie has confirmed preference for Jibble and agrees test account should be next step once funding clarity is established.",
       "email_subject": "RE: Clockify",
       "email_from": "Marie Cooksey",
-      "received": "2026-08-11 12:14",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995720000"
+      "received": "2026-08-11 12:08",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995710000"
     },
     {
-      "task_id": "t2608071200560",
-      "task_title": "Attend sickness absence survey working group catch-up",
-      "note": "Christopher Sanders forwarded the sickness absence survey working group meeting appointment from Simon Burford.",
-      "email_subject": "FW: Sickness Absence Survey working group",
-      "email_from": "Christopher Sanders",
-      "received": "2026-08-11 11:42",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629956E0000"
-    },
-    {
-      "task_id": "t2608101804010",
-      "task_title": "Investigate Clockify role consolidation for Beth",
-      "note": "Athena has tested Jibble as an alternative to Clockify and provided comparative analysis for Marie's review.",
-      "email_subject": "RE: Clockify",
-      "email_from": "Athena Artuso",
-      "received": "2026-08-11 10:07",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629956D0000"
-    },
-    {
-      "task_id": "t2608101804010",
-      "task_title": "Investigate Clockify role consolidation for Beth",
-      "note": "Marie indicated she does not want effort spent amending the current plan unless the funding decision changes.",
-      "email_subject": "RE: Clockify",
+      "task_id": "t2608111309070",
+      "task_title": "Attend H&S Systems Supplier Reviews meeting",
+      "note": "Meeting invitation received from Marie Cooksey for H&S Systems Supplier Reviews.",
+      "email_subject": "H&S Systems Supplier Reviews",
       "email_from": "Marie Cooksey",
-      "received": "2026-08-11 09:06",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629956A0000"
+      "received": "2026-08-11 11:50",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995700000"
+    },
+    {
+      "task_id": "t2608111309071",
+      "task_title": "Attend HR Systems Management meeting",
+      "note": "Meeting invitation received from Marie Cooksey for HR Systems Management.",
+      "email_subject": "HR Systems Management",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-11 11:49",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629956F0000"
     },
     {
       "task_id": "t2608101804010",
       "task_title": "Investigate Clockify role consolidation for Beth",
-      "note": "Sarah suggested asking Clockify support for help if funding is approved for the consolidation issue.",
-      "email_subject": "RE: Clockify",
-      "email_from": "Sarah Rowles",
-      "received": "2026-08-11 08:58",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995680000"
+      "note": "Marie Cooksey has asked if Beth's two Clockify roles (HR Systems and Biology) can be combined into one.",
+      "email_subject": "Clockify",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-10 17:05",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995660000"
     },
     {
-      "task_id": "t2608101804010",
-      "task_title": "Investigate Clockify role consolidation for Beth",
-      "note": "Sarah confirmed that combining Clockify roles may be possible and suggested investigating with Clockify support.",
-      "email_subject": "RE: Clockify",
-      "email_from": "Sarah Rowles",
-      "received": "2026-08-11 08:56",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995670000"
-    },
-    {
-      "task_id": "t2608041500480",
-      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Simon has been coordinating with the data warehouse team on ensuring only University of Oxford employees are included in feeds.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-06 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000"
+      "task_id": "t2608031500570",
+      "task_title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
+      "note": "Crispin Muncaster is out of office on annual leave, returning Monday 17 August; automatic reply confirms absence during testing period.",
+      "email_subject": "Automatic reply: DTP1092 College staff into PXD Team meeting",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-08-10 07:49",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955C0000"
     }
   ]
 }
