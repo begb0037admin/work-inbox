@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-11 18:01",
+  "generated_at": "2026-08-11 19:38",
   "new_tasks": [
     {
       "title": "Review Oxford Uni Pre-project Authentication call follow-up",
       "tier": "week",
-      "description": "Alex Manton-Jones sent a follow-up from an authentication call on 11 August. Kevin needs to review the full content to understand what action items or decisions arose from the call.",
+      "description": "Alex Manton-Jones sent a follow-up email from an authentication call held on 11 August. Kevin needs to review the full content and determine what action items, if any, are required from this call.",
       "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
       "email_from": "Alex Manton-Jones",
       "received": "2026-08-11 16:50",
@@ -41,33 +41,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608111719551",
-      "task_title": "Review updated DPIA and DPS documents for college record to PXD",
-      "note": "Anne Mortimer has provided updated access links to the current DPIA and DPS documents for review.",
-      "email_subject": "FW: draft DPIA for college record to PXD",
-      "email_from": "Anne Mortimer",
-      "received": "2026-08-11 15:32",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995780000"
-    },
-    {
-      "task_id": "t2608111507360",
-      "task_title": "Advise on GLAM joining 38-day balance departments scheme",
-      "note": "Julie Hickman is asking Marie (copied to Kevin) for thoughts on whether GLAM should also join the 38-day balance scheme alongside Maths and Chemistry.",
-      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-11 13:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995750000"
-    },
-    {
-      "task_id": "t2608071501071",
-      "task_title": "Respond to Occupational Health appointment offer",
-      "note": "Conor O'Brien (Access Group) has sent updated work on Multi Company Setup (FP 68261303) and notes that both Simon and Kevin are on leave next week.",
-      "email_subject": "RE: #External# RE: Multi Company Setup",
-      "email_from": "Conor O'Brien",
-      "received": "2026-08-07 12:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
-    }
-  ]
+  "applied_updates": []
 }
