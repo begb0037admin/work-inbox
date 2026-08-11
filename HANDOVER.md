@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-11 - Work Inbox Briefing now runs fully hidden with BurntToast success/failure notifications; surfaced (not caused) a pre-existing process-exit hang that currently blocks the notification from firing on that task specifically (Drew). See session entries below.
+**Last updated:** 2026-08-11 - Work Inbox Briefing hang bug: handed to Codex, no fix applied by Codex; Drew independently re-confirmed the hang live and drafted a proposed fix, posted to agent-commons issue #3 for Codex's review. NOT yet applied to the live .bat file — needs Kevin's explicit approval first. See session entries below.
 
 
 
@@ -53,6 +53,28 @@
 
 
 
+
+## Session 2026-08-11 (continued) — Hang bug NOT fixed by Codex; independently re-confirmed live, proposed fix drafted for review (Drew)
+
+**Scope:** Kevin reported Codex had "finished fixing" the Work Inbox Briefing hang bug (task completes real work but the instance never exits, force-killed at `ExecutionTimeLimit=PT15M`, `LastTaskResult 267014`). Asked for independent verification before trusting that claim, same discipline as everything else that day.
+
+**Verification, not assumption:**
+- Read `D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing.bat` live — the `/run`/`/update` early-exit guard that `Run Draft Diff Capture.bat` already has (added 10 Aug specifically to prevent landing on the interactive `choice /c MQ` prompt) is still absent from `Run Inbox Briefing.bat`.
+- Read the full `agent-commons` issue #3 thread (1486 lines via `gh issue view 3 --comments`) end to end. The last comment on the issue is Drew's own "HANDOFF TO CODEX" brief from earlier the same day — explicitly marked "Do not fix — investigation/fix is being handed to Codex. This comment is a handoff brief only." **There is no reply from Codex anywhere in the thread.** No fix was ever applied.
+- Triggered a real manual run of the "Work Inbox Briefing" scheduled task (`Start-ScheduledTask`, 19:35:27) and monitored `Get-ScheduledTask`/`Get-ScheduledTaskInfo` every 20s in the background. Real work visibly completed early in the run log, but the task instance stayed `State=Running` for the full 15-minute window and was force-killed at 19:50:34 — `LastTaskResult: 267014`, an exact re-reproduction with zero code changes in between. Confirms the bug is still live as of this session, not fixed.
+
+**Per Kevin's decision:** since Codex didn't act on the handoff, Drew drafted the exact proposed fix directly (mirroring `Run Draft Diff Capture.bat`'s proven guard verbatim) and posted it as a review-request comment on issue #3, asking Codex specifically to check the logic and confirm the interactive/manual-run path (no argument, double-click) still shows the menu correctly. **Comment:** https://github.com/begb0037admin/agent-commons/issues/3#issuecomment-5257829522
+
+**Proposed change (not applied — live file untouched):** insert two lines into `:run_script`, immediately after the `if "%RUN_EXIT%"=="0" (...) else (...)` block and before the final `choice /c MQ /n /m "Press M for the menu, or Q to quit: "` line:
+```bat
+if /I "%~1"=="/run" exit /b %RUN_EXIT%
+if /I "%~1"=="/update" exit /b %RUN_EXIT%
+```
+Task Scheduler invokes the batch as `/update` via the VBS wrapper (`Run Inbox Briefing Hidden.vbs`) with no console attached — currently execution falls through unconditionally to the interactive prompt, which blocks forever until the forced kill, before the VBS's own exit-code-passthrough and BurntToast notification call can ever run (`objShell.Run` for the batch never returns). The guard exits immediately with the real pipeline exit code once real work is done, matching the pattern already proven working in `Run Draft Diff Capture.bat` since 10 Aug.
+
+**Not done, on purpose:** fix not applied to `Run Inbox Briefing.bat`; not pushed anywhere. Waiting on Codex's review comment on issue #3, then Kevin's explicit approval, before anyone implements.
+
+---
 
 ## Session 2026-08-11 — Outlook COM connection retry (commit `3bd0649`, Drew)
 
