@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-11T13:32:42.222909",
+  "generated": "2026-08-11T13:47:27.576978+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
@@ -7,71 +7,133 @@
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079A4937640000",
       "subject": "REF29 UDF",
       "sender_tier": "senior-management",
-      "draft_text": "Hi Simon,\n\nNoted, thanks. [CONFIRM: agree the \"allow update on CorePortal\" option should stay deselected, per your assumption] \u2014 I'll make sure REF29 UDF is set up the same way in LIVE.\n\nBest,\nKevin",
-      "drafted_at": "2026-08-10T16:03:55.436790+00:00",
+      "draft_text": "Hi Simon,\n\nNoted, thanks \u2014 I built this UDF in UOXU myself on 6 July with Nathan (REFQUALCON Yes/No and REF Panel A/B/C/D dropdowns across the four appointment slots), so I know the config well. [CONFIRM: agree the \"allow update on CorePortal\" option should stay deselected, per your assumption] \u2014 I'll make sure it's set up the same way in LIVE.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-11T13:12:46.418860+00:00",
       "confidence": {
-        "level": "low",
-        "reason": "Bulk-corpus baseline only, no diff-pair correction available yet. Structure/register modelled on Kevin's real senior-management-tier voice; the one substantive technical point (whether the UDF permission assumption is correct) is marked inline for Kevin to confirm rather than assumed."
+        "level": "medium",
+        "reason": "Real content precedent found and used (Kevin's own \"Copy of Test UDF for REF Outcomes\" thread, 6-7 Jul 2026, 2 weeks before this email) \u2014 confirms Kevin has direct, recent, first-hand familiarity with this exact UDF's structure. Still medium not high: the specific CorePortal update-permission point Simon raises isn't addressed by that precedent, so one real flag remains."
       },
       "inline_flags": [
-        "Technical confirmation needed: whether the CorePortal update-permission assumption Simon stated is correct."
+        "Technical confirmation needed: whether the CorePortal update-permission assumption Simon stated is correct \u2014 not addressed by the found precedent."
       ],
       "received": "21 Jul",
       "status": "pending",
-      "draft_id": "lauren-draft-11-20260810"
+      "draft_id": "lauren-draft-11-20260810",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 645,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "no-filler-closing",
+          "acknowledge-then-confirm"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: Copy of Test UDF for REF Outcomes",
+            "source_date": "2026-07-06",
+            "relevance_note": "Kevin created this exact REF29 UDF himself in UOXU 2 weeks before Simon's email (12 fields: REFQUALCON Yes/No + REF Panel A/B/C/D across 4 appointment slots), and worked through a display bug with Nathan Kirwan the next day. Confirms direct recent familiarity with the UDF's structure; does not confirm the specific CorePortal update-permission assumption Simon states."
+          }
+        ]
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000",
       "subject": "Re: My Development Insight reports",
       "sender_tier": "other",
-      "draft_text": "Hi Julie,\n\nSorry for the delay on this \u2014 answers below:\n\n1. [CONFIRM: when will the new reports be available in live for all People Management Administrators?]\n2. [CONFIRM: can these move to the Professional Development section, or is it too late to change now?]\n3. [CONFIRM: what data is the Gender Analysis report designed to return?]\n4. [CONFIRM: status on adding Gender to the Review Status report?]\n\nBest,\nKevin",
-      "drafted_at": "2026-08-10T16:03:55.436790+00:00",
+      "draft_text": "Hi Julie,\n\nSorry for the delay on this \u2014 answers below, pulling in some history from the Talent Module UAT work with Access Group (Case 67835089) last November, though some of this may have moved on since:\n\n1. [CONFIRM: exact live-availability date for all People Management Administrators] \u2014 this was part of the same UAT round; as of last November we were still working to promote these once validated, so worth confirming the actual go-live date before I put one in writing.\n2. [CONFIRM: whether these can still move to the Professional Development section] \u2014 I don't have anything on this specific point, sorry \u2014 genuinely nothing in my records covers it.\n3. The Gender Analysis report was designed to give a gender breakdown per employee, though the criteria for which employees are included was still being clarified as of last November \u2014 [CONFIRM: whether that's since been finalised]. Worth flagging that the test environment had 241 active employees showing as Gender Unknown at that point, in case that's still relevant.\n4. Gender on the Review Status report was one of the priority items from the same UAT round \u2014 Access Group confirmed they could add it, but as of November were still reviewing it in Live. [CONFIRM: current status] \u2014 nothing more recent than that on my side.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-11T13:12:46.418860+00:00",
       "confidence": {
-        "level": "low",
-        "reason": "Bulk-corpus baseline only. This is genuinely closer to a skeleton than a finished draft \u2014 all four of Julie's questions require real, current system-state knowledge I don't have access to, so every substantive answer is marked for Kevin to fill in rather than guessed. Structure/opener/signoff follow Kevin's observed voice; content does not."
+        "level": "medium",
+        "reason": "Real content precedent found for questions 3 and 4 (same underlying Talent Module UAT project, Case 67835089), giving actual substance instead of a blank placeholder \u2014 but it's 8 months old and doesn't confirm current/final status, so this isn't presented as settled fact. Questions 1 and 2 remain genuinely unanswered after a real search: 1 has related context but no confirmed date, 2 has no precedent anywhere in the corpus."
       },
       "inline_flags": [
-        "Live availability date for new reports \u2014 unknown to Lauren.",
-        "Whether reports can still move to Professional Development section \u2014 unknown to Lauren.",
-        "Gender Analysis report's intended data/purpose \u2014 unknown to Lauren.",
-        "Status of adding Gender to Review Status report \u2014 unknown to Lauren."
+        "Live availability date for new reports \u2014 related UAT context found, but no confirmed date.",
+        "Whether reports can still move to Professional Development section \u2014 genuinely no precedent found after a real search.",
+        "Gender Analysis report inclusion criteria \u2014 was still unclarified as of Nov 2025 precedent; may have changed since.",
+        "Current status of Gender-on-Review-Status \u2014 was in-progress UAT as of Nov 2025; no more recent confirmation found."
       ],
       "received": "27 Jul",
       "status": "pending",
-      "draft_id": "lauren-draft-10-20260810"
+      "draft_id": "lauren-draft-10-20260810",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 1890,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "apology-for-delay-opener",
+          "numbered-response-to-numbered-ask",
+          "signoff-best-kevin"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "URGENT Follow-up \u2014 Outstanding Talent Module Tasks and UAT Review",
+            "source_date": "2025-11-19",
+            "relevance_note": "Same underlying Talent Module/Case 67835089 project as Julie's Q1 (live-availability) and Q4 (Gender on Review Status). Kevin's own priority-task list includes 'Add a consistent Gender column across all relevant reports' and 'Include a Reviewer sign-off record count in Review Status reports.'"
+          },
+          {
+            "source_subject": "Re: #External# URGENT Follow-up \u2014 Outstanding Talent Module Tasks and UAT Review",
+            "source_date": "2025-11-24",
+            "relevance_note": "Access Group's Alan Quirke confirms Gender field added to UAT ('241 active Employees where their Gender is Unknown') and that Review Status column was still pending review in Live \u2014 real precedent for Q3 (Gender Analysis report data) and Q4 (Review Status status), but 8 months old, not confirmation of current state."
+          }
+        ]
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998600000",
       "subject": "Multi Company Setup",
       "sender_tier": "other",
       "draft_text": "Hi Conor,\n\nThanks for the heads up \u2014 enjoy the time off, and appreciate Laurence covering while you're away.\n\nBest,\nKevin",
-      "drafted_at": "2026-08-10T16:03:55.436790+00:00",
+      "drafted_at": "2026-08-11T13:12:46.418860+00:00",
       "confidence": {
         "level": "low",
-        "reason": "Bulk-corpus baseline only, no diff-pair correction available yet. No factual claims in this one \u2014 it's a pure acknowledgment of an OOO notice, so the low-data gap mainly affects tone/terseness calibration, not correctness."
+        "reason": "No substantive question in this email to search precedent for \u2014 it's a pure OOO acknowledgment, so a content search was attempted (checked for prior Conor/Multi Company Setup correspondence) but found nothing materially different from a plain acknowledgment reply. Bulk-corpus style baseline only; no factual claims in this draft, so the low tier mainly reflects tone/terseness calibration rather than any unconfirmed content."
       },
       "inline_flags": [],
       "received": "7 Aug",
       "status": "pending",
-      "draft_id": "lauren-draft-08-20260810"
+      "draft_id": "lauren-draft-08-20260810",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 1890,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "no-filler-closing"
+        ],
+        "content_precedent": []
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000751A5367B0000",
       "subject": "Urgent request for an SQL report please to help identify balance code",
       "sender_tier": "other",
-      "draft_text": "Hi Anna,\n\n[CONFIRM: this request is from 10 April \u2014 four months old. Please check whether this has already been actioned or overtaken by events before sending anything.]\n\nIf it's still live: [CONFIRM: confirm whether an SQL report pulling name, personnel ID, appt ID and balance code by department is feasible, and a realistic timeframe.]\n\nBest,\nKevin",
-      "drafted_at": "2026-08-10T16:03:55.436790+00:00",
+      "draft_text": "Hi Anna,\n\n[CONFIRM: this request is from 10 April \u2014 four months old. Please check whether it's already been actioned or overtaken by events before sending anything.]\n\nIf it's still live: happy to take a look \u2014 could you send over the department list and any documentation on the balance code matrix you're working from? I'll review and reach out to Access Group for a quote and timeline on the SQL report, same as we've done for similar ad hoc report requests, and let you know next steps once I hear back from them.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-11T13:12:46.418860+00:00",
       "confidence": {
-        "level": "low",
-        "reason": "Bulk-corpus baseline only. Flagged as likely stale \u2014 received 10 Apr against a needs_reply batch generated 10 Aug, a 4-month gap, and the original ask had a 'within the next couple of weeks' urgency that has clearly passed. Included because it's genuinely addressed to Kevin and still sitting in the queue, but staleness should be the first thing Kevin checks, not the technical content."
+        "level": "medium",
+        "reason": "Searched specifically for balance-code/personnel-ID precedent \u2014 none exists (confirmed zero matches for 'balance code', 'balance matrix', 'personnel ID' across the full corpus). But found a real process precedent for how Kevin handles this exact category of request (bespoke SQL/Insight report build asks): review documentation, escalate to Access Group for a quote, follow up once heard back. Used that real pattern instead of guessing at feasibility or a timeline. Still flagged as likely stale ahead of the technical content \u2014 4 months old, original 'couple of weeks' urgency has passed."
       },
       "inline_flags": [
         "Likely stale \u2014 4 months old, original urgency window has passed.",
-        "SQL report feasibility/timeframe \u2014 unknown to Lauren, real technical judgment call for Kevin/team."
+        "SQL report feasibility/timeframe itself \u2014 no precedent found; genuinely depends on Access Group's quote, not something Lauren can determine."
       ],
       "received": "10 Apr",
       "status": "pending",
-      "draft_id": "lauren-draft-05-20260810"
+      "draft_id": "lauren-draft-05-20260810",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 1890,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "signoff-best-kevin"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: Holiday Records Duty - proposed reports",
+            "source_date": "2026-06-10",
+            "relevance_note": "Different report/topic (holiday pay compliance, not balance codes) so not a content answer to Anna's specific ask, but shows Kevin's standard process for a bespoke SQL/Insight report build request: review documentation, escalate to Access Group for a quote, follow up once heard back. Used as a process precedent, not invented feasibility/timeline."
+          }
+        ]
+      }
     }
   ]
 }
