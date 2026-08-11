@@ -2,13 +2,27 @@
 
 
 
+
+
+
+
 **Last updated:** 2026-08-10 - Calendar tab extended to a rolling 4-working-day view (today/tomorrow/+2/+3) with leave/absence items excluded from the day-view, and the mini-calendar extended from 2 to 4 months; also fixed the previously-documented calendar-summary index-offset bug while touching that code (Drew).
+
+
 
 **Status:** Active — pipeline fully working. Live at https://wi.lelitte.co.uk/ | https://begb0037admin.github.io/work-inbox/.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -16,7 +30,15 @@
 
 
 
+
+
+
+
 ### 1. Granola calendar context — CLOSED 2026-07-04 ✅
+
+
+
+
 
 
 
@@ -24,33 +46,67 @@
 
 
 
+
+
+
+
 **Root cause (fixed):** `fetch_inbox.py` only read `detail["summary"]`. Granola note detail responses return usable content in `summary_text` and `summary_markdown`.
+
+
+
+
 
 
 
 **Production fix (commits `7bc621f`, `cf6ca85`, `48e57ea`):**
 
+
+
 - `fetch_inbox.py` now falls back to `summary_text` / `summary_markdown`.
+
+
 
 - Granola context passed into Phase 3.8 increased to 1500 characters.
 
+
+
 - Phase 3.8 asks for 2-3 concise prep sentences with a 900 token response budget.
 
+
+
 - Title matching behaviour deliberately unchanged.
+
+
 
 - No debug logging, forced matches, phase-skip flags, or dry-run mode in production.
 
 
 
+
+
+
+
 **Future proposals (separate phases only):**
 
+
+
 - A first-class DRY_RUN mode for safer diagnostics may be proposed later.
+
+
 
 - Any title matching changes require a separate approved phase.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -58,72 +114,161 @@
 
 
 
+
+
+
+
 **Scope:** Kevin's explicit request, same session as the needs_reply staleness-cutoff and 3-tab dashboard work above: "I have the annual leave on the sidebar so I don't actually need the annual leave to display in my calendar... let's just go with four days: today, tomorrow, day after that, and day after that... add August, September, October, November to the calendars on the right-hand side." This explicitly reopens Phase 3.8 (previously marked closed 2026-07-04 — see above — do not treat this note as a general invitation to touch it again beyond what's described here).
+
+
+
+
 
 
 
 **`fetch_inbox.py` changes:**
 
+
+
 - `day2`/`day3` computed via `next_workday(tomorrow)` / `next_workday(day2)` — same weekend-skipping semantics `tomorrow` already used, so a Thursday's day2/day3 are Monday/Tuesday, not a blank Saturday/Sunday.
+
+
 
 - Leave/absence items excluded from all 4 day-view columns via `_DAY_VIEW_EXCLUDE_KEYWORDS` / `_is_leave_item()` (duplicates the existing `ABSENCE_KEYWORDS` term list used for the sidebar Absences panel rather than restructuring the file to share one constant — keep both in sync if either changes).
 
+
+
 - New `cal_day2_items` / `cal_day3_items`, output as `calDay2` / `calDay3` in the briefing JSON alongside the existing `calToday` / `calTomorrow`.
+
+
 
 - `calendar_summary_count()` / `weak_calendar_summary_count()` (the same-day-update safety gate in `validate_briefing_update()`) extended to check all 4 keys, not just the original 2.
 
+
+
 - **Also fixed while in this code, since extending to 4 columns would have doubled its surface area:** the previously-documented calendar-summary index-offset bug (root-caused 2026-08-04, `begb0037admin/drew` `memory/calendar-summary-offset-bug.md`) — `enumerate()` was applied before filtering out all-day items, so a non-all-day item's index could start above 0 whenever an all-day item preceded it, and claude-haiku-4-5 was sometimes observed echoing output-position instead of the literal idx in that case, silently misattributing a summary to the wrong meeting. Fixed via a new shared `_non_all_day_candidates()` helper that produces both a model-facing sequential `idx` (always starts at 0) and a write-back-only `real_idx` (the item's true position in the day's list); Phase 3.7b (Granola) and Phase 3.8 both now consume the same `_all_day_candidates` list instead of each building their own.
+
+
 
 - Preservation logic (`preserve_existing_calendar_summaries`) extended to cover `calDay2`/`calDay3`.
 
 
 
+
+
+
+
 **Frontend (`js/app.js`, `css/styles.css` — `index.html` untouched, it's just a container div):**
+
+
 
 - `renderCalPanel()` rewritten: `renderBlock()` now takes an explicit `bodyId` param and is called 4 times (today/tomorrow/day2/day3, DOM ids `calBodyToday`/`calBodyTom`/`calBodyDay2`/`calBodyDay3`). Day2/day3 headers show just the weekday name + date (e.g. "Wednesday 12 August"), not a "Today —"/"Tomorrow —"-style prefix, matching how Kevin described them.
 
+
+
 - `renderMiniCal()` now takes a `mtgDates` array (real `Date` objects for whichever of the 4 day-view columns have at least one item) so "has-meeting" dots work across all 4 rendered months, not just the first two hardcoded ones. Called with offsets 0-3 → 4 months, rolling with whatever month "today" is in (currently August–November 2026).
 
+
+
 - `.main-cal-panel` restructured from a 3-column `7fr 7fr 4fr` grid (which couldn't fit 4 day-columns + 4 months) into two full-width rows — `.main-cal-days-row` (4 equal columns) and `.main-cal-months-row` (4 equal columns), each still `display:grid;grid-template-columns:repeat(4,1fr)`.
+
+
 
 - Confirmed `renderMainCal()` (a separate, older function, ~line 285) is genuinely dead/unused code before touching anything — not edited.
 
 
 
+
+
+
+
 **Verification:**
+
+
 
 - `python -m py_compile` on the backend, `node --check` on the frontend.
 
+
+
 - Real production run: `D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing.bat /update` — exit code 0, "Phase 3.8 done - 12 calendar summaries generated", "Phase 3.8 preservation - reused 8 existing same-day calendar summaries", needs_reply and drafted_replies publishers both succeeded with `byte_identical_verified: true`.
+
+
 
 - Pulled the live `data/briefing.json` after that run and confirmed `calDay2`/`calDay3` present and populated (5 and 6 items that day), no leave-keyword titles leaked into any of the 4 day-view columns except one gap (see below), and every freshly-generated (non-preserved) Phase 3.8 summary in the brand-new `calDay2`/`calDay3` columns correctly named its own meeting — no cross-contamination, confirming the offset-bug fix works on fresh data.
 
+
+
 - Node DOM-stub test (same pattern as the Drafted Replies / tabs work, harness at `begb0037admin/drew` scratchpad, not committed) against the real edited `renderCalPanel()`: confirmed 4 day-columns, 4 correctly-named months, correct "has-meeting" dots, and correct Friday→"Next Week"-labeled-Monday weekend-boundary chaining for day2/day3.
+
+
 
 - Live-browser screenshot of `https://begb0037admin.github.io/work-inbox/` Calendar tab after pushing matched the test output exactly.
 
 
 
+
+
+
+
 **Known gap found during verification — FIXED same session, Kevin's explicit follow-up ("yes fix it - i dont want it to show"):** the leave-exclusion keyword list (and the pre-existing sidebar `ABSENCE_KEYWORDS` list it mirrors) matched `"a/l"` (with slash) but not the bare `"AL"` abbreviation. A real live entry, "Michael - AL", leaked through both the day-view exclusion and the sidebar Absences panel. Live Outlook check (bounded to the same date window `fetch_inbox.py` itself uses, not an unbounded scan — an earlier unbounded attempt over-ran and had to be killed) found this wasn't a one-off: two separate "Michael - AL" all-day entries exist on the "People Department - HR Systems" calendar (7 Aug and 10 Aug 2026), confirming the naming convention recurs.
+
+
 
 **Fix:** added `_BARE_AL_RE = re.compile(r"al", re.IGNORECASE)` — standalone-word matching, not a plain substring, specifically because a substring match on bare "al" would false-positive constantly (inside "annual", "practical", "Sal", "Alan", "Alison", "Malcolm", "Salary", etc.). Verified against 12 real/adversarial cases (all passed) before touching production code. Wired in as an additional OR condition in `_is_leave_item()` (day-view exclusion) and the sidebar absence-detection loop's keyword check, plus a targeted `_BARE_AL_RE.sub(" ", ...)` step inside `_clean_absence_name()` so "Michael - AL" cleans to "Michael" rather than the literal "Michael - Al" (real names containing "al" as a substring, e.g. "Alan Smith", are provably untouched — verified with a standalone test before pushing).
 
+
+
 **Verified against real production data, same run:** re-ran `Run Inbox Briefing.bat /update` (exit 0) and pulled the live `data/briefing.json` — "Michael - AL" no longer appears in `calToday`, and the sidebar `absences` list now correctly includes `"Michael O'Sullivan - off today, returns Tuesday 11 August"` (using the calendar item's real Organizer field, not the cleaned subject, since Organizer was a genuine person name here). Confirmed live in-browser too — screenshot of the Calendar tab and sidebar both matched.
 
+
+
 ---
+
+
 
 ## Session 2026-08-10 (continued again) — Calendar column height + Drafted Replies card style (Drew)
 
+
+
 **Scope:** Two small follow-up UI requests from Kevin right after the 4-day calendar work above, both in `css/styles.css` only.
 
+
+
 - `.cal-col-body` scroll cap raised from `260px` (tuned for the old 3-column layout, where day-columns sat beside a fixed-height mini-cal) to `560px` — Kevin: "we have a scroll bar but we have quite a lot of real estate beneath... make them longer so I have less to scroll." Now that the mini-cal moved to its own full-width row below (see above), the day-columns had no sibling height constraint and real spare page space was going unused. Still capped, not removed, so one exceptionally busy day doesn't blow out the page layout.
+
 - `.dr-card` (Drafted Replies panel cards) — removed the `border-left:3px solid var(--purple)` accent bar so drafted-reply cards use a plain 1px border all round, matching every other card style on the dashboard (`.card-ph`, `.main-cal-block`, etc.) instead of standing out with a colour bar.
 
+
+
 Both verified live in-browser after pushing (hard-reload + screenshot): taller day-columns show more of today's schedule without scrolling, and the Drafted Replies cards now have a plain border with no purple bar.
+
+---
+
+## Session 2026-08-10 (continued again) — Calendar CC link now deep-links to the matching Command Centre task (Drew)
+
+**Scope:** Kevin's explicit follow-up, same session: "whe i click on the cc on one of the schedules it take me to command centre but not the item - it should high[light] the item so i can drill dowwn into the email if required - one links to the other."
+
+**Root cause:** the Calendar tab's per-meeting "CC →" link was always a bare `href="https://cc.lelitte.co.uk"` with no task id at all -- calendar meetings (raw Outlook data) never carried any Command Centre task reference. This is different from the Priorities tab's CC buttons, which already deep-link correctly via `#${p.id}` since priority cards ARE sourced directly from Command Centre's own `tasks.json` (confirmed by reading `command-centre/js/app.js` directly: on load it reads `window.location.hash`, looks up `document.getElementById('card-'+hash)`, scrolls to it, and adds a `deep-linked-<tier>` highlight class -- this mechanism already existed and works, it just had nothing to link to from the calendar side).
+
+**Fix, `fetch_inbox.py`:** new `_match_cc_task_id()` -- for each calendar meeting, looks for an exact (case-insensitive) match between the meeting's title and a not-done Command Centre task's `emailRef` field. Confirmed live against real `tasks.json` that several tasks carry the verbatim meeting title in `emailRef` (e.g. "Sickness Absence Survey working group", "Confidential - OH Consultation"). Deliberately did NOT also match against `task.source` (which often names a meeting too, e.g. "HR Systems Managers Meeting 24/06") -- `source` carries a trailing date but no way to tell which week's occurrence of a *recurring* meeting it refers to, so matching against it risked deep-linking to a stale prior occurrence's task. If more than one not-done task shares the identical `emailRef`, no link is attached rather than guessing. Matched items get a new `ccTaskId` field.
+
+**Fix, `js/app.js`:** the CC link now renders as `href="https://cc.lelitte.co.uk/#${c.ccTaskId}"` when `c.ccTaskId` is present, and is omitted entirely otherwise -- a link that goes nowhere useful is worse than no link, per Kevin's complaint.
+
+**Verified:** `python -m py_compile` + `node --check`. Matching logic unit-tested against the real live `tasks.json` and 13 real calendar meeting titles seen this session -- exactly the 2 genuine matches came back ("Sickness Absence Survey working group" -> `t2608071200560`, "Confidential - OH Consultation" -> `t2608071501072`), zero false positives on the other 11. Node DOM-stub test of the real edited `renderCalPanel()` confirmed the matched item gets the deep-link href and the unmatched item gets no CC link at all (not the old generic homepage link). Real production run (`Run Inbox Briefing.bat /update`, exit 0) confirmed `ccTaskId` correctly attached to the same two live items in `data/briefing.json`, and a live-browser screenshot confirmed the CC link now shows on only those two meetings on the actual dashboard.
+
+**Not verified live end-to-end (Chrome extension disconnected mid-session):** did not get a live click-through confirming the deep-link actually scrolls to and highlights the task on the Command Centre page itself. High confidence this works -- it's the exact same hash format and exact same `command-centre/js/app.js` mechanism the Priorities tab's CC buttons already use successfully -- but flagging honestly that this specific last step was verified by direct code inspection + matching test output, not a live click. Worth a quick manual click-check next session if Kevin hasn't already confirmed it works.
+
+
+
+
 
 
 
 ---
+
+
+
+
 
 
 
@@ -131,7 +276,15 @@ Both verified live in-browser after pushing (hard-reload + screenshot): taller d
 
 
 
+
+
+
+
 **Scope:** `begb0037admin/agent-commons` issue #3 (cross-agent email/Teams style-learning pipeline), item 3/4 — bulk-ingest Kevin's own Sent items as the initial style corpus, via Graph API originally, redirected mid-task to reusing work-inbox's proven Outlook COM access instead.
+
+
+
+
 
 
 
@@ -139,7 +292,15 @@ Both verified live in-browser after pushing (hard-reload + screenshot): taller d
 
 
 
+
+
+
+
 **Redaction pass (automated, per Kevin's decision):** keyword/pattern-based, 4 categories (`health`, `bereavement`, `hr_case`, `absence`) — any match anywhere in subject+body excludes the whole message from the corpus. Redaction ledger records only `entry_id`/date/category/known-name-flag, never matched text. Tested against 13 synthetic cases (all 4 categories + 2 negative controls, including a "leave" false-positive check) — 13/13 passed. Chunking logic separately verified for gaps/overlaps across a year boundary.
+
+
+
+
 
 
 
@@ -147,7 +308,15 @@ Both verified live in-browser after pushing (hard-reload + screenshot): taller d
 
 
 
+
+
+
+
 **Update, same session — real dry run against live Outlook (Kevin started Outlook Classic mid-session):** ran in `--stats-only` mode (aggregate counts only, nothing written to disk) against the real last-90-days Sent folder. First run: `total_seen: 740` vs `clean_count(327) + redacted_count(76) = 403` — 337 items (45%) silently disappearing through a bare `except: continue`. Root cause: Sent Items also holds meeting requests/responses/cancellations (COM `Class` 53/54/55/56/57), which lack mail-style `Body`/`To` and threw an unhandled `AttributeError` indistinguishable from a real bug. Fixed by explicitly filtering to `Class == 43` (`olMail`) up front instead of relying on exception shape. Re-run fully reconciled: 403 = 327 clean + 76 redacted (health 60, hr_case 16, bereavement 3, absence 2), zero unexpected errors on real mail items. ~19% of real Sent Mail over 90 days matched a redaction category.
+
+
+
+
 
 
 
@@ -155,11 +324,23 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 **Still not done, on purpose:** no content written to disk yet (all runs stats-only), nothing pushed to `agent-commons/corpus/sent-items/` beyond the design-doc README. Next: real (non-stats-only) pull to local staging, spot-check locally, then push only the reviewed redacted corpus.json.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -167,7 +348,15 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 **Scope:** `begb0037admin/agent-commons` issue #3, forward-going half of the corpus approach (item 3) -- capture principal's draft-to-final edits over time, not just the one-time Sent-items backfill.
+
+
+
+
 
 
 
@@ -175,13 +364,27 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 **Built:**
+
+
 
 - `tools/style_corpus_common.py` -- redaction classifier (health/bereavement/hr_case/absence), `recipient_tier` mapping, and the `OL_MAIL_CLASS` non-mail-item filter, factored out of `sent_corpus_pull.py` now that a second script needs the identical logic.
 
+
+
 - `tools/sent_corpus_pull.py` -- refactored to import the shared module instead of duplicating it. Re-ran the original 13-case synthetic redaction suite + chunking test against the refactor -- zero regression.
 
+
+
 - `tools/draft_final_diff_capture.py` -- periodic snapshot-and-correlate (not an event-driven listener -- considered `Application.ItemSend` for perfect fidelity, rejected for v1 since it needs a persistently-running process, a different architecture from every other script here). Snapshots Drafts each run, diffs against the previous run's local-only ledger to find vanished drafts, correlates against Sent Items by `ConversationID` within a 72h window (earliest match wins, no fallback guessing), applies the same whole-pair redaction exclusion as Sent-items (either side sensitive excludes both), computes `recipient_tier`, classifies `edit_type`/`note` via claude-haiku-4-5 on the redacted pair (confirmed OK with Kevin, same model `fetch_inbox.py` already uses).
+
+
+
+
 
 
 
@@ -189,7 +392,15 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 **Not done, on purpose:** no diff pairs exist yet (need a real send to happen between two runs), nothing pushed to `agent-commons/corpus/draft-final-diffs/`. Not yet wired into Task Scheduler -- holding for confirmation given it makes live Anthropic API calls per pair on an unattended schedule.
+
+
+
+
 
 
 
@@ -197,7 +408,15 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -205,35 +424,71 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 **Scope:** Kevin decided to schedule `draft_final_diff_capture.py` on Task Scheduler now rather than run it manually. Before scheduling anything that makes unattended, no-human-in-the-loop Anthropic API calls, hardened the script and verified the hardening, per Kevin's explicit ask to double-check error handling/rate-limit/cost safety first.
+
+
+
+
 
 
 
 **Hardening added:**
 
+
+
 - Decoupled correlation+redaction (cheap, local, must never be lost) from AI classification (has cost/rate considerations) into two phases. The ledger is now saved unconditionally before any AI-related code runs, so an Anthropic-side problem can never risk losing track of currently-open drafts.
+
+
 
 - New local-only backlog (`pending_classification.json`) holds pairs that have passed redaction but haven't been classified yet -- either because a run found more pairs than its per-run cap, or a classification attempt failed. Nothing is dropped just because the AI step had a bad run.
 
+
+
 - `--max-classifications-per-run` cap (default 25) bounds live Anthropic API calls per run -- protects against an unbounded cost/rate-limit spike if many drafts vanish at once (real burst, or a ledger bug). Overflow waits in the backlog for the next scheduled run.
+
+
 
 - Anthropic client instantiation itself wrapped in try/except (bad key, package issue) -- degrades to `ai_unavailable_this_run: true` and preserves the backlog, rather than crashing the whole run.
 
+
+
 - Each backlog item gets up to `MAX_CLASSIFICATION_RETRIES` (3) attempts across runs before being permanently logged to `draft_final_classification_failures.json` and dropped -- not retried forever.
+
+
 
 - Proper exit codes: the `__main__` block now wraps the whole run in try/except and exits 1 on any unhandled failure, so Task Scheduler's own restart/failure detection actually sees a real failure rather than a silent no-op.
 
 
 
+
+
+
+
 **Verified before trusting it (mocked Outlook + mocked Anthropic, no real data or real API calls):**
+
+
 
 - Cap + carryover: 3 pairs found with cap=2 -> 2 classified immediately, 1 carried to the backlog and classified on the very next run, all 3 eventually published, none lost.
 
+
+
 - Anthropic client init failure: run completes without crashing, `ai_unavailable_this_run: true`, the 1 pending pair correctly preserved in the backlog rather than lost.
+
+
 
 - Persistent classification failure: pair retried across exactly 3 runs (retry_count 1, 2, 3), then permanently logged to classification_failures on the 3rd, backlog correctly empty afterward -- confirmed it doesn't retry forever.
 
+
+
 - Re-ran against real live Outlook after hardening (`--stats-only`): 96 drafts tracked, 0 vanished/0 pairs -- consistent with the untouched baseline, no regression.
+
+
+
+
 
 
 
@@ -241,7 +496,15 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 **Task Scheduler task "Draft Diff Capture":** hourly, 7am-7pm, Mon-Fri (13 runs/weekday) -- picked to sit meaningfully more frequent than the existing 5x/day Work Inbox Briefing cadence, since this mechanism can only capture a draft if it's still open at the moment of a poll; hourly gives a real chance of catching messages that get genuine editing attention (which are also the most valuable ones for a style corpus) without over-polling for the many replies that are drafted and sent within minutes and were never going to be caught regardless of interval -- an inherent floor of the whole draft-snapshot approach, not something interval choice fully solves. Settings mirror Work Inbox Briefing (`StartWhenAvailable`, `RestartCount 2`, `RestartInterval 5min`, `ExecutionTimeLimit 15min`), plus `MultipleInstances IgnoreNew` so a slow run (e.g. many pairs to classify) can't stack overlapping runs.
+
+
+
+
 
 
 
@@ -249,7 +512,15 @@ Full writeup and open questions (recipient-PII in the `to` field, redaction bein
 
 
 
+
+
+
+
 **`sent_corpus_pull.py` stays manual** -- Kevin confirmed the one-time snapshot is sufficient, no scheduling needed there.
+
+
+
+
 
 
 
@@ -257,7 +528,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -265,7 +544,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** `begb0037admin/agent-commons` issue #3 step-3 brief, items 1/2/4 -- the actual drafting hand-off loop (Drew finds -> Lauren drafts -> Kevin reviews). Kevin gave final go-ahead after item 4 was decided as 4B (dashboard-only, no live-mailbox writes).
+
+
+
+
 
 
 
@@ -273,15 +560,31 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 `fetch_inbox.py` Phase 3.2 (the existing per-email AI summary call over urgent+needs cards) now also returns `needs_reply: true/false`. Real production testing (not just unit tests) caught a genuine bug before it could reach the unattended scheduled run:
+
+
+
+
 
 
 
 1. **First real run**: Phase 3.2 failed outright -- `Expecting ',' delimiter` JSON parse error. Root cause looked like a size problem, so `max_tokens` was raised 4096 -> 8000. Still failed on retest (`Unterminated string`).
 
+
+
 2. **Root-caused properly** by reproducing the exact real 157-candidate payload with full diagnostics: `stop_reason: max_tokens`, `output_tokens: 8000` -- genuinely hitting the ceiling, but only 18KB of content, because the ~140-char raw Outlook EntryID used as the JSON map key for every entry was consuming most of the token budget before the model reached the actual summaries (hex strings tokenize far less efficiently than English text).
 
+
+
 3. **Real fix**: switched to short sequential ids ("0","1","2"...) in the API exchange, mapping back to the real EntryID locally by array position. Confirmed on the identical real payload: `stop_reason: end_turn`, only 5947/8000 tokens used, all 157 entries parsed.
+
+
+
+
 
 
 
@@ -289,7 +592,15 @@ Verified against real live Outlook data across three full production `.bat` runs
 
 
 
+
+
+
+
 ### Item 2 -- work-inbox/data/needs_reply.json, published by tools/publish_needs_reply.py
+
+
+
+
 
 
 
@@ -297,7 +608,15 @@ New script, separate from `fetch_inbox.py` (keeps that script's single-file-pull
 
 
 
+
+
+
+
 ### Item 4 -- Drafted Replies panel, 4B (dashboard-only), plus a real architecture correction
+
+
+
+
 
 
 
@@ -305,7 +624,15 @@ Original design assumed the dashboard could cross-fetch `agent-commons/pending-e
 
 
 
+
+
+
+
 Dashboard changes (`index.html`, `css/styles.css`, `js/app.js`): new "Drafted Replies" panel, distinct purple accent (not merged into the Today/Tomorrow/Week/Parked grid), per-card subject/`sender_tier` badge/timestamp/expandable draft text/Copy-to-clipboard/"Open original" (reusing the existing `openmail://` handler)/Mark sent/Discard. Mark sent/discard is bookkeeping only -- rides the exact same tick-sync mechanism (`getTicks`/`saveTicks`/`pushTicks`, existing `inbox-state` Worker route) already used for email cards, under a `draft_` key prefix so it doesn't collide with per-day briefing ticks. No new Worker route, nothing writes to a mailbox or sends anything.
+
+
+
+
 
 
 
@@ -313,7 +640,15 @@ Verified with a temporary synthetic seed pushed to `agent-commons/pending-email-
 
 
 
+
+
+
+
 ### Full chain verified live, three times, via the actual production `.bat`
+
+
+
+
 
 
 
@@ -321,7 +656,15 @@ Verified with a temporary synthetic seed pushed to `agent-commons/pending-email-
 
 
 
+
+
+
+
 One process-hygiene lesson from this session: nesting `run_in_background` (the Bash tool) around a command that ALSO backgrounds itself with a trailing `&` produces an orphaned, untracked process -- it happened here and briefly locked `inbox_briefing_last_run.log` for a real still-running `fetch_inbox.py` instance. Resolved by waiting for the orphaned PID to exit naturally rather than killing it (it was doing real, legitimate work, just detached from the tool's own tracking).
+
+
+
+
 
 
 
@@ -329,11 +672,23 @@ One process-hygiene lesson from this session: nesting `run_in_background` (the B
 
 
 
+
+
+
+
 Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -341,7 +696,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Kevin reported the sidebar Absences list showing duplicates ("Simon" and "Simon Burford" as separate entries) and "date unknown" on 8 of 10 entries. Root-caused and proposed on agent-commons issue #3 before building.
+
+
+
+
 
 
 
@@ -349,7 +712,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Fix A -- name reconciliation via the Organizer field.** Calendar items already carry `item.Organizer` (was being pulled, just never read by absence-detection). Verified live before building: `Organizer` holds the exact same full display name Outlook uses as the email sender name (`'Simon Burford'`, `'Athena Artuso'`, confirmed against real calendar items in the detection window). Now used as the primary name source for calendar-derived entries, falling back to the subject-derived name only when Organizer is empty.
+
+
+
+
 
 
 
@@ -357,15 +728,31 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Verified, real data, real production run:** live `briefing.json` absences count went from 10 (with duplicates) to 8 (deduplicated). "Athena"/"Athena Artuso" and "Simon"/"Simon Burford" each correctly merged into one real-dated entry. Two previously-"date unknown" entries (Crispin Muncaster, James Salas Guillen) now show best-effort guessed dates, clearly labeled. The remaining four (Christopher Sanders, Julie Hickman, Marie Cooksey, Sarah Rowles) genuinely have no extractable date and correctly stay honest about it rather than guessing.
+
+
+
+
 
 
 
 **Also this session (same production run, already reported separately on issue #3):**
 
+
+
 - `tools/publish_drafted_replies.py` schema bug fixed -- Lauren's real entries use `composed_at` not `drafted_at`, were being silently dropped; also now surfaces `confidence`/`inline_flags` on the dashboard, which the original design never accounted for. Verified with real content: 4/4 of Lauren's real drafts now publish and render correctly.
 
+
+
 - `needs_reply` precision investigated (Lauren found ~20/24 flagged entries were false positives) -- root cause: no cc-vs-primary-recipient signal and no staleness signal reach Phase 3.2's classifier at all (neither is captured/passed). Proposed fix posted to issue #3, not yet built -- needs Kevin's sign-off on staleness-cutoff specifics first.
+
+
+
+
 
 
 
@@ -373,7 +760,15 @@ Full detail on all of the above: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -381,7 +776,15 @@ Full detail on all of the above: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Kevin corrected the earlier absences fix -- he doesn't want OOO-email-guessed dates at all; his own Calendar plus the "People Department - HR Systems" calendar (confirmed real and enumerable earlier this session) are the absence source of truth. If someone's leave isn't logged in either, he does not want it surfaced.
+
+
+
+
 
 
 
@@ -389,17 +792,35 @@ Full detail on all of the above: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **A real, production-only edge case was caught and fixed.** A live run produced a bogus absence entry -- "People Department - Hr Systems - off today..." -- where a calendar item's `Organizer` field held the department's own name rather than a real person (likely how a particular admin-booked half-day/full-day entry was created). The existing organizer-placeholder pre-check should have caught this but didn't reproduce when replicated with identical logic moments later in the same session -- most likely a non-deterministic Outlook COM quirk specific to expanding a recurring series via `IncludeRecurrences`, not a pinned-down logic bug. Rather than keep chasing an intermittent trigger, added a defense-in-depth output-side guard in `_add_absence()`: reject any cleaned name that still contains obviously-non-person terms ("department", "systems", "team"), regardless of which mechanism produced it. Re-ran production after this fix: the bogus entry is gone, correctly replaced by "Kevin" (the real underlying person, via subject-derived fallback).
+
+
+
+
 
 
 
 **Verified, real production data, three consecutive real runs today:**
 
+
+
 - Run 1 (calendar-only sourcing, no fallback): 7 real entries, zero "date unknown", but included the bogus department-name entry.
+
+
 
 - Run 2 (first placeholder-organizer fix attempt): bogus entry persisted -- confirmed the first fix attempt was insufficient on its own.
 
+
+
 - Run 3 (defense-in-depth guard added): bogus entry gone, replaced by the real person ("Kevin"). Final live state: `Athena Artuso`, `David Johnson`, `Henry Acheampong`, `Julie Hickman`, `Kevin`, `Simon Burford`, `Susan Pratt` -- all real, calendar-verified dates, zero "date unknown", zero non-person entries.
+
+
+
+
 
 
 
@@ -407,11 +828,23 @@ One observation, not acted on unilaterally: Kevin's own leave now legitimately a
 
 
 
+
+
+
+
 Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -419,7 +852,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 3. **Drag reorder animation** — No visual feedback during drag. Cards need to visually shift in real time as Kevin drags — placeholder in the DOM during `dragover`.
+
+
+
+
 
 
 
@@ -427,7 +868,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -435,15 +884,31 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Flagged during unrelated meeting-records work — live `data/briefing.json` `calTomorrow` items had AI-generated `summary` text describing a *different* meeting than the one it was attached to. Investigated whether this is a Python index bug in `fetch_inbox.py` Phase 3.8.
+
+
+
+
 
 
 
 **Confirmed against live `data/briefing.json` (Wednesday 5 August briefing), pulled fresh with a cache-buster:**
 
+
+
 - `calToday` (9 items, first item is a real 09:30 meeting, no preceding all-day item): zero mismatches, every summary correctly self-referential.
 
+
+
 - `calTomorrow` (9 items, idx 0 is an all-day event — "Simon out of the office - funeral"): idx 1, 2, 3 each carry the summary content that rightfully belongs to the *next* item (idx 1 shows idx 2's title, idx 2 shows idx 3's title, idx 3 shows idx 4's actual topic while idx 4 itself is left with no summary). idx 6 and 7 are correctly self-referential — the mismatch does not persist for the whole day.
+
+
+
+
 
 
 
@@ -451,7 +916,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Proposed fix (not applied):** decouple the index shown to the model from the index used for write-back — renumber the `idx` sent to the model to always start at 0 within `_cal_for_summary` (sequential by array position), and keep the original `cal_today_items`/`cal_tomorrow_items` position in a separate field never exposed to the model, used only for the write-back. Small, contained diff, same file.
+
+
+
+
 
 
 
@@ -459,7 +932,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -467,23 +948,47 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Fix bug where the "Command Centre Focus" sidebar ticker (`loadCcTicker()` in `js/app.js`) counted ALL Command Centre tasks per tier, including tasks marked `done: true`, so it disagreed with Command Centre's own "Daily Focus" tile, which correctly counts only open (`!t.done`) tasks per tier.
+
+
+
+
 
 
 
 **Confirmed against live `command-centre/data/tasks.json` before the fix:** 39 tasks total, 13 marked done. All-tasks counts (old, wrong) vs. open-only counts (new, correct — matches CC's own tile):
 
+
+
 | Tier | All (old) | Open only (new/CC) |
+
+
 
 |---|---|---|
 
+
+
 | Today | 10 | 5 |
+
+
 
 | Tomorrow | 6 | 4 |
 
+
+
 | Week | 13 | 8 |
 
+
+
 | Parked | 10 | 9 |
+
+
+
+
 
 
 
@@ -491,7 +996,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Fix (commit `8582608`):** added `const openTasks=tasks.filter(t=>!t.done);` right after the tasks array is built, and switched all four tier-count filters (`cc-today-count`, `cc-tmrw-count`, `cc-week-count`, `cc-parked-count`) plus the age-based stats (`ages`, `stalled`, `oldest`, `avg`, `twoWeeks` — i.e. `cc-stalled`, `cc-oldest`, `cc-avg`, `cc-twoweeks`) to run over `openTasks` instead of the full `tasks` array. Judgement call, not explicitly requested by Kevin: extended the fix to the age stats too, for consistency — a completed-but-old task shouldn't be able to drag "Oldest task"/"Avg age" up or count toward "stalled"/"2+ weeks old", since those exist to flag *open* work going stale. Worth Kevin's explicit confirmation if this reads wrong once he's looking at real numbers.
+
+
+
+
 
 
 
@@ -499,19 +1012,39 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Diff scope confirmed minimal:** the only changes in the file are inside `loadCcTicker()` — one added line (`openTasks`) and eight filter calls switched from `tasks` to `openTasks`. Nothing else in `js/app.js` touched.
+
+
+
+
 
 
 
 **Also flagged to Kevin, not actioned this session (his call to prioritize):**
 
+
+
 - **Command Centre "Save failed — HTTP 502" + no way to exit inbox-suggestions view** — worker-side 502 from `cc-tasks-writer.kevinlelitte.workers.dev` on `persistTasks()`, cause not yet confirmed (possibly inbox auto-promotion write frequency, possibly cold start). Separately, `showView('inbox')` in command-centre's `js/app.js` has no matching `showView('board')` control in the markup — clicking "From your inbox" strands the user on the Inbox Suggestions view with no way back except F5. Kevin previously asked to hold other command-centre work until this is resolved — likely next in line.
+
+
 
 - **Work Inbox "Command Centre Focus" ticker redesign (6-across / drop Parked, widen to show Urgent + Needs response)** — dropped entirely by Kevin mid-session, 2026-08-02: the two tiles (CC's own Daily Focus vs. work-inbox's cross-reference into CC) are supposed to show different things by design; the redesign ask was based on a misunderstanding, not a real gap. Nothing from that thread was ever pushed to GitHub — it only existed as unapproved scratchpad edits (`wi_app_fresh.js`, `wi_index_fresh.html`, `wi_styles_fresh.css`) — so there is nothing to revert on the live site. Do not resurrect this thread without Kevin raising it again.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -519,21 +1052,43 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** `fetch_inbox.py` absence detection extended to surface tomorrow's leave in the sidebar absences panel. Weekend-aware labelling added.
+
+
+
+
 
 
 
 **What changed:**
 
+
+
 - Absence detection block replaced with version that scans both today and next working day.
+
+
 
 - Today's absences on weekends/Sundays show `"(next week)"` suffix — avoids "today" implying a working day when today is Saturday.
 
+
+
 - Absences starting on `tomorrow` (= `next_workday(today)`) labelled `"(tomorrow)"` on Mon–Thu, `"(next week)"` on Fri/Sat/Sun.
+
+
 
 - Shared `_extract_absence_name()` helper removes duplication from the name-stripping logic.
 
+
+
 - No duplicate checking needed: date logic naturally prevents double-listing the same person.
+
+
+
+
 
 
 
@@ -541,7 +1096,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -549,19 +1112,39 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Apply quick review follow-ups after Granola rollout.
+
+
+
+
 
 
 
 **What changed:**
 
+
+
 - `fetch_inbox.py`: Added a shared GitHub API timeout for script GitHub reads/writes.
+
+
 
 - `fetch_inbox.py`: Made Phase 3.6 task action append idempotent by skipping exact duplicate action text.
 
+
+
 - `fetch_inbox.py`: Renamed the Granola comment to Phase 3.7b to reduce diagnostic ambiguity; behaviour unchanged.
 
+
+
 - `js/app.js`: Added HTML escaping for calendar times, titles, organisers, and summaries before rendering.
+
+
+
+
 
 
 
@@ -569,7 +1152,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -577,17 +1168,35 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Fix Phase 3.7 Granola context and improve Phase 3.8 meeting prep summaries.
+
+
+
+
 
 
 
 **What changed:**
 
+
+
 - `fetch_inbox.py`: Granola note detail extraction now falls back from `summary` to `summary_text` / `summary_markdown`.
+
+
 
 - `fetch_inbox.py`: Granola context passed into Phase 3.8 increased from 500 to 1500 characters.
 
+
+
 - `fetch_inbox.py`: Phase 3.8 now asks for 2-3 concise prep sentences and has a 900 token response budget.
+
+
+
+
 
 
 
@@ -595,11 +1204,23 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Not included:** No title matching changes, no forced debug matches, no diagnostic logging spam, no phase skip flags, and no `fetch_inbox_debug.py` changes in production.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -607,15 +1228,31 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Replace expand/collapse toggle on Today and Tomorrow calendar columns with independent vertical scrolling. Keep fixed height (260px), same size and position.
+
+
+
+
 
 
 
 **What changed:**
 
+
+
 - **`css/styles.css`** (commit `dc3544b`): Removed expand/collapse styles (`.cal-col-body` with `overflow:hidden`, `.cal-expand-footer`, `.cal-expand-btn`). Added scroll styles — `.cal-col-body { max-height: 260px; overflow-y: auto; overflow-x: hidden }` with 4px webkit scrollbar (`#d1d9e6` thumb, hover `#94a3b8`).
 
+
+
 - **`js/app.js`** (commit `6589384`): `renderBlock()` inside `renderCalPanel()` — return statement no longer includes `cal-expand-footer` div. `toggleCalExpand()` function removed entirely. Both Today (`calBodyToday`) and Tomorrow (`calBodyTom`) columns now scroll independently via the same `renderBlock` code path.
+
+
+
+
 
 
 
@@ -623,7 +1260,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -631,7 +1276,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 **Scope:** Diagnosing why Phase 3.7 Granola fetch returns 10 notes but matches 0 calendar items.
+
+
+
+
 
 
 
@@ -639,7 +1292,15 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -647,29 +1308,59 @@ Full detail: `begb0037admin/agent-commons` issue #3.
 
 
 
+
+
+
+
 No code changes to work-inbox this session. Cross-repo maintenance only.
+
+
+
+
 
 
 
 - **Crest audit completed** — all dashboards inspected for Oxford crest usage:
 
+
+
   - work-inbox: external file `images/oxford-crest.jpg` — intact ✅
+
+
 
   - hris-launcher: base64 JPEG `<img class="sidebar-crest">` — intact ✅
 
+
+
   - command-centre: base64 JPEG `<img class="sb-crest">` — intact ✅
+
+
 
   - hr-fa-knowledge-base: base64 JPEG `<img class="crest">` — intact ✅
 
+
+
   - hris-dashboard: emoji 🎓 (no image) — N/A
 
+
+
   - ag-flexpoints: no crest — N/A
+
+
 
 - **Hard rule propagated** — added to CLAUDE.md for hris-launcher, command-centre, hr-fa-knowledge-base.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -677,15 +1368,31 @@ No code changes to work-inbox this session. Cross-repo maintenance only.
 
 
 
+
+
+
+
 - **`ctx-strip` label restored** — `setupCtxTicker()` was missing `<div class="ctx-label">Briefing context</div>`. Added back. Commit `fb178b5`.
 
+
+
 - **Badge position fixed** — NEW/UPDATED badges moved from inside `.card-ph-title` to `.card-ph-actions` (right side, next to CC→). Commit `2d39b9e`. Confirmed working.
+
+
 
 - **OSM IT Services URL** — sidebar link updated to `https://oxford.saasiteu.com/Modules/SelfService/#home`. Commit `e4cc1fd`.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -693,19 +1400,39 @@ No code changes to work-inbox this session. Cross-repo maintenance only.
 
 
 
+
+
+
+
 Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da688d` (combined mini-cals into one card, narrowed calendar column).
+
+
+
+
 
 
 
 ### What changed
 
+
+
 - **`css/styles.css`**: `.main-cal-panel` grid changed to `7fr 7fr 4fr` — Today and Tomorrow take equal wider columns; mini-cal column is narrower (≈22% of row).
+
+
 
 - **`js/app.js`**: `renderMiniCal(monthOffset)` now returns inner content only (no wrapping block). Both months rendered inside a single `.main-cal-block` with a `.mini-cal-divider` `<hr>` between them. AI summaries (`c.summary`) shown on Today/Tomorrow entries as `.main-cal-summary` divs.
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -713,19 +1440,39 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 - **Removed** email address from sidebar
+
+
 
 - **Links updated**: 6 approved links, all now populated
 
+
+
 - **Cards redesigned**: flat `.card-ph` design (drag handle, circle done button, title + sub, email + CC→ icons, NEW/UPDATED badges on right)
 
+
+
 - **Layout corrected**: left col = Today + Tomorrow, right col = Week + Parked
+
+
 
 - **Oxford crest**: restored as external file `images/oxford-crest.jpg` — NEVER embed as base64, NEVER delete, NEVER change the `src` attribute
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -733,23 +1480,47 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 | Component | Description |
+
+
 
 |-----------|-------------|
 
+
+
 | `fetch_inbox.py` | Outlook COM via pywin32. Pulls inbox → Anthropic triage (claude-haiku-4-5) → pushes `data/briefing.json` to GitHub via Contents API |
+
+
 
 | `index.html` | Shell — HTML structure only. Loads `css/styles.css` → `js/app.js`. No framework, no build step. |
 
+
+
 | `css/styles.css` | All styles. |
 
+
+
 | `js/app.js` | All JS — briefing render, cal panel, ctx ticker, CC ticker, drag-and-drop, tick sync, archive, live clock. |
+
+
 
 | `open_email.py` | Registered `openmail://` protocol handler — opens exact email in classic Outlook via EntryID COM |
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -757,45 +1528,91 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 ### Working
+
+
 
 - fetch_inbox.py — all phases confirmed working
 
+
+
 - **Granola calendar context (Phase 3.7b + 3.8)** — COMPLETE. Matching via keyword overlap; summary extracted from `summary_text`/`summary_markdown`. Do not modify.
+
+
 
 - **Absence detection** — today's leave + tomorrow's leave (weekend-aware labelling). Commit `3aab85c`.
 
+
+
 - Task Scheduler — `WorkInbox-0900` / `WorkInbox-1200` / `WorkInbox-1500` (Mon–Fri)
+
+
 
 - Dashboard loads live briefing.json on load, falls back to localStorage archive
 
+
+
 - Oxford navy sidebar — crest (external `images/oxford-crest.jpg`), branding, live clock, filter, CC ticker, absences, all 6 links populated
+
+
 
 - 3-column calendar panel (Today `7fr` | Tomorrow `7fr` | July+August mini-cals in one card `4fr`)
 
+
+
 - **Calendar columns scroll independently** — Today and Tomorrow each have `max-height: 260px; overflow-y: auto` with 4px scrollbar. Expand/collapse removed.
+
+
 
 - Rotating context strip with "Briefing context" label, dot nav
 
+
+
 - 2×2 priority grid with tier filter — flat `.card-ph` design, NEW/UPDATED badges on right
+
+
 
 - CC ticker reads live from CC tasks.json every 60s
 
+
+
 - drag-and-drop, tick sync, archive, show done, openmail:// all working
+
+
 
 - Multi-machine setup complete (begb0037.AD-OAK)
 
 
 
+
+
+
+
 ### Known issues (fix next session)
 
+
+
 - Drag reorder has no visual animation
+
+
 
 - Phase 3.8 calendar-summary mismatch on days starting with an all-day event (see Fix list item 4 and Session 2026-08-04 above) — root cause confirmed, fix scoped, awaiting Kevin's explicit reopening of Phase 3.8
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -803,25 +1620,51 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 | Key | Purpose |
+
+
 
 |-----|--------|
 
+
+
 | `workInbox_briefings_v1` | Archive of past briefing JSON objects, keyed by date string |
+
+
 
 | `workInbox_today_v1` | Key of the currently displayed briefing |
 
+
+
 | `workInbox_ticks_v1` | Tick (done) state for all cards |
+
+
 
 | `workInbox_priOverrides_v1` | Per-card section overrides for priority drag-and-drop |
 
+
+
 | `workInbox_priOrder_v1` | Per-section sort order for priority cards |
+
+
 
 | `workInbox_customPri_v1` | Email cards manually dragged into priority sections |
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -829,7 +1672,15 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 **index.html edits:** always use binary `atob()`/`btoa()` — NEVER `TextEncoder` on file content (re-encodes em-dash bytes).
+
+
+
+
 
 
 
@@ -837,7 +1688,15 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 ---
+
+
+
+
 
 
 
@@ -845,31 +1704,63 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 | File | Location |
+
+
 
 |------|---------|
 
+
+
 | Repo | github.com/begb0037admin/work-inbox |
+
+
 
 | Proxy | github-proxy.lelitte.co.uk/work-inbox/ |
 
+
+
 | Dashboard (primary) | wi.lelitte.co.uk |
+
+
 
 | Dashboard (GitHub Pages) | begb0037admin.github.io/work-inbox/ |
 
+
+
 | Styles | `css/styles.css` |
+
+
 
 | JS | `js/app.js` |
 
+
+
 | Script | `fetch_inbox.py` |
+
+
 
 | Opener | `open_email.py` |
 
+
+
 | Briefing | `data/briefing.json` |
+
+
 
 | Local | `C:\Users\admin\Documents\Claude\Projects\work-inbox\` |
 
+
+
 | Scheduler recovery | `create_inbox_tasks.bat` in repo root — run as Administrator |
+
+
+
+
 
 
 
@@ -877,19 +1768,39 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 
+
+
+
+
 ## Standing Rules
+
+
 
 - Never commit tokens or raw data
 
+
+
 - All GitHub writes via Contents API (PAT from `GITHUB_PAT` env var)
+
+
 
 - `index.html` edits: always use binary `atob()`/`btoa()` — NEVER `TextEncoder`
 
+
+
 - Desktop bat: always download fresh via PowerShell — never rename an existing file
+
+
 
 - Every raw.githubusercontent.com fetch MUST include `?t=<timestamp>` cache-buster
 
+
+
 - **NEVER touch `images/oxford-crest.jpg` or the `<img class="sidebar-crest">` src attribute** — external file only, never base64
 
+
+
 - **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
+
+
 
