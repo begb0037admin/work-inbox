@@ -74,6 +74,24 @@
 
 ---
 
+## Session 2026-08-11 (continued) — Draft Diff Capture rescheduled off Work Inbox Briefing's collision times (Drew)
+
+**Scope:** Kevin asked whether Work Inbox Briefing and Draft Diff Capture (`tools/draft_final_diff_capture.py`, hourly 7am-7pm Mon-Fri) could safely run concurrently, since their schedules collided at 9am/12pm/3pm/6pm — both open Outlook COM connections at the same trigger moment.
+
+**Investigation (real data, not assumption):**
+- Pulled the actual Windows Task Scheduler Operational event log (`Microsoft-Windows-TaskScheduler/Operational`), not just the two tasks' trigger definitions. Confirmed both tasks' action processes launch within ~15ms of each other at every collision trigger (09:00, 12:00, 15:00, 18:00).
+- Today's (11 Aug) real outcomes, using presence/absence of the Phase 4 `data/archive/briefing_*.json` file as the success proxy (the per-run log gets overwritten): 06:00 (no collision) succeeded; 09:00 (collision) succeeded; **12:00 (collision) failed — no archive written**; **15:00 (collision) failed — confirmed via log content, same `com_error` at line 250**. Both of today's two known failures landed on exact collision moments; the one non-collision trigger didn't fail.
+- Technical basis: `Outlook.Application` is served by one running `OUTLOOK.EXE` as a single-threaded apartment — every calling process shares that one STA message pump, with no per-caller isolation. `RPC_E_CALL_REJECTED` ("Call was rejected by callee") is COM's standard STA reentrancy-protection response, not a fluke. `tools/draft_final_diff_capture.py` has the same unguarded `Dispatch`/`GetNamespace`/`GetDefaultFolder` pattern fetch_inbox.py had before this session's retry fix — it just hadn't been unlucky yet (0 failures in ~30 runs).
+- Also surfaced, flagged separately as a distinct issue (not fixed this session): both tasks have `ExecutionTimeLimit=PT15M`; Work Inbox Briefing hit that forced kill on 3 of 4 checked triggers today (06:00, 12:00, 15:00), including the 06:00 run which had already completed all its real work successfully (archived 06:03:14) yet Task Scheduler didn't register it as finished until the 15-minute timeout — a process-exit hang somewhere in the `cmd.exe → powershell → python(COM)` chain, independent of this collision.
+
+**Kevin's approved fix, implemented:** Changed **Draft Diff Capture only** from hourly (`StartBoundary=07:00`, `Interval=PT1H`, `Duration=PT12H`) to 5 fixed weekly triggers at **06:30, 09:30, 12:30, 15:30, 18:30 Mon-Fri** — each 30 minutes after Work Inbox Briefing's own times, via `Set-ScheduledTask -TaskName "Draft Diff Capture" -Trigger $triggers`. Work Inbox Briefing's own schedule (6/9/12/15/18) was explicitly not touched, and the two scripts were not merged. Kevin accepted the tradeoff (5x/day diff-pair capture instead of 13x/day) since ConversationID correlation means nothing is lost, only delayed to the next run.
+
+**Verified live, not assumed:** re-ran `Get-ScheduledTask`/`schtasks /query /xml` after the change — confirms exactly 5 triggers (06:30/09:30/12:30/15:30/18:30, `DaysOfWeek=62`=Mon-Fri, no leftover hourly repetition), Action/Principal/Settings (`ExecutionTimeLimit=PT15M`, `MultipleInstancesPolicy=IgnoreNew`) all unchanged, `NextRunTime` correctly showing the next of the new fixed times, and Work Inbox Briefing's own 5 triggers confirmed byte-for-byte unchanged.
+
+**Not done this session (flagged for later, not requested yet):** applying the same connect-with-retry pattern to `draft_final_diff_capture.py`; investigating the `ExecutionTimeLimit`/process-exit-hang finding.
+
+---
+
 ## NEXT SESSION — START HERE
 
 
