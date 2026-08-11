@@ -92,6 +92,31 @@
 
 ---
 
+## Session 2026-08-11 (continued) — Draft Diff Capture's missed-trigger catch-up disabled (Drew)
+
+**Scope:** Kevin asked a follow-up architecture question after the schedule stagger above: if the machine is off at a trigger time and turns on later, could Windows Task Scheduler's `StartWhenAvailable` catch-up mechanism fire both tasks' missed triggers at once on wake, recreating the exact Outlook COM collision just fixed — just triggered by machine-on time instead of the clock?
+
+**Investigation (real data):**
+- Confirmed both tasks had `StartWhenAvailable=true` via live XML export.
+- Found direct historical proof in the Windows Task Scheduler Operational event log: on 10 Aug, the machine booted at 06:41:08 (missing Work Inbox Briefing's 06:00 trigger). Task Scheduler's next catch-up check didn't run until 07:50:22 — and at that exact second, **17 separate tasks caught up together, "Work Inbox Briefing" among them.** This proves Windows batches all eligible missed-trigger catch-ups into one simultaneous launch, with no spacing or randomization — confirming the risk was real, not just plausible.
+- No `RandomDelay` configured on either task's triggers, so nothing today would have broken up a simultaneous catch-up if both Work Inbox Briefing's and Draft Diff Capture's triggers were missed on the same day.
+
+**Kevin's approved fix, implemented:** Disabled `StartWhenAvailable` on **Draft Diff Capture only**; left Work Inbox Briefing's catch-up enabled. Rationale: a skipped Draft Diff Capture catch-up costs nothing real (same zero-data-loss logic already accepted for the schedule stagger — ConversationID correlation picks up any pending pair on the next real run), while Work Inbox Briefing's catch-up still has real value (recovering a fully-missed morning briefing rather than waiting up to 3 hours for the next slot). Disabling only one side is sufficient — the collision requires both tasks to catch up together, so removing either side's ability to catch up removes the risk entirely.
+
+```powershell
+$task = Get-ScheduledTask -TaskName "Draft Diff Capture"
+$settings = $task.Settings
+$settings.StartWhenAvailable = $false
+Set-ScheduledTask -TaskName "Draft Diff Capture" -Settings $settings
+```
+
+**Verified live afterward, two independent methods:**
+- `Get-ScheduledTask` CIM object: Draft Diff Capture `StartWhenAvailable = False`; Work Inbox Briefing `StartWhenAvailable = True`.
+- Raw XML export (`schtasks /query /xml`): Draft Diff Capture's `<Settings>` block now omits `<StartWhenAvailable>` entirely (Task Scheduler's schema only serializes this element when `true` — its absence is the correct signature of `false`, not a query failure, confirmed by cross-checking against the CIM read). Work Inbox Briefing's XML still explicitly shows `<StartWhenAvailable>true</StartWhenAvailable>`.
+- All other Draft Diff Capture settings/triggers/action/principal confirmed unchanged: `ExecutionTimeLimit=PT15M`, `MultipleInstancesPolicy=IgnoreNew`, `RestartOnFailure` (Count=2/Interval=PT5M), the 5 triggers (06:30/09:30/12:30/15:30/18:30 Mon-Fri), action (`wscript.exe` + hidden VBS wrapper), principal (`RunLevel=Limited`, `UserId=admin`).
+
+---
+
 ## NEXT SESSION — START HERE
 
 
