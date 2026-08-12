@@ -353,7 +353,35 @@ function togglePriCard(i){
 
 // Priority drag-and-drop helpers
 let _priDragState=null,_priDragEl=null,_priDragDropped=false;
-function _priGetKey(p){return(p.title||p.text||p.subject||'').toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,40)||'item';}
+function _priGetLegacyTitleKey(p){return(p.title||p.text||p.subject||'').toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,40)||'item';}
+// Prefer a stable identifier (entry_id for email-sourced items, id for
+// priorities items) over the item's display title -- fixed 12 Aug 2026,
+// closing out the "cards vanish on move" bug this same file's HANDOVER.md
+// entry flagged but didn't fix yet. Two genuinely different real items can
+// share an identical title (a meeting reschedule notice re-using the
+// original invite's subject line, a recurring standing-meeting subject,
+// etc.) -- confirmed live against Kevin's own data/briefing.json: an
+// "Incident Reporting PUG" email in Needs Response (entry_id
+// ...67A8967C720000) and a separately-triaged "Incident Reporting PUG" item
+// in FYI/Parked (a different entry_id) share exact title text but are two
+// different emails. applyPriOverrides() below used to dedupe purely on this
+// title text via _seen, which silently and permanently dropped the second
+// one it encountered -- not just from its own section, from every section,
+// since the drop happens before the override/section assignment ever runs.
+// That's exactly "I moved a card and it vanished, not in the destination,
+// not back in the source": if the dragged item's title collided with any
+// item processed earlier in the pt/ptom/pw/fyi/urgent/needs merge order, no
+// override could ever rescue it. Falls back to the old title-slug only when
+// an item genuinely has no stable id (matches prior behaviour for that
+// case; verified live that all six default arrays currently have 100%
+// entry_id/id coverage, so this fallback is a safety net, not the common
+// path).
+function _priGetKey(p){
+  if(p.entry_id) return 'eid_'+p.entry_id;
+  if(p.entryId) return 'eid_'+p.entryId;
+  if(p.id) return 'id_'+p.id;
+  return _priGetLegacyTitleKey(p);
+}
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
@@ -367,7 +395,18 @@ function applyPriOverrides(data){
   const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],ptom:[],pw:[],pfyi:[],ur:[],nr:[]};
   const validSecs=['pt','ptom','pw','pfyi','ur','nr'];
   const _seen=new Set();
-  for(const item of all){const k=_priGetKey(item);if(_seen.has(k))continue;_seen.add(k);const s=ovr[k]||item._dfSec;(validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});}
+  for(const item of all){
+    const k=_priGetKey(item);
+    if(_seen.has(k))continue;
+    _seen.add(k);
+    // Overrides saved by a drag before this fix are keyed by the old
+    // title-only slug -- fall back to that so Kevin's existing manual
+    // section placements keep applying even though new drags now save
+    // under the new stable-id key.
+    const legacyKey=_priGetLegacyTitleKey(item);
+    const s=ovr[k]||ovr[legacyKey]||item._dfSec;
+    (validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});
+  }
   for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
   return secs;
 }
