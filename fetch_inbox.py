@@ -8,6 +8,14 @@ import anthropic
 subprocess.run(["git", "config", "gc.auto", "0"], capture_output=True,
                cwd=os.path.dirname(os.path.abspath(__file__)))
 
+# Every run must print a clear timestamp so pasted console/log output is
+# self-dating -- a pasted traceback with no timestamp anywhere made an
+# already-fixed incident look like a fresh failure (Kevin, 12 Aug 2026).
+def log(msg):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}")
+
+log("fetch_inbox.py run started")
+
 GITHUB_REPO = "begb0037admin/work-inbox"
 GITHUB_PATH = "data/briefing.json"
 GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
@@ -187,15 +195,15 @@ def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
             # this far to actually catch the busy-callee condition.
             inbox_folder = mapi_ns.GetDefaultFolder(6)
             if attempt > 1:
-                print(f"Phase 1 - Outlook COM connection succeeded on attempt {attempt}/{max_attempts}.")
+                log(f"Phase 1 - Outlook COM connection succeeded on attempt {attempt}/{max_attempts}.")
             return outlook_app, mapi_ns, inbox_folder
         except pywintypes.com_error as e:
             last_error = e
-            print(f"Phase 1 - Outlook COM connection attempt {attempt}/{max_attempts} failed: {e}")
+            log(f"Phase 1 - Outlook COM connection attempt {attempt}/{max_attempts} failed: {e}")
             if attempt < max_attempts:
-                print(f"Phase 1 - Outlook automation layer appears busy (transient). Waiting {retry_wait_seconds}s before retrying...")
+                log(f"Phase 1 - Outlook automation layer appears busy (transient). Waiting {retry_wait_seconds}s before retrying...")
                 time.sleep(retry_wait_seconds)
-    print(f"Phase 1 - Outlook COM connection failed after {max_attempts} attempts. Giving up.")
+    log(f"Phase 1 - Outlook COM connection failed after {max_attempts} attempts. Giving up.")
     raise last_error
 
 outlook, mapi, _inbox_folder = connect_to_outlook()
@@ -230,7 +238,7 @@ def restrict_date(folder, cutoff_dt):
         return items
 
 # -- Phase 1 -- pull Outlook data --
-print("Phase 1 - pulling Outlook data...")
+log("Phase 1 - pulling Outlook data...")
 inbox = []
 unread_count = 0
 read_count   = 0
@@ -435,7 +443,7 @@ unread_total = sum(1 for m in inbox if not m["is_read"])
 print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)} (of which HR Systems calendar:{hr_calendar_count})")
 
 # -- Phase 2 -- AI writes context paragraph only --
-print("Phase 2 - calling Anthropic API for context...")
+log("Phase 2 - calling Anthropic API for context...")
 
 now          = datetime.now()
 today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
@@ -563,7 +571,7 @@ if not subtitle:
 print("Phase 2 done - context written")
 
 # -- Phase 3 -- Python builds every card --
-print("Phase 3 - building cards from inbox...")
+log("Phase 3 - building cards from inbox...")
 
 # Categorisation rules -- applied in order, first match wins
 # importance: 0=low, 1=normal, 2=high
@@ -685,7 +693,7 @@ print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} lo
 # Same pattern as Phase 3.7's priority-task summaries, applied to raw email
 # cards instead - so Urgent/Needs show a genuine one-sentence summary rather
 # than the first ~150 characters of the email body verbatim (card["sub"]).
-print("Phase 3.2 - generating AI email summaries...")
+log("Phase 3.2 - generating AI email summaries...")
 summary_candidates = [c for c in (urgent + needs) if c.get("entry_id")]
 if summary_candidates and anthropic_available:
     try:
@@ -1059,7 +1067,7 @@ except Exception as e:
     priorities_week     = []
 
 # Phase 3.5 - AI triage: which emails should become Command Centre tasks
-print("Phase 3.5 - triaging inbox for task suggestions...")
+log("Phase 3.5 - triaging inbox for task suggestions...")
 suggestions = {
     "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
     "new_tasks":    [],
@@ -1335,7 +1343,7 @@ if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
 
 
 # Phase 3.7 - AI summaries for priority tasks
-print("Phase 3.7 - generating AI task summaries...")
+log("Phase 3.7 - generating AI task summaries...")
 all_priorities = priorities_today + priorities_tomorrow + priorities_week
 if all_priorities and anthropic_available:
     try:
@@ -1633,7 +1641,7 @@ briefing = {
 }
 
 # -- Phase 4 -- push to GitHub --
-print("Phase 4 - pushing briefing to GitHub...")
+log("Phase 4 - pushing briefing to GitHub...")
 
 if not GITHUB_PAT:
     print("ERROR: GITHUB_PAT env var not set - cannot push.")

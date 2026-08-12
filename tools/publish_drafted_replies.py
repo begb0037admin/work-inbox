@@ -236,6 +236,7 @@ def run(token, dry_run=False):
 
 
 if __name__ == "__main__":
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] publish_drafted_replies.py run started")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

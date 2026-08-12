@@ -58,6 +58,7 @@ import json
 import os
 import sys
 import urllib.request
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from style_corpus_common import is_sensitive, recipient_tier
@@ -194,6 +195,7 @@ def run(token, dry_run=False):
 
 
 if __name__ == "__main__":
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] publish_needs_reply.py run started")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="Build entries but don't push to GitHub")
     args = parser.parse_args()

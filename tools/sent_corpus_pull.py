@@ -243,6 +243,7 @@ def pull_sent_corpus(start_date, end_date, out_dir, dry_run_stats_only=False):
 
 
 if __name__ == "__main__":
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] sent_corpus_pull.py run started")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--start", required=True, help="YYYY-MM-DD")
     parser.add_argument("--end", required=True, help="YYYY-MM-DD")

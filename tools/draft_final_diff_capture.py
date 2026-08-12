@@ -431,6 +431,7 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
 
 
 if __name__ == "__main__":
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] draft_final_diff_capture.py run started")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ledger-path", default=DEFAULT_LEDGER_PATH)
     parser.add_argument("--out-dir", default=DEFAULT_OUT_DIR)
