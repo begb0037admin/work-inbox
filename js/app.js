@@ -586,7 +586,7 @@ function renderBriefing(data,key){
         <div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-parked-wrap" style="margin-top:18px">
-        ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length)}
+        ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length,typeof data.fyiRawCount==='number'?data.fyiRawCount:undefined)}
         <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
       </div>
     </div>
@@ -611,10 +611,21 @@ function applySecCollapse(sec,collapsed){
   if(zone) zone.style.display=collapsed?'none':'';
   if(chev) chev.innerHTML=collapsed?'&#9656;':'&#9662;';
 }
-function _secHeadHtml(sec,dotClass,label,count){
+function _secHeadHtml(sec,dotClass,label,count,rawCount){
+  // rawCount (optional): the true pre-dedup message count, when it differs
+  // from the displayed `count`. Added 12 Aug 2026 so any dedup applied to a
+  // board section is visible and labelled, not a silent reduction Kevin has
+  // no way to see -- e.g. "18 threads (21 messages)" instead of just "18".
+  // Server-side thread-collapse (fetch_inbox.py Phase 3.3c) already
+  // resolves genuine duplicate "RE:"/"FW:" threads before this ever runs;
+  // this label only fires when the two numbers genuinely differ, so a
+  // section with no collapsing still shows a plain count as before.
+  const countHtml=(typeof rawCount==='number'&&rawCount!==count)
+    ? count+' threads <span class="sec-count-raw" style="font-weight:400;color:var(--text-muted)">('+rawCount+' messages)</span>'
+    : String(count);
   return '<div class="sec-head" onclick="toggleSecCollapse(\''+sec+'\')" style="cursor:pointer;user-select:none">'
     +'<span class="sec-chev" id="chev_'+sec+'" style="display:inline-block;width:14px;color:var(--text-muted);font-size:11px">&#9662;</span>'
-    +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+count+'</span></div>';
+    +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span></div>';
 }
 
 function toggleSum(id,btn){const el=document.getElementById(id);const exp=el.classList.toggle('expanded');btn.textContent=exp?'Show less':'Show more';}
