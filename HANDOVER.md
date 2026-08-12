@@ -54,6 +54,20 @@
 
 
 
+## Session 2026-08-12 (addendum) — self-reconciliation: this session's own push briefly overwrote the concurrent session's identical commit, confirmed harmless (Drew)
+
+**What happened, stated plainly:** this session (the one that hit the Codex `401 Unauthorized`/`Not logged in` auth failure and left the "BLOCKED" checkpoint at commit `a6b8382`) had Codex auth restore itself mid-session. It then completed its own 3rd (end-to-end) Codex pass independently — unaware the concurrent session below had already shipped — and pushed its own build as commit `9485ab0` at 10:47:42Z, which silently overwrote the concurrent session's `8dbb57a` (10:40:28Z) as the new HEAD for `fetch_inbox.py`. Caught this via a routine live-verification check that found the "Last updated" line already described a different push (`8dbb57a`) with numbers this session hadn't produced yet.
+
+**Reconciliation, checked directly rather than assumed:** pulled all three versions from the GitHub API — `8dbb57a`'s content, `9485ab0`'s content, and the current HEAD — and diffed them. **All three are byte-for-byte identical** (`md5sum` match). Both sessions independently arrived at the exact same design, variable names, and comments for this fix. There is no code divergence, no lost work, and no regression from the overwrite — it replaced identical bytes with identical bytes. `9485ab0` is the commit that is technically HEAD now, but it carries the same content the write-up above already describes and verified.
+
+**Independent second live verification (this session's own run, not a re-read of the other session's result):** pulled fresh from GitHub into the local run clone and ran `python fetch_inbox.py` directly against live Outlook. Real result, pulled back from the GitHub Contents API afterward: `urgent` 55 -> 3, `needs` 110 -> 19 (raw Phase 3 counts and demotion counts vary slightly run-to-run with live inbox content and AI non-determinism, as expected — this run demoted 91 Needs and 52 Urgent vs the other run's 90/52), `fyi` 328 -> 471, zero `_ai_verdict_valid` leakage, `inbox_suggestions.json` correctly suppressed the one noisy candidate this run surfaced. Two independent live runs, same code, consistent behaviour — real reproducibility evidence, not just one lucky run.
+
+**Lesson worth carrying forward, not yet formalised in agent-commons:** two sessions working the identical Kevin-approved task in parallel converged on identical code independently — reassuring for correctness, but the overwrite-without-conflict-detection on the GitHub Contents API (a stale-but-still-matching sha precondition let the second PUT through silently) is a real gap. Neither session had any signal the other existed until a live-verification step happened to expose the mismatched HANDOVER text. Worth a future check-in with Kevin about whether concurrent dispatch on the same task is expected/desired, or whether session start-up should include a live "is this file already mid-edit elsewhere" check beyond just reading HANDOVER.md once at the start.
+
+**Status: fully resolved, nothing further needed on this task.** Live code, live data, and this HANDOVER all agree. No action required from Kevin unless he wants the concurrent-dispatch question above addressed.
+
+---
+
 ## Session 2026-08-12 (new) — Urgent-tier + Command Centre noise-demotion extension, Codex-reviewed x3, pushed and verified live (Drew)
 
 **Scope:** Kevin approved extending the Phase 3.3 Needs-tier noise fix (commit `74ea07a`/`b071cb0`, see entry below) to the two places flagged-not-fixed in that session: (1) the Urgent tier (~9 similarly-noisy cards seen live), and (2) Command Centre's task-suggestion pipeline (Phase 3.5), with an explicit instruction to investigate Phase 3.5's actual code first rather than assume it consumes the tiered dashboard output.
