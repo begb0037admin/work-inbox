@@ -1,14 +1,23 @@
 {
-  "generated_at": "2026-08-12 06:01",
+  "generated_at": "2026-08-12 08:42",
   "new_tasks": [
     {
-      "title": "Review Oxford Uni Pre-project Authentication follow-up",
+      "title": "Review Oxford Uni Pre-project Authentication call follow-up",
       "tier": "week",
       "description": "Alex Manton-Jones sent a follow-up email from an authentication call held on 11 August. Kevin needs to review the full content and determine what action items, if any, are required from this call.",
       "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
       "email_from": "Alex Manton-Jones",
       "received": "2026-08-11 16:50",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629957D0000"
+    },
+    {
+      "title": "Advise Marie on GLAM joining 38-day balance scheme",
+      "tier": "week",
+      "description": "Marie Cooksey is seeking Kevin's input on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Kevin needs to provide thoughts and advice to inform the decision.",
+      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-11 13:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995750000"
     },
     {
       "title": "Review Cority Applicant Data Import update from James",
@@ -52,22 +61,13 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608061800541",
-      "task_title": "Attend Incident Reporting PUG meeting",
-      "note": "Mike West sent the Microsoft Teams meeting link for the Oxford University Evo Pre project meeting scheduled for 11 August.",
-      "email_subject": "Oxford University Evo Pre project meeting ",
-      "email_from": "Mike West",
-      "received": "2026-08-11 15:25",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995770000"
-    },
-    {
-      "task_id": "t2608101804010",
-      "task_title": "Investigate Clockify role consolidation for Beth",
-      "note": "Conor O'Brien has sent updated work on the Multi Company Setup (FP 68261303) and notes that both Simon and Kevin are on leave next week, indicating work is progressing and needs Kevin's review.",
-      "email_subject": "RE: #External# RE: Multi Company Setup",
-      "email_from": "Conor O'Brien",
-      "received": "2026-08-07 12:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
+      "task_id": "t2608061800540",
+      "task_title": "Attend Oxford University Evo Pre project meeting in Simon's absence",
+      "note": "Meeting reminder notification that the Oxford University Evo Pre project meeting is starting soon.",
+      "email_subject": "Your meeting \"Oxford University Evo Pre project meeting \" is starting soon...",
+      "email_from": "Mike West via Clari Copilot",
+      "received": "2026-08-11 15:21",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995760000"
     }
   ]
 }
