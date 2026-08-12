@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-12 - Needs-tier noise demotion (Phase 3.3) built, Codex-reviewed x4, verified live twice (110 -> 23 Needs cards). Checkpoint per agent-commons SESSION_PROTOCOL.md. Closed.
+**Last updated:** 2026-08-12 - Urgent-tier noise demotion (Phase 3.3b) + Command Centre task-suggestion noise fix built and Codex-reviewed (2 of 3 mandatory passes), BLOCKED on Codex auth before the 3rd pass and before pushing/live-testing. Not yet pushed to main. Checkpoint per agent-commons SESSION_PROTOCOL.md. Open - resume here.
 
 
 
@@ -53,6 +53,31 @@
 
 
 
+
+## Session 2026-08-12 (new) — Urgent-tier + Command Centre noise-demotion extension, BLOCKED on Codex auth mid-review, NOT pushed (Drew)
+
+**Scope:** Kevin approved extending the Phase 3.3 Needs-tier noise fix (commit `74ea07a`/`b071cb0`, see entry below) to the two places flagged-not-fixed in that session: (1) the Urgent tier (~9 similarly-noisy cards seen live), and (2) Command Centre's task-suggestion pipeline (Phase 3.5), with an explicit instruction to investigate Phase 3.5's actual code first rather than assume it consumes the tiered dashboard output.
+
+**Investigation (Task 2), confirmed by reading the code, not assumed:** Phase 3.5 (`fetch_inbox.py` ~line 1242+) does **not** consume the `urgent`/`needs`/`fyi` card lists Phase 3.2/3.3 build at all. It independently re-derives its own candidate list via a fresh `categorise(m)` call on raw inbox messages, then sends those to a completely separate Anthropic call (`TRIAGE_SYSTEM`) that has no concept of `needs_reply`/`no_action_needed` whatsoever. So it genuinely needed a separate fix, not just a data-source swap.
+
+**Design (both tasks), Codex-reviewed twice (plan pass + diff pass), both passes' findings incorporated:**
+- Task 1: added a Phase 3.3b block mirroring Phase 3.3 exactly, operating on `urgent` instead of `needs` — no new AI call needed, since `summary_candidates = urgent + needs` already means Urgent cards get the same AI verdict fields Needs cards do.
+- Both demotion blocks now also collect demoted entry_ids into a shared `_noise_demoted_entry_ids` set (built only after each pass's tier/FYI lists are actually committed, per Codex's exception-safety catch — collecting mid-loop before commit could suppress a Phase 3.5 task for a card a later exception left un-demoted after all).
+- Task 2: rather than removing candidates from Phase 3.5's AI input entirely (which would also block legitimate `task_updates` — e.g. a no-action-needed email can still be genuine progress info against an existing tracked task), the fix filters at the **output** stage: skips a `new_tasks` suggestion whose source email's entry_id is in `_noise_demoted_entry_ids`, leaves `task_updates` completely untouched. Added an observable `suppressed_no_action` count to the `Phase 3.5 done` print line.
+- Codex's diff-review pass caught a real gap not in the original plan: Phase 5's suggestion carry-forward logic (~line 1892-1905 in the original) re-injects old persisted `new_tasks` suggestions across runs — without the same filter there, a noisy suggestion could keep resurfacing via carry-forward even after fresh Phase 3.5 output was correctly filtered. Fixed with the same `_noise_demoted_entry_ids` check in the carry-forward loop, own observable count.
+- Known, flagged limitation (not fixed, out of scope for this extension): `_noise_demoted_entry_ids` is process-local to each run — it has no memory of a past run's demotions, so a carried-forward suggestion whose source email has since scrolled out of the 50-newest-email inbox window (no longer in that run's `summary_candidates` at all) won't be caught. A full fix would need to persist demoted entry_ids across runs (e.g. in `triage_ledger.json`).
+
+**BLOCKED here, 12 Aug 2026:** the mandatory 3rd Codex pass (full end-to-end review across the whole file, checking cross-step consistency before shipping) failed — `codex exec` returned `401 Unauthorized` on the OpenAI responses endpoint, and `codex login status` confirms `Not logged in` despite a present `~/.codex/auth.json` (token expired/invalid, not missing). No `OPENAI_API_KEY` available in this shell to re-auth non-interactively; re-login requires an interactive browser OAuth flow this session can't perform. Retried once after a 15s wait — same result, not transient.
+
+**Per the standing "Codex is mandatory, no exceptions" rule and the estate-wide checkpoint protocol, stopped here rather than pushing without the 3rd pass or skipping live verification.** The code change itself (syntax-checked, 2 of 3 Codex passes clean) is fully built in this session's local scratchpad temp directory on this machine (session-scoped, not durable) — **not committed, not pushed, live `origin/main` is still exactly commit `0c18032`** (confirmed live via `gh api repos/begb0037admin/work-inbox/commits`).
+
+**A real, unrelated risk found and NOT touched:** the separate long-running local clone at `C:\Users\admin\Documents\Claude\Projects\work-inbox` (used for local `python fetch_inbox.py` runs) has pre-existing dirty `git status` state completely unrelated to this task — staged+unstaged diffs on `fetch_inbox.py` (normal churn from the `.bat` launchers' HTTP-download-overwrite pattern, not a git-tracked workflow) plus line-ending-only (LF/CRLF) diffs on `Run_Inbox_Briefing.bat` and `open_email.py` versus origin. Confirmed via `git diff origin/main` that the latter two are whitespace-only, not content changes. Did not stage, commit, or touch any of this — noting it so a future session doesn't mistake it for new work or accidentally sweep it into an unrelated commit.
+
+**Exact next action:** once Codex auth is restored (Kevin runs `codex login` interactively, or provides a way to refresh the token), run the 3rd (end-to-end) review pass using the prompt already prepared, fold in any findings, then: (1) push the fetch_inbox.py diff to GitHub main via the Contents API (matching the repo's own "GitHub is the only working surface" rule — do not commit via the stale local clone's git repo), (2) run the real pipeline locally (pull fresh from GitHub into the local run directory, `python fetch_inbox.py` against live Outlook, matching the established Phase 3.3 verification precedent), (3) pull the pushed `briefing.json` and `inbox_suggestions.json` back from GitHub (not the local file — confirmed gotcha from the 12 Aug session below) and get real before/after Urgent counts and `suppressed_no_action` counts, (4) update this HANDOVER with the verified result, same discipline as the Needs-tier fix.
+
+**Not done, on purpose:** nothing pushed; no live run yet; HANDOVER only updated with this blocker checkpoint, not a "done" claim.
+
+---
 
 ## Session 2026-08-12 (continued again) — Needs-tier noise demotion (Phase 3.3), Codex-reviewed x4, verified live twice (Drew)
 
