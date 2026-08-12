@@ -469,9 +469,24 @@ day3 = next_workday(day2)
 # if either changes.
 _DAY_VIEW_EXCLUDE_KEYWORDS = [
     "annual leave", "a/l", "on leave", "out of office", "ooo",
-    "holiday", "away", "sick leave"
+    "holiday", "away", "sick leave", "non-working day", "non working day"
 ]
 
+# "non-working day" / "non working day" -- confirmed live, 12 Aug 2026:
+# "Marie K: Non-working day" (People Department - HR Systems calendar, real
+# recurring entries incl. 13/14 Aug 2026) slipped through this exclusion and
+# showed up in the Tomorrow/Friday day-view columns. This is the SECOND
+# occurrence of this exact failure class -- a real leave-calendar phrasing
+# variant the keyword list hadn't seen yet -- the first being the bare "AL"
+# incident directly below (10 Aug 2026). Both terms added to this list, to
+# ABSENCE_KEYWORDS, and to ABSENCE_NOISE (further down) so the item is still
+# excluded from day-view but still correctly surfaces on the sidebar
+# Absences panel -- verified live as "Marie King - off tomorrow, returns
+# Friday 14 August" (Organizer field "Marie King" wins over the
+# cleaned-subject fallback "Marie K" here, per the existing organizer-
+# priority logic below) -- which is what Kevin wants. If a third phrasing
+# variant turns up, see the dedicated Outlook metadata proposal in
+# HANDOVER.md before adding a fourth keyword-list entry.
 # Bare "AL" abbreviation (no slash) -- confirmed live, 10 Aug 2026: two real
 # entries titled exactly "Michael - AL" (7 Aug and 10 Aug) slipped through
 # both this day-view exclusion and the sidebar ABSENCE_KEYWORDS check below,
@@ -866,11 +881,12 @@ def build_cal_items(items):
 # going to appear in a People Department leave calendar).
 ABSENCE_KEYWORDS = [
     "annual leave", "a/l", "on leave", "out of office", "ooo",
-    "holiday", "away", "sick leave"
+    "holiday", "away", "sick leave", "non-working day", "non working day"
 ]
 ABSENCE_NOISE = [
     "annual leave", "a/l", "on leave", "out of office", "ooo",
-    "holiday", "away", "sick leave", "leave"
+    "holiday", "away", "sick leave", "leave", "non-working day",
+    "non working day"
 ]
 absence_map = {}
 

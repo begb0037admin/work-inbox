@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-12 - Run-start timestamp logging (fetch_inbox.py + 4 tools/*.py + 2 Desktop .bat launchers) confirmed shipped and live-verified end to end. Checkpoint per new agent-commons SESSION_PROTOCOL.md. Closed.
+**Last updated:** 2026-08-12 - "Marie K: Non-working day" day-view leak fixed and verified live (SECOND occurrence of the keyword-list-gap failure class, after bare-"AL" on 10 Aug). Checkpoint per agent-commons SESSION_PROTOCOL.md. Closed.
 
 
 
@@ -53,6 +53,28 @@
 
 
 
+
+## Session 2026-08-12 (continued) — "Marie K: Non-working day" day-view leak fixed, verified live; SECOND occurrence of this failure class (Drew)
+
+**Scope:** Kevin spotted "Marie K: Non-working day" showing in the Tomorrow/Friday day-view calendar columns. He wants leave/absence entries excluded from the day-view columns entirely (he already has annual leave on the sidebar Absences panel) — same standing decision as the 10 Aug bare-"AL" fix.
+
+**Root cause:** `_DAY_VIEW_EXCLUDE_KEYWORDS` (and its sidebar counterparts `ABSENCE_KEYWORDS`/`ABSENCE_NOISE`) had `"annual leave", "a/l", "on leave", "out of office", "ooo", "holiday", "away", "sick leave"` plus the bare-`AL` regex, but no entry for "non-working day" — a real, recurring phrasing Marie King's leave bookings on the "People Department - HR Systems" calendar use (confirmed live via Outlook COM: `Marie K: Non-working day`, real recurring all-day entries going back to Nov 2024, including 13 and 14 Aug 2026 — exactly Kevin's reported Tomorrow/Friday columns). This is the **second** occurrence of this exact failure class — a real leave-phrasing variant the keyword list hadn't seen yet, not a new kind of bug. Worth recognizing fast if it happens a third time.
+
+**Fix, `fetch_inbox.py`:** added `"non-working day"` and `"non working day"` (hyphen and space variant, defensively — only the hyphenated form was found live) to all three keyword lists: `_DAY_VIEW_EXCLUDE_KEYWORDS` (excludes from day-view), `ABSENCE_KEYWORDS` (triggers sidebar Absences detection), and `ABSENCE_NOISE` (used by `_clean_absence_name()` to strip the phrase out of the display name during name-cleaning/splitting). All three needed the update, not just the first — read the actual code before assuming symmetry, per the brief: `ABSENCE_KEYWORDS`/`ABSENCE_NOISE` are for the sidebar panel Kevin explicitly wants this entry to keep appearing on, so this is a case where both lists needed the SAME new term added (unlike a hypothetical case where a day-view-only or sidebar-only term would need asymmetric treatment) — confirmed by tracing `_clean_absence_name()`'s split-on-`":"` logic by hand against the real subject "Marie K: Non-working day", which only produces the correct "Marie K" fallback name when "non-working day" is also in `ABSENCE_NOISE`.
+
+**Verified against real live data, twice independently (real Outlook COM pull, real GitHub push, no local-file assumptions):**
+- Ran `python fetch_inbox.py` directly (uncommitted local fix) twice against live Outlook. Both real production runs pushed successfully (commits `276cca48` and `a1289fad`).
+- Pulled each pushed commit's actual `data/briefing.json` content back from the GitHub API (not the local working copy — confirmed as a real gotcha this session, see below) and checked directly: `calToday`/`calTomorrow`/`calDay2`/`calDay3` all show zero "Marie" matches in both runs; sidebar `absences` correctly shows `"Marie King - off tomorrow, returns Friday 14 August"` — excluded from day-view, still present on the sidebar, exactly what Kevin wants.
+- Cross-checked against the pre-fix archived briefing (`data/archive/briefing_20260812_090349.json`, from the 09:00 scheduled run, before this fix): confirms "Marie K: Non-working day" genuinely was present in `calTomorrow`/`calDay2` before the fix, and genuinely absent after — a real before/after comparison, not just "the new code looks right."
+- Isolated unit-style check on the exact literal subject string pulled live from Outlook (`'Marie K: Non-working day'`, confirmed plain ASCII hyphen, no unicode lookalike): pre-fix keyword list → not excluded (the bug); post-fix keyword list → excluded. Matches the live production result.
+
+**A real verification gotcha hit and resolved this session, worth flagging for next time:** `fetch_inbox.py` never writes `data/briefing.json` to local disk — Phase 4 only pushes via the GitHub Contents API (`PUT`). Checking the local working-copy file after running the script directly (rather than via the Desktop `.bat`, which does a fresh `git checkout` afterward) shows stale pre-run data and will look like the fix isn't taking effect even when it is. Always re-pull from `raw.githubusercontent.com` (with a cache-buster) or `gh api repos/.../contents/...` after a direct `python fetch_inbox.py` run, not the local file.
+
+**Proposed, not built — flagging per "propose before non-trivial engineering":** since this is the second keyword-list gap in three days, checked whether Outlook's own calendar metadata could supplement subject-keyword matching. Real live comparison (`BusyStatus`, `Categories`, `Sensitivity`, `AllDayEvent` pulled directly via COM for both the People Dept - HR Systems calendar and Kevin's own calendar, same window): 13 of 14 real leave/absence entries on the People Dept calendar are `BusyStatus=0` (Free); every regular meeting checked on Kevin's own calendar is `BusyStatus=1` or `2` (Tentative/Busy) — a genuinely strong correlation. Not a clean signal on its own though: one real entry ("Julie annual leave", 13 Aug, non-all-day) is booked `BusyStatus=2` (Busy) despite being genuine leave, and `Categories`/`Sensitivity` showed no useful pattern at all (mostly empty/Normal across both leave and non-leave items). Proposal, if Kevin wants it: add `BusyStatus == 0` (Free) as an *additional* OR condition alongside the keyword lists (not a replacement — would still miss the one Busy-booked outlier found live), which would have caught "non-working day" the first time it appeared without needing a keyword-list update at all. Real engineering work (touches the Phase 1 calendar pull to capture `BusyStatus`, plus both detection paths, plus testing against a longer real history than this session's 3-day window) — not started, needs Kevin's go-ahead first.
+
+**Not done, on purpose:** the BusyStatus proposal above (needs a decision); no attempt to hunt for further undiscovered leave-phrasing variants beyond what's confirmed live.
+
+---
 
 ## Session 2026-08-12 — Run-start timestamp logging: verified live end to end, closed (Drew)
 
