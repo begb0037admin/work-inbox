@@ -226,16 +226,78 @@ def dt(com_time):
         return None
 
 def restrict_date(folder, cutoff_dt):
-    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%m/%d/%Y %I:%M %p") + "'"
+    """Returns items in `folder` received on/after cutoff_dt.
+
+    Root cause, live-confirmed 12 Aug 2026 (three standalone read-only COM
+    diagnostics against the real mailbox, no writes): Outlook COM's
+    Items.Restrict() parses the date embedded in the filter string using the
+    machine's LOCALE-specific day/month ordering, not the literal field order
+    written into the string -- the same underlying class of bug already
+    documented for calendar Restrict()+IncludeRecurrences on UK locale (see
+    CLAUDE.md "Key Constraints"). The old mm/dd/yyyy-formatted string (e.g.
+    '08/05/2026' for 5 Aug) was silently misread as dd/mm (8 May) on this
+    UK-locale machine whenever cutoff_dt.day <= 12 -- shifting the real
+    cutoff back by months, with Restrict() itself still "succeeding" (no
+    exception, a plausible-looking Count). Confirmed directly: for the real
+    7-day cutoff on 12 Aug 2026, the mm/dd/yyyy filter returned 562 items
+    with the oldest dated 8 May (3+ months old); the dd/mm/yyyy filter for
+    the EXACT SAME cutoff returned 63 items, oldest genuinely 5 Aug -- the
+    correct number. This -- not "Kevin's inbox is just big" -- is the real
+    reason the old >200-item heuristic existed and why it kept firing: a
+    misread date bound looks exactly like a big true 7-day window from the
+    Count alone, so Count was never a reliable signal either way.
+
+    Fixed at the actual source (dd/mm/yyyy, matching this machine's UK
+    locale) rather than patched around with a bigger magic number. A
+    defense-in-depth check is kept below in case Restrict() ever silently
+    fails for some other reason -- it inspects the actual date of the oldest
+    item returned (not the count) to decide whether the filter genuinely
+    applied, and the fallback below preserves the date cutoff via bounded
+    manual iteration instead of the old behaviour of discarding the cutoff
+    entirely and scanning the whole unbounded folder.
+    """
+    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%d/%m/%Y %I:%M %p") + "'"
     try:
         restricted = folder.Items.Restrict(filter_str)
-        if restricted.Count > 200:
-            raise Exception("Filter returned too many items - likely failed")
+        # Verify the date bound genuinely applied by checking the single
+        # oldest item actually returned, rather than trusting Count. Uses a
+        # separate Restrict() call so sorting this check doesn't disturb the
+        # iteration order of `restricted`, which is returned to the caller
+        # unchanged on the healthy path.
+        check = folder.Items.Restrict(filter_str)
+        check.Sort("[ReceivedTime]", False)  # ascending -- oldest first
+        oldest = check.GetFirst()
+        if oldest is not None:
+            oldest_dt = dt(oldest.ReceivedTime)
+            # 6-hour grace window absorbs timezone/rounding noise around the
+            # boundary itself -- not a loophole for a genuinely stale filter.
+            if oldest_dt and oldest_dt < (cutoff_dt - timedelta(hours=6)):
+                raise Exception(
+                    f"restrict_date: Restrict() returned an item ({oldest_dt}) "
+                    f"older than the requested cutoff ({cutoff_dt}) - filter did not apply"
+                )
         return restricted
-    except:
+    except Exception:
+        # Bounded fallback: manual date-checked iteration, newest first,
+        # stopping as soon as an item older than cutoff_dt is reached --
+        # preserves the date cutoff instead of the old unrestricted full-
+        # folder scan (the actual cause of items up to 4.5 months old
+        # reaching FYI). Comparison is done in plain Python datetimes via
+        # dt(), so it is immune to the Restrict()-string locale issue above.
         items = folder.Items
-        items.Sort("[ReceivedTime]", True)
-        return items
+        items.Sort("[ReceivedTime]", True)  # descending -- newest first
+        bounded = []
+        item = items.GetFirst()
+        while item is not None:
+            try:
+                item_dt = dt(item.ReceivedTime)
+                if item_dt and item_dt < cutoff_dt:
+                    break
+                bounded.append(item)
+            except Exception:
+                pass
+            item = items.GetNext()
+        return bounded
 
 # -- Phase 1 -- pull Outlook data --
 log("Phase 1 - pulling Outlook data...")
@@ -1051,6 +1113,90 @@ elif summary_candidates:
     print("Phase 3.2 skipped - Anthropic is unavailable")
 else:
     print("Phase 3.2 skipped - no urgent/needs emails")
+
+# -- Phase 3.3c -- FYI thread-collapse + explicit aging, 12 Aug 2026 --
+# Kevin approved cleanup for two more documented FYI/Parked symptoms once the
+# true root cause (the restrict_date() locale bug + unbounded VIP sweep
+# above) was fixed at the source: (1) 47% of the pre-existing FYI baseline
+# was duplicate "RE:"/"FW:" threads with no thread-collapsing anywhere in
+# the pipeline (documented live example: "RE: HR Systems Managers Meeting"
+# x8); (2) cards landing in FYI via the Phase 3.3/3.3b demotion logic above
+# had no downstream cleanup, so they could accumulate indefinitely if a
+# future regression ever reopened the date-bound bug fixed above. Placed
+# outside the `if summary_candidates and anthropic_available:` block above
+# so it always runs -- thread duplication and cutoff-based aging are both
+# real regardless of whether the AI summary/demotion phases ran this time.
+fyi_raw_count = len(fyi)
+try:
+    # (1) Thread/subject dedup. Normalizes by repeatedly stripping leading
+    # Re:/Fw:/Fwd: prefixes (handles "Re: Fw: ..." chains, case-insensitive)
+    # and collapsing whitespace/case, then keeps a single card per thread --
+    # the most recently received one -- with an explicit messageCount so the
+    # collapse is visible to the dashboard rather than a silent reduction
+    # (see the corresponding js/app.js change, same session).
+    _RE_FWD_PREFIX = re.compile(r'^\s*(re|fw|fwd)\s*:\s*', re.IGNORECASE)
+
+    def _thread_key(card):
+        s = (card.get("subject") or "").strip().lower()
+        s = re.sub(r'\s+', ' ', s)
+        while True:
+            new_s = _RE_FWD_PREFIX.sub('', s).strip()
+            if new_s == s:
+                break
+            s = new_s
+        return s or ("id:" + str(card.get("entry_id", "")))
+
+    threads = {}
+    thread_order = []
+    for card in fyi:
+        key = _thread_key(card)
+        if key not in threads:
+            card["messageCount"] = 1
+            threads[key] = card
+            thread_order.append(key)
+        else:
+            existing = threads[key]
+            new_count = existing.get("messageCount", 1) + 1
+            try:
+                is_newer = str(card.get("received_raw") or "") > str(existing.get("received_raw") or "")
+            except Exception:
+                is_newer = False
+            if is_newer:
+                card["messageCount"] = new_count
+                threads[key] = card
+            else:
+                existing["messageCount"] = new_count
+
+    fyi = [threads[k] for k in thread_order]
+    collapsed_count = fyi_raw_count - len(fyi)
+
+    # (2) Explicit age cutoff, belt-and-braces on top of the restrict_date()
+    # fix above (not a replacement for it). Consistent with the pipeline's
+    # own existing precedent of date-bounding again at the point of use
+    # rather than trusting an upstream pull to stay bounded forever (see
+    # STALENESS_CUTOFF_DAYS elsewhere in this file, and Lauren's 60-day
+    # drafting-age cutoff in the sibling meeting-records pipeline). If the
+    # date-bound fix above ever regresses, this still stops FYI from quietly
+    # accumulating months-old cards with nothing removing them.
+    FYI_MAX_AGE_DAYS = 7
+    _fyi_age_cutoff = datetime.now() - timedelta(days=FYI_MAX_AGE_DAYS)
+    _fyi_before_age_filter = len(fyi)
+
+    def _fyi_card_recent_enough(card):
+        try:
+            rd = str(card.get("received_raw") or "")
+            t = datetime.fromisoformat(rd.split("+")[0].split(" (")[0].strip())
+            return t >= _fyi_age_cutoff
+        except Exception:
+            return True  # can't parse -- don't silently drop a real card
+
+    fyi = [c for c in fyi if _fyi_card_recent_enough(c)]
+    aged_out_count = _fyi_before_age_filter - len(fyi)
+
+    print(f"Phase 3.3c done - FYI thread-collapse: {fyi_raw_count} raw -> {len(fyi)} threads "
+          f"({collapsed_count} collapsed), {aged_out_count} aged out (>{FYI_MAX_AGE_DAYS}d)")
+except Exception as fyi_clean_err:
+    print(f"WARNING: Phase 3.3c FYI thread-collapse/aging failed, FYI left unchanged - {fyi_clean_err}")
 
 # -- Calendar post-processing --
 KNOWN_ABSENCES = []
@@ -1875,6 +2021,7 @@ briefing = {
     "urgent":       urgent,
     "needs":        needs,
     "fyi":          fyi,
+    "fyiRawCount":  fyi_raw_count,
     "low":          low,
     "calToday":     cal_today_items,
     "calTomorrow":  cal_tomorrow_items,
