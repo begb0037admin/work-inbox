@@ -1,15 +1,14 @@
 {
-  "generated_at": "2026-08-12 11:00",
+  "generated_at": "2026-08-12 11:11",
   "new_tasks": [
     {
-      "title": "Confirm support coverage for Marie's absence today",
-      "tier": "today",
-      "description": "Marie Cooksey is unwell and not working for the rest of today (Wednesday 12 August). Kevin should confirm what urgent support coverage is needed and delegate or handle critical items.",
-      "email_subject": "Marie C not working",
+      "title": "Advise Marie on GLAM joining 38-day balance scheme",
+      "tier": "week",
+      "description": "Marie Cooksey is seeking Kevin's input on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Kevin needs to provide thoughts and advice to inform the decision, pending cross-charging setup timelines.",
+      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
       "email_from": "Marie Cooksey",
-      "received": "2026-08-12 10:19",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A8967C710000",
-      "auto_promoted": true
+      "received": "2026-08-11 13:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995740000"
     },
     {
       "title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
@@ -44,13 +43,13 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608111719550",
-      "task_title": "Follow up on Oxford Uni Pre-project Authentication call",
-      "note": "Alex Manton-Jones follow-up email received on the pre-project authentication call held 11 August; Kevin needs to review full content and determine action items.",
-      "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
-      "email_from": "Alex Manton-Jones",
-      "received": "2026-08-11 16:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629957D0000"
+      "task_id": "t2608121100230",
+      "task_title": "Confirm support coverage for Marie's absence today",
+      "note": "Marie is unwell and not working for the rest of today (Wednesday 12 August); Kevin should confirm urgent support coverage needs.",
+      "email_subject": "Marie C not working",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-12 10:19",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A8967C710000"
     }
   ]
 }
