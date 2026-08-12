@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-12 - "Marie K: Non-working day" day-view leak fixed and verified live (SECOND occurrence of the keyword-list-gap failure class, after bare-"AL" on 10 Aug). Checkpoint per agent-commons SESSION_PROTOCOL.md. Closed.
+**Last updated:** 2026-08-12 - Needs-tier noise demotion (Phase 3.3) built, Codex-reviewed x4, verified live twice (110 -> 23 Needs cards). Checkpoint per agent-commons SESSION_PROTOCOL.md. Closed.
 
 
 
@@ -53,6 +53,34 @@
 
 
 
+
+## Session 2026-08-12 (continued again) — Needs-tier noise demotion (Phase 3.3), Codex-reviewed x4, verified live twice (Drew)
+
+**Scope:** Kevin, reviewing his real inbox after the Marie K fix above, said "there seems to be a lot of emails that require a response." Investigated with real data first (164 urgent+needs cards, only 4 flagged `needs_reply: true`) — found no evidence of a classifier bug, but Kevin's own follow-up reframed the actual complaint: "maybe these don't need to be my work inbox dashboard either" — i.e. the Urgent/Needs *tiering itself* is noisy, not the reply-flagging. Confirmed: `categorise()` (Phase 3) tiers purely by subject-keyword + read/unread rules, before any AI reads the content — colleague-to-colleague threads Kevin is only cc'd on land in Needs by keyword match (`"re:"`, `"chasing"`, `"follow"`, etc.) regardless of whether he personally needs to do anything. Kevin confirmed: "Yes if it's gonna clear the noise."
+
+**This was real engineering work, not a keyword tweak — full Codex-mandatory process followed, 4 read-only review passes (the standing cap):**
+
+1. **Plan review** — Codex confirmed placement/object-reuse was safe, caught that `needs[:] = still_needs` was unnecessary (no aliasing), and flagged the main risk early: `needs_reply=false` conflates three different states in the existing Phase 3.2 prompt ("read it", "take an offline action", or "do nothing") — using it alone as a demotion trigger risked hiding genuinely actionable items that just don't need a *written reply*.
+2. **Diff review (v1)** — built with a `needs_reply=false AND ai_summary text contains "no action needed"` combined condition as a safety margin (validated against one live snapshot: 98/108 matches). Codex caught a real exception-safety bug: the loop mutated `needs`/`fyi` card-by-card during iteration and only reassigned `needs` at the end, so a mid-loop exception (e.g. non-string `received_raw` breaking the later sort) could leave cards duplicated across both lists and leak an internal tracking field into public `briefing.json`. Fixed with local temp lists committed atomically, wrapped in its own try/except, cleanup moved to `finally`.
+3. **Final pass (v2)** — Codex signed off the exception-safety fix as production-ready, confirmed downstream consumers (Phase 3.5's Command Centre triage independently re-derives its own list via `categorise()`, `validate_briefing_update()` only checks calendar/absence counts) were unaffected.
+4. **Live run after pass 3 found a real bug pass-review couldn't catch:** ran the actual pipeline against real Outlook — **0 demotions**, despite Codex having signed off the design. Root cause: the "no action needed" text-match heuristic depended on the AI's *non-deterministic freeform wording* — a fresh run of the same underlying judgement produced "Kevin is cc'd only" instead of the literal phrase, 0/108 matches this time vs 98/108 in the earlier snapshot used to validate the design. Same brittleness class as the Marie K keyword-gap fixed earlier the same session — chasing wording variants is a losing game. **Redesigned:** replaced the text heuristic with a genuine structured signal — added an explicit `no_action_needed` boolean field to the Phase 3.2 AI response schema (`EMAIL_SUMMARY_SYSTEM` prompt), parsed and validated the same defensive way `needs_reply` already was, with `_ai_verdict_valid` now requiring both fields to be genuine booleans in a real dict response.
+5. **Pass 4 (final planned Codex pass)** — reviewed the redesign, found 3 more real issues, all fixed before shipping: (a) `max_tokens=8000` left uncomfortably little headroom for 165 candidates × 3 fields now, raised to 14000; (b) the cc-only default told the model to default `no_action_needed: true` too broadly — a cc'd thread can still need review/approval even without a direct question, tightened the prompt; (c) a contradictory model verdict (`needs_reply: true` AND `no_action_needed: true` both true) would pass type-validation and, after the staleness override flips `needs_reply` to false, become an eligible-looking demotion candidate despite never being a coherent verdict — added an explicit rejection for that combination in `_ai_verdict_valid`.
+6. **My own live re-test after applying pass 4's fixes found one more issue Codex couldn't have caught (it doesn't run the live pipeline):** raising `max_tokens` without also raising the call's timeout hit the client's global 60s default (`anthropic.Anthropic(timeout=60.0)`) — real `"Request timed out or interrupted"` on a live 165-entry payload. Added a per-call `timeout=150.0` override scoped to just this one call (by far the largest/longest in the file), not the global client default.
+
+**At the 4-Codex-pass cap after this** (the standing rule: 4 passes on the same task, then stop iterating solo) — the timeout fix in step 6 was mechanical and narrowly scoped (an SDK-documented per-call override, direct fix for an observed error message), so verified it directly via a third live run rather than spending a 5th Codex pass.
+
+**Verified against real live data, twice (not "should work"):**
+- Run 4 (broken, informative): 0 demotions — proved the text-heuristic redesign was necessary, not theoretical.
+- Run 5 (broken, informative): Phase 3.2 itself failed with a timeout — proved the max_tokens/timeout coupling issue.
+- Run 6 (clean): **`Phase 3.3 done - 87 Needs card(s) demoted to FYI`**. Pulled the actual pushed `briefing.json` back from GitHub: `needs` 110 → 23, `fyi` +87 (328 → 415), `urgent` unchanged at 55 (never touched, per scope decision), no internal `_ai_verdict_valid` field leaked into any card in the public JSON. Every remaining Needs card genuinely has `needs_reply: true` or `no_action_needed: false` (a real offline action still open) — spot-checked and none look like an obvious miss.
+
+**Deliberate scope boundaries, flagged to Kevin, not silently dropped:**
+- Only demotes from **Needs**, never **Urgent** — ~9 similarly-noisy cards were seen live in Urgent this session (importance-flagged or urgent-keyword-matched mail from colleague threads), not touched. Possible follow-up if Kevin wants it.
+- Does **not** touch Phase 3.5's Command Centre task-suggestion triage (~line 1121+), which independently re-derives its own candidate list via a fresh `categorise()` call on raw inbox messages and has no `needs_reply`/`no_action_needed` field to consult in its current form — demoted cards are still considered there for CC task suggestions.
+
+**Commit:** `74ea07a` (rebased/pushed as `b071cb0`). Full diff in `fetch_inbox.py` Phase 3.2/3.3 (~lines 707-1010).
+
+---
 
 ## Session 2026-08-12 (continued) — "Marie K: Non-working day" day-view leak fixed, verified live; SECOND occurrence of this failure class (Drew)
 
