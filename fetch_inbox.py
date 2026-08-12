@@ -760,20 +760,35 @@ if summary_candidates and anthropic_available:
             "needs him to read it, take an offline action, or do nothing at all (e.g. a system "
             "notification, an FYI, a failed-import alert, a case update that doesn't ask him anything "
             "directly).\n"
+            "Also decide no_action_needed: true ONLY if Kevin genuinely has nothing to do with this "
+            "email at all - a pure FYI, an automated notification, a colleague-to-colleague thread "
+            "he's just cc'd on for visibility, a status update that doesn't need him to act. false if "
+            "needs_reply is true, OR if Kevin needs to do anything else even without writing a reply - "
+            "review something, approve something, action a request personally, follow up with someone, "
+            "or respond to a meeting invite that's specifically asking for his availability/decision. "
+            "no_action_needed must always be false whenever needs_reply is true - never set both true.\n"
             "Weigh two extra signals given for each email:\n"
             "- kevin_is_primary_recipient: false means Kevin was only cc'd, not directly addressed. "
             "Default toward needs_reply: false for cc-only threads UNLESS the content clearly still "
             "asks Kevin himself something directly (e.g. someone names him and asks a question even "
-            "on a cc'd thread) - don't flip to false mechanically, use judgement.\n"
+            "on a cc'd thread) - don't flip mechanically, use judgement. Being cc'd does NOT by itself "
+            "mean no_action_needed: true - a cc'd thread can still need Kevin to review, approve, or "
+            "follow up on something even without a direct question. Only set no_action_needed: true "
+            "for a cc'd thread when it's genuinely visibility-only (e.g. two other people confirming "
+            "something between themselves that doesn't involve a decision or action of Kevin's) - if "
+            "in doubt whether a cc'd thread needs Kevin to do something, leave no_action_needed: "
+            "false.\n"
             "- age_days: how many days old the email is. Default toward needs_reply: false for "
             "anything genuinely old (multiple weeks+) - an unanswered thread that old is more likely "
             "already resolved elsewhere than still genuinely awaiting Kevin's reply.\n"
-            "Return ONLY a valid JSON object mapping the given short id to an object with 'summary' "
-            "and 'needs_reply' - no preamble, no markdown.\n"
+            "Return ONLY a valid JSON object mapping the given short id to an object with 'summary', "
+            "'needs_reply' and 'no_action_needed' - no preamble, no markdown.\n"
             'Example: {"0": {"summary": "Marie confirms funding approved for SBS exclusion from '
-            'the DSE feed; no action needed from Kevin.", "needs_reply": false}, "1": '
-            '{"summary": "James is asking whether the FA KPI meeting can move to Thursday.", '
-            '"needs_reply": true}}'
+            'the DSE feed; no action needed from Kevin.", "needs_reply": false, "no_action_needed": '
+            'true}, "1": {"summary": "James is asking whether the FA KPI meeting can move to '
+            'Thursday.", "needs_reply": true, "no_action_needed": false}, "2": {"summary": '
+            '"Christopher forwards the tender evaluation pack and needs Kevin to review and sign off '
+            'before Friday.", "needs_reply": false, "no_action_needed": false}}'
         )
         email_summary_user = (
             f"Today is {today_str}.\n\n"
@@ -781,7 +796,28 @@ if summary_candidates and anthropic_available:
         )
         es_resp = client.messages.create(
             model      = "claude-haiku-4-5",
-            max_tokens = 8000,
+            # Raised 8000 -> 14000, 12 Aug 2026: the 10 Aug incident that
+            # first hit stop_reason=max_tokens on this call used 5947/8000
+            # for 157 entries x 2 fields (summary, needs_reply). Adding the
+            # no_action_needed field (Phase 3.3 demotion work, same day)
+            # brings this call to a real live inbox size of 165 entries x 3
+            # fields -- flagged by Codex review as leaving uncomfortably
+            # little headroom against a repeat of that exact failure mode,
+            # not yet re-tested against a real payload at this size before
+            # this change, so erring toward more headroom rather than
+            # waiting to find out live.
+            max_tokens = 14000,
+            # Per-call override, 12 Aug 2026: raising max_tokens above
+            # without also giving the call more wall-clock time doesn't
+            # actually help -- confirmed live the same session, this exact
+            # call failed with "Request timed out or interrupted" against
+            # the global `client = anthropic.Anthropic(timeout=60.0)`
+            # default (line ~551) immediately after the max_tokens increase
+            # above, on a real 165-entry payload. Scoped to this one call
+            # only (not raising the global client timeout) since this is by
+            # far the largest-volume/longest call in the file and the other
+            # client.messages.create() call sites haven't shown this issue.
+            timeout    = 150.0,
             system     = EMAIL_SUMMARY_SYSTEM,
             messages   = [{"role": "user", "content": email_summary_user}]
         )
@@ -809,26 +845,147 @@ if summary_candidates and anthropic_available:
             entry = email_summaries.get(str(i))
             if entry is None:
                 continue
-            # Defensive: accept either the new {summary, needs_reply} shape or,
-            # if the model ever reverts to a bare string, treat that as
-            # needs_reply defaulting to False rather than crashing the phase.
+            # Defensive: accept either the new {summary, needs_reply,
+            # no_action_needed} shape or, if the model ever reverts to a
+            # bare string, treat that as needs_reply/no_action_needed both
+            # defaulting to False rather than crashing the phase.
+            # Track whether this was a genuine, schema-valid AI verdict (a
+            # real dict response with actual booleans for BOTH needs_reply
+            # and no_action_needed) versus one of the defensive fallback
+            # paths above (bare-string response, or a dict missing/
+            # mistyping either field) -- fallbacks also land on False, but
+            # that's a "we don't actually know" default, not a real AI
+            # judgement. Phase 3.3 below must only ever act on the genuine
+            # case -- see its own comment for why this distinction matters.
+            # Also reject a contradictory model verdict (needs_reply=true
+            # AND no_action_needed=true at the same time -- the prompt tells
+            # the model never to do this, but nothing enforces it) as
+            # invalid too. Checked against the RAW entry here, before the
+            # staleness override below can run -- that override only ever
+            # flips needs_reply true->false, which would otherwise turn an
+            # already-contradictory {true, true} pair into a {false, true}
+            # pair that looks like a clean demotion candidate despite never
+            # having been a coherent verdict to begin with.
+            c["_ai_verdict_valid"] = (
+                isinstance(entry, dict)
+                and isinstance(entry.get("needs_reply"), bool)
+                and isinstance(entry.get("no_action_needed"), bool)
+                and not (entry.get("needs_reply") is True and entry.get("no_action_needed") is True)
+            )
+
             if isinstance(entry, dict):
                 c["ai_summary"] = entry.get("summary", "")
                 nr = entry.get("needs_reply", False)
                 c["needs_reply"] = bool(nr) if isinstance(nr, bool) else False
+                na = entry.get("no_action_needed", False)
+                c["no_action_needed"] = bool(na) if isinstance(na, bool) else False
             else:
                 c["ai_summary"] = str(entry)
                 c["needs_reply"] = False
+                c["no_action_needed"] = False
 
             age = _age_days(c)
             if c["needs_reply"] and age is not None and age > STALENESS_CUTOFF_DAYS:
                 c["needs_reply"] = False
                 stale_overridden += 1
+                # Staleness forces needs_reply true->false as a deterministic
+                # override, but says nothing about whether Kevin still has
+                # some OTHER action to take -- an old, stale-flagged thread
+                # isn't necessarily a pure FYI. Leave no_action_needed as
+                # whatever the model itself said, don't infer it from this.
 
             applied += 1
             if c["needs_reply"]:
                 needs_reply_count += 1
         print(f"Phase 3.2 done - {applied} email summaries generated, {needs_reply_count} flagged needs_reply ({stale_overridden} overridden false for being older than {STALENESS_CUTOFF_DAYS} days)")
+
+        # -- Phase 3.3 -- demote AI-confirmed no-action cards out of Needs --
+        # Kevin's explicit request, 12 Aug 2026: Phase 3's categorise() (the
+        # urgent/needs/fyi/low split above) runs BEFORE any AI involvement,
+        # on subject-keyword + read/unread rules alone ("re:", "chasing",
+        # "follow", etc.) -- it has no idea whether Kevin himself needs to
+        # act, only whether the subject looks actionable. That's why
+        # colleague-to-colleague threads he's only cc'd on land in Needs by
+        # keyword match, even though this same Phase 3.2 AI pass -- reading
+        # the actual content a few seconds later -- correctly judges most of
+        # them needs_reply=false.
+        #
+        # REVISION, same session: the first version of this demotion used
+        # needs_reply=False AND the model's summary text literally
+        # containing "no action needed" as a second safety check. That text
+        # heuristic looked solid against one live snapshot (98/108 of that
+        # run's needs_reply=false Needs cards used that exact phrase) but
+        # failed completely on the very next live run -- the model's
+        # freeform wording is not deterministic between calls, and a
+        # same-content re-run produced 0/108 matches (different phrasing,
+        # e.g. "Kevin is cc'd only" instead of "no action needed"). Relying
+        # on exact-text matching against non-deterministic LLM prose is the
+        # same brittleness class as the subject-keyword-list gap fixed
+        # earlier today (Marie K "non-working day") -- chasing wording
+        # variants is a losing game. Replaced with a real structured signal
+        # instead: the model now returns an explicit `no_action_needed`
+        # boolean alongside `needs_reply` (see EMAIL_SUMMARY_SYSTEM above),
+        # not inferred from prose at all.
+        #
+        # Deliberately conservative on two remaining axes, checked against a
+        # Codex read-only review before building (12 Aug 2026):
+        # 1. Only demotes from Needs, never Urgent -- Urgent is importance-
+        #    flagged or urgent-keyword-matched mail; demoting away from it
+        #    is a materially higher-risk call than Needs, and wasn't what
+        #    Kevin asked for. ~9 similarly-noisy Urgent cards were seen live
+        #    this session -- flagged to Kevin as a possible separate
+        #    follow-up, not touched here.
+        # 2. Requires `_ai_verdict_valid` is True -- i.e. the model returned
+        #    a genuine dict response with real booleans for BOTH
+        #    needs_reply and no_action_needed, not one of the defensive
+        #    fallback paths above (bare-string response, missing/mistyped
+        #    field). Those fallbacks default both to False as a "we don't
+        #    know" case, not a real verdict, and must never drive a
+        #    demotion.
+        # Does NOT touch Phase 3.5's separate Command Centre task-suggestion
+        # triage (~line 1121+), which independently re-derives its own
+        # candidate list via a fresh categorise(m) call on raw inbox
+        # messages and has no needs_reply/no_action_needed field to consult
+        # at all in its current form -- demoted cards are still considered
+        # there. Flagged to Kevin as a distinct, unfixed scope boundary, not
+        # silently dropped.
+        # Exception-safety, added after a Codex review of this exact block
+        # caught a real bug: an earlier version mutated `needs`/`fyi`
+        # card-by-card DURING the loop and only reassigned `needs =
+        # still_needs` at the end, so an exception partway through (e.g. a
+        # non-string received_raw breaking the later sort) would leave some
+        # cards already appended to `fyi` while `needs` still held them too
+        # -- a real duplicate-card bug -- and would also skip the internal-
+        # field cleanup below, leaking it into the public briefing.json.
+        # Fixed by building into local temp lists first and only committing
+        # to `needs`/`fyi` after the whole pass succeeds, wrapping the whole
+        # thing in its own try/except so a failure here can never take down
+        # Phase 3.2's already-good results, and moving cleanup into
+        # `finally` so it always runs regardless of outcome.
+        try:
+            demoted_count = 0
+            still_needs = []
+            newly_fyi = []
+            for card in needs:
+                if card.get("_ai_verdict_valid") and card.get("needs_reply") is False and card.get("no_action_needed") is True:
+                    card["badge"], card["badgeType"] = badge_for(card, "fyi")
+                    newly_fyi.append(card)
+                    demoted_count += 1
+                else:
+                    still_needs.append(card)
+            needs = still_needs
+            fyi.extend(newly_fyi)
+            if demoted_count:
+                try:
+                    fyi.sort(key=lambda c: str(c.get("received_raw") or ""), reverse=True)
+                except Exception as sort_err:
+                    print(f"WARNING: Phase 3.3 FYI re-sort failed, order preserved as-is - {sort_err}")
+                print(f"Phase 3.3 done - {demoted_count} Needs card(s) demoted to FYI (AI-confirmed no action needed)")
+        except Exception as demote_err:
+            print(f"WARNING: Phase 3.3 demotion failed, Needs left unchanged - {demote_err}")
+        finally:
+            for card in (urgent + needs + fyi + low):
+                card.pop("_ai_verdict_valid", None)
     except Exception as e:
         print(f"WARNING: Phase 3.2 AI email summaries failed - {e}")
 elif summary_candidates:
