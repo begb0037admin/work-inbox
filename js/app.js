@@ -417,9 +417,48 @@ function priDragStart(e,sec,priKey){
   _priDragDropped=false;
   e.dataTransfer.effectAllowed='move';
   e.dataTransfer.setData('text/plain',priKey);
+  // Consistent drag ghost across Chrome/Edge/Firefox -- fixed 12 Aug 2026
+  // per wi-dragdrop-review-12aug.md Tier 1. Without setDragImage(), each
+  // browser renders its own default ghost (a snapshot of the card taken at
+  // dragstart) while priCardDragOver/priZoneDragOver simultaneously live-move
+  // the *real* dragged node in the DOM for reorder preview -- so the user
+  // sees a static browser ghost and a moving blue-bordered real card at the
+  // same time, which is exactly the "card visually snaps around
+  // unpredictably" complaint. Using an explicit offscreen clone, anchored to
+  // the cursor's original grab point within the card, makes the ghost
+  // identical across browsers and independent of the live reorder.
+  try{
+    const rect=_priDragEl.getBoundingClientRect();
+    const ghost=_priDragEl.cloneNode(true);
+    ghost.style.position='absolute';
+    ghost.style.top='-9999px';
+    ghost.style.left='-9999px';
+    ghost.style.width=rect.width+'px';
+    ghost.style.pointerEvents='none';
+    ghost.style.margin='0';
+    ghost.classList.remove('pri-dragging');
+    document.body.appendChild(ghost);
+    // Cleanup must run whether setDragImage succeeds or throws (e.g.
+    // unsupported), otherwise a failed call leaks the offscreen clone --
+    // Codex review finding, 12 Aug 2026: cleanup was previously registered
+    // only after a successful call.
+    try{
+      e.dataTransfer.setDragImage(ghost,e.clientX-rect.left,e.clientY-rect.top);
+    }finally{
+      setTimeout(()=>{ghost.remove();},0);
+    }
+  }catch(err){/* setDragImage unsupported/element issue -- falls back to browser default ghost */}
   setTimeout(()=>{if(_priDragEl)_priDragEl.classList.add('pri-dragging');},0);
 }
 function priDragEnd(e){
+  // Flush any pending, not-yet-applied reorder from the last dragover event
+  // before reading DOM order for persistence -- otherwise a fast
+  // drop/release right after the final dragover (before the next animation
+  // frame fires) would persist the pre-preview position instead of what was
+  // last previewed. Codex review finding, 12 Aug 2026.
+  if(_priReorderRAF!=null){cancelAnimationFrame(_priReorderRAF);_priReorderRAF=null;}
+  _priRunReorderFrame();
+  _priPendingReorder=null;
   if(_priDragEl)_priDragEl.classList.remove('pri-dragging');
   document.querySelectorAll('.pri-drop-zone.pri-zone-active').forEach(el=>el.classList.remove('pri-zone-active'));
   if(_priDragDropped){
@@ -444,20 +483,89 @@ function emailCardDragEnd(e){
   _emailDragData=null;
   document.querySelectorAll('.pri-drop-zone.pri-zone-active').forEach(el=>el.classList.remove('pri-zone-active'));
 }
+// --- rAF-batched reorder with hysteresis -- fixed 12 Aug 2026 per
+// wi-dragdrop-review-12aug.md Tier 1. priCardDragOver/priZoneDragOver used
+// to run a synchronous getBoundingClientRect() + DOM move on every single
+// native dragover event, which browsers fire at high frequency while the
+// pointer moves -- a per-event reflow+mutation that produces visible
+// stutter on long lists (FYI/Parked has been measured elsewhere this
+// session-cluster at up to ~290 displayed cards). Now each dragover just
+// records the latest pointer/target and schedules a single
+// requestAnimationFrame callback (a no-op if one is already pending) that
+// performs at most one reorder decision + DOM mutation per frame. The
+// midpoint-only before/after boundary check (e.clientY<rect.top+rect.height/2)
+// also had no hysteresis, so hovering near a card's vertical centre could
+// flip the insertion point back and forth every event -- a buffer band
+// around the midpoint plus a per-target "last committed side" memory now
+// only flips the decision once the pointer is clearly past the midpoint,
+// not right at it.
+//
+// Pending state is a SINGLE directive (card-hover or zone-hover), not two
+// independent ones -- Codex review finding, 12 Aug 2026: two independent
+// pending records let one rAF callback apply a stale card-hover mutation
+// followed by a newer zone-hover mutation in the same frame (two DOM
+// mutations instead of one, and the stale one could momentarily win). Only
+// the most recent dragover -- whichever type it was -- is kept.
+let _priReorderRAF=null;
+let _priPendingReorder=null; // {type:'card',target,zoneSec,clientY} | {type:'zone',zone} | null
+const _priHysteresisFrac=0.15; // 15% of card height either side of midpoint
+let _priLastBefore=new WeakMap(); // target el -> last committed before/after decision
+
+function _priScheduleReorderFrame(){
+  if(_priReorderRAF!=null)return;
+  _priReorderRAF=requestAnimationFrame(_priRunReorderFrame);
+}
+function _priRunReorderFrame(){
+  _priReorderRAF=null;
+  const pending=_priPendingReorder;
+  _priPendingReorder=null;
+  if(!_priDragState||!_priDragEl||!pending)return;
+  if(pending.type==='card'){
+    const{target,zoneSec,clientY}=pending;
+    if(target!==_priDragEl&&target.isConnected){
+      const zone=document.querySelector(`.pri-drop-zone[data-sec="${zoneSec}"]`);
+      if(zone){
+        const r=target.getBoundingClientRect();
+        const mid=r.top+r.height/2;
+        const buffer=r.height*_priHysteresisFrac;
+        let before;
+        if(clientY<mid-buffer)before=true;
+        else if(clientY>mid+buffer)before=false;
+        else before=_priLastBefore.has(target)?_priLastBefore.get(target):(clientY<mid);
+        _priLastBefore.set(target,before);
+        zone.insertBefore(_priDragEl,before?target:target.nextSibling);
+      }
+    }
+  }else if(pending.type==='zone'){
+    const{zone}=pending;
+    if(zone&&_priDragEl&&!zone.contains(_priDragEl))zone.appendChild(_priDragEl);
+  }
+}
 function priCardDragOver(e,sec,priKey){
   if(!_priDragState&&!_emailDragData)return;
   e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect='move';
   if(_priDragState&&_priDragEl){
     const target=e.currentTarget;
     if(target===_priDragEl)return;
-    const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
-    if(!zone)return;
-    const r=target.getBoundingClientRect();
-    const before=e.clientY<r.top+r.height/2;
-    zone.insertBefore(_priDragEl,before?target:target.nextSibling);
+    _priPendingReorder={type:'card',target,zoneSec:sec,clientY:e.clientY};
+    _priScheduleReorderFrame();
   }
 }
-function priCardDragLeave(e,priKey){}
+function priCardDragLeave(e,priKey){
+  // Clear a pending reorder if it targets the card being left -- otherwise
+  // a deferred frame could still reorder against a card the pointer is no
+  // longer hovering (Codex review, pass 1). Guard against the parent->child
+  // dragleave/dragenter pair the browser fires when the pointer moves onto
+  // a NESTED element inside the same card (title text, action buttons,
+  // etc) -- relatedTarget still sits inside e.currentTarget in that case,
+  // so it is not a real "left the card" event, and clearing on it would
+  // wipe an otherwise-valid pending reorder before it gets a chance to
+  // flush (Codex review, pass 3).
+  if(e.currentTarget&&e.currentTarget.contains&&e.currentTarget.contains(e.relatedTarget))return;
+  if(_priPendingReorder&&_priPendingReorder.type==='card'&&_priPendingReorder.target===e.currentTarget){
+    _priPendingReorder=null;
+  }
+}
 function priCardDrop(e,sec,priKey){
   e.preventDefault();e.stopPropagation();
   if(_emailDragData){const{item,cls}=_emailDragData;_addEmailCardToPriority(item,cls,sec);emailCardDragEnd(e);if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);return;}
@@ -472,11 +580,21 @@ function priZoneDragOver(e,sec){
   const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
   if(!zone)return;
   zone.classList.add('pri-zone-active');
-  if(_priDragState&&_priDragEl&&!zone.contains(_priDragEl))zone.appendChild(_priDragEl);
+  if(_priDragState&&_priDragEl){
+    _priPendingReorder={type:'zone',zone};
+    _priScheduleReorderFrame();
+  }
 }
 function priZoneDragLeave(e,sec){
   const z=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
-  if(z&&!z.contains(e.relatedTarget))z.classList.remove('pri-zone-active');
+  if(z&&!z.contains(e.relatedTarget)){
+    z.classList.remove('pri-zone-active');
+    // Same staleness risk as priCardDragLeave above -- clear a pending
+    // zone-append if the pointer has left the zone it targeted.
+    if(_priPendingReorder&&_priPendingReorder.type==='zone'&&_priPendingReorder.zone===z){
+      _priPendingReorder=null;
+    }
+  }
 }
 function priZoneDrop(e,sec){
   e.preventDefault();
