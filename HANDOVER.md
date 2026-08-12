@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-12 - FYI/Parked cleanup BUILT and shipped: restrict_date() locale bug fixed (real root cause, more precise than the earlier proposal -- UK-locale mm/dd vs dd/mm date misread, not just item-count), thread-collapse + explicit 7d aging added (Phase 3.3c), silent title-key dedup on the FYI/Parked board made visible ("N threads (M messages)"). Built WITHOUT Codex review (Codex out of usage) -- real gap, disclosed. Anthropic API also hit a credit-balance error live this session -- items 2/3's interaction with the AI-demotion path unverified live. See entry below.
+**Last updated:** 2026-08-12 - openmail:// email-open console flash FIXED: root cause was python.exe's console PE subsystem, fixed by repointing the local HKCU protocol-handler registry command at pythonw.exe. Live-verified with zero new conhost process and a real Outlook item opening. Local-machine registry only, not tracked in any repo file -- flagged for Phase 4 (multi-machine) below. See entry below for FYI/Parked cleanup (still current, not superseded).
 
 
 
@@ -37,6 +37,31 @@
 
 
 
+
+---
+
+## Session 2026-08-12 (continued yet again) — openmail:// email-open console-window flash fixed, live-verified end to end (Drew)
+
+**Scope:** Kevin's UX complaint — clicking the email icon on the dashboard to open an email in Outlook briefly flashes a visible black Python console window before the email opens. Wanted it gone entirely, even briefly. Investigate-first, don't assume, per the brief.
+
+**Mechanism traced, not assumed:** `js/app.js` line 242 (`window.location.href='openmail://'+entryId+'/'`) hands off to the Windows-registered `openmail://` protocol handler — there is no local server/endpoint involved, it's a pure OS protocol-handler shell-out. The handler itself is **not defined anywhere in this repo** — no setup/registration script exists (checked: repo tree, `Setup_Inbox.bat`/`setup_inbox.py`, `README.md`, `AGENT_MODEL.md`, `CHAT_PROMPT.md`, GitHub code search for "openmail" across the whole repo — none register it). It only exists as a live Windows registry key on this machine, presumably set up manually and never documented. Found it directly: `HKCU:\Software\Classes\openmail\shell\open\command`, default value `"C:\Python314\python.exe" "C:\...\open_email.py" "%1"`.
+
+**Root cause, confirmed at the PE level, not just "python.exe consoles are known to do this":** read the PE optional-header Subsystem field directly out of both binaries — `python.exe` = `3` (`IMAGE_SUBSYSTEM_WINDOWS_CUI`, console), `pythonw.exe` = `2` (`IMAGE_SUBSYSTEM_WINDOWS_GUI`). A console-subsystem exe launched via `ShellExecute`/protocol-handler always gets an OS-allocated console window; a GUI-subsystem exe never does — not "hidden fast," structurally never created. `open_email.py` itself does no console I/O (only file-based logging + `item.Display()`), so nothing in the script depends on having a console.
+
+**Fix — one-line registry change, HKCU only:** repointed the command at `pythonw.exe`:
+```
+"C:\Python314\pythonw.exe" "C:\Users\admin\Documents\Claude\Projects\work-inbox\open_email.py" "%1"
+```
+Old value recorded before changing (`python.exe` form above) in case of rollback. Chose this over the VBS-wrapper pattern used elsewhere in the pipeline (`Run Inbox Briefing Hidden.vbs` etc.) because that pattern exists to hide a *batch/PowerShell* launch chain Task Scheduler owns; here the OS is launching the interpreter directly off a registry command with a single argument, and `pythonw.exe` is the standard, purpose-built CPython answer to exactly this case — no wrapper needed.
+
+**Verified live, real click-to-open flow, not "should work":**
+- Confirmed `open_email.py`'s local copy is byte-identical to GitHub (sha256 match) before testing, so the test exercises the real deployed script.
+- Snapshotted running `conhost.exe` PIDs, triggered the actual protocol URL the dashboard uses (`Start-Process 'openmail://<real EntryID>/'` — the same OS call `window.location.href` makes) against a real card's entry_id pulled from live `briefing.json`, re-snapshotted `conhost.exe` PIDs 300ms later: **zero new conhost processes** — not one that closed fast, none created at all.
+- Confirmed via `Win32_Process` that `pythonw.exe` (PID 35428) launched with the exact expected command line, parented correctly.
+- Confirmed the email genuinely opened: `data/openmail.log` recorded a fresh `RAW ARG` → `ENTRY ID` → `SUCCESS` sequence timestamped to the same second as the launch, and a live Outlook Inspector window was open immediately after with the matching subject ("Oxford Uni - Pre-project Authentication (Follow up) - Meeting") — the real item, not just a log line claiming success.
+- Ran the same test twice (two different real entry_ids from live `briefing.json`) — both clean, both zero new conhost, both confirmed `SUCCESS` + matching Outlook window.
+
+**Not done, on purpose, flagged not buried:** this is a live HKCU registry change on this one machine only — there is nothing in the repo to "push" for the fix itself, and no setup script exists anywhere to encode it for reproducibility. Phase 4 (multi-machine — replicate on `begb0037.AD-OAK`, still 🔲 Pending per CLAUDE.md) will need this same registration done from scratch there; whoever does it should register `pythonw.exe` from the start rather than repeating today's `python.exe` mistake. Worth writing a small idempotent `register_openmail_handler.ps1` at that point rather than another manual one-off — out of scope for today's launch-mechanism fix, not built.
 
 ---
 
