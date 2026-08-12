@@ -1,3 +1,28 @@
+# Handover -- 12 August 2026, addendum (Drew) -- independent re-verification of the cards-vanish-on-move fix, one new anomaly flagged (not fixed)
+
+## Scope
+Kevin re-dispatched the same "cards vanish on move" task (recover his two specific lost cards + fix the dedup bug) to a fresh session, apparently concurrently with or just after the session below that already fixed it. This session found the fix already live (commits `e6a9e8f8`/`09b00923`/`202e25e1` below) and, rather than re-doing the work, independently re-verified it end-to-end before reporting back, per the "verify against the live thing, not the doc about it" rule.
+
+## Independent verification performed this session (not a re-read of the writeup)
+- Confirmed `09b00923` is on `main` and is the current HEAD for `js/app.js` (sha `d3633ad0...`, 59985 bytes) via a fresh Contents API pull.
+- Read the actual live `_priGetKey()`/`applyPriOverrides()` code directly (not just the HANDOVER prose) and confirmed the logic is correct: stable `entry_id`/`id` key, legacy-title-slug fallback only when neither exists, override lookup checks new key then legacy key.
+- Pulled the **current live** `data/briefing.json` fresh and ran both the old (pre-fix) and new (post-fix) dedup logic against it directly in Node:
+  - Pre-fix logic: 79 total items across the six merged arrays, 2 genuine title collisions (matches the original session's "found 2 genuine collisions" claim).
+  - Post-fix logic: same 79 items, **zero drops** -- every item renders in its correct section.
+- The two live collision pairs, confirmed by entry_id/task-id (not guessed):
+  1. **"Incident Reporting PUG"** -- one in `fyi` (entry_id ending `...A4CD431E0000`, received 6 Aug) and one in `needs` (entry_id ending `...A8967C720000`, received 12 Aug 13:35). This is the same pair the fix session found and is the only collision matching Kevin's exact reported pattern (a Needs Response item that would silently vanish everywhere the instant it collided with an earlier-processed section during a drag). Both entry_ids still exist in live data as of this check and both now render (fyi + needs) with the fix live.
+  2. **New finding, not previously flagged**: "Review outstanding Development Insight reports actions with Julie" appears **twice** in `prioritiesWeek` under two different task IDs (`task-1785700344174` and `task-1785704715215`) -- identical title, both already defaulting to the same section (`pw`), so this doesn't match Kevin's Needs-to-Priority-Today move pattern and is very unlikely to be one of his two missing cards. Flagging as a separate, likely genuine duplicate-task entry in the underlying task data (command-centre `tasks.json` or wherever `prioritiesWeek` is sourced from) -- not investigated further, not fixed, out of scope for this task. Worth a look next time Priority This Week is touched.
+- Confirmed the fix is actually served live, not just committed: `curl`'d both `https://begb0037admin.github.io/work-inbox/js/app.js` and `https://wi.lelitte.co.uk/js/app.js` with cache-busters, both 59985 bytes, both contain `_priGetLegacyTitleKey` -- no CDN staleness remaining.
+- Noted a real, recent (14:54Z, ~5 min after the fix went live) `ticks.json` sync commit (`04dc819`) that ticked a new `pri_pt_3` entry -- consistent with the dashboard being actively used post-fix, though it doesn't by itself identify which two cards Kevin originally lost (that state lives only in his browser's `localStorage`, confirmed unreachable by this or the prior session).
+
+## On Task 1 (recovering the literal two cards Kevin lost) -- honest limit, not a guess dressed up as an answer
+There is no way to determine with certainty which two specific cards Kevin dragged and lost, because `workInbox_priOverrides_v1`/`workInbox_priOrder_v1` (where a drag's result is recorded) live only in Kevin's own browser `localStorage` and are never synced to GitHub or the Cloudflare Worker -- there is no server-side log of the drag action itself. What **is** confirmed, not guessed: the underlying data for every item currently in `needs`/`fyi`/`urgent`/the priorities arrays is intact (nothing was deleted from `data/briefing.json` by the move -- consistent with this always having been a render/dedup bug, never a data-deletion one), and the one real collision pair in his live data that matches his described symptom (`Incident Reporting PUG`, Needs Response vs FYI/Parked) is now rendering correctly in both places. If Kevin can say what the two card titles were, that would let this be confirmed directly rather than inferred from the closest matching evidence.
+
+## Next action
+None outstanding on the dedup/vanish bug itself -- fixed, deployed, independently re-verified twice now (original session + this one). Ask Kevin to reload the dashboard and confirm his two originally-lost cards are back; if not, get the exact titles from him directly since server-side data alone cannot identify them. Separately, the duplicate "Review outstanding Development Insight reports actions with Julie" task entry (finding above) is worth a look, unrelated to this bug.
+
+---
+
 # Handover -- 12 August 2026, continued again (Drew) -- "cards vanish on move" bug FIXED, verified live
 
 ## TL;DR
