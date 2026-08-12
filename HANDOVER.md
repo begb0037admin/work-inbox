@@ -1,3 +1,43 @@
+# Handover -- 12 August 2026, latest (Drew) -- Priority-board drag-and-drop Tier 1 fixes shipped, Codex-reviewed x4, verified live
+
+## Scope
+Kevin approved "Tier 1" of the same-day drag-and-drop review (`wi-dragdrop-review-12aug.md` in the `drew` repo, produced after the Show/Hide Done and cards-vanish-on-move fixes below, itself review-only, nothing built). Tier 1 is the cheap/low-risk subset of that review's 3-tier recommendation, scoped exactly:
+1. Throttle/rAF-batch the `dragover`-driven DOM mutation in `priCardDragOver`/`priZoneDragOver` (previously synchronous `getBoundingClientRect()` + DOM move on every native `dragover` event, unthrottled).
+2. Add `e.dataTransfer.setDragImage()` in `priDragStart` for a consistent drag ghost across Chrome/Edge/Firefox.
+3. Add hysteresis to the midpoint-only reorder boundary check so hovering near a card's vertical centre doesn't flicker the insertion point.
+
+Explicitly out of scope (Tier 2/3, not approved this pass): the full-rebuild-on-every-`dragend` behaviour, a DnD library swap, touch/mobile support.
+
+## What was built
+`js/app.js`, the priority drag-and-drop block (`priDragStart`/`priDragEnd`/`priCardDragOver`/`priZoneDragOver`/`priCardDragLeave`/`priZoneDragLeave` and new helpers `_priScheduleReorderFrame`/`_priRunReorderFrame`):
+- `priCardDragOver`/`priZoneDragOver` now just record the latest pointer/target into a single `_priPendingReorder` directive (`{type:'card',...}` or `{type:'zone',...}`) and schedule one `requestAnimationFrame` callback (no-op if already pending). `_priRunReorderFrame` applies at most one reorder mutation per frame.
+- The reorder decision uses a 15%-of-card-height hysteresis band (`_priHysteresisFrac`) around the midpoint plus a per-target last-committed-side memory (`_priLastBefore`, a `WeakMap`), so hovering near centre no longer flip-flops the insertion point.
+- `priDragStart` clones the dragged card, appends it off-screen, and calls `setDragImage()` anchored to the cursor's grab offset — cleanup (`ghost.remove()`) is in a `try/finally` so it runs even if `setDragImage()` throws.
+- `priDragEnd` now flushes any still-pending reorder (`_priRunReorderFrame()`) before reading final DOM order for `_priSetOrder` persistence, so a fast drop right after the last `dragover` (before the next paint) doesn't persist a stale pre-preview position.
+- `priCardDragLeave`/`priZoneDragLeave` clear `_priPendingReorder` if it targeted what's being left — guarded against the parent→child `dragleave`/`dragenter` bubble pair (pointer moving onto a nested element, e.g. the card title, within the SAME card) via `e.currentTarget.contains(e.relatedTarget)`, so a false "leave" doesn't wipe a still-valid pending reorder.
+
+## Codex review — 4 passes (the process cap), disclosed honestly
+Pass 1 found 4 real defects: (a) `priDragEnd` cancelled the pending frame instead of flushing it before persisting order; (b) two independent pending records (card-hover + zone-hover) could both apply in one frame instead of last-writer-wins; (c) `priCardDragLeave` left a stale pending reorder in place when the pointer left the hovered target before the frame fired; (d) the ghost-clone cleanup leaked if `setDragImage()` threw. All 4 fixed. Pass 2: clean. Pass 3 found one more real defect — `priCardDragLeave`'s new unconditional clear (from fixing (c)) was itself wrong for a parent→child bubble within the same card; fixed with the `contains()` guard above. Pass 4: clean, explicitly asked to be maximally thorough as the last allowed pass.
+
+**Disclosed tension, not hidden:** this is event-ordering/concurrency-adjacent code, for which the standing rule is 3 *consecutive* clean Codex passes before shipping, not just one. Only passes 2 and 4 were clean (pass 3 found something in between), so the streak achieved was 1 consecutive clean pass at the cap, not 3. Hit the 4-pass hard cap with the code in a clean state — per that same rule, stopping and reporting plainly rather than continuing past the cap. If Kevin wants the full 3-consecutive-clean bar met, that needs an explicit decision to run further passes beyond the cap; not done unilaterally.
+
+## Verification (real, not inferred)
+- **Two jsdom simulations against the real `app.js`** (not a re-implementation), 24 checks total, all passing:
+  - `test_dragdrop.js`: setDragImage anchor/clone correctness (4 checks), rAF batching — 5 rapid `dragover` events schedule exactly 1 frame and apply exactly 1 mutation using only the latest event (3 checks), hysteresis — band-crossing flips the decision, in-band events don't (4 checks).
+  - `test_dragdrop_codex_fixes.js`: drop-time flush of a pending reorder before persistence (2 checks), unified-directive last-writer-wins across two different zones (4 checks), `dragleave` staleness guards including the genuine-leave case and the nested-child false-leave case (4 checks), ghost-clone cleanup on both a successful and a throwing `setDragImage()` call (2 checks).
+- `node --check` passes on the final pushed file.
+- **Backup-and-verify sequence**: fresh GET of live `js/app.js` immediately before writing (sha `d3633ad0...`, 59985 bytes, confirmed matching the `09b00923` HEAD from the cards-vanish fix below — no concurrent edit landed in between) → sha-guarded PUT (commit `9ef7f176`) → re-GET confirmed new content sha `70573657...`, 66096 bytes, byte-for-byte diff against the intended source, `node --check` passes on the actual pushed bytes.
+- **Live production verify**: polled `https://begb0037admin.github.io/work-inbox/js/app.js` with cache-busting — stale for ~10s (2 polls, matches the documented GitHub Pages CDN propagation-lag pattern), 3rd poll byte-identical to the pushed content.
+- **Gotcha hit and worked around, not previously documented for this repo**: `gh api -f content=@file` does NOT read the file's content (that `@file` behaviour is only documented for `-F/--field`, the typed-field flag) — using `-f` sends the literal string `"@file"` or otherwise mishandles it, producing `"content is not valid Base64"` even for a trivially correct base64 string. Confirmed via an isolated throwaway-file test against Drew's own repo before touching work-inbox. Fix: use `-F content=@file` (and `-F message=@file` for a large multi-line commit message, to dodge the Windows command-line length limit that broke passing base64 content directly as an argument value). Worth flagging in `agent-commons` for any other agent pushing large files via `gh api`.
+
+## Commits
+- `9ef7f176` — fix: rAF-batch dragover reorder, setDragImage ghost, hysteresis on the reorder midpoint (Tier 1 of `wi-dragdrop-review-12aug.md`), plus 5 Codex-found defect fixes folded in before push
+
+## Next action
+None outstanding for Tier 1 — shipped, Codex-reviewed, live-verified. Tier 2 (targeted DOM patch instead of `priDragEnd`'s full rebuild) and Tier 3 (DnD library swap, e.g. SortableJS, with free touch/mobile support) remain Kevin's call, not yet approved. The "Drag reorder has no visual animation" known issue below is a Tier 2/3-scale item, not addressed by this pass.
+
+---
+
 # Handover -- 12 August 2026, addendum (Drew) -- independent re-verification of the cards-vanish-on-move fix, one new anomaly flagged (not fixed)
 
 ## Scope
