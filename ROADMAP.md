@@ -70,3 +70,16 @@ Once Phase 1 chat is stable in both dashboards:
 - Chat in work-inbox may gain authority to mark briefing items as actioned
 
 ---
+
+## Deferred — Drag-and-drop mechanics improvements (Tier 2 / Tier 3)
+
+**Recorded 12 Aug 2026.** Card drag-and-drop review (`memory/wi-dragdrop-review-12aug.md`) found the mechanism fragile — two real bugs (Show/Hide Done reset, title-collision card vanish) traced to the same root cause: every drag gesture triggers a full destroy-and-rebuild of all six board sections. Tier 1 (cheap fixes — rAF-batched drag movement, consistent cross-browser drag ghost via `setDragImage()`, reorder-boundary hysteresis) was approved and shipped 12 Aug 2026 (commit `9ef7f176`). Tiers 2 and 3 were reviewed but explicitly deferred — Kevin wants them recorded for a later decision, not built now.
+
+| Tier | Scope | Why deferred |
+|---|---|---|
+| 2 — Moderate | Replace `priDragEnd`'s unconditional full rebuild with a targeted DOM patch — only the affected zones, only on an actual drop — matching the pattern `toggleTick` already uses successfully elsewhere in `js/app.js`. Meaningfully closes the "any drag wipes unrelated UI state" risk class without a full rewrite. | Real engineering effort, not a quick patch; worth a dedicated session |
+| 3 — Most invasive | Replace the hand-rolled native HTML5 drag-and-drop with a proper library (e.g. SortableJS) or a state-driven diffed render. Removes the bug class structurally and adds free touch/mobile support. | Largest change of the three; needs a staged, Codex-reviewed build, not a same-session patch |
+
+**Status:** Both await Kevin's go-ahead. Revisit if drag-and-drop bugs recur after Tier 1, or when there's appetite for a dedicated dashboard-engineering session.
+
+---
