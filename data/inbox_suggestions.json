@@ -1,14 +1,77 @@
 {
-  "generated_at": "2026-08-12 10:05",
+  "generated_at": "2026-08-12 10:08",
   "new_tasks": [
     {
-      "title": "Review Oxford Uni Pre-project Authentication follow-up",
+      "title": "Review Oxford Uni Pre-project Authentication call follow-up",
       "tier": "week",
-      "description": "Alex Manton-Jones sent a follow-up email from the authentication call held on 11 August. Kevin needs to review the full content and determine what action items or next steps are required from this call.",
+      "description": "Alex Manton-Jones sent a follow-up email from an authentication call held on 11 August. Kevin needs to review the full content and determine what action items, if any, are required from this call.",
       "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
       "email_from": "Alex Manton-Jones",
       "received": "2026-08-11 16:50",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629957D0000"
+    },
+    {
+      "title": "Advise Marie on GLAM joining 38-day balance scheme",
+      "tier": "week",
+      "description": "Julie Hickman has asked Kevin for his thoughts on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Marie has copied Kevin in and is seeking his input to inform the decision.",
+      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-11 13:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995740000"
+    },
+    {
+      "title": "Review Cority Applicant Data Import update from James",
+      "tier": "week",
+      "description": "James Salas Guillen has sent an update on the Cority Applicant Data Import following several uploads/imports in Production. Kevin needs to review and take any necessary action.",
+      "email_subject": "Cority - Applicant Data Import file",
+      "email_from": "James Salas Guillen",
+      "received": "2026-08-11 13:11",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995730000"
+    },
+    {
+      "title": "Investigate Clockify role consolidation for Beth",
+      "tier": "week",
+      "description": "Marie Cooksey is asking whether it is possible to combine Beth's two Clockify roles (HR Systems and Biology) into one. Kevin needs to investigate the Clockify platform capabilities and advise Marie on feasibility.",
+      "email_subject": "Clockify",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-10 17:05",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995660000"
+    },
+    {
+      "title": "Review volunteering leave pay code configuration work",
+      "tier": "week",
+      "description": "Simon Burford has been working on moving volunteering leave from 'Other Leave' reason code to its own standalone leave type. Kevin needs to review Simon's analysis and determine next steps for implementation in PeopleXD.",
+      "email_subject": "Volunteering Leave",
+      "email_from": "Simon Burford",
+      "received": "2026-08-07 16:21",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000"
+    },
+    {
+      "title": "Investigate team calendar config issue with Asta",
+      "tier": "week",
+      "description": "Simon encountered a missing option when trying to configure the Volunteering Leave pay code in UOXU. Kevin needs to work with Asta to diagnose and resolve the team calendar configuration problem.",
+      "email_subject": "Team Calendar Config",
+      "email_from": "Simon Burford",
+      "received": "2026-08-07 15:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998640000"
+    },
+    {
+      "title": "Review Conor's Multi Company Setup work and align on next steps",
+      "tier": "week",
+      "description": "Conor O'Brien has sent updated work on the Multi Company Setup (FP 68261303) for DTP1092. Kevin needs to review Conor's progress and confirm availability to continue discussions, as Simon is on leave next week.",
+      "email_subject": "RE: #External# RE: Multi Company Setup",
+      "email_from": "Conor O'Brien",
+      "received": "2026-08-07 12:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
+    },
+    {
+      "title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
+      "tier": "week",
+      "description": "Simon is discussing with Michael O'Sullivan whether to refresh UOXU and UOXC environments with a new clone of UOXP for DTP1092 Company 90 configuration and testing. Kevin needs to confirm this approach with Michael.",
+      "email_subject": "RE: Business rules for Data Warehouse",
+      "email_from": "Simon Burford",
+      "received": "2026-08-06 17:05",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000"
     },
     {
       "title": "Confirm DTP1092 integrations testing completion by 14 Aug",
@@ -18,16 +81,6 @@
       "email_from": "Crispin Muncaster",
       "received": "2026-08-10 07:20",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000",
-      "carried_forward": true
-    },
-    {
-      "title": "Review data warehouse business rules alignment for Company 90",
-      "tier": "week",
-      "description": "Simon has documented the business rules needed to ensure only University employees (not colleges/external entities) are included in data warehouse feeds related to Company 90. Kevin needs to review and confirm the approach with Ewan and Matt.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-06 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000",
       "carried_forward": true
     },
     {
@@ -41,33 +94,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608071501071",
-      "task_title": "Respond to Occupational Health appointment offer",
-      "note": "Occupational Health appointment reminder received; Kevin needs to confirm attendance or reschedule.",
-      "email_subject": "Appointment Reminder – Occupational Health",
-      "email_from": "enquiries@uohs.ox.ac.uk",
-      "received": "2026-08-12 08:40",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A8967C700000"
-    },
-    {
-      "task_id": "t2608120903060",
-      "task_title": "Advise Marie on GLAM joining 38-day balance scheme",
-      "note": "Julie Hickman is asking Marie (and Kevin by copy) for thoughts on GLAM joining the 38-day balance scheme; awaiting Kevin's input.",
-      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-11 13:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995750000"
-    },
-    {
-      "task_id": "t2608120903060",
-      "task_title": "Advise Marie on GLAM joining 38-day balance scheme",
-      "note": "Marie Cooksey has copied Kevin in to provide his thoughts on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry.",
-      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-11 13:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995740000"
-    }
-  ]
+  "applied_updates": []
 }
