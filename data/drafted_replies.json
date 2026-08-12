@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-12T05:03:00.209770+00:00",
+  "generated": "2026-08-12T07:15:44.695437+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
@@ -118,7 +118,7 @@
         "SQL report feasibility/timeframe itself \u2014 no precedent found; genuinely depends on Access Group's quote, not something Lauren can determine."
       ],
       "received": "10 Apr",
-      "status": "pending",
+      "status": "withdrawn",
       "draft_id": "lauren-draft-05-20260810",
       "corpus_provenance": {
         "sent_items_baseline_count": 1890,
@@ -131,6 +131,44 @@
             "source_subject": "Re: Holiday Records Duty - proposed reports",
             "source_date": "2026-06-10",
             "relevance_note": "Different report/topic (holiday pay compliance, not balance codes) so not a content answer to Anna's specific ask, but shows Kevin's standard process for a bespoke SQL/Insight report build request: review documentation, escalate to Access Group for a quote, follow up once heard back. Used as a process precedent, not invented feasibility/timeline."
+          }
+        ]
+      }
+    },
+    {
+      "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000",
+      "subject": "DTP1092 College Staff into PXD - Testing",
+      "sender_tier": "other",
+      "draft_text": "Hi Crispin,\n\nHappy to talk this through. Good timing on our side too \u2014 the College post profiles went into UOXU in early July, and Nathan set up some dummy staff records once those landed, ready for further testing.\n\n[CONFIRM: whether the open items from the spring config sessions (the Company 90 pay scale code, and the downstream-systems/BizTalk-CUD exclusion check) have since been signed off \u2014 worth confirming those are cleared before we lock in the testing assumptions.]\n\nI'll make sure the right people from HR Systems are in the session. Let me know if there's anything you'd like us to come prepared with beforehand.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-12T06:54:51.301964+00:00",
+      "confidence": {
+        "level": "medium",
+        "reason": "Real, recent content precedent found and used \u2014 this is the same DTP1092 College Staff into PXD project Kevin was hands-on with as recently as 9 Jul 2026 (loaded the College post profiles into UOXU himself; Nathan Kirwan set up dummy staff records for further testing immediately after). That gives genuine grounding for 'good timing' and the testing-readiness framing. Held at medium, not high: the specific 'testing assumptions and steps' Crispin is asking to discuss aren't things Lauren can know without the actual current test plan, and two earlier open items (pay scale code for Company 90, downstream-systems/BizTalk-CUD exclusion) were still unresolved as of the most recent precedent found (Apr-Jul 2026) \u2014 flagged rather than assumed closed."
+      },
+      "inline_flags": [
+        "Whether the Company 90 pay scale code and downstream-systems (BizTalk/CUD) exclusion items from the spring/early-July sessions have since been signed off -- no confirmation found in the corpus after this."
+      ],
+      "received": "4 Aug",
+      "status": "pending",
+      "draft_id": "lauren-draft-12-20260812",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "loop-in-right-people-offer"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: DTP-1092 Bucket posts for College staff going into Company 90",
+            "source_date": "2026-07-09",
+            "relevance_note": "Same DTP1092 project, ~4 weeks before this email. Kevin loaded the College post profiles into UOXU himself on 9 Jul before going on leave (10-27 Jul); Nathan Kirwan confirmed he'd set up dummy staff records once the posts landed 'for further testing' \u2014 directly explains why a testing-assumptions conversation would be live now. Also surfaces an unresolved point (no pay scale code confirmed yet for Company 90 as of that thread) that may or may not have been settled since."
+          },
+          {
+            "source_subject": "Re: DTP1092 College Staff into PXD",
+            "source_date": "2026-04-30",
+            "relevance_note": "Kevin asked Crispin directly about DPIA completion status as a pre-condition for live data load, and (1 Apr thread) flagged that downstream systems (BizTalk, CUD, other identity/HR integrations) needed review to ensure the new non-payroll entity wasn't unintentionally picked up. No later corpus entry confirms either was resolved -- real open items, not just style color."
           }
         ]
       }
