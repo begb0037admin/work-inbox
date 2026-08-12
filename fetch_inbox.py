@@ -710,6 +710,15 @@ print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} lo
 # than the first ~150 characters of the email body verbatim (card["sub"]).
 log("Phase 3.2 - generating AI email summaries...")
 summary_candidates = [c for c in (urgent + needs) if c.get("entry_id")]
+# Entry IDs of cards actually demoted by Phase 3.3/3.3b below (AI-confirmed
+# no_action_needed). Declared unconditionally, before the Phase 3.2 block
+# below, so it always exists (empty set) even if Phase 3.2 is skipped or
+# fails outright. Reused by Phase 3.5's Command Centre task-suggestion
+# triage further down so a bogus new_tasks suggestion isn't generated for an
+# email this same run already confirmed Kevin has nothing to do about --
+# see that phase's own comment for the full reasoning and its own scope
+# limits (12 Aug 2026, extending the same-day Phase 3.3 Needs fix).
+_noise_demoted_entry_ids = set()
 if summary_candidates and anthropic_available:
     try:
         # Use short sequential ids in the API exchange, not the raw ~140-char
@@ -927,28 +936,28 @@ if summary_candidates and anthropic_available:
         # boolean alongside `needs_reply` (see EMAIL_SUMMARY_SYSTEM above),
         # not inferred from prose at all.
         #
-        # Deliberately conservative on two remaining axes, checked against a
+        # Deliberately conservative on one remaining axis, checked against a
         # Codex read-only review before building (12 Aug 2026):
-        # 1. Only demotes from Needs, never Urgent -- Urgent is importance-
-        #    flagged or urgent-keyword-matched mail; demoting away from it
-        #    is a materially higher-risk call than Needs, and wasn't what
-        #    Kevin asked for. ~9 similarly-noisy Urgent cards were seen live
-        #    this session -- flagged to Kevin as a possible separate
-        #    follow-up, not touched here.
-        # 2. Requires `_ai_verdict_valid` is True -- i.e. the model returned
-        #    a genuine dict response with real booleans for BOTH
-        #    needs_reply and no_action_needed, not one of the defensive
-        #    fallback paths above (bare-string response, missing/mistyped
-        #    field). Those fallbacks default both to False as a "we don't
-        #    know" case, not a real verdict, and must never drive a
-        #    demotion.
-        # Does NOT touch Phase 3.5's separate Command Centre task-suggestion
-        # triage (~line 1121+), which independently re-derives its own
+        # Requires `_ai_verdict_valid` is True -- i.e. the model returned a
+        # genuine dict response with real booleans for BOTH needs_reply and
+        # no_action_needed, not one of the defensive fallback paths above
+        # (bare-string response, missing/mistyped field). Those fallbacks
+        # default both to False as a "we don't know" case, not a real
+        # verdict, and must never drive a demotion.
+        #
+        # EXTENSION, same day (12 Aug 2026): originally this only demoted
+        # from Needs -- Urgent (importance-flagged or urgent-keyword-matched
+        # mail) was left alone as a materially higher-risk call, and Phase
+        # 3.5's separate Command Centre task-suggestion triage was flagged
+        # as a known, unfixed gap (it independently re-derives its own
         # candidate list via a fresh categorise(m) call on raw inbox
-        # messages and has no needs_reply/no_action_needed field to consult
-        # at all in its current form -- demoted cards are still considered
-        # there. Flagged to Kevin as a distinct, unfixed scope boundary, not
-        # silently dropped.
+        # messages and had no needs_reply/no_action_needed field to consult
+        # at all). Kevin approved extending both after ~9 similarly-noisy
+        # Urgent cards were seen live in the original session. See Phase
+        # 3.3b immediately below for the Urgent extension, and Phase 3.5's
+        # own comment further down for how it reuses `_noise_demoted_entry_ids`
+        # (built by both this block and 3.3b) rather than re-deriving noise
+        # detection from scratch.
         # Exception-safety, added after a Codex review of this exact block
         # caught a real bug: an earlier version mutated `needs`/`fyi`
         # card-by-card DURING the loop and only reassigned `needs =
@@ -966,15 +975,26 @@ if summary_candidates and anthropic_available:
             demoted_count = 0
             still_needs = []
             newly_fyi = []
+            demoted_ids_this_pass = set()
             for card in needs:
                 if card.get("_ai_verdict_valid") and card.get("needs_reply") is False and card.get("no_action_needed") is True:
                     card["badge"], card["badgeType"] = badge_for(card, "fyi")
                     newly_fyi.append(card)
                     demoted_count += 1
+                    eid = card.get("entry_id")
+                    if eid:
+                        demoted_ids_this_pass.add(eid)
                 else:
                     still_needs.append(card)
             needs = still_needs
             fyi.extend(newly_fyi)
+            # Only merge into the shared cross-phase set once the tier/FYI
+            # lists above are actually committed (i.e. we know this pass
+            # genuinely succeeded) -- Codex review flagged that adding to a
+            # shared set mid-loop, before commit, could suppress a Phase 3.5
+            # task suggestion for a card that a later exception in THIS pass
+            # then left un-demoted after all.
+            _noise_demoted_entry_ids.update(demoted_ids_this_pass)
             if demoted_count:
                 try:
                     fyi.sort(key=lambda c: str(c.get("received_raw") or ""), reverse=True)
@@ -983,6 +1003,45 @@ if summary_candidates and anthropic_available:
                 print(f"Phase 3.3 done - {demoted_count} Needs card(s) demoted to FYI (AI-confirmed no action needed)")
         except Exception as demote_err:
             print(f"WARNING: Phase 3.3 demotion failed, Needs left unchanged - {demote_err}")
+
+        # -- Phase 3.3b -- same demotion logic applied to Urgent, 12 Aug 2026 --
+        # Kevin approved extending Phase 3.3 above to Urgent after ~9
+        # similarly-noisy Urgent cards were seen live in the original
+        # session (importance-flagged or urgent-keyword-matched mail from
+        # colleague threads Kevin is only cc'd on). Urgent cards already
+        # carry the same AI verdict fields as Needs cards -- summary_candidates
+        # above is `urgent + needs` together, so every Urgent card that got
+        # an AI summary already has needs_reply/no_action_needed/
+        # _ai_verdict_valid set by the exact same loop that set them for
+        # Needs cards. No new AI call, same criteria, same exception-safety
+        # pattern (atomic temp lists, its own try/except so a failure here
+        # can't take down Phase 3.3's already-committed Needs result).
+        try:
+            demoted_urgent_count = 0
+            still_urgent = []
+            newly_fyi_from_urgent = []
+            demoted_urgent_ids_this_pass = set()
+            for card in urgent:
+                if card.get("_ai_verdict_valid") and card.get("needs_reply") is False and card.get("no_action_needed") is True:
+                    card["badge"], card["badgeType"] = badge_for(card, "fyi")
+                    newly_fyi_from_urgent.append(card)
+                    demoted_urgent_count += 1
+                    eid = card.get("entry_id")
+                    if eid:
+                        demoted_urgent_ids_this_pass.add(eid)
+                else:
+                    still_urgent.append(card)
+            urgent = still_urgent
+            fyi.extend(newly_fyi_from_urgent)
+            _noise_demoted_entry_ids.update(demoted_urgent_ids_this_pass)
+            if demoted_urgent_count:
+                try:
+                    fyi.sort(key=lambda c: str(c.get("received_raw") or ""), reverse=True)
+                except Exception as sort_err:
+                    print(f"WARNING: Phase 3.3b FYI re-sort failed, order preserved as-is - {sort_err}")
+                print(f"Phase 3.3b done - {demoted_urgent_count} Urgent card(s) demoted to FYI (AI-confirmed no action needed)")
+        except Exception as demote_err:
+            print(f"WARNING: Phase 3.3b demotion failed, Urgent left unchanged - {demote_err}")
         finally:
             for card in (urgent + needs + fyi + low):
                 card.pop("_ai_verdict_valid", None)
@@ -1346,11 +1405,27 @@ try:
     t_out = json.loads(t_raw)
 
     task_by_id = {t["id"]: t for t in task_summaries}
+    suppressed_no_action = 0
     for nt in t_out.get("new_tasks", [])[:12]:
         i = nt.get("email_n")
         if not isinstance(i, int) or not (0 <= i < len(email_candidates)):
             continue
         src = email_candidates[i]
+        # 12 Aug 2026: don't let Phase 3.5's own (separate) AI triage call
+        # spawn a brand-new Command Centre task suggestion from an email
+        # this same run's Phase 3.2/3.3 already AI-confirmed is genuinely
+        # nothing for Kevin to act on. Reuses `_noise_demoted_entry_ids`
+        # (built by Phase 3.3/3.3b above) rather than re-running a second
+        # classification pass. Deliberately does NOT filter task_updates
+        # below -- a no_action_needed email can still be genuine, useful
+        # progress information against an EXISTING already-tracked task
+        # (e.g. "vendor confirms shipment date") even though Kevin
+        # personally has nothing to do about it, so it stays a valid
+        # candidate for that purpose; only brand-new task proposals are
+        # noise here, matching the same demotion logic applied elsewhere.
+        if src.get("entry_id") and src["entry_id"] in _noise_demoted_entry_ids:
+            suppressed_no_action += 1
+            continue
         suggestions["new_tasks"].append({
             "title":         nt.get("title", ""),
             "tier":          nt.get("tier") if nt.get("tier") in ("today", "tomorrow", "week") else "week",
@@ -1377,7 +1452,7 @@ try:
             "received":      src["received"],
             "entry_id":      src["entry_id"]
         })
-    print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} updates:{len(suggestions['task_updates'])}")
+    print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} (suppressed_no_action:{suppressed_no_action}) updates:{len(suggestions['task_updates'])}")
 except Exception as e:
     if anthropic_available:
         print(f"WARNING: Phase 3.5 triage failed - {e}")
@@ -1895,16 +1970,36 @@ if GITHUB_PAT:
         if prev_suggestions:
             seen = {s.get("entry_id") for s in suggestions["new_tasks"] if s.get("entry_id")}
             carried = 0
+            carry_suppressed_no_action = 0
             for old in prev_suggestions.get("new_tasks", []):
                 oid = old.get("entry_id")
                 if not oid or oid in seen or oid in ledger.get("promoted", {}):
+                    continue
+                # 12 Aug 2026: also drop a previously-persisted suggestion
+                # here if its source email was AI-confirmed no_action_needed
+                # by THIS run's Phase 3.3/3.3b (demoted out of Needs/Urgent
+                # just above) -- Codex review flagged that without this
+                # check, a noisy suggestion generated earlier could keep
+                # resurfacing via carry-forward even after the fresh Phase
+                # 3.5 output above was correctly filtered in the same run.
+                # Known limitation, not fixed here: `_noise_demoted_entry_ids`
+                # is process-local to this run only (line ~721) -- it has no
+                # memory of a PAST run's demotions, so an old carried-forward
+                # suggestion whose source email has since scrolled out of the
+                # 50-newest-email inbox window (so it's no longer in this
+                # run's summary_candidates at all) won't be caught here. A
+                # full fix would need to persist demoted entry_ids across
+                # runs (e.g. in triage_ledger.json) -- out of scope for this
+                # extension, flagged not silently dropped.
+                if oid in _noise_demoted_entry_ids:
+                    carry_suppressed_no_action += 1
                     continue
                 old["carried_forward"] = True
                 suggestions["new_tasks"].append(old)
                 seen.add(oid)
                 carried += 1
-            if carried:
-                print(f"Phase 5 - carried forward {carried} unactioned suggestion(s)")
+            if carried or carry_suppressed_no_action:
+                print(f"Phase 5 - carried forward {carried} unactioned suggestion(s) (suppressed_no_action:{carry_suppressed_no_action})")
 
         content_b64 = base64.b64encode(
             json.dumps(suggestions, indent=2, ensure_ascii=False).encode("utf-8")
