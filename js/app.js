@@ -60,19 +60,25 @@ function toggleImport(){
   document.getElementById('archivePanel').classList.remove('visible');
   document.getElementById('importError').style.display='none';
 }
+/* Show/Hide Done: showingDoneItems is the single source of truth for whether
+   done items render hidden. It must ONLY ever change inside toggleShowDone(),
+   fired only by the Show/Hide Done button's own onclick. Every render path
+   (renderItems/renderPriorityCards) reads this same variable when building
+   card HTML, so a full re-render triggered by anything else -- a tick, a
+   drag/drop, an accidental micro-drag from a plain click on a draggable card
+   (dragstart fires from HTML5 drag-and-drop on the slightest pointer
+   movement, even during what feels like a simple click) -- always re-applies
+   the current toggle state instead of silently reverting to "all visible".
+   Previously this function mutated .card-hidden on the live DOM directly;
+   that mutation was wiped out by the next renderBriefing() call from any
+   other interaction, which is exactly the "click a card and hidden done
+   items reappear" bug. Fixed 12 Aug 2026. */
 let showingDoneItems=false;
 function toggleShowDone(){
   const btn=document.getElementById('btn-show-done');
   showingDoneItems=!showingDoneItems;
-  if(showingDoneItems){
-    document.querySelectorAll('.card.done,.card-link.done,.pri-card.done,.card-ph.done').forEach(el=>el.classList.remove('card-hidden'));
-    document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='flex');
-    btn.textContent='Hide done';
-  } else {
-    document.querySelectorAll('.card.done,.card-link.done,.pri-card.done,.card-ph.done').forEach(el=>el.classList.add('card-hidden'));
-    document.querySelectorAll('.priority-row.done').forEach(el=>el.style.display='none');
-    btn.textContent='Show done';
-  }
+  if(btn) btn.textContent=showingDoneItems?'Hide done':'Show done';
+  if(window._wipData&&window._wipKey) renderBriefing(window._wipData,window._wipKey);
 }
 function toggleArchive(){
   const p=document.getElementById('archivePanel');
@@ -270,8 +276,9 @@ function renderItems(items,cls){
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
     const dragAttrs=`draggable="true" ondragstart="emailCardDragStart(event,'${cls}',${i})" ondragend="emailCardDragEnd(event)"`;
-    const cardHtml=`<div class="card${ticked?' done':''}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
-    return hasLink?`<a class="card-link${ticked?' done':''}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)" ${dragAttrs}>${cardHtml}</a>`:`<div ${dragAttrs}>${cardHtml}</div>`;
+    const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
+    const cardHtml=`<div class="card${ticked?' done':''}${hiddenCls}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
+    return hasLink?`<a class="card-link${ticked?' done':''}${hiddenCls}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)" ${dragAttrs}>${cardHtml}</a>`:`<div ${dragAttrs}>${cardHtml}</div>`;
   }).join('');
 }
 
@@ -466,7 +473,8 @@ function renderPriorityCards(priorities,key,sec){
     const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.ai_summary||p.sub||'');
     const emailBtn=(p.entry_id||p.entryId)?`<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`:'';
     const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC&#8594;</span>`:'';
-    return `<div class="card-ph${ticked?' done':''}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
+    const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
+    return `<div class="card-ph${ticked?' done':''}${hiddenCls}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
       <span class="card-drag" onclick="event.stopPropagation()">&#10783;</span>
       <button class="card-done-btn${ticked?' done':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()" aria-label="Mark done"></button>
       <div class="card-ph-body">
