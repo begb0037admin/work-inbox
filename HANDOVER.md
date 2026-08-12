@@ -1,3 +1,36 @@
+# Handover -- 12 August 2026, continued (Drew) -- Show/Hide Done bug FIXED, verified live
+
+## TL;DR
+Kevin reported: "Show/Hide button is a real showstopper. If I click on a card, it shows and keeps showing up things that are hidden." Root-caused and fixed in `js/app.js`. A second Drew session was dispatched moments before this one on the same two bugs (this one, plus "cards vanishing on move"); no shared channel to that session was reachable (`SendMessage` to `drew` returned "not reachable"), but live evidence (a `bug_investigation/` scratch folder with `wi_appjs.js`/`wi_briefing.json`/`wi_index.html`/`wi_styles.css` fetched ~3 minutes before this session started writing) confirms it was investigating the same `js/app.js`. No commit from it landed before this fix was pushed (checked immediately before every write) -- proceeded per Kevin's explicit instruction to continue if the other session's status can't be confirmed.
+
+## Root cause
+`toggleShowDone()` (js/app.js) hid done items by mutating the live DOM directly -- adding a `.card-hidden` class to whichever `.card`/`.card-link`/`.card-ph` elements existed *at the moment the button was clicked*. But `showingDoneItems` (the actual toggle state) was never read by the card-rendering functions (`renderItems()`, `renderPriorityCards()`) themselves. Any full re-render via `renderBriefing()` -- which fires on `priDragEnd()` (drag end, unconditionally, whether or not anything was actually dropped), `priCardDrop()`, and `priZoneDrop()` -- regenerated all card HTML from scratch with no `card-hidden` class at all, silently undoing the hide. Since `draggable="true"` covers the whole `.card-ph`/card element, a plain click with even a tiny pointer movement can trip HTML5's own `dragstart`/`dragend` cycle without an intentional drag -- exactly matching Kevin's "if I click on a card" trigger. The `showingDoneItems` variable itself was never touched by this path (so the button's own label/state looked untouched) -- only the rendered visibility was silently lost, matching "it shows and keeps showing up things that are hidden" precisely.
+
+## Fix
+`js/app.js`, three changes:
+1. `renderItems()` and `renderPriorityCards()` now compute `hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':''` and bake it into the card's class list at render time, so **every** render (not just the one immediately after a button click) reflects current toggle state.
+2. `toggleShowDone()` simplified to flip `showingDoneItems` and call `renderBriefing(window._wipData,window._wipKey)` instead of doing ad-hoc `querySelectorAll` DOM mutation -- single source of truth, no more drift between "what the variable says" and "what's actually visible."
+3. `showingDoneItems` is now provably the *only* thing that can change visibility -- it is written to in exactly one place (`toggleShowDone()`, fired only by the Show/Hide Done button's `onclick`), and every render path reads it fresh. This directly satisfies Kevin's hard requirement: no other interaction (card click, drag, tick, drop, refresh) can ever change it.
+
+`toggleTick()`'s existing per-item `card-hidden` handling (lines ~205-239, the lightweight non-re-render path for a single checkbox click) was already correctly gated on `showingDoneItems` and needed no change -- it was only the *full re-render* paths that were broken.
+
+## Verification (real, not just code review)
+- **Standalone logic test** (no DOM needed): extracted `renderItems()` verbatim into a Node script against a fake ticks store. Confirmed (a) a ticked item gets `card-hidden` on first render with `showingDoneItems=false`; (b) a **second render with `showingDoneItems` unchanged** (simulating the exact bug -- a re-render fired by an unrelated interaction) produces byte-identical output, i.e. the item stays hidden; (c) only flipping `showingDoneItems` (simulating the actual button click) removes `card-hidden`. This is the precise scenario Kevin reported, verified programmatically, not inferred from reading the code.
+- **Backup-and-verify sequence**: GET live `js/app.js` (sha `bd9b85ca...`, 57182 bytes) -> `Archive/app_backup_20260812_1541.js` (commit `6790666`) -> re-GET confirmed backup content sha byte-identical to source -> re-checked live sha immediately before the write (race guard against the other session) -> PUT with sha-guarded write (commit `f030b34`) -> re-GET confirmed new content sha `027fedab...`, 57901 bytes, `node --check` passes.
+- **Live production verify**: `https://begb0037admin.github.io/work-inbox/js/app.js` polled with cache-busting every 15s; GitHub Pages CDN lag observed for ~45s (3 stale polls, matches the previously-documented propagation-lag pattern), 4th poll byte-identical to the pushed content. Confirmed the two `hiddenCls=(ticked&&!showingDoneItems)` occurrences are present in the actual served file, not just the repo.
+
+## Commits
+- `6790666` -- backup: js/app.js before fix (`Archive/app_backup_20260812_1541.js`)
+- `f030b34` -- fix: Show/Hide Done state baked into every card render
+
+## Possible connection to the OTHER open bug ("cards vanishing on move") -- NOT fixed, flagged only
+While reading `applyPriOverrides()` (js/app.js, priority card dedup) chasing this bug, noticed `_priGetKey()` generates a dedup key by lowercasing the title, stripping non-alphanumerics, and truncating to 40 chars -- and `applyPriOverrides()` silently `continue`s (drops) any item whose key was already `_seen`. Two genuinely different items with similar/generic titles (or titles sharing the same first ~40 normalised characters) would collide and one would vanish from ALL sections, not just be hidden. This is a plausible, not yet verified, root cause for "cards vanishing on move" -- flagging for whichever session picks that bug up next (this session's remaining time went to the Show/Hide Done fix per Kevin's explicit priority in this dispatch). Did not touch `applyPriOverrides()`.
+
+## Next action
+None outstanding for the Show/Hide Done bug -- fixed, verified live via logic test + production byte-comparison. If the other Drew session already independently reached a different (or the same) fix and pushed after this checkpoint was written, reconcile by diffing commit `f030b34` against whatever it produced before assuming either is wrong. The `_priGetKey` collision lead above is unexplored and worth a look for "cards vanishing on move."
+
+---
+
 # work-inbox — Living Handover Document
 
 
