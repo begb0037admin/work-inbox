@@ -1,35 +1,6 @@
 {
-  "generated_at": "2026-08-12 11:15",
+  "generated_at": "2026-08-12 11:43",
   "new_tasks": [
-    {
-      "title": "Advise Marie on GLAM joining 38-day balance scheme",
-      "tier": "week",
-      "description": "Marie Cooksey copied Kevin in and asked for his thoughts/advice on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Julie Hickman is chasing for a response to pass on to the departments. Kevin needs to provide input to inform the decision.",
-      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-11 13:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995740000"
-    },
-    {
-      "title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
-      "tier": "week",
-      "description": "Simon is discussing with Michael O'Sullivan whether to refresh UOXU and UOXC environments with a new clone of UOXP for DTP1092 Company 90 configuration and testing. Kevin needs to confirm this approach with Michael.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-06 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000",
-      "carried_forward": true
-    },
-    {
-      "title": "Confirm DTP1092 integrations testing completion by 14 Aug",
-      "tier": "week",
-      "description": "Crispin Muncaster is requesting confirmation that integrations testing for College Staff into PXD can be completed by Friday 14 August. Guy Williams' email (n=0) confirms staging imports are ready. Kevin needs to confirm this tight deadline is achievable given team capacity.",
-      "email_subject": "DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-10 07:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629955A0000",
-      "carried_forward": true
-    },
     {
       "title": "Review outstanding Development Insight reports actions with Julie",
       "tier": "week",
@@ -41,5 +12,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": []
+  "task_updates": []
 }
