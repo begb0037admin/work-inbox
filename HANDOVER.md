@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-11 - Work Inbox Briefing hang bug FIXED and verified live: two-line /run+/update early-exit guard applied to Run Inbox Briefing.bat (Kevin approved, didn't wait further on Codex). Real scheduled-task run exited cleanly in ~5m46s (LastTaskResult 0, was 267014), toast notification confirmed fired. Closed.
+**Last updated:** 2026-08-12 - Run-start timestamp logging (fetch_inbox.py + 4 tools/*.py + 2 Desktop .bat launchers) confirmed shipped and live-verified end to end. Checkpoint per new agent-commons SESSION_PROTOCOL.md. Closed.
 
 
 
@@ -53,6 +53,32 @@
 
 
 
+
+## Session 2026-08-12 — Run-start timestamp logging: verified live end to end, closed (Drew)
+
+**Scope:** Per the new estate-wide `agent-commons/SESSION_PROTOCOL.md` (mandatory from 12 Aug 2026), checked the actual live state of the timestamp-logging work Kevin approved earlier this session — did not trust a prior in-chat "done" claim, verified against GitHub commit history and live Desktop/log files directly.
+
+**Code — confirmed pushed:** commit `b74a794` (2026-08-12T07:38:40Z) — "Add run-start timestamp to every console/log-producing script." Touches `fetch_inbox.py` (+19/-11, adds a `log()` helper used on every Phase-boundary print plus the Outlook COM retry lines — the exact lines involved in the 11 Aug incident that prompted this) and all four `tools/*.py` scripts (`draft_final_diff_capture.py`, `publish_drafted_replies.py`, `publish_needs_reply.py`, `sent_corpus_pull.py`), each gaining a one-line `print(f"[...] <script> run started")` as the literal first statement under `if __name__ == "__main__":`.
+
+**Desktop .bat launchers — confirmed edited, not tracked in git (Desktop-only files):** both `Run Inbox Briefing.bat` and `Run Draft Diff Capture.bat` on `D:\OneDrive - lelitte.com\Desktop\` got a 3-line timestamp block inserted immediately after `title`, before any other work:
+```bat
+for /f "delims=" %%I in ('powershell -NoProfile -Command "Get-Date -Format \"yyyy-MM-dd HH:mm:ss\""') do set "RUN_TS=%%I"
+echo Run started: %RUN_TS%
+```
+Confirmed via `diff` against the pre-edit backups both scripts' own convention already produced (`Run Inbox Briefing.bat.backup-20260812-083908`, `Run Draft Diff Capture.bat.backup-20260812-083908`). This echo is console/title-only (prints before the `python -u ... | Tee-Object` redirection starts), so it's visible on an interactive double-click run but not captured in the `*_last_run.log` files — the log-file self-dating guarantee comes from the Python `log()`/print lines below, not this echo.
+
+**Live verification — not assumed, checked directly:**
+- `fetch_inbox.py`: real 09:00 scheduled "Work Inbox Briefing" run (post-dating the 08:38 BST code push) — `inbox_briefing_last_run.log` shows `[2026-08-12 09:00:08] fetch_inbox.py run started` plus timestamped Phase 1/2/3/3.2/3.5/3.7/4 boundary lines. Task completed `LastTaskResult 0`.
+- `tools/publish_needs_reply.py`: same 09:00 run's downstream chain — `needs_reply_last_run.log` shows `[2026-08-12 09:04:00] publish_needs_reply.py run started`.
+- `tools/publish_drafted_replies.py`: same chain — `drafted_replies_last_run.log` shows `[2026-08-12 09:04:07] publish_drafted_replies.py run started`.
+- `tools/draft_final_diff_capture.py`: not naturally due until 09:30 and its last log predated the code push (06:30, stale). Manually triggered `Start-ScheduledTask -TaskName 'Draft Diff Capture'` (same hidden VBS-wrapper `/update` path Task Scheduler itself uses, so this is a genuine exercise of the real automated path, not a synthetic test) and polled to completion — `LastTaskResult 0`, `draft_diff_capture_last_run.log` now shows `[2026-08-12 09:12:24] draft_final_diff_capture.py run started`.
+- `tools/sent_corpus_pull.py`: has no scheduled task (manual-only, requires explicit `--start`/`--end`). Local copy in `tools/` was stale (pre-dated the code push); backed it up (`sent_corpus_pull.py.backup-20260812-091146`) and re-pulled the current version from GitHub, then ran it directly with its own built-in `--stats-only` safe/read-only dry-run flag (`--start 2026-08-11 --end 2026-08-12 --stats-only`, writes nothing to disk, no GitHub push) — console output opened with `[2026-08-12 09:12:19] sent_corpus_pull.py run started` followed by the stats JSON.
+
+All five files (`fetch_inbox.py` + 4 `tools/*.py`) and both Desktop `.bat` launchers now confirmed live and verified with real timestamped output, not just pushed code. Nothing remains open on this item.
+
+**Next action:** none — closed. If a future incident needs this data, `*_last_run.log` files under `C:\Users\admin\Documents\Claude\Projects\work-inbox\` (and `\tools\`) are the first place to check; each now opens with a `[YYYY-MM-DD HH:MM:SS] <script> run started` line.
+
+---
 
 ## Session 2026-08-11 (continued) — Hang bug FIXED and verified live; issue #3 closed (Drew)
 
