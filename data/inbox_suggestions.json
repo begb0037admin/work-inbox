@@ -1,5 +1,25 @@
 {
-  "generated_at": "2026-08-12 12:42",
-  "new_tasks": [],
-  "task_updates": []
+  "generated_at": "2026-08-12 15:00",
+  "new_tasks": [
+    {
+      "title": "Review Oxford Uni Pre-project Authentication call follow-up",
+      "tier": "week",
+      "description": "Alex Manton-Jones has sent a follow-up from the 11 August authentication call. Kevin needs to review the call summary and determine what action items or next steps are required from this pre-project discussion.",
+      "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
+      "email_from": "Alex Manton-Jones",
+      "received": "2026-08-11 16:50",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629957D0000"
+    }
+  ],
+  "applied_updates": [
+    {
+      "task_id": "t2608061800541",
+      "task_title": "Attend Incident Reporting PUG meeting",
+      "note": "Christopher Sanders has rescheduled the Incident Reporting PUG meeting to accommodate other commitments; agenda to follow.",
+      "email_subject": "Incident Reporting PUG",
+      "email_from": "Christopher Sanders",
+      "received": "2026-08-12 13:35",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A8967C720000"
+    }
+  ]
 }
