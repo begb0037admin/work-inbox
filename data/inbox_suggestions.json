@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-12 08:42",
+  "generated_at": "2026-08-12 09:02",
   "new_tasks": [
     {
-      "title": "Review Oxford Uni Pre-project Authentication call follow-up",
+      "title": "Review Oxford Uni Pre-project Authentication follow-up",
       "tier": "week",
-      "description": "Alex Manton-Jones sent a follow-up email from an authentication call held on 11 August. Kevin needs to review the full content and determine what action items, if any, are required from this call.",
+      "description": "Alex Manton-Jones sent a follow-up from an authentication call on 11 August. Kevin needs to review the full email content and determine what action items, if any, are required from this discussion.",
       "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
       "email_from": "Alex Manton-Jones",
       "received": "2026-08-11 16:50",
@@ -13,20 +13,12 @@
     {
       "title": "Advise Marie on GLAM joining 38-day balance scheme",
       "tier": "week",
-      "description": "Marie Cooksey is seeking Kevin's input on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Kevin needs to provide thoughts and advice to inform the decision.",
+      "description": "Marie Cooksey is seeking Kevin's input on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Kevin needs to provide thoughts/advice to inform the decision.",
       "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-11 13:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995750000"
-    },
-    {
-      "title": "Review Cority Applicant Data Import update from James",
-      "tier": "week",
-      "description": "James Salas Guillen has sent an update on the Cority Applicant Data Import following several uploads/imports in Production. Kevin needs to review and action as needed.",
-      "email_subject": "Cority - Applicant Data Import file",
-      "email_from": "James Salas Guillen",
-      "received": "2026-08-11 13:11",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995730000"
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-11 13:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995740000",
+      "auto_promoted": true
     },
     {
       "title": "Confirm DTP1092 integrations testing completion by 14 Aug",
@@ -61,13 +53,13 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608061800540",
-      "task_title": "Attend Oxford University Evo Pre project meeting in Simon's absence",
-      "note": "Meeting reminder notification that the Oxford University Evo Pre project meeting is starting soon.",
-      "email_subject": "Your meeting \"Oxford University Evo Pre project meeting \" is starting soon...",
-      "email_from": "Mike West via Clari Copilot",
-      "received": "2026-08-11 15:21",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995760000"
+      "task_id": "t2608071501070",
+      "task_title": "Confirm availability for Multi Company Setup discussion with Conor (FP 68261303)",
+      "note": "Occupational Health appointment reminder received; Kevin should respond with availability.",
+      "email_subject": "Appointment Reminder – Occupational Health",
+      "email_from": "enquiries@uohs.ox.ac.uk",
+      "received": "2026-08-12 08:40",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A8967C700000"
     }
   ]
 }
