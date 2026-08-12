@@ -1,68 +1,15 @@
 {
-  "generated_at": "2026-08-12 10:08",
+  "generated_at": "2026-08-12 11:00",
   "new_tasks": [
     {
-      "title": "Review Oxford Uni Pre-project Authentication call follow-up",
-      "tier": "week",
-      "description": "Alex Manton-Jones sent a follow-up email from an authentication call held on 11 August. Kevin needs to review the full content and determine what action items, if any, are required from this call.",
-      "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
-      "email_from": "Alex Manton-Jones",
-      "received": "2026-08-11 16:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629957D0000"
-    },
-    {
-      "title": "Advise Marie on GLAM joining 38-day balance scheme",
-      "tier": "week",
-      "description": "Julie Hickman has asked Kevin for his thoughts on whether GLAM should join the 38-day balance scheme alongside Maths and Chemistry. Marie has copied Kevin in and is seeking his input to inform the decision.",
-      "email_subject": "RE: 38 day balance departments - Maths, Chemistry and GLAM? - GLAM chasing",
+      "title": "Confirm support coverage for Marie's absence today",
+      "tier": "today",
+      "description": "Marie Cooksey is unwell and not working for the rest of today (Wednesday 12 August). Kevin should confirm what urgent support coverage is needed and delegate or handle critical items.",
+      "email_subject": "Marie C not working",
       "email_from": "Marie Cooksey",
-      "received": "2026-08-11 13:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995740000"
-    },
-    {
-      "title": "Review Cority Applicant Data Import update from James",
-      "tier": "week",
-      "description": "James Salas Guillen has sent an update on the Cority Applicant Data Import following several uploads/imports in Production. Kevin needs to review and take any necessary action.",
-      "email_subject": "Cority - Applicant Data Import file",
-      "email_from": "James Salas Guillen",
-      "received": "2026-08-11 13:11",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995730000"
-    },
-    {
-      "title": "Investigate Clockify role consolidation for Beth",
-      "tier": "week",
-      "description": "Marie Cooksey is asking whether it is possible to combine Beth's two Clockify roles (HR Systems and Biology) into one. Kevin needs to investigate the Clockify platform capabilities and advise Marie on feasibility.",
-      "email_subject": "Clockify",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-10 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995660000"
-    },
-    {
-      "title": "Review volunteering leave pay code configuration work",
-      "tier": "week",
-      "description": "Simon Burford has been working on moving volunteering leave from 'Other Leave' reason code to its own standalone leave type. Kevin needs to review Simon's analysis and determine next steps for implementation in PeopleXD.",
-      "email_subject": "Volunteering Leave",
-      "email_from": "Simon Burford",
-      "received": "2026-08-07 16:21",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998650000"
-    },
-    {
-      "title": "Investigate team calendar config issue with Asta",
-      "tier": "week",
-      "description": "Simon encountered a missing option when trying to configure the Volunteering Leave pay code in UOXU. Kevin needs to work with Asta to diagnose and resolve the team calendar configuration problem.",
-      "email_subject": "Team Calendar Config",
-      "email_from": "Simon Burford",
-      "received": "2026-08-07 15:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998640000"
-    },
-    {
-      "title": "Review Conor's Multi Company Setup work and align on next steps",
-      "tier": "week",
-      "description": "Conor O'Brien has sent updated work on the Multi Company Setup (FP 68261303) for DTP1092. Kevin needs to review Conor's progress and confirm availability to continue discussions, as Simon is on leave next week.",
-      "email_subject": "RE: #External# RE: Multi Company Setup",
-      "email_from": "Conor O'Brien",
-      "received": "2026-08-07 12:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998620000"
+      "received": "2026-08-12 10:19",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A8967C710000",
+      "auto_promoted": true
     },
     {
       "title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
@@ -71,7 +18,8 @@
       "email_subject": "RE: Business rules for Data Warehouse",
       "email_from": "Simon Burford",
       "received": "2026-08-06 17:05",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A4CD43200000",
+      "carried_forward": true
     },
     {
       "title": "Confirm DTP1092 integrations testing completion by 14 Aug",
@@ -94,5 +42,15 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t2608111719550",
+      "task_title": "Follow up on Oxford Uni Pre-project Authentication call",
+      "note": "Alex Manton-Jones follow-up email received on the pre-project authentication call held 11 August; Kevin needs to review full content and determine action items.",
+      "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
+      "email_from": "Alex Manton-Jones",
+      "received": "2026-08-11 16:50",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629957D0000"
+    }
+  ]
 }
