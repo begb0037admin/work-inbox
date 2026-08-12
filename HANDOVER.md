@@ -14,7 +14,7 @@
 
 
 
-**Last updated:** 2026-08-12 - Urgent-tier noise demotion (Phase 3.3b) + Command Centre task-suggestion noise fix built, Codex-reviewed x3 (plan/diff/end-to-end, all clean, verdict SHIP), pushed (`8dbb57a`), verified live (Urgent 55->3, Needs 110->20, CC new_tasks 4->1). Supersedes the same-day "BLOCKED on Codex auth" checkpoint below, left by a concurrent session that hit a Codex CLI auth failure this session did not encounter -- see the entry for details, nothing from that blocked session was ever pushed. Checkpoint per agent-commons SESSION_PROTOCOL.md. Closed.
+**Last updated:** 2026-08-12 - FYI/Parked bloat investigated (292 displayed / 466 raw): root-caused live, NOT built. ~30% is today's own Needs/Urgent demotion overflow (142 cards, no downstream cleanup); the dominant ~70% baseline is a pre-existing, unrelated structural bug (uncapped VIP sweep + Restrict()-fallback dropping the date cutoff). Proposal made, awaiting Kevin's decision on cleanup approach. See entry below. Checkpoint per agent-commons SESSION_PROTOCOL.md.
 
 
 
@@ -53,6 +53,30 @@
 
 
 
+
+## Session 2026-08-12 (new) — "FYI / Parked" bloat investigated and root-caused live; investigate-and-propose only, nothing built or pushed (Drew)
+
+**Scope:** Kevin flagged "FYI Parked" at 292 entries as clearly too many, following the same-day Needs/Urgent demotion fixes (Phase 3.3/3.3b, commits `74ea07a`/`8dbb57a`). Explicit instruction: investigate the real root cause with live code and live data, don't guess, and say plainly if today's own fix just moved the noise rather than solving it. Investigate-and-propose only — no build, no push, per Kevin's brief.
+
+**Finding 1 — today's fix is a real, partial, honestly-disclosed contributor.** Of the current raw `fyi` count (466, pulled live via GitHub Contents API), 142 (90 Needs-demoted + 52 Urgent-demoted, ~30%) are today's own Phase 3.3/3.3b output, added to FYI with zero downstream cleanup mechanism — nothing ages, re-triages, or expires a demoted card.
+
+**Finding 2 — the dominant ~70% baseline is a separate, pre-existing structural bug, unrelated to today's work.** Root-caused via three standalone read-only diagnostic scripts run directly against live Outlook COM (no writes, no pipeline trigger):
+- `restrict_date()` (`fetch_inbox.py` ~line 228) falls back to an unrestricted, unbounded folder scan (no date cutoff at all) whenever the 7-day `Restrict()` filter returns >200 items, on the assumption the filter "likely failed." Live-confirmed this fires on **every run**: Kevin's real inbox returns 562 items on the 7-day filter (780 in the folder all-time).
+- The main Phase 1 pull still self-caps at 80 correctly. The **VIP sweep** (lines 323-348) does not — it has no cap and no date bound, and live-added 420 extra items this run, some dating back to 1 April 2026.
+- 298 of those 420 old VIP-swept items default to FYI via `categorise()`'s catch-all "read + no keyword match -> fyi" rule. Age distribution: 0 within 7 days, 23 at 8-30 days, 154 at 31-90 days, 121 over 90 days old.
+- 47% of the pre-existing FYI baseline (154 of 327 cards) is duplicate threads — 47 distinct subjects appear more than once (e.g. "RE: HR Systems Managers Meeting" x8) — no thread-collapsing exists anywhere in the pipeline.
+
+**Finding 3 — separate UI correctness issue, found along the way.** The "FYI / Parked" board Kevin actually looks at (`js/app.js` line 589) is a client-side title-key dedup across ALL Priorities-board sections, not the raw `fyi` array. Simulating it against the live 466-item array reproduces ~290, matching Kevin's observed 292. ~38% of the raw tier is already silently invisible to Kevin via title-key collisions — a real, distinct risk that two genuinely different emails sharing a normalized title could silently collide, independent of the volume question.
+
+**Proposed, not built:** (1) fix the VIP-sweep/Restrict-fallback root cause; (2) add thread/subject dedup upstream; (3) Kevin to decide what should happen to demoted cards over time (leave as-is / separate sub-view / staleness cutoff like Lauren's 60-day drafting rule); (4) fix the title-key dedup collision risk in the Priorities board.
+
+**Codex note:** Kevin reported Codex out of usage today (separate from the earlier 401/auth incident this same day). This was investigate-only — no code written or pushed — so the mandatory-Codex-on-builds rule wasn't triggered. Flagged to Kevin: no Codex pass has reviewed this investigation/proposal; get one before any build, once capacity is back.
+
+Full detail: `begb0037admin/drew` `memory/fyi-parked-bloat-investigation-12aug.md`.
+
+**Next action:** awaiting Kevin's decision on which cleanup approach(es) to build.
+
+---
 
 ## Session 2026-08-12 (addendum) — self-reconciliation: this session's own push briefly overwrote the concurrent session's identical commit, confirmed harmless (Drew)
 
