@@ -1,5 +1,6 @@
 import json, os, base64, html, re, urllib.request, urllib.error, subprocess, time
 from datetime import datetime, timedelta
+from difflib import SequenceMatcher
 import win32com.client
 import pywintypes
 import anthropic
@@ -1676,17 +1677,42 @@ if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
                     break
 
         # Auto-promote new task suggestions straight into tasks.json.
-        # Guarded three ways so a task is never created twice: the promoted
-        # ledger, an existing task already carrying that entryId, and a
-        # case-insensitive title match against the current list.
-        existing_entry_ids = {t.get("entryId") for t in task_list if t.get("entryId")}
-        existing_titles    = {(t.get("title") or "").strip().lower() for t in task_list}
+        # Guarded four ways so a task is never created twice: the promoted
+        # ledger, an existing task already carrying that entryId, an exact
+        # case-insensitive title match, and (added 12 Aug 2026) a fuzzy
+        # near-duplicate title match against every existing task title.
+        # The fuzzy guard exists because the exact-match guard alone missed
+        # a confirmed live duplicate pair where two separate emails about
+        # the same request produced two near-identical titles ("Advise on
+        # GLAM joining 38-day balance departments scheme" vs "Advise Marie
+        # on GLAM joining 38-day balance scheme", SequenceMatcher ratio
+        # 0.83). Threshold 0.8 chosen empirically against live task data:
+        # it catches every confirmed live duplicate pair (0.83-1.0) while
+        # staying clear of the closest known false positive -- two
+        # genuinely different meetings that share generic words (0.68).
+        FUZZY_DUP_THRESHOLD = 0.8
+        def _fuzzy_duplicate_of(title, other_titles):
+            for other in other_titles:
+                if SequenceMatcher(None, title.lower(), other.lower()).ratio() >= FUZZY_DUP_THRESHOLD:
+                    return other
+            return None
+
+        existing_entry_ids  = {t.get("entryId") for t in task_list if t.get("entryId")}
+        existing_titles     = {(t.get("title") or "").strip().lower() for t in task_list}
+        existing_title_list = [(t.get("title") or "").strip() for t in task_list if t.get("title")]
         promoted = 0
+        fuzzy_skipped = 0
         for nt in (suggestions["new_tasks"] if AUTO_PROMOTE_NEW_TASKS else []):
             eid = nt.get("entry_id", "")
             if not eid or eid in ledger.get("promoted", {}) or eid in existing_entry_ids:
                 continue
-            if (nt.get("title") or "").strip().lower() in existing_titles:
+            title = (nt.get("title") or "").strip()
+            if title.lower() in existing_titles:
+                continue
+            dup_of = _fuzzy_duplicate_of(title, existing_title_list)
+            if dup_of:
+                fuzzy_skipped += 1
+                print(f"Phase 3.6 - skipped near-duplicate task suggestion: '{title}' looks like existing '{dup_of}'")
                 continue
             new_id = "t" + datetime.now().strftime("%y%m%d%H%M%S") + str(promoted)
             task_list.append({
@@ -1702,7 +1728,8 @@ if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
                 "actions":     [f"[{stamp}] Auto-created from inbox triage (email: {nt['email_from']} - {nt.get('email_subject','')})."]
             })
             existing_entry_ids.add(eid)
-            existing_titles.add((nt.get("title") or "").strip().lower())
+            existing_titles.add(title.lower())
+            existing_title_list.append(title)
             nt["auto_promoted"] = True
             promoted += 1
 
@@ -1716,7 +1743,7 @@ if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
                     f"inbox: {' + '.join(bits)} {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                     json.dumps(tasks_doc, indent=2, ensure_ascii=False).encode("utf-8"),
                     cc_meta["sha"])
-            print(f"Phase 3.6 done - {applied} update(s), {promoted} new task(s) applied to Command Centre")
+            print(f"Phase 3.6 done - {applied} update(s), {promoted} new task(s) applied to Command Centre" + (f" ({fuzzy_skipped} near-duplicate suggestion(s) skipped)" if fuzzy_skipped else ""))
             for u in suggestions["task_updates"]:
                 ledger["applied"][u["entry_id"] + "_" + u["task_id"]] = datetime.now().strftime("%Y-%m-%d")
             for nt in suggestions["new_tasks"]:
