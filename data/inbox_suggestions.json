@@ -1,15 +1,90 @@
 {
-  "generated_at": "2026-08-13 15:00",
-  "new_tasks": [],
+  "generated_at": "2026-08-13 18:01",
+  "new_tasks": [
+    {
+      "title": "Review DTP1334 SHSMS supplier requirements evaluations -- deadline 21 Aug",
+      "tier": "week",
+      "description": "Helen Harbour is coordinating supplier requirements evaluations for the Strategic Health & Safety Management System project (DTP1334) with an upcoming deadline of Friday 21 August. Kevin needs to review supplier submissions and clarifications and contribute to the evaluation process.",
+      "email_subject": "Strategic Health & Safety Management System project supplier requirements evaluations; upcoming deadline of Friday 21 August",
+      "email_from": "Helen Harbour",
+      "received": "2026-08-13 16:10",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B02200000",
+      "auto_promoted": true
+    },
+    {
+      "title": "Review Supplier Submission Clarifications V2.0 -- DTP1334 SHSMS",
+      "tier": "week",
+      "description": "Caroline Gow has shared a document containing supplier clarification questions for the DTP1334 SHSMS project evaluation. Kevin needs to review and provide input on supplier responses ahead of the 21 August deadline.",
+      "email_subject": "Caroline Gow shared \"Supplier Submission Clarifications V2.0\" with you",
+      "email_from": "Caroline Gow",
+      "received": "2026-08-13 16:56",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B02220000",
+      "auto_promoted": true
+    }
+  ],
   "applied_updates": [
+    {
+      "task_id": "t2608121801281",
+      "task_title": "Review PeopleXD uplift timeline from Jessica Oldershaw",
+      "note": "Tracy Roberts has added payroll processing stats and monthly implementation details to the uplift timeline discussion.",
+      "email_subject": "RE: Timeline for implementation of uplift",
+      "email_from": "Tracy Roberts",
+      "received": "2026-08-13 15:44",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B021F0000"
+    },
+    {
+      "task_id": "t2608121801281",
+      "task_title": "Review PeopleXD uplift timeline from Jessica Oldershaw",
+      "note": "Athena has flagged parental leave commitment from late October through end of January that may impact October implementation timelines.",
+      "email_subject": "RE: Timeline for implementation of uplift",
+      "email_from": "Athena Artuso",
+      "received": "2026-08-13 13:35",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B021D0000"
+    },
+    {
+      "task_id": "t2608121801281",
+      "task_title": "Review PeopleXD uplift timeline from Jessica Oldershaw",
+      "note": "Sarah Clarke has requested further clarification and is coordinating input from team members on the uplift implementation timeline.",
+      "email_subject": "RE: Timeline for implementation of uplift",
+      "email_from": "Sarah Clarke",
+      "received": "2026-08-13 13:32",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B021C0000"
+    },
+    {
+      "task_id": "t2608121801281",
+      "task_title": "Review PeopleXD uplift timeline from Jessica Oldershaw",
+      "note": "Athena has cc'd Michael O'Sullivan from the Functional Analyst team to provide input on implementation feasibility.",
+      "email_subject": "RE: Timeline for implementation of uplift",
+      "email_from": "Athena Artuso",
+      "received": "2026-08-13 09:07",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A981A2750000"
+    },
     {
       "task_id": "t2608121100230",
       "task_title": "Confirm support coverage for Marie's absence today",
-      "note": "Marie has now advised Beth to step away too due to sickness, leaving no helpdesk cover today; Sarah Rowles and Ant are managing coverage.",
+      "note": "Sarah Rowles confirms Ant is covering the applicant inbox today and Athena is discussing task re-prioritization.",
       "email_subject": "RE: Reduced Help Desk Support",
+      "email_from": "Sarah Rowles",
+      "received": "2026-08-13 09:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B021A0000"
+    },
+    {
+      "task_id": "t2608121100230",
+      "task_title": "Confirm support coverage for Marie's absence today",
+      "note": "Athena has acknowledged the reduced helpdesk support situation.",
+      "email_subject": "RE: Reduced Help Desk Support",
+      "email_from": "Athena Artuso",
+      "received": "2026-08-13 09:33",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A981A2790000"
+    },
+    {
+      "task_id": "t2608121100230",
+      "task_title": "Confirm support coverage for Marie's absence today",
+      "note": "Marie initially notified team of reduced help desk support due to annual leave and sickness.",
+      "email_subject": "Reduced Help Desk Support",
       "email_from": "Marie Cooksey",
-      "received": "2026-08-13 11:18",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B021B0000"
+      "received": "2026-08-13 09:32",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A981A2780000"
     }
   ]
 }
