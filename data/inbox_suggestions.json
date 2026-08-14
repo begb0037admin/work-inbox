@@ -1,15 +1,16 @@
 {
-  "generated_at": "2026-08-14 12:00",
-  "new_tasks": [],
-  "applied_updates": [
+  "generated_at": "2026-08-14 15:01",
+  "new_tasks": [
     {
-      "task_id": "t034",
-      "task_title": "Sickness Absence Reporting -- open absence bug",
-      "note": "Athena Artuso confirms that only Employer Contribution Rates for NHS Pension tiers are relevant for statutory reporting purposes.",
-      "email_subject": "RE: Support Call# 11701239: NHS Pension tiers new pay ranges",
-      "email_from": "Athena Artuso",
-      "received": "2026-08-13 09:16",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A981A2760000"
+      "title": "Attend H&S Roadmap catch-up with Christopher Sanders",
+      "tier": "week",
+      "description": "Christopher Sanders has scheduled a regular catch-up to review open support tickets, health & safety roadmap, backlog items, blockers and concerns. Kevin needs to attend this meeting.",
+      "email_subject": "H&S Roadmap",
+      "email_from": "Christopher Sanders",
+      "received": "2026-08-14 13:13",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AA5B58050000",
+      "auto_promoted": true
     }
-  ]
+  ],
+  "applied_updates": []
 }
