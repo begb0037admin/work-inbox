@@ -83,18 +83,3 @@ Once Phase 1 chat is stable in both dashboards:
 **Status:** Both await Kevin's go-ahead. Revisit if drag-and-drop bugs recur after Tier 1, or when there's appetite for a dedicated dashboard-engineering session.
 
 ---
-
-## Deferred — 7th Priorities-board tier: "Needs Response – No Fixed Deadline"
-
-**Recorded 17 Aug 2026.** Arose from investigating why a real Alan Quirke/Access Group vendor email (23 Jul, Holiday Records reports quote/scheduling) never got chased — it was correctly triaged into Needs, then scrolled out of the 50-newest-email Outlook pull with no way back (see `memory/wi-quirke-needs-tier-scrollout-17aug.md` in `begb0037admin/drew`; the scroll-out vanishing itself was fixed same day as Phase 3.9 in `fetch_inbox.py`).
-
-Kevin's own framing: the Priorities board only has 6 sections (Urgent, Priority Today/Tomorrow/This Week, Needs Response – 24–48hrs, FYI/Parked), and the raw AI triage only outputs 4 tiers (`urgent`/`needs`/`fyi`/`low`). A slow-moving vendor/project thread — genuinely needs a reply eventually, but has no tight deadline — currently gets force-fit into "Needs response – within 24–48 hrs," which is misleading about urgency and likely part of why it doesn't get chased before it's buried under newer, genuinely time-critical items.
-
-**Proposed shape (not designed in detail, not built):** a 7th board section, e.g. "Needs Response – No Fixed Deadline" / "Tracking," sitting between "Needs response – 24–48 hrs" and "FYI/Parked," for items awaiting a reply with no hard clock — vendor quotes, scheduling follow-ups, anything waiting on someone else. Would need:
-- A genuine 5th classification signal from the AI triage prompt (not just a UI relabel) — Phase 3.2's `EMAIL_SUMMARY_SYSTEM` would need a real "has a deadline / no fixed deadline" distinction alongside `needs_reply`/`no_action_needed`.
-- A new `validSecs` entry, drag-drop override wiring, and section HTML/CSS in `js/app.js`/`index.html` (same pattern as the existing 6 — `applyPriOverrides()`, `_secHeadHtml()`, the `pri-drop-zone` markup).
-- Natural fit for Phase 3.9's carried-forward items specifically (see above) — items that need to survive indefinitely without a hard "resolve or die" clock are exactly this tier's purpose, so if/when this is built, doing it together with Phase 3.9 rather than as a separate later pass would avoid re-touching the same card-classification code twice.
-
-**Status:** Explicitly deferred by Kevin, 17 Aug 2026 — good idea, not now. Revisit alongside or after any future AI-prompt/triage work.
-
----
