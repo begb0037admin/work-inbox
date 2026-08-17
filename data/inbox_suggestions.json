@@ -1,42 +1,51 @@
 {
-  "generated_at": "2026-08-17 09:00",
+  "generated_at": "2026-08-17 12:01",
   "new_tasks": [],
   "applied_updates": [
     {
-      "task_id": "t006",
-      "task_title": "Org hierarchy documentation and process",
-      "note": "Julie Hickman has acknowledged Athena's work on intranet hyperlinks as a positive step toward resolving the documentation and guidance issues raised by Simon.",
-      "email_subject": "RE: Review of intranet hyperlinks",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-17 08:10",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7BD0000"
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "Simon Burford's follow-up on 17 Aug confirms he wants to test the actual go-live solution first before proceeding with staging imports.",
+      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 11:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C50000"
     },
     {
-      "task_id": "t2608111309071",
-      "task_title": "Attend HR Systems Management meeting",
-      "note": "Marie Cooksey has sent the Teams meeting link for the HR Systems Management meeting Kevin needs to attend.",
-      "email_subject": "H&S Systems Supplier Reviews",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-11 11:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A62995700000"
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "Andrew Goff clarifies that the API_USER restriction recommendation came from Guy, based on potential future lifting of the restriction.",
+      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Andrew Goff (IT Services)",
+      "received": "2026-08-17 11:19",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C40000"
     },
     {
-      "task_id": "t2608111309070",
-      "task_title": "Attend H&S Systems Supplier Reviews meeting",
-      "note": "Marie Cooksey has sent the Teams meeting link for the H&S Systems Supplier Reviews meeting Kevin needs to attend.",
-      "email_subject": "HR Systems Management",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-11 11:49",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A629956F0000"
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "Simon Burford questions why the API_USER and API_USER2 restrictions would be lifted, suggesting the restriction is part of the intended solution.",
+      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 11:03",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C20000"
     },
     {
-      "task_id": "t2608100901260",
-      "task_title": "Review Conor's Multi Company Setup work and align on next steps",
-      "note": "Kevin has shared the KPI presentation for July 2026 with Michael O'Sullivan, indicating progress on documenting HR Systems performance metrics.",
-      "email_subject": "Kevin Lelitte shared \"KPI presentation - July 2026\" with you",
-      "email_from": "Kevin (sent to: Michael O'Sullivan)",
-      "received": "2026-08-11 19:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007A88157F40000"
+      "task_id": "t2608071801052",
+      "task_title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
+      "note": "Simon clarifies that Company 90 should be ignored for now as it was set up only for WFM workgroup attachment purposes.",
+      "email_subject": "RE: Balance Period End Matrix",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 10:55",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C10000"
+    },
+    {
+      "task_id": "t046",
+      "task_title": "PACS org structure -- college entities L2 to L3 impact assessment",
+      "note": "Simon Burford forwards notification of PACS organisational structure changes moving colleges and societies from L2 to L3, effective through 12 August 2026.",
+      "email_subject": "FW: Organisational Structure Update - August 2026 - DRAFT",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 10:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C00000"
     }
   ]
 }
