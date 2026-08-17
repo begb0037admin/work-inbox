@@ -1,3 +1,38 @@
+# Handover -- 17 August 2026 (Drew) -- Priorities-board card search shipped, Kevin-approved, verified live
+
+## Scope
+Kevin's feature request: a live search box on the Priorities board so cards (Urgent, Priority Today/Tomorrow/This Week, Needs Response, FYI/Parked) can be filtered by subject, sender, or AI summary text now that the board has grown long. Client-side filter only, no redesign. Built and tested by a prior same-day Drew session (screenshotted, Playwright-verified with 7 passing assertions), which held the change unpushed pending Kevin's review per the standing UI-approval-gate practice. Kevin reviewed 4 screenshots via a published artifact and typed the literal word "approved" twice in the coordinator session. That prior session's edited files lived only in its own ephemeral scratchpad, which does not persist across a fresh agent spawn — this session (fresh spawn, dispatched specifically to push the approved work) confirmed the files were genuinely unrecoverable (clean local `work-inbox` clone with nothing uncommitted, no relevant pushed branch among the repo's 18 `claude/*` branches, no trace of the feature already on live `main`) before re-implementing the exact same feature from this repo's own `memory/wi-card-search-feature-17aug.md` checkpoint, which the prior session had written before losing its scratchpad.
+
+## What was built
+- `index.html`: `.wi-search-row` (text input `#wiSearchInput`, count span `#wiSearchCount`, `#wiSearchClear` button) inside `#tabContentPriorities`, directly above `#contextBar`/`#inboxCol` — shows only on the Priorities tab via the existing `.tab-content.active` CSS class, no new tab logic needed.
+- `js/app.js`: `applyCardSearch(val)`, `clearCardSearch()`, `_runCardSearch()`. Plain lowercased substring match against each `.card-ph`'s full `textContent` (subject + sender + latest action/summary, everything already rendered into the card), toggling `card.style.display` per card. Inline `display:none` composes correctly with the existing `.card-hidden` (Show/Hide Done) class. Per-zone "No matches" placeholder (reuses `.pri-zone-empty` styling) shown only when a zone has real cards but none match — the existing "Drop items here" empty-zone state is left untouched. `_runCardSearch()` is called at the end of `renderBriefing()` so an active search term survives every re-render path (drag-drop, tick, priority overrides all rebuild `#inboxGrid`'s innerHTML from scratch).
+- `css/styles.css`: `.wi-search-row`/`.wi-search-input`/`.wi-search-count`, styled to match the existing `.btn`/`.filter-select` look (Inter font, `--oxford` focus ring, same border radius/spacing tokens).
+- Purely additive — no changes to card rendering, drag-and-drop, tier filters, or any other existing behaviour.
+
+## Testing — real, not assumed
+Playwright (chromium) against the actual three edited files served via `file://` with the correct `js/`/`css/` relative subpaths. Aborted every external host (`github-proxy.lelitte.co.uk`, the Cloudflare Worker, `*.lelitte.co.uk`) via `page.route()` so `init()`'s real production fetch never raced the test, then called `window.renderBriefing()` directly with an injected fixture (5 cards across 5 of the 6 sections, one section deliberately left empty to exercise the untouched "Drop items here" path). 15 assertions, all passing: baseline full visibility with no term; substring match on title; substring match on sender; substring match on summary/action text (2 cards share "payroll" across two different sections); live match-count text; zero-match state (0 count, "No matches" placeholder in all 5 non-empty sections, zero visible cards); Clear button restores full view, empties the input, and re-hides itself; search term persists correctly across a simulated `renderBriefing()` re-render. `node --check` passes on both the pre-push file and the actual pulled-back live file.
+
+## Push — backup-and-verify sequence, GitHub platform incident hit mid-push
+A GitHub API partial outage was independently confirmed active during this push (`githubstatus.com` summary API showed an "Incident with GitHub.com," investigating, updated 16:59 UTC) — same-day incident already documented in this repo's `drew` memory as `phase4-github-503-17aug.md` from the scheduled Phase 4 briefing push earlier today. Every write in this session's sequence hit at least one bare 503 and succeeded on retry (up to 4 attempts, 8s backoff) — consistent with that known transient pattern, not a new problem.
+- Fresh GET of all three live files immediately before editing; sizes matched their known shas exactly (`index.html` 6503B, `js/app.js` 66096B — the same sha recorded as the final push in the 12 Aug drag-drop entry below, `css/styles.css` 35760B) — confirmed no concurrent edit had landed since 12 Aug.
+- Archive backups of the pre-edit content pushed first and verified byte-identical (blob sha matched the live pre-edit sha exactly) before any real edit was pushed: `Archive/index_backup_20260817_1715.html`, `Archive/app_backup_20260817_1715.js`, `Archive/styles_backup_20260817_1715.css`.
+- Re-checked live shas a second time immediately before the real writes (race guard) — unchanged.
+- Sha-guarded `PUT` for each file, then a fresh Contents API re-GET confirmed the new size/sha and that the actual pushed bytes contain the new function names/markers (`applyCardSearch`/`clearCardSearch`/`_runCardSearch` x6 in `app.js`; `wiSearchInput`/`wiSearchClear`/`wiSearchCount` x3 in `index.html`; `wi-search` x4 in `styles.css`).
+- Live production verify on both URLs with cache-busters: `begb0037admin.github.io/work-inbox` (js/css/html all confirmed) and `wi.lelitte.co.uk` (note: `/index.html` 307-redirects to `/` on this domain — fetching `/` directly, not `/index.html`, is the correct check). CDN staleness observed for ~20-90s depending on file/domain (consistent with the previously-documented GitHub Pages/Cloudflare propagation-lag pattern), then all three files confirmed byte-matching on both domains.
+
+## Commits
+- `5c842935c` — backup: index.html before card-search feature (`Archive/index_backup_20260817_1715.html`)
+- `990629e2b` — backup: js/app.js before card-search feature (`Archive/app_backup_20260817_1715.js`)
+- `7091fabc0` — backup: css/styles.css before card-search feature (`Archive/styles_backup_20260817_1715.css`)
+- `c940f1630` — feat: add live search box to Priorities board (`index.html`)
+- `0cf9bbf55` — feat: add card search to js/app.js (`js/app.js`)
+- `cc87ea982` — feat: add wi-search-row/wi-search-input/wi-search-count styles (`css/styles.css`)
+
+## Next action
+None outstanding — shipped, Kevin-approved (his explicit "approved," twice), live-verified on both production URLs. Worth a UX pass later if Kevin wants search to also cover a section that's currently empty at load but gains cards later (already handled correctly — the "no cards at all" vs "no matches" states are computed live per render) or wants the search box available before the Priorities tab is the active one (not requested, not built).
+
+---
+
 # Handover -- 12 August 2026, latest (Drew) -- Priority-board drag-and-drop Tier 1 fixes shipped, Codex-reviewed x4, verified live
 
 ## Scope
