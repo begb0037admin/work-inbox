@@ -2122,6 +2122,30 @@ try:
     except Exception:
         pass
 
+    # Dashboard-ticked-done entry_ids, for the resolution cross-check --
+    # added 17 Aug 2026 as part of the same-day live-incident fix ("mark
+    # done, refresh, it's back"). Before this, Phase 3.9 had exactly two
+    # resolution signals (Outlook Parent.EntryID, Command Centre done-task)
+    # and never looked at the dashboard's own done state at all, so ticking
+    # an item done in the UI did nothing to stop it being carried forward
+    # forever once it scrolled out of the fresh pull. data/ticks.json keys
+    # are 'eid_<entry_id>'/'id_<id>' for anything with a stable identity
+    # (js/app.js fixed the same day to key ticks this way instead of by
+    # render position) -- read that file directly (not the dashboard's own
+    # in-browser copy, which this script has no access to) and treat a
+    # true-valued 'eid_<entry_id>' entry as a genuine resolution, same as
+    # the CC-done check above.
+    _ticked_done_entry_ids = set()
+    try:
+        _ticks_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/ticks.json"
+        _ticks_meta = _gh_get(_ticks_url, _persist_ro_headers)
+        _ticks_doc = json.loads(base64.b64decode(_ticks_meta["content"]).decode("utf-8"))
+        for _k, _v in (_ticks_doc.get("ticks") or {}).items():
+            if _v is True and isinstance(_k, str) and _k.startswith("eid_"):
+                _ticked_done_entry_ids.add(_k[4:])
+    except Exception as e:
+        print(f"WARNING: Phase 3.9 could not read data/ticks.json for done-tick cross-check - {e}")
+
     today_iso = datetime.now().strftime("%Y-%m-%d")
 
     # 1. Checkpoint every live card this run (refreshes cached content and
@@ -2152,6 +2176,10 @@ try:
         if eid in live_ids:
             continue  # already handled by the checkpoint above
         if eid in _cc_done_entry_ids:
+            del tracked[eid]
+            dropped_resolved += 1
+            continue
+        if eid in _ticked_done_entry_ids:
             del tracked[eid]
             dropped_resolved += 1
             continue
