@@ -231,6 +231,11 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .pri-drop-zone.pri-zone-active { background: rgba(55,138,221,0.06); outline: 2px dashed rgba(55,138,221,0.3); outline-offset: 2px; }
 .pri-zone-empty { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 8px 4px; }
 
+.wi-search-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.wi-search-input { flex: 1; max-width: 360px; font-family: var(--font); font-size: 13px; padding: 8px 12px; border-radius: var(--radius); border: 1px solid #d1d9e6; background: var(--card-bg); color: var(--text-dark); outline: none; transition: border-color .15s; }
+.wi-search-input:focus { border-color: var(--oxford); }
+.wi-search-count { font-size: 12px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+
 /* No items */
 .no-items { font-size: 12px; color: var(--text-very-muted); font-style: italic; padding: 4px 0; }
 
