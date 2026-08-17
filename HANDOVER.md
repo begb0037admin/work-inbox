@@ -1,3 +1,41 @@
+# Handover -- 17 August 2026, later (Drew) -- Phase 3.9 actually activated (prior session's live run never really ran it); 98-archive backfill sweep completed, 48 genuine misses reinstated
+
+## Scope
+A prior same-day Drew session shipped the Phase 3.9 scroll-out-persistence fix (commit `5216d9fd`) and reported kicking off (a) a live `fetch_inbox.py` run to activate it and (b) a backfill sweep across all archived briefings to recover any Urgent/Needs item that had ever silently vanished pre-fix. That session went quiet mid-run with no completion report, no HANDOVER entry, no `drew` memory write-up. This session (fresh dispatch, Kevin asked for a verified status check) found and finished both pieces from scratch, verifying every claim against live GitHub/Outlook state rather than trusting anything in chat.
+
+## What was actually found (not what was assumed)
+- `data/triage_ledger.json`'s `tracked_needs_urgent` key had never been written by anything -- the last ledger commit predated the Phase 3.9 fix entirely.
+- Root cause: the local `fetch_inbox.py` copy at `C:\Users\admin\Documents\Claude\Projects\work-inbox\` was stale -- last self-updated from GitHub main by the 18:00 *scheduled* Task Scheduler run, which itself ran roughly an hour *before* the Phase 3.9 commit landed. If the prior session's "live run" used that local copy directly (rather than pulling fresh from GitHub first, which only the desktop `.bat`'s self-update step does), Phase 3.9's code was never actually present in the process it ran -- fully consistent with the ledger showing zero Phase 3.9 activity and the run stalling somewhere before a real completion, with no local log evidence of it either (a manual terminal run doesn't write to `inbox_briefing_last_run.log`; only the scheduled `.vbs`-wrapped run does).
+- No process was still running (confirmed via `tasklist`) and Task Scheduler's `Work Inbox Briefing` task was `Ready`/idle, not mid-run -- there was nothing live to resume, only a stalled prior attempt to redo correctly.
+
+## Phase 3.9 -- properly activated this session
+1. Overwrote the local `fetch_inbox.py` with the real GitHub `main` copy (confirmed present: 6 references to "Phase 3.9", full function body at lines 2044-2207).
+2. Ran the real pipeline end-to-end (`python -u fetch_inbox.py`, foreground, output captured). First two attempts hit a live GitHub-wide partial outage (`githubstatus.com` "Partial System Outage", investigating -- same incident class already documented in this repo's `drew` memory as `phase4-github-503-17aug.md`, not a new problem) -- Phase 3.9's own fail-open design worked exactly as intended (logged a WARNING, did not crash, run continued). Second retry got Phase 3.9 to persist for the first time ever (`tracked_needs_urgent` populated with 9 entries, commit `45a03fb2`), but Phase 3.6/Phase 4 still 503'd on that attempt.
+3. Third attempt: full clean success, exit code 0. Real proof line: `Phase 3.9 done - carried:2 dropped_resolved:0 inconclusive_lookups_carried:0 stale_over_90d:0 tracked_total:9` -- two items that had genuinely scrolled out of the top-50 pull window were live-checked against Outlook and correctly carried forward. Briefing pushed (`a99911f`), suggestions pushed (`f376017`).
+
+## Backfill sweep across all 101 archived briefings (98 pre-existing + 3 made by this session's runs)
+Built as a one-off standalone tool (`scratchpad/backfill_*.py`, not committed to the repo -- ad hoc analysis scripts, not part of the product) rather than hand-checking 101 files:
+1. **Scan**: every `data/archive/briefing_*.json` back to 4 July, collect every distinct `entry_id` that ever appeared in `urgent`/`needs` across all of them -- 238 unique historical entries.
+2. **Filter to real candidates**: 230 not present in the current live `urgent`/`needs`.
+3. **Live Outlook cross-check** (same method as Phase 3.9 itself: `mapi.GetItemFromID` + compare `item.Parent.EntryID` to the Inbox's own): 215 still physically sitting in the Inbox, 1 resolved via a done Command Centre task, 0 moved to another folder, 14 inconclusive COM lookups.
+4. **Critical refinement, not in the original plan**: cross-referencing "still in Inbox" against current live **FYI/Low** tiers too (not just urgent/needs) -- Phase 3.3/3.3b's AI no-action demotion moves plenty of once-urgent/needs items to FYI *correctly*, which is completely different from a Phase-3.9-class scroll-out bug. Only 10 of 215 were explained this way (FYI's own thread-collapse strips most entry_ids, so this check under-counts, but it's a meaningful sanity filter regardless) -- 205 remained genuinely absent from every tier of the live briefing.
+5. **AI re-verdict using the live pipeline's own Phase 3.2/3.3 prompt verbatim** (same model, same `needs_reply`/`no_action_needed` fields, same system prompt, with one added sentence of honest context that these are backfill candidates being judged fresh) rather than a hand-rolled heuristic or a blind dump: of 205, the AI confirmed 157 as genuinely no-action-needed now (stale, resolved elsewhere, or low-value notifications) and 48 as still genuinely open.
+6. Sanity check: the 48 include the exact Alan Quirke/Access Group "PeopleXD Insight Reporting - Holiday Records Reports quote" email that was the original real-world miss Kevin reported and that motivated this whole fix (documented in `drew`'s `wi-quirke-needs-tier-scrollout-17aug.md`) -- direct evidence the methodology recovers the actual target case, not just noise.
+
+## Reinstatement -- before/after, live-verified
+- `data/triage_ledger.json` `tracked_needs_urgent`: 9 -> 57 (48 backfill entries added, each tagged `backfill_reinstated: <date>` and carrying the fresh AI summary used to justify keeping it, so it's auditable later). Backed up first to `data/archive/triage_ledger_backup_20260817_*.json`. Commit `e824ea68`.
+- `data/briefing.json`: `urgent` 0 -> 14, `needs` 9 -> 43 (all 48 landed, none were already present). Backed up first to `data/archive/briefing_backup_pre_backfill_20260817_*.json`. Commit `38a3917c`.
+- Live-reverified by a fresh, independent GitHub API re-GET after both pushes: `urgent:14 needs:43 fyi:29 low:2`, ledger `tracked_needs_urgent` total 57 with 48 flagged `backfill_reinstated`.
+
+## Deliberately NOT done
+- The 157 AI-confirmed no-action items and the 14 inconclusive-Outlook-lookup items were left alone -- not reinstated, not deleted from history, no ledger/briefing change for them. If any of the 14 inconclusive ones turn out to matter, they're recoverable from `scratchpad/backfill_true_misses.json`'s `true_misses_read`/`true_misses_unread` (session-scoped scratchpad, not durable -- flagging so a future session doesn't assume this list persists anywhere else).
+- Did not attempt to dedupe two backfill entries that look like literal content duplicates under different `entry_id`s (two "Hold: Getting started on your AI Journey in Operations (Part 3)" from Marie Cooksey) -- different Outlook items, left as-is rather than guessing which is authoritative.
+
+## Next action
+None outstanding on this specific task. Worth Kevin's awareness: `urgent` went from 0 to 14 live cards in one push, which is a real visible jump on the dashboard -- entirely explained by the backfill (all 14 live urgent cards are backfill reinstatements, since this run's fresh pull had demoted all 5 of its own fresh urgent cards to FYI before the backfill even ran), not a new problem with today's triage.
+
+---
+
 # Handover -- 17 August 2026 (Drew) -- Priorities-board card search shipped, Kevin-approved, verified live
 
 ## Scope
