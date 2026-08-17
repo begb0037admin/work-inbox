@@ -97,6 +97,11 @@
     </div>
 
     <div class="tab-content" id="tabContentPriorities">
+      <div class="wi-search-row">
+        <input type="text" id="wiSearchInput" class="wi-search-input" placeholder="Search cards by subject, sender, or summary&hellip;" oninput="applyCardSearch(this.value)">
+        <span class="wi-search-count" id="wiSearchCount"></span>
+        <button class="btn wi-search-clear" id="wiSearchClear" onclick="clearCardSearch()" style="display:none">Clear</button>
+      </div>
       <div id="contextBar"></div>
       <div id="inboxCol"></div>
     </div>
