@@ -1,0 +1,2357 @@
+import json, os, base64, html, re, urllib.request, urllib.error, subprocess, time
+from datetime import datetime, timedelta
+from difflib import SequenceMatcher
+import win32com.client
+import pywintypes
+import anthropic
+
+# Suppress Windows git gc --auto interactive prompts
+subprocess.run(["git", "config", "gc.auto", "0"], capture_output=True,
+               cwd=os.path.dirname(os.path.abspath(__file__)))
+
+# Every run must print a clear timestamp so pasted console/log output is
+# self-dating -- a pasted traceback with no timestamp anywhere made an
+# already-fixed incident look like a fresh failure (Kevin, 12 Aug 2026).
+def log(msg):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}")
+
+log("fetch_inbox.py run started")
+
+GITHUB_REPO = "begb0037admin/work-inbox"
+GITHUB_PATH = "data/briefing.json"
+GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
+GITHUB_TIMEOUT = 30
+
+def load_existing_briefing():
+    if GITHUB_PAT:
+        try:
+            url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
+            headers = {
+                "Authorization": f"token {GITHUB_PAT}",
+                "Content-Type":  "application/json",
+                "User-Agent":    "work-inbox-script"
+            }
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
+                data = json.loads(r.read())
+            return json.loads(base64.b64decode(data["content"]).decode("utf-8"))
+        except Exception as e:
+            print(f"WARNING: Could not load existing briefing from GitHub for AI preservation - {e}")
+    try:
+        local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), GITHUB_PATH)
+        with open(local_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"WARNING: Could not load existing briefing locally for AI preservation - {e}")
+        return {}
+
+def same_briefing_date(existing, date_label):
+    return existing.get("date") == date_label
+
+def cal_summary_key(item):
+    return ((item.get("time") or "").strip().lower(),
+            (item.get("title") or "").strip().lower())
+
+WEAK_CALENDAR_SUMMARY_PHRASES = [
+    "no prep notes available",
+    "confirm agenda",
+    "confirm scope",
+    "no details provided",
+    "check calendar context",
+    "blocked time or placeholder",
+]
+
+def weak_calendar_summary(summary):
+    text = (summary or "").strip().lower()
+    if not text:
+        return True
+    if len(text) < 45:
+        return True
+    return any(phrase in text for phrase in WEAK_CALENDAR_SUMMARY_PHRASES)
+
+def preserve_existing_calendar_summaries(existing, key, items):
+    previous = {
+        cal_summary_key(item): item.get("summary", "")
+        for item in existing.get(key, [])
+        if item.get("summary")
+    }
+    preserved = 0
+    for item in items:
+        summary = previous.get(cal_summary_key(item))
+        if summary:
+            current = item.get("summary", "")
+            if current and not weak_calendar_summary(current) and weak_calendar_summary(summary):
+                continue
+            item["summary"] = summary
+            preserved += 1
+    return preserved
+
+def calendar_summary_count(briefing_doc):
+    return sum(
+        1
+        for key in ("calToday", "calTomorrow", "calDay2", "calDay3")
+        for item in briefing_doc.get(key, [])
+        if item.get("summary")
+    )
+
+def weak_calendar_summary_count(briefing_doc):
+    return sum(
+        1
+        for key in ("calToday", "calTomorrow", "calDay2", "calDay3")
+        for item in briefing_doc.get(key, [])
+        if item.get("summary") and weak_calendar_summary(item.get("summary"))
+    )
+
+def validate_briefing_update(new_doc, old_doc):
+    fatal = []
+    warnings = []
+    context_text = (new_doc.get("context") or "").strip()
+    if len(context_text) < 80:
+        fatal.append("context is missing or too short")
+
+    if not old_doc:
+        return fatal, warnings
+
+    same_day = same_briefing_date(old_doc, new_doc.get("date", ""))
+    old_context = (old_doc.get("context") or "").strip()
+    if same_day and old_context and len(context_text) < max(80, len(old_context) // 3):
+        fatal.append("same-day context would be substantially degraded")
+
+    old_summaries = calendar_summary_count(old_doc)
+    new_summaries = calendar_summary_count(new_doc)
+    if same_day and old_summaries and new_summaries == 0:
+        fatal.append("same-day calendar summaries would be removed")
+    elif same_day and old_summaries >= 3 and new_summaries < max(1, old_summaries // 2):
+        fatal.append(f"calendar summaries dropped from {old_summaries} to {new_summaries}")
+
+    old_absences = len(old_doc.get("absences") or [])
+    new_absences = len(new_doc.get("absences") or [])
+    if same_day and old_absences and new_absences == 0:
+        fatal.append("same-day absences would be cleared")
+
+    weak_count = weak_calendar_summary_count(new_doc)
+    if weak_count:
+        warnings.append(f"{weak_count} calendar summaries look generic or weak")
+
+    return fatal, warnings
+
+def _plain_text(value):
+    text = re.sub(r"\s+", " ", str(value or "")).strip()
+    return text.replace(" - ", ": ")
+
+def build_fallback_context(inbox_items, today_items, tomorrow_items):
+    unread = [item for item in inbox_items if not item.get("is_read", True)]
+    high_importance = [item for item in unread if item.get("importance", 1) == 2]
+    sentences = [
+        f"Outlook has {len(unread)} unread messages from the last seven days, "
+        f"including {len(high_importance)} marked high importance."
+    ]
+
+    candidates = high_importance + [item for item in unread if item not in high_importance]
+    for item in candidates[:3]:
+        sender = _plain_text(item.get("from")) or "an unknown sender"
+        subject = _plain_text(item.get("subject")) or "no subject"
+        sentences.append(f"Review {subject} from {sender}.")
+
+    def meeting_sentence(label, items):
+        timed = [item for item in items if not item.get("all_day")]
+        if not timed:
+            return f"There are no timed meetings in Outlook {label}."
+        names = ", ".join(
+            _plain_text(item.get("subject")) or "untitled meeting"
+            for item in timed[:3]
+        )
+        return f"Outlook shows {len(timed)} timed meeting(s) {label}: {names}."
+
+    sentences.append(meeting_sentence("today", today_items))
+    sentences.append(meeting_sentence("tomorrow", tomorrow_items))
+    sentences.append(
+        "AI enrichment is temporarily unavailable, so email cards and calendar data "
+        "have been refreshed directly from Outlook without generated interpretation."
+    )
+    return " ".join(sentences)
+
+def build_fallback_subtitle(inbox_items):
+    unread = sum(1 for item in inbox_items if not item.get("is_read", True))
+    return f"{unread} unread messages - Outlook-only refresh"
+
+# Outlook's COM automation layer occasionally rejects the very first call of
+# a run with pywintypes.com_error (-2147418111, 'Call was rejected by
+# callee.', None, None) -- Outlook is momentarily busy (mid-sync, a modal
+# dialog open, etc.), not a real fault. Confirmed transient twice on
+# 2026-08-11: a manual retry a few minutes later succeeded cleanly both
+# times. Retry is scoped ONLY to this initial connection step (Dispatch +
+# GetNamespace + first folder handle) -- deliberately not applied to COM
+# calls later in the script, so a real error deeper in Phase 1+ still fails
+# immediately instead of being masked by a blind retry.
+def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
+    last_error = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            # Late binding avoids failures caused by a corrupt win32com.gen_py cache.
+            outlook_app = win32com.client.dynamic.Dispatch("Outlook.Application")
+            mapi_ns     = outlook_app.GetNamespace("MAPI")
+            # Touch the inbox folder now too -- today's real failures happened
+            # here, not at Dispatch/GetNamespace, so the probe has to reach
+            # this far to actually catch the busy-callee condition.
+            inbox_folder = mapi_ns.GetDefaultFolder(6)
+            if attempt > 1:
+                log(f"Phase 1 - Outlook COM connection succeeded on attempt {attempt}/{max_attempts}.")
+            return outlook_app, mapi_ns, inbox_folder
+        except pywintypes.com_error as e:
+            last_error = e
+            log(f"Phase 1 - Outlook COM connection attempt {attempt}/{max_attempts} failed: {e}")
+            if attempt < max_attempts:
+                log(f"Phase 1 - Outlook automation layer appears busy (transient). Waiting {retry_wait_seconds}s before retrying...")
+                time.sleep(retry_wait_seconds)
+    log(f"Phase 1 - Outlook COM connection failed after {max_attempts} attempts. Giving up.")
+    raise last_error
+
+outlook, mapi, _inbox_folder = connect_to_outlook()
+cutoff  = datetime.now() - timedelta(days=7)
+today   = datetime.now().date()
+
+def next_workday(d):
+    d = d + timedelta(days=1)
+    while d.weekday() >= 5:
+        d = d + timedelta(days=1)
+    return d
+
+tomorrow = next_workday(today)
+
+def dt(com_time):
+    try:
+        return datetime(com_time.year, com_time.month, com_time.day,
+                        com_time.hour, com_time.minute, com_time.second)
+    except:
+        return None
+
+def restrict_date(folder, cutoff_dt):
+    """Returns items in `folder` received on/after cutoff_dt.
+
+    Root cause, live-confirmed 12 Aug 2026 (three standalone read-only COM
+    diagnostics against the real mailbox, no writes): Outlook COM's
+    Items.Restrict() parses the date embedded in the filter string using the
+    machine's LOCALE-specific day/month ordering, not the literal field order
+    written into the string -- the same underlying class of bug already
+    documented for calendar Restrict()+IncludeRecurrences on UK locale (see
+    CLAUDE.md "Key Constraints"). The old mm/dd/yyyy-formatted string (e.g.
+    '08/05/2026' for 5 Aug) was silently misread as dd/mm (8 May) on this
+    UK-locale machine whenever cutoff_dt.day <= 12 -- shifting the real
+    cutoff back by months, with Restrict() itself still "succeeding" (no
+    exception, a plausible-looking Count). Confirmed directly: for the real
+    7-day cutoff on 12 Aug 2026, the mm/dd/yyyy filter returned 562 items
+    with the oldest dated 8 May (3+ months old); the dd/mm/yyyy filter for
+    the EXACT SAME cutoff returned 63 items, oldest genuinely 5 Aug -- the
+    correct number. This -- not "Kevin's inbox is just big" -- is the real
+    reason the old >200-item heuristic existed and why it kept firing: a
+    misread date bound looks exactly like a big true 7-day window from the
+    Count alone, so Count was never a reliable signal either way.
+
+    Fixed at the actual source (dd/mm/yyyy, matching this machine's UK
+    locale) rather than patched around with a bigger magic number. A
+    defense-in-depth check is kept below in case Restrict() ever silently
+    fails for some other reason -- it inspects the actual date of the oldest
+    item returned (not the count) to decide whether the filter genuinely
+    applied, and the fallback below preserves the date cutoff via bounded
+    manual iteration instead of the old behaviour of discarding the cutoff
+    entirely and scanning the whole unbounded folder.
+    """
+    filter_str = "[ReceivedTime] >= '" + cutoff_dt.strftime("%d/%m/%Y %I:%M %p") + "'"
+    try:
+        restricted = folder.Items.Restrict(filter_str)
+        # Verify the date bound genuinely applied by checking the single
+        # oldest item actually returned, rather than trusting Count. Uses a
+        # separate Restrict() call so sorting this check doesn't disturb the
+        # iteration order of `restricted`, which is returned to the caller
+        # unchanged on the healthy path.
+        check = folder.Items.Restrict(filter_str)
+        check.Sort("[ReceivedTime]", False)  # ascending -- oldest first
+        oldest = check.GetFirst()
+        if oldest is not None:
+            oldest_dt = dt(oldest.ReceivedTime)
+            # 6-hour grace window absorbs timezone/rounding noise around the
+            # boundary itself -- not a loophole for a genuinely stale filter.
+            if oldest_dt and oldest_dt < (cutoff_dt - timedelta(hours=6)):
+                raise Exception(
+                    f"restrict_date: Restrict() returned an item ({oldest_dt}) "
+                    f"older than the requested cutoff ({cutoff_dt}) - filter did not apply"
+                )
+        return restricted
+    except Exception:
+        # Bounded fallback: manual date-checked iteration, newest first,
+        # stopping as soon as an item older than cutoff_dt is reached --
+        # preserves the date cutoff instead of the old unrestricted full-
+        # folder scan (the actual cause of items up to 4.5 months old
+        # reaching FYI). Comparison is done in plain Python datetimes via
+        # dt(), so it is immune to the Restrict()-string locale issue above.
+        items = folder.Items
+        items.Sort("[ReceivedTime]", True)  # descending -- newest first
+        bounded = []
+        item = items.GetFirst()
+        while item is not None:
+            try:
+                item_dt = dt(item.ReceivedTime)
+                if item_dt and item_dt < cutoff_dt:
+                    break
+                bounded.append(item)
+            except Exception:
+                pass
+            item = items.GetNext()
+        return bounded
+
+# -- Phase 1 -- pull Outlook data --
+log("Phase 1 - pulling Outlook data...")
+inbox = []
+unread_count = 0
+read_count   = 0
+MAX_UNREAD   = 50
+MAX_READ     = 30
+
+# VIP senders -- always captured regardless of cap
+VIP_NAMES = {
+    'Athena Artuso','Marie Cooksey','Sarah Rowles','Simon Burford',
+    'Asta Palmer','James Salas Guillen',"Michael O'Sullivan",
+    'Anna Carter-Windle','Anthony Kong','Beth Gray','Christopher Sanders',
+    'David Johnson','Emma Fitz-Gibbon','Henry Acheampong','Iyanuloluwa Akinsanya',
+    'Julie Hickman','Marie King','Michelle Williams','Nathan Kirwan',
+    'Susan Pratt','Anne Mortimer','Nicholas Chandler','Steve McBrearty',
+}
+VIP_EMAILS = {
+    'tony.boydell@it.ox.ac.uk','erika.braverman@it.ox.ac.uk',
+    'hr.systems@admin.ox.ac.uk','support.access@theaccessgroup.com',
+    'edward.demetillo@cority.com','crispin.muncaster@it.ox.ac.uk',
+    'christopher.sanders@admin.ox.ac.uk','henry.acheampong@admin.ox.ac.uk',
+    'iyanuloluwa.akinsanya@tss.ox.ac.uk',
+}
+
+def is_vip(msg):
+    try:
+        return (msg.SenderName or '').strip() in VIP_NAMES or \
+               (msg.SenderEmailAddress or '').lower().strip() in VIP_EMAILS
+    except:
+        return False
+
+# Kevin's own address, for the to-vs-cc primary-recipient signal (agent-commons
+# issue #3 step-3 brief, needs_reply precision fix -- Kevin was cc'd or the
+# thread was stale on ~20 of 24 flagged entries in the first real batch,
+# because the classifier had no visibility into either dimension before this).
+KEVIN_EMAIL = "kevin.lelitte@admin.ox.ac.uk"
+
+def _kevin_is_primary_recipient(msg):
+    """True if Kevin's address appears in To (addressed directly), False if
+    only in CC (or not found at all -- distribution lists/aliases mean this
+    can't be 100% certain, so it's a signal for the classifier to weigh, not
+    an absolute gate on its own)."""
+    try:
+        to_field = (msg.To or "").lower()
+        return KEVIN_EMAIL in to_field
+    except:
+        return True  # can't tell -- don't silently suppress a real email over a read failure
+
+# Reuses the folder handle connect_to_outlook() already opened (and retried)
+# above, rather than issuing a second unretried GetDefaultFolder(6) call --
+# this is exactly the call site both of today's real failures hit.
+for msg in restrict_date(_inbox_folder, cutoff):
+    try:
+        if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
+            break
+        is_read = not msg.UnRead
+        if is_read and read_count >= MAX_READ:
+            continue
+        if not is_read and unread_count >= MAX_UNREAD:
+            continue
+        entry = {
+            "subject":         msg.Subject,
+            "from":            msg.SenderName,
+            "from_email":      msg.SenderEmailAddress,
+            "received":        str(msg.ReceivedTime),
+            "is_read":         is_read,
+            "has_attachments": msg.Attachments.Count > 0,
+            "importance":      msg.Importance,
+            "entry_id":        msg.EntryID,
+            "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
+        }
+        if not is_read:
+            entry["body_preview"] = (msg.Body or "")[:150]
+            unread_count += 1
+        else:
+            read_count += 1
+        inbox.append(entry)
+    except:
+        continue
+
+inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
+
+# VIP sweep -- pick up any VIP emails missed by the cap
+captured_ids = {e["entry_id"] for e in inbox}
+for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
+    try:
+        if msg.EntryID in captured_ids:
+            continue
+        if not is_vip(msg):
+            continue
+        is_read = not msg.UnRead
+        entry = {
+            "subject":         msg.Subject,
+            "from":            msg.SenderName,
+            "from_email":      msg.SenderEmailAddress,
+            "received":        str(msg.ReceivedTime),
+            "is_read":         is_read,
+            "has_attachments": msg.Attachments.Count > 0,
+            "importance":      msg.Importance,
+            "entry_id":        msg.EntryID,
+            "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
+        }
+        if not is_read:
+            entry["body_preview"] = (msg.Body or "")[:150]
+        inbox.append(entry)
+        captured_ids.add(msg.EntryID)
+    except:
+        continue
+
+inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
+print(f"Phase 1 VIP sweep done - total inbox now: {len(inbox)}")
+
+sent = []
+for msg in mapi.GetDefaultFolder(5).Items:
+    try:
+        t = dt(msg.SentOn)
+        if t and t >= cutoff:
+            sent.append({
+                "subject":      msg.Subject,
+                "to":           msg.To,
+                "sent":         str(msg.SentOn),
+                "body_preview": (msg.Body or "")[:100],
+                "entry_id":     msg.EntryID
+            })
+    except:
+        continue
+
+week_end = today + timedelta(days=6)
+lookback  = today - timedelta(days=30)  # catch multi-day absences spanning today
+calendar = []
+_cal_items = mapi.GetDefaultFolder(9).Items
+_cal_items.IncludeRecurrences = True
+_cal_items.Sort("[Start]")
+for item in _cal_items:
+    try:
+        t = dt(item.Start)
+        if not t:
+            continue
+        if t.date() > week_end:
+            break
+        if t.date() < lookback:
+            continue
+        calendar.append({
+            "subject":      item.Subject,
+            "start":        str(item.Start),
+            "end":          str(item.End),
+            "location":     item.Location,
+            "organizer":    item.Organizer,
+            "body_preview": (item.Body or "")[:100],
+            "all_day":      item.AllDayEvent
+        })
+    except:
+        continue
+
+# Also pull the "People Department - HR Systems" shared calendar -- confirmed
+# live, 10 Aug 2026, that it's the department's real leave-tracking calendar
+# (279 real dated events with proper Organizer fields, reachable as an "Other
+# Calendar" nested under Kevin's own primary mailbox via the same COM
+# session). Per Kevin's explicit decision: his own Calendar plus this one are
+# the absence source of truth -- if someone's leave isn't in either, he does
+# not want it surfaced at all. Wrapped in try/except so a folder-structure
+# change (permissions, renaming) degrades to "this calendar contributes
+# nothing this run" rather than failing Phase 1 entirely.
+hr_calendar_count = 0
+try:
+    _kevin_store = None
+    for _store in mapi.Folders:
+        if _store.Name == "kevin.lelitte@admin.ox.ac.uk":
+            _kevin_store = _store
+            break
+    if _kevin_store is not None:
+        _hr_cal_folder = _kevin_store.Folders("Calendar").Folders("People Department - HR Systems")
+        _hr_items = _hr_cal_folder.Items
+        _hr_items.IncludeRecurrences = True
+        _hr_items.Sort("[Start]")
+        for item in _hr_items:
+            try:
+                t = dt(item.Start)
+                if not t:
+                    continue
+                if t.date() > week_end:
+                    break
+                if t.date() < lookback:
+                    continue
+                calendar.append({
+                    "subject":      item.Subject,
+                    "start":        str(item.Start),
+                    "end":          str(item.End),
+                    "location":     item.Location,
+                    "organizer":    item.Organizer,
+                    "body_preview": (item.Body or "")[:100],
+                    "all_day":      item.AllDayEvent
+                })
+                hr_calendar_count += 1
+            except:
+                continue
+    else:
+        print("WARNING: 'kevin.lelitte@admin.ox.ac.uk' store not found -- People Department - HR Systems calendar not pulled this run")
+except Exception as e:
+    print(f"WARNING: People Department - HR Systems calendar pull failed - {e}")
+
+unread_total = sum(1 for m in inbox if not m["is_read"])
+print(f"Phase 1 done - inbox:{len(inbox)} (unread:{unread_total}) sent:{len(sent)} calendar:{len(calendar)} (of which HR Systems calendar:{hr_calendar_count})")
+
+# -- Phase 2 -- AI writes context paragraph only --
+log("Phase 2 - calling Anthropic API for context...")
+
+now          = datetime.now()
+today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
+tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorrow.strftime("%B %Y")
+existing_briefing = load_existing_briefing()
+
+# Calendar day-view now covers 4 rolling working days (today, tomorrow, +2,
+# +3) instead of just today/tomorrow -- Kevin's explicit request, 10 Aug
+# 2026 ("today, tomorrow, day after that, and day after that... when
+# tomorrow comes, it will drop and get Friday"). Day+2/Day+3 use the same
+# next_workday() weekend-skipping semantics "tomorrow" already used, for
+# consistency -- a Thursday's day+2/day+3 are Monday/Tuesday, not a blank
+# Saturday/Sunday.
+day2 = next_workday(tomorrow)
+day3 = next_workday(day2)
+
+# Leave/absence calendar entries are deliberately excluded from the day-view
+# columns -- Kevin's explicit call, same request: "I have the annual leave
+# on the sidebar so I don't actually need the annual leave to display in my
+# calendar." Duplicates the term list ABSENCE_KEYWORDS uses later in this
+# file (defined further down, for the sidebar Absences panel) rather than
+# reordering the whole file to share one constant -- keep both lists in sync
+# if either changes.
+_DAY_VIEW_EXCLUDE_KEYWORDS = [
+    "annual leave", "a/l", "on leave", "out of office", "ooo",
+    "holiday", "away", "sick leave", "non-working day", "non working day"
+]
+
+# "non-working day" / "non working day" -- confirmed live, 12 Aug 2026:
+# "Marie K: Non-working day" (People Department - HR Systems calendar, real
+# recurring entries incl. 13/14 Aug 2026) slipped through this exclusion and
+# showed up in the Tomorrow/Friday day-view columns. This is the SECOND
+# occurrence of this exact failure class -- a real leave-calendar phrasing
+# variant the keyword list hadn't seen yet -- the first being the bare "AL"
+# incident directly below (10 Aug 2026). Both terms added to this list, to
+# ABSENCE_KEYWORDS, and to ABSENCE_NOISE (further down) so the item is still
+# excluded from day-view but still correctly surfaces on the sidebar
+# Absences panel -- verified live as "Marie King - off tomorrow, returns
+# Friday 14 August" (Organizer field "Marie King" wins over the
+# cleaned-subject fallback "Marie K" here, per the existing organizer-
+# priority logic below) -- which is what Kevin wants. If a third phrasing
+# variant turns up, see the dedicated Outlook metadata proposal in
+# HANDOVER.md before adding a fourth keyword-list entry.
+# Bare "AL" abbreviation (no slash) -- confirmed live, 10 Aug 2026: two real
+# entries titled exactly "Michael - AL" (7 Aug and 10 Aug) slipped through
+# both this day-view exclusion and the sidebar ABSENCE_KEYWORDS check below,
+# since the list only matched "a/l" with a slash. Kevin's explicit fix
+# request: "i dont want it to show." A plain substring match on "al" would
+# false-positive constantly (matches inside "annual", "practical", "Sal",
+# etc.), so this is a standalone-word regex instead -- \b requires a
+# non-word/word transition immediately either side, which "annual"/
+# "practical" never have around their trailing "al" (the preceding letter is
+# itself a word character), but "Michael - AL" does (bounded by a space and
+# a dash). Applied as an additional OR condition alongside the existing
+# substring keyword lists, not a replacement for them.
+_BARE_AL_RE = re.compile(r"\bal\b", re.IGNORECASE)
+
+def _has_bare_al(text):
+    return bool(_BARE_AL_RE.search(text or ""))
+
+def _is_leave_item(c):
+    subj = c.get("subject") or ""
+    subj_lower = subj.lower()
+    return any(kw in subj_lower for kw in _DAY_VIEW_EXCLUDE_KEYWORDS) or _has_bare_al(subj)
+
+def _cal_for_date(target_date):
+    return [
+        c for c in calendar
+        if datetime.fromisoformat(c["start"]).date() == target_date and not _is_leave_item(c)
+    ]
+
+cal_today    = _cal_for_date(today)
+cal_tomorrow = _cal_for_date(tomorrow)
+cal_day2     = _cal_for_date(day2)
+cal_day3     = _cal_for_date(day3)
+
+inbox_for_api = [{k: v for k, v in m.items() if k != "entry_id"} for m in inbox]
+
+SYSTEM = """You are Kevin's morning inbox briefing assistant at Oxford University Personnel Services.
+Your ONLY job is to write the context paragraph. You do not categorise emails. You do not produce cards.
+Return ONLY a valid JSON object with exactly two fields - no preamble, no markdown, no code fences.
+Use only plain ASCII punctuation: use - instead of dashes, use ' instead of curly quotes.
+
+Return exactly this:
+{
+  "context": "<A dense, specific 5-7 sentence morning briefing for Kevin. Must include: full names and exact return dates of every absent colleague; which specific projects, systems or cases are blocked because of those absences; any emails waiting more than 48 hours without a response; the most time-critical deadline this week with its exact date; the one thing Kevin should open first. Use real names, real dates, real case numbers and real project names from the data. Every sentence must contain at least one specific proper noun. Do not generalise. Do not mention GitHub, CI/CD, or workflow authentication issues.>",
+  "subtitle": "<one short phrase describing the day>"
+}"""
+
+USER = f"""Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.
+
+INBOX ({len(inbox_for_api)} emails, last 7 days):
+{json.dumps(inbox_for_api, indent=2, ensure_ascii=True)}
+
+SENT ({len(sent)} items, last 7 days):
+{json.dumps(sent, indent=2, ensure_ascii=True)}
+
+CALENDAR TODAY:
+{json.dumps(cal_today, indent=2, ensure_ascii=True)}
+
+CALENDAR TOMORROW:
+{json.dumps(cal_tomorrow, indent=2, ensure_ascii=True)}
+"""
+
+client   = anthropic.Anthropic(timeout=60.0)
+anthropic_available = True
+context  = ""
+subtitle = ""
+try:
+    response = client.messages.create(
+        model      = "claude-haiku-4-5",
+        max_tokens = 1024,
+        system     = SYSTEM,
+        messages   = [{"role": "user", "content": USER}]
+    )
+
+    raw_text = response.content[0].text.strip()
+    if raw_text.startswith("```"):
+        raw_text = "\n".join(raw_text.split("\n")[1:])
+    if raw_text.endswith("```"):
+        raw_text = "\n".join(raw_text.split("\n")[:-1])
+
+    ai_output = json.loads(raw_text)
+    context  = ai_output.get("context", "")
+    subtitle = ai_output.get("subtitle", "")
+except Exception as e:
+    anthropic_available = False
+    print(f"WARNING: Phase 2 context failed - {e}")
+if same_briefing_date(existing_briefing, today_str):
+    if existing_briefing.get("context"):
+        context = existing_briefing["context"]
+        print("Phase 2 preservation - reused existing same-day context")
+    if existing_briefing.get("subtitle"):
+        subtitle = existing_briefing["subtitle"]
+if not context:
+    context = build_fallback_context(inbox, cal_today, cal_tomorrow)
+    print("Phase 2 fallback - generated context directly from Outlook data")
+if not subtitle:
+    subtitle = build_fallback_subtitle(inbox)
+print("Phase 2 done - context written")
+
+# -- Phase 3 -- Python builds every card --
+log("Phase 3 - building cards from inbox...")
+
+# Categorisation rules -- applied in order, first match wins
+# importance: 0=low, 1=normal, 2=high
+URGENT_SENDERS   = []  # add sender email fragments here if needed
+URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", "security vulnerab"]
+NEEDS_SUBJECTS   = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
+                    "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
+                    "import", "failed", "issue", "case ", "support"]
+FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
+                    "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
+                    "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
+LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
+                    "github", "pages", "build", "deploy", "run failed", "wisp"]
+
+def categorise(msg):
+    subj    = (msg.get("subject") or "").lower()
+    sender  = (msg.get("from_email") or "").lower()
+    is_read = msg.get("is_read", True)
+    imp     = msg.get("importance", 1)
+
+    # High importance flag always pushes to urgent
+    if imp == 2:
+        return "urgent"
+
+    # Subject keyword matching
+    for kw in LOW_SUBJECTS:
+        if kw in subj or kw in sender:
+            return "low"
+    for kw in URGENT_SUBJECTS:
+        if kw in subj:
+            return "urgent"
+    # Unread + needs keywords -- needs response
+    if not is_read:
+        for kw in NEEDS_SUBJECTS:
+            if kw in subj:
+                return "needs"
+    for kw in FYI_SUBJECTS:
+        if kw in subj:
+            return "fyi"
+    # Unread with no other match -- needs response
+    if not is_read:
+        return "needs"
+    # Read with no match -- fyi
+    return "fyi"
+
+def badge_for(msg, category):
+    imp  = msg.get("importance", 1)
+    received = msg.get("received", "")
+    age_hrs = 0
+    try:
+        t = datetime.fromisoformat(received.split("+")[0].split(" (")[0].strip())
+        age_hrs = (datetime.now() - t).total_seconds() / 3600
+    except:
+        pass
+
+    if category == "urgent":
+        return "Act today", "red"
+    if category == "needs":
+        if age_hrs > 48:
+            return "Overdue", "red"
+        return "Reply within 48hrs", "yellow"
+    if category == "fyi":
+        return "FYI", "gray"
+    return "", "gray"
+
+def make_card(msg, category):
+    subj    = msg.get("subject") or "(no subject)"
+    sender  = msg.get("from") or ""
+    preview = (msg.get("body_preview") or "").strip()
+    preview = re.sub(r"<\?\s*https?://\S+>?", "[link]", preview)
+    badge, badge_type = badge_for(msg, category)
+
+    title = subj
+    sub   = f"From <strong>{sender}</strong>."
+    if preview:
+        sub += f" {html.escape(preview[:120])}"
+
+    received_str = ""
+    try:
+        rec = msg.get("received", "")
+        rec_dt = datetime.fromisoformat(rec.split("+")[0].split(" (")[0].strip())
+        received_str = str(rec_dt.day) + rec_dt.strftime(" %b")
+    except:
+        pass
+    card = {
+        "title":     title,
+        "sub":       sub,
+        "badge":     badge,
+        "badgeType": badge_type,
+        "subject":   subj,
+        "from":      sender,
+        "entry_id":  msg.get("entry_id", ""),
+        "received":  received_str,
+        "received_raw": msg.get("received", ""),
+        "kevin_is_primary_recipient": msg.get("kevin_is_primary_recipient", True)
+    }
+    return card
+
+urgent = []
+needs  = []
+fyi    = []
+low    = []
+
+for msg in inbox:
+    cat  = categorise(msg)
+    card = make_card(msg, cat)
+    if cat == "urgent":
+        urgent.append(card)
+    elif cat == "needs":
+        needs.append(card)
+    elif cat == "fyi":
+        fyi.append(card)
+    else:
+        low.append(card)
+
+print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
+
+# -- Phase 3.2 - AI summaries for urgent/needs email cards --
+# Same pattern as Phase 3.7's priority-task summaries, applied to raw email
+# cards instead - so Urgent/Needs show a genuine one-sentence summary rather
+# than the first ~150 characters of the email body verbatim (card["sub"]).
+log("Phase 3.2 - generating AI email summaries...")
+summary_candidates = [c for c in (urgent + needs) if c.get("entry_id")]
+# Entry IDs of cards actually demoted by Phase 3.3/3.3b below (AI-confirmed
+# no_action_needed). Declared unconditionally, before the Phase 3.2 block
+# below, so it always exists (empty set) even if Phase 3.2 is skipped or
+# fails outright. Reused by Phase 3.5's Command Centre task-suggestion
+# triage further down so a bogus new_tasks suggestion isn't generated for an
+# email this same run already confirmed Kevin has nothing to do about --
+# see that phase's own comment for the full reasoning and its own scope
+# limits (12 Aug 2026, extending the same-day Phase 3.3 Needs fix).
+_noise_demoted_entry_ids = set()
+if summary_candidates and anthropic_available:
+    try:
+        # Use short sequential ids in the API exchange, not the raw ~140-char
+        # Outlook EntryID -- confirmed live, 10 Aug 2026: with 157 real
+        # urgent+needs candidates, using entry_id as the JSON key hit
+        # stop_reason="max_tokens" at the full 8000-token budget (hex strings
+        # tokenize far less efficiently than English text, so the KEYS alone
+        # were consuming most of the budget before the model reached the
+        # actual summaries). Switching to "0","1","2"... as the wire-format
+        # id and mapping back to entry_id locally resolved it completely on
+        # the identical real payload: stop_reason="end_turn", only 5947/8000
+        # tokens used, all 157 entries parsed. Root cause was token-inefficient
+        # keys, not response size -- raising max_tokens further would not
+        # have fixed this on its own.
+        # Recipient-role + age signals -- confirmed root cause, 10 Aug 2026:
+        # Lauren's review of the first real needs_reply batch found ~20 of 24
+        # flagged entries were cc-only threads or clearly stale, and neither
+        # signal reached the classifier before this fix (no To/CC captured at
+        # all for received mail, no date passed in this payload even though
+        # it's one field away). Both now computed deterministically in Python
+        # and given to the model as explicit signals, not left for it to guess.
+        def _age_days(card):
+            try:
+                rec_dt = datetime.fromisoformat(card.get("received_raw", "").split("+")[0].split(" (")[0].strip())
+                return (datetime.now() - rec_dt).days
+            except:
+                return None
+
+        emails_for_summary = [
+            {
+                "id":      str(i),
+                "subject": c["subject"],
+                "from":    c["from"],
+                "preview": (c.get("sub") or "")[:250],
+                "kevin_is_primary_recipient": c.get("kevin_is_primary_recipient", True),
+                "age_days": _age_days(c)
+            }
+            for i, c in enumerate(summary_candidates)
+        ]
+        EMAIL_SUMMARY_SYSTEM = (
+            "You are Kevin's inbox briefing assistant at Oxford University Personnel Services.\n"
+            "For each email, write ONE concise sentence summarising what it is actually about and "
+            "what, if anything, Kevin needs to do. Do not just repeat the subject line or copy the "
+            "opening words verbatim - genuinely summarise the content. Be specific - use names, "
+            "dates and case numbers where present. Plain ASCII punctuation only.\n"
+            "Also decide needs_reply: true if this email genuinely calls for Kevin to send a reply "
+            "(a question, a request, something someone is waiting to hear back on), false if it just "
+            "needs him to read it, take an offline action, or do nothing at all (e.g. a system "
+            "notification, an FYI, a failed-import alert, a case update that doesn't ask him anything "
+            "directly).\n"
+            "Also decide no_action_needed: true ONLY if Kevin genuinely has nothing to do with this "
+            "email at all - a pure FYI, an automated notification, a colleague-to-colleague thread "
+            "he's just cc'd on for visibility, a status update that doesn't need him to act. false if "
+            "needs_reply is true, OR if Kevin needs to do anything else even without writing a reply - "
+            "review something, approve something, action a request personally, follow up with someone, "
+            "or respond to a meeting invite that's specifically asking for his availability/decision. "
+            "no_action_needed must always be false whenever needs_reply is true - never set both true.\n"
+            "Weigh two extra signals given for each email:\n"
+            "- kevin_is_primary_recipient: false means Kevin was only cc'd, not directly addressed. "
+            "Default toward needs_reply: false for cc-only threads UNLESS the content clearly still "
+            "asks Kevin himself something directly (e.g. someone names him and asks a question even "
+            "on a cc'd thread) - don't flip mechanically, use judgement. Being cc'd does NOT by itself "
+            "mean no_action_needed: true - a cc'd thread can still need Kevin to review, approve, or "
+            "follow up on something even without a direct question. Only set no_action_needed: true "
+            "for a cc'd thread when it's genuinely visibility-only (e.g. two other people confirming "
+            "something between themselves that doesn't involve a decision or action of Kevin's) - if "
+            "in doubt whether a cc'd thread needs Kevin to do something, leave no_action_needed: "
+            "false.\n"
+            "- age_days: how many days old the email is. Default toward needs_reply: false for "
+            "anything genuinely old (multiple weeks+) - an unanswered thread that old is more likely "
+            "already resolved elsewhere than still genuinely awaiting Kevin's reply.\n"
+            "Return ONLY a valid JSON object mapping the given short id to an object with 'summary', "
+            "'needs_reply' and 'no_action_needed' - no preamble, no markdown.\n"
+            'Example: {"0": {"summary": "Marie confirms funding approved for SBS exclusion from '
+            'the DSE feed; no action needed from Kevin.", "needs_reply": false, "no_action_needed": '
+            'true}, "1": {"summary": "James is asking whether the FA KPI meeting can move to '
+            'Thursday.", "needs_reply": true, "no_action_needed": false}, "2": {"summary": '
+            '"Christopher forwards the tender evaluation pack and needs Kevin to review and sign off '
+            'before Friday.", "needs_reply": false, "no_action_needed": false}}'
+        )
+        email_summary_user = (
+            f"Today is {today_str}.\n\n"
+            f"EMAILS:\n{json.dumps(emails_for_summary, indent=1, ensure_ascii=True)}"
+        )
+        es_resp = client.messages.create(
+            model      = "claude-haiku-4-5",
+            # Raised 8000 -> 14000, 12 Aug 2026: the 10 Aug incident that
+            # first hit stop_reason=max_tokens on this call used 5947/8000
+            # for 157 entries x 2 fields (summary, needs_reply). Adding the
+            # no_action_needed field (Phase 3.3 demotion work, same day)
+            # brings this call to a real live inbox size of 165 entries x 3
+            # fields -- flagged by Codex review as leaving uncomfortably
+            # little headroom against a repeat of that exact failure mode,
+            # not yet re-tested against a real payload at this size before
+            # this change, so erring toward more headroom rather than
+            # waiting to find out live.
+            max_tokens = 14000,
+            # Per-call override, 12 Aug 2026: raising max_tokens above
+            # without also giving the call more wall-clock time doesn't
+            # actually help -- confirmed live the same session, this exact
+            # call failed with "Request timed out or interrupted" against
+            # the global `client = anthropic.Anthropic(timeout=60.0)`
+            # default (line ~551) immediately after the max_tokens increase
+            # above, on a real 165-entry payload. Scoped to this one call
+            # only (not raising the global client timeout) since this is by
+            # far the largest-volume/longest call in the file and the other
+            # client.messages.create() call sites haven't shown this issue.
+            timeout    = 150.0,
+            system     = EMAIL_SUMMARY_SYSTEM,
+            messages   = [{"role": "user", "content": email_summary_user}]
+        )
+        es_raw = es_resp.content[0].text.strip()
+        if es_raw.startswith("```"):
+            es_raw = "\n".join(es_raw.split("\n")[1:])
+        if es_raw.endswith("```"):
+            es_raw = "\n".join(es_raw.split("\n")[:-1])
+        email_summaries = json.loads(es_raw)
+        applied = 0
+        needs_reply_count = 0
+        # Deterministic staleness gate -- Kevin's explicit cutoff. Set to 2
+        # months/60 days (10 Aug 2026), briefly revised to 30 days (11 Aug
+        # 2026), then reverted back to 60 the same day -- 60 is his current
+        # final call on this parameter. This is a hard override applied
+        # AFTER the AI's own judgement, not a replacement for it -- the AI
+        # still gets age_days as a soft signal above (for anything younger
+        # than the cutoff), but nothing older than 60 days can end up
+        # needs_reply=true regardless of what the model decides, since
+        # Kevin was explicit that this is his call to set, not the
+        # model's to infer.
+        STALENESS_CUTOFF_DAYS = 60
+        stale_overridden = 0
+        for i, c in enumerate(summary_candidates):
+            entry = email_summaries.get(str(i))
+            if entry is None:
+                continue
+            # Defensive: accept either the new {summary, needs_reply,
+            # no_action_needed} shape or, if the model ever reverts to a
+            # bare string, treat that as needs_reply/no_action_needed both
+            # defaulting to False rather than crashing the phase.
+            # Track whether this was a genuine, schema-valid AI verdict (a
+            # real dict response with actual booleans for BOTH needs_reply
+            # and no_action_needed) versus one of the defensive fallback
+            # paths above (bare-string response, or a dict missing/
+            # mistyping either field) -- fallbacks also land on False, but
+            # that's a "we don't actually know" default, not a real AI
+            # judgement. Phase 3.3 below must only ever act on the genuine
+            # case -- see its own comment for why this distinction matters.
+            # Also reject a contradictory model verdict (needs_reply=true
+            # AND no_action_needed=true at the same time -- the prompt tells
+            # the model never to do this, but nothing enforces it) as
+            # invalid too. Checked against the RAW entry here, before the
+            # staleness override below can run -- that override only ever
+            # flips needs_reply true->false, which would otherwise turn an
+            # already-contradictory {true, true} pair into a {false, true}
+            # pair that looks like a clean demotion candidate despite never
+            # having been a coherent verdict to begin with.
+            c["_ai_verdict_valid"] = (
+                isinstance(entry, dict)
+                and isinstance(entry.get("needs_reply"), bool)
+                and isinstance(entry.get("no_action_needed"), bool)
+                and not (entry.get("needs_reply") is True and entry.get("no_action_needed") is True)
+            )
+
+            if isinstance(entry, dict):
+                c["ai_summary"] = entry.get("summary", "")
+                nr = entry.get("needs_reply", False)
+                c["needs_reply"] = bool(nr) if isinstance(nr, bool) else False
+                na = entry.get("no_action_needed", False)
+                c["no_action_needed"] = bool(na) if isinstance(na, bool) else False
+            else:
+                c["ai_summary"] = str(entry)
+                c["needs_reply"] = False
+                c["no_action_needed"] = False
+
+            age = _age_days(c)
+            if c["needs_reply"] and age is not None and age > STALENESS_CUTOFF_DAYS:
+                c["needs_reply"] = False
+                stale_overridden += 1
+                # Staleness forces needs_reply true->false as a deterministic
+                # override, but says nothing about whether Kevin still has
+                # some OTHER action to take -- an old, stale-flagged thread
+                # isn't necessarily a pure FYI. Leave no_action_needed as
+                # whatever the model itself said, don't infer it from this.
+
+            applied += 1
+            if c["needs_reply"]:
+                needs_reply_count += 1
+        print(f"Phase 3.2 done - {applied} email summaries generated, {needs_reply_count} flagged needs_reply ({stale_overridden} overridden false for being older than {STALENESS_CUTOFF_DAYS} days)")
+
+        # -- Phase 3.3 -- demote AI-confirmed no-action cards out of Needs --
+        # Kevin's explicit request, 12 Aug 2026: Phase 3's categorise() (the
+        # urgent/needs/fyi/low split above) runs BEFORE any AI involvement,
+        # on subject-keyword + read/unread rules alone ("re:", "chasing",
+        # "follow", etc.) -- it has no idea whether Kevin himself needs to
+        # act, only whether the subject looks actionable. That's why
+        # colleague-to-colleague threads he's only cc'd on land in Needs by
+        # keyword match, even though this same Phase 3.2 AI pass -- reading
+        # the actual content a few seconds later -- correctly judges most of
+        # them needs_reply=false.
+        #
+        # REVISION, same session: the first version of this demotion used
+        # needs_reply=False AND the model's summary text literally
+        # containing "no action needed" as a second safety check. That text
+        # heuristic looked solid against one live snapshot (98/108 of that
+        # run's needs_reply=false Needs cards used that exact phrase) but
+        # failed completely on the very next live run -- the model's
+        # freeform wording is not deterministic between calls, and a
+        # same-content re-run produced 0/108 matches (different phrasing,
+        # e.g. "Kevin is cc'd only" instead of "no action needed"). Relying
+        # on exact-text matching against non-deterministic LLM prose is the
+        # same brittleness class as the subject-keyword-list gap fixed
+        # earlier today (Marie K "non-working day") -- chasing wording
+        # variants is a losing game. Replaced with a real structured signal
+        # instead: the model now returns an explicit `no_action_needed`
+        # boolean alongside `needs_reply` (see EMAIL_SUMMARY_SYSTEM above),
+        # not inferred from prose at all.
+        #
+        # Deliberately conservative on one remaining axis, checked against a
+        # Codex read-only review before building (12 Aug 2026):
+        # Requires `_ai_verdict_valid` is True -- i.e. the model returned a
+        # genuine dict response with real booleans for BOTH needs_reply and
+        # no_action_needed, not one of the defensive fallback paths above
+        # (bare-string response, missing/mistyped field). Those fallbacks
+        # default both to False as a "we don't know" case, not a real
+        # verdict, and must never drive a demotion.
+        #
+        # EXTENSION, same day (12 Aug 2026): originally this only demoted
+        # from Needs -- Urgent (importance-flagged or urgent-keyword-matched
+        # mail) was left alone as a materially higher-risk call, and Phase
+        # 3.5's separate Command Centre task-suggestion triage was flagged
+        # as a known, unfixed gap (it independently re-derives its own
+        # candidate list via a fresh categorise(m) call on raw inbox
+        # messages and had no needs_reply/no_action_needed field to consult
+        # at all). Kevin approved extending both after ~9 similarly-noisy
+        # Urgent cards were seen live in the original session. See Phase
+        # 3.3b immediately below for the Urgent extension, and Phase 3.5's
+        # own comment further down for how it reuses `_noise_demoted_entry_ids`
+        # (built by both this block and 3.3b) rather than re-deriving noise
+        # detection from scratch.
+        # Exception-safety, added after a Codex review of this exact block
+        # caught a real bug: an earlier version mutated `needs`/`fyi`
+        # card-by-card DURING the loop and only reassigned `needs =
+        # still_needs` at the end, so an exception partway through (e.g. a
+        # non-string received_raw breaking the later sort) would leave some
+        # cards already appended to `fyi` while `needs` still held them too
+        # -- a real duplicate-card bug -- and would also skip the internal-
+        # field cleanup below, leaking it into the public briefing.json.
+        # Fixed by building into local temp lists first and only committing
+        # to `needs`/`fyi` after the whole pass succeeds, wrapping the whole
+        # thing in its own try/except so a failure here can never take down
+        # Phase 3.2's already-good results, and moving cleanup into
+        # `finally` so it always runs regardless of outcome.
+        try:
+            demoted_count = 0
+            still_needs = []
+            newly_fyi = []
+            demoted_ids_this_pass = set()
+            for card in needs:
+                if card.get("_ai_verdict_valid") and card.get("needs_reply") is False and card.get("no_action_needed") is True:
+                    card["badge"], card["badgeType"] = badge_for(card, "fyi")
+                    newly_fyi.append(card)
+                    demoted_count += 1
+                    eid = card.get("entry_id")
+                    if eid:
+                        demoted_ids_this_pass.add(eid)
+                else:
+                    still_needs.append(card)
+            needs = still_needs
+            fyi.extend(newly_fyi)
+            # Only merge into the shared cross-phase set once the tier/FYI
+            # lists above are actually committed (i.e. we know this pass
+            # genuinely succeeded) -- Codex review flagged that adding to a
+            # shared set mid-loop, before commit, could suppress a Phase 3.5
+            # task suggestion for a card that a later exception in THIS pass
+            # then left un-demoted after all.
+            _noise_demoted_entry_ids.update(demoted_ids_this_pass)
+            if demoted_count:
+                try:
+                    fyi.sort(key=lambda c: str(c.get("received_raw") or ""), reverse=True)
+                except Exception as sort_err:
+                    print(f"WARNING: Phase 3.3 FYI re-sort failed, order preserved as-is - {sort_err}")
+                print(f"Phase 3.3 done - {demoted_count} Needs card(s) demoted to FYI (AI-confirmed no action needed)")
+        except Exception as demote_err:
+            print(f"WARNING: Phase 3.3 demotion failed, Needs left unchanged - {demote_err}")
+
+        # -- Phase 3.3b -- same demotion logic applied to Urgent, 12 Aug 2026 --
+        # Kevin approved extending Phase 3.3 above to Urgent after ~9
+        # similarly-noisy Urgent cards were seen live in the original
+        # session (importance-flagged or urgent-keyword-matched mail from
+        # colleague threads Kevin is only cc'd on). Urgent cards already
+        # carry the same AI verdict fields as Needs cards -- summary_candidates
+        # above is `urgent + needs` together, so every Urgent card that got
+        # an AI summary already has needs_reply/no_action_needed/
+        # _ai_verdict_valid set by the exact same loop that set them for
+        # Needs cards. No new AI call, same criteria, same exception-safety
+        # pattern (atomic temp lists, its own try/except so a failure here
+        # can't take down Phase 3.3's already-committed Needs result).
+        try:
+            demoted_urgent_count = 0
+            still_urgent = []
+            newly_fyi_from_urgent = []
+            demoted_urgent_ids_this_pass = set()
+            for card in urgent:
+                if card.get("_ai_verdict_valid") and card.get("needs_reply") is False and card.get("no_action_needed") is True:
+                    card["badge"], card["badgeType"] = badge_for(card, "fyi")
+                    newly_fyi_from_urgent.append(card)
+                    demoted_urgent_count += 1
+                    eid = card.get("entry_id")
+                    if eid:
+                        demoted_urgent_ids_this_pass.add(eid)
+                else:
+                    still_urgent.append(card)
+            urgent = still_urgent
+            fyi.extend(newly_fyi_from_urgent)
+            _noise_demoted_entry_ids.update(demoted_urgent_ids_this_pass)
+            if demoted_urgent_count:
+                try:
+                    fyi.sort(key=lambda c: str(c.get("received_raw") or ""), reverse=True)
+                except Exception as sort_err:
+                    print(f"WARNING: Phase 3.3b FYI re-sort failed, order preserved as-is - {sort_err}")
+                print(f"Phase 3.3b done - {demoted_urgent_count} Urgent card(s) demoted to FYI (AI-confirmed no action needed)")
+        except Exception as demote_err:
+            print(f"WARNING: Phase 3.3b demotion failed, Urgent left unchanged - {demote_err}")
+        finally:
+            for card in (urgent + needs + fyi + low):
+                card.pop("_ai_verdict_valid", None)
+    except Exception as e:
+        print(f"WARNING: Phase 3.2 AI email summaries failed - {e}")
+elif summary_candidates:
+    print("Phase 3.2 skipped - Anthropic is unavailable")
+else:
+    print("Phase 3.2 skipped - no urgent/needs emails")
+
+# -- Phase 3.3c -- FYI thread-collapse + explicit aging, 12 Aug 2026 --
+# Kevin approved cleanup for two more documented FYI/Parked symptoms once the
+# true root cause (the restrict_date() locale bug + unbounded VIP sweep
+# above) was fixed at the source: (1) 47% of the pre-existing FYI baseline
+# was duplicate "RE:"/"FW:" threads with no thread-collapsing anywhere in
+# the pipeline (documented live example: "RE: HR Systems Managers Meeting"
+# x8); (2) cards landing in FYI via the Phase 3.3/3.3b demotion logic above
+# had no downstream cleanup, so they could accumulate indefinitely if a
+# future regression ever reopened the date-bound bug fixed above. Placed
+# outside the `if summary_candidates and anthropic_available:` block above
+# so it always runs -- thread duplication and cutoff-based aging are both
+# real regardless of whether the AI summary/demotion phases ran this time.
+fyi_raw_count = len(fyi)
+try:
+    # (1) Thread/subject dedup. Normalizes by repeatedly stripping leading
+    # Re:/Fw:/Fwd: prefixes (handles "Re: Fw: ..." chains, case-insensitive)
+    # and collapsing whitespace/case, then keeps a single card per thread --
+    # the most recently received one -- with an explicit messageCount so the
+    # collapse is visible to the dashboard rather than a silent reduction
+    # (see the corresponding js/app.js change, same session).
+    _RE_FWD_PREFIX = re.compile(r'^\s*(re|fw|fwd)\s*:\s*', re.IGNORECASE)
+
+    def _thread_key(card):
+        s = (card.get("subject") or "").strip().lower()
+        s = re.sub(r'\s+', ' ', s)
+        while True:
+            new_s = _RE_FWD_PREFIX.sub('', s).strip()
+            if new_s == s:
+                break
+            s = new_s
+        return s or ("id:" + str(card.get("entry_id", "")))
+
+    threads = {}
+    thread_order = []
+    for card in fyi:
+        key = _thread_key(card)
+        if key not in threads:
+            card["messageCount"] = 1
+            threads[key] = card
+            thread_order.append(key)
+        else:
+            existing = threads[key]
+            new_count = existing.get("messageCount", 1) + 1
+            try:
+                is_newer = str(card.get("received_raw") or "") > str(existing.get("received_raw") or "")
+            except Exception:
+                is_newer = False
+            if is_newer:
+                card["messageCount"] = new_count
+                threads[key] = card
+            else:
+                existing["messageCount"] = new_count
+
+    fyi = [threads[k] for k in thread_order]
+    collapsed_count = fyi_raw_count - len(fyi)
+
+    # (2) Explicit age cutoff, belt-and-braces on top of the restrict_date()
+    # fix above (not a replacement for it). Consistent with the pipeline's
+    # own existing precedent of date-bounding again at the point of use
+    # rather than trusting an upstream pull to stay bounded forever (see
+    # STALENESS_CUTOFF_DAYS elsewhere in this file, and Lauren's 60-day
+    # drafting-age cutoff in the sibling meeting-records pipeline). If the
+    # date-bound fix above ever regresses, this still stops FYI from quietly
+    # accumulating months-old cards with nothing removing them.
+    FYI_MAX_AGE_DAYS = 7
+    _fyi_age_cutoff = datetime.now() - timedelta(days=FYI_MAX_AGE_DAYS)
+    _fyi_before_age_filter = len(fyi)
+
+    def _fyi_card_recent_enough(card):
+        try:
+            rd = str(card.get("received_raw") or "")
+            t = datetime.fromisoformat(rd.split("+")[0].split(" (")[0].strip())
+            return t >= _fyi_age_cutoff
+        except Exception:
+            return True  # can't parse -- don't silently drop a real card
+
+    fyi = [c for c in fyi if _fyi_card_recent_enough(c)]
+    aged_out_count = _fyi_before_age_filter - len(fyi)
+
+    print(f"Phase 3.3c done - FYI thread-collapse: {fyi_raw_count} raw -> {len(fyi)} threads "
+          f"({collapsed_count} collapsed), {aged_out_count} aged out (>{FYI_MAX_AGE_DAYS}d)")
+except Exception as fyi_clean_err:
+    print(f"WARNING: Phase 3.3c FYI thread-collapse/aging failed, FYI left unchanged - {fyi_clean_err}")
+
+# -- Calendar post-processing --
+KNOWN_ABSENCES = []
+
+def build_cal_items(items):
+    result = []
+    items = sorted(items, key=lambda x: x.get("start", ""))
+    for item in items:
+        start = item.get("start", "")
+        try:
+            t = datetime.fromisoformat(start)
+            time_str = "All day" if item.get("all_day") else t.strftime("%H:%M")
+        except:
+            time_str = "All day" if item.get("all_day") else ""
+
+        title = item.get("subject", "")
+        sub   = item.get("organizer", "") or ""
+        alert = ""
+
+        # Check known absences
+        title_lower = title.lower()
+        for absence in KNOWN_ABSENCES:
+            if any(tr in title_lower for tr in absence["triggers"]):
+                time_str = "All day"
+                title    = absence["title"]
+                sub      = absence["sub"]
+                alert    = absence["alert"]
+                break
+
+        cal_item = {"time": time_str, "title": title, "sub": sub}
+        if alert:
+            cal_item["alert"] = alert
+        result.append(cal_item)
+    return result
+
+# Detect absences from calendar sources only -- Kevin's Calendar plus the
+# "People Department - HR Systems" calendar pulled in Phase 1. Explicit
+# decision, 10 Aug 2026: these two calendars are the absence source of
+# truth; if someone's leave isn't logged in either, Kevin does not want it
+# surfaced at all. The previous OOO-auto-reply-email fallback (and the
+# best-effort date-guessing built for it the same day) is deliberately
+# removed, not just unused -- it was the source of both the "date unknown"
+# entries and cross-department noise (e.g. IT Services staff who were never
+# going to appear in a People Department leave calendar).
+ABSENCE_KEYWORDS = [
+    "annual leave", "a/l", "on leave", "out of office", "ooo",
+    "holiday", "away", "sick leave", "non-working day", "non working day"
+]
+ABSENCE_NOISE = [
+    "annual leave", "a/l", "on leave", "out of office", "ooo",
+    "holiday", "away", "sick leave", "leave", "non-working day",
+    "non working day"
+]
+absence_map = {}
+
+def _parse_iso_date(value):
+    try:
+        return datetime.fromisoformat(str(value)).date()
+    except:
+        return None
+
+def _fmt_absence_date(d):
+    return d.strftime("%A ") + str(d.day) + d.strftime(" %B")
+
+def _absence_key(name):
+    return " ".join((name or "").lower().split())
+
+def _clean_absence_name(text):
+    name = (text or "").strip()
+    if "<" in name:
+        name = name.split("<", 1)[0].strip()
+    for sep in [" - ", " -- ", ":", "|"]:
+        parts = [p.strip() for p in name.split(sep) if p.strip()]
+        if len(parts) == 2:
+            left_l = parts[0].lower()
+            right_l = parts[1].lower()
+            if any(kw in left_l for kw in ABSENCE_NOISE):
+                name = parts[1]
+            elif any(kw in right_l for kw in ABSENCE_NOISE):
+                name = parts[0]
+            break
+    lower_name = name.lower()
+    for kw in ABSENCE_NOISE:
+        lower_name = lower_name.replace(kw, " ")
+    # Strip a standalone "AL" token too (e.g. "Michael - AL" -> "Michael")
+    # -- not added to ABSENCE_NOISE's plain substring loop above because a
+    # blind "al" substring replace would corrupt real names that merely
+    # contain "al" (Alan, Alison, Natalie, Malcolm...). _BARE_AL_RE only
+    # matches "al" as its own word (see the comment above its definition),
+    # so "Alan Smith" is untouched while "Michael - AL" -> "Michael - ".
+    lower_name = _BARE_AL_RE.sub(" ", lower_name)
+    cleaned = []
+    for token in lower_name.replace("(", " ").replace(")", " ").split():
+        if token in ("is", "on", "until", "from", "to", "for"):
+            continue
+        cleaned.append(token)
+    if cleaned:
+        name = " ".join(cleaned).title()
+    return " ".join(name.split()).strip(" -:")
+
+def _absence_label(start_date, last_absent_date, all_day):
+    if not start_date:
+        return "out of office"
+
+    next_week_start = today + timedelta(days=(7 - today.weekday()))
+    if start_date <= today <= last_absent_date:
+        label = "off next week" if today.weekday() >= 5 else "off today"
+    elif start_date == tomorrow:
+        label = "off next week" if today.weekday() >= 4 else "off tomorrow"
+    elif start_date >= next_week_start:
+        label = "off next week"
+    else:
+        label = "off " + _fmt_absence_date(start_date)
+
+    return_date = next_workday(last_absent_date) if all_day else None
+    if return_date and return_date > today:
+        label += ", returns " + _fmt_absence_date(return_date)
+    return label
+
+# Defense-in-depth, not a substitute for the organizer-placeholder check
+# above: after cleaning, reject anything that still reads as a department/
+# system name rather than a person. Caught live, 10 Aug 2026 -- a real
+# production run produced "People Department - Hr Systems" as a bogus
+# absent "person" despite the organizer-placeholder pre-check, and a
+# same-session, same-logic replication immediately after could NOT
+# reproduce it (most likely an Outlook COM quirk specific to expanding a
+# recurring series via IncludeRecurrences, not a pinned-down logic bug) --
+# rather than keep chasing a non-reproducible trigger, this output-side
+# check guards against the whole class of "organizer/name resolved to
+# something obviously not a person" regardless of which mechanism causes it.
+_NON_PERSON_NAME_TERMS = ["department", "systems", " team", "hr systems"]
+
+def _looks_like_a_person(name):
+    lower = name.lower()
+    return not any(term in lower for term in _NON_PERSON_NAME_TERMS)
+
+def _add_absence(name, label):
+    name = _clean_absence_name(name)
+    key = _absence_key(name)
+    if not key or len(name) < 3:
+        return
+    if not _looks_like_a_person(name):
+        return
+    text = name + " - " + label if label else name
+    existing = absence_map.get(key)
+    if not existing or "date unknown" in existing:
+        absence_map[key] = text
+
+week_absence_end = today + timedelta(days=8)
+for item in calendar:
+    subj = item.get("subject") or ""
+    subj_lower = subj.lower()
+    # Bare "AL" (no slash) counts as a leave keyword here too -- see the
+    # _has_bare_al() comment above _DAY_VIEW_EXCLUDE_KEYWORDS for why this
+    # needs standalone-word regex matching rather than a plain substring.
+    # Fixes "Michael - AL" (and any future same-pattern entry) being
+    # invisible in the sidebar Absences panel, not just the day-view.
+    if not (any(kw in subj_lower for kw in ABSENCE_KEYWORDS) or _has_bare_al(subj)):
+        continue
+    if "absence reporting" in subj_lower or "sickness absence report" in subj_lower:
+        continue
+
+    start_date = _parse_iso_date(item.get("start"))
+    end_date = _parse_iso_date(item.get("end")) or start_date
+    if not start_date:
+        continue
+
+    all_day = bool(item.get("all_day"))
+    last_absent_date = (end_date - timedelta(days=1)) if all_day and end_date > start_date else end_date
+    if last_absent_date < today or start_date > week_absence_end:
+        continue
+
+    # Use the calendar item's Organizer (the actual person whose leave this
+    # is) as the name source when available, not just whatever's left in the
+    # subject after stripping leave keywords -- confirmed live, 10 Aug 2026:
+    # Organizer holds the same full display name Outlook uses as the email
+    # sender name (e.g. "Simon Burford", "Athena Artuso") for most entries.
+    # Some entries (confirmed live, e.g. a half-day "JS - Annual Leave" on
+    # 10 Aug) instead have Organizer set to the calendar/department's own
+    # name ("People Department - HR Systems") rather than a real person --
+    # likely how that entry was booked (an admin/shared process, not the
+    # individual themselves). Treat that placeholder as "no useful
+    # organizer" and fall back to the subject, which still names the real
+    # person via initials/short-name even when Organizer doesn't.
+    organizer = (item.get("organizer") or "").strip()
+    is_placeholder_organizer = "people department" in organizer.lower() or "hr systems" in organizer.lower()
+    name_source = organizer if (len(organizer) >= 3 and not is_placeholder_organizer) else subj
+
+    _add_absence(name_source, _absence_label(start_date, last_absent_date, all_day))
+
+# No email-OOO fallback -- calendar-only sourcing per Kevin's explicit
+# decision, 10 Aug 2026 (see comment above ABSENCE_KEYWORDS). Every entry
+# below now has a real calendar-verified date; "date unknown" can no longer
+# appear in this list at all.
+absences = sorted(absence_map.values())
+
+# Priority actions -- pulled from Command Centre tasks.json
+COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
+COMMAND_CENTRE_PATH = "data/tasks.json"
+# Auto-create Command Centre tasks from inbox suggestions without review.
+# Enabled 2026-08-02 by Kevin's explicit instruction, overriding the default-off
+# stance taken because command-centre/CLAUDE.md reserves new-task creation as
+# his approval authority. Each promoted task still carries an
+# "origin": "inbox-auto" tag and an auto-created action-log entry so promoted
+# tasks stay distinguishable from ones Kevin created directly.
+AUTO_PROMOTE_NEW_TASKS = True
+priorities_today    = []
+priorities_tomorrow = []
+priorities_week     = []
+cc_content = []
+try:
+    cc_url     = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
+    cc_headers = {
+        "Authorization": f"token {GITHUB_PAT}",
+        "Content-Type":  "application/json",
+        "User-Agent":    "work-inbox-script"
+    }
+    cc_req = urllib.request.Request(cc_url, headers=cc_headers)
+    with urllib.request.urlopen(cc_req, timeout=GITHUB_TIMEOUT) as r:
+        cc_data    = json.loads(r.read())
+        cc_content = json.loads(base64.b64decode(cc_data["content"]).decode("utf-8"))
+    task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+    for task in task_list:
+        if task.get("done"):
+            continue
+        tier = task.get("tier", "")
+        entry = {
+            "id":          task.get("id", ""),
+            "text":        task.get("title", ""),
+            "description": task.get("description", ""),
+            "actions":     task.get("actions", []),
+            "source":      task.get("source", ""),
+            "dateType":    "red" if tier == "today" else "orange"
+        }
+        if tier == "today":
+            priorities_today.append(entry)
+        elif tier == "tomorrow":
+            priorities_tomorrow.append(entry)
+        elif tier == "week":
+            priorities_week.append(entry)
+    print(f"Command Centre loaded - today:{len(priorities_today)} tomorrow:{len(priorities_tomorrow)} week:{len(priorities_week)}")
+except Exception as e:
+    print(f"WARNING: Could not load Command Centre tasks - {e}")
+    priorities_today    = []
+    priorities_tomorrow = []
+    priorities_week     = []
+
+# Phase 3.5 - AI triage: which emails should become Command Centre tasks
+log("Phase 3.5 - triaging inbox for task suggestions...")
+suggestions = {
+    "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+    "new_tasks":    [],
+    "task_updates": []
+}
+# Dedupe ledger - emails already applied to Command Centre tasks
+ledger = {"applied": {}, "promoted": {}}
+if GITHUB_PAT:
+    try:
+        _lurl = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
+        _lreq = urllib.request.Request(_lurl, headers={"Authorization": f"token {GITHUB_PAT}", "User-Agent": "work-inbox-script"})
+        with urllib.request.urlopen(_lreq) as r:
+            ledger = json.loads(base64.b64decode(json.loads(r.read())["content"]).decode("utf-8"))
+        if "applied" not in ledger:
+            ledger["applied"] = {}
+        if "promoted" not in ledger:
+            ledger["promoted"] = {}
+    except Exception:
+        pass
+try:
+    if not anthropic_available:
+        raise RuntimeError("skipped because Anthropic is unavailable")
+    task_summaries = []
+    task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+    for t in task_list:
+        task_summaries.append({
+            "id":          t.get("id", ""),
+            "title":       t.get("title", ""),
+            "description": (t.get("description") or "")[:300],
+            "emailRef":    t.get("emailRef", "")
+        })
+    if not task_summaries:
+        raise Exception("Command Centre tasks unavailable - skipping triage")
+
+    email_candidates = []
+    for m in inbox:
+        if categorise(m) in ("urgent", "needs"):
+            email_candidates.append({
+                "subject":      m.get("subject", ""),
+                "from":         m.get("from", ""),
+                "received":     (m.get("received", "") or "")[:16],
+                "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
+                "entry_id":     m.get("entry_id", "")
+            })
+
+    for s in sent[:30]:
+        email_candidates.append({
+            "subject":      s.get("subject", ""),
+            "from":         "Kevin (sent to: " + (s.get("to") or "") + ")",
+            "received":     (s.get("sent", "") or "")[:16],
+            "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
+            "entry_id":     s.get("entry_id", ""),
+            "direction":    "sent"
+        })
+
+    api_emails = [{"n": i, "direction": e.get("direction", "received"),
+                   "subject": e["subject"], "from": e["from"],
+                   "received": e["received"], "body_preview": e["body_preview"]}
+                  for i, e in enumerate(email_candidates)]
+
+    TRIAGE_SYSTEM = (
+        "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
+        "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
+        "Identify:\n"
+        "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Max 12. "
+        "Do not be over-cautious: if an email asks Kevin for something, or commits him to something, and no existing task covers it, propose it. "
+        "It is better to propose a task Kevin dismisses in one click than to leave real work invisible.\n"
+        "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
+        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 20. "
+        "A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
+        "If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
+        "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
+        "{\n"
+        '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|tomorrow|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
+        '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}]\n'
+        "}\n"
+        'Rules: tier "today" only if the deadline is today or overdue; "tomorrow" if it must happen the next working day; otherwise "week". '
+        "Never invent case numbers or names. Automated notifications, newsletters, calendar "
+        "accept/decline messages and out-of-office replies are never tasks. "
+        "Use direction=sent emails to log Kevin's own actions on existing tasks as task_updates "
+        "(e.g. 'Kevin replied to Reenu with the requested staff list') so the action log shows "
+        "both sides of the conversation. Never propose a new task for work that a sent email "
+        "shows Kevin has already handled."
+    )
+
+    triage_user = (
+        f"Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.\n\n"
+        f"EXISTING TASKS:\n{json.dumps(task_summaries, indent=1, ensure_ascii=True)}\n\n"
+        f"EMAILS (received urgent/needs + sent by Kevin, last 7 days):\n{json.dumps(api_emails, indent=1, ensure_ascii=True)}"
+    )
+
+    t_resp = client.messages.create(
+        model      = "claude-haiku-4-5",
+        max_tokens = 8000,
+        system     = TRIAGE_SYSTEM,
+        messages   = [{"role": "user", "content": triage_user}]
+    )
+    t_raw = t_resp.content[0].text.strip()
+    if t_raw.startswith("```"):
+        t_raw = "\n".join(t_raw.split("\n")[1:])
+    if t_raw.endswith("```"):
+        t_raw = "\n".join(t_raw.split("\n")[:-1])
+    t_out = json.loads(t_raw)
+
+    task_by_id = {t["id"]: t for t in task_summaries}
+    suppressed_no_action = 0
+    for nt in t_out.get("new_tasks", [])[:12]:
+        i = nt.get("email_n")
+        if not isinstance(i, int) or not (0 <= i < len(email_candidates)):
+            continue
+        src = email_candidates[i]
+        # 12 Aug 2026: don't let Phase 3.5's own (separate) AI triage call
+        # spawn a brand-new Command Centre task suggestion from an email
+        # this same run's Phase 3.2/3.3 already AI-confirmed is genuinely
+        # nothing for Kevin to act on. Reuses `_noise_demoted_entry_ids`
+        # (built by Phase 3.3/3.3b above) rather than re-running a second
+        # classification pass. Deliberately does NOT filter task_updates
+        # below -- a no_action_needed email can still be genuine, useful
+        # progress information against an EXISTING already-tracked task
+        # (e.g. "vendor confirms shipment date") even though Kevin
+        # personally has nothing to do about it, so it stays a valid
+        # candidate for that purpose; only brand-new task proposals are
+        # noise here, matching the same demotion logic applied elsewhere.
+        if src.get("entry_id") and src["entry_id"] in _noise_demoted_entry_ids:
+            suppressed_no_action += 1
+            continue
+        suggestions["new_tasks"].append({
+            "title":         nt.get("title", ""),
+            "tier":          nt.get("tier") if nt.get("tier") in ("today", "tomorrow", "week") else "week",
+            "description":   nt.get("description", ""),
+            "email_subject": src["subject"],
+            "email_from":    src["from"],
+            "received":      src["received"],
+            "entry_id":      src["entry_id"]
+        })
+    for tu in t_out.get("task_updates", [])[:20]:
+        i   = tu.get("email_n")
+        tid = tu.get("task_id", "")
+        if not isinstance(i, int) or not (0 <= i < len(email_candidates)) or tid not in task_by_id:
+            continue
+        if email_candidates[i]["entry_id"] + "_" + tid in ledger.get("applied", {}):
+            continue
+        src = email_candidates[i]
+        suggestions["task_updates"].append({
+            "task_id":       tid,
+            "task_title":    task_by_id[tid]["title"],
+            "note":          tu.get("note", ""),
+            "email_subject": src["subject"],
+            "email_from":    src["from"],
+            "received":      src["received"],
+            "entry_id":      src["entry_id"]
+        })
+    print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} (suppressed_no_action:{suppressed_no_action}) updates:{len(suggestions['task_updates'])}")
+except Exception as e:
+    if anthropic_available:
+        print(f"WARNING: Phase 3.5 triage failed - {e}")
+    else:
+        print("Phase 3.5 skipped - Anthropic is unavailable")
+
+
+# -- Assemble final briefing --
+
+# Phase 3.6 - apply task updates directly to Command Centre tasks.json
+def _gh_get(url, headers):
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
+        return json.loads(r.read())
+
+def _gh_put(url, headers, message, content_bytes, sha=None):
+    payload = {"message": message,
+               "content": base64.b64encode(content_bytes).decode("ascii")}
+    if sha:
+        payload["sha"] = sha
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"),
+                                 headers=headers, method="PUT")
+    with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
+        return json.loads(r.read())
+
+def _backup_briefing_before_write(remote_meta, headers):
+    if not remote_meta or not remote_meta.get("content"):
+        return
+    backup_bytes = base64.b64decode(remote_meta["content"])
+    backup_path = f"data/archive/briefing_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    backup_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{backup_path}"
+    _gh_put(
+        backup_url,
+        headers,
+        f"backup: briefing before refresh {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        backup_bytes
+    )
+    print(f"Phase 4 backup created - {backup_path}")
+
+if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
+    try:
+        gh_headers = {"Authorization": f"token {GITHUB_PAT}",
+                      "Content-Type":  "application/json",
+                      "User-Agent":    "work-inbox-script"}
+        cc_tasks_url = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
+        cc_meta   = _gh_get(cc_tasks_url, gh_headers)
+        tasks_doc = json.loads(base64.b64decode(cc_meta["content"]).decode("utf-8"))
+
+        # Mandatory daily backup before any write to tasks.json
+        backup_path = f"Archive/tasks_backup_{datetime.now().strftime('%Y%m%d')}.json"
+        backup_url  = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{backup_path}"
+        try:
+            _gh_get(backup_url, gh_headers)
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+            _gh_put(backup_url, gh_headers,
+                    f"backup: tasks.json {datetime.now().strftime('%Y-%m-%d')}",
+                    base64.b64decode(cc_meta["content"]))
+            print(f"Phase 3.6 - daily backup created: {backup_path}")
+
+        stamp   = datetime.now().strftime("%d %b %Y")
+        applied = 0
+        task_list = tasks_doc if isinstance(tasks_doc, list) else tasks_doc.get("tasks", [])
+        for task in task_list:
+            for upd in suggestions["task_updates"]:
+                if task.get("id") == upd["task_id"]:
+                    action_text = f"[{stamp}] {upd['note']} (email: {upd['email_from']} - {upd['email_subject']})"
+                    actions = task.setdefault("actions", [])
+                    if action_text in actions:
+                        break
+                    actions.append(action_text)
+                    task["entryId"] = upd["entry_id"]
+                    applied += 1
+                    break
+
+        # Auto-promote new task suggestions straight into tasks.json.
+        # Guarded four ways so a task is never created twice: the promoted
+        # ledger, an existing task already carrying that entryId, an exact
+        # case-insensitive title match, and (added 12 Aug 2026) a fuzzy
+        # near-duplicate title match against every existing task title.
+        # The fuzzy guard exists because the exact-match guard alone missed
+        # a confirmed live duplicate pair where two separate emails about
+        # the same request produced two near-identical titles ("Advise on
+        # GLAM joining 38-day balance departments scheme" vs "Advise Marie
+        # on GLAM joining 38-day balance scheme", SequenceMatcher ratio
+        # 0.83). Threshold 0.8 chosen empirically against live task data:
+        # it catches every confirmed live duplicate pair (0.83-1.0) while
+        # staying clear of the closest known false positive -- two
+        # genuinely different meetings that share generic words (0.68).
+        FUZZY_DUP_THRESHOLD = 0.8
+        def _fuzzy_duplicate_of(title, other_titles):
+            for other in other_titles:
+                if SequenceMatcher(None, title.lower(), other.lower()).ratio() >= FUZZY_DUP_THRESHOLD:
+                    return other
+            return None
+
+        existing_entry_ids  = {t.get("entryId") for t in task_list if t.get("entryId")}
+        existing_titles     = {(t.get("title") or "").strip().lower() for t in task_list}
+        existing_title_list = [(t.get("title") or "").strip() for t in task_list if t.get("title")]
+        promoted = 0
+        fuzzy_skipped = 0
+        for nt in (suggestions["new_tasks"] if AUTO_PROMOTE_NEW_TASKS else []):
+            eid = nt.get("entry_id", "")
+            if not eid or eid in ledger.get("promoted", {}) or eid in existing_entry_ids:
+                continue
+            title = (nt.get("title") or "").strip()
+            if title.lower() in existing_titles:
+                continue
+            dup_of = _fuzzy_duplicate_of(title, existing_title_list)
+            if dup_of:
+                fuzzy_skipped += 1
+                print(f"Phase 3.6 - skipped near-duplicate task suggestion: '{title}' looks like existing '{dup_of}'")
+                continue
+            new_id = "t" + datetime.now().strftime("%y%m%d%H%M%S") + str(promoted)
+            task_list.append({
+                "id":          new_id,
+                "title":       nt["title"],
+                "tier":        nt["tier"],
+                "source":      f"Inbox - {nt['email_from']}, {nt['received']}",
+                "emailRef":    nt.get("email_subject", ""),
+                "entryId":     eid,
+                "summary":     "",
+                "description": nt.get("description", ""),
+                "origin":      "inbox-auto",
+                "actions":     [f"[{stamp}] Auto-created from inbox triage (email: {nt['email_from']} - {nt.get('email_subject','')})."]
+            })
+            existing_entry_ids.add(eid)
+            existing_titles.add(title.lower())
+            existing_title_list.append(title)
+            nt["auto_promoted"] = True
+            promoted += 1
+
+        if applied or promoted:
+            bits = []
+            if applied:
+                bits.append(f"apply {applied} task update(s)")
+            if promoted:
+                bits.append(f"add {promoted} new task(s)")
+            _gh_put(cc_tasks_url, gh_headers,
+                    f"inbox: {' + '.join(bits)} {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                    json.dumps(tasks_doc, indent=2, ensure_ascii=False).encode("utf-8"),
+                    cc_meta["sha"])
+            print(f"Phase 3.6 done - {applied} update(s), {promoted} new task(s) applied to Command Centre" + (f" ({fuzzy_skipped} near-duplicate suggestion(s) skipped)" if fuzzy_skipped else ""))
+            for u in suggestions["task_updates"]:
+                ledger["applied"][u["entry_id"] + "_" + u["task_id"]] = datetime.now().strftime("%Y-%m-%d")
+            for nt in suggestions["new_tasks"]:
+                if nt.get("auto_promoted"):
+                    ledger["promoted"][nt["entry_id"]] = datetime.now().strftime("%Y-%m-%d")
+            ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
+            l_sha = None
+            try:
+                l_sha = _gh_get(ledger_url, gh_headers).get("sha")
+            except urllib.error.HTTPError as e:
+                if e.code != 404:
+                    raise
+            _gh_put(ledger_url, gh_headers, "chore: update triage ledger",
+                    json.dumps(ledger, indent=1).encode("utf-8"), l_sha)
+        suggestions["applied_updates"] = suggestions.pop("task_updates")
+    except Exception as e:
+        print(f"WARNING: Phase 3.6 apply failed - {e}")
+
+
+# Phase 3.7 - AI summaries for priority tasks
+log("Phase 3.7 - generating AI task summaries...")
+all_priorities = priorities_today + priorities_tomorrow + priorities_week
+if all_priorities and anthropic_available:
+    try:
+        tasks_for_summary = [
+            {
+                "id":          e["id"],
+                "title":       e["text"],
+                "description": (e.get("description") or "")[:300],
+                "actions":     e.get("actions", [])[-5:]
+            }
+            for e in all_priorities if e.get("id")
+        ]
+        SUMMARY_SYSTEM = (
+            "You are Kevin's task briefing assistant at Oxford University Personnel Services.\n"
+            "For each task, write a 1-2 sentence status summary: current state, what needs to happen next, any blockers.\n"
+            "Be specific - use names, dates and case numbers from the data. Plain ASCII punctuation only.\n"
+            "Return ONLY a valid JSON object mapping task id to summary string - no preamble, no markdown.\n"
+            "Example: {\"task-001\": \"Awaiting response from Jane Smith re HRIS migration. Next: chase by Friday 20 Jun.\"}"
+        )
+        summary_user = (
+            f"Today is {today_str}.\n\n"
+            f"TASKS:\n{json.dumps(tasks_for_summary, indent=1, ensure_ascii=True)}"
+        )
+        s_resp = client.messages.create(
+            model      = "claude-haiku-4-5",
+            max_tokens = 4096,
+            system     = SUMMARY_SYSTEM,
+            messages   = [{"role": "user", "content": summary_user}]
+        )
+        s_raw = s_resp.content[0].text.strip()
+        if s_raw.startswith("```"):
+            s_raw = "\n".join(s_raw.split("\n")[1:])
+        if s_raw.endswith("```"):
+            s_raw = "\n".join(s_raw.split("\n")[:-1])
+        summaries = json.loads(s_raw)
+        for entry in all_priorities:
+            tid = entry.get("id", "")
+            if tid in summaries:
+                entry["ai_summary"] = summaries[tid]
+        print(f"Phase 3.7 done - {len(summaries)} summaries generated")
+    except Exception as e:
+        print(f"WARNING: Phase 3.7 AI summaries failed - {e}")
+elif all_priorities:
+    print("Phase 3.7 skipped - Anthropic is unavailable")
+
+
+# Pre-build cal items so Phase 3.8 can annotate them before briefing dict is assembled
+cal_today_items    = build_cal_items(cal_today)
+cal_tomorrow_items = build_cal_items(cal_tomorrow)
+cal_day2_items     = build_cal_items(cal_day2)
+cal_day3_items     = build_cal_items(cal_day3)
+
+# Attach a Command Centre task id to a calendar item, when one genuinely
+# exists, so the dashboard's "CC ->" link on that meeting can deep-link
+# straight to the matching task (command-centre's js/app.js already reads
+# window.location.hash and highlights/scrolls to '#card-'+hash -- confirmed
+# by reading that code, not assumed) instead of just landing on the CC
+# homepage with nothing highlighted. Kevin's explicit ask, 10 Aug 2026:
+# "it should high[light] the item so i can drill dowwn into the email if
+# required - one links to the other."
+#
+# Deliberately conservative: only an EXACT (case-insensitive) match against
+# a not-done task's emailRef counts -- confirmed live against real
+# tasks.json that several tasks carry the verbatim meeting title in
+# emailRef (e.g. "Sickness Absence Survey working group", "Confidential -
+# OH Consultation", "Oxford University Evo Pre project meeting"). task.source
+# also often names a meeting but with a trailing "DD/MM" date and no way to
+# tell which week's occurrence of a *recurring* meeting it refers to (e.g.
+# "HR Systems Managers Meeting 24/06" could easily be a stale prior
+# occurrence of a meeting that recurs weekly) -- deliberately NOT matched
+# against, to avoid deep-linking a real person to the wrong week's task.
+# If more than one not-done task shares the identical emailRef, that's
+# ambiguous and no link is attached rather than guessing.
+_cc_task_list_for_matching = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+
+def _match_cc_task_id(meeting_title):
+    title_lower = (meeting_title or "").strip().lower()
+    if not title_lower:
+        return None
+    matches = []
+    for t in _cc_task_list_for_matching:
+        if t.get("done"):
+            continue
+        email_ref = (t.get("emailRef") or "").strip().lower()
+        if email_ref and email_ref == title_lower:
+            tid = t.get("id")
+            if tid and tid not in matches:
+                matches.append(tid)
+    return matches[0] if len(matches) == 1 else None
+
+def _attach_cc_task_ids(items):
+    for it in items:
+        tid = _match_cc_task_id(it.get("title"))
+        if tid:
+            it["ccTaskId"] = tid
+    return items
+
+_attach_cc_task_ids(cal_today_items)
+_attach_cc_task_ids(cal_tomorrow_items)
+_attach_cc_task_ids(cal_day2_items)
+_attach_cc_task_ids(cal_day3_items)
+
+# -- Phase 3.7b -- Fetch recent Granola meeting notes for calendar context --
+GRANOLA_API_KEY = os.environ.get("GRANOLA_API_KEY", "")
+_granola_context = {}  # "day_idx" -> {"note_title": str, "summary": str}
+
+def _granola_keywords(title):
+    t = re.sub(r'\b\d{1,2}/\d{2}\b', '', title)   # remove DD/MM dates
+    t = re.sub(r'\b\d{4}\b', '', t)                # remove years
+    t = re.sub(r'[—\-&]', ' ', t)             # dashes and ampersands to spaces
+    t = re.sub(r'[^\w\s]', '', t)                  # strip remaining punctuation
+    return set(w.lower() for w in t.split() if len(w) >= 2)
+
+def _granola_fetch(url):
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {GRANOLA_API_KEY}"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.loads(r.read().decode())
+
+# Shared candidate builder for Phase 3.7b (Granola) and Phase 3.8 (AI prep
+# summaries) -- fixes the calendar-summary offset bug root-caused 4 Aug 2026
+# (memory/calendar-summary-offset-bug.md) but left unfixed since Phase 3.8
+# was closed pending Kevin explicitly reopening it. He did, 10 Aug 2026, by
+# asking to extend this exact phase to 4 days -- fixing it now rather than
+# extending the same bug across twice as many columns.
+#
+# Root cause: the old code did `enumerate(cal_X_items)` THEN filtered out
+# all-day items -- so if item 0 of a day is an all-day event (now much more
+# likely now leave items are filtered separately upstream, and any other
+# all-day entry), the surviving non-all-day items keep indices 1,2,3...
+# instead of starting at 0. claude-haiku-4-5 (the model both phases are
+# locked to) was found to sometimes echo output-position (0,1,2...) instead
+# of the literal idx value whenever it doesn't start at 0, silently writing
+# a summary onto the wrong meeting.
+#
+# Fix: every candidate now carries TWO indices -- "idx" (sequential 0-based
+# within its day, the ONLY index ever shown to the model, for both the
+# Granola match keys and the Phase 3.8 AI call) and "real_idx" (the true
+# position in cal_X_items, used ONLY for the final local write-back, never
+# sent to or read from the model).
+def _non_all_day_candidates(items, day_label):
+    candidates = []
+    model_idx = 0
+    for real_idx, c in enumerate(items):
+        if c.get("time", "").lower() == "all day":
+            continue
+        candidates.append({
+            "idx": model_idx, "real_idx": real_idx, "day": day_label,
+            "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")
+        })
+        model_idx += 1
+    return candidates
+
+_all_day_candidates = (
+    _non_all_day_candidates(cal_today_items, "today") +
+    _non_all_day_candidates(cal_tomorrow_items, "tomorrow") +
+    _non_all_day_candidates(cal_day2_items, "day2") +
+    _non_all_day_candidates(cal_day3_items, "day3")
+)
+
+if GRANOLA_API_KEY:
+    try:
+        _lookback = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        _g_data   = _granola_fetch(f"https://public-api.granola.ai/v1/notes?created_after={_lookback}")
+        _g_notes  = _g_data.get("notes", [])
+
+        # Reuse the same idx-fixed candidate list built above for matching.
+        _cal_candidates = _all_day_candidates
+
+        for cal_item in _cal_candidates:
+            cal_kw = _granola_keywords(cal_item["title"])
+            if not cal_kw:
+                continue
+            best_note, best_score = None, 0
+            for note in _g_notes:
+                score = len(cal_kw & _granola_keywords(note.get("title", "")))
+                if score > best_score:
+                    best_score, best_note = score, note
+            if best_note and best_score >= 1:
+                # ?include=transcript required for the API to return the summary field
+                detail   = _granola_fetch(f"https://public-api.granola.ai/v1/notes/{best_note['id']}?include=transcript")
+                _raw_sum = detail.get("summary") or ""
+                if isinstance(_raw_sum, dict):
+                    summary = (_raw_sum.get("text") or _raw_sum.get("content") or "").strip()
+                else:
+                    summary = str(_raw_sum).strip()
+                if not summary:
+                    summary = (detail.get("summary_text") or detail.get("summary_markdown") or "").strip()
+                if summary:
+                    key = f"{cal_item['day']}_{cal_item['idx']}"
+                    _granola_context[key] = {"note_title": best_note.get("title", ""), "summary": summary[:1500]}
+
+        print(f"Phase 3.7 done - Granola context for {len(_granola_context)} meetings")
+    except Exception as e:
+        print(f"WARNING: Phase 3.7 Granola fetch failed - {e}")
+else:
+    print("Phase 3.7 skipped - GRANOLA_API_KEY not set")
+
+# -- Phase 3.8 -- AI prep summaries for all 4 calendar day-view columns --
+# Reuse the same idx-fixed candidate list -- "idx" (sequential, model-facing)
+# is what gets sent to and read back from the AI; "real_idx" (true position
+# in cal_X_items) is only used for the write-back below, never sent to the
+# model. Fixes the calendar-summary offset bug -- see comment above
+# _non_all_day_candidates().
+_cal_for_summary = [
+    dict(c, prev_meeting_notes=_granola_context.get(f"{c['day']}_{c['idx']}", {}).get("summary", ""))
+    for c in _all_day_candidates
+]
+if _cal_for_summary and anthropic_available:
+    try:
+        CAL_SUM_SYSTEM = (
+            "You are Kevin's briefing assistant at Oxford University HR Systems.\n"
+            "For each meeting, write 2-3 concise sentences of prep context Kevin needs before walking in.\n"
+            "Where 'prev_meeting_notes' is provided, use it as your primary source -- it is the AI summary from the last time this meeting ran.\n"
+            "Prioritise: carry-forwards and open actions from last time, any live decision or blocker, who Kevin needs to speak to, and the most useful detail Kevin should remember.\n"
+            "Plain ASCII punctuation only. No filler like 'This meeting is about...'. Be direct and specific.\n"
+            "Return ONLY valid JSON: {\"day_idx\": \"2-3 concise sentences\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
+            "Example: {\"today_0\": \"Pick up the evaluation scoring from last week -- Helen still needs a decision on weightings. Confirm whether James has resolved the reporting extract and agree the next owner before Friday.\"}"
+        )
+        _cal_user = (
+            f"Today is {today_str}.\n\n"
+            f"MEETINGS:\n{json.dumps(_cal_for_summary, indent=1, ensure_ascii=True)}"
+        )
+        _cs_resp = client.messages.create(
+            model      = "claude-haiku-4-5",
+            max_tokens = 900,
+            system     = CAL_SUM_SYSTEM,
+            messages   = [{"role": "user", "content": _cal_user}]
+        )
+        _cs_raw = _cs_resp.content[0].text.strip()
+        if _cs_raw.startswith("```"): _cs_raw = "\n".join(_cs_raw.split("\n")[1:])
+        if _cs_raw.endswith("```"):   _cs_raw = "\n".join(_cs_raw.split("\n")[:-1])
+        _cs_map = json.loads(_cs_raw)
+        _CAL_DAY_TARGETS = {
+            "today": cal_today_items, "tomorrow": cal_tomorrow_items,
+            "day2": cal_day2_items, "day3": cal_day3_items,
+        }
+        for item in _cal_for_summary:
+            key = f"{item['day']}_{item['idx']}"
+            if key in _cs_map:
+                target = _CAL_DAY_TARGETS[item["day"]]
+                target[item["real_idx"]]["summary"] = _cs_map[key]
+        print(f"Phase 3.8 done - {len(_cs_map)} calendar summaries generated")
+    except Exception as e:
+        print(f"WARNING: Phase 3.8 calendar summaries failed - {e}")
+elif _cal_for_summary:
+    print("Phase 3.8 skipped - Anthropic is unavailable")
+
+if same_briefing_date(existing_briefing, today_str):
+    _preserved_cal = (
+        preserve_existing_calendar_summaries(existing_briefing, "calToday", cal_today_items) +
+        preserve_existing_calendar_summaries(existing_briefing, "calTomorrow", cal_tomorrow_items) +
+        preserve_existing_calendar_summaries(existing_briefing, "calDay2", cal_day2_items) +
+        preserve_existing_calendar_summaries(existing_briefing, "calDay3", cal_day3_items)
+    )
+    if _preserved_cal:
+        print(f"Phase 3.8 preservation - reused {_preserved_cal} existing same-day calendar summaries")
+
+# Build calFull -- Mon through Fri of the current working week
+def _week_workdays(ref):
+    mon = ref - timedelta(days=ref.weekday())
+    return [mon + timedelta(days=i) for i in range(5)]
+
+calFull = []
+for _wd in _week_workdays(today):
+    _day_items = [c for c in calendar if datetime.fromisoformat(c["start"]).date() == _wd]
+    calFull.append({
+        "date":    _wd.strftime("%Y-%m-%d"),
+        "label":   _wd.strftime("%A") + " " + str(_wd.day) + " " + _wd.strftime("%b"),
+        "items":   build_cal_items(_day_items),
+        "isToday": _wd == today
+    })
+
+if same_briefing_date(existing_briefing, today_str) and not absences and existing_briefing.get("absences"):
+    absences = sorted(existing_briefing.get("absences", []))
+    print(f"Absence preservation - reused {len(absences)} existing same-day absence(s)")
+
+# -- Phase 3.9 -- Needs/Urgent scroll-out persistence, 17 Aug 2026 --
+# Kevin-reported real miss, root-caused live: an Alan Quirke/Access Group
+# vendor email (23 Jul) was correctly triaged into Needs on the 31 Jul run,
+# then silently vanished from every subsequent run once it scrolled out of
+# Phase 1's 50-newest-email Outlook pull. There was no persistence for
+# Urgent/Needs once an item left that window -- the same class of gap this
+# file's own Phase 5 carry-forward comment already flagged for the Command
+# Centre suggestion path (further down), never extended to the primary
+# tiers. Scoped narrowly by Kevin, 17 Aug 2026: fix the vanish only -- no
+# new tier, no AI-prompt change. A carried item stays in its original
+# Urgent/Needs bucket, rendered identically to a fresh card -- this is a
+# pure data-layer fix, index.html/app.js/css are untouched.
+#
+# Mechanism:
+# 1. Every run, after Phase 3.2/3.3/3.3b have finished (so cards already
+#    carry their AI summary/needs_reply verdict), snapshot every currently-
+#    live Urgent/Needs card into triage_ledger.json under
+#    "tracked_needs_urgent", keyed by entry_id.
+# 2. Any previously-tracked entry_id NOT in this run's fresh urgent/needs
+#    (i.e. it scrolled out of the pull) is checked directly against Outlook
+#    via GetItemFromID -- an EntryID lookup is a direct item reference, not
+#    restricted to the top-50 window, so this works regardless of mailbox
+#    backlog volume. Confirmed live before building this: Outlook's
+#    LastVerbExecuted property (the obvious "has this been replied to"
+#    signal) is NOT reliably readable through this COM binding -- both plain
+#    dynamic-dispatch attribute access and PropertyAccessor().GetProperty()
+#    raised "<unknown>.LastVerbExecuted"/"<unknown>.GetProperty" on every
+#    live inbox item tested, so it is deliberately NOT used here. The one
+#    signal confirmed to work reliably live: comparing item.Parent.EntryID
+#    against the Inbox folder's own EntryID.
+#      - lookup throws (deleted/inaccessible/transient COM issue) -> UNKNOWN,
+#        fail OPEN (still carried) -- this fix's whole point is that nothing
+#        should vanish on an inconclusive signal, so uncertainty must never
+#        silently drop an item the way the original bug did.
+#      - lookup succeeds and the item has moved out of the Inbox (filed,
+#        archived, or deleted) -> Kevin has deliberately dealt with it ->
+#        resolved, drop.
+#      - lookup succeeds and a Command Centre task exists whose entryId
+#        matches and is done:true -> resolved via the other surface, drop.
+#      - otherwise (still sitting unfiled in the Inbox) -> still genuinely
+#        open -> re-inject the cached card exactly as it last looked.
+# 3. Safety valve only, not the primary mechanism: an item carried for more
+#    than 90 days without resolving gets a WARNING logged (visible, not
+#    silent) but is still carried -- Kevin was explicit these should not
+#    vanish, so this fix does not reintroduce a silent time-based drop.
+#
+# Known, disclosed limitation: because LastVerbExecuted isn't usable here, a
+# reply Kevin sends WITHOUT also filing/deleting the original stays tracked
+# until he does so (or until a matching Command Centre task is marked
+# done). This over-carries rather than under-carries -- the safer failure
+# mode given the bug being fixed is exactly the opposite (silent vanishing
+# of something still genuinely open).
+try:
+    _persist_ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
+    _persist_ro_headers = {"Authorization": f"token {GITHUB_PAT}", "User-Agent": "work-inbox-script"} if GITHUB_PAT else None
+    _persist_ledger = {"applied": {}, "promoted": {}, "tracked_needs_urgent": {}}
+    _persist_sha = None
+    if GITHUB_PAT:
+        try:
+            _pmeta = _gh_get(_persist_ledger_url, _persist_ro_headers)
+            _persist_sha = _pmeta.get("sha")
+            _persist_ledger = json.loads(base64.b64decode(_pmeta["content"]).decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+        except Exception as e:
+            print(f"WARNING: Phase 3.9 could not read triage_ledger.json, starting fresh - {e}")
+    if "tracked_needs_urgent" not in _persist_ledger:
+        _persist_ledger["tracked_needs_urgent"] = {}
+    tracked = _persist_ledger["tracked_needs_urgent"]
+
+    # Command Centre done-task entry_ids, for the resolution cross-check.
+    _cc_done_entry_ids = set()
+    try:
+        _cc_task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+        for _t in _cc_task_list:
+            if _t.get("done") and _t.get("entryId"):
+                _cc_done_entry_ids.add(_t["entryId"])
+    except Exception:
+        pass
+
+    today_iso = datetime.now().strftime("%Y-%m-%d")
+
+    # 1. Checkpoint every live card this run (refreshes cached content and
+    #    first_tracked/last_confirmed bookkeeping for anything still in the
+    #    fresh pull).
+    for _tier_name, _tier_list in (("urgent", urgent), ("needs", needs)):
+        for c in _tier_list:
+            eid = c.get("entry_id")
+            if not eid:
+                continue
+            prev = tracked.get(eid, {})
+            tracked[eid] = {
+                "tier": _tier_name,
+                "card": {k: v for k, v in c.items() if not str(k).startswith("_")},
+                "first_tracked": prev.get("first_tracked", today_iso),
+                "last_confirmed": today_iso
+            }
+
+    live_ids = set(tracked.keys()) & ({c.get("entry_id") for c in urgent if c.get("entry_id")} |
+                                       {c.get("entry_id") for c in needs if c.get("entry_id")})
+
+    # 2. Resolve or carry anything that scrolled out of this run's pull.
+    carried = 0
+    dropped_resolved = 0
+    inconclusive = 0
+    stale_warnings = 0
+    for eid, rec in list(tracked.items()):
+        if eid in live_ids:
+            continue  # already handled by the checkpoint above
+        if eid in _cc_done_entry_ids:
+            del tracked[eid]
+            dropped_resolved += 1
+            continue
+
+        outcome = "unknown"
+        try:
+            item = mapi.GetItemFromID(eid)
+            item_parent_id = item.Parent.EntryID
+            outcome = "still_open" if item_parent_id == _inbox_folder.EntryID else "moved_out"
+        except Exception:
+            outcome = "unknown"
+
+        if outcome == "moved_out":
+            del tracked[eid]
+            dropped_resolved += 1
+            continue
+        if outcome == "unknown":
+            inconclusive += 1
+            # fall through to carry -- fail open, see comment block above
+
+        card_copy = dict(rec.get("card") or {})
+        if not card_copy:
+            del tracked[eid]
+            continue
+        tier = rec.get("tier", "needs")
+        (urgent if tier == "urgent" else needs).append(card_copy)
+        tracked[eid]["last_confirmed"] = today_iso
+        carried += 1
+
+        try:
+            _first = datetime.strptime(rec.get("first_tracked", today_iso), "%Y-%m-%d")
+            age_days = (datetime.now() - _first).days
+            if age_days > 90:
+                stale_warnings += 1
+                print(f"WARNING: Phase 3.9 - '{card_copy.get('subject','?')}' has been carried for {age_days} days without resolving (still shown, not dropped)")
+        except Exception:
+            pass
+
+    if carried or dropped_resolved or inconclusive:
+        print(f"Phase 3.9 done - carried:{carried} dropped_resolved:{dropped_resolved} inconclusive_lookups_carried:{inconclusive} stale_over_90d:{stale_warnings} tracked_total:{len(tracked)}")
+
+    if GITHUB_PAT:
+        try:
+            _persist_ledger["tracked_needs_urgent"] = tracked
+            _persist_rw_headers = {"Authorization": f"token {GITHUB_PAT}", "Content-Type": "application/json", "User-Agent": "work-inbox-script"}
+            _gh_put(_persist_ledger_url, _persist_rw_headers,
+                    "chore: update Needs/Urgent scroll-out tracking",
+                    json.dumps(_persist_ledger, indent=1).encode("utf-8"), _persist_sha)
+        except Exception as e:
+            print(f"WARNING: Phase 3.9 could not persist triage_ledger.json - {e}")
+except Exception as e:
+    print(f"WARNING: Phase 3.9 scroll-out persistence failed entirely, Urgent/Needs left as fresh-pull-only this run - {e}")
+
+briefing = {
+    "date":         today_str,
+    "subtitle":     subtitle,
+    "context":      context,
+    "urgent":       urgent,
+    "needs":        needs,
+    "fyi":          fyi,
+    "fyiRawCount":  fyi_raw_count,
+    "low":          low,
+    "calToday":     cal_today_items,
+    "calTomorrow":  cal_tomorrow_items,
+    "calDay2":      cal_day2_items,
+    "calDay3":      cal_day3_items,
+    "calFull":      calFull,
+    "absences":     absences,
+    "prioritiesToday":    priorities_today,
+    "prioritiesTomorrow": priorities_tomorrow,
+    "prioritiesWeek":     priorities_week,
+    "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
+}
+
+# -- Phase 4 -- push to GitHub --
+log("Phase 4 - pushing briefing to GitHub...")
+
+if not GITHUB_PAT:
+    print("ERROR: GITHUB_PAT env var not set - cannot push.")
+else:
+    try:
+        api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_PATH}"
+        headers = {
+            "Authorization": f"token {GITHUB_PAT}",
+            "Content-Type":  "application/json",
+            "User-Agent":    "work-inbox-script"
+        }
+        sha = None
+        remote_meta = None
+        remote_briefing = existing_briefing
+        try:
+            remote_meta = _gh_get(api_url, headers)
+            sha = remote_meta.get("sha")
+            if remote_meta.get("content"):
+                remote_bytes = base64.b64decode(remote_meta["content"])
+                remote_briefing = json.loads(remote_bytes.decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+
+        fatal, warnings = validate_briefing_update(briefing, remote_briefing)
+        for warning in warnings:
+            print(f"Phase 4 safe-write warning - {warning}")
+        if fatal:
+            raise Exception("Safe write blocked briefing update: " + "; ".join(fatal))
+
+        _backup_briefing_before_write(remote_meta, headers)
+
+        content_b64 = base64.b64encode(
+            json.dumps(briefing, indent=2, ensure_ascii=False).encode("utf-8")
+        ).decode("ascii")
+        payload = {
+            "message": f"chore: update briefing {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            "content": content_b64
+        }
+        if sha:
+            payload["sha"] = sha
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(api_url, data=data, headers=headers, method="PUT")
+        with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
+            result = json.loads(r.read())
+            print(f"Phase 4 done - briefing pushed to GitHub (commit: {result.get('commit',{}).get('sha','?')[:7]})")
+    except Exception as e:
+        print(f"Phase 4 FAILED - {e}")
+        raise
+
+
+# Phase 5 - push task suggestions to GitHub (consumed by Command Centre dashboard)
+if GITHUB_PAT:
+    try:
+        sug_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/inbox_suggestions.json"
+        headers = {
+            "Authorization": f"token {GITHUB_PAT}",
+            "Content-Type":  "application/json",
+            "User-Agent":    "work-inbox-script"
+        }
+        sha = None
+        prev_suggestions = None
+        try:
+            req = urllib.request.Request(sug_url, headers=headers)
+            with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
+                _prev_meta = json.loads(r.read())
+                sha = _prev_meta.get("sha")
+                prev_suggestions = json.loads(base64.b64decode(_prev_meta["content"]).decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+        except Exception:
+            prev_suggestions = None
+
+        # Carry forward any earlier suggestion that never became a task, so an
+        # unactioned suggestion is not silently lost when this file is
+        # rewritten (the script now runs five times a day).
+        if prev_suggestions:
+            seen = {s.get("entry_id") for s in suggestions["new_tasks"] if s.get("entry_id")}
+            carried = 0
+            carry_suppressed_no_action = 0
+            for old in prev_suggestions.get("new_tasks", []):
+                oid = old.get("entry_id")
+                if not oid or oid in seen or oid in ledger.get("promoted", {}):
+                    continue
+                # 12 Aug 2026: also drop a previously-persisted suggestion
+                # here if its source email was AI-confirmed no_action_needed
+                # by THIS run's Phase 3.3/3.3b (demoted out of Needs/Urgent
+                # just above) -- Codex review flagged that without this
+                # check, a noisy suggestion generated earlier could keep
+                # resurfacing via carry-forward even after the fresh Phase
+                # 3.5 output above was correctly filtered in the same run.
+                # Known limitation, not fixed here: `_noise_demoted_entry_ids`
+                # is process-local to this run only (line ~721) -- it has no
+                # memory of a PAST run's demotions, so an old carried-forward
+                # suggestion whose source email has since scrolled out of the
+                # 50-newest-email inbox window (so it's no longer in this
+                # run's summary_candidates at all) won't be caught here. A
+                # full fix would need to persist demoted entry_ids across
+                # runs (e.g. in triage_ledger.json) -- out of scope for this
+                # extension, flagged not silently dropped.
+                if oid in _noise_demoted_entry_ids:
+                    carry_suppressed_no_action += 1
+                    continue
+                old["carried_forward"] = True
+                suggestions["new_tasks"].append(old)
+                seen.add(oid)
+                carried += 1
+            if carried or carry_suppressed_no_action:
+                print(f"Phase 5 - carried forward {carried} unactioned suggestion(s) (suppressed_no_action:{carry_suppressed_no_action})")
+
+        content_b64 = base64.b64encode(
+            json.dumps(suggestions, indent=2, ensure_ascii=False).encode("utf-8")
+        ).decode("ascii")
+        payload = {
+            "message": f"chore: update task suggestions {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            "content": content_b64
+        }
+        if sha:
+            payload["sha"] = sha
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(sug_url, data=data, headers=headers, method="PUT")
+        with urllib.request.urlopen(req, timeout=GITHUB_TIMEOUT) as r:
+            result = json.loads(r.read())
+            print(f"Phase 5 done - suggestions pushed (commit: {result.get('commit',{}).get('sha','?')[:7]})")
+    except Exception as e:
+        print(f"Phase 5 FAILED - {e}")
