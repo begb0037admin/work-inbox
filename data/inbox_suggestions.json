@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-17 17:43",
+  "generated_at": "2026-08-17 18:01",
   "new_tasks": [
     {
-      "title": "Attend Teams meeting on planning for departments move to 38-day balance",
+      "title": "Attend planning meeting for departments moving to 38-day balance",
       "tier": "tomorrow",
-      "description": "Julie Hickman has sent a Teams meeting link for a planning meeting on the 38-day balance rollout to additional departments. Kevin's attendance is required to participate in this planning discussion.",
+      "description": "Julie Hickman has scheduled a Teams meeting for planning the move of departments to 38-day balance scheme. Kevin's attendance is required to discuss implementation and next steps.",
       "email_subject": "Planning for depts move to 38 day balance ",
       "email_from": "Julie Hickman",
       "received": "2026-08-17 15:06",
@@ -13,58 +13,13 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608171727070",
-      "task_title": "Attend HSMS Tender Session (final) on Microsoft Teams",
-      "note": "Meeting reminder received for final HSMS tender session scheduled for today.",
-      "email_subject": "HSMS Tender Session (the final one)",
-      "email_from": "Christopher Sanders",
-      "received": "2026-08-17 12:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C70000"
-    },
-    {
-      "task_id": "t2608071501071",
-      "task_title": "Respond to Occupational Health appointment offer",
-      "note": "Simon Burford continuing to discuss DTP1092 College Staff into PXD testing approach with IT Services; technical discussion ongoing with Andrew Goff on API_USER restriction.",
-      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Simon Burford",
-      "received": "2026-08-17 11:22",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C50000"
-    },
-    {
-      "task_id": "t2608071501071",
-      "task_title": "Respond to Occupational Health appointment offer",
-      "note": "Andrew Goff (IT Services) clarified reasoning behind API_USER restriction lift recommendation; technical context provided for testing strategy.",
-      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Andrew Goff (IT Services)",
-      "received": "2026-08-17 11:19",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C40000"
-    },
-    {
-      "task_id": "t2608071501071",
-      "task_title": "Respond to Occupational Health appointment offer",
-      "note": "Simon Burford questioned the API_USER restriction lift approach; ongoing clarification needed on DTP1092 testing configuration.",
-      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Simon Burford",
-      "received": "2026-08-17 11:03",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C20000"
-    },
-    {
-      "task_id": "t2608060900570",
-      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
-      "note": "Simon forwarded notification of August 2026 PACS organisational structure changes moving colleges and societies from L2 to L3; directly related to college data in PXD project.",
-      "email_subject": "FW: Organisational Structure Update - August 2026 - DRAFT",
-      "email_from": "Simon Burford",
-      "received": "2026-08-17 10:22",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C00000"
-    },
-    {
-      "task_id": "t2608071501071",
-      "task_title": "Respond to Occupational Health appointment offer",
-      "note": "Andrew Goff (IT Services) advised that next step requires removing API_USER and API_USER2 account restrictions for test environment; technical blocker identified.",
-      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Andrew Goff (IT Services)",
-      "received": "2026-08-14 12:36",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AA0D4F3C0000"
+      "task_id": "task-1785700344174",
+      "task_title": "Review outstanding Development Insight reports actions with Julie",
+      "note": "Kevin shared KPI presentation for July 2026 with Michael O'Sullivan, indicating he is working on tracking and reporting tasks.",
+      "email_subject": "Kevin Lelitte shared \"KPI presentation - July 2026\" with you",
+      "email_from": "Kevin (sent to: Michael O'Sullivan)",
+      "received": "2026-08-11 19:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007A88157F40000"
     }
   ]
 }
