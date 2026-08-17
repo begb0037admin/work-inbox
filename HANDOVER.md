@@ -1,3 +1,26 @@
+# Handover -- 17 August 2026, end of night (Drew) -- session checkpoint: tick-resurrection incident CLOSED; thread-dedup work PAUSED pending Kevin's morning effort-level call, findings preserved
+
+## Status at stop
+Kevin stopped for the night. Checkpointing per standing session protocol before ending. No code changes in this checkpoint -- HANDOVER.md/memory only, per explicit instruction not to touch the thread-dedup code or push anything else tonight.
+
+## (a) Tick/resurrection incident -- CLOSED, nothing further needed
+Fixed and verified live this session (full writeup directly below this entry). One disclosed caveat, not yet resolved and not expected to need action unless Kevin raises it: ~173 pre-existing entries in `data/ticks.json` are in the old day-scoped/render-position-keyed format from before this fix and cannot be retroactively migrated (no record of the array order at the moment each was set). Any specific item still carrying one of those stale keys may resurrect one more time; from the next tick onward it uses the new stable key and stays fixed. `main` confirmed clean at HEAD `640b44ee01be993835058897781e12dcd90a76b4`, all three real commits present in order (`d97db64d` app.js fix, `5556c308` fetch_inbox.py fix, `640b44ee` this doc) -- no partial/uncommitted state.
+
+## (b) Thread-dedup / thread-identity work -- PAUSED, not started, pending Kevin's morning call
+Kevin asked (relayed via the coordinator session mid-incident) for every board section to collapse to only the newest message per email thread, using real Outlook thread identity rather than subject-string matching. Flagged this to Kevin as warranting Section 10 (Effort Level Governance) sign-off before starting, since it's cross-system architecture (new field in the core Outlook pull, new grouping logic spanning every section, an interaction with the Phase 3.9 ledger shipped hours earlier) rather than mechanical spec-following -- not yet confirmed either way as of stopping tonight. **No code was written for this. Do not self-select an effort level next session -- wait for Kevin's explicit decision.**
+
+Findings from read-only investigation this session, preserved so the next session doesn't have to re-derive them:
+- **No Outlook `ConversationID`/`ConversationTopic` is captured anywhere in the current pipeline.** Checked every item/msg dict-construction site in `fetch_inbox.py` (lines 365, 396, 422, 447, 489) -- only `.Subject` is read. Adding thread identity means extending the core Phase 1 Outlook COM pull itself, not just a post-processing filter.
+- The only existing thread-collapse logic, Phase 3.3c (`fetch_inbox.py` ~line 1118, 12 Aug), keys on a normalized SUBJECT STRING (`Re:`/`Fw:`/`Fwd:` prefixes stripped) and only runs on the FYI tier. It is not a generalizable base for a cross-section, ConversationID-based rebuild as-is.
+- `ConversationID` was already proven reliable in this exact mailbox on 10 Aug (100% presence, 40/40 sampled items, in both Drafts and Sent) -- but that was for a different pairing (draft-to-sent correlation). Its reliability across arbitrary same-thread messages spread over multiple days across Urgent/Needs/FYI/Parked has not yet been checked live and should be confirmed before it's trusted as the join key here.
+- **Interacts directly with the Phase 3.9 ledger shipped earlier the same day**: when a newer reply arrives on a thread whose earlier message is being carried forward by Phase 3.9, the carry-forward needs to resolve to the latest message in the thread, not keep an orphaned older one alive. This needs to be designed together with whatever grouping mechanism is chosen, not bolted on after.
+- **Pattern worth naming explicitly**: this would be the third time this specific codebase has been bitten by "identity computed from derived/positional data instead of a stable ID" -- title-slug text collision silently dropping distinct Priorities-board cards (12 Aug), render-position+calendar-day tick keys losing done-state (this session, above), and now subject-string thread matching instead of real Outlook thread identity. The first two both caused real, live, Kevin-visible faults. Worth treating any future "just match on X-derived-text" shortcut in this file with real suspicion. A cross-cutting confirmed-fact entry covering the general lesson (UI resolution state / dedup identity must be stable, not derived-text-or-position) is already in both `drew/memory/index.json` and `begb0037admin/agent-commons/memory/index.json` as of this session.
+
+## Next action
+Wait for Kevin's effort-level decision (standard vs. raised) on the thread-dedup work before writing any code for it. Once confirmed, the four findings above are the starting point -- no need to re-investigate ConversationID capture, Phase 3.3c's current scope, or the Phase 3.9 interaction from scratch.
+
+---
+
 # Handover -- 17 August 2026, live incident (Drew) -- "mark done, refresh, it comes back" FIXED, live-verified end to end via a real production round-trip
 
 ## Scope
