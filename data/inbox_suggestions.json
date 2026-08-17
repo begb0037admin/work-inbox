@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-17 18:01",
+  "generated_at": "2026-08-17 19:41",
   "new_tasks": [
     {
       "title": "Attend planning meeting for departments moving to 38-day balance",
       "tier": "tomorrow",
-      "description": "Julie Hickman has scheduled a Teams meeting for planning the move of departments to 38-day balance scheme. Kevin's attendance is required to discuss implementation and next steps.",
+      "description": "Julie Hickman has scheduled a Microsoft Teams meeting on 38-day balance planning. Kevin needs to attend to participate in departmental transition discussions.",
       "email_subject": "Planning for depts move to 38 day balance ",
       "email_from": "Julie Hickman",
       "received": "2026-08-17 15:06",
@@ -13,9 +13,27 @@
   ],
   "applied_updates": [
     {
-      "task_id": "task-1785700344174",
-      "task_title": "Review outstanding Development Insight reports actions with Julie",
-      "note": "Kevin shared KPI presentation for July 2026 with Michael O'Sullivan, indicating he is working on tracking and reporting tasks.",
+      "task_id": "t2608071501070",
+      "task_title": "Confirm availability for Multi Company Setup discussion with Conor (FP 68261303)",
+      "note": "Simon Burford continues DTP1092 testing discussions; Simon raising questions about testing approach with Andrew Goff and IT Services on HRIS staging imports.",
+      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 11:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C50000"
+    },
+    {
+      "task_id": "t2608121801282",
+      "task_title": "Review August 2026 organisational structure draft",
+      "note": "Simon forwarded organisational structure update confirming changes to PACS org structure moving colleges and societies from L2 to L3, effective through 12 August 2026.",
+      "email_subject": "FW: Organisational Structure Update - August 2026 - DRAFT",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 10:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C00000"
+    },
+    {
+      "task_id": "t2608111507360",
+      "task_title": "Advise on GLAM joining 38-day balance departments scheme",
+      "note": "Kevin shared KPI presentation (July 2026) with Michael O'Sullivan, providing data context for ongoing discussions.",
       "email_subject": "Kevin Lelitte shared \"KPI presentation - July 2026\" with you",
       "email_from": "Kevin (sent to: Michael O'Sullivan)",
       "received": "2026-08-11 19:00",
