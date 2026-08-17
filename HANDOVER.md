@@ -1,12 +1,58 @@
+# Handover -- 17 August 2026, late night (Drew) -- REVERT to pre-Quirke-investigation state, at Kevin's explicit request; search-box feature retained
+
+## Scope
+Kevin ended the night unhappy with the state tonight's Quirke-email investigation left things in and asked for a full revert rather than further patching -- back to the state immediately after commit `69fd72997` (the card-search feature's HANDOVER entry, which shipped, was Kevin-approved, and stays). Everything from the Quirke-email scroll-out investigation onward was undone. This was a live-incident revert on a production repo with a 5x/day Task Scheduler pipeline and live dashboard data, executed with the same backup-and-verify discipline as any other write to this repo -- not a rushed rollback.
+
+## What was reverted
+- **Phase 3.9 persistence/carry-forward logic** in `fetch_inbox.py` (commits `5216d9fd`, `a99911f`) -- removed entirely. `fetch_inbox.py` is back to its exact `69fd72997` content (byte-verified against the git blob at that commit).
+- **The 48-item backfill reinstatement** into `data/triage_ledger.json` / `data/briefing.json` (commits `e824ea68`, `38a3917c`) -- both files reverted to their last pre-Phase-3.9 pipeline state: `data/triage_ledger.json` to the last ledger update before Phase 3.9 existed (commit `639c7d0`, `tracked_needs_urgent` key does not exist in this version -- confirmed, it was never written before Phase 3.9), `data/briefing.json` to the 18:02 pipeline snapshot (commit `c1cb40f`, the last briefing update before Phase 3.9 activation -- `urgent:0 needs:7 fyi:28`). `data/inbox_suggestions.json` reverted to its matching 18:02 snapshot (commit `40bc9e3`) for internal consistency with the reverted briefing.
+- **The tick-key fix** (commits `d97db64d`, `5556c308`, `640b44ee`) -- `js/app.js`'s `_tickStorageKey`/stable-key tick logic and `fetch_inbox.py`'s Phase 3.9 ticks.json-as-resolution-signal logic are both gone. This means the underlying "mark done, refresh, it comes back" bug this fix addressed is **back**, until a fresh approach is designed -- an accepted, explicit consequence of Kevin's request, not an oversight.
+- **The deferred 7th-tier ROADMAP.md entry** (commit `b430210`) -- removed. Speculative idea tied to the now-reverted approach; `ROADMAP.md` reverted to its `69fd72997` content.
+
+## What was explicitly preserved
+- **The card-search feature** (commits `c940f1630`, `0cf9bbf55`, `cc87ea982`, HANDOVER entry `69fd72997`) -- untouched. Confirmed no commit touched `index.html` or `css/styles.css` between `69fd72997` and tonight's revert, and `js/app.js`'s reverted content still contains `applyCardSearch`/`clearCardSearch`/`_runCardSearch` (2 live occurrences confirmed in the pushed bytes). This feature is fully intact and live.
+- **Kevin's real tick data** -- `data/ticks.json` was deliberately **not reverted** and was not touched by this operation at all (confirmed via an unchanged content sha before and after every other file's revert). It still contains every real tick from tonight, including the two flagged live commits `e15a41ae` and `99de5f5d`.
+
+## The one genuine hand-merge issue -- flagged, not silently dropped
+Kevin anticipated this and asked it be flagged rather than blind-reverted, and it did in fact occur: the very last tick Kevin made tonight (commit `99de5f5d`) was written using the **new** stable key format the tick-key fix introduced -- `eid_0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500078B27E4DF0000`. The reverted `js/app.js` no longer knows how to read `eid_`-prefixed keys -- it only understands the old day-scoped/render-position key scheme (`Monday_17_August_2026_pri_ur_12`, etc.).
+
+**Nothing was deleted.** The `eid_...4DF0000` key is still sitting in `data/ticks.json` on GitHub, byte-for-byte as Kevin left it (verified live, post-revert). It simply won't render as "ticked" on the dashboard until Kevin re-ticks that one specific card once -- from that point it uses the (reverted) old key scheme and behaves like every other current tick. A synthetic old-format key was deliberately **not** hand-crafted to force it to display correctly, because that would require guessing the item's exact render position under the now-reverted `briefing.json`, and a wrong guess would silently tick the *wrong* card done -- a worse outcome than one card needing a single re-tick. The other two ticks in that same commit (`Monday_17_August_2026_pri_ur_0`, `Monday_17_August_2026_pri_pt_5`, and `_ur_12` from the commit before) are already in the old-format scheme and are unaffected.
+
+## Backup-and-verify sequence performed (every file, no exceptions)
+For each of `fetch_inbox.py`, `js/app.js`, `ROADMAP.md`, `data/triage_ledger.json`, `data/briefing.json`, `data/inbox_suggestions.json`: fresh Contents API GET of live pre-revert content -> byte-exact Archive backup pushed and verified (content sha matched the live pre-revert sha before proceeding) -> race-guard re-GET of live sha immediately before the real write -> sha-guarded PUT of the reverted content -> fresh post-push GET, diffed byte-for-byte against the intended target content (extracted directly from the relevant historical git commit, not retyped or reconstructed).
+
+One real mistake caught and fixed mid-sequence, disclosed not hidden: the first backup attempt for `js/app.js` and `ROADMAP.md` was sourced from a local `git clone`'s **working-tree** checkout, which Windows Git's `core.autocrlf=true` had silently rewritten from LF to CRLF line endings (working-tree size 70374 bytes vs. the true git blob's 69087 bytes for `app.js`). The resulting backup's content sha did not match the live file's sha -- caught immediately by comparing the two before proceeding, not assumed correct. Both backups were re-extracted via `git show <ref>:<path>` (raw blob bytes, bypasses the working-tree checkout filter entirely) and re-pushed; both now byte-identical to the live pre-revert content (content shas confirmed matching). All six real reverted files were pushed from `git show`-extracted content from the start, never from a working-tree checkout, so this class of corruption did not affect any of the actual reverted content -- only the first two backup attempts, both caught and fixed before the real writes happened.
+
+Archive backups from tonight's revert: `Archive/fetch_inbox_backup_20260817_2122.py`, `Archive/app_backup_20260817_2122.js`, `Archive/ROADMAP_backup_20260817_2122.md`, `Archive/HANDOVER_backup_20260817_2122.md`, `Archive/triage_ledger_backup_20260817_2122.json`, `Archive/briefing_backup_20260817_2122.json`, `Archive/inbox_suggestions_backup_20260817_2122.json` -- all confirmed content-sha-identical to the live pre-revert state at push time, so the exact pre-revert state (Phase 3.9, backfill, tick-key fix, all of it) is fully recoverable from Archive if ever needed.
+
+## Verification performed (real, not inferred)
+- Fresh post-push Contents API GET of all six changed files, diffed byte-for-byte (`cmp`) against the target content extracted directly from `git show 69fd729:<path>` / `git show 639c7d0:data/triage_ledger.json` / `git show c1cb40f:data/briefing.json` / `git show 40bc9e3:data/inbox_suggestions.json` -- all six MATCH exactly.
+- `python -m py_compile` on the live pulled-back `fetch_inbox.py` -- passes. `node --check` on the live pulled-back `js/app.js` -- passes.
+- `fetch_inbox.py`: 0 occurrences of "Phase 3.9" in the live file (fully removed).
+- `js/app.js`: 0 occurrences of `_tickStorageKey` (tick-key fix removed), 2 occurrences of `applyCardSearch` (search feature confirmed intact).
+- `data/ticks.json`: content sha unchanged throughout the entire operation (`9ff30f5b...`) -- confirmed untouched. The `eid_...4DF0000` key confirmed still present in the live file post-revert.
+- `data/briefing.json` live post-revert: `urgent:0 needs:7 fyi:28` -- matches the intended 18:02 pre-Phase-3.9 snapshot exactly.
+
+## Next action
+None outstanding for the revert itself -- executed, backed up, and verified live end to end. The scroll-out-persistence problem (an item can silently vanish from the board once it ages out of the 50-newest-email Outlook pull window) is real and still needs solving, and the "mark done, refresh, it comes back" tick-key issue is back until re-addressed -- both are explicitly deferred for a fresh design pass later, not resumed from tonight's approach, per Kevin's instruction. Ask Kevin to reload the dashboard and confirm the board looks right (card search present and working, no Phase-3.9-era urgent/needs cards that shouldn't be there) as final human confirmation; a real browser click-through wasn't performed this session (no browser automation tool available), consistent with how prior sessions in this same file have disclosed the same limitation.
+
+---
+
 # Handover -- 17 August 2026, end of night (Drew) -- session checkpoint: tick-resurrection incident CLOSED; thread-dedup work PAUSED pending Kevin's morning effort-level call, findings preserved
 
 ## Status at stop
 Kevin stopped for the night. Checkpointing per standing session protocol before ending. No code changes in this checkpoint -- HANDOVER.md/memory only, per explicit instruction not to touch the thread-dedup code or push anything else tonight.
 
 ## (a) Tick/resurrection incident -- CLOSED, nothing further needed
+
+**[SUPERSEDED BY REVERT -- 2026-08-17 night, see top entry "REVERT to pre-Quirke-investigation state"]** The tick-key fix and the Phase 3.9 ledger this entry describes as closed/paused have both been reverted at Kevin's explicit request. This entry is kept as historical record of what was built and why, not as current live state.
+
 Fixed and verified live this session (full writeup directly below this entry). One disclosed caveat, not yet resolved and not expected to need action unless Kevin raises it: ~173 pre-existing entries in `data/ticks.json` are in the old day-scoped/render-position-keyed format from before this fix and cannot be retroactively migrated (no record of the array order at the moment each was set). Any specific item still carrying one of those stale keys may resurrect one more time; from the next tick onward it uses the new stable key and stays fixed. `main` confirmed clean at HEAD `640b44ee01be993835058897781e12dcd90a76b4`, all three real commits present in order (`d97db64d` app.js fix, `5556c308` fetch_inbox.py fix, `640b44ee` this doc) -- no partial/uncommitted state.
 
 ## (b) Thread-dedup / thread-identity work -- PAUSED, not started, pending Kevin's morning call
+
+**[MOOT -- underlying Phase 3.9 ledger code this was going to build on top of has since been reverted, see top entry. No longer the starting point for future thread-dedup work; re-scope from scratch if/when Kevin revisits it.]**
+
 Kevin asked (relayed via the coordinator session mid-incident) for every board section to collapse to only the newest message per email thread, using real Outlook thread identity rather than subject-string matching. Flagged this to Kevin as warranting Section 10 (Effort Level Governance) sign-off before starting, since it's cross-system architecture (new field in the core Outlook pull, new grouping logic spanning every section, an interaction with the Phase 3.9 ledger shipped hours earlier) rather than mechanical spec-following -- not yet confirmed either way as of stopping tonight. **No code was written for this. Do not self-select an effort level next session -- wait for Kevin's explicit decision.**
 
 Findings from read-only investigation this session, preserved so the next session doesn't have to re-derive them:
@@ -22,6 +68,9 @@ Wait for Kevin's effort-level decision (standard vs. raised) on the thread-dedup
 ---
 
 # Handover -- 17 August 2026, live incident (Drew) -- "mark done, refresh, it comes back" FIXED, live-verified end to end via a real production round-trip
+
+**[SUPERSEDED BY REVERT -- 2026-08-17 night, see top entry "REVERT to pre-Quirke-investigation state"]** The tick-key fix and the Phase 3.9 ledger this entry describes as closed/paused have both been reverted at Kevin's explicit request. This entry is kept as historical record of what was built and why, not as current live state.
+
 
 ## Scope
 Kevin hit this live, immediately after the same-day Phase 3.9 activation below: marking a card done (or having it get carried across a day boundary) and refreshing the dashboard brought it back undone. Dispatched as a live incident with a stated working hypothesis (Phase 3.9's carry-forward never checks the dashboard's own done state) -- confirmed correct, plus a second, larger contributing bug found live that the hypothesis didn't anticipate.
@@ -61,6 +110,7 @@ None outstanding for this incident -- both root causes fixed, pushed, and verifi
 ---
 
 
+**[SUPERSEDED BY REVERT -- 2026-08-17 night, see top entry "REVERT to pre-Quirke-investigation state"]** Phase 3.9 and the 48-item backfill this entry describes have both been reverted at Kevin's explicit request -- triage_ledger.json/briefing.json are back to their pre-Phase-3.9 state. Kept as historical record only.
 
 ## Scope
 A prior same-day Drew session shipped the Phase 3.9 scroll-out-persistence fix (commit `5216d9fd`) and reported kicking off (a) a live `fetch_inbox.py` run to activate it and (b) a backfill sweep across all archived briefings to recover any Urgent/Needs item that had ever silently vanished pre-fix. That session went quiet mid-run with no completion report, no HANDOVER entry, no `drew` memory write-up. This session (fresh dispatch, Kevin asked for a verified status check) found and finished both pieces from scratch, verifying every claim against live GitHub/Outlook state rather than trusting anything in chat.
