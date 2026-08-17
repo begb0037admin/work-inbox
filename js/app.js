@@ -209,7 +209,7 @@ function clearToday(){
   renderBriefing(SEED,'seed');
 }
 function toggleTick(id){
-  const ticks=getTicks(), k=currentKey+'_'+id;
+  const ticks=getTicks(), k=_tickStorageKey(id);
   ticks[k]=!ticks[k]; saveTicks(ticks);
   const cb=document.getElementById('cb_'+id);
   const item=document.getElementById('item_'+id);
@@ -247,7 +247,24 @@ function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
-function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
+// Tick/done storage key -- fixed 17 Aug 2026 (live incident: marking a card
+// done, refreshing, and it coming back). Root cause: this used to be
+// currentKey+'_'+id where id was a RENDER-POSITION index ('pri_ur_3',
+// 'urgent_2', etc), not the item's own identity. Any reorder (a fresh
+// pipeline run, Phase 3.9 carrying an item back in across a day boundary,
+// a drag, a tier reclassification) shifts which real item sits at that
+// index, so the done-flag silently detaches from the card it was meant
+// for. Callers now pass a STABLE id (see _priGetKey -- 'eid_<entry_id>' or
+// 'id_<id>', already proven correct for drag/dedup on 12 Aug) wherever one
+// exists, so the flag survives reorders and day rollovers. Only the rare
+// legacy fallback (an item with neither entry_id nor id) still falls back
+// to the old day-scoped positional key -- same narrow, currently-empty-in-
+// practice edge case already disclosed for _priGetKey itself.
+function _tickStorageKey(id){
+  if(typeof id==='string' && (id.indexOf('eid_')===0 || id.indexOf('id_')===0)) return id;
+  return currentKey+'_'+id;
+}
+function isTicked(id){if(!currentKey) return false; return !!getTicks()[_tickStorageKey(id)];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
 function escapeHtml(text){
@@ -273,7 +290,7 @@ function sanitizeSub(text){
 function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map((item,i)=>{
-    const id=cls+'_'+i, ticked=isTicked(id);
+    const id=_priGetKey(item), ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
     const dragAttrs=`draggable="true" ondragstart="emailCardDragStart(event,'${cls}',${i})" ondragend="emailCardDragEnd(event)"`;
     const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
@@ -614,7 +631,7 @@ function renderPriorityCards(priorities,key,sec){
   function _firstActionDate(actions){if(!actions||!actions.length)return null;const m=actions[0].match(/^\[(\d{1,2}) (\w{3}) (\d{4})\]/);if(!m)return null;return new Date(parseInt(m[3]),_mo2[m[2]],parseInt(m[1]),12,0,0);}
   return priorities.map((p,i)=>{
     const priKey=p._priKey||_priGetKey(p);
-    const id='pri_'+sec+'_'+i, ticked=isTicked(id);
+    const id=priKey, ticked=isTicked(id);
     const titleText=(p.title||p.text||'(untitled)').replace(' -- ',' — ');
     const aiBadge=(p.badge&&sec!=='pfyi')?badge(p.badge,p.badgeType||'gray'):'';
     const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
