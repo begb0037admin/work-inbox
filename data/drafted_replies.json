@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17T17:03:11.226212+00:00",
+  "generated": "2026-08-17T21:39:09.184993+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
@@ -171,6 +171,27 @@
             "relevance_note": "Kevin asked Crispin directly about DPIA completion status as a pre-condition for live data load, and (1 Apr thread) flagged that downstream systems (BizTalk, CUD, other identity/HR integrations) needed review to ensure the new non-payroll entity wasn't unintentionally picked up. No later corpus entry confirms either was resolved -- real open items, not just style color."
           }
         ]
+      }
+    },
+    {
+      "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B73828F0000",
+      "subject": "RE: #External# PeopleXD Insight Reporting \u2013 Quote Request for Holiday Records Reports",
+      "sender_tier": "other",
+      "draft_text": "Hi Alan,\n\nApologies for the delay coming back to you \u2014 good to hear this is approved and ready to move. I've got a few slots that could work for a kickoff/scoping call with you and Conor, pending final confirmation on my side: Tuesday 18 August, 1:30\u20132:15pm; Thursday 20 August, 1:30\u20132:15pm; or Monday 24 August, 10:00\u201310:45am. Let me know which works best for you both, or send over a couple of alternatives if none of these fit.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-17T21:35:38.298198+00:00",
+      "confidence": {
+        "level": "high",
+        "reason": "This is Kevin's own verbatim dictated text, supplied in full by the coordinating session (Drew's handoff), not a Lauren-composed draft \u2014 so the usual style/content-precedent grounding categories (patterns_applied, content_precedent) don't apply here and are left empty rather than padded. What Lauren did verify independently: the recipient/thread, rather than trusting the handoff description alone. Confirmed against live work-inbox data (pre-revert Archive/briefing_backup_20260817_2122.json, needs list) that this is a real entry \u2014 subject 'RE: #External# PeopleXD Insight Reporting \u2013 Quote Request for Holiday Records Reports', from Alan Quirke, received 23 Jul, entry_id as recorded here \u2014 and cross-checked against the current live briefing.json's prioritiesWeek item for the same case (69001638, Access Group Project Scope Document, quote received from Alan Quirke 24 Jun, approved 24 Jun 2026), which corroborates the 'approved and ready to move' framing in Kevin's own text. Recipient is external (Access Group vendor), tiered 'other'. 23 Jul is 25 days before this run (17 Aug) \u2014 well within the current 60-day staleness window confirmed live against begb0037admin/lauren AGENT.md before drafting."
+      },
+      "inline_flags": [],
+      "received": "23 Jul",
+      "status": "pending",
+      "draft_id": "lauren-draft-13-20260817",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [],
+        "content_precedent": []
       }
     }
   ]
