@@ -757,6 +757,53 @@ function renderBriefing(data,key){
     </div>
   </div>`;
   ['pt','ptom','ur','pw','nr','pfyi'].forEach(sec=>applySecCollapse(sec,!!getCollapsedSecs()[sec]));
+  _runCardSearch();
+}
+
+// Card search (Priorities board) — plain client-side substring filter across
+// each card's full rendered text (subject/sender/summary), live match count,
+// per-section "No matches" state. Called at the end of renderBriefing() so an
+// active search term survives a full re-render (drag-drop, tick, priority
+// overrides all rebuild #inboxGrid's innerHTML from scratch).
+let _wiSearchTerm='';
+function applyCardSearch(val){
+  _wiSearchTerm=(val||'').trim().toLowerCase();
+  const clearBtn=document.getElementById('wiSearchClear');
+  if(clearBtn) clearBtn.style.display=_wiSearchTerm?'':'none';
+  _runCardSearch();
+}
+function clearCardSearch(){
+  const input=document.getElementById('wiSearchInput');
+  if(input) input.value='';
+  applyCardSearch('');
+}
+function _runCardSearch(){
+  const zones=document.querySelectorAll('.pri-drop-zone');
+  let totalCards=0, totalMatched=0;
+  zones.forEach(zone=>{
+    const cards=zone.querySelectorAll('.card-ph');
+    if(!cards.length) return; // leave the existing "Drop items here" empty-zone state untouched
+    let matched=0;
+    cards.forEach(card=>{
+      totalCards++;
+      const isMatch=!_wiSearchTerm||card.textContent.toLowerCase().includes(_wiSearchTerm);
+      card.style.display=isMatch?'':'none';
+      if(isMatch){matched++;totalMatched++;}
+    });
+    let noMatchEl=zone.querySelector('.wi-search-no-match');
+    if(_wiSearchTerm&&matched===0){
+      if(!noMatchEl){
+        noMatchEl=document.createElement('div');
+        noMatchEl.className='pri-zone-empty wi-search-no-match';
+        noMatchEl.textContent='No matches';
+        zone.appendChild(noMatchEl);
+      }
+    } else if(noMatchEl){
+      noMatchEl.remove();
+    }
+  });
+  const countEl=document.getElementById('wiSearchCount');
+  if(countEl) countEl.textContent=_wiSearchTerm?(totalMatched+' of '+totalCards+' match'+(totalCards===1?'':'es')):'';
 }
 
 // Collapse/expand per section (Urgent, Needs response, etc.) - state persists
