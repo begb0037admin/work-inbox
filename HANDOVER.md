@@ -1,3 +1,26 @@
+# Handover -- 18 August 2026, EXECUTED (Drew) -- Apr/May 2026 Inbox archive complete, verified live, CLOSED
+
+## What happened
+Kevin gave explicit go-ahead (relayed via coordinator) on the combined dry-run figure (275 items: 0 pre-April 2026 + 144 April 2026 + 131 May 2026). Ran `python archive_apr_may_2026.py --execute` from `C:\Users\admin\Documents\Claude\Projects\work-inbox\` (the same working directory the scheduled task uses) at 11:01, 18 Aug 2026.
+
+## Result -- 275/275 moved, 0 failed
+- Pre-move Inbox count: 774 items (one more than the last dry run's 773 -- a new item arrived in the interim; confirmed below it landed outside the archive window and was correctly excluded)
+- Matched and moved: 275 (0 pre-April, 144 April, 131 May -- identical to the confirmed dry run)
+- Moved to `\\kevin.lelitte@admin.ox.ac.uk\Archive` -- the correctly-scoped folder (own mailbox only, not the Junk Email mis-mapping or any of the other 4 attached mailboxes' Archive folders -- see the 18 Aug scoping-fix entries below, reconfirmed unchanged and applied correctly here)
+- The same 2 unreadable NDR/bounce items identified during the dry run (see the scope-expansion entry below for detail: `CreationTime` 27 Apr 2026 and 10 Aug 2026, no readable `ReceivedTime`) were skipped again, exactly as before -- excluded from the move, still sitting in Inbox unarchived
+
+## Post-run verification (live, all script-generated, not asserted)
+- **0 pre-June-2026 items remain in Inbox** -- confirmed via a full fresh re-scan after the move (`find_items_to_archive()` re-run against live Inbox)
+- **497 June/July/August 2026 items remain in Inbox**, untouched. Cross-checked arithmetically against the pre-move state rather than only trusting the post-move number in isolation: pre-move total 774 − 275 moved − 2 unreadable (never in scope) = 497, which is exactly what the post-move scan measured. This is strong internal confirmation that nothing outside April/May 2026 was moved.
+- **Inbox item count after move: 499** (774 − 275 = 499, matches exactly)
+- **Archive folder item count after move: 316** (41 before the move + 275 = 316, matches exactly)
+- No other folder was read or written at any point in this task -- only Inbox (source, read+move) and Archive (destination, read-only resolution then move target).
+
+## Status: CLOSED
+This task is complete. `archive_apr_may_2026.py` remains in the repo (commit `454b138`) as a reusable reference/audit trail, but there is no further scheduled or recurring use of it -- it was a one-off, not folded into `fetch_inbox.py` or the scheduled-task pipeline. No further action needed unless Kevin raises a new archiving request.
+
+---
+
 # Handover -- 18 August 2026, scope expansion (Drew) -- archive tool extended to cover everything before 1 Apr 2026 too, combined dry-run verified, STILL BLOCKED on Kevin's go-ahead
 
 ## Scope expansion
