@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18 15:21",
+  "generated_at": "2026-08-18 18:00",
   "new_tasks": [
     {
       "title": "Attend planning meeting for departments moving to 38-day balance",
@@ -14,67 +14,58 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608071801050",
-      "task_title": "Review volunteering leave pay code configuration work",
-      "note": "Michael O'Sullivan has responded with information that TIMDEP04 Absence Reasons report may need updating to include the Volunteering Leave Absence Type; this provides technical guidance for Simon's volunteering leave configuration work.",
-      "email_subject": "RE: Volunteering Leave",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-18 09:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007ACBB5F110000"
-    },
-    {
-      "task_id": "t2608071801052",
-      "task_title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
-      "note": "Michael O'Sullivan confirms that the clone from UOXP into UOXC was completed successfully and all post-clone activities are complete; this resolves the environment refresh work for Company 90 testing.",
-      "email_subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-18 08:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007ACBB5F100000"
-    },
-    {
-      "task_id": "t2608041500480",
-      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Andrew Goff (IT Services) explains that the API_USER restriction lift was Guy's recommendation; technical discussion on DTP1092 testing assumptions and approach.",
-      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Andrew Goff (IT Services)",
-      "received": "2026-08-17 11:19",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C40000"
-    },
-    {
-      "task_id": "t2608041500480",
-      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Simon Burford continues questioning the testing approach and API_USER restriction logic for DTP1092; indicates confusion about the solution design that needs to be clarified with Crispin.",
-      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "task_id": "t2608111331410",
+      "task_title": "Review Cority Applicant Data Import update from James",
+      "note": "Simon Burford is exploring automated CSV export options for the Cority Applicant Data Import, building on James Salas Guillen's earlier responses.",
+      "email_subject": "RE: Cority - Applicant Data Import file",
       "email_from": "Simon Burford",
-      "received": "2026-08-17 11:03",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C20000"
+      "received": "2026-08-18 17:56",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F7C0000"
     },
     {
-      "task_id": "t2608071801051",
-      "task_title": "Investigate team calendar config issue with Asta",
-      "note": "Simon Burford clarifies that Company 90 should be ignored for now as it was only set up for WFM workgroup configuration; this provides guidance on the team calendar configuration work with Asta.",
-      "email_subject": "RE: Balance Period End Matrix",
-      "email_from": "Simon Burford",
-      "received": "2026-08-17 10:55",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C10000"
+      "task_id": "t2608111331410",
+      "task_title": "Review Cority Applicant Data Import update from James",
+      "note": "James Salas Guillen has provided detailed responses to Simon's questions on the Cority Applicant Data Import file format and configuration.",
+      "email_subject": "RE: Cority - Applicant Data Import file",
+      "email_from": "James Salas Guillen",
+      "received": "2026-08-18 16:41",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F7B0000"
     },
     {
-      "task_id": "t2608121801282",
-      "task_title": "Review August 2026 organisational structure draft",
-      "note": "Simon Burford has forwarded notification of changes to the PACS organisational structure moving colleges and societies to level 3 from level 2; this is the update that Kevin needs to review for HR Systems implications.",
-      "email_subject": "FW: Organisational Structure Update - August 2026 - DRAFT",
-      "email_from": "Simon Burford",
-      "received": "2026-08-17 10:22",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C00000"
+      "task_id": "t2608181501150",
+      "task_title": "Create user guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements",
+      "note": "Julie Hickman has scheduled a Teams meeting for planning departments' move to 38-day balance scheme.",
+      "email_subject": "Planning for depts move to 38 day balance ",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-17 15:06",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7CA0000"
     },
     {
-      "task_id": "task-1787044968753",
-      "task_title": "Auto job-alert notification email -- text changes (Laura Porter)",
-      "note": "Michael O'Sullivan has forwarded FYI notification of planned PeopleXD maintenance on Friday 28 August between 8-10 pm; this may impact job alert notification email testing if scheduled.",
+      "task_id": "t2608181501150",
+      "task_title": "Create user guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements",
+      "note": "Julie Hickman reports productive initial conversation with GLAM about their 38-day balance implementation needs and struggles.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-17 14:57",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C90000"
+    },
+    {
+      "task_id": "t2608031500570",
+      "task_title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
+      "note": "Michael O'Sullivan is forwarding notification of planned PeopleXD maintenance on Friday 28 August between 8-10 pm that may impact services.",
       "email_subject": "FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance",
       "email_from": "Michael O'Sullivan",
       "received": "2026-08-17 08:12",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007AAB5BD9C0000"
+    },
+    {
+      "task_id": "t2608121801281",
+      "task_title": "Review PeopleXD uplift timeline from Jessica Oldershaw",
+      "note": "Michael O'Sullivan has provided detailed analysis of uplift timeline and resource implications for FA team, recommending October implementation.",
+      "email_subject": "RE: Timeline for implementation of uplift",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-13 09:36",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186EA0000"
     }
   ]
 }
