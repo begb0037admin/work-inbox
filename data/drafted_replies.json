@@ -1,8 +1,44 @@
 {
-  "generated": "2026-08-18T17:02:42.386883+00:00",
+  "generated": "2026-08-18T20:55:50.089023+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
+    {
+      "source_entry_id": "lauren-draft-15-20260818",
+      "subject": "RE: Organisational Structure Update - August 2026 - DRAFT",
+      "sender_tier": "senior-management",
+      "draft_text": "Hi all,\n\nThanks Simon -- agreed the PeopleXD impact looks limited overall, and the three new management units (0C01 Kellogg, 0C02 St Cross, 0C03 Reuben) make sense to properly align the Societies area.\n\nOn the H&S dashboard mapping risk you flagged: that one I want to check myself before this goes live, rather than assume it carries through cleanly -- I'll validate the data-warehouse org-structure mapping tables (the ones David and Christopher built for the dashboard) against the Colleges/Societies L2->L3 move.\n\nSarah -- on your timing question: [CONFIRM: proposed go-live date for this change, and whether it can be scheduled to avoid your Monday 24 Aug HESA generate]\n\nNo further errors or omissions to flag from our side beyond the above -- this reply covers our feedback ahead of Wednesday's deadline.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-18T00:00:00+00:00",
+      "confidence": {
+        "level": "medium",
+        "reason": "Real, directly relevant precedent found and used for tone/structure: Kevin's own reply on last year's equivalent annual thread ('Re: Organisational Structure - August 2025 - Final', 14 Aug 2025, same sender Simon Burford, senior-management tier) was terse and direct -- 'Yes, I've seen the final version. I'll raise the change.' -- confirming the acknowledge-then-commit pattern and short signoff used here. The substantive content (agreeing PeopleXD impact is limited, the H&S dashboard mapping validation commitment, and the deadline-met framing) is Lauren's own judgment composition per Kevin's explicit brief, grounded in the H&S Roadmap domain Lauren already owns for Kevin -- not drawn from any corpus precedent, since no prior email in the corpus covers this specific H&S-dashboard-mapping or Societies-management-unit content. The go-live date is deliberately left as an explicit [CONFIRM] placeholder rather than invented, per Kevin's explicit instruction not to fabricate one -- this is the one open item Kevin must fill in himself before sending, since Simon has not yet answered Sarah's question anywhere in the retrieved thread."
+      },
+      "inline_flags": [
+        "[CONFIRM] Go-live date for this change, and whether it can be scheduled to avoid Sarah's Monday 24 Aug HESA generate -- genuinely unknown to Lauren; Simon has not answered this in the thread as retrieved, and Kevin must supply a real answer or explicitly say it's still unknown before sending.",
+        "Full email addresses for Christopher Sanders, James Salas Guillen, Michael O'Sullivan, David Johnson, Marie Cooksey, and Athena Artuso were not present verbatim in the command-centre task record (names only) -- confirm the actual To/Cc header in Outlook before sending, don't rely on this list alone.",
+        "This draft assumes Kevin wants to send this as HR Systems' consolidated internal reply-all (covering both Simon's proposal and Sarah's question) rather than a separate direct reply to orgstructure@admin.ox.ac.uk for the errors/omissions deadline -- confirm that's the intended channel, since the original notice's deadline is nominally addressed to orgstructure@admin.ox.ac.uk directly, not this internal thread."
+      ],
+      "received": "17 Aug 2026 11:28 UTC (Sarah Rowles' reply, most recent message in thread)",
+      "status": "pending",
+      "draft_id": "lauren-draft-15-20260818",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "acknowledge-then-confirm",
+          "no-filler-closing"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: Organisational Structure - August 2025 - Final",
+            "source_date": "2025-08-14",
+            "relevance_note": "Same sender (Simon Burford), same annual Organisational Structure update process, one year earlier almost to the day. Kevin's own reply was two short sentences: 'Yes, I've seen the final version. I'll raise the change.' Confirms the terse, action-committing tone used in this draft, and that Kevin treats this annual notice as something he personally owns raising a change for -- not evidence for any of this year's specific content (management units, H&S dashboard mapping, HESA), which is new this cycle and has no prior-year precedent."
+          }
+        ]
+      }
+    },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079A4937640000",
       "subject": "REF29 UDF",
@@ -192,6 +228,89 @@
         "diff_pairs_applied": 0,
         "patterns_applied": [],
         "content_precedent": []
+      }
+    },
+    {
+      "source_entry_id": "lauren-draft-14-20260818",
+      "subject": "Re: Auto job alert notification email - text changes",
+      "sender_tier": "other",
+      "draft_text": "Hi Laura,\n\nApologies for the delay \u2013 I said I'd pick this back up towards the end of July and it's now mid-August, so this is later than I intended.\n\n[CONFIRM: current status/ETA on the Access Group support ticket \u2013 I don't have a live status for this beyond \"still open as of 8 Jul, root cause not yet fixed,\" so please fill in the actual latest before sending] I'm still working through the backend issue with Access Group \u2013 the saved config change isn't yet taking effect on the outgoing notification emails.\n\nOnce it's confirmed working in test, I'll send you a screenshot for your sign-off before we push it to Live, as agreed.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-18T00:00:00+00:00",
+      "confidence": {
+        "level": "medium",
+        "reason": "Real content precedent found and used for the core commitment language: Kevin's own 10 Feb 2026 reply on this exact thread says 'I'll make the change in our test environment and provide screenshots for your approval before applying it to the Live' -- reused near-verbatim here since it's his own proven phrasing for this exact commitment, not invented. Tone (short, direct, 'Hi X' / 'Best, Kevin', no over-explaining) matches multiple other status-update/apology precedents in the corpus (e.g. 'Apologies for the delay in getting back to you. I'll be picking this up moving forward,' 10 Oct 2025). Held at medium, not high: the actual current status of the Access Group ticket raised 8 Jul 2026 could not be found anywhere in the corpus or in a read-only cross-reference check of work-inbox/data (needs_reply.json, briefing.json, triage_ledger.json, inbox_suggestions.json all searched for 'job alert', 'Laura Porter', 'vacancy notification', 'Access Group', 'Talent Mobility' on 18 Aug 2026 -- no matching entry for this specific ticket). Rather than invent a resolution or an ETA, the draft leaves an explicit [CONFIRM] placeholder for Kevin to fill in the real current status before sending, per his own instruction not to fabricate one."
+      },
+      "inline_flags": [
+        "Current status/ETA of the Access Group support ticket (raised 8 Jul 2026) -- genuinely unknown to Lauren, no precedent or live record found; Kevin needs to fill this in himself before sending."
+      ],
+      "status": "pending",
+      "draft_id": "lauren-draft-14-20260818",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "apology-for-delay-opener",
+          "no-filler-closing"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: Auto job alert notification email - text changes",
+            "source_date": "2026-02-10",
+            "relevance_note": "Same thread, same recipient (Laura Porter, cc Philip Taylor). Kevin's own prior commitment on this exact topic: 'I\u2019ll make the change in our test environment and provide screenshots for your approval before applying it to the Live.' Reused near-verbatim for the sign-off-before-Live commitment in this draft."
+          },
+          {
+            "source_subject": "Re: Substantive Vs Non-Substantive Issue",
+            "source_date": "2025-10-10",
+            "relevance_note": "Precedent for Kevin's own phrasing when apologising for a delay and resuming a stalled item: 'Apologies for the delay in getting back to you. I\u2019ll be picking this up moving forward.' Used as the tone/structure model for this draft's opening line."
+          }
+        ]
+      }
+    },
+    {
+      "source_entry_id": "lauren-draft-16-20260818",
+      "subject": "RE: Cority - Applicant Data Import file",
+      "sender_tier": "other",
+      "draft_text": "Hi both,\n\nThanks for working through this -- good progress narrowing down the header and date-of-birth issues.\n\nJames -- good that you've already got a ticket open with Cority support on the column-mapping mismatch; let us know what they come back with.\n\nOn Simon's two open questions from Friday:\n1. Null value handling for the automated CSV export: [CONFIRM: preferred null-value handling -- blank / NULL / N/A / dash]\n2. UTF-8 encoding: [CONFIRM: encoding requirements -- confirm UTF-8 is fine for Cority's import, or what they require instead]\n\nOn the network folder for an automated export: [CONFIRM: destination folder/location to point this at]\n\nOn where this report came from -- I know it's not sitting right that it's not on the QA server and has no change request behind it, especially given it's now a live interface file. [CONFIRM: what do you know about this report's origin from Lee's handover?] I'll dig into what I have and come back to you both.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-18T00:00:00+00:00",
+      "confidence": {
+        "level": "low",
+        "reason": "Tone/structure (terse 'Hi both,' opener, numbered replies to numbered questions, 'Best,\nKevin' signoff, no filler) is well grounded in real corpus precedent -- Kevin's own multi-year Cority correspondence with James Salas Guillen and Ed Demetillo on this exact CSV/upload/encryption workstream shows the identical pattern (e.g. 'Could you please confirm: 1... 2... 3.', 4 Mar 2026). Held at low, not medium, because every substantive item in this draft is a genuine [CONFIRM] placeholder rather than answered content -- all four open items (Cority's expected null-value format, UTF-8 encoding requirement, the automated-export destination folder, and whether Lee's handover covers RECSUP20's origin) are Cority-technical or system-history facts Lauren has no source for and was explicitly told not to invent (per the dispatching brief: 'if the email needs domain judgment beyond what's a straightforward acknowledgment/status reply, flag that back rather than inventing technical Cority content'). This is closer to a skeleton than a finished draft, same category as lauren-draft-08 (Julie Hickman) and lauren-draft-15's go-live-date gap. Updated 18 Aug 2026 (later same pass, per coordinator follow-up) to add an explicit acknowledgment of James's already-open Cority support ticket on the column-mapping mismatch (thread message [1], 11 Aug: \"I currently have a support ticket open with the Cority support team to investigate this further\") -- this is directly stated in the retrieved thread, not invented, and is kept precise to the actual ticket scope (column-mapping mismatch) rather than the coordinator brief's looser paraphrase (\"formatting-issue ticket\"), since the retrieved thread shows the open Cority ticket covers only the column-mapping question, not the separate manual-cleanup formatting items (quotes/headers/DOB/missing columns) which have no ticket and are being resolved directly between James and Simon. Also added a one-line acknowledgment that Kevin will look into the RECSUP20 origin question himself, consistent with his established pattern of personally chasing Cority process/history questions (command-centre t002, and his own Cority PUG escalation) -- flagged as inferred framing, not fact, alongside the [CONFIRM] placeholder for the actual Lee's-handover content."
+      },
+      "inline_flags": [
+        "[CONFIRM] Cority's expected null-value format for the automated CSV export (blank / NULL / N/A / dash) -- genuinely unknown to Lauren, this is a Cority-technical fact only Kevin/the team can supply.",
+        "[CONFIRM] Whether UTF-8 encoding is acceptable for Cority's import, or what encoding they actually require.",
+        "[CONFIRM] Destination network folder/location for an automated CSV export.",
+        "[CONFIRM] Whether Kevin has anything from Lee's handover covering how/why the RECSUP20_Applicant Cority Interface File report was built outside the standard QA/change-request process, given it is being used as a live production interface file. This is the one item Simon explicitly @-tagged Kevin for.",
+        "The dispatching brief referred to this thread as 'Fw: Cority - Applicant Data Import file' -- Drew's live mailbox search found no such forwarded variant; the real thread is the direct 5-message exchange addressed to Kevin throughout. Flagging this discrepancy rather than silently assuming a forward exists.",
+        "This thread sits in the Cority H&S expansion domain Adam owns in CORITY-FEASIBILITY.md -- Drew's task record flags a separate cross-reference for Adam; not assessed or actioned here, per the dispatching brief's explicit instruction not to take over that domain.",
+        "Coordinator follow-up (18 Aug 2026) asked to also acknowledge that James's Cority ticket on the formatting issue is already in motion -- checked against the retrieved thread and kept precise: the open ticket (message [1]) covers only the column-mapping mismatch, not the separate quotes/headers/DOB/missing-columns manual-cleanup items, which have no ticket. Acknowledged accordingly rather than repeating the broader paraphrase verbatim."
+      ],
+      "received": "18 Aug 2026 17:56 UTC (Simon Burford's message, most recent in thread)",
+      "status": "pending",
+      "draft_id": "lauren-draft-16-20260818",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "numbered-question-reply",
+          "no-filler-closing"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: Cority upload to the test server - Follow-up",
+            "source_date": "2026-03-02",
+            "relevance_note": "Same overall workstream (Cority applicant/employee data file upload via James Salas Guillen), same numbered-question reply pattern Kevin uses for Cority technical exchanges: 'Could you please confirm: 1. That this is the correct and current public key... 2. That the file has been successfully received. 3. That your team is able to decrypt it without issue.' Used as the structural model for this draft's numbered [CONFIRM] list."
+          },
+          {
+            "source_subject": "50891626 - Cority (GW): Coordinate call with Gillian",
+            "source_date": "2025-10-13",
+            "relevance_note": "Confirms James Salas Guillen is Kevin's real point of contact for Cority file/report work and that Kevin routinely delegates the practical file handling to James while staying across the correspondence himself -- consistent with 'Hi both,' rather than addressing only Simon."
+          }
+        ]
       }
     }
   ]
