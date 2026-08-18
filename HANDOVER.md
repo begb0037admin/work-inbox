@@ -1,3 +1,19 @@
+# Handover -- 18 August 2026, ~16:00 (Drew) -- CONFIRMED: Laura Porter/Access Group logging (Tasks 1+2) already complete from earlier background dispatch; no new work needed
+
+## Scope
+A prior background dispatch of Drew logged the Laura Porter/Access Group job-alert thread as an outstanding item, but its outcome (commit SHAs, entry IDs) was never confirmed back before that session paused. Re-dispatched specifically to verify live state before doing anything, per Kevin's instruction not to duplicate blind.
+
+## Verified live, not just from memory/docs
+- work-inbox `HANDOVER.md` entry (see the "18 August 2026" entry below this one, commit `d37434e5d251398ce7de10655af0e08cbd888975`) -- fetched live via Contents API, content confirmed present and correctly framed as pending on Kevin's own follow-up, not Laura's.
+- command-centre `data/tasks.json` task `task-1787044968753` -- fetched live, confirmed present with correct schema (id/title/tier/source/emailRef/summary/description/actions/notes/dateAdded/entryId), correct real Outlook EntryID, correctly framed as pending on Kevin.
+- command-centre `docs/HANDOVER.md` matching checkpoint entry -- fetched live, commit `01119a9630d7079671746ac5f899b320daa0e23e` confirmed, full backup-and-verify sequence details present and match command-centre's own mandatory protocol.
+- All four commit SHAs (`d37434e5`, `a73aa64d`, `5ca8e4ad`, `01119a96`) independently confirmed to exist via `gh api repos/.../commits/<sha>`, not just trusted from a memory file.
+
+## Outcome
+Tasks 1 and 2 from the Laura Porter brief are confirmed complete and correct. No new logging work performed this session -- this entry exists only to close the loop on the previously-unconfirmed dispatch outcome. Task 3 (draft reply email) remains Lauren's, out of scope here.
+
+---
+
 # Handover -- 18 August 2026, ~15:30 (Drew) -- Phase 1 extended to recurse into 5 named Inbox subfolder trees; Michael O'Sullivan's "RE: Volunteering Leave" reply confirmed live in the pull. Isolated commit, top-level Inbox pull unchanged
 
 ## Scope
