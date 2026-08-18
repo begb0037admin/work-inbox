@@ -1,3 +1,25 @@
+# Handover -- 18 August 2026, follow-up investigation (Drew) -- "can't see the archived emails" explained: Favorites-pane visibility, not a data/sync problem. RESOLVED (diagnosis given, no code change needed)
+
+## Report
+After the 275-item execute run below, Kevin checked Outlook and couldn't see the archived emails. Investigated live rather than assuming the move failed (the COM-level verification at execute time was already solid: Inbox 774->499, Archive 41->316).
+
+## What was checked, all live against the real session
+1. **Exact Archive folder path/hierarchy:** `\\kevin.lelitte@admin.ox.ac.uk\Archive`, direct child of the mailbox root, sibling of Inbox -- not nested anywhere obscure. `StoreID` byte-identical to Inbox's `StoreID` (same store).
+2. **Regular folder vs. Exchange Online/In-Place Archive mailbox:** checked `ExchangeStoreType` on every attached store via `mapi.Stores`. Kevin's primary mailbox is type `0` (`olExchangeMailboxStore`, ordinary mailbox) -- no store anywhere in this profile has the Online-Archive store type, and none is named "Online Archive - ...". Confirms the destination can only be an ordinary same-mailbox folder, not a separate special archive store (which doesn't exist in this profile at all).
+3. **Sync/cache re-check:** re-ran a live COM read of `Archive.Items.Count` well after execution -- still exactly 316, matching the post-move figure with zero drift. Rules out a mid-air Cached Exchange Mode desync or rollback.
+4. **Profile/session identity:** `CurrentUser` Kevin Lelitte, account `kevin.lelitte@admin.ox.ac.uk`, single profile "Outlook". Outlook COM `Dispatch()` attaches to the already-running Outlook.exe process rather than spinning up a hidden second instance, so the script's session and Kevin's visible window are provably the same session, not two different ones that could disagree.
+
+## Root cause found: Favorites pane, not the data
+Inspected Kevin's live Navigation Pane (`outlook.ActiveExplorer().NavigationPane`) directly. His Mail module has exactly one pinned group, **Favorites**, containing only **Inbox, Sent Items, Deleted Items**. Archive was never pinned there. The full mailbox folder tree (including Archive) only appears below Favorites, under the `kevin.lelitte@admin.ox.ac.uk` node in the folder pane -- a separate, less-visible section most users don't scroll to if they're used to only checking Favorites. This fully explains "I can't see it" without any data or sync problem existing.
+
+## Resolution
+Told Kevin (via coordinator) to scroll past Favorites, expand his own mailbox name in the folder pane, and look for "Archive" there alongside Drafts/Sent Items/Junk Email. Offered to pin Archive into Favorites via COM for one-click access going forward, but did not do this unprompted -- a UI-config change, low-risk but not asked for.
+
+## Status: RESOLVED (diagnosis complete)
+No code or data change was needed -- the archive itself was correct throughout (see the EXECUTED entry below). Nothing further required unless Kevin asks for the Favorites pin to be added, or reports something still doesn't look right after checking the actual folder tree location.
+
+---
+
 # Handover -- 18 August 2026, EXECUTED (Drew) -- Apr/May 2026 Inbox archive complete, verified live, CLOSED
 
 ## What happened
