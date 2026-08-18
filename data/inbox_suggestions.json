@@ -1,14 +1,34 @@
 {
-  "generated_at": "2026-08-18 09:00",
+  "generated_at": "2026-08-18 12:00",
   "new_tasks": [
     {
-      "title": "Confirm appointment availability with Chris Little",
-      "tier": "tomorrow",
-      "description": "Chris Little has offered two morning slots on 11 or 12 September for an appointment. Kevin needs to confirm which date works for him.",
-      "email_subject": "Re: Appointment request",
-      "email_from": "Chris Little",
-      "received": "2026-08-18 08:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F680000",
+      "title": "Confirm ER pension rates for annual Financial Statements",
+      "tier": "week",
+      "description": "Simon Burford's email (forwarded by Kevin as a bump) concerns confirmation of employer pension rates needed for the university's annual Financial Statements. This appears to be an outstanding item requiring Kevin's input or sign-off.",
+      "email_subject": "Fw: Confirming ERs pension rates for annual Financial Statements -- FINAL",
+      "email_from": "Kevin Lelitte",
+      "received": "2026-08-18 10:24",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6F0000",
+      "auto_promoted": true
+    },
+    {
+      "title": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
+      "tier": "week",
+      "description": "Kevin has flagged an email from Anna Carter-Windle regarding GLAM's rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security. This requires follow-up action to clarify requirements and next steps with the team.",
+      "email_subject": "Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
+      "email_from": "Kevin Lelitte",
+      "received": "2026-08-18 10:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6D0000",
+      "auto_promoted": true
+    },
+    {
+      "title": "Follow up on EcoOnline supplier engagement",
+      "tier": "week",
+      "description": "Kevin has bumped an email from Joanne Grant at EcoOnline regarding University engagement. This appears to require a response or action from Kevin to progress the relationship or proposal discussion.",
+      "email_subject": "Fw: EcoOnline /University of Oxford",
+      "email_from": "Kevin Lelitte",
+      "received": "2026-08-18 10:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6C0000",
       "auto_promoted": true
     },
     {
@@ -24,31 +44,31 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t1781099896490",
-      "task_title": "Follow up on Scoping Session with Sophie Levy",
-      "note": "Sarah Rowles reminder that tomorrow's HR Systems Team meeting is the Roadmap session; confirm any AOB or apologies needed.",
-      "email_subject": "HR Systems Team Meeting - Roadmap",
-      "email_from": "Sarah Rowles",
-      "received": "2026-08-18 08:56",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F690000"
+      "task_id": "t2608111331410",
+      "task_title": "Review Cority Applicant Data Import update from James",
+      "note": "Simon has provided technical details on the Cority Applicant Data Import file format issue when saved as CSV in Notepad++.",
+      "email_subject": "RE: Cority - Applicant Data Import file",
+      "email_from": "Simon Burford",
+      "received": "2026-08-18 11:55",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F720000"
     },
     {
-      "task_id": "t2608111507360",
-      "task_title": "Advise on GLAM joining 38-day balance departments scheme",
-      "note": "Julie Hickman has had an initial conversation with Becky Fitzek at GLAM which was productive; provides new information on GLAM's readiness to join 38-day balance scheme.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-17 14:57",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C90000"
+      "task_id": "t2608041500480",
+      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
+      "note": "Simon has raised clarification questions about DTP1092 testing assumptions regarding API_USER account restrictions that need resolution before final integrations testing.",
+      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 11:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C50000"
     },
     {
-      "task_id": "t2608121801280",
-      "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Michael O'Sullivan has provided NHS Pension tier new pay ranges update; Athena notes the team only needs employer contribution rates for statutory reporting.",
-      "email_subject": "RE: Support Call# 11701239: NHS Pension tiers new pay ranges",
-      "email_from": "Athena Artuso",
-      "received": "2026-08-13 09:16",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A981A2760000"
+      "task_id": "t2608180901160",
+      "task_title": "Confirm appointment availability with Chris Little",
+      "note": "Kevin has confirmed availability and replied to Chris Little that Friday 11 September works for the appointment.",
+      "email_subject": "Re: Appointment request",
+      "email_from": "Kevin (sent to: Chris Little)",
+      "received": "2026-08-18 09:44",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39E30000"
     }
   ]
 }
