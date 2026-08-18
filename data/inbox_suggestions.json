@@ -1,34 +1,14 @@
 {
-  "generated_at": "2026-08-18 12:00",
+  "generated_at": "2026-08-18 15:00",
   "new_tasks": [
     {
-      "title": "Confirm ER pension rates for annual Financial Statements",
+      "title": "Create user guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements",
       "tier": "week",
-      "description": "Simon Burford's email (forwarded by Kevin as a bump) concerns confirmation of employer pension rates needed for the university's annual Financial Statements. This appears to be an outstanding item requiring Kevin's input or sign-off.",
-      "email_subject": "Fw: Confirming ERs pension rates for annual Financial Statements -- FINAL",
-      "email_from": "Kevin Lelitte",
-      "received": "2026-08-18 10:24",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6F0000",
-      "auto_promoted": true
-    },
-    {
-      "title": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
-      "tier": "week",
-      "description": "Kevin has flagged an email from Anna Carter-Windle regarding GLAM's rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security. This requires follow-up action to clarify requirements and next steps with the team.",
-      "email_subject": "Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-      "email_from": "Kevin Lelitte",
-      "received": "2026-08-18 10:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6D0000",
-      "auto_promoted": true
-    },
-    {
-      "title": "Follow up on EcoOnline supplier engagement",
-      "tier": "week",
-      "description": "Kevin has bumped an email from Joanne Grant at EcoOnline regarding University engagement. This appears to require a response or action from Kevin to progress the relationship or proposal discussion.",
-      "email_subject": "Fw: EcoOnline /University of Oxford",
-      "email_from": "Kevin Lelitte",
-      "received": "2026-08-18 10:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6C0000",
+      "description": "Julie Hickman has requested help creating user guidance for staff on leave entitlement calculations for new grades (39Q, 30S, 38S, 36S) following a meeting with Maths and Chemistry departments. This is part of the 38-day balance implementation.",
+      "email_subject": "User guidance for staff on grades 39Q, 30S, 38S and 36S - leave entitlement calculations",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-17 13:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C80000",
       "auto_promoted": true
     },
     {
@@ -46,29 +26,56 @@
     {
       "task_id": "t2608111331410",
       "task_title": "Review Cority Applicant Data Import update from James",
-      "note": "Simon has provided technical details on the Cority Applicant Data Import file format issue when saved as CSV in Notepad++.",
+      "note": "Simon Burford has added further questions about column headings and CSV formatting for the Cority Applicant Data Import file.",
       "email_subject": "RE: Cority - Applicant Data Import file",
       "email_from": "Simon Burford",
-      "received": "2026-08-18 11:55",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F720000"
+      "received": "2026-08-18 13:02",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F760000"
+    },
+    {
+      "task_id": "t2608181201060",
+      "task_title": "Confirm ER pension rates for annual Financial Statements",
+      "note": "Kevin bumped the original email from Simon (28 May) requesting confirmation of employer pension rates for the university's annual Financial Statements; still outstanding.",
+      "email_subject": "Fw: Confirming ERs pension rates for annual Financial Statements -- FINAL",
+      "email_from": "Kevin Lelitte",
+      "received": "2026-08-18 10:24",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6F0000"
+    },
+    {
+      "task_id": "t2608181201061",
+      "task_title": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
+      "note": "Kevin bumped the original email from Anna Carter-Windle (28 May) regarding GLAM rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security; still requires follow-up.",
+      "email_subject": "Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
+      "email_from": "Kevin Lelitte",
+      "received": "2026-08-18 10:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6D0000"
+    },
+    {
+      "task_id": "t2608181201062",
+      "task_title": "Follow up on EcoOnline supplier engagement",
+      "note": "Kevin bumped the original email from Joanne Grant (28 May) regarding EcoOnline/University engagement; still requires follow-up.",
+      "email_subject": "Fw: EcoOnline /University of Oxford",
+      "email_from": "Kevin Lelitte",
+      "received": "2026-08-18 10:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6C0000"
     },
     {
       "task_id": "t2608041500480",
       "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Simon has raised clarification questions about DTP1092 testing assumptions regarding API_USER account restrictions that need resolution before final integrations testing.",
-      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "note": "Simon Burford clarified Company 90 setup for WFM integration; ignore for now as it was created only to attach a new default workgroup.",
+      "email_subject": "RE: Balance Period End Matrix",
       "email_from": "Simon Burford",
-      "received": "2026-08-17 11:22",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C50000"
+      "received": "2026-08-17 10:55",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C10000"
     },
     {
-      "task_id": "t2608180901160",
-      "task_title": "Confirm appointment availability with Chris Little",
-      "note": "Kevin has confirmed availability and replied to Chris Little that Friday 11 September works for the appointment.",
-      "email_subject": "Re: Appointment request",
-      "email_from": "Kevin (sent to: Chris Little)",
-      "received": "2026-08-18 09:44",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39E30000"
+      "task_id": "t2608060900570",
+      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
+      "note": "Andrew Goff confirmed the next step for DTP1092 testing is to remove the API_USER account restrictions; currently blocked with no identified owner.",
+      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Andrew Goff (IT Services)",
+      "received": "2026-08-14 12:36",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AA0D4F3C0000"
     }
   ]
 }
