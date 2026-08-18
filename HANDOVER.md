@@ -1,3 +1,21 @@
+# Handover -- 18 August 2026, scope expansion (Drew) -- archive tool extended to cover everything before 1 Apr 2026 too, combined dry-run verified, STILL BLOCKED on Kevin's go-ahead
+
+## Scope expansion
+Same day, before any execution: Kevin expanded the request to also archive everything in the Inbox dated before 1 April 2026 (no lower bound -- all older mail), in addition to the already-dry-run-confirmed April/May 2026 batch below. Nothing has been executed. `archive_apr_may_2026.py` extended (still dry-run by default, `--execute` still required, pushed commit `454b138`) to scan for ReceivedTime < 1 June 2026 with no lower bound, and to report a pre-April/April/May breakdown plus a combined total so each piece stays individually auditable.
+
+## Combined dry-run results (live, verified 18 Aug 2026 10:43)
+- **Pre-April 2026 (no lower bound): 0 items.** The oldest item anywhere in the live Inbox right now is dated 7 April 2026 -- confirmed genuine, not a scan artifact (see below).
+- April 2026: 144 items (unchanged from the original dry run)
+- May 2026: 131 items (unchanged)
+- **Combined total: 275 items** -- identical to the original April/May-only total, since there is nothing older to add
+- Archive destination re-confirmed identical and correct for this expanded scope: the folder-resolution fix (scoped to `inbox_folder.Parent`, avoiding both the wrong `GetDefaultFolder(23)` mapping and the 5-mailbox Archive-name collision -- see the entry below) is date-independent, so it applies without any additional risk here.
+- The same 2 unreadable items as before were investigated further this round rather than left as an open question: both are Non-Delivery Report (NDR/bounce) messages with no readable `ReceivedTime` (`MessageClass` `REPORT.IPM.Note.NDR` and `REPORT.IPM.Schedule.Meeting.Canceled.NDR`), `CreationTime` 27 Apr 2026 and 10 Aug 2026 respectively. Neither is a hidden pre-April item. Both remain excluded from the move (as any unreadable item is) -- flagged here in case Kevin wants the 27 Apr NDR handled manually, but not archived automatically since its ReceivedTime can't be verified.
+
+## Status: STILL BLOCKED on Kevin's explicit go-ahead
+Combined figure to give Kevin for one final go-ahead: **275 items total** (0 pre-April + 144 April + 131 May), date range 2026-04-07 to 2026-05-29. Next action unchanged in kind: get Kevin's confirmation on this combined number, then run `python archive_apr_may_2026.py --execute` from `C:\Users\admin\Documents\Claude\Projects\work-inbox\`, report its own post-run verification.
+
+---
+
 # Handover -- 18 August 2026, later same day (Drew) -- Apr/May 2026 Inbox archive tool built, dry-run verified, BLOCKED on Kevin's explicit go-ahead to execute
 
 ## Scope
