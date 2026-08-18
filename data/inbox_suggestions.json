@@ -1,16 +1,6 @@
 {
-  "generated_at": "2026-08-18 15:00",
+  "generated_at": "2026-08-18 15:21",
   "new_tasks": [
-    {
-      "title": "Create user guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements",
-      "tier": "week",
-      "description": "Julie Hickman has requested help creating user guidance for staff on leave entitlement calculations for new grades (39Q, 30S, 38S, 36S) following a meeting with Maths and Chemistry departments. This is part of the 38-day balance implementation.",
-      "email_subject": "User guidance for staff on grades 39Q, 30S, 38S and 36S - leave entitlement calculations",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-17 13:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C80000",
-      "auto_promoted": true
-    },
     {
       "title": "Attend planning meeting for departments moving to 38-day balance",
       "tier": "tomorrow",
@@ -24,58 +14,67 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608111331410",
-      "task_title": "Review Cority Applicant Data Import update from James",
-      "note": "Simon Burford has added further questions about column headings and CSV formatting for the Cority Applicant Data Import file.",
-      "email_subject": "RE: Cority - Applicant Data Import file",
-      "email_from": "Simon Burford",
-      "received": "2026-08-18 13:02",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F760000"
+      "task_id": "t2608071801050",
+      "task_title": "Review volunteering leave pay code configuration work",
+      "note": "Michael O'Sullivan has responded with information that TIMDEP04 Absence Reasons report may need updating to include the Volunteering Leave Absence Type; this provides technical guidance for Simon's volunteering leave configuration work.",
+      "email_subject": "RE: Volunteering Leave",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-18 09:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007ACBB5F110000"
     },
     {
-      "task_id": "t2608181201060",
-      "task_title": "Confirm ER pension rates for annual Financial Statements",
-      "note": "Kevin bumped the original email from Simon (28 May) requesting confirmation of employer pension rates for the university's annual Financial Statements; still outstanding.",
-      "email_subject": "Fw: Confirming ERs pension rates for annual Financial Statements -- FINAL",
-      "email_from": "Kevin Lelitte",
-      "received": "2026-08-18 10:24",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6F0000"
-    },
-    {
-      "task_id": "t2608181201061",
-      "task_title": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
-      "note": "Kevin bumped the original email from Anna Carter-Windle (28 May) regarding GLAM rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security; still requires follow-up.",
-      "email_subject": "Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-      "email_from": "Kevin Lelitte",
-      "received": "2026-08-18 10:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6D0000"
-    },
-    {
-      "task_id": "t2608181201062",
-      "task_title": "Follow up on EcoOnline supplier engagement",
-      "note": "Kevin bumped the original email from Joanne Grant (28 May) regarding EcoOnline/University engagement; still requires follow-up.",
-      "email_subject": "Fw: EcoOnline /University of Oxford",
-      "email_from": "Kevin Lelitte",
-      "received": "2026-08-18 10:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6C0000"
+      "task_id": "t2608071801052",
+      "task_title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
+      "note": "Michael O'Sullivan confirms that the clone from UOXP into UOXC was completed successfully and all post-clone activities are complete; this resolves the environment refresh work for Company 90 testing.",
+      "email_subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-18 08:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007ACBB5F100000"
     },
     {
       "task_id": "t2608041500480",
       "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
-      "note": "Simon Burford clarified Company 90 setup for WFM integration; ignore for now as it was created only to attach a new default workgroup.",
+      "note": "Andrew Goff (IT Services) explains that the API_USER restriction lift was Guy's recommendation; technical discussion on DTP1092 testing assumptions and approach.",
+      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Andrew Goff (IT Services)",
+      "received": "2026-08-17 11:19",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C40000"
+    },
+    {
+      "task_id": "t2608041500480",
+      "task_title": "Schedule DTP1092 integrations testing discussion with Crispin",
+      "note": "Simon Burford continues questioning the testing approach and API_USER restriction logic for DTP1092; indicates confusion about the solution design that needs to be clarified with Crispin.",
+      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 11:03",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C20000"
+    },
+    {
+      "task_id": "t2608071801051",
+      "task_title": "Investigate team calendar config issue with Asta",
+      "note": "Simon Burford clarifies that Company 90 should be ignored for now as it was only set up for WFM workgroup configuration; this provides guidance on the team calendar configuration work with Asta.",
       "email_subject": "RE: Balance Period End Matrix",
       "email_from": "Simon Burford",
       "received": "2026-08-17 10:55",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C10000"
     },
     {
-      "task_id": "t2608060900570",
-      "task_title": "Attend DTP1092 integrations testing meeting tomorrow (Friday 7 Aug)",
-      "note": "Andrew Goff confirmed the next step for DTP1092 testing is to remove the API_USER account restrictions; currently blocked with no identified owner.",
-      "email_subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Andrew Goff (IT Services)",
-      "received": "2026-08-14 12:36",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AA0D4F3C0000"
+      "task_id": "t2608121801282",
+      "task_title": "Review August 2026 organisational structure draft",
+      "note": "Simon Burford has forwarded notification of changes to the PACS organisational structure moving colleges and societies to level 3 from level 2; this is the update that Kevin needs to review for HR Systems implications.",
+      "email_subject": "FW: Organisational Structure Update - August 2026 - DRAFT",
+      "email_from": "Simon Burford",
+      "received": "2026-08-17 10:22",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C00000"
+    },
+    {
+      "task_id": "task-1787044968753",
+      "task_title": "Auto job-alert notification email -- text changes (Laura Porter)",
+      "note": "Michael O'Sullivan has forwarded FYI notification of planned PeopleXD maintenance on Friday 28 August between 8-10 pm; this may impact job alert notification email testing if scheduled.",
+      "email_subject": "FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-17 08:12",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007AAB5BD9C0000"
     }
   ]
 }
