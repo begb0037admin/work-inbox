@@ -1,3 +1,43 @@
+# Handover -- 18 August 2026, ~23:15 (Drew) -- CORRECTION: Kevin was right, the drafting-loop automation IS built; publish_drafted_replies.py is chained into the scheduled run, not manual-only
+
+## Scope
+Kevin pushed back hard on tonight's earlier diagnostic (the three entries immediately below this one, ~21:30/22:00/22:40) which concluded "draft-composition automation was never actually built... no `.bat` file references it (GitHub code search, zero hits)." He said this was wrong and asked for a surgical re-investigation, not a re-assertion. He was right. This entry corrects the record with the concrete mechanism and the concrete gap in the prior passes.
+
+## What the prior passes actually checked (confirmed by re-reading their own write-ups)
+- GitHub Actions workflows in `work-inbox`, `agent-commons`, `lauren` -- correctly found none relevant to drafting.
+- A grep of `fetch_inbox.py` itself for `publish_drafted_replies` -- correctly found none (it isn't called from there).
+- A **GitHub code search** (`gh api search/code`) for `.bat` files referencing `publish_drafted_replies` -- found zero hits, org-wide.
+- Exactly one Task Scheduler task, "Work Inbox Briefing" -- but only its `State`/`LastRunTime`/`LastTaskResult`, never its actual `.Actions` target.
+
+## What this pass checked that the prior ones didn't
+1. **command-centre** -- full recursive repo tree, `cloudflare-worker/*.js` (both `cc-tasks-writer-PREVIOUS.js` and `cc-tasks-writer-proposed.js`, plus `ai-log-endpoint.js`) grepped directly for `draft`/`reply`/`needs_reply` -- zero matches, no server-side Worker mechanism exists.
+2. **Every Task Scheduler task on this machine**, not just one -- `Get-ScheduledTask | Select TaskName,State,TaskPath` (root-level: `ClaudeEchoHotkeyWatchdog`, `CreateExplorerShellUnelevatedTask`, `Draft Diff Capture`, `Git for Windows Updater`, `MacriumWeeklyBackup`, OneDrive tasks, `Work Inbox Briefing`, plus ~150 stock Windows/Office/vendor tasks under `\Microsoft\...` -- none else touch this pipeline). Found a second real task, **"Draft Diff Capture"** (built 11 Aug, hourly-ish 06:30/09:30/12:30/15:30/18:30 Mon-Fri, `LastTaskResult 0`) -- this is a **different, adjacent** automation (agent-commons issue #3's style-learning corpus: `work-inbox/tools/draft_final_diff_capture.py` snapshots Outlook Drafts vs Sent to learn edit patterns for tone-training; writes only to local `C:\Users\admin\Documents\CorpusStaging\draft_watch\`, never to `drafts.json` or `needs_reply.json`). Real, healthy, but not the mechanism in question.
+3. **Resolved "Work Inbox Briefing"'s actual `.Actions` target** (never done in the prior passes): `wscript.exe "D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing Hidden.vbs"`. Read that file and the `.bat` it wraps directly with the Read tool.
+4. **The critical finding:** `Run Inbox Briefing.bat`'s main flow, on every successful `fetch_inbox.py` run, executes `call :publish_needs_reply` and then `call :publish_drafted_replies` -- each subroutine downloads the latest version of its script fresh from `raw.githubusercontent.com` (same cache-busted, integrity-checked pattern `fetch_inbox.py` itself uses), then runs it, with failures in either step logged but explicitly non-fatal to the overall briefing run. **This file is local-only -- `D:\OneDrive - lelitte.com\Desktop\`, OneDrive-synced -- and was never committed to `work-inbox`, `agent-commons`, or `lauren`.** A GitHub code search for `.bat` content was therefore structurally guaranteed to return zero hits regardless of whether the chain existed. That's the exact gap.
+5. Cross-checked against `agent-commons` issue #3's own comment thread, 10 Aug 2026 ("Full chain confirmed live, via the real production `.bat`... `Run Inbox Briefing.bat` now chains `fetch_inbox.py` -> `publish_needs_reply.py` -> `publish_drafted_replies.py` in one run... Status: live in the automatic 5x/day pipeline now") -- this was already on record and was not re-read by tonight's earlier diagnostic passes.
+6. Read `publish_drafted_replies.py`'s `run()` function in full to confirm what it actually does: pure read-normalize-republish mirror of `agent-commons/pending-email-drafts/drafts.json` into `work-inbox/data/drafted_replies.json`. Zero Anthropic/composition calls, zero logic that writes new content into `drafts.json`. It cannot and does not compose drafts -- it only republishes what Lauren has already written.
+
+## Corrected picture, stated precisely
+- **`needs_reply.json` publish** (Drew's queue-generation step, `publish_needs_reply.py`): automatic, confirmed healthy. Never in dispute.
+- **`drafted_replies.json` mirror** (`publish_drafted_replies.py`): **also automatic.** Runs every "Work Inbox Briefing" cycle, 5x/day Mon-Fri (06:00/09:00/12:00/15:00/18:00 UK), via the local `.bat` chain above. **The prior sessions' claim that this "must be run manually" / "no .bat file references it" was wrong** -- it does, and does so on every scheduled run.
+- **Draft composition itself** -- an agent (Lauren) reading a `needs_reply.json` entry and writing a new composed entry into `agent-commons/pending-email-drafts/drafts.json` -- genuinely has **no scheduled or automatic trigger anywhere.** Confirmed: no GitHub Actions workflow in any of the three repos, nothing in the `.bat` chain calls anything that composes new content, and `publish_drafted_replies.py` itself is proven (by reading its source) to be composition-free. This is the one real gap, and it is the reason the 2 outstanding `needs_reply.json` entries (13 Aug KPI presentation discrepancy, 12 Aug NHS Pension tiers, both Michael O'Sullivan) have sat undrafted for 5-6 days -- not because anything is broken, but because nothing automatically dispatches Lauren against the queue. This was always true, by original design (per the issue #3 thread's own closing line: "Waiting on Lauren to start writing real content... no further action needed on Drew's side" -- i.e. composition was always meant to be a separate, human/agent-dispatched step, never scheduled).
+
+## Timing theory, checked directly rather than assumed
+The two live `needs_reply.json` entries are 5-6 days old. The publish/mirror half of the pipeline runs every ~3 hours during the working week and has run without failure throughout that window (commit history on both `needs_reply.json` and `drafted_replies.json` confirms this). Since composition has no cadence or threshold logic of any kind to check -- it is not "runs weekly" or "runs above N entries," it simply does not exist as a trigger -- there is no plausible cadence under which these 2 entries would have been picked up automatically. The gap is real and structural, not a timing coincidence.
+
+## Memory corrected
+- `begb0037admin/drew` `memory/index.json`: superseded the incorrect confirmed-fact entry (`...mirror-schema-drops-any-draft...`, which contained "this mirror script is not wired into fetch_inbox.py or any Task Scheduler .bat/GitHub Actions workflow -- it must be run manually") with a corrected entry stating the mirror IS scheduled. New prose entry `memory/wi-drafting-loop-diagnostic-correction-18aug.md` added, `MEMORY.md` index updated to flag the superseded entries. Commit `e43378a`, pushed.
+- `begb0037admin/agent-commons` `memory/index.json`: added the cross-cutting confirmed fact (local `.bat`/`.vbs` orchestration is invisible to GitHub code search; always resolve a Task Scheduler task's actual `.Actions` target before concluding something "isn't wired up"). Commit `ed5ba1a`, pushed.
+
+## What Kevin needs to decide (unchanged from tonight's earlier entry, still accurate)
+Whether to build real automation for draft composition itself -- e.g. a scheduled check of `needs_reply.json` for new/unaddressed entries that dispatches a Lauren drafting pass automatically. This is genuine new engineering (Drew + Lauren both touch it), not a restore -- the publish/mirror plumbing was never broken and needs no fix; only composition has never had a trigger.
+
+## Not done
+- No automation built for draft composition -- this remains investigate-and-correct-the-record only, per the surgical-review instruction.
+- Outlook untouched, no email drafted or sent, Microsoft Graph API not re-attempted, `needs_reply.json`/`drafts.json` content not modified.
+
+---
+
 # Handover -- 18 August 2026, ~21:30 (Drew, resumed session) -- Independent re-verification of the automatic email drafting diagnostic; reported back to Kevin
 
 ## Context
