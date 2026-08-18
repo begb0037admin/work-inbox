@@ -1,3 +1,21 @@
+# Handover -- 18 August 2026, ~21:30 (Drew, resumed session) -- Independent re-verification of the automatic email drafting diagnostic; reported back to Kevin
+
+## Context
+A prior session tonight completed the full diagnostic below (entry timestamped ~22:40 / commit `efbaed4b`, 21:23:39 UTC) but was killed before its final report reached Kevin -- so a fresh session was dispatched to redo the diagnosis "from scratch." Rather than duplicate the live checks, this session read the existing entry, then independently re-verified every live claim in it before trusting it (per standing instruction to verify subagent claims rather than act on them blind).
+
+## Independent re-verification, all done live just now (21:27 UTC, ~4 minutes after the prior entry)
+- Task Scheduler (`Get-ScheduledTask`/`Get-ScheduledTaskInfo`, this machine): `Work Inbox Briefing` -- State `Ready`, `LastRunTime` 18/08/2026 18:00:00, `LastTaskResult` 0, `NextRunTime` 19/08/2026 06:00:00. Matches.
+- `data/needs_reply.json` commit history: last publish 18 Aug 17:02:03 UTC, "2 flagged entries" (commit `932b7b15`) -- matches, and file content re-read confirms the same 2 entries (Michael O'Sullivan / KPI presentation discrepancy, Michael O'Sullivan / NHS Pension tiers), neither yet drafted.
+- `data/briefing.json` commit history: last update 17:01:52 UTC (commit `774d9776`), on the normal 7/9/11/13/15/17 cadence. Matches.
+- `agent-commons/pending-email-drafts/drafts.json` commit history: most recent commit 20:35:05 UTC today (lauren-draft-16 edit) -- confirms the manual-dispatch pattern, no new entries or automatic pickup of the 2 current `needs_reply.json` items since.
+- HANDOVER.md's own diagnostic entry: only 4 minutes old at time of re-check.
+
+**Conclusion: nothing has changed. The prior session's finding stands, independently confirmed: the pipeline is not broken. Drew's automated half (Outlook pull -> triage -> `needs_reply.json`) runs healthily on schedule; Lauren's half (composing a draft, then `publish_drafted_replies.py` mirroring it to the dashboard) has only ever run on explicit dispatch, never automatically. That was true by original design, not a regression -- "automatic drafting" was never actually wired to trigger itself. No fix was available or attempted, since nothing is stopped or erroring.**
+
+This entry exists only to record that the finding was independently checked, not just trusted, and that it has now been reported back to Kevin. See the full diagnostic immediately below for all detail and the decision Kevin needs to make.
+
+---
+
 # Handover -- 18 August 2026, ~22:40 (Drew) -- Diagnostic pass: "automatic email drafting stopped working" -- confirmed nothing is broken/regressed; the gap is a design gap, not a fault
 
 ## Scope
