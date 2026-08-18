@@ -25,6 +25,43 @@ Standalone read-only script (`search_cority_thread.py`, scratchpad only, `fetch_
 - work-inbox `HANDOVER.md` -- this entry.
 - command-centre `data/tasks.json` -- **existing** task `t2608111331410` (already logged 11 Aug 2026 by inbox-auto triage, tier `week`) was **updated in place, not duplicated**, per Kevin's explicit mid-task instruction after Adam flagged its existence: title prefixed `URGENT --`, tier changed `week` -> `today`, new `priority: "urgent"` field added, `summary` and `description` fully rewritten with all 5 verbatim message bodies plus the attachment/screenshot findings above, `actions` appended (not overwritten) with the escalation record, a `[TODO]` for Kevin's two open items, and a `[MONITOR]` noting Adam's separate cross-reference. Full command-centre mandatory backup-and-verify sequence followed: live file GETs confirmed non-zero (69 tasks, 121082 bytes) before any write, timestamped backup committed to `Archive/tasks_backup_20260818_2025.json` (commit `de0a8e55`), backup re-fetched and its SHA (`cd75197f`) confirmed to match the pre-write live file exactly, only then the write was made using that fresh SHA (commit `126165de`, new content SHA `df75cb7d`), and the live file was re-fetched afterward and confirmed to contain the update correctly (title/tier/priority/description/actions all verified against the pushed JSON, not assumed).
 
+## Draft reply available -- lauren-draft-16-20260818 (Lauren, status: pending -- NOT SENT)
+Added retroactively, 18 Aug 2026 later same day, once the draft existed (it did not exist yet when this entry was first logged). Full text pulled read-only from `agent-commons/pending-email-drafts/drafts.json` -- that file itself was not modified by this update.
+
+**Subject:** RE: Cority - Applicant Data Import file
+
+**Reply-all To:** Simon Burford <simon.burford@admin.ox.ac.uk>, James Salas Guillen <james.salas@admin.ox.ac.uk>
+
+**Draft body:**
+> Hi both,
+>
+> Thanks for working through this -- good progress narrowing down the header and date-of-birth issues.
+>
+> James -- good that you've already got a ticket open with Cority support on the column-mapping mismatch; let us know what they come back with.
+>
+> On Simon's two open questions from Friday:
+> 1. Null value handling for the automated CSV export: [CONFIRM: preferred null-value handling -- blank / NULL / N/A / dash]
+> 2. UTF-8 encoding: [CONFIRM: encoding requirements -- confirm UTF-8 is fine for Cority's import, or what they require instead]
+>
+> On the network folder for an automated export: [CONFIRM: destination folder/location to point this at]
+>
+> On where this report came from -- I know it's not sitting right that it's not on the QA server and has no change request behind it, especially given it's now a live interface file. [CONFIRM: what do you know about this report's origin from Lee's handover?] I'll dig into what I have and come back to you both.
+>
+> Best,
+> Kevin
+
+**Open items before this can be sent (from the draft's own `inline_flags`, not resolved here):**
+1. Cority's expected null-value format for the automated CSV export (blank / NULL / N/A / dash) -- genuinely unknown to Lauren, a Cority-technical fact only Kevin/the team can supply.
+2. Whether UTF-8 encoding is acceptable for Cority's import, or what encoding they actually require.
+3. Destination network folder/location for an automated CSV export.
+4. Whether Kevin has anything from Lee's handover covering how/why the RECSUP20_Applicant Cority Interface File report was built outside the standard QA/change-request process, given it is being used as a live production interface file -- the one item Simon explicitly @-tagged Kevin for.
+5. The dispatching brief referred to this thread as "Fw: Cority - Applicant Data Import file" -- Drew's live mailbox search found no such forwarded variant; the real thread is the direct 5-message exchange addressed to Kevin throughout. Flagged as a discrepancy rather than silently assuming a forward exists.
+6. This thread sits in the Cority H&S expansion domain Adam owns in CORITY-FEASIBILITY.md -- not assessed or actioned in this draft, per the dispatching brief's explicit instruction not to take over that domain.
+
+Confidence: low (see the draft entry's own `confidence`/`corpus_provenance` fields in `drafts.json` for the full reasoning -- tone/structure is well grounded in real multi-year precedent from Kevin's own Cority correspondence with James Salas Guillen, but every substantive item in the draft is a genuine `[CONFIRM]` placeholder rather than answered content, since these are Cority-technical/system-history facts Lauren has no source for and was explicitly told not to invent).
+
+Status as of this update: **pending, not sent.** Sending is Kevin's decision, not automated by either Drew or Lauren.
+
 ## Not done
 No reply has been sent on this thread. No content/feasibility assessment of the Cority H&S expansion implications made -- that is explicitly Adam's cross-reference, dispatched separately by Kevin.
 
