@@ -1,3 +1,21 @@
+# Handover -- 18 August 2026, Favorites pin added (Drew) -- Archive folder pinned to Kevin's Mail Favorites per his explicit go-ahead, verified live
+
+## What happened
+Following the Favorites-visibility diagnosis below, Kevin explicitly said yes to pinning the Archive folder into his Outlook Favorites pane for one-click access. Done via COM against the same live session (`outlook.ActiveExplorer().NavigationPane`), not a script left running unattended -- one-shot, read-verify-write-verify.
+
+## How
+Located the Mail module's `Favorites` NavigationGroup (module #1, confirmed by group name rather than an assumed `NavigationModuleType` constant, since an earlier diagnostic this same session showed that assumption was wrong). Re-resolved the Archive folder exactly the same way the archive script and the earlier investigation did -- scoped to `inbox.Parent.Folders`, not a mailbox-wide search -- to guarantee the folder being pinned is the identical one 275 items were moved into, not a same-named folder in one of the other 4 attached mailboxes. Checked it wasn't already pinned (by EntryID, not just name) before calling `Favorites.NavigationFolders.Add(archive)`.
+
+## Verified live
+- Before: Favorites = Inbox, Sent Items, Deleted Items
+- After: Favorites = Inbox, Sent Items, Deleted Items, **Archive** (`\\kevin.lelitte@admin.ox.ac.uk\Archive`, 316 items at time of pinning)
+- Re-read the Favorites group fresh after the Add() call (not just trusting the return value) -- Archive is genuinely present with the correct FolderPath.
+
+## Status: CLOSED
+Kevin should now see Archive directly in his Favorites shortcuts without needing to expand the full mailbox folder tree. No further action expected unless he reports it's still not visible after this, in which case the next thing to check would be whether his Outlook client needs the Explorer window itself refreshed/reopened to repaint the Favorites list (a UI repaint issue, distinct from the folder-pane-scrolling issue already resolved) -- not yet ruled in or out, only mentioned as the next diagnostic step if needed.
+
+---
+
 # Handover -- 18 August 2026, follow-up investigation (Drew) -- "can't see the archived emails" explained: Favorites-pane visibility, not a data/sync problem. RESOLVED (diagnosis given, no code change needed)
 
 ## Report
