@@ -1,3 +1,39 @@
+# Handover -- 18 August 2026, ~18:05 (Drew) -- HIGH PRIORITY / URGENT: "Organisational Structure Update - August 2026 - DRAFT" thread found live, logged as outstanding, awaiting Kevin/Simon resolution before the 19 Aug deadline
+
+## Scope
+Kevin flagged this "ultra urgent" directly. Retrieval and logging only, no reply drafted or sent, per his explicit instruction.
+
+## Live Outlook COM search -- what was actually checked
+Standalone read-only script (`search_org_structure_thread.py`, scratchpad only, `fetch_inbox.py` untouched), using the same late-bound `win32com.client.dynamic.Dispatch("Outlook.Application")` + `GetNamespace("MAPI")` connection pattern already proven in `fetch_inbox.py`. Searched top-level Inbox (500 items checked) and Sent Items (1547 items checked) for subject "Organisational Structure Update - August 2026 - DRAFT", exact and normalized/contains match (case-insensitive, RE:/FW: prefix stripped, whitespace-collapsed). Found 3 matches in Inbox on the first pass, all sharing one `ConversationID` (`7AF8A0622F2048D4B2D6FB52D1AACA95`), so the full mailbox recursive walk and `GetConversation()` cross-check were not needed to surface additional items (both were coded and would have run automatically had the direct search come back empty). No matching item exists in Sent Items -- confirmed live, not inferred -- meaning Kevin has not yet replied on this thread.
+
+## Chronological thread unpack
+1. **12 Aug 2026 16:22 UTC** -- `orgstructure@admin.ox.ac.uk` ("Organisational Structure" mailing address) sends the original notification to `orgstructure@maillist.ox.ac.uk`, subject "Organisational Structure Update - August 2026 - DRAFT". Draft PACS org-structure changes attached (effective dates up to 12 Aug 2026), covering a wholesale move of College entities from L2 to L3 and a large Subsidiary Companies update. Explicit deadline stated: **errors/omissions must be reported no later than Wednesday 19 August 2026** -- i.e. tomorrow relative to today's date. System Administrators told not to make changes until the final version is published next week.
+2. **17 Aug 2026 10:22 UTC** -- **Simon Burford** (HR Systems Analysis and Insights Manager, HR Systems, People Department -- identified by SMTP address `simon.burford@admin.ox.ac.uk`, confirmed via the quoted reply header in Sarah Rowles' message below, since his own item exposed only an Exchange X.500 DN, not a plain SMTP address) forwards the notification ("FW: ...") to Kevin Lelitte, Christopher Sanders, James Salas Guillen, Michael O'Sullivan, David Johnson, cc Marie Cooksey, Sarah Rowles, Athena Artuso. **Simon's content, specifically:** he thinks the L2->L3 college/society move has limited impact on PeopleXD (departments already held at "Department Code" level), but flags it may be sensible to align the Societies area properly -- proposing 3 new management units (0C01 Kellogg, 0C02 St Cross, 0C03 Reuben College) and moving department codes GR/LB, S1, GS under them respectively. He explicitly flags a knock-on risk to org-structure mapping tables in the data warehouse, **including the H&S mapping David Johnson and Christopher Sanders built for the H&S dashboard**, and asks that once a decision is made it be communicated widely so the impact can be prepared for. He also flags a possible HESA/wider-reporting impact given societies are now returned for HESA, which is why Sarah and Athena were copied.
+3. **17 Aug 2026 11:28 UTC** -- **Sarah Rowles** replies-all to Simon (cc'ing Marie Cooksey, Athena Artuso; Kevin remains a recipient), thanking him and asking **when this goes into the live environment** -- she's concerned because dept code feeds the Exemption Rules that determine which records enter the HESA Module, and she has a full HESA generate (the last one) planned for **Monday 24 August 2026**. She notes Societies are currently allowed in so this shouldn't change (she's turned off the triggers), but flags the Exemption Rules might need updating for next year.
+
+**No further activity found after Sarah's 17 Aug 11:28 message** -- nothing from Simon, nothing from Kevin, nothing later in the mailbox matching this thread as of this search (18 Aug, live check).
+
+## Simon identification -- no ambiguity
+Only one Simon appears anywhere in this thread: **Simon Burford**, `simon.burford@admin.ox.ac.uk`, HR Systems Analysis and Insights Manager. No other Simon is a sender, recipient, or cc on any of the 3 messages. Nothing to disambiguate.
+
+## Thread status: OPEN -- awaiting resolution, time-sensitive
+- Simon's question to the wider group (how to handle the Societies alignment) has not been answered by anyone in this mailbox's view of the thread.
+- Sarah's direct question to Simon ("when does this go live?") has not been answered.
+- **Kevin has not replied on this thread at all** (confirmed live -- zero matches in Sent Items).
+- The original notification's own deadline for flagging errors/omissions is **19 August 2026 -- tomorrow**. Whether Kevin needs to act before that deadline (e.g. confirm no HR Systems-side objection) is his call, not inferred or assumed here.
+
+## Where this is logged
+- work-inbox `HANDOVER.md` -- this entry (commit follows below).
+- command-centre `data/tasks.json` -- new task, full mandatory backup-and-verify sequence, tier `today` given the 19 Aug deadline (see that commit's own entry for SHAs).
+
+## Not done
+No reply drafted or sent, per Kevin's explicit "retrieval and logging only" instruction. No attachment content extracted (the draft org-structure spreadsheet attachment itself was not opened/read -- only the message bodies).
+
+## Next action
+Kevin to decide how/whether to respond before the 19 Aug deadline -- either to `orgstructure@admin.ox.ac.uk` directly (errors/omissions) or to Simon/Sarah's internal discussion thread (HR Systems' position on the Societies management-unit restructuring Simon proposed). No engineering action required; this is a content/judgment decision, not a pipeline issue.
+
+---
+
 # Handover -- 18 August 2026, ~16:00 (Drew) -- CONFIRMED: Laura Porter/Access Group logging (Tasks 1+2) already complete from earlier background dispatch; no new work needed
 
 ## Scope
