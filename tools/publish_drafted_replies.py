@@ -112,7 +112,26 @@ def normalize_entry(e):
     if not isinstance(e, dict):
         return None, "not a dict"
 
-    core = {"source_entry_id", "subject", "sender_tier", "draft_text"}
+    # source_entry_id was originally required as "core" -- but it only
+    # exists for drafts sourced from work-inbox/data/needs_reply.json (a
+    # single Outlook EntryID). Drafts 14/15/16 (18 Aug 2026) come from a
+    # direct Kevin chat-paste and from Drew's own live-thread retrievals
+    # (reply-all threads, no single needs_reply.json EntryID carried into
+    # the draft record) -- they were silently dropped by this check even
+    # though they're real, complete, reviewable drafts. FIX (18 Aug 2026,
+    # Drew): source_entry_id is now optional. When present, it's used as
+    # before (identity for tick-dedup + the "Open original" Outlook deep
+    # link). When absent, falls back to the draft's own draft_id, which is
+    # always unique and always present -- so tick-dedup (mark sent/discard)
+    # still works correctly and doesn't collide across entries that all
+    # lack a real EntryID. Known, disclosed side effect: for those entries
+    # the "Open original" button will still render (dashboard just checks
+    # for a non-empty string) but will call openEmail() with a draft_id
+    # instead of a real Outlook EntryID, so it won't successfully open the
+    # source email. Not fixed here -- would need an app.js-side change
+    # (hasSource check) and this fix is intentionally scoped to unblocking
+    # visibility only, not a same-night frontend change on top of it.
+    core = {"subject", "sender_tier", "draft_text"}
     missing_core = core - e.keys()
     if missing_core:
         return None, f"missing core field(s): {sorted(missing_core)}"
@@ -128,7 +147,7 @@ def normalize_entry(e):
         return None, "missing both composed_at and drafted_at"
 
     normalized = {
-        "source_entry_id": e["source_entry_id"],
+        "source_entry_id": e.get("source_entry_id") or e.get("draft_id") or "",
         "subject": e["subject"],
         "sender_tier": e["sender_tier"],
         "draft_text": e["draft_text"],
