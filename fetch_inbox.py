@@ -413,6 +413,121 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
 inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 print(f"Phase 1 VIP sweep done - total inbox now: {len(inbox)}")
 
+# -- Phase 1c -- named subfolder sweep --
+# Kevin confirmed (18 Aug 2026) that Outlook rules auto-file certain mail
+# into subfolders under Inbox, and Phase 1 above has only ever read the
+# top-level Inbox -- confirmed live the same day: Michael O'Sullivan's
+# "RE: Volunteering Leave" reply landed in Inbox/Team/Michael O'Sullivan and
+# never reached the briefing (see begb0037admin/drew memory/index.json,
+# id starting "2026-08-18-work-inbox-phase-1-pull-only-scans..."). Kevin
+# gave explicit scope: recurse into these five named trees only, not the
+# whole mailbox. Top-level Inbox pull above is completely unchanged.
+#
+# Live folder names were verified via COM before hardcoding (18 Aug 2026,
+# diag_subfolders.py, read-only) -- two of Kevin's five requested names did
+# not match the live folder name exactly:
+#   - "Bi-Monthly CDRPD Working Group" -> live name is
+#     "Bi-monthly CDR/PD working group" (lowercase, "CDR/PD" with a slash)
+#   - "Health and Safety" -> no folder by that name exists; the live folder
+#     is "H&S" (confirmed as the intended tree -- it's also referenced by
+#     the sibling folder "DTP1334 - H&S System Evaluation" under Projects,
+#     same abbreviation convention). Flagged to Kevin in HANDOVER.md; using
+#     "H&S" here since it is unambiguous.
+# "Senior Management", "Team" and "Projects" matched exactly as given.
+SUBFOLDER_TREES = [
+    "Senior Management",
+    "Bi-monthly CDR/PD working group",
+    "H&S",
+    "Team",
+    "Projects",
+]
+
+# Separate, smaller budget from the top-level Inbox's MAX_UNREAD/MAX_READ
+# above so a busy subfolder tree can never displace a top-level Inbox item
+# Kevin needs to see -- these two budgets are additive, not shared, and
+# both are still bounded by the same 7-day `cutoff` restrict_date() applies
+# everywhere else in Phase 1. A live volume check across all 5 trees (18
+# Aug 2026) found only 10 items in the last 7 days, so this cap is
+# deliberately generous headroom relative to today's real numbers, not a
+# tight fit -- documented decision, not a guess.
+SUBFOLDER_MAX_UNREAD = 40
+SUBFOLDER_MAX_READ   = 20
+
+def walk_folder_tree(folder):
+    """Yield `folder` itself, then every nested subfolder, recursively."""
+    yield folder
+    for sub in folder.Folders:
+        yield from walk_folder_tree(sub)
+
+def _build_subfolder_entry(msg, is_read, source_folder):
+    entry = {
+        "subject":         msg.Subject,
+        "from":            msg.SenderName,
+        "from_email":      msg.SenderEmailAddress,
+        "received":        str(msg.ReceivedTime),
+        "is_read":         is_read,
+        "has_attachments": msg.Attachments.Count > 0,
+        "importance":      msg.Importance,
+        "entry_id":        msg.EntryID,
+        "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg),
+        "source_folder":   source_folder,
+    }
+    if not is_read:
+        entry["body_preview"] = (msg.Body or "")[:150]
+    return entry
+
+subfolder_unread = 0
+subfolder_read   = 0
+subfolder_count  = 0
+for tree_name in SUBFOLDER_TREES:
+    try:
+        top_folder = None
+        for f in _inbox_folder.Folders:
+            if f.Name == tree_name:
+                top_folder = f
+                break
+        if top_folder is None:
+            print(f"WARNING: Phase 1c - no Inbox subfolder named {tree_name!r} found - skipping this tree this run (folder may have been renamed/removed)")
+            continue
+        for sub in walk_folder_tree(top_folder):
+            if subfolder_unread >= SUBFOLDER_MAX_UNREAD and subfolder_read >= SUBFOLDER_MAX_READ:
+                break
+            try:
+                for msg in restrict_date(sub, cutoff):
+                    try:
+                        # olMail (43) only -- subfolders can hold meeting
+                        # items/receipts too; filter by Class rather than
+                        # letting a bare except conflate "not mail" with a
+                        # real bug (see begb0037admin/drew memory/index.json
+                        # id starting "2026-08-10-outlook-com-sent-items-
+                        # folder-contains-non-mail-items...").
+                        if getattr(msg, "Class", None) != 43:
+                            continue
+                        if msg.EntryID in captured_ids:
+                            continue
+                        is_read = not msg.UnRead
+                        if is_read and subfolder_read >= SUBFOLDER_MAX_READ:
+                            continue
+                        if not is_read and subfolder_unread >= SUBFOLDER_MAX_UNREAD:
+                            continue
+                        entry = _build_subfolder_entry(msg, is_read, sub.FolderPath)
+                        inbox.append(entry)
+                        captured_ids.add(msg.EntryID)
+                        subfolder_count += 1
+                        if is_read:
+                            subfolder_read += 1
+                        else:
+                            subfolder_unread += 1
+                    except Exception:
+                        continue
+            except Exception as e:
+                print(f"WARNING: Phase 1c - failed to scan {sub.FolderPath!r} - {e}")
+    except Exception as e:
+        print(f"WARNING: Phase 1c - failed to process tree {tree_name!r} - {e}")
+
+inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
+print(f"Phase 1c subfolder sweep done - added {subfolder_count} (unread:{subfolder_unread} read:{subfolder_read}) from {len(SUBFOLDER_TREES)} named trees - total inbox now: {len(inbox)}")
+
 sent = []
 for msg in mapi.GetDefaultFolder(5).Items:
     try:
