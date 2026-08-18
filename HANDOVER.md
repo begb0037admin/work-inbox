@@ -1,3 +1,57 @@
+# Handover -- 18 August 2026, ~15:30 (Drew) -- Phase 1 extended to recurse into 5 named Inbox subfolder trees; Michael O'Sullivan's "RE: Volunteering Leave" reply confirmed live in the pull. Isolated commit, top-level Inbox pull unchanged
+
+## Scope
+Kevin gave explicit scope for the subfolder-scan gap diagnosed earlier today (see entry directly below, commit `c3eff76`): extend Phase 1 to also pull, within the existing 7-day cutoff, everything in these 5 named Inbox subfolder trees, recursively:
+- `Inbox/Senior Management`
+- `Inbox/Bi-Monthly CDRPD Working Group`
+- `Inbox/Health and Safety`
+- `Inbox/Team`
+- `Inbox/Projects`
+
+Top-level Inbox pull stays exactly as-is. Not "walk the whole mailbox" -- only these 5 trees.
+
+## Live folder names verified before hardcoding -- 2 of 5 did not match Kevin's wording
+Before writing any code, ran a read-only recursive COM scan (`diag_subfolders.py`) against the live mailbox to get exact names, not assume them:
+- "Senior Management" -- matches exactly.
+- "Bi-Monthly CDRPD Working Group" -- live folder is actually **"Bi-monthly CDR/PD working group"** (lowercase "monthly", "CDR/PD" with a literal slash, lowercase "working group").
+- "Health and Safety" -- **no folder by that name exists at all.** The live folder is **"H&S"**. Confirmed as the intended tree -- it's the only H&S-related folder under Inbox, and the naming convention is corroborated by a sibling folder "DTP1334 - H&S System Evaluation" under Projects. Used "H&S", flagging this substitution to Kevin rather than silently guessing.
+- "Team" -- matches exactly.
+- "Projects" -- matches exactly.
+
+`SUBFOLDER_TREES` in `fetch_inbox.py` now hardcodes the 5 live-confirmed names, with the naming discrepancies documented in a code comment at the point of use so a future session doesn't have to re-derive this.
+
+## What was built
+New "Phase 1c" block in `fetch_inbox.py`, inserted immediately after the existing VIP sweep (nothing before that point touched). For each of the 5 named trees: resolve the top-level subfolder by exact name under `_inbox_folder.Folders` (warns and skips that tree, does not crash the run, if a folder has been renamed/removed since); recursively walk every nested subfolder (`walk_folder_tree()`); reuse the existing `restrict_date()` helper unchanged (same 7-day cutoff, same locale-safe date-filter logic already proven for the top-level pull) against every folder in the tree; filter to `Class == 43` (olMail) before touching mail-specific properties, so a meeting item/receipt/etc. sitting in one of these folders is excluded cleanly rather than silently swallowed by a bare except and mistaken for "the pull failed here" (see `begb0037admin/drew` memory id starting `2026-08-10-outlook-com-sent-items-folder-contains-non-mail-items`); dedup against the same `captured_ids` set the VIP sweep already built, so a subfolder item that somehow duplicates a top-level entry_id is never double-added.
+
+**Cap decision (documented, not left implicit):** a separate `SUBFOLDER_MAX_UNREAD = 40` / `SUBFOLDER_MAX_READ = 20` budget, additive to (not shared with) the top-level Inbox's existing `MAX_UNREAD = 50` / `MAX_READ = 30`. This guarantees the subfolder sweep can never displace a top-level Inbox item Kevin needs to see -- the two pulls have entirely separate budgets. A live volume check across all 5 trees on 18 Aug 2026 found only 10 items in the last 7 days (9 unread in `Team/Michael O'Sullivan`, 1 unread in `H&S/Cority`), so 40/20 is deliberately generous headroom relative to today's real numbers, not a tight fit to them -- if a rule ever routes much higher volume into one of these trees, the cap holds rather than ballooning Phase 2's AI triage input unbounded.
+
+Also added a `source_folder` field (the subfolder's live `FolderPath`) to each entry this sweep adds, for traceability/debugging -- top-level entries don't carry this key, which is safe since nothing downstream requires a uniform key set (checked: no `.keys()`/schema validation anywhere in the pipeline).
+
+## Verification -- real, not inferred
+1. **Isolated live logic test** (`test_subfolder_sweep.py`, read-only, no GitHub/Anthropic calls): ran the new Phase 1c block verbatim against the real live mailbox before ever pushing. Found 11 items (11 unread, 0 read) across the 5 trees -- 10 from `Team/Michael O'Sullivan`, 1 from `H&S/Cority`. Michael O'Sullivan's "RE: Volunteering Leave" (received 2026-08-18 09:39:41 UTC) is in the result set with `entry_id` ending `...7ACBB5F110000` -- byte-identical to the entry_id the earlier diagnostic session found scanning the live mailbox directly.
+2. **`py_compile`** passes on the edited file, both the scratch copy and the byte-diffed live-pulled-back copy post-push.
+3. **Byte-for-byte push verification**: fresh Contents API GET immediately after the push, `cmp`'d clean against the intended local file. `Phase 1c` appears 5x, `SUBFOLDER_TREES` 3x in the live served bytes.
+4. **Real end-to-end production run**, not a simulation: pulled `fetch_inbox.py` fresh from `origin/main` into the actual scheduled-task working directory (`C:\Users\admin\Documents\Claude\Projects\work-inbox\`, same directory and same `git fetch origin && git checkout origin/main -- fetch_inbox.py` pattern the real Task Scheduler run uses) and ran the full script live, 18 Aug 2026 ~15:20-15:23. Own log output: `Phase 1 VIP sweep done - total inbox now: 57` (unchanged top-level+VIP behaviour) then `Phase 1c subfolder sweep done - added 11 (unread:11 read:0) from 5 named trees - total inbox now: 68`. No `WARNING: Phase 1c` lines -- all 5 trees resolved cleanly. Ran through every phase with no errors: `urgent:5 needs:37 fyi:23 low:3`, `Phase 3.3c done - FYI thread-collapse: 55 raw -> 33 threads (22 collapsed)`, `Phase 3.5/3.6` and `Phase 4/5` all completed and pushed (`briefing.json` commit `d013c06`, `inbox_suggestions.json` commit `c2e6cf9`).
+5. **Michael O'Sullivan's specific reply, traced into the pushed data, with an honest caveat:** his exact `entry_id` does not appear verbatim anywhere in the pushed `briefing.json` -- but this is a pre-existing, separate mechanism, not a new gap this fix introduced or missed. `fyiRawCount` went to 55 (raw pre-collapse), and the live FYI card for "RE: Volunteering Leave" now shows `"messageCount": 2` (Julie Hickman's 12:04 UTC reply and Michael's 09:39 UTC reply are the only two real messages on this thread today -- matches exactly). `fetch_inbox.py`'s pre-existing Phase 3.3c thread-collapse (built 12 Aug 2026, keys on normalized subject string, FYI tier only -- unrelated to and untouched by this fix) merged the two into one card and kept Julie's (the later-received) as the surviving display, discarding Michael's own byline. **Net effect: Michael's reply is now genuinely ingested and counted by the pipeline (confirmed via the isolated test and the raw-count math above) where before it was invisible outright -- but Kevin will see it as "this FYI thread now has 2 messages," not literally "Michael O'Sullivan replied."** Flagging this plainly rather than overclaiming a card with his name on it. If Kevin wants the collapse to preserve/surface each contributor's name, that's a change to Phase 3.3c specifically -- a different, already-identified piece of work (see the 17 Aug thread-dedup entries below), not folded into this fix.
+6. **Nothing else regressed**: top-level `MAX_UNREAD`/`MAX_READ`/VIP-sweep code is byte-unchanged (diff confirms the new block was inserted only after the existing `print(f"Phase 1 VIP sweep done...")` line); Command Centre sync (`Phase 3.5/3.6`) ran cleanly (`new:0 updates:7`, `6 update(s) applied`) with no duplicate-task symptoms.
+
+## Cap interaction -- explicit answer to "does this push out top-level items Kevin needs to see"
+No. The two pulls never share a budget. Top-level Inbox is capped exactly as before (50 unread / 30 read within its own restrict). The 5 subfolder trees have their own separate 40 unread / 20 read cap, entirely additive. Worst case today: 80 (top-level) + 60 (subfolders) = 140 items reaching Phase 2's AI triage -- well inside territory this pipeline has already handled (FYI raw counts in the 400s+ are on record from 12 Aug without a triage failure, per `begb0037admin/drew` memory `fyi-parked-bloat-investigation-12aug.md`).
+
+## Commits
+- `b6d0efe` -- backup: `Archive/fetch_inbox_backup_20260818_1520.py` (pre-change fetch_inbox.py, sha-verified identical to live pre-change content)
+- `e58a300` -- `fetch_inbox.py`: Phase 1c subfolder sweep added
+- Backup of this file: `Archive/HANDOVER_backup_20260818_1524.md` (pre-edit content, sha-verified)
+- `d013c06` / `c2e6cf9` -- real production run this session, `data/briefing.json` and `data/inbox_suggestions.json`
+
+## Not touched
+No other pipeline phase, no other file. Phase 3.3c's thread-collapse behaviour (flagged above) was read and understood but deliberately not modified -- out of scope per Kevin's explicit "do not bundle this with any other pipeline changes" instruction.
+
+## Next action
+None outstanding for this fix -- built, isolated, live-verified end to end, including the exact real-world case that motivated it. If Kevin wants collapsed FYI thread cards to name every contributor (not just the newest), that's a separate, explicitly out-of-scope follow-up on Phase 3.3c.
+
+---
+
 # Handover -- 18 August 2026, ~15:10 (Drew) -- "Volunteering Leave" thread investigation: pipeline healthy, real cause is an Inbox subfolder the Phase 1 pull never scans. Diagnosis only, no code change (needs an effort-level decision first)
 
 ## Scope
