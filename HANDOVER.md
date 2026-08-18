@@ -1,3 +1,28 @@
+# Handover -- 18 August 2026, ~22:40 (Drew) -- Diagnostic pass: "automatic email drafting stopped working" -- confirmed nothing is broken/regressed; the gap is a design gap, not a fault
+
+## Scope
+Kevin reported automatic email drafting had "stopped working end-to-end" and he was drafting manually. Dispatched as a diagnostic-only pass (no fix authorized beyond a trivial, obviously-safe one) to check every link in the Drew-to-Lauren drafting loop live: Task Scheduler, the Outlook COM pull + Anthropic triage, `needs_reply.json`, and Lauren's consumption of it into `agent-commons/pending-email-drafts/drafts.json`.
+
+## What was checked live, not assumed
+- **Task Scheduler** (`Get-ScheduledTask`/`Get-ScheduledTaskInfo`, this admin machine): "Work Inbox Briefing" -- State `Ready`, `LastRunTime` 18/08/2026 18:00:00, `LastTaskResult` 0 (success), `NextRunTime` 19/08/2026 06:00:00. Healthy, on schedule, not stopped or failing.
+- **`data/briefing.json` commit history**: fresh commits today at 08:01, 11:01, 14:01/14:22, and 17:01 UTC -- matches the scheduled 7/9/11/13/15/17 cadence. Outlook pull + Anthropic triage (Phases 1-3.9) confirmed running end to end, every scheduled slot, today.
+- **`data/needs_reply.json` commit history**: also fresh and current -- last publish 18 Aug 17:02 UTC, "2 flagged entries." Read live: Michael O'Sullivan / KPI presentation discrepancy (13 Aug) and Michael O'Sullivan / NHS Pension tiers (12 Aug), both still sitting unflagged in any draft. This half of the pipeline (Drew's side) is fully automated and healthy.
+- **`agent-commons/pending-email-drafts/drafts.json`**: 16 entries total, most recent (14/15/16, 18 Aug) all confirmed as manually dispatched -- Kevin chat-paste, or a coordinator handing Lauren a specific live-retrieved thread -- not an automatic pickup of the current 2 `needs_reply.json` entries above. Neither of today's 2 flagged entries has a draft.
+
+## Root finding -- this was already discovered and documented same-day, re-verified here, not new
+A prior session tonight (~22:00, commit `b96e22ed` to this file) already investigated the exact second half of this question and found: **draft-composition automation was never actually built.** No GitHub Actions workflow exists in `work-inbox`, `agent-commons`, or `lauren` for this. `fetch_inbox.py` never calls `publish_drafted_replies.py` (zero references). No `.bat` file references it either. Lauren's own `drafting-loop-wiring-proposal.md` (10 Aug) incorrectly assumed "the next scheduled Run Inbox Briefing.bat run picks up the mirror" -- that was never true, and is now corrected in that file directly (`begb0037admin/lauren`, memory/drafting-loop-wiring-proposal.md).
+
+**This diagnostic pass independently re-confirms that finding is still accurate as of tonight** (checked the actual current `drafts.json` commit history and content, not just trusted the prior write-up) and additionally confirms the automated side (Drew's `needs_reply.json` publish) is itself completely healthy -- so nothing regressed there either. **There is no broken component to restart.** The pipeline was always: Drew's half runs automatically on schedule; Lauren's half (composing a draft from `needs_reply.json`, and the `publish_drafted_replies.py` mirror step) has only ever run when someone explicitly dispatches it. What changed for Kevin is not a fault -- it's that nothing has been dispatching Lauren against the growing `needs_reply.json` queue on its own, so entries accumulate (2 live right now) with no draft ever appearing unless Kevin or a coordinator asks for one by name.
+
+## Not done (diagnostic pass, per explicit instruction)
+- No fix attempted -- there was no trivial/obviously-safe fix available, since nothing is actually stopped or erroring. The gap is an absent feature (a scheduled trigger for Lauren's half), not a regression.
+- Outlook untouched, no email drafted or sent, Microsoft Graph API not re-attempted.
+- No automation built for either draft composition or the mirror step.
+
+## What Kevin needs to decide
+Whether to build real automation for Lauren's half -- e.g. a scheduled check of `needs_reply.json` for new entries that dispatches a Lauren drafting pass automatically, and/or wiring `publish_drafted_replies.py` into the existing `Run Inbox Briefing` schedule so the dashboard mirror stays current without a manual run. This is genuine new engineering (Drew + Lauren both touch it), not a restore-to-working-order task -- there is no prior automatic state to restore it to. In the meantime, the 2 current `needs_reply.json` entries (Michael O'Sullivan, KPI discrepancy and NHS Pension tiers) have no draft and won't get one without an explicit dispatch.
+
+
 # Handover -- 18 August 2026, ~22:15 (Drew) -- FULL RETRIEVAL: "Volunteering Leave" / TIMDEP04 thread, ahead of Kevin's 19 Aug 1-1 with Simon Burford
 
 ## Scope
