@@ -1,3 +1,39 @@
+# Handover -- 18 August 2026, ~23:45 (Drew) -- FULL ARC LOGGED, per Kevin: "everything discussed and discovered must be logged and hardcoded" -- stopping for the night, exact resume point below
+
+## Why this entry exists
+Kevin reviewed the correction below (commit `61eb6b5d`) and had a follow-up exchange about it, then decided to stop for the night. He was explicit that the *whole arc* of tonight's investigation -- not just the mechanism finding -- has to be the durable checkpoint here, since HANDOVER.md is the resume record per session protocol, not chat history. This entry captures that full arc end to end. It extends the `61eb6b5d` entry immediately below; nothing in that entry is wrong or overwritten, this adds the conversation that happened after it was reported.
+
+## 1. What was disputed
+A diagnostic pass earlier tonight (the three entries below the `61eb6b5d` correction: ~21:30/22:00/22:40) concluded that draft-composition automation "was never actually built" and that no `.bat` file anywhere referenced `publish_drafted_replies.py` (based on a GitHub code search returning zero hits). Kevin said this was flatly wrong and asked for a surgical re-investigation rather than a re-assertion of the same conclusion.
+
+## 2. What was found (mechanism, restated concisely -- full detail in the `61eb6b5d` entry directly below)
+Task Scheduler task **"Work Inbox Briefing"** -> `.Actions` = `wscript.exe "D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing Hidden.vbs"` -> which runs `D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing.bat`. On every successful `fetch_inbox.py` run, that `.bat` chains `call :publish_needs_reply` then `call :publish_drafted_replies`, running **5x/day Mon-Fri (06:00/09:00/12:00/15:00/18:00 UK)**. Both the `.vbs` and `.bat` live only on Kevin's Desktop (OneDrive-synced) and were **never committed to work-inbox, agent-commons, or lauren** -- which is exactly why a GitHub Actions check and a `gh api search/code` pass could never find them: GitHub code search only indexes committed repo content, and these orchestration files structurally sit outside every repo. The prior diagnostic checked the right question (is this wired to run automatically?) with a search method that could not, by construction, see the answer.
+
+## 3. Precise scope of what the chain does and doesn't do
+- **`publish_needs_reply.py`** -- pushes freshly-triaged `needs_reply.json` to GitHub. Surfaces newly-flagged "needs a reply" emails on the dashboard. Runs automatically, confirmed healthy, never in dispute.
+- **`publish_drafted_replies.py`** -- pure mirror. Republishes whatever currently exists in `agent-commons/pending-email-drafts/drafts.json` into `work-inbox/data/drafted_replies.json`. Confirmed by reading its `run()` function in full: zero Anthropic/composition logic, zero code path that writes new content into `drafts.json`. It can only ever re-show what's already there.
+- **What is NOT automated:** nobody/nothing ever calls Lauren to actually compose draft content for an entry sitting in `needs_reply.json`. That dispatch -- an agent or Kevin explicitly asking Lauren to draft a specific item -- has always been a manual step, by original design (per `agent-commons` issue #3's own 10 Aug 2026 thread: "Waiting on Lauren to start writing real content... no further action needed on Drew's side").
+- **Why the 2 current `needs_reply.json` entries have sat 5-6 days undrafted** (Michael O'Sullivan / KPI presentation discrepancy, 13 Aug; Michael O'Sullivan / NHS Pension tiers, 12 Aug): not a broken pipeline. The pipeline correctly detected both, published them to `needs_reply.json`, and has correctly re-mirrored the (empty, for these two) drafts state every scheduled cycle since. Nobody ever dispatched Lauren to draft either one, so `publish_drafted_replies.py` has had nothing new to mirror for them. The plumbing did its job correctly every single run; the missing piece is the human/agent dispatch step that was never automated and was never supposed to be, until now.
+
+## 4. Options presented to Kevin -- STILL UNDECIDED, this is the exact resume point
+Three options were laid out for closing this gap, none chosen yet:
+- **(a) Dispatch Lauren now** to clear the 2-item backlog -- draft replies for the two Michael O'Sullivan entries, nothing structural changes.
+- **(b) Wire actual composition into the chain permanently** -- e.g. a GitHub Action calling the Anthropic API server-side when `needs_reply.json` changes, so new entries get drafted automatically without manual dispatch. Real new engineering, touches both Drew's and Lauren's territory, needs its own scoped design (model/cost, Kevin's-voice guardrails, review-before-send discipline) before being built.
+- **(c) Deliberately keep composition manual/human-gated** -- explicit decision NOT to automate this further, on the grounds that some workflows want a human trigger before content is written in Kevin's voice, rather than a scheduled draft appearing unasked.
+
+**Kevin has not chosen between (a)/(b)/(c).** He said to stop for tonight and pick this up tomorrow.
+
+## Exact next action
+**Resume by asking Kevin which of (a)/(b)/(c) he wants before doing anything further on this thread.** No code, no dispatch to Lauren, no automation build should happen on this specific gap until that choice is made -- everything upstream of it (the `needs_reply.json`/mirror plumbing) is confirmed correct and needs no further work.
+
+## Not done tonight, deliberately
+- No dispatch to Lauren -- decision (a) not yet made.
+- No automation build for composition -- decision (b) not yet made, and would need its own scoping session regardless.
+- No decision recorded closing this off as (c) -- Kevin hasn't chosen.
+- Outlook untouched throughout, no email drafted or sent, Microsoft Graph API not re-attempted, `needs_reply.json`/`drafts.json` content not modified by any part of tonight's investigation.
+
+---
+
 # Handover -- 18 August 2026, ~23:15 (Drew) -- CORRECTION: Kevin was right, the drafting-loop automation IS built; publish_drafted_replies.py is chained into the scheduled run, not manual-only
 
 ## Scope
