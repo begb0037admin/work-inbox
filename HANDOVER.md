@@ -1,3 +1,29 @@
+# Handover -- 18 August 2026, ~15:10 (Drew) -- "Volunteering Leave" thread investigation: pipeline healthy, real cause is an Inbox subfolder the Phase 1 pull never scans. Diagnosis only, no code change (needs an effort-level decision first)
+
+## Scope
+Kevin reported seeing two new emails today on the "Volunteering Leave" thread (started by Simon Burford, 7 Aug) directly in Outlook, but the dashboard/briefing.json showed no reply activity from today. Investigated live rather than assuming the pipeline was broken.
+
+## Pipeline health -- confirmed fine, not stale
+- Task Scheduler `Work Inbox Briefing`: `LastRunTime 18/08/2026 15:00:00`, `LastTaskResult 0` (success), `NextRunTime 18/08/2026 18:00:00`. Schedule is 06:00/09:00/12:00/15:00/18:00 BST Mon-Fri (confirmed via `Get-ScheduledTask` triggers -- the 200-line CLAUDE.md's "7am/9am/11am/1pm/3pm/5pm" line is stale prose, actual live triggers are 6/9/12/15/18).
+- GitHub commits for this run: `3999950e` (ledger), `2da5b76e`/`b023aed6` (briefing backup+update), `8f78eb4a` (suggestions), `c24eef24` (needs_reply), `47f6c3cb` (drafted_replies mirror) -- all at 14:01-14:02 UTC (15:01-15:02 BST), i.e. ~2 minutes after the 15:00 run started. No gap, no failure, no backlog.
+
+## Root cause -- NOT a pipeline bug, a folder-scope gap
+Live recursive Outlook COM scan of Kevin's full mailbox tree (all folders, not just top-level Inbox) for "volunteering leave" found exactly 4 items, which fully explains what Kevin is seeing:
+1. Simon Burford's original, 7 Aug 2026 16:21 UTC, top-level Inbox (the thread starter Kevin referenced).
+2. Julie Hickman's "RE: Volunteering Leave" reply, **18 Aug 12:04:54 UTC**, top-level Inbox -- **this one WAS correctly ingested** by the 15:00 run and is live in `data/briefing.json` right now, under the `fyi` tier (`kevin_is_primary_recipient: false` -- Kevin is cc'd via `hrsystems@maillist.ox.ac.uk`, not a primary recipient, so FYI rather than Urgent/Needs is a defensible triage call, not a miss).
+3. Michael O'Sullivan's "RE: Volunteering Leave" reply, **18 Aug 09:39:41 UTC**, but filed in **`Inbox/Team/Michael O'Sullivan`** -- a subfolder, not the top-level Inbox. **This is the one that never reached the dashboard.** Confirmed directly against the live `fetch_inbox.py` (GitHub main, line 388: `for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):`) -- Phase 1 only ever calls `.Items` on the top-level Inbox folder object; it has never recursed into subfolders. This is not new or today-specific -- any mail an existing Outlook rule/folder structure diverts into `Inbox/Team/<name>` (or any other subfolder) has always been invisible to the pull, for any thread, not just this one.
+4. A **draft** (not a received item), "Fw: Volunteering Leave", in Kevin's own Drafts folder, timestamped 15:03:52 UTC -- roughly the moment Kevin was reporting this to the coordinator. Confirms he was actively mid-workflow on this thread, not a pipeline artifact.
+
+No email from Simon Burford himself arrived today on this thread -- the two new messages are Julie Hickman's and Michael O'Sullivan's replies (Kevin's phrasing read the parenthetical "(from Simon Burford, originally sent 7 Aug)" as describing the thread's origin, not today's senders -- confirmed against live data, not a live discrepancy needing further chasing).
+
+## Status: diagnosis complete, fix NOT started
+The subfolder-scan gap is real and would affect every thread with the same Inbox/Team/<sender> filing pattern, not just this one -- but extending Phase 1 to recurse into Inbox subfolders is a change to the core pull (interacts with the 50-newest-item cap, dedup, and downstream tiering), not a one-line safe fix, and this repo's own recent history (17 Aug same-night stacked-fix regression, now in Drew's memory as `feedback-work-inbox-cautious-change-pace`) argues against patching it live without a scoped pass. Flagging per Effort Level Governance (CLAUDE.md, CONSTITUTION.md Section 10) rather than self-selecting and building it now.
+
+## Next action
+Kevin to decide: (a) is the subfolder-scan gap worth fixing (raise effort level, scope a Phase 1 extension to walk `Inbox/Team/*` or configurable subfolders), or (b) leave as-is and rely on Outlook's own conversation view / manual checks for threads that get auto-filed out of the top-level Inbox. No code changed this session. Julie Hickman's reply is already correctly on the dashboard under FYI if Kevin wants to check it there.
+
+---
+
 # Handover -- 18 August 2026, Favorites pin added (Drew) -- Archive folder pinned to Kevin's Mail Favorites per his explicit go-ahead, verified live
 
 ## What happened
