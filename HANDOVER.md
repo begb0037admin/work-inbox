@@ -1,3 +1,50 @@
+# Handover -- 18 August 2026, ~22:15 (Drew) -- FULL RETRIEVAL: "Volunteering Leave" / TIMDEP04 thread, ahead of Kevin's 19 Aug 1-1 with Simon Burford
+
+## Scope
+Kevin asked for a full, deep retrieval on "Volunteering Leave" / "TIMDEP04" -- this had been started and stopped twice earlier this session without completing. He wants full context to speak to Simon Burford knowledgeably in their 1-1 tomorrow (19 Aug 2026), and was explicit that this is his to review, not unowned. Retrieval, ownership-check, and logging only -- no reply drafted; Lauren is handling that separately.
+
+## What was actually checked, live, not assumed
+Standalone read-only Outlook COM script (`search_volunteering_leave.py`, scratchpad only, `fetch_inbox.py` untouched), same late-bound `win32com.client.dynamic.Dispatch("Outlook.Application")` pattern already proven safe in this repo. Walked every store and every folder (252 folders, all subfolders included) plus Sent Items/Drafts/Deleted Items for "volunteering leave", "volunteer leave", "timdep04", "timdep 04" in subject or body. 25 genuine matches, no false positives once checked -- every "unexpected" hit (an OSM ticket, an Access Group case, a P5 task) turned out to be real prior background on this same issue.
+
+## Full correspondence trail
+
+**Main "Volunteering Leave" thread (ConversationID `3304B254F441491EB7177567380418D6`):**
+1. **7 Aug 2026 16:20** -- Simon Burford to `hrsystems@maillist.ox.ac.uk` -- opens the thread: wants to move Volunteering Leave from a reason code under "Other Leave" to its own standalone leave type so employees can book it directly; asks who to work with on updating guidance, and whether/how departments currently report on volunteering/other leave.
+2. **18 Aug 09:39** -- Michael O'Sullivan replies (found in `Inbox/Team/Michael O'Sullivan`, a subfolder -- now correctly swept by yesterday's Phase 1c fix): flags that **TIMDEP04 Absence Reasons** report may need updating to include Volunteering Leave as its own Absence Type in the parameter listing; today it's run against the "Other Leave" type filtered by reason code `VOLPO`.
+3. **18 Aug 12:04** -- Julie Hickman replies: little existing guidance exists (system steps are simple, most detail lives on the pay-and-conditions webpages); she's best placed to update it when ready.
+4. **18 Aug 15:03** -- Kevin's own "Fw: Volunteering Leave" -- found in **Deleted Items**, blank To field. He started a forward and deleted it without sending. He has **not** replied on this thread.
+5. **18 Aug 18:33** -- Marie Cooksey replies -- **new, not previously known to any prior session or to the pipeline**: per her prior agreement with Sarah Clarke, HR Systems (her team) owns the technical system changes and SME support on User Guide wording; Reward and Alex Betts' team own staff engagement/notification of the change.
+
+**Real origin, found via full-mailbox sweep (not previously surfaced):**
+- **2 Jul 2026** -- Simon raises Access Group Support Case **69049424** ("Allowing employees to select a single absence reason"): explains "Other Leave" bundles several reasons incl. Volunteering Leave and is manager-only bookable; asks Access Group for options. Case resolved same day.
+- **6 Jul 2026** -- Simon summarises the resolution to Marie Cooksey and Kevin (`Recording volunteer leave on PeopleXD by Employees`, resolution `.msg` attached): two options -- (1) open all of "Other Leave" to employees, or (2) create a new standalone Volunteering Leave pay code (Access Group's recommended, cleanest approach, but with real cost -- reporting split across pay codes, no historic-leave migration, workflow-config unknowns, absence reports needing review). Simon explicitly says this should go on the **POG backlog** and asks Kevin to work out when the FA team can fit it in -- **this prioritisation decision from Kevin is still outstanding.**
+- **7 Aug 2026 15:09** -- same day as opening the main thread, Simon separately raises `Team Calendar Config` (cc Kevin) -- while configuring the Volunteering Leave pay code in UOXU he found the Team Calendar Configuration menu option missing, self-fixed it in COREPORTAL_ADMIN, and asked Asta Palmer to propagate to all environments/docs. Kevin has an unsent Draft `Fw: Team Calendar Config` (18 Aug 16:44, blank recipient) -- separate, already tracked as command-centre task `t2608071801051`, not touched by this session.
+
+**TIMDEP04 background, also found via the sweep (directly relevant to Michael's 18 Aug point):**
+- **27 Feb -- 3 Mar 2026**: Kevin coordinated the "TIMDEP Go-Live" report suite update (Change `20019874`, approved by Marie, deployed live by Simon 3 Mar) -- TIMDEP02 renamed, security-model alignment, and TIMDEP03/TIMDEP04 v2/v4 given a historic cut-off (absences from 1 Aug 2021 on).
+- **16 Mar 2026**: P5 Task `50937289` ("TIMDEP04 absence logic", against Incident `11665867`) -- a support query asking whether TIMDEP04's date-range logic is why an open-ended absence doesn't show.
+- **14 Apr -- 26 Jun 2026**: ServiceReq `30404938` / Task `50945166` (Estates Services, Anna Schneiderova) -- escalated as overdue "Owner Required" 24 Jun. Michelle Williams (with Michael's input) confirmed: TIMDEP03 correctly returns open-ended sickness absences; **TIMDEP04 is by design date-range-only and does not return open-ended records** -- its primary purpose is "other leave types such as family leave and other leave," not sickness. Kevin closed this out 26 Jun as a guidance issue, not a fault (his own reply preserved in Sent Items/Drafts).
+- This is exactly the report Michael's 18 Aug message says now needs a parameter update to add Volunteering Leave as its own Absence Type -- Kevin can speak to its known date-range design limitation firsthand from the June exchange.
+
+## What TIMDEP04/Volunteering Leave actually is, plainly
+A PeopleXD/Access Group absence-type configuration project, not a bug. Volunteering Leave currently lives as one reason code inside the "Other Leave" pay code, which only managers can book on an employee's behalf. Simon wants to split it into its own standalone leave type so employees can self-book it. That requires: a new pay code build, a decision on which of the two Access-Group-confirmed options to take, an update to the TIMDEP04 Absence Reasons report (Michael's point), updated user guidance (Julie), and a comms/engagement plan (Marie/Reward/Alex Betts' team, separate from HR Systems' technical piece). **Outstanding and pending from Kevin specifically:** deciding when/how the FA team prioritises this against the POG backlog (Simon's direct ask, 6 Jul, still unanswered), and reviewing Michael's TIMDEP04 report point. **People involved besides Kevin and Simon:** Michael O'Sullivan, Julie Hickman, Marie Cooksey, Asta Palmer (Team Calendar Config side), Michelle Williams (TIMDEP04 background, now closed).
+
+## Ownership check -- command-centre
+Task `t2608071801050` ("Review volunteering leave pay code configuration work") already existed, dateAdded 07 Aug 2026. **command-centre's `data/tasks.json` schema has no `owner` field at all** -- confirmed by a zero-match grep of the entire live file and of `js/app.js`/`index.html` (no "owner" concept anywhere in the UI code either). So this task is not literally marked "unowned" anywhere in the system -- the concept doesn't exist in the current schema. It is implicitly Kevin's by virtue of living in his personal Command Centre dashboard, the same as every other task there. **Not changed without Kevin's explicit confirmation, per his instruction** -- if he wants an `owner` field added to the schema (here and/or across all tasks), that's a real, separate, schema-level change for a follow-up session, not something done silently tonight.
+
+## Pipeline gap flagged, not fixed
+Marie Cooksey's 18:33 reply postdates both the 15:00 and 18:00 scheduled Task Scheduler runs, so it is not yet in `data/briefing.json` and will not appear until tonight's next run (or the next `Run Inbox Briefing` after it). It is fully captured in the command-centre task update below instead, so nothing is lost for the 1-1.
+
+## What was logged
+- **command-centre** `data/tasks.json`, task `t2608071801050`: full mandatory backup-and-verify sequence run (live file GET, 133680 bytes, sha `df75cb7d...` -> timestamped backup `Archive/tasks_backup_20260818_2200.json` committed and SHA-verified before any edit -> edit applied -> live file re-read after, sha `370a4743...`, 69 tasks confirmed, no count drift). Description enriched with the full background above; 4 new action-log entries added (Marie Cooksey's reply, the origin/backlog-prioritisation summary, a `[TODO]` for Kevin's prioritisation + TIMDEP04 review, an `[AWAITING]` noting Kevin's unsent draft and that Lauren is drafting the reply separately); **tier moved `week` -> `tomorrow`** given the 19 Aug 1-1 is the direct trigger for this retrieval -- flagged here as a judgement call, not a default-to-urgent one, since nothing in the thread itself is time-critical beyond that meeting.
+- **work-inbox** `HANDOVER.md` -- this entry.
+
+## Not done (deliberately, per Kevin's instruction)
+- No reply drafted on the Volunteering Leave thread -- Lauren is handling that separately.
+- No `owner` field added to command-centre's schema -- flagged above, needs Kevin's explicit confirmation first.
+- No change to `fetch_inbox.py` or any pipeline code -- retrieval and logging only.
+
+
 # Handover -- 18 August 2026, ~22:00 (Drew) -- Drafted Replies dashboard fix: lauren-draft-14/15/16 now visible live; mirror-schema bug found and fixed; draft-composition automation confirmed NOT built (investigate-only on that part)
 
 ## Scope
