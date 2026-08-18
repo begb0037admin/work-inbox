@@ -26,8 +26,39 @@ Only one Simon appears anywhere in this thread: **Simon Burford**, `simon.burfor
 - work-inbox `HANDOVER.md` -- this entry (commit follows below).
 - command-centre `data/tasks.json` -- new task, full mandatory backup-and-verify sequence, tier `today` given the 19 Aug deadline (see that commit's own entry for SHAs).
 
+## Draft reply available -- lauren-draft-15-20260818 (Lauren, status: pending -- NOT SENT)
+Added retroactively, 18 Aug 2026 later same day, once the draft existed (it did not exist yet when this entry was first logged). Full text pulled read-only from `agent-commons/pending-email-drafts/drafts.json` -- that file itself was not modified by this update.
+
+**Subject:** RE: Organisational Structure Update - August 2026 - DRAFT
+
+**Reply-all To:** Simon Burford <simon.burford@admin.ox.ac.uk>, Sarah Rowles <sarah.rowles@admin.ox.ac.uk>, Christopher Sanders, James Salas Guillen, Michael O'Sullivan, David Johnson
+**Cc:** Marie Cooksey, Athena Artuso
+
+**Draft body:**
+> Hi all,
+>
+> Thanks Simon -- agreed the PeopleXD impact looks limited overall, and the three new management units (0C01 Kellogg, 0C02 St Cross, 0C03 Reuben) make sense to properly align the Societies area.
+>
+> On the H&S dashboard mapping risk you flagged: that one I want to check myself before this goes live, rather than assume it carries through cleanly -- I'll validate the data-warehouse org-structure mapping tables (the ones David and Christopher built for the dashboard) against the Colleges/Societies L2->L3 move.
+>
+> Sarah -- on your timing question: [CONFIRM: proposed go-live date for this change, and whether it can be scheduled to avoid your Monday 24 Aug HESA generate]
+>
+> No further errors or omissions to flag from our side beyond the above -- this reply covers our feedback ahead of Wednesday's deadline.
+>
+> Best,
+> Kevin
+
+**Open items before this can be sent (from the draft's own `inline_flags`, not resolved here):**
+1. Go-live date is a genuine unknown -- Simon never answered Sarah's question in the retrieved thread. Kevin must supply a real date or explicitly say it's still unknown.
+2. Full email addresses for Christopher Sanders, James Salas Guillen, Michael O'Sullivan, David Johnson, Marie Cooksey, and Athena Artuso were reconstructed from the command-centre task record's description field (names only, no verbatim addresses) -- confirm the actual To/Cc header in Outlook before sending.
+3. This draft assumes Kevin wants a consolidated internal reply-all covering both Simon's proposal and Sarah's question, rather than a separate direct reply to `orgstructure@admin.ox.ac.uk` for the errors/omissions deadline -- confirm that's the intended channel.
+
+Confidence: medium (see the draft entry's own `confidence`/`corpus_provenance` fields in `drafts.json` for the full reasoning -- grounded in one real one-year-earlier precedent from Kevin's own sent items for tone/structure, with this year's specific content being Lauren's own judgment composition per her brief, not corpus-sourced).
+
+Status as of this update: **pending, not sent.** Sending is Kevin's decision, not automated by either Drew or Lauren.
+
 ## Not done
-No reply drafted or sent, per Kevin's explicit "retrieval and logging only" instruction. No attachment content extracted (the draft org-structure spreadsheet attachment itself was not opened/read -- only the message bodies).
+No reply has been sent on this thread (still true). A draft now exists (see above, composed by Lauren in a separate pass after this entry was first logged) but remains unsent pending Kevin's review of the open items listed above. No attachment content extracted (the draft org-structure spreadsheet attachment itself was not opened/read -- only the message bodies).
 
 ## Next action
 Kevin to decide how/whether to respond before the 19 Aug deadline -- either to `orgstructure@admin.ox.ac.uk` directly (errors/omissions) or to Simon/Sarah's internal discussion thread (HR Systems' position on the Societies management-unit restructuring Simon proposed). No engineering action required; this is a content/judgment decision, not a pipeline issue.
