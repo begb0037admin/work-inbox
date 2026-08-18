@@ -1,3 +1,52 @@
+# Handover -- 18 August 2026, ~22:00 (Drew) -- Drafted Replies dashboard fix: lauren-draft-14/15/16 now visible live; mirror-schema bug found and fixed; draft-composition automation confirmed NOT built (investigate-only on that part)
+
+## Scope
+Kevin had asked repeatedly why lauren-draft-14/15/16 (Laura Porter reply, Organisational Structure Update reply-all, Cority Applicant Data Import reply-all -- all composed by Lauren earlier today, 18 Aug) weren't showing on the live dashboard (https://begb0037admin.github.io/work-inbox/). Mid-task, the coordinator also relayed a second question: whether an automated/scheduled trigger for draft composition was ever actually built (the "Drew-to-Lauren drafting loop" referenced in Lauren's `drafting-loop-wiring-proposal.md`). Both addressed below. No send capability touched or built -- these remain review-only drafts, per Kevin's explicit instruction.
+
+## Part 1 -- why the 3 drafts weren't showing (real bug, now fixed)
+
+**The dashboard UI was already fully wired** -- this was not a missing-feature problem. `js/app.js` has had a working "Drafted Replies" tab (`draftedRepliesPanel`, `renderDraftedReplies()`, polling `loadDraftedReplies()` every 60s) since 10-11 Aug, reading `https://github-proxy.lelitte.co.uk/work-inbox/data/drafted_replies.json`. That file is a **mirror** (`tools/publish_drafted_replies.py`) of `agent-commons/pending-email-drafts/drafts.json` -- agent-commons is private, so the public dashboard can't read it directly; the mirror republishes only what's already meant to be shown, same pattern as `needs_reply.json`.
+
+**Root cause, confirmed live (not assumed):** ran `publish_drafted_replies.py --dry-run` and got `entries_found: 9, entries_published: 6, entries_dropped_bad_shape: 3` -- draft-14/15/16 were being silently dropped by the mirror's own schema check. `normalize_entry()` required `source_entry_id` (a single Outlook EntryID) as a "core" field. That field only exists for drafts sourced from `work-inbox/data/needs_reply.json`. Drafts 14/15/16 don't come from that path -- 14 is a direct Kevin chat-paste, 15/16 are reply-all threads Drew retrieved live via Outlook COM/ConversationID search (see the two HANDOVER entries below this one) -- so none of them ever had a `source_entry_id`, and all three were dropped every time the mirror ran.
+
+**Fix (`tools/publish_drafted_replies.py`, commit `66518aad`):** `source_entry_id` is now optional in the core-field check. When present it's used as before (tick-dedup identity + the "Open original" Outlook deep link). When absent, falls back to the draft's own `draft_id` (always unique, always present) so tick-dedup (mark sent/discard) still works correctly and doesn't collide across entries that all lack a real EntryID.
+
+**Disclosed known side effect, not fixed tonight (deliberately, per Kevin's own instruction to keep this scoped to visibility only):** for draft-14/15/16, the "Open original" button now renders (the dashboard just checks for a non-empty string) but will call `openEmail(draft_id)` instead of a real Outlook EntryID, so clicking it won't successfully open the source email in Outlook for these three specifically. Fixing this properly would need an `app.js`-side change (the `hasSource` check) and was left out to avoid a same-night frontend change on top of the mirror fix, consistent with this pipeline's known history of stacked-change regressions (see `feedback-work-inbox-cautious-change-pace`, 17 Aug). "Copy to clipboard" and "Mark sent"/"Discard" all work correctly for these three -- only the Outlook deep-link is affected.
+
+**Also found and corrected while fixing this:** the mirror hadn't been re-run since 17:02 UTC today regardless of the schema bug -- it is a standalone script, not wired into any automatic trigger (see Part 2). Ran it for real after the fix: pushed `data/drafted_replies.json` with all 9 entries (`entries_published: 9, entries_dropped_bad_shape: 0`), byte-identical-verified against the live GitHub blob (new SHA `c232403c`).
+
+**Live verification, not just claimed:** used Playwright (headless Chromium) against the actual deployed page, clicked the "Drafted Replies" tab, waited for the real `fetch()` to resolve, and read the rendered DOM. Confirmed 7 cards render (2 of the 9 published entries -- "Multi Company Setup" and the withdrawn SQL-report draft -- are already marked sent/discarded via Kevin's own previously-synced ticks, which is correct existing behaviour, not a bug). All three target drafts are present and fully rendered with subject, confidence badge, draft text, and confirmation flags:
+- "Re: Auto job alert notification email - text changes" (lauren-draft-14)
+- "RE: Organisational Structure Update - August 2026 - DRAFT" (lauren-draft-15)
+- "RE: Cority - Applicant Data Import file" (lauren-draft-16)
+
+No console errors/warnings during the run. Full-page screenshot taken confirming the visual render.
+
+## Part 2 -- draft-composition automation: confirmed NOT built (investigate-only, nothing built tonight)
+
+Checked directly rather than trusting the proposal doc's own wording:
+- **No GitHub Actions workflow exists anywhere in this pipeline that composes or mirrors drafts automatically.** `work-inbox/.github/workflows/` has exactly one workflow (`export-inbox-history.yml`, unrelated). `agent-commons/.github/workflows/` has exactly one (`validate.yml`, schema validation only). The `lauren` repo has no `.github/workflows/` directory at all.
+- **`fetch_inbox.py` never calls `publish_drafted_replies.py`.** Confirmed via a full-file grep of the live `fetch_inbox.py` -- zero references. Nor does any `.bat` file reference it (GitHub code search, zero hits). So even the mirror step Drew owns is a standalone manual script, not wired into the scheduled `Run Inbox Briefing.bat` pipeline that runs Phases 1-6 on Task Scheduler.
+- Lauren's own `drafting-loop-wiring-proposal.md` (10 Aug) states as its "Next step": *"...next scheduled Run Inbox Briefing.bat run picks up the mirror"* -- **this assumption was never actually true and is corrected here.** The scheduled pipeline does not invoke the mirror; every mirror run to date (10/11/12 Aug per Drew's own memory index, and tonight) has been a manual/dispatched run.
+- **Draft composition itself** (Lauren reading `needs_reply.json`, pulling corpus exemplars, writing `agent-commons/pending-email-drafts/drafts.json`) has, in every documented instance, been triggered by an explicit dispatch/ask (Kevin asking directly, or a coordinating session handing Lauren a specific thread) -- never by a schedule or an automatic watcher on `needs_reply.json`.
+
+**Bottom line for Kevin: the "Drew-to-Lauren drafting loop" was greenlit as a design and proven to work end-to-end with real data (10 Aug, 4 real drafts), but "wired" only ever meant "the two halves connect correctly when both are run" -- not "either half runs on its own." Nothing here is broken that was supposed to be automatic; it was never built to be automatic in the first place. Per the coordinator's explicit instruction, no automation was built tonight** -- this is investigate-and-report only, scoped separately from the visibility fix above. If Kevin wants this automated (e.g. a scheduled check of `needs_reply.json` for new entries, or wiring the mirror into `Run Inbox Briefing.bat`), that's a real, separate, larger piece of work involving both Drew and Lauren, not a tonight-sized addition on top of a same-night visibility fix.
+
+## Where this is logged
+- work-inbox `HANDOVER.md` -- this entry.
+- work-inbox `tools/publish_drafted_replies.py` -- fixed, commit `66518aad`.
+- work-inbox `data/drafted_replies.json` -- republished with all 9 entries, commit reflected in the file's own `new_sha` (`c232403c`).
+
+## Not done
+- The cosmetic "Open original" mismatch for drafts without a real Outlook EntryID (14/15/16) -- disclosed above, not fixed.
+- No automation built for either draft composition or the mirror step -- investigate-and-report only, per explicit instruction.
+- No send capability of any kind added or touched.
+
+## Next action
+None required from Kevin to see the drafts -- they're live now. If Kevin wants the drafting loop made automatic (composition, the mirror, or both), that's a distinct scoped task for a future session, not carried forward as an implicit TODO here.
+
+---
+
 # Handover -- 18 August 2026, ~21:30 (Drew) -- HIGH PRIORITY / URGENT: "Cority - Applicant Data Import file" thread fully retrieved and unpacked, existing command-centre task escalated (not duplicated)
 
 ## Scope
