@@ -1,3 +1,30 @@
+# Handover -- 19 August 2026, ~00:10 (Drew) -- DECISION LOGGED: Kevin chose Option B2 (server-side GitHub Action auto-composition); NOT to be built until tonight's (19 Aug) session, ANTHROPIC_API_KEY-as-Actions-secret sign-off still required first
+
+## Exact next action for tonight's (19 Aug) resume
+**Build Option B2 as scoped below. Before writing any workflow YAML, first confirm Kevin's explicit sign-off on storing `ANTHROPIC_API_KEY` as a GitHub Actions secret** -- this is a new credential location (today's rule is Windows user env vars only) and a real security-posture change that has not been confirmed yet, only flagged as needing confirmation. Do not assume it and start building around it.
+
+## Decision made
+Of the three options logged in the previous entry (commit `f01f9895`) -- (a) one-off manual Lauren dispatch to clear the backlog, (b) permanent automation, (c) deliberately stay manual -- **Kevin chose (b), specifically the server-side GitHub Action sub-variant ("B2") over a local `.bat`-chain addition ("B1") and over staying manual ("C").** He explicitly does not want it built right now -- he wants to look at it during tonight's (19 August) evening session. Logging this now so it isn't forgotten or re-litigated from scratch at the start of that session.
+
+**The 2-item backlog was NOT cleared today.** Kevin chose to wait for the permanent B2 fix rather than a one-off manual dispatch of Lauren. The two entries (Michael O'Sullivan / KPI presentation discrepancy, 13 Aug; Michael O'Sullivan / NHS Pension tiers, 12 Aug) remain undrafted in `work-inbox/data/needs_reply.json` and should be picked up automatically once B2 ships -- or manually before then, only if Kevin asks for that in the meantime.
+
+## Exact shape of B2, as already scoped -- build from this, don't re-derive it
+- A GitHub Action, repo TBD at build time (likely `work-inbox` or `agent-commons`, whichever should own/trigger off `needs_reply.json` changes -- decide this as the first concrete build step), triggered when `work-inbox/data/needs_reply.json` changes.
+- On trigger: diff against `agent-commons/pending-email-drafts/drafts.json` to find `needs_reply.json` entries that don't yet have a draft.
+- Apply the existing 60-day age cutoff rule that already governs Lauren's drafting -- **reuse it, don't reinvent it.** Locate where that rule currently lives in Lauren's pipeline before building (see Drew's own memory index / `feedback-email-drafting-age-cutoff` for the 12 Aug 2026 origin of that rule -- confirm the live implementation location before reusing).
+- For each qualifying entry, call the Anthropic API server-side, from the Action itself, with a system prompt encoding Lauren's drafting style/tone (the same style corpus already built under `agent-commons/corpus/*`, per issue #3), generate reply text, and write it into `agent-commons/pending-email-drafts/drafts.json`.
+- The existing `publish_drafted_replies.py` mirror step then picks the new entry up and republishes to the dashboard as normal on the next scheduled "Work Inbox Briefing" cycle -- **no change needed to that script.**
+- **Open decision, must be confirmed before/during tonight's build, not assumed:** storing `ANTHROPIC_API_KEY` as a GitHub Actions secret. Today's hard rule (work-inbox `CLAUDE.md`, Drew's own `AGENT.md`) is that this credential lives only in local Windows user env vars, never in any file, never anywhere else. A GitHub Actions secret is a genuinely new storage location for it and is a real security-posture change -- flagged here prominently as the first thing to confirm with Kevin, before any workflow YAML is written.
+- **Confirmed: B2 does not touch the "never send/touch Outlook, never touch Graph API" boundary.** It only ever writes generated text into `drafts.json` for dashboard review -- functionally identical to a manual Lauren dispatch from the pipeline's-eye view, just triggered automatically instead of by request. Sending remains entirely manual and untouched; Kevin/the principal still reviews and sends every draft by hand, same as today.
+
+## Not done
+- B2 not built -- explicitly deferred to tonight's (19 Aug) session per Kevin's own instruction.
+- No `ANTHROPIC_API_KEY` GitHub Actions secret created -- sign-off not yet obtained, must be confirmed first.
+- No workflow YAML written.
+- The 2-item backlog not cleared -- Kevin's own choice, waiting on B2 rather than a one-off dispatch.
+
+---
+
 # Handover -- 18 August 2026, ~23:45 (Drew) -- FULL ARC LOGGED, per Kevin: "everything discussed and discovered must be logged and hardcoded" -- stopping for the night, exact resume point below
 
 ## Why this entry exists
