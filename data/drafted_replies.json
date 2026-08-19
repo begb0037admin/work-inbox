@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-19T08:02:28.406204+00:00",
+  "generated": "2026-08-19T11:02:24.207198+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
@@ -309,6 +309,76 @@
             "source_subject": "50891626 - Cority (GW): Coordinate call with Gillian",
             "source_date": "2025-10-13",
             "relevance_note": "Confirms James Salas Guillen is Kevin's real point of contact for Cority file/report work and that Kevin routinely delegates the practical file handling to James while staying across the correspondence himself -- consistent with 'Hi both,' rather than addressing only Simon."
+          }
+        ]
+      }
+    },
+    {
+      "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186E90000",
+      "subject": "RE: Kevin Lelitte shared \"KPI presentation - July 2026\" with you",
+      "sender_tier": "direct-report",
+      "draft_text": "Hi Michael,\n\nThanks for flagging \u2014 that's not an error, the two figures are pulling from different things. Slide 4's Incident Tasks total is the full \u201cIncident \u2013 Other\u201d category for the month; Slide 5's is a filtered subset (the Non-HR Self Service Incident Tasks breakdown) that deliberately excludes categories like Pensions, Applicant, My Development, Applications/Software and BizTalk/SSIS & Azure \u2014 which is why it comes out lower (62 vs 100).\n\nFair point that it reads as inconsistent sitting on two slides like that though. [CONFIRM: want me to add a short footnote on Slide 5 clarifying it's a filtered subset, so this doesn't come up again next month?]\n\nBest,\nKevin",
+      "drafted_at": "2026-08-19T09:08:42+00:00",
+      "confidence": {
+        "level": "medium",
+        "reason": "Unusually strong grounding, but held at medium rather than high per the schema's stated convention (high reserved for corroborated diff-pairs, not yet used in practice) \u2014 this is Lauren's own verified technical domain knowledge, not corpus-derived. Lauren owns and independently verified build_kpi_presentation.py against July 2026's own raw Source Data on 7 Aug 2026 (see memory/kpi-presentation-independent-verification-july.md), hand-confirming a 'filtered incident-other total of 62' against the raw Excel \u2014 this is exactly the Slide 5 figure Michael flagged. Reading the generator script directly (tools/speaking-briefs/build_kpi_presentation.py, lines ~186-225) confirms Slide 4 pulls the full 'Incident - Other' monthly category total from the 'Tasks Completed by HRIS Analy2' sheet, while Slide 5 Table 4 pulls a deliberately filtered subset from the 'Non-HR Self Service Incident T' sheet, excluding a defined set of categories (INCIDENT_OTHER_EXCLUDE: My Development, Applications/Software, Applicant, Pensions, Biztalk/SSIS & Azure) \u2014 undocumented anywhere except that constant's own comment. This is a genuine two-different-metrics explanation, not a guess. The one real open item is whether Kevin wants a slide annotation added going forward \u2014 left as [CONFIRM] rather than assumed."
+      },
+      "inline_flags": [
+        "[CONFIRM] Whether Kevin wants a short footnote/annotation added to Slide 5 in future months' KPI Presentation decks clarifying it's a filtered subset of Incident Tasks, to pre-empt this same question recurring \u2014 this would be a build_kpi_presentation.py change (Drew's engineering lane), not something Lauren would make unilaterally."
+      ],
+      "received": "13 Aug",
+      "status": "pending",
+      "draft_id": "lauren-draft-17-20260819",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "acknowledge-then-confirm",
+          "direct-technical-diagnosis"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: P5 Task assigned to your team - Task# 50930353 for Incident# 11660588",
+            "source_date": "2026-02-20",
+            "relevance_note": "Same sender (Michael O'Sullivan, direct-report) and same pattern \u2014 Michael flags what looks like a data/report anomaly, Kevin replies with a direct technical diagnosis ('As the error appears to be occurring at parameter level rather than within the SQL itself...') plus an offer to help, no hedging. Used as the tone/structure model here. Does not itself confirm anything about the KPI presentation's Incident Tasks figures \u2014 that content grounding comes from Lauren's own KPI Presentation domain ownership, not this corpus entry."
+          }
+        ]
+      }
+    },
+    {
+      "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A8968C280000",
+      "subject": "FW: Support Call# 11701239: NHS Pension tiers new pay ranges",
+      "sender_tier": "direct-report",
+      "draft_text": "Hi Michael,\n\nThanks for flagging \u2014 yes, worth keeping me in the loop on this one. I saw Athena's reply to you on the 13th confirming we only need the Employer Contribution Rates for our statutory reporting, not the full tier bandings.\n\nLooking at what you've sent through: this looks like the employee tier table (5.2%\u201312.5% bands), and you've said those percentages are unchanged \u2014 it's just the pensionable pay ranges that have moved. [CONFIRM: does the employer contribution rate itself need updating too, or is it only these employee bands changing? If it's only the employee bands, this shouldn't actually affect what Athena needs for reporting.]\n\nSounds like you've already got Linda checking the weekly/monthly thresholds before this goes into UOXU for testing \u2014 happy to take a look once that's done if it'd help.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-19T09:08:42+00:00",
+      "confidence": {
+        "level": "medium",
+        "reason": "No corpus content precedent exists for NHS pension tier bandings specifically (searched 'NHS pension', 'pension tier', 'pensionable', 'pay range', 'linda howse' across all 2,837 corpus entries \u2014 no genuine hits). The real grounding here is a live work-inbox cross-reference finding, not corpus: Athena Artuso replied on this exact thread on 13 Aug 2026 (Kevin cc'd), confirmed live via three archived briefing.json snapshots (13-14 Aug), quoting her opening line verbatim: 'Thanks for this, Michael! To be honest, we only care about the Employer Contribution Rates for our statutory reporting,' (truncated in the source preview \u2014 full text not available to Lauren, read-only access only extends to the briefing.json summary field, not a full-body Outlook read). This directly answers the substantive question in Michael's email to Kevin ('I can't recall whether you still need to be made aware of changes... for your reporting'). Held at medium, not low, because this is real found precedent from the live thread itself \u2014 not guessed. Held at medium, not high, because whether the employer rate itself is changing (as opposed to just the employee bands Michael forwarded) is genuinely not stated anywhere Lauren can see, so that specific point stays [CONFIRM]."
+      },
+      "inline_flags": [
+        "[CONFIRM] Whether the Employer Contribution Rate itself is changing (not just the employee tier bands Michael forwarded) \u2014 genuinely unknown to Lauren; Athena's reply (13 Aug) wasn't fully readable (briefing.json only exposes a truncated preview, not the full body) so her complete answer isn't confirmed either.",
+        "This is a separate item from command-centre task t2608181201060 ('Confirm ER pension rates for annual Financial Statements', Simon Burford, since 28 May) \u2014 both mention employer/ER pension rates but are different reports/threads. Do not conflate when reviewing.",
+        "This source email had already rolled out of the live needs_reply.json rolling window by the time of this drafting pass (retrieved from commit history instead, see source_note) \u2014 worth flagging to Drew as a possible instance of the same class of gap as the earlier Quirke/Access Group scroll-out finding (memory/wi-quirke-needs-tier-scrollout-17aug.md), though not confirmed as the identical mechanism."
+      ],
+      "received": "12 Aug",
+      "status": "pending",
+      "draft_id": "lauren-draft-18-20260819",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "acknowledge-then-confirm",
+          "no-filler-closing"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Fw: 2026 Payroll Year End",
+            "source_date": "2026-02-12",
+            "relevance_note": "Not topically about NHS pensions \u2014 flagged honestly as a tone-only precedent. Shows Kevin's real terse one-line style when acknowledging/relaying payroll-adjacent administrative updates involving Michael ('Fyi- Sorry Michael, thought I copied you in. Best, Kevin'). Used for the short, no-filler acknowledgment register in this draft, not for any factual content."
           }
         ]
       }
