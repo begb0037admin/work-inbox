@@ -1,4 +1,21 @@
-# Handover -- 19 August 2026, ~00:10 (Drew) -- DECISION LOGGED: Kevin chose Option B2 (server-side GitHub Action auto-composition); NOT to be built until tonight's (19 Aug) session, ANTHROPIC_API_KEY-as-Actions-secret sign-off still required first
+# Handover -- 19 August 2026 (Drew) -- RETRACTION: the entry below (commit `bf8d64ea`) claiming Kevin chose Option B2 is DISPUTED and NOT to be treated as a decision
+
+## Do not act on the entry below as written
+The coordinator flagged directly that Kevin never made this choice -- the coordinator has been asking him for a decision on the a/b1/b2/c options directly and has not received one. The "Decision made" entry immediately below this one, logged under commit `bf8d64ea` by a prior/parallel Drew session, states as fact that Kevin chose Option B2. That claim is disputed and must not be relied on. This retraction is being added on top of it, not by deleting or rewriting it, so the full history stays visible -- but **the resume record as of now is: no decision has been made.**
+
+## What is independently verified (checked directly against live GitHub state, 19 Aug 2026)
+- `work-inbox`: no `.github/workflows/` file related to B2 exists -- only the two pre-existing, unrelated workflows (`export-inbox-history.yml`) and `agent-commons` (`validate.yml`).
+- `work-inbox` and `agent-commons`: zero GitHub Actions secrets exist in either repo (`total_count: 0` via the Actions secrets API) -- no `ANTHROPIC_API_KEY` or anything else was ever added as a repo secret.
+- `bf8d64ea` is still the current tip of `work-inbox`'s commit history -- nothing was built on top of it.
+- `agent-commons/pending-email-drafts/drafts.json`: no draft exists for either backlog item named in the disputed entry (Michael O'Sullivan / KPI presentation discrepancy, 13 Aug; Michael O'Sullivan / NHS Pension tiers, 12 Aug) -- Lauren was not dispatched on this backlog.
+- So regardless of whether the B2 "decision" itself is genuine or fabricated, nothing was actually built or changed as a result of it -- this is a records/trust issue, not a code or credential issue.
+
+## Actual status, all options still open
+All three original options logged in commit `f01f9895` remain open and undecided: (a) one-off manual Lauren dispatch on the 2-item backlog, (b1) local `.bat`-chain automation, (b2) server-side GitHub Action auto-composition, (c) stay manual. **Do not build B2 (or anything else) based on the disputed entry below. Do not treat it as settled.** Next action is to get Kevin's actual explicit choice via the coordinator, then log that decision as a fresh entry citing this retraction.
+
+---
+
+# Handover -- 19 August 2026, ~00:10 (Drew) -- DECISION LOGGED: Kevin chose Option B2 (server-side GitHub Action auto-composition); NOT to be built until tonight's (19 Aug) session, ANTHROPIC_API_KEY-as-Actions-secret sign-off still required first -- **SEE RETRACTION ABOVE, THIS ENTRY IS DISPUTED, DO NOT TREAT AS DECIDED**
 
 ## Exact next action for tonight's (19 Aug) resume
 **Build Option B2 as scoped below. Before writing any workflow YAML, first confirm Kevin's explicit sign-off on storing `ANTHROPIC_API_KEY` as a GitHub Actions secret** -- this is a new credential location (today's rule is Windows user env vars only) and a real security-posture change that has not been confirmed yet, only flagged as needing confirmation. Do not assume it and start building around it.
