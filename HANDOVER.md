@@ -1,3 +1,26 @@
+# Handover -- 19 August 2026, ~09:00 UTC (Drew) -- GENUINE DECISION: Kevin chose (a) now + (b2) later, received directly from Kevin via the coordinator in a live conversation -- this is NOT the disputed `bf8d64ea` entry further below, see explicit contrast
+
+## This entry is genuine -- how it differs from the disputed `bf8d64ea` entry below
+Everything below this entry, down through the "RETRACTION" and "DISPUTED" entries, remains accurate history and is not being overwritten. That thread ended with: nothing decided, all four options (a)/(b1)/(b2)/(c) still open, and a prior/parallel session's claim that Kevin had chosen B2 was independently verified to be false (no evidence he'd ever been asked-and-answered). **This entry is different in kind, not just in content.** Kevin has now given his actual explicit decision directly to the coordinator, for the first time in this whole thread, in the coordinator's own words: "(a) now, (b2) later." This was received live from Kevin in the current conversation, not inferred, not relayed secondhand through a prior session's own account of what Kevin supposedly said.
+
+## The decision, stated precisely
+- **(a) — actioned now.** Draft the 2-item backlog (Michael O'Sullivan / KPI presentation discrepancy, 13 Aug; Michael O'Sullivan / NHS Pension tiers, 12 Aug). The coordinator is dispatching Lauren for this in parallel to Drew's own task of logging this decision -- Drew is not doing the drafting itself.
+- **(b2) — deferred, not started.** Kevin wants the server-side GitHub Action auto-composition approach (exact shape already scoped in the `~00:10` entry further below: trigger on `needs_reply.json` changes, diff against `drafts.json`, call the Anthropic API server-side with Lauren's style corpus, write into `drafts.json`, existing `publish_drafted_replies.py` mirror picks it up unchanged) built LATER, not now. This is a genuine scheduling decision from Kevin, not a go-ahead to start building.
+- **(b1) local `.bat`-chain automation and (c) stay manual were not chosen** -- (a)+(b2) supersedes needing to decide between them; no further action on b1/c.
+
+## What "later" does NOT authorize -- read before touching b2
+Building b2 still requires a **separate, explicit go-ahead from Kevin specifically on storing `ANTHROPIC_API_KEY` as a GitHub Actions secret**, before any workflow YAML is written. This was already flagged as an open, unconfirmed item in the `~00:10` entry further below (today's rule, per work-inbox `CLAUDE.md` and Drew's own `AGENT.md`, is that this credential lives only in local Windows user env vars, never anywhere else -- a GitHub Actions secret is a new storage location and a real security-posture change). "Later" is scheduling intent only, not that sign-off. **Do not start building b2 now, and do not treat a future "let's do b2 now" as also covering the secret question -- ask for that specifically.**
+
+## Exact resume point for b2, when Kevin wants to proceed
+1. Get Kevin's explicit sign-off on the `ANTHROPIC_API_KEY`-as-GitHub-Actions-secret step, specifically, first.
+2. Only then scope (repo TBD, likely `work-inbox` or `agent-commons`) and build the GitHub Action per the shape already documented in the `~00:10` entry below.
+
+## What is NOT done as of this entry
+- The 2-item backlog: dispatched to Lauren by the coordinator, in parallel -- not yet confirmed drafted by Drew directly (Drew did not do the drafting and did not independently verify Lauren's output as part of this logging task).
+- No workflow YAML written, no GitHub Actions secret created, no b2 build started.
+
+---
+
 # Handover -- 19 August 2026 (Drew) -- RETRACTION: the entry below (commit `bf8d64ea`) claiming Kevin chose Option B2 is DISPUTED and NOT to be treated as a decision
 
 ## Do not act on the entry below as written
