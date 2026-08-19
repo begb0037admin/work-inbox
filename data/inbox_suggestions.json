@@ -1,14 +1,24 @@
 {
-  "generated_at": "2026-08-19 09:00",
+  "generated_at": "2026-08-19 12:00",
   "new_tasks": [
     {
-      "title": "Complete DTP1334 SHSMS supplier evaluation by 21 August",
+      "title": "Review DTP1334 SHSMS supplier evaluations and submit feedback by 21 Aug",
       "tier": "week",
-      "description": "Helen Harbour has circulated the Strategic Health & Safety Management System project supplier requirements evaluations with a deadline of Friday 21 August 2026. Kevin needs to review supplier submissions and clarifications and contribute to the evaluation process before the deadline.",
+      "description": "Helen Harbour is coordinating supplier requirements evaluations for the Strategic Health & Safety Management System project (DTP1334) with a deadline of Friday 21 August. Kevin needs to review supplier submissions and clarifications and contribute to the evaluation process by the deadline.",
       "email_subject": "Strategic Health & Safety Management System project supplier requirements evaluations; upcoming deadline of Friday 21 August",
       "email_from": "Helen Harbour",
       "received": "2026-08-13 16:10",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B02200000"
+    },
+    {
+      "title": "Review intranet hyperlinks with Athena Artuso",
+      "tier": "week",
+      "description": "Athena Artuso has sent a request to review intranet hyperlinks. Kevin needs to understand the scope and provide input or approve the changes.",
+      "email_subject": "Review of intranet hyperlinks",
+      "email_from": "Athena Artuso",
+      "received": "2026-08-13 16:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B02210000",
+      "auto_promoted": true
     },
     {
       "title": "Attend planning meeting for departments moving to 38-day balance",
@@ -23,40 +33,58 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608181201061",
-      "task_title": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
-      "note": "Kevin bumped this email on 18 Aug, indicating it remains an open action requiring follow-up.",
-      "email_subject": "RE: Volunteering Leave",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-18 09:39",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007ACBB5F110000"
+      "task_id": "t039",
+      "task_title": "Summer support cover -- training checks during Julie's leave",
+      "note": "Marie Cooksey advised that Beth is also stepping away unwell, leaving no helpdesk cover; Sarah Rowles is coordinating alternative support.",
+      "email_subject": "RE: Reduced Help Desk Support",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-13 11:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B021B0000"
     },
     {
-      "task_id": "t2608121801281",
-      "task_title": "Review PeopleXD uplift timeline from Jessica Oldershaw",
-      "note": "Michael O'Sullivan provided an update on PeopleXD platform maintenance scheduled for Friday 28 August between 8-10pm that may impact services.",
-      "email_subject": "FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-17 08:12",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007AAB5BD9C0000"
+      "task_id": "t039",
+      "task_title": "Summer support cover -- training checks during Julie's leave",
+      "note": "Sarah Rowles confirmed Ant is covering applicant inbox today and Athena will discuss re-prioritisation of other helpdesk tasks.",
+      "email_subject": "RE: Reduced Help Desk Support",
+      "email_from": "Sarah Rowles",
+      "received": "2026-08-13 09:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B021A0000"
     },
     {
-      "task_id": "t030",
-      "task_title": "Cority SFTP production feed error -- 22 June",
-      "note": "Cority Integration Platform reported another SFTP connection error on 14 August at 17:00; the CHI Team has been notified and is working on resolution.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-14 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-14 18:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AA5BBE7E0000"
+      "task_id": "t2608181201060",
+      "task_title": "Confirm ER pension rates for annual Financial Statements",
+      "note": "Kevin bumped Simon Burford's email on 18 Aug regarding confirmation of employer pension rates for annual Financial Statements.",
+      "email_subject": "Fw: Confirming ERs pension rates for annual Financial Statements -- FINAL",
+      "email_from": "Kevin (sent to: Kevin Lelitte)",
+      "received": "2026-08-18 10:24",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39E80000"
     },
     {
-      "task_id": "t2608121801280",
-      "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Michael O'Sullivan provided context on the Balance Period End Matrix process for annual leave year-end and system calendar extension procedures.",
-      "email_subject": "RE: Balance Period End Matrix",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-14 12:20",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007AA0D4B4F0000"
+      "task_id": "t2608181201062",
+      "task_title": "Follow up on EcoOnline supplier engagement",
+      "note": "Kevin bumped the EcoOnline supplier engagement email on 18 Aug, flagging it for follow-up action.",
+      "email_subject": "Fw: EcoOnline /University of Oxford",
+      "email_from": "Kevin (sent to: Kevin Lelitte)",
+      "received": "2026-08-18 10:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39E60000"
+    },
+    {
+      "task_id": "t2608180901160",
+      "task_title": "Confirm appointment availability with Chris Little",
+      "note": "Kevin confirmed receipt of appointment details from Chris Little for 11 September.",
+      "email_subject": "RE: Appointment request",
+      "email_from": "Kevin (sent to: 'Chris Little')",
+      "received": "2026-08-18 12:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077C2A011B0000"
+    },
+    {
+      "task_id": "t1781204987882",
+      "task_title": "Holiday Records - 3 Reports Created -- approved, awaiting scheduling (case 69001638)",
+      "note": "Kevin replied to Alan Quirke and Marie Cooksey approving the Holiday Records 3 Reports project and confirming it is ready to schedule with Access Group.",
+      "email_subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "email_from": "Kevin (sent to: 'Alan Quirke'; Marie Cooksey)",
+      "received": "2026-08-19 11:32",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077C2A011C0000"
     }
   ]
 }
