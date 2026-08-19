@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18 18:00",
+  "generated_at": "2026-08-19 07:43",
   "new_tasks": [
     {
       "title": "Attend planning meeting for departments moving to 38-day balance",
@@ -14,45 +14,9 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608111331410",
-      "task_title": "Review Cority Applicant Data Import update from James",
-      "note": "Simon Burford is exploring automated CSV export options for the Cority Applicant Data Import, building on James Salas Guillen's earlier responses.",
-      "email_subject": "RE: Cority - Applicant Data Import file",
-      "email_from": "Simon Burford",
-      "received": "2026-08-18 17:56",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F7C0000"
-    },
-    {
-      "task_id": "t2608111331410",
-      "task_title": "Review Cority Applicant Data Import update from James",
-      "note": "James Salas Guillen has provided detailed responses to Simon's questions on the Cority Applicant Data Import file format and configuration.",
-      "email_subject": "RE: Cority - Applicant Data Import file",
-      "email_from": "James Salas Guillen",
-      "received": "2026-08-18 16:41",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F7B0000"
-    },
-    {
-      "task_id": "t2608181501150",
-      "task_title": "Create user guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements",
-      "note": "Julie Hickman has scheduled a Teams meeting for planning departments' move to 38-day balance scheme.",
-      "email_subject": "Planning for depts move to 38 day balance ",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-17 15:06",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7CA0000"
-    },
-    {
-      "task_id": "t2608181501150",
-      "task_title": "Create user guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements",
-      "note": "Julie Hickman reports productive initial conversation with GLAM about their 38-day balance implementation needs and struggles.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-17 14:57",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C90000"
-    },
-    {
-      "task_id": "t2608031500570",
-      "task_title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
-      "note": "Michael O'Sullivan is forwarding notification of planned PeopleXD maintenance on Friday 28 August between 8-10 pm that may impact services.",
+      "task_id": "task-1787072363309",
+      "task_title": "URGENT -- Organisational Structure Update - August 2026 - DRAFT (Simon Burford / Sarah Rowles thread)",
+      "note": "Michael O'Sullivan has forwarded a PeopleXD platform maintenance notice for Friday 28 August between 8-10 pm that will impact services during the org structure implementation period.",
       "email_subject": "FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance",
       "email_from": "Michael O'Sullivan",
       "received": "2026-08-17 08:12",
@@ -61,11 +25,38 @@
     {
       "task_id": "t2608121801281",
       "task_title": "Review PeopleXD uplift timeline from Jessica Oldershaw",
-      "note": "Michael O'Sullivan has provided detailed analysis of uplift timeline and resource implications for FA team, recommending October implementation.",
-      "email_subject": "RE: Timeline for implementation of uplift",
+      "note": "Michael O'Sullivan has provided detailed information on the Balance Period End Matrix process for annual leave year-end configuration for Company 1.",
+      "email_subject": "RE: Balance Period End Matrix",
       "email_from": "Michael O'Sullivan",
-      "received": "2026-08-13 09:36",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186EA0000"
+      "received": "2026-08-14 12:20",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007AA0D4B4F0000"
+    },
+    {
+      "task_id": "t040",
+      "task_title": "Work Inbox -- render CC Today/This Week tasks as cards in priority panel",
+      "note": "Michael O'Sullivan has identified discrepancies in the KPI presentation slides (Incident Tasks count on Slide 4 differs from Slide 3).",
+      "email_subject": "RE: Kevin Lelitte shared \"KPI presentation - July 2026\" with you",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-13 08:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186E90000"
+    },
+    {
+      "task_id": "t2608071801052",
+      "task_title": "Confirm UOXU/UOXC refresh approach for Company 90 testing",
+      "note": "Michael O'Sullivan confirms the decision to proceed with clone from UOXP into UOXC only, scheduled by Access Group.",
+      "email_subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-12 10:56",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A8968C290000"
+    },
+    {
+      "task_id": "t034",
+      "task_title": "Sickness Absence Reporting -- open absence bug",
+      "note": "Michael O'Sullivan is flagging potential changes to NHS pension tier bandings that may impact reporting and require configuration updates.",
+      "email_subject": "FW: Support Call# 11701239: NHS Pension tiers new pay ranges",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-12 08:57",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A8968C280000"
     }
   ]
 }
