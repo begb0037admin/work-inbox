@@ -2188,6 +2188,243 @@ if same_briefing_date(existing_briefing, today_str) and not absences and existin
     absences = sorted(existing_briefing.get("absences", []))
     print(f"Absence preservation - reused {len(absences)} existing same-day absence(s)")
 
+# -- Phase 3.9 -- Needs/Urgent scroll-out persistence, v2 (20 Aug 2026) --
+# REBUILT from a fresh design pass, not a cherry-pick of the old revert. The
+# original version of this (17 Aug 2026, commits 5216d9fd/640b44ee) was
+# fully reverted the same night at Kevin's explicit request -- but the
+# revert was about resetting a messy same-night investigation, not a flaw
+# found in this mechanism itself: by the time of the revert, Phase 3.9 had
+# already been proven live end-to-end (a real "carried:2" production run,
+# plus a real production round-trip proving the done-tick resolution signal
+# worked). Kevin separately asked for a fresh design pass rather than a
+# quick re-patch, so the core mechanism below was deliberately re-evaluated,
+# not just restored -- kept where it was sound, changed in two places (see
+# "What changed from v1" below).
+#
+# Problem (unchanged from v1, still real, still verified): Phase 1 only
+# ever pulls the 50 newest Outlook items. An item the AI correctly triages
+# into Urgent/Needs has no durable state once it scrolls out of that
+# window -- it just silently vanishes from every tier, even though nothing
+# about it was ever resolved. Real-world case that exposed this: an Alan
+# Quirke/Access Group vendor email, correctly triaged Needs on 31 Jul,
+# gone without a trace by 2 Aug (see wi-quirke-needs-tier-scrollout-17aug.md
+# in the `drew` repo for the full archived-briefing evidence trail).
+#
+# Mechanism:
+# 1. Every run, after Phase 3.2/3.3/3.3b have finished (so cards already
+#    carry their AI summary/needs_reply verdict), snapshot every currently-
+#    live Urgent/Needs card into triage_ledger.json under
+#    "tracked_needs_urgent", keyed by entry_id.
+# 2. Any previously-tracked entry_id NOT in this run's fresh urgent/needs
+#    (i.e. it scrolled out of the pull) is checked against three
+#    independent resolution signals, in this order:
+#      a. Outlook GetItemFromID -> item.Parent.EntryID vs the Inbox's own
+#         EntryID. Moved out of the Inbox (filed/archived/deleted) ->
+#         Kevin has dealt with it -> resolved, drop. Lookup throwing for
+#         any reason -> UNKNOWN, fail OPEN (still carried) -- confirmed
+#         live before v1 was built that Outlook's LastVerbExecuted
+#         property is not reliably readable through this COM binding, so
+#         it is deliberately not used; failing open on any lookup
+#         uncertainty is the safer failure mode given the bug this fixes
+#         is silent vanishing, not over-carrying.
+#      b. Command Centre tasks.json: a task whose entryId matches and is
+#         done:true -> resolved via the other surface, drop.
+#      c. The dashboard's own data/ticks.json: a true-valued
+#         'eid_<entry_id>' key -> Kevin ticked it done in the UI -> drop.
+#         This signal did not exist in the very first same-day cut of v1
+#         and was added hours later that same night after a live "mark
+#         done, refresh, it comes back" incident -- it ships here from the
+#         start this time, not as an emergency same-night patch (see "What
+#         changed from v1", point 1).
+# 3. Safety valve only, not the primary mechanism: an item carried for more
+#    than 90 days without resolving gets a visible WARNING logged, but is
+#    still carried -- Kevin was explicit these should not silently vanish,
+#    so this does not reintroduce a silent time-based drop.
+#
+# What changed from v1:
+# 1. Tick-key stability ships together with this fix, not as a same-night
+#    follow-on patch. v1's real incident on 17 Aug was caused by exactly
+#    this ordering problem: Phase 3.9 shipped first, keyed against
+#    js/app.js's THEN-positional tick storage keys
+#    (`<calendar-day>_pri_<sec>_<i>`), which broke the moment an item was
+#    reordered, dragged, or carried across a day boundary by this very
+#    mechanism -- carrying an item across days was new behaviour Phase 3.9
+#    itself introduced, and it collided with a pre-existing tick-key bug
+#    nothing had previously exercised hard enough to surface. This time,
+#    js/app.js's card/tick identity was made day-independent and
+#    position-independent (same _priGetKey()-derived id used for the DOM
+#    element AND the tick storage key, see the drag-and-drop architecture
+#    rework in the same changeset) BEFORE this mechanism goes live, so
+#    resolution signal (c) above can never resurrect a ticked item on
+#    reorder or day rollover.
+# 2. A dry-run safety valve (WI_PHASE39_DRY_RUN env var) -- v1 had none;
+#    the only way to validate it was to let it write to production
+#    triage_ledger.json/briefing.json and inspect the result after the
+#    fact. This version can run the full real Outlook/CC/tick resolution
+#    logic against live data and log exactly what it WOULD do, with zero
+#    writes, so a session (or Kevin) can verify correctness against real
+#    live data before ever letting it touch main. Used to verify this
+#    build itself, see the `drew` repo's memory entry for this session.
+# 3. Carried-forward cards are tagged `_carried_forward: true` in the
+#    injected copy -- pure metadata, not rendered by index.html/app.js
+#    (confirmed: card rendering only reads specific known fields, unknown
+#    extra fields are inert), added purely so a future debugging session
+#    can immediately tell "was this card fresh this run or resurrected
+#    from the ledger" without cross-referencing the ledger by hand. No new
+#    UI tier, no visible badge, no AI-prompt change -- same narrow scoping
+#    Kevin gave the original fix.
+#
+# Deliberately NOT rebuilt as part of this: the one-time 48-item historical
+# backfill sweep v1 also did (re-scanning ~101 archived briefings and
+# re-verdicting historical candidates with the live AI prompt). That was a
+# one-off recovery action for the backlog that had already accumulated
+# during the pre-fix gap, not part of the ongoing mechanism -- rebuilding
+# it wasn't asked for in this pass and isn't needed for the mechanism
+# itself to work correctly going forward; flagged to Kevin as a separate,
+# optional follow-up if he wants that historical recovery re-run.
+_WI_PHASE39_DRY_RUN = os.environ.get("WI_PHASE39_DRY_RUN", "").strip().lower() in ("1", "true", "yes")
+try:
+    _persist_ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
+    _persist_ro_headers = {"Authorization": f"token {GITHUB_PAT}", "User-Agent": "work-inbox-script"} if GITHUB_PAT else None
+    _persist_ledger = {"applied": {}, "promoted": {}, "tracked_needs_urgent": {}}
+    _persist_sha = None
+    if GITHUB_PAT:
+        try:
+            _pmeta = _gh_get(_persist_ledger_url, _persist_ro_headers)
+            _persist_sha = _pmeta.get("sha")
+            _persist_ledger = json.loads(base64.b64decode(_pmeta["content"]).decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+        except Exception as e:
+            print(f"WARNING: Phase 3.9 could not read triage_ledger.json, starting fresh - {e}")
+    if "tracked_needs_urgent" not in _persist_ledger:
+        _persist_ledger["tracked_needs_urgent"] = {}
+    tracked = _persist_ledger["tracked_needs_urgent"]
+
+    # Command Centre done-task entry_ids, for the resolution cross-check.
+    _cc_done_entry_ids = set()
+    try:
+        _cc_task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+        for _t in _cc_task_list:
+            if _t.get("done") and _t.get("entryId"):
+                _cc_done_entry_ids.add(_t["entryId"])
+    except Exception:
+        pass
+
+    # Dashboard-ticked-done entry_ids, for the resolution cross-check. Reads
+    # data/ticks.json directly (this script has no access to the dashboard's
+    # own in-browser copy) and treats a true-valued 'eid_<entry_id>' key as
+    # a genuine resolution, same as the CC-done check above.
+    _ticked_done_entry_ids = set()
+    try:
+        _ticks_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/ticks.json"
+        _ticks_meta = _gh_get(_ticks_url, _persist_ro_headers)
+        _ticks_doc = json.loads(base64.b64decode(_ticks_meta["content"]).decode("utf-8"))
+        for _k, _v in (_ticks_doc.get("ticks") or {}).items():
+            if _v is True and isinstance(_k, str) and _k.startswith("eid_"):
+                _ticked_done_entry_ids.add(_k[4:])
+    except Exception as e:
+        print(f"WARNING: Phase 3.9 could not read data/ticks.json for done-tick cross-check - {e}")
+
+    today_iso = datetime.now().strftime("%Y-%m-%d")
+
+    # 1. Checkpoint every live card this run (refreshes cached content and
+    #    first_tracked/last_confirmed bookkeeping for anything still in the
+    #    fresh pull).
+    for _tier_name, _tier_list in (("urgent", urgent), ("needs", needs)):
+        for c in _tier_list:
+            eid = c.get("entry_id")
+            if not eid:
+                continue
+            prev = tracked.get(eid, {})
+            tracked[eid] = {
+                "tier": _tier_name,
+                "card": {k: v for k, v in c.items() if not str(k).startswith("_")},
+                "first_tracked": prev.get("first_tracked", today_iso),
+                "last_confirmed": today_iso
+            }
+
+    live_ids = set(tracked.keys()) & ({c.get("entry_id") for c in urgent if c.get("entry_id")} |
+                                       {c.get("entry_id") for c in needs if c.get("entry_id")})
+
+    # 2. Resolve or carry anything that scrolled out of this run's pull.
+    carried = 0
+    dropped_resolved = 0
+    inconclusive = 0
+    stale_warnings = 0
+    for eid, rec in list(tracked.items()):
+        if eid in live_ids:
+            continue  # already handled by the checkpoint above
+        if eid in _cc_done_entry_ids:
+            del tracked[eid]
+            dropped_resolved += 1
+            continue
+        if eid in _ticked_done_entry_ids:
+            del tracked[eid]
+            dropped_resolved += 1
+            continue
+
+        outcome = "unknown"
+        try:
+            item = mapi.GetItemFromID(eid)
+            item_parent_id = item.Parent.EntryID
+            outcome = "still_open" if item_parent_id == _inbox_folder.EntryID else "moved_out"
+        except Exception:
+            outcome = "unknown"
+
+        if outcome == "moved_out":
+            del tracked[eid]
+            dropped_resolved += 1
+            continue
+        if outcome == "unknown":
+            inconclusive += 1
+            # fall through to carry -- fail open, see comment block above
+
+        card_copy = dict(rec.get("card") or {})
+        if not card_copy:
+            del tracked[eid]
+            continue
+        card_copy["_carried_forward"] = True
+        tier = rec.get("tier", "needs")
+        (urgent if tier == "urgent" else needs).append(card_copy)
+        tracked[eid]["last_confirmed"] = today_iso
+        carried += 1
+
+        try:
+            _first = datetime.strptime(rec.get("first_tracked", today_iso), "%Y-%m-%d")
+            age_days = (datetime.now() - _first).days
+            if age_days > 90:
+                stale_warnings += 1
+                print(f"WARNING: Phase 3.9 - '{card_copy.get('subject','?')}' has been carried for {age_days} days without resolving (still shown, not dropped)")
+        except Exception:
+            pass
+
+    if carried or dropped_resolved or inconclusive:
+        dry_run_tag = " [DRY RUN - no writes]" if _WI_PHASE39_DRY_RUN else ""
+        print(f"Phase 3.9 done - carried:{carried} dropped_resolved:{dropped_resolved} inconclusive_lookups_carried:{inconclusive} stale_over_90d:{stale_warnings} tracked_total:{len(tracked)}{dry_run_tag}")
+
+    if _WI_PHASE39_DRY_RUN:
+        print("Phase 3.9 dry run - skipping triage_ledger.json write and briefing carry-forward injection.")
+        # Dry run intentionally still ran the resolution-signal checks above
+        # for real (Outlook/CC/ticks), it just doesn't persist the ledger or
+        # leave carried cards appended to urgent/needs -- undo the in-memory
+        # append so a dry run has zero observable effect on this run's output.
+        if carried:
+            urgent[:] = [c for c in urgent if not c.get("_carried_forward")]
+            needs[:] = [c for c in needs if not c.get("_carried_forward")]
+    elif GITHUB_PAT:
+        try:
+            _persist_ledger["tracked_needs_urgent"] = tracked
+            _persist_rw_headers = {"Authorization": f"token {GITHUB_PAT}", "Content-Type": "application/json", "User-Agent": "work-inbox-script"}
+            _gh_put(_persist_ledger_url, _persist_rw_headers,
+                    "chore: update Needs/Urgent scroll-out tracking",
+                    json.dumps(_persist_ledger, indent=1).encode("utf-8"), _persist_sha)
+        except Exception as e:
+            print(f"WARNING: Phase 3.9 could not persist triage_ledger.json - {e}")
+except Exception as e:
+    print(f"WARNING: Phase 3.9 scroll-out persistence failed entirely, Urgent/Needs left as fresh-pull-only this run - {e}")
+
 briefing = {
     "date":         today_str,
     "subtitle":     subtitle,
