@@ -1,23 +1,14 @@
 {
-  "generated_at": "2026-08-20 15:00",
+  "generated_at": "2026-08-20 18:00",
   "new_tasks": [
     {
-      "title": "Action org structure specifics from Organisational Structure team",
-      "tier": "week",
-      "description": "The Organisational Structure team has sent specific details about the org structure update for Kevin and Simon to action. Kevin needs to review the specifics and determine what changes or actions are required in HR Systems for the college/society L2-to-L3 move.",
-      "email_subject": "RE: Org Structure Update",
-      "email_from": "Organisational Structure",
-      "received": "2026-08-19 16:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F880000"
-    },
-    {
-      "title": "Estimate effort for internal candidate identification in application form",
-      "tier": "week",
-      "description": "Simon Burford forwarded a request asking Kevin to estimate the Functional Analysis effort required to implement identification of internal candidates in the application form. This is a scoping/estimation task.",
-      "email_subject": "FW: Application form - identification of internal candidates",
-      "email_from": "Simon Burford",
-      "received": "2026-08-19 15:51",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000",
+      "title": "Complete DTP1334 SHSMS supplier evaluation by Friday 21 Aug",
+      "tier": "tomorrow",
+      "description": "Helen Harbour is checking that Kevin will complete and return the supplier requirements evaluations for the Strategic Health & Safety Management System project by the Friday 21 August deadline. Kevin needs to review supplier submissions and clarifications and return his evaluation.",
+      "email_subject": "Fw: Strategic Health & Safety Management System project supplier requirements evaluations; upcoming deadline of Friday 21 August",
+      "email_from": "Helen Harbour",
+      "received": "2026-08-20 16:24",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F420000",
       "auto_promoted": true
     },
     {
@@ -53,31 +44,22 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608200721490",
-      "task_title": "Review org structure specifics from Organisational Structure team",
-      "note": "Julie Hickman sent reminder about Kudoboard for Beth's farewell messages - ongoing team coordination activity.",
-      "email_subject": "RE: Farewell wishes and gift for Beth",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-20 14:13",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F410000"
+      "task_id": "t2608201500590",
+      "task_title": "Estimate effort for internal candidate identification in application form",
+      "note": "Simon Burford requests functional analysis effort estimate for internal candidate identification feature in application form.",
+      "email_subject": "FW: Application form - identification of internal candidates",
+      "email_from": "Simon Burford",
+      "received": "2026-08-19 15:51",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000"
     },
     {
-      "task_id": "t2608121801280",
-      "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Julie Hickman provided update that Chemistry estimates approximately 110 existing work groups to convert for 38-day balance rollout.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-20 14:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F400000"
-    },
-    {
-      "task_id": "t2608191801190",
-      "task_title": "Estimate effort for application form internal candidate identification feature",
-      "note": "Simon Burford forwarded request for effort estimation on internal candidate identification in application form from Functional Analysis perspective.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-19 15:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F830000"
+      "task_id": "t2608180901160",
+      "task_title": "Confirm appointment availability with Chris Little",
+      "note": "Kevin forwarded Chris Little's reply to his own inbox as a reminder.",
+      "email_subject": "Fw: Appointment request",
+      "email_from": "Kevin (sent to: Kevin Lelitte)",
+      "received": "2026-08-18 09:45",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39E40000"
     }
   ]
 }
