@@ -1,3 +1,29 @@
+# Handover -- 20 August 2026, ~18:15 UTC (Drew) -- card-title/badge squeeze audit: NOT present in work-inbox; separate narrow-width finding surfaced instead, awaiting Kevin's direction
+
+## What this was
+Kevin asked whether the command-centre card-title/badge squeeze bug (fixed there in commit `f1dc0965f2fadb3de192af81c8ffc7d3f4a35cde`: a non-shrinking badge next to a `min-width:0` title in a non-wrapping flex row, collapsing the title column to near-zero and forcing every word onto its own line) also exists in work-inbox's dashboard. Investigation only -- no code changed, nothing pushed to `index.html`/`css/styles.css`/`js/app.js`.
+
+## Finding 1 -- the specific anti-pattern is NOT present here
+Checked all three card layouts that pair a title with a badge:
+- `.card-title` (email list cards, `js/app.js` `renderItems()`) -- already has `flex-wrap:wrap` (css/styles.css line 175); title text and badge are direct flex children with no `min-width:0` override, so there's no near-zero squeeze possible.
+- `.card-ph-title` / `.card-ph-actions` (priority cards, "v5 approved design", `renderPriorityCards()`) -- badge lives in a separate `.card-ph-actions{flex-shrink:0}` column, but `.card-ph-title` itself is plain block text inside `.card-ph-body{flex:1;min-width:0}`, not a flex row -- normal word-wrap applies, not the compounding flex-in-flex collapse.
+- `.dr-subject` / `.dr-meta` (Drafted Replies cards, `renderDraftedReplies()`) -- `.dr-card-top` is a flex row without `flex-wrap`, but `.dr-subject` has no `min-width:0` override, so it defaults to `min-width:auto` and can't collapse below its min-content width.
+
+Verified empirically, not just by CSS reading: used Playwright against the live `https://begb0037admin.github.io/work-inbox/` page, injecting synthetic long-title + badge data through the app's own `renderPriorityCards()`/`renderItems()` functions and a synthetic `dr-card`, screenshotted at 750px and 1400px viewport widths. All three wrapped cleanly -- multi-word lines, badge intact, no per-word collapse. (Also noted, dead CSS: `.pri-card-header`/`.pri-card-title-wrap` in styles.css do have the vulnerable shape, min-width:0 title next to non-wrapping actions, but that markup is never generated anywhere in `app.js` -- `card-ph` superseded it. Not fixed since it's unreachable, but flagged here in case it's ever revived.)
+
+## Finding 2 -- separate, more severe, pre-existing issue found instead
+At the narrow width band Kevin asked to test (~380-450px), the *entire* main content area is unusable, not just a card title. Root cause: `.shell{display:flex}` has a `.sidebar{position:fixed;width:340px}` and `.main{margin-left:340px;flex:1;padding:28px 36px 60px}` -- and **there is no `@media` breakpoint anywhere in `css/styles.css`** to collapse or reflow the sidebar at narrow widths. Command-centre has one (`@media(max-width:640px){.shell{flex-direction:column}.sidebar{width:100%;height:auto;position:static}}`) -- work-inbox does not.
+
+Measured directly at 400px viewport: `.main`'s content-box width resolves to 0 (340 sidebar margin + 72px L/R padding > 400px viewport, browser clamps to 0), so every element inside `.main` -- headings, calendar text, every card -- is squeezed into a roughly 72px-wide sliver at the right edge of the screen, each word wrapping onto its own line. Screenshot: `wi_real_narrow_400_viewport.png` (session scratchpad). This produces a visually similar symptom (tall, broken, per-word-wrapped stack) to the command-centre bug, but the mechanism and fix are different and much larger in scope -- it needs a responsive sidebar-collapse breakpoint added to the whole shell layout, not a title/badge CSS tweak to one card.
+
+## Not actioned
+Per the task instructions and work-inbox's own cautious-change-pace convention (17 Aug 2026: favor small isolated verified changes over same-night stacked fixes), no fix was written for either finding: Finding 1 needed no fix (nothing broken), and Finding 2 is out of the scope Kevin described and is a bigger structural change (adding a shell/sidebar responsive breakpoint) than the card-level CSS fix he asked me to check for. Reporting both back to Kevin rather than either inventing an unneeded fix or silently expanding scope to a page-wide layout change without his sign-off.
+
+## Exact next action
+Awaiting Kevin's decision on Finding 2: whether to add a responsive sidebar breakpoint (mirroring command-centre's `@media(max-width:640px)` approach, adapted to work-inbox's `--sidebar-width:340px` shell), leave narrow-width unsupported as a known gap, or something else. No code change is pending; this entry is investigation-only.
+
+---
+
 # Handover -- 20 August 2026, ~10:00 UTC (Drew) -- needs_reply kevin_is_primary_recipient FIX DEPLOYED, live-verified
 
 ## Deploy outcome
