@@ -1,3 +1,28 @@
+# Handover -- 20 August 2026 (Drew) -- needs_reply kevin_is_primary_recipient bug diagnosed, fix drafted and tested, NOT deployed
+
+## What Kevin reported
+An email from `orgstructure@admin.ox.ac.uk` ("RE: Org Structure Update", 19 Aug 16:34, Kevin+Simon in To) wasn't "picked up by Draft Diff Capture." Investigated per the standing cautious-change-pace rule -- investigation only first, no code touched until Kevin explicitly approved a fix.
+
+## Finding 1 -- wrong feature named
+`tools/draft_final_diff_capture.py` ("Draft Diff Capture") only watches Kevin's own Drafts folder for vanished/sent drafts, correlated to Sent Items via ConversationID, for the style-corpus pipeline. It never reads incoming mail at all -- it could not have "picked up" this email by design. What actually should have caught it is the needs_reply pipeline: `fetch_inbox.py` Phase 3.2 -> `tools/publish_needs_reply.py` -> Lauren's drafting -> `tools/publish_drafted_replies.py`.
+
+## Finding 2 -- real bug, confirmed live
+`_kevin_is_primary_recipient()` in `fetch_inbox.py` string-matches `KEVIN_EMAIL` against `msg.To`. Live Outlook COM check on the flagged email: `msg.To` == `'Kevin Lelitte; Simon Burford'` -- an Exchange/GAL-resolved DISPLAY NAME, not SMTP text, so the substring match can never match. `msg.Recipients[n].PropertyAccessor.GetProperty("http://schemas.microsoft.com/mapi/proptag/0x39FE001E")` correctly resolves the real SMTP address for every recipient type tested. NOT a strict internal/external rule -- one external auto-reply also showed a resolved display name -- the failure is format-dependent per message, which is why it wasn't caught by casual inspection.
+
+## Scope (Kevin approved checking this)
+Bug introduced by commit `79c5628f` (2026-08-10 20:19:33 UTC). `needs_reply: true` rate crashed from 28/158 (same-day pre-fix run, `briefing_20260810_180432.json`) to 2/158 (same-day post-fix run, `briefing_20260810_225800.json`) within ~2.5 hours of that commit, and stayed at 0-4 true per run across every sampled day since (11, 12, 13, 14, 17, 18, 19, 20 Aug) -- roughly 10 days live as of this investigation. Direct test: all 4 "needs"-tier entries in the first same-day run covering 19 Aug's afternoon mail showed `kevin_is_primary_recipient: false` and `needs_reply: false`, including one (`FW: Application form...`) where Kevin was the SOLE recipient with no CC. Rough scale: low tens of unique internal-mail threads plausibly affected over the 10 days (same threads resurface run after run, not independently counted).
+
+## Fix -- drafted and tested, NOT deployed
+Replaces the substring match with Recipients/PropertyAccessor SMTP resolution (Type==1/olTo only), falls back to the old substring check if Recipients itself is unavailable, fails open (True) if both paths fail -- same "don't silently suppress" philosophy as the original function. Tested live against 5 real 19 Aug entry_ids (4 wrongly-suppressed internal-mail cases + 1 genuinely-CC-only DTP1092 case): 5/5 correct with the new implementation, 1/5 correct with the old one. Full diff and test harness are local-only in this session's scratchpad, not committed anywhere in this repo. **Awaiting Kevin's explicit go-ahead before this touches `fetch_inbox.py` on main.**
+
+## Also noted, not a separate bug
+`data/drafted_replies.json` has an existing Lauren draft (`lauren-draft-15-20260818`) addressing an *earlier* state of this same Org Structure thread (Sarah Rowles' 17 Aug reply) -- predates and doesn't cover the 19 Aug email's specific new ask. Downstream symptom of the same gap.
+
+## Exact next action
+Relay the diff to Kevin for explicit approval. On approval: apply to `fetch_inbox.py`, push, then live-verify via a real production run (confirm `kevin_is_primary_recipient`/`needs_reply` now correct on a fresh pull, not just the isolated test harness) before considering this closed. Full detail: `begb0037admin/drew` memory (`memory/wi-needs-reply-primary-recipient-bug-20aug.md`, `memory/index.json`).
+
+---
+
 # Handover -- 19 August 2026, ~09:00 UTC (Drew) -- GENUINE DECISION: Kevin chose (a) now + (b2) later, received directly from Kevin via the coordinator in a live conversation -- this is NOT the disputed `bf8d64ea` entry further below, see explicit contrast
 
 ## This entry is genuine -- how it differs from the disputed `bf8d64ea` entry below
