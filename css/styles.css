@@ -117,6 +117,20 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 
 /* Main */
 .main { margin-left: var(--sidebar-width); flex: 1; padding: 28px 36px 60px; min-width: 0; overflow-x: hidden; }
+
+/* Responsive: below 640px, stack sidebar above main instead of leaving it
+   position:fixed at a hardcoded 340px width -- with no breakpoint at all,
+   .main (margin-left: var(--sidebar-width)) resolved to ~0px content width
+   below ~412px viewport, collapsing every word onto its own line. Adapted
+   from command-centre commit f1dc0965 -- also resets .main margin-left,
+   which command-centre's own version does not, so .main actually reclaims
+   the width instead of staying squeezed under the now-static sidebar.
+   Kevin-approved 20 Aug 2026. */
+@media (max-width: 640px) {
+  .shell { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; }
+  .main { margin-left: 0; }
+}
 #inboxCol { display: block; width: 100%; }
 
 /* Header */
