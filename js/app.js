@@ -427,7 +427,20 @@ function applyPriOverrides(data){
     const s=ovr[k]||ovr[legacyKey]||item._dfSec;
     (validSecs.includes(s)?secs[s]:secs.pw).push({...item,_priKey:k});
   }
-  for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??999)-(om[b._priKey]??999));}}
+  // Newest-first-insertion requirement, 20 Aug 2026 -- an item with no
+  // recorded position in ord[s] (a fresh Outlook-pull arrival into this
+  // section, or a section it's never been manually reordered within) used
+  // to sort with om[key]??999, i.e. AFTER every item that does have a
+  // recorded index -- new items landed at the BOTTOM. Kevin wants new
+  // arrivals at the TOP instead, while every item that already has a real
+  // recorded index keeps that exact relative order (om[key]??999 among
+  // themselves is unaffected by this change -- only where the "no index"
+  // bucket sorts relative to them changes, from after to before). Using -1
+  // (always less than any real 0-based index) instead of 999 achieves this;
+  // Array.prototype.sort is spec-guaranteed stable, so multiple new items
+  // arriving in the same pull keep their relative merge order among
+  // themselves at the top, they don't get shuffled.
+  for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??-1)-(om[b._priKey]??-1));}}
   return secs;
 }
 
@@ -515,14 +528,32 @@ function priDragEnd(e){
       _priOriginParent.insertBefore(_priDragEl,_priOriginNextSibling);
     }
   }else{
+    const fromSec=_priDragState&&_priDragState.sec;
+    const toSec=_priDropTargetSec||fromSec;
+    const crossZoneMove=!!(_priDragEl&&fromSec&&toSec&&fromSec!==toSec);
+    // Newest-first-insertion requirement, 20 Aug 2026 -- a card entering a
+    // DIFFERENT section for the first time (a cross-zone move -- "manual
+    // move/re-categorization into that zone") lands at the TOP of the
+    // destination zone, not wherever the live drag-preview
+    // (priCardDragOver/priZoneDragOver) happened to leave it. Deliberately
+    // scoped: this override runs ONLY when fromSec!==toSec, and it runs
+    // BEFORE the sk[] DOM-order snapshot below so the forced top position
+    // is what actually gets persisted to workInbox_priOrder_v1, not
+    // overwritten by it. A same-zone reorder (fromSec===toSec, the far
+    // more common case) never enters this branch at all -- the live
+    // preview's exact drop position is captured completely unchanged,
+    // per Kevin's hard constraint that manual drag-to-reorder within a
+    // section must keep working exactly as before.
+    if(crossZoneMove){
+      const destZone=document.querySelector(`.pri-drop-zone[data-sec="${toSec}"]`);
+      if(destZone) destZone.insertBefore(_priDragEl,destZone.firstElementChild);
+    }
     const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
     const sk={};
     allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .card-ph`)).map(c=>c.dataset.prikey);});
     _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
 
-    const fromSec=_priDragState&&_priDragState.sec;
-    const toSec=_priDropTargetSec||fromSec;
-    if(_priDragEl&&fromSec&&toSec&&fromSec!==toSec){
+    if(crossZoneMove){
       // Real cross-zone move: the card's own markup depends on its section
       // (badge visibility, the section literal baked into its own drag
       // handlers, data-sec) so THIS ONE card needs fresh markup -- every
@@ -791,7 +822,11 @@ function _priInsertCardIntoBoard(item,cls,sec){
   const html=_priRenderOneCard(p,sec);
   const tmp=document.createElement('div');
   tmp.innerHTML=html.trim();
-  zone.appendChild(tmp.firstElementChild);
+  // Newest-first-insertion requirement, 20 Aug 2026 -- an email card
+  // dragged from the Inbox column onto the board is a NEW item entering
+  // this zone, so it goes to the top (insertBefore the zone's current
+  // first card), not the bottom (appendChild, the old behaviour).
+  zone.insertBefore(tmp.firstElementChild,zone.firstElementChild);
   _priUpdateZoneChrome(sec);
   _runCardSearch();
 }
