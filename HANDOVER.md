@@ -1,3 +1,37 @@
+# Handover -- 20 August 2026, ~10:00 UTC (Drew) -- needs_reply kevin_is_primary_recipient FIX DEPLOYED, live-verified
+
+## Deploy outcome
+Kevin approved deploying the fix diagnosed and drafted in the entry immediately below this one. Deployed and live-verified:
+
+1. **Applied and pushed to `fetch_inbox.py` on `main`.** Commit `c8ab371356b58dba1e4b286cd1e72f120873a426` (parent `c55e8b06`, clean fast-forward). Pre-edit backup made in the production working copy (`fetch_inbox.py.backup-drew-primary-recipient-fix-20260820-095702`, in `C:/Users/admin/Documents/Claude/Projects/work-inbox/`, local, untracked, matching this working copy's existing backup convention). Push verified byte-identical against GitHub via `git/blobs` (bypasses CDN cache), and confirmed syntactically valid (`python -m py_compile`) both before and after push.
+
+   One wrinkle worth flagging for future sessions using this local working copy: its HEAD had drifted to a stale June commit (per-file `git checkout origin/main -- <path>` never moves HEAD or does a full merge) with hundreds of files from real `origin/main` missing from the sparse working tree entirely. A naive `git push` failed non-fast-forward; a naive merge/`git add -A` would have staged deletions of hundreds of live files. Fixed by `git reset --mixed origin/main` (moves HEAD/index only, never touches the working tree) then staging and committing ONLY `fetch_inbox.py` on top of the correct parent. Confirmed via `git diff --cached --stat` showing exactly 1 file, 37 insertions/5 deletions, before committing.
+
+2. **Live sanity run**, exact production invocation (`git fetch origin && git checkout origin/main -- fetch_inbox.py && python fetch_inbox.py`): completed clean, exit code 0, all phases succeeded (Phase 4 pushed `data/briefing.json` at commit `ade6885`, Phase 5 at `6c57b22`). Log: Phase 1 inbox 59, Phase 3.2 "17 email summaries generated, 1 flagged needs_reply."
+
+3. **Fix confirmed working against real mail**, comparing the fresh post-fix `data/briefing.json` to the pre-fix diagnosis:
+
+   | Email | Pre-fix `kevin_is_primary_recipient` | Post-fix `kevin_is_primary_recipient` | Post-fix `needs_reply` |
+   |---|---|---|---|
+   | RE: Org Structure Update (19 Aug 16:34) | False (wrong) | **True (correct)** | False |
+   | RE: 38 day balance... (19 Aug 16:29 + 15:34) | False (wrong) | **True (correct)** | False |
+   | FW: Application form - identification of internal candidates (19 Aug 15:51, Kevin sole recipient) | False (wrong) | **True (correct)** | **True** -- this is the run's 1 flagged needs_reply |
+   | RE: Cority - Applicant Data Import file (19 Aug 16:23) | False (wrong) | **True (correct)** | n/a (fyi tier) |
+   | RE: DTP1092 College Staff into PXD (Kevin genuinely CC-only) | False (correct) | **False (still correct)** | False (still correct) |
+
+   The signal is fixed for all 5 test cases -- 4 previously-wrong now correct, the 1 genuinely-CC-only case unaffected. **Important nuance for Kevin:** fixing the signal does not mean every previously-suppressed email now gets `needs_reply: true` -- the Org Structure Update and 38-day-balance threads still show `needs_reply: false` even with the corrected to/cc signal, because Phase 3.2's AI classifier, now working from accurate information, judged those specific ones as not requiring a written reply this run (as opposed to being wrongly suppressed by bad signal data). Only "Application form" flipped all the way through to `needs_reply: true`. That's the fix working as designed -- it corrects the input signal, not the model's judgment call on any individual email.
+
+## What Kevin should watch for over the next day or two
+- `data/needs_reply.json` will only pick up "FW: Application form..." (or anything else newly flagged true) on the next scheduled run of the full 3-script chain (`fetch_inbox.py` -> `tools/publish_needs_reply.py` -> `tools/publish_drafted_replies.py`, via the Desktop `.bat`/`.vbs` wrapper) -- this session ran `fetch_inbox.py` alone for the sanity check, not the full chain, so nothing has propagated to Lauren's drafting queue yet.
+- Watch whether `needs_reply: true` rate returns to something closer to the pre-10-Aug baseline (was 28/158 before the bug; today's run was 1/17, but the candidate pool itself has shrunk a lot since 10 Aug from unrelated noise-demotion work over the past 10 days, so don't expect the raw count to jump back to 28 -- watch the *rate*, not the absolute number).
+- If a genuinely CC-only email starts getting wrongly flagged `kevin_is_primary_recipient: true` (the opposite failure mode), that would mean the PropertyAccessor SMTP resolution itself is behaving unexpectedly for some recipient type not covered by this session's 5 test cases -- flag it, don't assume it's a one-off.
+- The stale existing draft (`lauren-draft-15-20260818` in `data/drafted_replies.json`, addressing the 17 Aug state of the Org Structure thread rather than the 19 Aug FINAL/PXD-changes ask) is still there and still stale -- not touched by this fix, remains Lauren's or Kevin's call on whether to redraft.
+
+## Full prior investigation + fix diff
+See the entry immediately below this one (root cause, scope check back to commit `79c5628f`, the tested diff) and `begb0037admin/drew` memory (`memory/wi-needs-reply-primary-recipient-bug-20aug.md`, `memory/index.json`).
+
+---
+
 # Handover -- 20 August 2026 (Drew) -- needs_reply kevin_is_primary_recipient bug diagnosed, fix drafted and tested, NOT deployed
 
 ## What Kevin reported
