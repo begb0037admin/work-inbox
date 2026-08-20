@@ -1,3 +1,50 @@
+# Handover -- 20 August 2026, ~19:49 UTC (Drew) -- Phase 1 (scroll-out persistence rebuild + drag-and-drop architecture rework) DEPLOYED to live main, pending Kevin's hands-on test
+
+## Deploy outcome
+Kevin gave explicit approval to deploy Phase 1 (the work staged and verified in the entry below, `wi-phase1-scrollout-dragdrop-rework-20aug` in Drew's own memory repo) to the live dashboard, on these terms: back up current live state first, push the branch live, and be ready to revert immediately if it doesn't work out. Deployed and live-verified.
+
+**Pre-deploy state (revert-to point if everything, including the two data-file backups below, needs undoing):**
+- work-inbox `main` was at commit `da63e7a528747d911201d569a2bad03829a766fe` immediately before this task touched anything.
+
+**1. Backups taken before any write**, via GitHub Contents API, content-sha-verified byte-identical to the live files at time of backup:
+- `data/briefing.json` (live sha `2969e5cf259dfb4753d9edd09418a57884641c59`, 153974 bytes) -> `Archive/briefing_backup_20260820_1947.json` in work-inbox (same blob sha, confirmed byte-identical) -- commit `d610e38e2b8b5b89ca3e4c431b218fbeba1d7142`.
+- `data/ticks.json` (live sha `e7d7fc9e9ed3c4cc48795e8131f501dfad4217eb`, 9180 bytes) -> `Archive/ticks_backup_20260820_1947.json` in work-inbox (same blob sha, confirmed byte-identical) -- commit `a3f86ff21f63eff1fdf1c185ec814aef0f7660d2`.
+- command-centre `data/tasks.json` (live sha `447dcaaf2ce4f66db54956da18e38d091f4a8369`, 158564 bytes) -> `Archive/tasks_backup_20260820_1947.json` in **command-centre** (same blob sha, confirmed byte-identical) -- commit `3be023fecba617e2a5f7385f8978f9c74338c7b9`.
+
+These two work-inbox Archive-backup commits landed on `main` between the noted pre-deploy SHA and the actual merge (harmless, backup-only writes) -- so the true "everything-else-intact" pre-deploy tip, used as the revert target below, is `a3f86ff21f63eff1fdf1c185ec814aef0f7660d2`, not `da63e7a5` (`da63e7a5` is the state *before even the backups*, and reverting all the way to it would delete the backup files themselves, which is not wanted).
+
+**2. Merge**: branch `phase1-scrollout-persistence-dragdrop-rework-20aug` (tip `a50802ce8828cce7a3fcbd2c17bd93895062b3b2`, diffing cleanly against `main` with no conflicts -- `fetch_inbox.py` +237/-0, `js/app.js` +182/-29) merged into `main` via the GitHub Merges API. New `main` tip: **`863e2922e2639303777315d545058e90a928845c`**.
+
+**3. Deploy verified live, concretely, not just "merge succeeded":**
+- GitHub Pages build for commit `863e2922e2639303777315d545058e90a928845c` polled to `status: "built"` (Pages source is `main` branch root, legacy build type -- confirmed via `/repos/.../pages`).
+- Fetched the live served file directly from `https://begb0037admin.github.io/work-inbox/js/app.js` with a cache-busting query param, and confirmed:
+  - It contains the Phase 1 markers that only exist in the new code (`_priRenderOneCard` x4, `_tickStorageKey` x4, `_priOriginParent` x5).
+  - It is **byte-for-byte identical** to the `js/app.js` blob now on `main` (direct diff, zero differences) -- proves Pages is serving the actual new code, not a stale cached copy.
+
+## Pending Kevin's live hands-on test
+This is now live on the real dashboard he uses (`https://begb0037admin.github.io/work-inbox/`). Per Kevin's own instruction: if it works, it stays; if it doesn't, revert immediately using the exact steps below -- no fresh investigation needed.
+
+## Revert plan -- tested and ready, one step
+A forward-only revert commit (not a destructive history rewrite/force-push) was already created in the git object store and validated end-to-end on a disposable throwaway branch (created, patched, confirmed, deleted -- `main` was never touched during this validation). It restores the exact tree state of `a3f86ff2` (pre-merge, backups intact) as a new commit on top of the current tip.
+
+**Prepared revert commit (already exists, inert until a ref points at it):** `f097898b2c18cf8c4abd2fc0d3c015731690732e` (tree `07b5da3769f29787db6ee63de7efdbb640b3a241`, parent `863e2922e2639303777315d545058e90a928845c`).
+
+**To execute the revert** (only if Kevin reports a live problem with Phase 1), run:
+
+```
+echo '{"sha": "f097898b2c18cf8c4abd2fc0d3c015731690732e", "force": false}' > /tmp/revert_payload.json
+gh api repos/begb0037admin/work-inbox/git/refs/heads/main -X PATCH --input /tmp/revert_payload.json
+```
+
+This is a plain fast-forward (the revert commit's parent is the current live `main` tip), so `force: false` is correct and sufficient -- no force-push needed. GitHub Pages will auto-rebuild from the new `main` tip within about a minute, the same mechanism just used to deploy. Verify the same way this deploy was verified: poll `gh api repos/begb0037admin/work-inbox/pages/builds/latest --jq '{status,commit}'` until `status:"built"` and `commit` matches the new tip, then fetch `https://begb0037admin.github.io/work-inbox/js/app.js?t=<cache-buster>` and confirm the Phase 1 markers (`_priRenderOneCard`, `_tickStorageKey`) are gone.
+
+**Note on `gh api -f content=@file`:** during this task, `gh api ... -f content=@file` and `-f force=false` both silently failed on this machine's gh v2.96.0 -- `-f`/`-F` do not dereference `@file` the way older docs suggest (sends the literal string), and unquoted `false`/`true` via `-f` is sent as a JSON string, not a boolean, which GitHub's refs endpoint rejects. Reliable fix used throughout this task: build the exact JSON body with Python's `json` module and pass it via `--input <file>`. Worth a candidate entry in Drew's confirmed-fact memory and a check against `agent-commons` for whether this is already known.
+
+## What was NOT touched
+- `fetch_inbox.py`'s changes (237 additions, Phase 3.9 v2 + `WI_PHASE39_DRY_RUN` safety valve) are live on `main` but this script only runs when the Windows Task Scheduler job or a manual run pulls it from GitHub -- no scheduled or manual run was triggered by this deploy. The next scheduled `fetch_inbox.py` run will pull this new version automatically per the repo's own "always pull from GitHub before running" rule.
+- No production write of `briefing.json`, `ticks.json`, or command-centre's `tasks.json` was made by this deploy itself -- only the pre-emptive backups noted above.
+
+
 # Handover -- 20 August 2026, ~17:46 UTC (Drew) -- responsive sidebar breakpoint DEPLOYED, live-verified: fixes the narrow-width collapse from the entry below
 
 ## Deploy outcome
