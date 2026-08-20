@@ -208,8 +208,23 @@ function clearToday(){
   localStorage.removeItem(TODAY_KEY);
   renderBriefing(SEED,'seed');
 }
+// Tick storage key -- day-independent and position-independent for any id
+// carrying a stable identity (the 'eid_'/'id_' prefix _priGetKey() below
+// produces), falling back to the old calendar-day-scoped key only for the
+// rare item with no stable id at all. Fixed 20 Aug 2026 as a prerequisite
+// for rebuilding Phase 3.9 (server-side scroll-out persistence) -- without
+// this, any item Phase 3.9 carries across a day boundary would resurrect
+// as undone every day regardless of its real done state, exactly the "mark
+// done, refresh, it comes back" incident from 17 Aug 2026 (see
+// wi-tick-resurrection-incident-17aug.md in the `drew` repo). That incident
+// fix shipped once already and worked correctly in production before being
+// swept up in an unrelated same-night full revert; reused verbatim here
+// rather than reinvented, since it was never the part that was wrong.
+function _tickStorageKey(id){
+  return (typeof id==='string'&&(id.indexOf('eid_')===0||id.indexOf('id_')===0)) ? id : (currentKey+'_'+id);
+}
 function toggleTick(id){
-  const ticks=getTicks(), k=currentKey+'_'+id;
+  const ticks=getTicks(), k=_tickStorageKey(id);
   ticks[k]=!ticks[k]; saveTicks(ticks);
   const cb=document.getElementById('cb_'+id);
   const item=document.getElementById('item_'+id);
@@ -247,7 +262,7 @@ function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
-function isTicked(id){if(!currentKey) return false; return !!getTicks()[currentKey+'_'+id];}
+function isTicked(id){if(!currentKey) return false; return !!getTicks()[_tickStorageKey(id)];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
 function escapeHtml(text){
@@ -353,6 +368,11 @@ function togglePriCard(i){
 
 // Priority drag-and-drop helpers
 let _priDragState=null,_priDragEl=null,_priDragDropped=false;
+// Added 20 Aug 2026, drag-and-drop architecture rework: origin-position
+// memory (for an O(1) revert-on-cancel) and the actual drop-target section
+// (so priDragEnd can tell a same-zone reorder from a real cross-zone move
+// without re-deriving it from localStorage).
+let _priOriginParent=null,_priOriginNextSibling=null,_priDropTargetSec=null;
 function _priGetLegacyTitleKey(p){return(p.title||p.text||p.subject||'').toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,40)||'item';}
 // Prefer a stable identifier (entry_id for email-sourced items, id for
 // priorities items) over the item's display title -- fixed 12 Aug 2026,
@@ -415,6 +435,17 @@ function priDragStart(e,sec,priKey){
   _priDragState={sec,priKey};
   _priDragEl=e.currentTarget;
   _priDragDropped=false;
+  _priDropTargetSec=null;
+  // Remember exactly where this card came from (parent zone + the sibling
+  // it sat before) -- fixed 20 Aug 2026, drag-and-drop architecture rework.
+  // priCardDragOver/priZoneDragOver live-move this real DOM node as a drag
+  // preview on every dragover; if the drag ends without a real drop (a
+  // cancelled drag, an accidental micro-drag from a plain click, dragging
+  // outside the window), the ONLY thing that needs undoing is putting this
+  // one node back -- a single insertBefore, not a full-board rebuild. See
+  // priDragEnd() for where this is used.
+  _priOriginParent=_priDragEl.parentElement;
+  _priOriginNextSibling=_priDragEl.nextElementSibling;
   e.dataTransfer.effectAllowed='move';
   e.dataTransfer.setData('text/plain',priKey);
   // Consistent drag ghost across Chrome/Edge/Firefox -- fixed 12 Aug 2026
@@ -461,14 +492,61 @@ function priDragEnd(e){
   _priPendingReorder=null;
   if(_priDragEl)_priDragEl.classList.remove('pri-dragging');
   document.querySelectorAll('.pri-drop-zone.pri-zone-active').forEach(el=>el.classList.remove('pri-zone-active'));
-  if(_priDragDropped){
+
+  // Drag-and-drop architecture rework, 20 Aug 2026 (see wi-dragdrop-review-
+  // 12aug.md for the original review this closes out). priDragEnd used to
+  // unconditionally call renderBriefing() -- a full innerHTML destroy/
+  // rebuild of all six board sections -- on EVERY dragend, successful drop
+  // or not. That was the structural root cause behind two bugs already
+  // found and fixed the same day as the review (Show/Hide Done silently
+  // resetting, cards vanishing on a title collision): any client-side UI
+  // state not explicitly re-derived by the render functions gets silently
+  // wiped by a full rebuild, and a plain click can trigger a dragstart/
+  // dragend cycle without an intentional drag at all. Closing this
+  // structurally (not just patching each symptom as it's found) means: no
+  // full rebuild on ANY dragend any more. Two cases instead:
+  if(!_priDragDropped){
+    // No real drop -- put the dragged node back exactly where it started.
+    // The live preview (priCardDragOver/priZoneDragOver) already moved the
+    // real DOM node speculatively; since nothing was persisted, the only
+    // correct recovery is undoing that one move. O(1), touches no other
+    // card's DOM node, needs no data re-derivation.
+    if(_priDragEl&&_priOriginParent){
+      _priOriginParent.insertBefore(_priDragEl,_priOriginNextSibling);
+    }
+  }else{
     const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
     const sk={};
     allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .card-ph`)).map(c=>c.dataset.prikey);});
     _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
+
+    const fromSec=_priDragState&&_priDragState.sec;
+    const toSec=_priDropTargetSec||fromSec;
+    if(_priDragEl&&fromSec&&toSec&&fromSec!==toSec){
+      // Real cross-zone move: the card's own markup depends on its section
+      // (badge visibility, the section literal baked into its own drag
+      // handlers, data-sec) so THIS ONE card needs fresh markup -- every
+      // other card on the board is untouched. This is the only case that
+      // still needs any markup regenerated; same-zone reorders need
+      // nothing further; the live DOM already reflects the final order.
+      const priKey=_priDragEl.dataset.prikey;
+      const priorities=applyPriOverrides(window._wipData||{})[toSec]||[];
+      const p=priorities.find(x=>x._priKey===priKey);
+      if(p){
+        const html=_priRenderOneCard(p,toSec);
+        const tmp=document.createElement('div');
+        tmp.innerHTML=html.trim();
+        const newEl=tmp.firstElementChild;
+        _priDragEl.replaceWith(newEl);
+        _priDragEl=newEl;
+      }
+      _priUpdateZoneChrome(fromSec);
+      _priUpdateZoneChrome(toSec);
+    }
   }
-  if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);
+  _runCardSearch();
   _priDragState=null;_priDragEl=null;_priDragDropped=false;
+  _priOriginParent=null;_priOriginNextSibling=null;_priDropTargetSec=null;
 }
 let _emailDragData=null;
 function emailCardDragStart(e,cls,idx){
@@ -568,10 +646,11 @@ function priCardDragLeave(e,priKey){
 }
 function priCardDrop(e,sec,priKey){
   e.preventDefault();e.stopPropagation();
-  if(_emailDragData){const{item,cls}=_emailDragData;_addEmailCardToPriority(item,cls,sec);emailCardDragEnd(e);if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);return;}
+  if(_emailDragData){const{item,cls}=_emailDragData;_addEmailCardToPriority(item,cls,sec);emailCardDragEnd(e);_priInsertCardIntoBoard(item,cls,sec);return;}
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
+  _priDropTargetSec=sec;
   _priDragDropped=true;
 }
 function priZoneDragOver(e,sec){
@@ -598,40 +677,57 @@ function priZoneDragLeave(e,sec){
 }
 function priZoneDrop(e,sec){
   e.preventDefault();
-  if(_emailDragData){const{item,cls}=_emailDragData;_addEmailCardToPriority(item,cls,sec);emailCardDragEnd(e);if(window._wipData&&window._wipKey)renderBriefing(window._wipData,window._wipKey);return;}
+  if(_emailDragData){const{item,cls}=_emailDragData;_addEmailCardToPriority(item,cls,sec);emailCardDragEnd(e);_priInsertCardIntoBoard(item,cls,sec);return;}
   if(!_priDragState)return;
   const{sec:fromSec,priKey:fromKey}=_priDragState;
   if(fromSec!==sec)_priSetOverride(fromKey,sec);
+  _priDropTargetSec=sec;
   _priDragDropped=true;
 }
 
-function renderPriorityCards(priorities,key,sec){
-  if(!priorities||!priorities.length) return '<div class="pri-zone-empty">Drop items here</div>';
+// Single-card renderer -- extracted 20 Aug 2026 (drag-and-drop architecture
+// rework) from what used to be inline in renderPriorityCards' .map(). Now
+// the ONE place that knows how to render a priority card, used both by the
+// full multi-card render below AND by priDragEnd's/`_priInsertCardIntoBoard`'s
+// targeted single-card patch paths -- closing the "two different code paths
+// producing the same visual card state" divergence risk the 12 Aug review
+// flagged (point 5), not just the render/state coupling.
+//
+// DOM/tick id is now the card's own stable `priKey` (already 'eid_<id>' or
+// 'id_<id>' from _priGetKey(), confirmed 100% coverage across all six
+// source arrays) instead of a render-position index ('pri_'+sec+'_'+i).
+// This is the second half of the tick-key stability fix (see
+// _tickStorageKey() above): a positional id silently detaches from its
+// card on ANY reorder, cross-zone move, or fresh pipeline run that
+// reshuffles array order -- exactly the mechanism behind the 17 Aug tick-
+// resurrection incident. Using the item's own identity means a card's
+// done-state and DOM id follow the card itself, including across a
+// cross-zone drag, not the slot it happens to occupy.
+function _priRenderOneCard(p,sec){
   const _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const _recentPfxs4=Array.from({length:4},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return'['+String(d.getDate()).padStart(2,'0')+' '+_mo[d.getMonth()]+' '+d.getFullYear()+']';});
   const _cutoff=new Date();_cutoff.setDate(_cutoff.getDate()-4);_cutoff.setHours(0,0,0,0);
   const _mo2={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
   function _firstActionDate(actions){if(!actions||!actions.length)return null;const m=actions[0].match(/^\[(\d{1,2}) (\w{3}) (\d{4})\]/);if(!m)return null;return new Date(parseInt(m[3]),_mo2[m[2]],parseInt(m[1]),12,0,0);}
-  return priorities.map((p,i)=>{
-    const priKey=p._priKey||_priGetKey(p);
-    const id='pri_'+sec+'_'+i, ticked=isTicked(id);
-    const titleText=(p.title||p.text||'(untitled)').replace(' -- ',' — ');
-    const aiBadge=(p.badge&&sec!=='pfyi')?badge(p.badge,p.badgeType||'gray'):'';
-    const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
-    const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
-    const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
-    const theBadge=aiBadge||newBadge||updBadge;
-    let subText='';
-    if(p.actions&&p.actions.length){
-      const todo=p.actions.find(a=>a.startsWith('[TODO]')||a.startsWith('[AWAITING]'));
-      const latest=todo||p.actions[p.actions.length-1];
-      if(latest) subText=latest.replace(/^\[[^\]]+\]\s*/,'');
-    }
-    const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.ai_summary||p.sub||'');
-    const emailBtn=(p.entry_id||p.entryId)?`<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`:'';
-    const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC&#8594;</span>`:'';
-    const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
-    return `<div class="card-ph${ticked?' done':''}${hiddenCls}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
+  const priKey=p._priKey||_priGetKey(p);
+  const id=priKey, ticked=isTicked(id);
+  const titleText=(p.title||p.text||'(untitled)').replace(' -- ',' — ');
+  const aiBadge=(p.badge&&sec!=='pfyi')?badge(p.badge,p.badgeType||'gray'):'';
+  const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
+  const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
+  const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
+  const theBadge=aiBadge||newBadge||updBadge;
+  let subText='';
+  if(p.actions&&p.actions.length){
+    const todo=p.actions.find(a=>a.startsWith('[TODO]')||a.startsWith('[AWAITING]'));
+    const latest=todo||p.actions[p.actions.length-1];
+    if(latest) subText=latest.replace(/^\[[^\]]+\]\s*/,'');
+  }
+  const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.ai_summary||p.sub||'');
+  const emailBtn=(p.entry_id||p.entryId)?`<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`:'';
+  const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC&#8594;</span>`:'';
+  const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
+  return `<div class="card-ph${ticked?' done':''}${hiddenCls}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
       <span class="card-drag" onclick="event.stopPropagation()">&#10783;</span>
       <button class="card-done-btn${ticked?' done':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()" aria-label="Mark done"></button>
       <div class="card-ph-body">
@@ -640,7 +736,64 @@ function renderPriorityCards(priorities,key,sec){
       </div>
       <div class="card-ph-actions">${theBadge}${emailBtn}${ccBtn}</div>
     </div>`;
-  }).join('');
+}
+function _priZonePlaceholderHtml(sec){return sec==='pfyi'?'Drop items here to park':'Drop items here';}
+function renderPriorityCards(priorities,key,sec){
+  if(!priorities||!priorities.length) return `<div class="pri-zone-empty">${_priZonePlaceholderHtml(sec)}</div>`;
+  return priorities.map(p=>_priRenderOneCard(p,sec)).join('');
+}
+
+// Targeted zone chrome patch (section header count + empty-zone placeholder)
+// -- added 20 Aug 2026 alongside the drag-and-drop architecture rework, used
+// after a single-card DOM patch instead of regenerating the header/zone
+// markup for all six sections via a full renderBriefing().
+function _priZoneCardCount(sec){
+  const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
+  return zone?zone.querySelectorAll('.card-ph').length:0;
+}
+function _priUpdateZoneChrome(sec){
+  const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
+  if(!zone)return;
+  const count=zone.querySelectorAll('.card-ph').length;
+  const wrap=zone.closest('[id^="sec-"]');
+  const countEl=wrap?wrap.querySelector('.sec-count'):null;
+  // Only overwrite the plain-number case -- if the header is showing the
+  // "N threads (M messages)" server-side-dedup form (fyiRawCount), a
+  // client-side count patch can't know the new raw count, so leave that
+  // form alone rather than clobber it with a number that would be wrong.
+  // A drag can only ever change the displayed thread count anyway (moving
+  // a card doesn't change how many raw messages it collapsed from), so this
+  // is a display-only edge case, not a correctness one.
+  if(countEl&&!countEl.querySelector('.sec-count-raw')) countEl.textContent=String(count);
+  let placeholder=zone.querySelector('.pri-zone-empty:not(.wi-search-no-match)');
+  if(count===0&&!placeholder){
+    placeholder=document.createElement('div');
+    placeholder.className='pri-zone-empty';
+    placeholder.textContent=_priZonePlaceholderHtml(sec);
+    zone.appendChild(placeholder);
+  }else if(count>0&&placeholder){
+    placeholder.remove();
+  }
+}
+// Inbox-card-dragged-onto-board insert patch -- replaces the previous
+// unconditional renderBriefing() call in priCardDrop/priZoneDrop's
+// _emailDragData branch. _addEmailCardToPriority() has already updated the
+// underlying data (workInbox_customPri_v1 + the section override) by the
+// time this runs; this only needs to add the ONE new card's markup to the
+// target zone's DOM, same principle as the rest of this rework.
+function _priInsertCardIntoBoard(item,cls,sec){
+  const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
+  if(!zone)return;
+  const priorities=applyPriOverrides(window._wipData||{})[sec]||[];
+  const priKey=_priGetKey(item);
+  const p=priorities.find(x=>x._priKey===priKey);
+  if(!p)return; // defensive -- should always be found immediately after _addEmailCardToPriority
+  const html=_priRenderOneCard(p,sec);
+  const tmp=document.createElement('div');
+  tmp.innerHTML=html.trim();
+  zone.appendChild(tmp.firstElementChild);
+  _priUpdateZoneChrome(sec);
+  _runCardSearch();
 }
 
 // Staleness banner: fetch_inbox.py is scheduled Mon-Fri at 06:00, 09:00,
