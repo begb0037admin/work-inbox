@@ -338,16 +338,48 @@ def is_vip(msg):
 # because the classifier had no visibility into either dimension before this).
 KEVIN_EMAIL = "kevin.lelitte@admin.ox.ac.uk"
 
+# PR_SMTP_ADDRESS: MAPI property tag for a recipient's real SMTP address.
+# msg.To / msg.CC return whatever the SENDING client resolved at compose
+# time -- for GAL-resolvable recipients (confirmed live 20 Aug 2026: every
+# internal @admin.ox.ac.uk sender in a real sample) that's the DISPLAY NAME
+# ("Kevin Lelitte; Simon Burford"), not SMTP text, so a substring match
+# against KEVIN_EMAIL silently never matches. Live-verified root cause of
+# the needs_reply precision regression introduced by this function's first
+# version (commit 79c5628f, 10 Aug 2026) -- see begb0037admin/drew memory
+# and agent-commons issue #3 for the investigation.
+PR_SMTP_ADDRESS = "http://schemas.microsoft.com/mapi/proptag/0x39FE001E"
+olTo = 1
+
 def _kevin_is_primary_recipient(msg):
     """True if Kevin's address appears in To (addressed directly), False if
     only in CC (or not found at all -- distribution lists/aliases mean this
     can't be 100% certain, so it's a signal for the classifier to weigh, not
-    an absolute gate on its own)."""
+    an absolute gate on its own).
+
+    Resolves each To-recipient's real SMTP address via PropertyAccessor
+    rather than string-matching msg.To, since msg.To can be an
+    Exchange-resolved display name (see PR_SMTP_ADDRESS comment above).
+    Falls back to the old substring check on msg.To if the Recipients
+    collection itself is unavailable, and fails OPEN (True) if both paths
+    fail -- never silently suppress a real email over a read failure, same
+    philosophy as the original function."""
     try:
-        to_field = (msg.To or "").lower()
-        return KEVIN_EMAIL in to_field
-    except:
-        return True  # can't tell -- don't silently suppress a real email over a read failure
+        for r in msg.Recipients:
+            try:
+                if r.Type != olTo:
+                    continue
+                smtp = r.PropertyAccessor.GetProperty(PR_SMTP_ADDRESS)
+                if smtp and smtp.lower() == KEVIN_EMAIL:
+                    return True
+            except Exception:
+                continue  # this recipient couldn't be resolved -- check the rest
+        return False
+    except Exception:
+        try:
+            to_field = (msg.To or "").lower()
+            return KEVIN_EMAIL in to_field
+        except Exception:
+            return True  # can't tell -- don't silently suppress a real email over a read failure
 
 # Reuses the folder handle connect_to_outlook() already opened (and retried)
 # above, rather than issuing a second unretried GetDefaultFolder(6) call --
