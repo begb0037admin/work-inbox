@@ -1,3 +1,59 @@
+# Handover -- 20 August 2026, ~21:14 UTC (Drew) -- "newest items at top of section" fix MERGED to main and live-verified, byte-diff confirmed
+
+## What shipped
+Branch `wi-newest-first-insertion-20aug` (tip `27053cb8b8809de093d24051e2b2b61355d45735`), Kevin-approved, merged into `main`. The fix: new priority-board items now land at the TOP of a section instead of the bottom, in three places in `js/app.js`:
+- `applyPriOverrides()` -- items with no recorded manual-order index (`ord[s]`) now sort with `om[key]??-1` instead of `om[key]??999`, so unordered/fresh items float to the top instead of sinking to the bottom. Items that already have a real recorded index are completely unaffected (stable sort, same relative order among themselves).
+- `priDragEnd()` -- a card manually dragged into a *different* section for the first time (`crossZoneMove`) is now force-inserted at the top of the destination zone (`insertBefore(...,destZone.firstElementChild)`) before the DOM-order snapshot is taken, so the forced top position is what actually persists to `workInbox_priOrder_v1`. Same-zone reorders (the common case) are untouched -- this branch only runs when `fromSec!==toSec`.
+- `_priInsertCardIntoBoard()` -- a card dragged from the Inbox column onto the board now uses `insertBefore(tmp.firstElementChild, zone.firstElementChild)` instead of `appendChild`.
+
+Diff stats (`80ff606d...27053cb8`): `js/app.js` only, +40/-5, single file.
+
+## 1. Backup-and-verify sequence -- run in full, per this repo's own protocol, before touching anything
+- GET live `js/app.js`: sha `3f7e69fb6f723f8fe0cf25f94279d0b0a9941129`, 76538 bytes, confirmed non-zero.
+- Backup pushed to `Archive/app_backup_20260820_2113.js` (commit `2251f8c45cf6e75f26b4012726a7d05ea32ea283`) -- content sha `3f7e69fb6f723f8fe0cf25f94279d0b0a9941129`, byte-identical to the live pre-merge sha above, size matches exactly (76538 bytes).
+- Race-guard re-GET of live `js/app.js` and `main` tip immediately before the merge: sha unchanged (`3f7e69f...`) -- no concurrent edit landed between backup and merge.
+- Confirmed via `compare` API that `main` had moved 1 commit ahead of the branch's parent since the branch was cut (`ab1f6bb4`, "Phase 3.6 Command Centre sync failures now fire a real desktop toast" -- touches only `fetch_inbox.py`, unrelated) -- no file overlap with the branch's `js/app.js` change, so the merge was guaranteed conflict-free before it was attempted.
+
+**Backup location:** `Archive/app_backup_20260820_2113.js` in work-inbox, commit `2251f8c45cf6e75f26b4012726a7d05ea32ea283` -- this is the exact pre-merge state of `js/app.js` (76538 bytes, sha `3f7e69fb6f723f8fe0cf25f94279d0b0a9941129`).
+
+## 2. Merge
+Branch `wi-newest-first-insertion-20aug` (tip `27053cb8`) merged into `main` via the GitHub Merges API (3-way merge, not a fast-forward, since `main` had diverged by the unrelated toast-notification commit). **New `main` tip: `c1be67d241bc78b1e5bca52f93b84ddb40feee28`** (parents: `2251f8c4` the backup commit, `27053cb8` the branch tip).
+
+Confirmed the merge took the branch's `js/app.js` cleanly and exactly: the blob sha of `js/app.js` on the new `main` tip (`e7a34cb1465454c0c43fbd0453b2425ffecf28f7`, 78921 bytes) is identical to the blob sha of `js/app.js` on the branch tip itself -- the 3-way merge produced byte-for-byte the same file as the source branch, no merge-driver surprises.
+
+## 3. Deploy verified live -- byte-diff, not just "merge succeeded"
+- Polled `gh api repos/begb0037admin/work-inbox/pages/builds/latest` every 5-6s: `status` went from `building` to `built` for commit `c1be67d2...` after ~45s.
+- Fetched the live served file directly: `https://begb0037admin.github.io/work-inbox/js/app.js?t=<cache-buster>` -> 78921 bytes, sha256 `a1054d3bac36368c39d1767915348be48cedd4a660061094dcbc58541f78977f`.
+- Fetched the merged blob directly via `git/blobs/e7a34cb1...` (bypasses any Pages/CDN cache) -> 78921 bytes, **same sha256 `a1054d3bac36368c39d1767915348be48cedd4a660061094dcbc58541f78977f`**.
+- **`diff` of the two files: zero differences. Byte-for-byte identical.** Confirms GitHub Pages is serving the actual merged code, not a stale cached copy.
+- Belt-and-braces marker check on the live-served file: `crossZoneMove` x3, `??-1` x2, `insertBefore(tmp.firstElementChild` x1 -- all present, matching the diff above exactly.
+
+**Result: IDENTICAL. The deploy is confirmed live, not just merged.**
+
+## 4. Revert plan -- validated against the actual current live state, not assumed safe
+Checked before writing this plan: `main`'s tip is still exactly the merge commit `c1be67d2...` (`compare c1be67d2...main` -> `ahead_by: 0`, zero files) -- nothing landed on `main` between the merge and this write-up. But per the lesson from the entry below (5 tick-sync commits landing within minutes of the last deploy, from the Cloudflare Worker `cc-tasks-writer` syncing real dashboard use), `main`'s tip on this repo is a known moving target whenever Kevin is actively using the live dashboard -- so the revert plan is a `git revert` of the merge commit (3-way, mainline-aware), not a fixed-parent ref-reset, exactly per that established lesson.
+
+**Validated for real, not guessed:** cloned the actual live repo fresh into a throwaway local branch, ran the exact command below against the real current tip -- applied with **zero conflicts**, touched **exactly 1 file** (`js/app.js`: -40/+5, matching the merge's own diff stats exactly in reverse). This validation was local-only and was never pushed; `main` was not touched by it.
+
+**To execute** (only if Kevin reports a live problem with the newest-first-insertion behaviour):
+```
+git clone https://github.com/begb0037admin/work-inbox.git
+cd work-inbox
+git revert -m 1 c1be67d241bc78b1e5bca52f93b84ddb40feee28 --no-edit
+git push origin main
+```
+(`-m 1` = mainline is `main`, not the feature branch -- required since this reverts a merge commit.) This applies cleanly regardless of how much further `main` has moved by execution time, as long as nothing later has itself edited `js/app.js` (checked: nothing has, as of this entry). It will not touch `data/ticks.json`, `data/briefing.json`, or any other data file even if Kevin has been actively ticking items on the live dashboard in the meantime. After pushing, verify the revert the same way this deploy was verified: poll `pages/builds/latest` until `status:"built"` and `commit` matches the new revert-commit sha, then fetch `js/app.js?t=<cache-buster>` and confirm the markers (`crossZoneMove`, `??-1`, `insertBefore(tmp.firstElementChild`) are gone.
+
+If `git` clone access isn't available in whatever session executes the revert, the GitHub API equivalent: fetch the live tree at the then-current `main` tip, create a new tree with `js/app.js`'s blob entry replaced by the pre-merge blob (from `Archive/app_backup_20260820_2113.js`, sha `3f7e69fb6f723f8fe0cf25f94279d0b0a9941129`), commit it with parent = the then-current live tip, and fast-forward `refs/heads/main` to the new commit.
+
+## Not touched
+`data/briefing.json`, `data/ticks.json`, `fetch_inbox.py`, `css/styles.css`, `index.html` -- this task touched only `js/app.js` (via the merge) and `Archive/app_backup_20260820_2113.js` (the backup).
+
+## Exact next action
+None pending on this thread. Awaiting Kevin's hands-on confirmation that new board items now land at the top of their section as expected; revert plan above is ready if not.
+
+---
+
 # Handover -- 20 August 2026, ~20:10 UTC (Drew) -- CORRECTION to the revert plan in the entry immediately below: the pre-baked ref-reset revert is now stale and unsafe, use `git revert` instead
 
 ## What changed since the entry below was written
