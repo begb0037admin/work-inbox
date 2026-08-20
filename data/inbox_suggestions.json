@@ -1,14 +1,32 @@
 {
-  "generated_at": "2026-08-20 09:59",
+  "generated_at": "2026-08-20 12:00",
   "new_tasks": [
     {
       "title": "Action org structure specifics from Organisational Structure team",
-      "tier": "week",
-      "description": "The Organisational Structure team has sent specific details about the org structure update requiring action from Kevin and Simon. Kevin needs to review and determine what changes or actions are required in HR Systems.",
+      "tier": "today",
+      "description": "Organisational Structure team has sent specific details about the org structure update for Kevin and Simon to action. Kevin needs to review and determine what changes or implementation work is required in HR Systems systems.",
       "email_subject": "RE: Org Structure Update",
       "email_from": "Organisational Structure",
       "received": "2026-08-19 16:34",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F880000"
+    },
+    {
+      "title": "Estimate effort for internal candidate identification in application form",
+      "tier": "week",
+      "description": "Simon Burford has forwarded a request asking Kevin to estimate the work required from a Functional Analysis point of view to implement identification of internal candidates in the application form. This is a scoping/estimation task.",
+      "email_subject": "FW: Application form - identification of internal candidates",
+      "email_from": "Simon Burford",
+      "received": "2026-08-19 15:51",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000"
+    },
+    {
+      "title": "Review and evaluate DTP1334 SHSMS supplier submissions by 21 Aug",
+      "tier": "tomorrow",
+      "description": "Helen Harbour is coordinating supplier requirements evaluations for the Strategic Health & Safety Management System project (DTP1334) with a deadline of Friday 21 August 2026. Kevin needs to review supplier submissions and contribute to the evaluation process.",
+      "email_subject": "Strategic Health & Safety Management System project supplier requirements evaluations; upcoming deadline of Friday 21 August",
+      "email_from": "Helen Harbour",
+      "received": "2026-08-13 16:10",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B02200000"
     },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
@@ -43,27 +61,9 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608191801190",
-      "task_title": "Estimate effort for application form internal candidate identification feature",
-      "note": "Simon is requesting Kevin's estimation of effort required from Functional Analysis perspective to implement internal candidate identification in the application form.",
-      "email_subject": "FW: Application form - identification of internal candidates",
-      "email_from": "Simon Burford",
-      "received": "2026-08-19 15:51",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000"
-    },
-    {
-      "task_id": "t2608191643002",
-      "task_title": "GLAM HR Shared Service escalation — Ashmolean Visitor Experience Leave & Absence / Rostering",
-      "note": "Kevin has bumped the GLAM rostering requirement email from 28 May regarding Botanic Gardens Ticket Office and Ashmolean Security, indicating this needs follow-up action.",
-      "email_subject": "Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-      "email_from": "Kevin Lelitte",
-      "received": "2026-08-18 10:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6D0000"
-    },
-    {
-      "task_id": "t040",
-      "task_title": "Work Inbox -- render CC Today/This Week tasks as cards in priority panel",
-      "note": "Kevin has declined the Cross-Team Process Improvement Working Group meeting due to a scheduling conflict.",
+      "task_id": "task-1785700344174",
+      "task_title": "Review outstanding Development Insight reports actions with Julie",
+      "note": "Kevin declined the Cross-Team Process Improvement Working Group 1st meeting due to schedule conflict, but no new action is required from Kevin regarding the Development Insight reports actions task itself.",
       "email_subject": "Re: Cross-Team Process Improvement Working Group – 1st Meeting",
       "email_from": "Kevin (sent to: Otter Ho)",
       "received": "2026-08-19 13:34",
