@@ -1756,6 +1756,49 @@ except Exception as e:
 
 # -- Assemble final briefing --
 
+# Desktop-toast helper for internal phase failures this script otherwise
+# swallows by design (graceful degradation -- see the many bare "except
+# Exception" blocks throughout this file: a downstream phase failing must
+# never take down the primary briefing deliverable). That design is correct
+# for the pipeline's own resilience, but it means a real failure here (e.g.
+# Phase 3.6's Command Centre sync) currently produces nothing Kevin will
+# actually see -- fetch_inbox.py still exits 0, so the existing end-of-run
+# Show-TaskNotification.ps1 call in "Run Inbox Briefing Hidden.vbs" reports
+# "Success" regardless. This reuses that exact same notification mechanism
+# (Show-TaskNotification.ps1 / BurntToast) mid-run instead of inventing a
+# new one, for phases specifically flagged as needing real visibility (see
+# HANDOVER.md, Phase 2 build 20 Aug 2026).
+#
+# Writes a small dedicated one-line detail file rather than pointing
+# Show-TaskNotification.ps1 at the shared inbox_briefing_last_run.log --
+# that log keeps growing for the rest of this run, and Get-LogTailDetail's
+# regex ("Error|Traceback|Exception|com_error|Call was rejected") is not
+# guaranteed to match every exception's str() text, so relying on it against
+# a shared, still-growing log risks surfacing the wrong line by the time the
+# toast script actually reads it. A dedicated one-line file makes the detail
+# text deterministic regardless of what runs afterward.
+#
+# Best-effort only, by design: a failure to raise the toast must never mask
+# or replace the original exception already being handled by the caller's
+# own except block, and must never itself crash the run.
+NOTIFY_SCRIPT_PATH = r"D:\OneDrive - lelitte.com\Desktop\Show-TaskNotification.ps1"
+
+def _notify_phase_failure(task_name, detail):
+    try:
+        detail_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phase_failure_last.log")
+        with open(detail_path, "w", encoding="utf-8") as f:
+            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {task_name} failed: {detail}\n")
+        if os.path.exists(NOTIFY_SCRIPT_PATH):
+            subprocess.run(
+                ["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-File", NOTIFY_SCRIPT_PATH,
+                 "-Status", "Failure", "-TaskName", task_name, "-LogPath", detail_path],
+                timeout=20, capture_output=True
+            )
+        else:
+            print(f"WARNING: failure toast skipped for '{task_name}' - notification script not found at {NOTIFY_SCRIPT_PATH}")
+    except Exception as notify_err:
+        print(f"WARNING: failure toast for '{task_name}' could not be sent - {notify_err}")
+
 # Phase 3.6 - apply task updates directly to Command Centre tasks.json
 def _gh_get(url, headers):
     req = urllib.request.Request(url, headers=headers)
@@ -1908,6 +1951,7 @@ if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
         suggestions["applied_updates"] = suggestions.pop("task_updates")
     except Exception as e:
         print(f"WARNING: Phase 3.6 apply failed - {e}")
+        _notify_phase_failure("Work Inbox Briefing - Command Centre sync", f"{type(e).__name__}: {e}")
 
 
 # Phase 3.7 - AI summaries for priority tasks
