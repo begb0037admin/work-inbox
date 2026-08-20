@@ -1,3 +1,46 @@
+# Handover -- 20 August 2026, ~17:46 UTC (Drew) -- responsive sidebar breakpoint DEPLOYED, live-verified: fixes the narrow-width collapse from the entry below
+
+## Deploy outcome
+Kevin approved the fix proposed in the entry immediately below this one (narrow-width `.main` content collapse -- Finding 2 of the card-title/badge squeeze audit). Deployed and live-verified:
+
+1. **Backup-and-verify sequence, in full, via GitHub Contents API:**
+   - GET live `css/styles.css`: sha `d7db407c7ec062f76d8bc44b635a4094327aceab`, 36273 bytes, confirmed non-zero.
+   - Backup pushed to `Archive/styles_backup_20260820_1745.css` (commit `c419227073171ddc80581f5539f5d2db9dc13220`) -- content sha `d7db407c7ec062f76d8bc44b635a4094327aceab`, byte-identical to the live pre-change sha above, confirmed before touching anything else.
+   - Race-guard re-GET of live `css/styles.css` immediately before the real write: sha unchanged (`d7db4...`) -- no concurrent edit landed in between.
+   - Diff confirmed as a single clean insertion (14 lines, comment + media query, no other line touched) before writing, brace-balance-checked (351 open / 351 close).
+   - Sha-guarded PUT to `css/styles.css` (commit `86962cd79691201be28cc7713eb86f6c5a5cab9b`), new content sha `e56af02a06ede082a5cff7e4e625e737d81a775f`, 36983 bytes.
+   - Fresh post-write GET: sha matches the PUT response exactly, and the live bytes are byte-for-byte identical to the intended write (verified via direct comparison, not just sha trust).
+
+2. **The fix, adapted from command-centre's `f1dc0965` -- not a literal copy-paste.** Inserted directly after the existing `.main {...}` rule:
+   ```css
+   @media (max-width: 640px) {
+     .shell { flex-direction: column; }
+     .sidebar { width: 100%; height: auto; position: static; }
+     .main { margin-left: 0; }
+   }
+   ```
+   Important deviation, checked before proposing it: command-centre's own live site was tested at 400px before mirroring its snippet, and its `.main{margin-left:var(--sidebar-width)}` is never reset by its media query -- so even on the already-shipped command-centre fix, `.main` at 400px still measures only ~64px wide (340px margin never released). Copying that literally onto work-inbox would have left it similarly squeezed, not actually fixed. Work-inbox's version additionally resets `.main{margin-left:0}`, which command-centre's does not.
+
+3. **Live-verified end-to-end**, not just via commit/sha checks. GitHub Pages CDN (Fastly) lagged ~15s behind the build (confirmed still-cached old 36273-byte response briefly after `pages/builds/latest` already showed `status:"built"` for the deploy commit) -- polled until the CDN served the new 36983-byte file, then re-tested the real deployed page (no CSS injection) at all three widths:
+
+   | Width | `.main` width | `.sidebar` position | Result |
+   |---|---|---|---|
+   | 400px | 400px (full) | `static` (stacked) | Was ~0px before -- fixed |
+   | 800px | 460px | `fixed` | Unchanged (matches pre-fix measurement exactly) |
+   | 1400px | 1060px | `fixed` | Unchanged (matches pre-fix measurement exactly) |
+
+   Desktop (1400px) and mid (800px) screenshots were also byte-identical (sha256-compared) between the client-side pre-approval simulation and a plain unmodified load, confirming zero visual regression above the 640px breakpoint.
+
+4. **Card layouts re-confirmed clean, including at the now-functional narrow width.** `.card-title`, `.card-ph-title`/`.card-ph-actions`, and `.dr-subject`/`.dr-meta` (the three layouts audited in the entry below) were re-tested with synthetic long-title data at 400px post-fix -- all wrap normally, no regression, no squeeze.
+
+## Not touched
+`.page-header`'s subtitle-vs-buttons crowding at narrow width, noted in the entry below as a separate, minor, unrelated observation -- still not fixed, not asked for.
+
+## Exact next action
+None pending. This closes the narrow-width finding from the audit below. If Kevin wants the `.page-header` crowding addressed, that's a new, separate, small task.
+
+---
+
 # Handover -- 20 August 2026, ~18:15 UTC (Drew) -- card-title/badge squeeze audit: NOT present in work-inbox; separate narrow-width finding surfaced instead, awaiting Kevin's direction
 
 ## What this was
