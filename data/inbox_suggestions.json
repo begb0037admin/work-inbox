@@ -1,25 +1,6 @@
 {
-  "generated_at": "2026-08-20 07:21",
+  "generated_at": "2026-08-20 09:00",
   "new_tasks": [
-    {
-      "title": "Review org structure specifics from Organisational Structure team",
-      "tier": "week",
-      "description": "The Organisational Structure team has sent specific details about the org structure update for Kevin and Simon to action. Kevin needs to review the specifics and determine what changes or actions are required in HR Systems.",
-      "email_subject": "RE: Org Structure Update",
-      "email_from": "Organisational Structure",
-      "received": "2026-08-19 16:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F880000",
-      "auto_promoted": true
-    },
-    {
-      "title": "Review intranet hyperlinks request from Athena Artuso",
-      "tier": "week",
-      "description": "Athena Artuso has sent a request to review intranet hyperlinks. Kevin needs to understand the scope of changes and provide any input or approval required.",
-      "email_subject": "Review of intranet hyperlinks",
-      "email_from": "Athena Artuso",
-      "received": "2026-08-13 16:53",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A99B02210000"
-    },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
       "tier": "week",
@@ -27,7 +8,8 @@
       "email_subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
       "email_from": "Kevin (sent to: 'Alan Quirke'; Marie Cooksey)",
       "received": "2026-08-19 11:32",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077C2A011C0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF53500077C2A011C0000",
+      "carried_forward": true
     },
     {
       "title": "Clarify availability for Cross-Team Process Improvement Working Group",
@@ -36,7 +18,8 @@
       "email_subject": "Re: Cross-Team Process Improvement Working Group – 1st Meeting",
       "email_from": "Kevin (sent to: Otter Ho)",
       "received": "2026-08-19 13:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39ED0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39ED0000",
+      "carried_forward": true
     },
     {
       "title": "Attend planning meeting for departments moving to 38-day balance",
@@ -51,22 +34,31 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608111309071",
-      "task_title": "Attend HR Systems Management meeting",
-      "note": "PeopleXD platform maintenance scheduled for Friday 28 August 2026 between 8-10 pm; Kevin should note this downtime window for planning purposes.",
-      "email_subject": "FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-17 08:12",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007AAB5BD9C0000"
+      "task_id": "t2608200721490",
+      "task_title": "Review org structure specifics from Organisational Structure team",
+      "note": "Org Structure team has sent specific details about the org structure update for Kevin and Simon to action.",
+      "email_subject": "RE: Org Structure Update",
+      "email_from": "Organisational Structure",
+      "received": "2026-08-19 16:34",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F880000"
     },
     {
-      "task_id": "t2608180901160",
-      "task_title": "Confirm appointment availability with Chris Little",
-      "note": "Kevin has initiated contact with Chris Little to request an appointment on 11 or 12 September.",
-      "email_subject": "Appointment request",
-      "email_from": "Kevin (sent to: hand.shouldersurgery@gmail.com)",
-      "received": "2026-08-18 07:46",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39E20000"
+      "task_id": "t2608071801051",
+      "task_title": "Investigate team calendar config issue with Asta",
+      "note": "Michael O'Sullivan has responded that the TIMDEP04 Absence Reasons report may need updating to include the new Volunteering Leave absence type.",
+      "email_subject": "RE: Volunteering Leave",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-18 09:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007ACBB5F110000"
+    },
+    {
+      "task_id": "task-1785704715215",
+      "task_title": "Review outstanding Development Insight reports actions with Julie",
+      "note": "Kevin declined a meeting with Otter Ho on the Cross-Team Process Improvement Working Group due to a scheduling conflict.",
+      "email_subject": "Re: Cross-Team Process Improvement Working Group – 1st Meeting",
+      "email_from": "Kevin (sent to: Otter Ho)",
+      "received": "2026-08-19 13:34",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39ED0000"
     }
   ]
 }
