@@ -1,3 +1,49 @@
+# Handover -- 21 August 2026, ~08:50 UTC (Drew) -- Phase 2 item 3 CLOSED: staleness badge added to "Priorities This Week", shared definition with command-centre, STAGED pending screenshot approval
+
+## What this closes
+Kevin's work-inbox stability plan, Phase 2 (Medium), item 3 -- the last open item from the 21 Aug ~08:10 entry above. Kevin chose option 3: fix command-centre's underlying staleness-clock bug first, then apply one consistent staleness definition across both dashboards. Full root-cause/fix writeup for the command-centre half is in that repo's own `docs/HANDOVER.md` (same timestamp) -- not duplicated here in full, only the parts specific to this repo.
+
+## What's new here -- genuinely new logic, not a port
+work-inbox's "Priorities This Week" (`pw` zone, header "Priority actions - this week") had NO aging/staleness indicator at all until now -- confirmed live: 9 of the 39 live items had gone untouched a week+, oldest 51 days, with zero visual signal of that on the board.
+
+The `pw` zone's default contents are command-centre's own `tier:'week'` tasks, mirrored verbatim (including their `actions[]` array, unchanged) by `fetch_inbox.py`'s "Command Centre loaded" block. Because the mirrored `actions[]` strings are the exact same strings command-centre's own fix reads -- not independently re-derived -- reusing the identical genuine-activity rule here means both dashboards are actually sharing one definition, not just two definitions that happen to agree today:
+
+- Genuine activity = an untagged action-log entry (manual note), or one tagged `(email: Kevin (sent to: ...)` (Kevin's own sent reply). A routine inbound-mail-tagged entry `(email: <sender> - <subject>)` does not, by itself, reset the clock.
+- Threshold: 21 days, matching command-centre's own `CC_STALE_DAYS.week` exactly (not a separately chosen number).
+- New helper functions `_priLastActivityTs(p)` / `_priStaleDays(p,sec)` in `js/app.js`, deliberately scoped to `sec==='pw'` only -- this is new aging visibility for "Priorities This Week" specifically, per Kevin's ask, not a redesign of the other five board sections (Today/Tomorrow/Urgent/Needs/FYI), which are untouched and get no badge from this change.
+- A card dragged in from Urgent/Needs/FYI (which carry no `actions[]` log, only a raw email's `received_raw` timestamp) falls back to that single timestamp as a weaker aging anchor -- reasonable since there is, by definition, no second inbound touch on such a card that could falsely reset a clock the way the underlying bug does elsewhere. Flagged, not fixed here: if FYI/Urgent/Needs' own thread-collapse mechanism ever bumps `received`/`received_raw` on a routine reply to an already-seen thread, that would be a live instance of the same class of bug in a different part of the pipeline -- out of this fix's stated scope (explicitly "Priorities This Week" only), not investigated this session.
+
+## Badge convention -- reused, not invented
+Followed the existing `badge(text,type)` pattern already used for NEW/UPDATED/AI-source pills (no new CSS). New badge: `<span class="badge badge-red">NNd QUIET</span>` -- `badge-red` already exists in `css/styles.css` and was not touched; renders alongside (not replacing) any existing AI-source/NEW/UPDATED badge on the same card, matching command-centre's own "additive, not exclusive" badge philosophy for its stale indicator.
+
+## Live verification against real data (not synthetic), before writing anything
+Extracted the exact function block from the intended edit and ran it in Node against a fresh pull of live `data/briefing.json`'s `prioritiesWeek` array (39 items): 6 flagged stale at 21+ days (66d, 73d, 48d, 45d, 58d, 52d). Cross-checked against command-centre's own live `data/tasks.json`, filtered to `tier==='week'`: **same 6 task ids, same day counts** (one item off by 1 day -- `briefing.json`'s mirror snapshot is refreshed periodically, not live-synced to the instant `tasks.json` was pulled; both converge on the next `fetch_inbox.py` run). This is the concrete proof the two dashboards are using the same definition against the same underlying data, not just similar-looking logic.
+
+## Screenshot verification (UI approval gate -- not written into this repo's own CLAUDE.md as an explicit rule, but the discipline every visual work-inbox change this week has followed, e.g. the 17 Aug card-search feature and the 20 Aug Phase 1 build, both held for screenshot approval before merge)
+Built a local before/after test harness: live `index.html`/`css/styles.css`/`data/briefing.json`, swapping only `js/app.js`, with `BRIEFING_API` pointed at the local file for the test harness only (never touched in the real pushed file). Screenshotted via Playwright (installed locally). Confirmed visually: "Smart notes escalation", "Org hierarchy documentation and process", "DSE data feed issues", "REF attributes via ESS", "Summer support cover", and "Gate 2.0 equivalence test task" all correctly show new `NNd QUIET` red badges; genuinely recent/updated items (e.g. "Holiday Records - 3 Reports Created", "Review outstanding Development Insight reports actions") show only their existing UPDATED badge, unaffected. No other visual element changed.
+
+## Backup-and-verify sequence, run in full (this repo's own established discipline)
+1. Fresh GET of live `js/app.js` -- sha `e7a34cb1465454c0c43fbd0453b2425ffecf28f7`, 78921 bytes, non-zero, confirmed, matched the byte-diff-verified state from the merge earlier in this file (20 Aug ~21:14 entry).
+2. Timestamped backup pushed first (to `main`, per convention): `Archive/app_backup_20260821_0840.js`, commit `187717862d92f87f488a2980566073f70bf6a83f` -- content sha `e7a34cb1465454c0c43fbd0453b2425ffecf28f7`, byte-identical to the live pre-change file, confirmed via independent re-GET.
+3. Race-guard re-GET of live `js/app.js` immediately before the edit -- unchanged.
+4. Edit applied: new `WI_PW_STALE_DAYS`/`WI_MONTHS`/`_priLastActivityTs`/`_priStaleDays` block inserted before `_priRenderOneCard`; `_priRenderOneCard` itself extended with a `staleBadge` computation and one addition to its returned template (`${theBadge}${staleBadge}${emailBtn}${ccBtn}`, was `${theBadge}${emailBtn}${ccBtn}`).
+5. Pushed to a NEW branch `phase2-item3-staleness-fix-21aug` (not `main`), sha-guarded against the pre-change sha above -- commit `ece2603450567a1a735ad661cccc486b3140afdb`, new content sha `9272751df8399647a5e17acbcef561d8a9a11c1f`, 82774 bytes.
+6. Fresh post-push GET from the branch: byte-identical to the intended edit, confirmed. `node --check` clean. `main`'s `js/app.js` confirmed still at the pre-change sha -- untouched.
+
+## NOT merged to main -- held for screenshot approval
+Staged on branch `phase2-item3-staleness-fix-21aug` (commit `ece26034`), same branch name as command-centre's matching staged fix (different repo, no collision), with before/after screenshots ready, awaiting Kevin's literal **"approved"**.
+
+## Decision on `holding/item8-staleness-badge-fix` (command-centre)
+Not this repo's branch, but the decision affects the shared-definition story: reviewed live (94 commits behind current command-centre `main`, 1 ahead, single-hunk diff), judged SUPERSEDED rather than resumed as-is -- its core regex was sound and re-verified against current `fetch_inbox.py` tag conventions, but live verification here found and fixed a real edge case (all-inbound-history task with no `dateAdded` silently losing its staleness signal entirely) that the 12 Aug branch didn't cover. Branch deleted after recording its final sha (`7c7406af36fcc05f237a7d4f5fd4c15176048bf5`) for full traceability. Full reasoning in command-centre's own `docs/HANDOVER.md`, same timestamp.
+
+## Revert plan (once merged -- currently N/A since nothing is on main yet)
+If merged and a live problem is reported: restore `js/app.js` from `Archive/app_backup_20260821_0840.js` (content sha `e7a34cb1465454c0c43fbd0453b2425ffecf28f7`) via a sha-guarded PUT against whatever `main`'s tip is at that time -- same pattern as every prior revert in this file (e.g. the `wi-newest-first-insertion-20aug` entry above uses the identical shape). Until merged, reverting is simply not merging the branch; `main` is untouched.
+
+## Next action
+Show Kevin the before/after screenshots (both repos, same session -- command-centre's matching entry is immediately relevant). On his literal "approved": merge both repos' `phase2-item3-staleness-fix-21aug` branches into their respective `main`s (GitHub Merges API, checking for divergence first, same as every merge this week), poll each Pages build to `built`, byte-diff the live served files against the merged blobs. That closes Phase 2 of Kevin's work-inbox stability plan in full -- report back to him per his own instruction, which triggers his stock-take before Phase 3 (merging the 2 duplicate task pairs; the original item8 concern is not separately open, this change supersedes it).
+
+---
+
 # Handover -- 21 August 2026, ~08:10 UTC (Drew) -- Phase 2 continued: silent-failure fix FINISHED for both remaining targets (needs_reply + drafted_replies), a real double-toast regression found and fixed in the local .bat, item 2 (ticks.json retry/merge) CORRECTED -- already shipped by the prior session, not re-done. Staleness-policy options for "Priorities This Week" scoped, not implemented.
 
 ## Context -- resuming after a prior session hit a session limit mid-Phase-2
