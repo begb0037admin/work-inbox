@@ -1,3 +1,37 @@
+# Handover -- 21 August 2026, ~09:00 UTC (Drew) -- Phase 2 item 3 MERGED to main, verified live -- PHASE 2 CLOSED IN FULL
+
+## What shipped
+Kevin reviewed the staged before/after screenshots himself and gave literal approval to merge. Branch `phase2-item3-staleness-fix-21aug` (commit `ece2603450567a1a735ad661cccc486b3140afdb`) merged into `main` -- the "Priorities This Week" staleness badge, sharing one staleness definition with command-centre (see the 21 Aug ~08:50 entry immediately below for the full writeup, not repeated here).
+
+## Pre-merge verification (this repo's own established backup-and-verify discipline)
+- Fresh GET of live `main` `js/app.js` immediately before merging: sha `e7a34cb1465454c0c43fbd0453b2425ffecf28f7`, 78921 bytes -- unchanged since the branch was staged (matches the pre-change sha recorded in the ~08:50 entry), confirming no drift and that the existing backup is still the correct restore point.
+- `compare/main...phase2-item3-staleness-fix-21aug`: branch 1 ahead / 1 behind main ("diverged"). Checked what the 1 extra main commit touched before merging: only `HANDOVER.md` (this file's own staging entry) -- never `js/app.js`, so no conflict risk.
+- Re-verified `Archive/app_backup_20260821_0840.js` (commit `187717862d92f87f488a2980566073f70bf6a83f`) live: sha `e7a34cb1465454c0c43fbd0453b2425ffecf28f7`, byte-identical to pre-merge `main`.
+
+## Merge
+GitHub Merges API, `base=main`, `head=phase2-item3-staleness-fix-21aug` -> merge commit `b5c54a51fbbd8a7f9c04ba322128a0860529f5d5`. Post-merge `main`'s `js/app.js` sha confirmed via direct GET: `9272751df8399647a5e17acbcef561d8a9a11c1f`, 82774 bytes -- exact match to the branch's staged content.
+
+## Live deploy verification -- byte-diff, not just "merge succeeded" or a status field
+Per agent-commons' documented cache-trap gotcha (raw.githubusercontent.com and `/pages/builds/latest` can serve/report stale right after a real change), did not stop at the Pages status:
+1. Polled `pages/builds/latest` -- `building` -> `built` (commit `b5c54a51fbbd8a7f9c04ba322128a0860529f5d5`) within ~50s of the merge.
+2. Downloaded the **actual served file** -- `curl https://begb0037admin.github.io/work-inbox/js/app.js?t=<cache-buster>` -- and diffed it directly against the merged git blob (`contents/js/app.js?ref=main`, base64-decoded): `cmp` reports 0 byte differences, SHA-256 identical (`94164da4...`) on both sides.
+3. Confirmed `_priLastActivityTs`/`_priStaleDays` present in the live served file (sanity grep, 5 occurrences).
+
+## Backup location
+`Archive/app_backup_20260821_0840.js` (commit `187717862d92f87f488a2980566073f70bf6a83f`) -- pre-fix `js/app.js`, sha `e7a34cb1465454c0c43fbd0453b2425ffecf28f7`, 78921 bytes. Correct restore point for this specific change.
+
+## Revert plan -- validated against current live data this session, not just described
+If a live problem is reported: fetch current `main` sha for `js/app.js`, sha-guarded `PUT` of `Archive/app_backup_20260821_0840.js`'s content back onto `js/app.js`, commit message `"Revert to pre-Phase2-item3 staleness badge"`.
+**Validated, not just asserted:** the backup is the exact byte-identical file that was live and working seconds before this merge -- confirmed its `_priRenderOneCard` (the only function this fix touched) contains zero references to the new `_priLastActivityTs`/`_priStaleDays` helpers (grepped directly), so reverting is a pure feature-removal with no dangling-reference risk, not a partial/broken state. Cross-checked against **today's actual live `data/briefing.json`** (39 `prioritiesWeek` items, current data, not the dataset the fix was originally verified against) -- the reverted code path (the old, badge-less `_priRenderOneCard`) is exactly what already ran cleanly against this same live data for months before today's change, so no new execution risk from data shape drift.
+
+## Branch cleanup
+`phase2-item3-staleness-fix-21aug` deleted after all of the above was confirmed. The change is carried forward permanently via merge commit `b5c54a51fbbd8a7f9c04ba322128a0860529f5d5`; the branch's original tip (`ece2603450567a1a735ad661cccc486b3140afdb`) remains reachable through that commit's parent history for full traceability.
+
+## Phase 2 status
+This was the last open Phase 2 item. **Phase 2 is closed in full on this repo's side.** Command-centre's matching half of the same fix is documented in that repo's own `docs/HANDOVER.md`, same session, same verification standard. Reporting back to Kevin per his own instruction -- this closes Phase 2 overall, triggering his stock-take before Phase 3 (merging the 2 duplicate task pairs; the original item8 concern is not separately open, superseded by this change).
+
+---
+
 # Handover -- 21 August 2026, ~08:50 UTC (Drew) -- Phase 2 item 3 CLOSED: staleness badge added to "Priorities This Week", shared definition with command-centre, STAGED pending screenshot approval
 
 ## What this closes
