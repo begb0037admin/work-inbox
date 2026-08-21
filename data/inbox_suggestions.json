@@ -1,15 +1,14 @@
 {
-  "generated_at": "2026-08-21 12:00",
+  "generated_at": "2026-08-21 15:00",
   "new_tasks": [
     {
-      "title": "Review sickness absence data completeness with Sarah Rowles",
+      "title": "Estimate FA effort for application form internal candidate identification",
       "tier": "week",
-      "description": "Sarah Rowles has sent data completeness analysis for the DWHS sickness absence dataset (OUTPUT_SicknessDataChecks_20260811.xlsx). Kevin needs to review the findings and discuss any data quality issues or follow-up actions required.",
-      "email_subject": "Sickness Absence Data Catch-up",
-      "email_from": "Sarah Rowles",
-      "received": "2026-08-21 11:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F550000",
-      "auto_promoted": true
+      "description": "Simon Burford is asking Kevin to provide a Functional Analysis effort estimate for implementing internal candidate identification in the application form. This is a scoping task requiring Kevin's assessment of complexity and work required.",
+      "email_subject": "FW: Application form - identification of internal candidates",
+      "email_from": "Simon Burford",
+      "received": "2026-08-19 15:51",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000"
     },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
@@ -42,5 +41,15 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t2608191801190",
+      "task_title": "Estimate effort for application form internal candidate identification feature",
+      "note": "Julie Hickman has reminded the team to add messages to Beth's Kudoboard; this is informational follow-up to the farewell/gift task.",
+      "email_subject": "RE: Farewell wishes and gift for Beth",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-20 14:13",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F410000"
+    }
+  ]
 }
