@@ -1,3 +1,29 @@
+# Handover -- 21 August 2026, ~17:05 UTC (Drew) -- Phase 3 MERGED to main (manual conflict resolution), Worker deploy confirmed live in command-centre
+
+## What shipped
+- Merged `phase3-donesync-21aug` (tip `5fe77083f`) into `main`. **This merge had a real conflict**, unlike command-centre's clean merge: `main` had advanced 13 commits since the branch was cut (drag-drop rework, staleness badge, newest-first-insertion, Archive per-date purge control, the absences-panel dedup fix), all appending to the same top-of-file point in `HANDOVER.md` this branch's own entry also targeted. `js/app.js` merged cleanly via git's own auto-merge (zero conflicts) -- confirmed via `node --check` post-merge and a direct grep for `_ticksBaseSha`/`refreshTicksBaseSha` in the merged file. `HANDOVER.md`'s conflict was resolved by hand -- reordered the three overlapping entries into correct chronological order (15:55 newest, then this Phase 3 entry at 15:15, then the 11:35 entry last), no content lost or altered, just re-sequenced. Merge commit `5c5b1c84c43dbe2b2a5234575536421769373f4e` (parents `7f712a3` + branch tip `5fe7708`).
+- Command-centre's `cc-tasks-writer-proposed.js` (this Phase 3's server-side half) is now deployed live to the shared Worker -- see command-centre's own `docs/HANDOVER.md` (21 Aug ~17:05 entry) for the full Worker-deploy verification (the `wrangler deploy`-works-for-code confirmation, live round-trip tests on both `tasks.json` and `ticks.json`). This repo's `_ticksBaseSha`/`pushTicks()` baseSha-sending change is no longer inert -- the live Worker now reads and acts on it.
+
+## Verification
+- Post-merge, confirmed live on `main` (not just pushed): `js/app.js` contains `_ticksBaseSha`, `refreshTicksBaseSha()`, and `baseSha` sent inside `pushTicks()`'s POST body -- fetched fresh from GitHub, not assumed from the local merge.
+- The command-centre-side live round-trip test against this repo's real `data/ticks.json` succeeded: `{"ok":true,"merged":false,"attempts":1,"sha":"1fc9b147...","doneSynced":[]}` -- confirms the deployed Worker's `handleInboxState` correctly accepts this repo's data shape end-to-end.
+
+## Backup-and-verify sequence, this session
+| File | Pre-merge live SHA | Backup path | Backup SHA re-verified |
+|---|---|---|---|
+| `js/app.js` | `0fa0bdf7fb4e06b77431cc67b4ff9125cd30f34e` (84411 bytes) | `Archive/app_backup_20260821_1425.js` | byte-identical, re-GET confirmed |
+| `HANDOVER.md` | `a4e9c3430c41c69fd5daaf389115f627a5f67f5e` (376916 bytes) | `Archive/HANDOVER_backup_20260821_1425.md` | byte-identical, re-GET confirmed |
+
+(Note: a backup of `js/app.js` was first mistakenly committed to `data/Archive/app_backup_20260821_1425.js` -- wrong path, this repo's convention is root-level `Archive/`. Caught immediately, correct backup committed to `Archive/`, the mistaken `data/Archive/` copy deleted the same session before the merge proceeded.)
+
+## Revert plan -- validated
+Sha-guarded `PUT` of `Archive/app_backup_20260821_1425.js`'s content back onto `js/app.js` against `main`'s then-current sha -- confirmed byte-identical to the exact pre-merge live content. Safe to revert independently of command-centre's Worker: an old client simply stops sending `baseSha`, which the live Worker already treats as "no staleness check possible" (its pre-Phase-3, backward-compatible behaviour).
+
+## Branch cleanup
+`phase3-donesync-21aug` deleted from both `command-centre` and `work-inbox` after this entry, now that main is confirmed live and matches in both repos.
+
+---
+
 # Handover -- 21 August 2026, ~15:55 UTC (Drew) -- Absences-panel dedup + organizer-placeholder fix IMPLEMENTED, verified live, HELD ON A BRANCH (not merged -- Kevin's explicit word required)
 
 ## What this is
