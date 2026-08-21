@@ -1,15 +1,14 @@
 {
-  "generated_at": "2026-08-20 18:00",
+  "generated_at": "2026-08-21 07:56",
   "new_tasks": [
     {
-      "title": "Complete DTP1334 SHSMS supplier evaluation by Friday 21 Aug",
-      "tier": "tomorrow",
-      "description": "Helen Harbour is checking that Kevin will complete and return the supplier requirements evaluations for the Strategic Health & Safety Management System project by the Friday 21 August deadline. Kevin needs to review supplier submissions and clarifications and return his evaluation.",
+      "title": "Complete DTP1334 SHSMS supplier evaluation by Friday 21 Aug (TODAY)",
+      "tier": "today",
+      "description": "Helen Harbour is checking that Kevin will complete and return the supplier requirements evaluations for the Strategic Health & Safety Management System project by today (Friday 21 August). Kevin needs to review supplier submissions and clarifications and submit his evaluation before end of business.",
       "email_subject": "Fw: Strategic Health & Safety Management System project supplier requirements evaluations; upcoming deadline of Friday 21 August",
       "email_from": "Helen Harbour",
       "received": "2026-08-20 16:24",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F420000",
-      "auto_promoted": true
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F420000"
     },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
@@ -44,22 +43,22 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608201500590",
-      "task_title": "Estimate effort for internal candidate identification in application form",
-      "note": "Simon Burford requests functional analysis effort estimate for internal candidate identification feature in application form.",
-      "email_subject": "FW: Application form - identification of internal candidates",
-      "email_from": "Simon Burford",
-      "received": "2026-08-19 15:51",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000"
+      "task_id": "t2608201801130",
+      "task_title": "Complete DTP1334 SHSMS supplier evaluation by Friday 21 Aug",
+      "note": "Helen Harbour sent a final check-in confirming the Friday 21 August deadline for supplier evaluation returns.",
+      "email_subject": "Fw: Strategic Health & Safety Management System project supplier requirements evaluations; upcoming deadline of Friday 21 August",
+      "email_from": "Helen Harbour",
+      "received": "2026-08-20 16:24",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F420000"
     },
     {
-      "task_id": "t2608180901160",
-      "task_title": "Confirm appointment availability with Chris Little",
-      "note": "Kevin forwarded Chris Little's reply to his own inbox as a reminder.",
-      "email_subject": "Fw: Appointment request",
-      "email_from": "Kevin (sent to: Kevin Lelitte)",
-      "received": "2026-08-18 09:45",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39E40000"
+      "task_id": "t2608111331410",
+      "task_title": "URGENT -- Cority Applicant Data Import file (James Salas Guillen / Simon Burford thread)",
+      "note": "Kevin replied to Simon Burford and James Salas Guillen clarifying that the Cority Applicant Data Import report was originally built by Grace, not Lee, and has been handed over.",
+      "email_subject": "Re: Cority - Applicant Data Import file",
+      "email_from": "Kevin (sent to: Simon Burford; James Salas Guillen)",
+      "received": "2026-08-20 17:42",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ADFEA7630000"
     }
   ]
 }
