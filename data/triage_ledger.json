@@ -386,8 +386,8 @@
     "received": "20 Aug",
     "received_raw": "2026-08-20 14:13:18.596000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman invites Kevin to add farewell messages for Beth on the Kudoboard if he hasn't already.",
-    "needs_reply": false,
+    "ai_summary": "Julie Hickman asks Kevin to add farewell messages for Beth to the Kudoboard.",
+    "needs_reply": true,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
@@ -406,7 +406,7 @@
     "received": "20 Aug",
     "received_raw": "2026-08-20 14:09:30.937000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman updates Kevin on 38-day balance progress across departments with Chemistry's estimated figures.",
+    "ai_summary": "Julie Hickman provides update on 38 day balance for departments, with Chemistry providing estimated work group numbers.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -446,7 +446,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 16:29:30.947000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman provides Kevin with contact details for departmental leads working on the 38-day balance project (Chemistry, Maths, etc.).",
+    "ai_summary": "Julie Hickman shares department contact details (Chemistry Jenna Boyce and Alexia Leakey, Maths Emma H) for 38 day balance work.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -466,7 +466,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford asks Kevin to estimate from an FA perspective how much work is needed to identify internal candidates in application forms.",
+    "ai_summary": "Simon Burford forwards application form query about identification of internal candidates and asks Kevin for FA workload estimate.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -486,7 +486,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:34:44.335000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman shares a OneDrive file with Kevin containing a timeframe of task for the 38-day balance project.",
+    "ai_summary": "Julie Hickman shares OneDrive file with timeframe of task related to 38 day balance for departments.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -506,8 +506,8 @@
     "received": "18 Aug",
     "received_raw": "2026-08-18 10:23:53.928000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Kevin Lelitte bumps a forwarded request from Anna Carter-Windle about GLAM Botanic Gardens and Ashmolean Security rostering requirement (original from May 2026).",
-    "needs_reply": true,
+    "ai_summary": "Kevin Lelitte bumps earlier email from Anna Carter-Windle (28 May 2026) about GLAM Botanic Gardens and Ashmolean Security rostering requirement.",
+    "needs_reply": false,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
