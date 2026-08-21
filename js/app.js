@@ -126,7 +126,10 @@ function renderArchiveList(){
     return `<div class="archive-day">
       <div class="archive-day-header" onclick="toggleArchiveDay(${di})">
         <div><div class="archive-day-date">${e.dateStr}</div><div class="archive-day-meta">${items.length} items · ${tickedCount} done</div></div>
-        <span class="archive-day-arrow" id="arch-arrow-${di}">–</span>
+        <div class="archive-day-header-right">
+          <button type="button" class="archive-day-purge-btn" title="Purge this date" onclick="event.stopPropagation();purgeArchiveDay(${di})">&times;</button>
+          <span class="archive-day-arrow" id="arch-arrow-${di}">–</span>
+        </div>
       </div>
       <div class="archive-day-items" id="arch-items-${di}">${itemsHtml}</div>
     </div>`;
@@ -137,6 +140,32 @@ function toggleArchiveDay(i){
   const arrow=document.getElementById('arch-arrow-'+i);
   const open=el.classList.toggle('open');
   arrow.textContent=open?'▲':'–';
+}
+/* Per-date purge, additive alongside the existing bulk "purge older than N
+   days" control (purgeOldTicks, below) -- deliberately matches its safety
+   level exactly: a single native confirm() naming what will be deleted, no
+   backup step, immediate on confirm. Looks the target entry up fresh from
+   getArchiveData() by index at click time (same pattern toggleArchiveDay
+   already uses) rather than trusting a stale closure, so it stays correct
+   even if the list re-renders between paint and click. Deletes only this
+   date's store entry and its own tick entries -- saveTicks() still fires the
+   existing scheduleStateSync() cross-machine sync exactly as it does for the
+   bulk purge, so an individual purge propagates to data/ticks.json the same
+   way. The archived briefing content itself (store) has never been synced
+   anywhere -- purging it here is exactly as local-only as it already was. */
+function purgeArchiveDay(di){
+  const entries=getArchiveData();
+  const e=entries[di];
+  if(!e) return;
+  const items=getAllItemsForDay(e.data);
+  if(!confirm('Purge "'+e.dateStr+'" ('+items.length+' items)? This cannot be undone.')) return;
+  const store=getStore(), ticks=getTicks();
+  delete store[e.key];
+  Object.keys(ticks).filter(tk=>tk.startsWith(e.key+'_')).forEach(tk=>{delete ticks[tk];});
+  saveStore(store);
+  saveTicks(ticks);
+  renderArchiveList();
+  alert('"'+e.dateStr+'" purged.');
 }
 function exportArchiveMd(){
   const entries=getArchiveData();
