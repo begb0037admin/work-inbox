@@ -392,8 +392,8 @@
     "received": "20 Aug",
     "received_raw": "2026-08-20 14:13:18.596000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman invites Kevin to add farewell messages for Beth on the Kudoboard.",
-    "needs_reply": false,
+    "ai_summary": "Julie Hickman requests Kevin add a message to the Kudoboard for Beth's farewell gift.",
+    "needs_reply": true,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
@@ -472,7 +472,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford asks Kevin to estimate from an FA point of view how much work would be involved in implementing identification of internal candidates on an application form.",
+    "ai_summary": "Simon Burford asks Kevin to estimate effort required from Finance & Administration perspective to identify internal candidates in application forms.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -512,7 +512,7 @@
     "received": "18 Aug",
     "received_raw": "2026-08-18 10:23:53.928000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Kevin Lelitte bumps a May 2026 rostering requirement inquiry from Anna Carter-Windle for GLAM Botanic Gardens Ticket Office and Ashmolean Security.",
+    "ai_summary": "Kevin Lelitte forwards Anna Carter-Windle's request from 28 May 2026 regarding rostering requirements for GLAM Botanic Gardens and Ashmolean Security with a bump note.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -534,6 +534,26 @@
     "kevin_is_primary_recipient": true,
     "ai_summary": "Sarah Rowles asks Kevin to discuss sickness absence data completeness in the DWHS using the attached OUTPUT_SicknessDataChecks_20260811.xlsx file.",
     "needs_reply": true,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-21",
+   "last_confirmed": "2026-08-21"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000": {
+   "tier": "needs",
+   "card": {
+    "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-21 17:00",
+    "sub": "From <strong>Cority_Integration_Platform_Notifications@Cority.com</strong>. An error occured while processing your HR import. Please review the attached log file for additional details.",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-21 17:00",
+    "from": "Cority_Integration_Platform_Notifications@Cority.com",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000",
+    "received": "21 Aug",
+    "received_raw": "2026-08-21 18:00:49.263000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Cority Employee Import failed on 21 August 2026 at 17:00; Kevin needs to review the attached error log file.",
+    "needs_reply": false,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
