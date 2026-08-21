@@ -1,3 +1,53 @@
+# Handover -- 21 August 2026, ~18:15 UTC (Drew) -- Absences-panel second-pass fix: current/soonest-window selection, corrects the first pass's fabricated-bridge bug -- STILL HELD ON A BRANCH, not merged
+
+## What this is
+Second-pass correction to the first-pass fix logged in the entry below (~15:55 UTC, same day, branch `wi-absences-dedup-fix-21aug`). Kevin, via the coordinator, ruled the first pass's "latest-starting real window wins" selection rule wrong: it fabricates a bridge across a genuine gap whenever a person has more than one separate real absence window in the eligible range, presenting the result as one continuous span when it isn't. Confirmed directly by Kevin: his own three "Kevin - A/L" bookings (Mon 24, Wed 26, Fri 28 Aug) are genuinely separate single-day entries, not one block and not a data error.
+
+## Re-verified live, not inherited from notes
+Did not trust the prior session's or this repo's memory notes at face value -- pulled a fresh raw Outlook COM snapshot today (both Kevin's own Calendar and the "People Department - HR Systems" shared calendar, 21 Jul - 11 Sep window, wider than either the Phase 1 pull or the absence-eligibility window so nothing plausible could be missed) and ran the REAL, currently-committed `fetch_inbox.py` code (verbatim `exec()` of the actual source block, not a hand-copied reimplementation) against it, both before and after the edit, for the full requested audit: Kevin, Michael O'Sullivan, Marie King, Anthony Kong, David Johnson, Simon Burford, Susan Pratt, Henry Acheampong, Julie Hickman.
+
+Findings that corrected an assumption in the first-pass entry: Michael O'Sullivan's Mon 24 Aug entry is a genuine **single day**, not a two-day Mon-Tue span as speculated (its raw all-day end date is 25 Aug, i.e. exclusive-end for one calendar day, 24th only). Two more people were newly found to have a second separate real window in the current eligible range that the first-pass logic would also have wrongly bridged: **Simon Burford** (real entries Fri 21 Aug and Fri 28 Aug) and **Anthony Kong** (Fri 21 Aug, now correctly named via the already-working PR_SENDER_NAME fix, and a separate Thu 27-Fri 28 Aug block with a real Organizer).
+
+## The fix
+Selection rule in the per-person resolution loop (just above `absences = sorted(...)`) changed from `chosen = max(windows, key=lambda w: w["start"])` to: prefer whichever merged window genuinely covers **today**, if one does; otherwise the window with the **earliest** start date among the remaining (upcoming) ones -- never the latest, never a fabricated bridge. `_merge_adjacent_windows()` itself (true calendar-day adjacency -- next window's start is the same day as or the day immediately after the previous window's last day, not a fuzzy proximity check) was already correct in the first pass and is unchanged. Any real window not chosen is still written to the run log (`log()`), not silently dropped, per the same "don't silently lose a real window" requirement as the first pass -- log wording updated to say which rule fired (`covers today` vs `soonest upcoming`). Applied uniformly across every person -- no special-casing by name, per explicit instruction.
+
+## Before (first-pass branch) / After (this fix) -- full audit, verified live today
+| Person | First-pass output | This fix's output | Changed? |
+|---|---|---|---|
+| Kevin (own entry) | off next week, returns **Thursday 27 August** (production; the Fri 28 window is invisible to the first pass's own live run because of the separate, pre-existing Phase 1 window-vs-eligibility mismatch noted below -- confirmed via the pure-logic harness that without that mismatch the first pass would instead have picked Fri 28, "returns Monday 31 August") | off next week, returns **Tuesday 25 August** | **YES -- this was the bug.** Matches the coordinator-relayed exact expected value: today (Fri 21 Aug) falls in none of his three windows, so the soonest (Mon 24, single day) is surfaced. |
+| Michael O'Sullivan | off next week, returns Tuesday 25 August | off **today**, returns Monday 24 August | **YES -- flagged, needs Kevin's own read, see below.** |
+| Simon Burford | off next week, returns Monday 31 August (would have been, under the first-pass rule with both his real windows visible) | off today, returns Monday 24 August | **Corrects a live bug the first pass hadn't been tested against** -- Simon now genuinely has two real windows (Fri 21, Fri 28); today's window correctly wins. |
+| Anthony Kong | off next week, returns Monday 31 August | off today, returns Monday 24 August | **YES.** Now has one row (name-fix from the first pass still holds), and the date now correctly reflects his real Fri 21 window covering today; the separate Thu 27-Fri 28 block is logged, not shown. |
+| Marie King | off next week, returns Thursday 27 August | off next week, returns Thursday 27 August | No change -- her real tier has only one (merged, genuinely-adjacent) window either way. |
+| David Johnson | off today, returns Monday 24 August | off today, returns Monday 24 August | No change -- single real entry. |
+| Susan Pratt | off today, returns Monday 24 August | off today, returns Monday 24 August | No change -- single real entry. |
+| Henry Acheampong | off next week, returns Friday 28 August | off next week, returns Friday 28 August | No change -- single real entry. |
+| Julie Hickman | off next week, returns Wednesday 2 September | off next week, returns Wednesday 2 September | No change -- single real entry. |
+
+## Flagged for Kevin's own read -- Michael O'Sullivan
+Michael has a real, non-recurring "Michael A/L" entry covering **today** (Fri 21 Aug) as well as the separate Mon 24 Aug entry. The rule Kevin gave (current-covers-today wins, else soonest) makes his label "off today, returns Monday 24 August" -- but an earlier session recorded Kevin directly confirming "Mon 24 -> Tue 25" as Michael's correct real dates. That confirmation predates today's discovery that Michael also has a genuinely real Friday entry; it isn't known whether Kevin was aware of the Friday entry when he confirmed the Monday one, or whether both are simply both true (he was off Friday, and separately is off Monday-into-Tuesday). This implementation did **not** special-case Michael's name to force the earlier-confirmed answer, per the explicit instruction to apply the rule uniformly -- surfacing this plainly rather than silently picking either interpretation. If Kevin's real intent is that the Friday entry shouldn't count as "current" for some reason not visible in Outlook's own data, that needs his own read, not an assumption baked into the code.
+
+## Not touched, still separately flagged -- Phase 1 pull window vs absence-eligibility window
+Unchanged from the first-pass entry: Phase 1's own calendar pull only goes to `today + 6 days`, while the absence-eligibility check's window is `today + 8 days`. This means an entry starting on day+7 or day+8 (e.g. Kevin's real Fri 28 Aug window) is invisible to the *real production* pipeline even though it's real and would otherwise be logged as a "not shown" window -- not a new gap introduced by this session, not fixed here (out of the stated scope: this session's changes are the selection rule only). It does **not** affect the correctness of any displayed label in this audit, since every person's chosen window falls within the first 6 days regardless. Still worth a deliberate decision in a future session on whether to widen Phase 1's own pull window to match.
+
+## Verified, not assumed
+- `python -m py_compile fetch_inbox.py` clean before commit.
+- Real edited source block `exec()`'d verbatim against the fresh live raw snapshot (not a hand-copied reimplementation) -- output matches the table above exactly.
+- Placeholder-organizer name resolution (`PR_SENDER_NAME`) untouched by this pass, reconfirmed still correct live (Anthony Kong resolves to one name, one key).
+- `_title_case_name()` mid-name-apostrophe handling reconfirmed unaffected (Michael O'Sullivan's name renders correctly throughout).
+
+## Backup-and-verify sequence, this pass
+On branch `wi-absences-dedup-fix-21aug`, main untouched throughout:
+1. Branch-tip `fetch_inbox.py` sha confirmed via GitHub Contents API immediately before any write: `5709e00174de265e17a1dd34059ce3ee981589e8`, 139089 bytes -- matches `git ls-tree HEAD` locally.
+2. Timestamped backup committed first: `Archive/fetch_inbox_backup_20260821_1710.py`, commit `ca122dc`.
+3. Edit applied, `py_compile` clean, committed: commit `a2baf9e`, new content sha `56d27063f9b9dae731fd1dd052747af3b5ca23f8` (140757 bytes) -- confirmed via GitHub Contents API against the pushed branch.
+4. Branch pushed to `origin/wi-absences-dedup-fix-21aug`. Live `main` `fetch_inbox.py` sha re-checked after push: `7117f63b579f331ec5377cf6097a87ccda5f0e46`, 132763 bytes -- **completely unchanged**, exact same sha as before the first pass and this second pass. This checkpoint doc update (`HANDOVER.md` on `main` directly, per this repo's own convention for checkpoint docs even while the code change stays on the branch) is the only thing pushed to `main` this session.
+
+## Exact next action
+Still the same gate as the first pass: Kevin's explicit word merges `wi-absences-dedup-fix-21aug` into `main` (fast-forward, only `fetch_inbox.py` and `Archive/` backups touched on the branch). Before merging, Kevin's own read on the flagged Michael O'Sullivan question above would be good to have, though it doesn't block the merge -- the uniform rule is defensible as-is and the alternative (special-casing) was explicitly ruled out.
+
+---
+
 # Handover -- 21 August 2026, ~17:05 UTC (Drew) -- Phase 3 MERGED to main (manual conflict resolution), Worker deploy confirmed live in command-centre
 
 ## What shipped
