@@ -1,6 +1,16 @@
 {
-  "generated_at": "2026-08-21 09:00",
+  "generated_at": "2026-08-21 12:00",
   "new_tasks": [
+    {
+      "title": "Review sickness absence data completeness with Sarah Rowles",
+      "tier": "week",
+      "description": "Sarah Rowles has sent data completeness analysis for the DWHS sickness absence dataset (OUTPUT_SicknessDataChecks_20260811.xlsx). Kevin needs to review the findings and discuss any data quality issues or follow-up actions required.",
+      "email_subject": "Sickness Absence Data Catch-up",
+      "email_from": "Sarah Rowles",
+      "received": "2026-08-21 11:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F550000",
+      "auto_promoted": true
+    },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
       "tier": "week",
@@ -32,15 +42,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608030857560",
-      "task_title": "Attend SH&SM Project HR Systems Tender Evaluation Response meeting",
-      "note": "Kevin clarified that the Cority applicant data import report was originally built by Grace, not Lee, and has been handed over with documentation.",
-      "email_subject": "Re: Cority - Applicant Data Import file",
-      "email_from": "Kevin (sent to: Simon Burford; James Salas Guillen)",
-      "received": "2026-08-20 17:42",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ADFEA7630000"
-    }
-  ]
+  "applied_updates": []
 }
