@@ -1620,18 +1620,42 @@ for item in calendar:
 #
 # Within whichever tier is used, entries that are genuinely continuous
 # (no gap at all between one's last day and the next's first day) are
-# merged into a single combined window. Entries that are NOT touching
-# are treated as genuinely separate absence periods; the one with the
-# LATEST start date is what's surfaced. Confirmed against Michael
-# O'Sullivan's two real, non-adjacent "Michael A/L" bookings live, 21
-# Aug 2026 -- Fri 21 Aug and Mon 24 Aug, gap of a full weekend between
-# them, so NOT merged -- where Kevin's own independently confirmed real
-# dates (Mon 24 -> Tue 25) match the LATER entry, not the one
-# first-write-wins used to silently keep. Any non-surfaced real window
-# is not silently discarded -- it's written to the run log below, since
-# the current one-line-per-person absences data shape can only display
-# one line per person (a real limitation of today's data model, not
-# addressed by this fix -- see HANDOVER.md).
+# merged into a single combined window -- true calendar-day adjacency
+# only (next window's start is the same day as, or the very next day
+# after, the previous window's last day); this was already correct in
+# the first pass and is unchanged here. Entries that are NOT touching
+# are treated as genuinely separate absence periods and are NEVER
+# bridged into a fabricated combined span.
+#
+# SECOND PASS, 21 Aug 2026 -- corrects the first pass's selection rule.
+# The first pass picked whichever window had the LATEST start date,
+# reasoning (wrongly) that "most recent booking" was most relevant.
+# Live re-verification the same day found real people with more than
+# two genuinely separate windows in the eligible range (Kevin: three
+# separate single-day A/L entries, Mon 24 / Wed 26 / Fri 28 Aug, each
+# its own calendar entry, confirmed genuinely separate by Kevin
+# directly -- not a data error, not one span), and "latest start wins"
+# fabricates a bridge past real gaps to whichever window happens to
+# start last, e.g. producing "off next week, returns Thursday 27
+# August" for Kevin by silently discarding the nearer, actually-current
+# Monday 24 window. Corrected rule: prefer whichever window genuinely
+# covers TODAY, if any; otherwise the window with the EARLIEST start
+# date that is still upcoming (the soonest-relevant one) -- never the
+# latest. Re-verified live against fresh Outlook COM data, 21 Aug 2026:
+# this is the only rule that reproduces Kevin's own confirmed real
+# dates for his own three entries (today, Fri 21 Aug, falls in none of
+# them, so the soonest -- Mon 24, returning Tue 25 -- is what's
+# surfaced) and is applied uniformly for every person, not special-
+# cased to Kevin's or anyone else's name -- so it also corrects the
+# same "latest wins" bug for Simon Burford and Anthony Kong, who were
+# each independently found live to now have a second, separate real
+# window the first pass would have wrongly bridged to.
+#
+# Any non-surfaced real window is not silently discarded -- it's
+# written to the run log below, since the current one-line-per-person
+# absences data shape can only display one line per person (a real
+# limitation of today's data model, not addressed by this fix -- see
+# HANDOVER.md).
 def _merge_adjacent_windows(cands):
     windows = sorted((dict(c) for c in cands), key=lambda c: c["start"])
     merged = []
@@ -1650,16 +1674,18 @@ for key, cands in absence_candidates.items():
     if not tier:
         continue
     windows = _merge_adjacent_windows(tier)
-    chosen = max(windows, key=lambda w: w["start"])
+    current_windows = [w for w in windows if w["start"] <= today <= w["end"]]
+    chosen = current_windows[0] if current_windows else min(windows, key=lambda w: w["start"])
     if len(windows) > 1:
         for w in windows:
             if w is chosen:
                 continue
             log(f"Phase absences - {chosen['name']}: {len(windows)} separate "
                 f"{'real' if real else 'recurring'} windows in window; "
-                f"surfacing {chosen['start']}..{chosen['end']}, not dropping "
-                f"{w['start']}..{w['end']} (see HANDOVER.md -- one-line-per-"
-                f"person display can't show both)")
+                f"surfacing {chosen['start']}..{chosen['end']} "
+                f"({'covers today' if current_windows else 'soonest upcoming'}), "
+                f"not dropping {w['start']}..{w['end']} (see HANDOVER.md -- "
+                f"one-line-per-person display can't show both)")
     label = _absence_label(chosen["start"], chosen["end"], chosen["all_day"])
     absence_map[key] = chosen["name"] + " - " + label if label else chosen["name"]
 
