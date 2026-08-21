@@ -1,3 +1,73 @@
+# Handover -- 21 August 2026, ~18:30 UTC (Drew) -- Absences-panel third-pass fix: bridge real windows only across a pure weekend gap -- resolves the Michael O'Sullivan tension flagged in the second-pass entry below, STILL HELD ON A BRANCH, not merged
+
+## What this is
+Third-pass correction, same branch (`wi-absences-dedup-fix-21aug`), same day. The second-pass entry immediately below flagged an unresolved tension for Michael O'Sullivan: his real Fri 21 Aug entry and real Mon 24 Aug entry are NOT calendar-day-adjacent (there's a 2-day numeric gap, Sat 22/Sun 23), so the second pass's strict-adjacency-only merge kept them separate and the "covers today" rule picked the Friday window, producing "off today, returns Monday 24 August." Kevin, via the coordinator, has now directly resolved this: from Michael's real-world perspective this is ONE continuous absence, because the entire gap is non-working days anyway (a weekend). He gave an explicit, precise rule: bridge two real entries only if EVERY day in the gap is a non-working day (weekend, or an existing non-working-day concept in the codebase if one exists) -- if the gap contains any actual working day, keep the entries separate per the second pass's already-correct logic.
+
+## Searched first for an existing non-working-day/bank-holiday concept before building anything
+Per the instruction, checked `fetch_inbox.py` and the wider repo before assuming weekend-only was the right scope (grep for `holiday`, `bank.holiday`, `non.working`, `is_working_day`, `WEEKEND` across the whole repo, including `Archive/`). Found:
+- `ABSENCE_KEYWORDS`'s `"non-working day"` / `"non working day"` entries -- this is a **calendar-subject text keyword**, matching real recurring entries like "Marie K: Non-working day" that mark a person's own personal working pattern (e.g. someone who doesn't work Fridays). It is a different concept entirely from a public holiday calendar, and it already lives in its own tier-priority handling (recurring entries only ever surface when no real entry exists for that person) -- untouched by this fix, not something to extend.
+- `next_workday()` (line 214-218, unchanged since it was written): only ever skips `d.weekday() >= 5` -- i.e. Saturday/Sunday. No bank-holiday list, no external holiday API call, no hardcoded UK bank-holiday date list anywhere in `fetch_inbox.py` or the rest of the repo.
+- **Conclusion: no bank-holiday/non-working-day-beyond-weekend concept exists anywhere in this codebase.** Weekend-only (Saturday/Sunday) is therefore the correct scope for the new gap check, not a corner cut -- building a full UK bank-holiday calendar was explicitly out of scope and would have been scope creep beyond what was asked.
+
+## The fix
+New helper `_gap_is_all_weekend(prev_end, next_start)` in `fetch_inbox.py`: walks every calendar day strictly between `prev_end` and `next_start` and returns `True` only if every one of them has `weekday() >= 5`. `_merge_adjacent_windows()`'s merge condition extended from pure zero-gap adjacency to `zero-gap-adjacency OR _gap_is_all_weekend(...)` -- i.e. two real windows now bridge into one continuous window either when they touch directly (unchanged from the second pass) or when the entire calendar gap between them is a weekend. Everything else in the second pass (real-beats-recurring tiering, "covers today else soonest" selection, logging of any non-chosen real window) is unchanged.
+
+## Day-of-week verification, real 2026 calendar dates -- shown, not assumed
+Ran `date -d <date> +%A` for every boundary date involved:
+
+| Date | Day |
+|---|---|
+| 2026-08-21 | Friday (today) |
+| 2026-08-22 | Saturday |
+| 2026-08-23 | Sunday |
+| 2026-08-24 | Monday |
+| 2026-08-25 | Tuesday |
+| 2026-08-26 | Wednesday |
+| 2026-08-27 | Thursday |
+| 2026-08-28 | Friday |
+
+**Michael O'Sullivan:** entry 1 ends Fri 21 Aug, entry 2 starts Mon 24 Aug. Gap days = Sat 22, Sun 23 -- both weekend -> **bridges**. Merged window Fri 21..Mon 24; today (Fri 21) falls inside it -> "off today"; `next_workday(Mon 24)` = Tue 25 -> **"off today, returns Tuesday 25 August."** Matches Kevin's confirmed-correct answer exactly.
+
+**Kevin:** entry 1 (Mon 24) ends Mon 24, entry 2 (Wed 26) starts Wed 26 -- gap day = Tue 25, a Tuesday, weekday() = 1 (< 5) -> contains a real working day -> **does not bridge**. Entry 2 (Wed 26) ends Wed 26, entry 3 (Fri 28) starts Fri 28 -- gap day = Thu 27, a Thursday, weekday() = 3 (< 5) -> **does not bridge**. His three entries stay genuinely separate, exactly as Kevin confirmed they should. Today (Fri 21) falls in none of them -> soonest is Mon 24 -> `next_workday(Mon 24)` = Tue 25 -> unchanged label, **"off next week, returns Tuesday 25 August."**
+
+## Verified live against fresh Outlook COM data, not reused from an earlier pull
+Two live re-pulls run this session (both fresh, not the second pass's snapshot): (1) the actual branch-committed absence-detection code block (lines 1431-1740 of the now-fixed `fetch_inbox.py`, `exec()`'d verbatim, not a reimplementation) against a fresh live snapshot -- 303 calendar items, 67 from the HR Systems calendar, `today = 2026-08-21 (Friday)`. (2) An apples-to-apples before/after run of BOTH the pre-fix (`a2baf9e`, second-pass) and post-fix (`042eb12`, third-pass) absence blocks, verbatim `exec()`'d against the SAME single fresh live snapshot, to isolate the diff caused by this change alone from ordinary day-rollover churn.
+
+### Before (a2baf9e, strict-adjacency-only) vs After (042eb12, weekend-gap bridging) -- identical live snapshot
+
+| Person | Before | After | Changed? |
+|---|---|---|---|
+| Kevin | off next week, returns Tuesday 25 August | off next week, returns Tuesday 25 August | No -- unaffected, exactly as expected. |
+| Michael O'Sullivan | off today, returns **Monday 24 August** | off today, returns **Tuesday 25 August** | **YES -- this was the fix.** |
+| Marie King | off next week, returns Thursday 27 August | off next week, returns Thursday 27 August | No. |
+| Anthony Kong | off today, returns Monday 24 August | off today, returns Monday 24 August | No -- his second real window (Thu 27-Fri 28) is separated from Fri 21 by Sat 22/Sun 23/Mon 24/Tue 25/Wed 26, which includes real weekdays, so it correctly stays un-bridged. |
+| David Johnson | off today, returns Monday 24 August | off today, returns Monday 24 August | No -- single real entry. |
+| Simon Burford | off today, returns Monday 24 August | off today, returns Monday 24 August | No -- his second real window (Fri 28) is separated from Fri 21 by a full week including real weekdays, correctly stays un-bridged. |
+| Susan Pratt | off today, returns Monday 24 August | off today, returns Monday 24 August | No -- single real entry. |
+| Henry Acheampong | off next week, returns Friday 28 August | off next week, returns Friday 28 August | No -- single real entry. |
+| Julie Hickman | off next week, returns Wednesday 2 September | off next week, returns Wednesday 2 September | No -- single real entry. |
+
+Two additional names appeared in this live pull that weren't part of the original named audit list (Asta Palmer, James Salas Guillen) -- both unchanged before/after, ordinary background presence in the live calendar data as the eligible window rolls forward day to day, not related to this fix.
+
+**Full diff, computed programmatically against the identical live snapshot: exactly one line changed (Michael O'Sullivan), zero regressions anywhere else.**
+
+## Verified, not assumed
+- `python -m py_compile fetch_inbox.py` clean before commit.
+- Backup-and-verify sequence run before the write: live branch-tip `fetch_inbox.py` sha256 confirmed (`d088fba5...`) before backup; `Archive/fetch_inbox_backup_20260821_1823.py` created and sha256-verified byte-identical to the pre-edit file before the backup was committed (`6e7ca3e`); edit applied and compiled clean; committed (`042eb12`).
+- `git ls-tree origin/main -- fetch_inbox.py` reconfirmed after this pass: blob `7117f63b579f331ec5377cf6097a87ccda5f0e46` -- **identical to every prior checkpoint this whole investigation**, main's `fetch_inbox.py` has not moved once across all three passes.
+
+## Backup-and-verify sequence, this pass
+On branch `wi-absences-dedup-fix-21aug`, main untouched throughout:
+1. Live branch-tip `fetch_inbox.py` sha256 confirmed immediately before backup: `d088fba5dd18438c3e036361e874211932e70b03deffa912ce46865ddb5ea0e1`.
+2. Timestamped backup created and sha256-verified byte-identical before commit: `Archive/fetch_inbox_backup_20260821_1823.py`, commit `6e7ca3e`.
+3. Edit applied (`_gap_is_all_weekend()` + extended `_merge_adjacent_windows()` condition), `py_compile` clean, committed: `042eb12`, new sha256 `8298639db7f8775507cfd5f4e963efb2f53070c871898469fc8ba75bac9a4ce0` (2819 lines, up from 2775).
+4. Branch pushed to `origin/wi-absences-dedup-fix-21aug` (`042eb12`). Live `main` `fetch_inbox.py` blob re-checked after push via `git ls-tree origin/main`: `7117f63b579f331ec5377cf6097a87ccda5f0e46` -- unchanged. This checkpoint doc update (`HANDOVER.md` on `main` directly, per this repo's own convention) is the only thing pushed to `main` this session; code changes stay on the branch.
+
+## Exact next action
+Same gate as both prior passes: Kevin's explicit word merges `wi-absences-dedup-fix-21aug` into `main` (fast-forward, only `fetch_inbox.py` and `Archive/` backups touched on the branch). The Michael O'Sullivan tension flagged in the second-pass entry below is now resolved by this pass -- no open questions remain from this investigation. The separately-flagged, out-of-scope Phase 1 pull-window-vs-eligibility-window mismatch (today+6 vs today+8, noted in the second-pass entry below) is still not touched -- still worth a deliberate decision in a future session, still doesn't affect the correctness of any label in this audit since every chosen window in every pass so far has fallen within the first 6 days.
+
+---
+
 # Handover -- 21 August 2026, ~18:15 UTC (Drew) -- Absences-panel second-pass fix: current/soonest-window selection, corrects the first pass's fabricated-bridge bug -- STILL HELD ON A BRANCH, not merged
 
 ## What this is
