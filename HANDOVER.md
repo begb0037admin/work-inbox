@@ -1,3 +1,25 @@
+# Handover -- 21 August 2026, ~06:56 UTC (Drew) -- Scrollbar-styling fix, Kevin-approved, DEPLOYED
+
+## What was done
+Replaced default browser scrollbars with a thin, low-contrast style matching hris-dashboard's existing scrollbar CSS (copied values, not invented), across every scrollable container in this dashboard: `.sidebar`, `html` (outer page scroll), `.cal-col-body` (calendar day columns), and `.archive-panel` (Archive modal -- previously had no scrollbar styling at all). Companion fix landed in `begb0037admin/command-centre` in the same session (`.sidebar`, `html`, `.intel-scroll`).
+
+Kevin reviewed before/after screenshots and approved directly in a Claude Code coordinator session ("great apprvoed"), then gave standing AFK authorization to proceed without further per-step check-ins. A prior Drew session did the design/audit/screenshot work; this session picked up execution only, after independently re-verifying the live CSS still matched the audited state before writing.
+
+## Pre-write verification (live-state check, not assumed)
+Live `.cal-col-body` already carried some scrollbar styling (4px width, `#d1d9e6` thumb, hover-darken to `#94a3b8`) -- pre-existing from the calendar-tab build, not recent drift; checked commit history on `css/styles.css`, nothing since has touched `.cal-col-body`'s scrollbar properties (only its `max-height` cap, in an earlier unrelated commit). `.archive-panel` confirmed to genuinely have zero scrollbar styling, matching the audit exactly. Confirmed no pre-existing `.sidebar`/`html` scrollbar-width/color rules anywhere in the file. Full property-replace, so end visual state is deterministic from the new CSS regardless of prior content -- proceeded.
+
+## Backup-and-verify sequence, run in full (this repo's own mandatory protocol)
+1. Fresh GET of live `css/styles.css` -- sha `e56af02a06ede082a5cff7e4e625e737d81a775f`, 36983 bytes, non-zero, confirmed.
+2. Timestamped backup pushed first: `Archive/styles_backup_20260821_0656.css`, commit `6631b8a69d5862a2d031d5fe63f08c26529588db` -- content sha `e56af02a06ede082a5cff7e4e625e737d81a775f`, byte-identical to live pre-change file, confirmed via independent re-GET.
+3. Edit applied: replaced `.cal-col-body` block (dropped hover-darken variant per approved CSS), replaced `.archive-panel` block (added scrollbar rules, first time this selector has had any), appended `.sidebar`/`html` scrollbar rules at end of file.
+4. sha-guarded `PUT`, commit `c01513cf24dfcad7f52219f3b8c9fa450757550b`, new content sha `5abc8afd6a2dfb4f444677d9e29ec8b3f9c55648`, 37562 bytes.
+5. Fresh post-push GET: sha matches PUT response exactly, `.archive-panel`, `.cal-col-body`, and appended rules all confirmed present verbatim in the live file.
+
+## Next action
+None outstanding on this fix -- done and verified live on both repos. UI approval gate already satisfied (Kevin approved via screenshots before this write); no further screenshot/re-approval needed per his explicit instruction.
+
+---
+
 # Handover -- 20 August 2026, ~21:14 UTC (Drew) -- "newest items at top of section" fix MERGED to main and live-verified, byte-diff confirmed
 
 ## What shipped
