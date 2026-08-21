@@ -575,6 +575,41 @@ for msg in mapi.GetDefaultFolder(5).Items:
     except:
         continue
 
+# PR_SENDER_NAME (MAPI proptag 0x0C1A001E) -- the display name of
+# whoever actually submitted/booked the item. For entries booked by an
+# admin/department process on the "People Department - HR Systems"
+# calendar, Organizer (and PR_SENT_REPRESENTING_NAME, the same field
+# Outlook's Organizer property reads) often shows the placeholder
+# department name instead of the real person -- but PR_SENDER_NAME
+# reliably still names the real person. Confirmed live 21 Aug 2026
+# against every placeholder-organizer entry found in the current
+# absence window: "Ant's Annual Leave" -> "Anthony Kong", "Asta -
+# Annual Leave" -> "Asta Palmer", "SarahR - A/L" -> "Sarah Rowles", a
+# timed "JS - Annual Leave" occurrence -> "James Salas Guillen" --
+# general mechanism, not special-cased to any one person. Captured
+# here at Phase 1 (while the live COM item is still in hand) and used
+# later by the absence-detection organizer-placeholder fallback
+# instead of subject-text parsing. Recipients/GlobalAppointmentID were
+# also tried live and rejected: Recipients on these placeholder-
+# organizer entries contains ONLY the placeholder itself (no real
+# attendee), and the two real "Ant's Annual Leave" bookings for the
+# same person have completely different GlobalAppointmentIDs (they are
+# separate bookings, not occurrences of one series), so a
+# series/GlobalAppointmentID lookup would not have connected them.
+_PR_SENDER_NAME_TAG = "http://schemas.microsoft.com/mapi/proptag/0x0C1A001E"
+
+def _get_pr_sender_name(item):
+    try:
+        return (item.PropertyAccessor.GetProperty(_PR_SENDER_NAME_TAG) or "").strip()
+    except Exception:
+        return ""
+
+def _get_is_recurring(item):
+    try:
+        return bool(item.IsRecurring)
+    except Exception:
+        return False
+
 week_end = today + timedelta(days=6)
 lookback  = today - timedelta(days=30)  # catch multi-day absences spanning today
 calendar = []
@@ -596,6 +631,8 @@ for item in _cal_items:
             "end":          str(item.End),
             "location":     item.Location,
             "organizer":    item.Organizer,
+            "sender_name":  _get_pr_sender_name(item),
+            "is_recurring": _get_is_recurring(item),
             "body_preview": (item.Body or "")[:100],
             "all_day":      item.AllDayEvent
         })
@@ -638,6 +675,8 @@ try:
                     "end":          str(item.End),
                     "location":     item.Location,
                     "organizer":    item.Organizer,
+                    "sender_name":  _get_pr_sender_name(item),
+                    "is_recurring": _get_is_recurring(item),
                     "body_preview": (item.Body or "")[:100],
                     "all_day":      item.AllDayEvent
                 })
@@ -1442,8 +1481,27 @@ def _clean_absence_name(text):
             continue
         cleaned.append(token)
     if cleaned:
-        name = " ".join(cleaned).title()
+        name = _title_case_name(" ".join(cleaned))
     return " ".join(name.split()).strip(" -:")
+
+# str.title() capitalises the letter after ANY non-alpha character,
+# which wrongly turns a possessive "'s" suffix into "'S" -- confirmed
+# live, 21 Aug 2026: "ant's" (subject-derived token from "Ant's Annual
+# Leave") -> "Ant'S" instead of "Ant's". A trailing "'s" token (the
+# whole word ends in apostrophe-s, e.g. "ant's", "kevin's") is always
+# possessive, never a mid-name apostrophe, so it's handled specially;
+# genuine mid-name apostrophes (O'Sullivan, O'Brien) don't end in "'s"
+# and still get the standard title()-style capitalise-after-apostrophe
+# behaviour, unchanged from before.
+def _title_case_name(name):
+    out = []
+    for token in name.split():
+        if len(token) > 2 and token.lower().endswith("'s"):
+            base = token[:-2]
+            out.append(base[:1].upper() + base[1:].lower() + "'s")
+        else:
+            out.append(token.title())
+    return " ".join(out)
 
 def _absence_label(start_date, last_absent_date, all_day):
     if not start_date:
@@ -1481,17 +1539,46 @@ def _looks_like_a_person(name):
     lower = name.lower()
     return not any(term in lower for term in _NON_PERSON_NAME_TERMS)
 
-def _add_absence(name, label):
+# Root-caused live, 21 Aug 2026 (see HANDOVER.md and
+# begb0037admin/drew/memory/wi-absences-dedup-diagnosis-21aug.md): the
+# old _add_absence() was unconditional first-write-wins, so when a
+# person had more than one real, eligible calendar entry in the window
+# the EARLIEST-processed one silently won and any later, more relevant
+# one was dropped with no record of it anywhere. Replaced with a
+# two-pass design: collect every eligible entry per person first, then
+# resolve each person's full candidate list in one place.
+def _resolve_person_name(organizer, sender_name, subject):
+    # Preference order: (1) a real (non-placeholder) Organizer; (2) a
+    # real (non-placeholder) PR_SENDER_NAME, captured at Phase 1 -- see
+    # the comment above _get_pr_sender_name(); (3) the subject text, as
+    # a last resort for entries with no distinguishing submitter at all
+    # (e.g. bare "Kevin - A/L" bookings where even PR_SENDER_NAME is
+    # just the placeholder department name).
+    def _is_placeholder(n):
+        n = n.lower()
+        return "people department" in n or "hr systems" in n
+
+    organizer = (organizer or "").strip()
+    if len(organizer) >= 3 and not _is_placeholder(organizer):
+        return organizer
+    sender_name = (sender_name or "").strip()
+    if len(sender_name) >= 3 and not _is_placeholder(sender_name):
+        return sender_name
+    return subject
+
+absence_candidates = {}  # key -> list of {name, start, end, all_day, is_recurring}
+
+def _collect_absence_candidate(name, start_date, last_absent_date, all_day, is_recurring):
     name = _clean_absence_name(name)
     key = _absence_key(name)
     if not key or len(name) < 3:
         return
     if not _looks_like_a_person(name):
         return
-    text = name + " - " + label if label else name
-    existing = absence_map.get(key)
-    if not existing or "date unknown" in existing:
-        absence_map[key] = text
+    absence_candidates.setdefault(key, []).append({
+        "name": name, "start": start_date, "end": last_absent_date,
+        "all_day": all_day, "is_recurring": is_recurring,
+    })
 
 week_absence_end = today + timedelta(days=8)
 for item in calendar:
@@ -1517,23 +1604,64 @@ for item in calendar:
     if last_absent_date < today or start_date > week_absence_end:
         continue
 
-    # Use the calendar item's Organizer (the actual person whose leave this
-    # is) as the name source when available, not just whatever's left in the
-    # subject after stripping leave keywords -- confirmed live, 10 Aug 2026:
-    # Organizer holds the same full display name Outlook uses as the email
-    # sender name (e.g. "Simon Burford", "Athena Artuso") for most entries.
-    # Some entries (confirmed live, e.g. a half-day "JS - Annual Leave" on
-    # 10 Aug) instead have Organizer set to the calendar/department's own
-    # name ("People Department - HR Systems") rather than a real person --
-    # likely how that entry was booked (an admin/shared process, not the
-    # individual themselves). Treat that placeholder as "no useful
-    # organizer" and fall back to the subject, which still names the real
-    # person via initials/short-name even when Organizer doesn't.
-    organizer = (item.get("organizer") or "").strip()
-    is_placeholder_organizer = "people department" in organizer.lower() or "hr systems" in organizer.lower()
-    name_source = organizer if (len(organizer) >= 3 and not is_placeholder_organizer) else subj
+    name_source = _resolve_person_name(item.get("organizer"), item.get("sender_name"), subj)
+    _collect_absence_candidate(
+        name_source, start_date, last_absent_date, all_day,
+        bool(item.get("is_recurring"))
+    )
 
-    _add_absence(name_source, _absence_label(start_date, last_absent_date, all_day))
+# Resolve each person's candidate list into a single display entry.
+#
+# Kevin's explicit policy, 21 Aug 2026: a recurring "non-working
+# day"/pattern match is a background-schedule signal, not a real
+# absence, so it should only surface when NO real (non-recurring) entry
+# exists for that person in the window -- real entries always take
+# priority over recurring ones, not merely tie-break against them.
+#
+# Within whichever tier is used, entries that are genuinely continuous
+# (no gap at all between one's last day and the next's first day) are
+# merged into a single combined window. Entries that are NOT touching
+# are treated as genuinely separate absence periods; the one with the
+# LATEST start date is what's surfaced. Confirmed against Michael
+# O'Sullivan's two real, non-adjacent "Michael A/L" bookings live, 21
+# Aug 2026 -- Fri 21 Aug and Mon 24 Aug, gap of a full weekend between
+# them, so NOT merged -- where Kevin's own independently confirmed real
+# dates (Mon 24 -> Tue 25) match the LATER entry, not the one
+# first-write-wins used to silently keep. Any non-surfaced real window
+# is not silently discarded -- it's written to the run log below, since
+# the current one-line-per-person absences data shape can only display
+# one line per person (a real limitation of today's data model, not
+# addressed by this fix -- see HANDOVER.md).
+def _merge_adjacent_windows(cands):
+    windows = sorted((dict(c) for c in cands), key=lambda c: c["start"])
+    merged = []
+    for c in windows:
+        if merged and c["start"] <= merged[-1]["end"] + timedelta(days=1):
+            merged[-1]["end"] = max(merged[-1]["end"], c["end"])
+            merged[-1]["all_day"] = merged[-1]["all_day"] or c["all_day"]
+        else:
+            merged.append(c)
+    return merged
+
+for key, cands in absence_candidates.items():
+    real = [c for c in cands if not c["is_recurring"]]
+    recurring = [c for c in cands if c["is_recurring"]]
+    tier = real if real else recurring
+    if not tier:
+        continue
+    windows = _merge_adjacent_windows(tier)
+    chosen = max(windows, key=lambda w: w["start"])
+    if len(windows) > 1:
+        for w in windows:
+            if w is chosen:
+                continue
+            log(f"Phase absences - {chosen['name']}: {len(windows)} separate "
+                f"{'real' if real else 'recurring'} windows in window; "
+                f"surfacing {chosen['start']}..{chosen['end']}, not dropping "
+                f"{w['start']}..{w['end']} (see HANDOVER.md -- one-line-per-"
+                f"person display can't show both)")
+    label = _absence_label(chosen["start"], chosen["end"], chosen["all_day"])
+    absence_map[key] = chosen["name"] + " - " + label if label else chosen["name"]
 
 # No email-OOO fallback -- calendar-only sourcing per Kevin's explicit
 # decision, 10 Aug 2026 (see comment above ABSENCE_KEYWORDS). Every entry
