@@ -18,12 +18,34 @@ function scheduleStateSync(){
   clearTimeout(stateSyncTimer);
   stateSyncTimer=setTimeout(pushTicks,1500);
 }
+// BASE SHA (Phase 3, 21 Aug 2026) -- mirrors command-centre's own
+// _tasksBaseSha (js/api.js there): what ticks.json's blob sha was the
+// moment we last loaded/saved it, sent as `baseSha` so the Worker's
+// handleInboxState can tell "nothing changed server-side since this page
+// loaded, safe to write directly" from "something changed, must merge"
+// BEFORE attempting a write -- closing the same "browser tab open for
+// minutes" gap for ticks.json that only tasks.json had server-side support
+// for before this session. Verified live (curl -I against both raw.
+// githubusercontent.com endpoints) that the ETag header is NOT usable for
+// this -- it's a 64-hex SHA-256 of the raw bytes, not GitHub's 40-hex blob
+// SHA-1 -- so this is captured via one direct, unauthenticated GitHub
+// Contents API call, once per page load (inside loadRemoteTicks, not on a
+// poll), refreshed from the Worker's own response `sha` afterwards so a
+// second fetch is never needed just to stay current.
+let _ticksBaseSha=null;
+async function refreshTicksBaseSha(){
+  try{
+    const r=await fetch('https://api.github.com/repos/begb0037admin/work-inbox/contents/data/ticks.json?ref=main&t='+Date.now(),{headers:{'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){const j=await r.json();_ticksBaseSha=j.sha||null;}
+  }catch(e){/* best-effort -- baseSha capture is an enhancement, page must still work without it */}
+}
 async function pushTicks(){
   try{
     const doc={ticks:getTicks(),updated_at:new Date().toISOString()};
-    const res=await fetch(STATE_WRITER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:'inbox-state',message:'tick sync',doc:doc})});
+    const res=await fetch(STATE_WRITER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:'inbox-state',message:'tick sync',doc:doc,baseSha:_ticksBaseSha})});
     const out=await res.json().catch(()=>({}));
     if(!res.ok||!out.ok) throw new Error(out.error||('HTTP '+res.status));
+    if(out.sha)_ticksBaseSha=out.sha;
     console.log('Ticks synced to GitHub');
   }catch(e){
     console.warn('Tick sync failed',e);
@@ -51,6 +73,7 @@ async function loadRemoteTicks(){
       if(st&&typeof st==='object'&&st.ticks) localStorage.setItem(TICKS_KEY,JSON.stringify(st.ticks));
     }
   }catch(e){console.warn('Remote ticks unavailable',e);}
+  await refreshTicksBaseSha();
   stateSyncReady=true;
 }
 

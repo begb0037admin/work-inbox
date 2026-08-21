@@ -94,6 +94,42 @@ No changes to `fetch_inbox.py`, `briefing.json`, or any Outlook data. Diagnostic
 
 ---
 
+# Handover -- 21 August 2026, ~15:15 UTC (Drew) -- Phase 3: ticks.json baseSha capture, pairs with command-centre's Worker race-fix + done-sync -- STAGED, NOT MERGED
+
+## Scope
+This repo's half of Kevin's Phase 3 (race-window close + bidirectional done-sync). The actual sync logic and the server-side race-fix both live in the shared Cloudflare Worker, `cc-tasks-writer-proposed.js`, in `begb0037admin/command-centre` -- that repo's own `docs/HANDOVER.md` (21 Aug ~15:15 entry) has the full design, key scheme, and test results; not duplicated here in full. This entry covers only what changed in this repo.
+
+## What shipped -- `js/app.js`, branch `phase3-donesync-21aug`, NOT merged to main
+- New `_ticksBaseSha` / `refreshTicksBaseSha()`: one direct, unauthenticated GitHub Contents API call per page load (inside `loadRemoteTicks()`, not on any poll) to capture `data/ticks.json`'s current blob sha. **Verified live, not assumed:** `curl -I` against `raw.githubusercontent.com/.../data/ticks.json` returns an `ETag` that is a 64-hex SHA-256 of the raw bytes, not GitHub's 40-hex blob SHA-1 the Contents API actually uses for its `sha` field/PUT conflict check -- so that would-have-been-cheaper option doesn't work; the direct Contents API call is what's built, matching command-centre's own `_tasksBaseSha` approach exactly.
+- `pushTicks()` now sends `baseSha` in its POST to the Worker, and updates `_ticksBaseSha` from the Worker's own returned `sha` afterwards (no second fetch needed). This closes, on the client side, the same "browser tab open for minutes" race for `ticks.json` that only `tasks.json` had protection for before this session -- see the Worker-side `handleInboxState` change in command-centre's own HANDOVER for the server half.
+- **No other change needed in this repo for the done-sync itself.** Both directions of the actual sync (CC task done <-> WI tick) run entirely inside the shared Worker as a side effect of the existing write paths -- `toggleTick()`/`pushTicks()` here already send the complete `ticks` map on every change, which is exactly what the Worker reads to detect a genuine done/undone transition on a recognised `id_`/`eid_` key. `_priGetKey()`'s existing stable key scheme (17/20 Aug work) was read directly, not modified, to design the sync -- it was already exactly what the sync needed.
+
+## Verification
+Synthetic only -- no live `data/ticks.json` read or written by any of this session's testing.
+- Logic correctness: command-centre's `cloudflare-worker/test_phase3_donesync.mjs` (9/9 passing) exercises the actual shared Worker code both repos' writes go through, including the key scheme this repo's cards produce (`id_<ccTaskId>`/`eid_<entry_id>`, read live from `_priGetKey()` before writing any test).
+- Visual: a local static-file harness of this repo's own `index.html`/`css/styles.css`/`js/app.js`, with `BRIEFING_API`/`TICKS_URL` pointed at local synthetic files (`./data/briefing.json`, `./data/ticks.json` -- never the live GitHub-hosted ones), screenshotted via headless Chrome. Two synthetic demo tasks (`tDEMO001`/`tDEMO002`) in "Priority Actions -- This Week": before, both visible/unticked; after, `data/ticks.json` set to the **exact content the Worker is proven to produce** (`{"id_tDEMO001":true}`, per the command-centre test suite's test 1, not a hand-guessed mockup) -- `tDEMO001`'s card correctly disappears via the existing `isTicked()`/hidden-card logic, `tDEMO002` stays untouched. Screenshots shown to Kevin for the required sign-off; not yet approved as of this entry.
+- **Observed, out of scope, not fixed**: the "PRIORITY ACTIONS – THIS WEEK" header count (`renderPriorityCards` caller, ~line 1049) is the raw `priSecs.pw.length` and does not subtract ticked/hidden cards -- pre-existing, unrelated to this change, flagged only.
+
+## Backup-and-verify
+| File | Pre-edit live SHA | Backup path | Backup commit | Backup SHA re-verified |
+|---|---|---|---|---|
+| `js/app.js` | `0fa0bdf7fb4e06b77431cc67b4ff9125cd30f34e` (84411 bytes) | `Archive/app_backup_20260821_1404.js` | `d1157c9676a46ecf45042d87648bba9ef712041b` | `0fa0bdf7...` (byte-identical, re-GET confirmed) |
+
+Backup landed directly on `main` (pure addition, no risk) before the edit, per established practice. **`main`'s own `js/app.js` re-verified unchanged after the branch push**: still `0fa0bdf7...`, confirmed via a fresh GET, not assumed.
+
+## Branch / merge status
+Staged on `phase3-donesync-21aug` -- tip `bc41de4f08ead5bffaf6f5b95c3ed7554f8da1e5` -- and the matching branch of the same name in `command-centre` -- tip `b0c0a9facd432c19ad5b99f700e908230cec5cf3`. **NOT merged to main.** Waiting on Kevin's literal "approved" on the before/after screenshots before either branch merges.
+
+## Revert plan -- validated, not just described
+If not approved, or a problem is found post-merge: sha-guarded `PUT` of `Archive/app_backup_20260821_1404.js`'s content back onto `js/app.js` against `main`'s then-current sha. Confirmed byte-identical to the exact pre-change live content (table above) -- clean revert, no partial-state risk. A revert here alone (without also reverting command-centre's Worker change) is safe: `_ticksBaseSha` simply stops being sent, and `handleInboxState` already treats a missing `baseSha` as "no staleness check possible," its pre-Phase-3 behaviour -- no crash, no broken state, just narrower race protection, exactly as it was before this session.
+
+## Not done / next action
+- **Awaiting Kevin's literal "approved"** on the screenshots before merging either repo's branch to main.
+- No live `data/ticks.json` write of any kind was made by this session.
+- Once approved: merge both branches. The done-sync/race-fix logic itself only takes effect once command-centre's `cc-tasks-writer-proposed.js` is actually redeployed to the live Worker (a separate manual step, per that file's own header note) -- this repo's `js/app.js` change (sending `baseSha`) is inert until then, harmlessly ignored by the currently-live Worker code.
+
+---
+
 # Handover -- 21 August 2026, ~11:35 UTC (Drew) -- Archive modal per-date purge control ADDED, LIVE on main
 
 ## What shipped
