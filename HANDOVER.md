@@ -1,3 +1,31 @@
+# Handover -- 21 August 2026, ~17:55 UTC (Drew) -- Absences-panel dedup/date-labeling fix MERGED TO MAIN -- closes out today's investigation
+
+## What this is
+Kevin gave his own direct, literal authorization to merge -- his exact word, typed directly in response to being told the branch was ready: "merge". This satisfied work-inbox's standing hard gate requiring Kevin's explicit direct word before anything goes live, held open across all three passes logged below. Branch `wi-absences-dedup-fix-21aug` (final commit `042eb12`, built on `6e7ca3e`/`a2baf9e`/`ca122dc`/`6769f8a`/`0a87871`) is now merged into `main`. This closes out the full Absences panel dedup/date-labeling investigation and fix -- no open questions remain from this thread.
+
+## Merge mechanics -- verified, not assumed
+The task brief assumed a clean fast-forward would be possible since main's `fetch_inbox.py` was confirmed untouched throughout the whole investigation. Checked directly via the GitHub Compare API rather than trusting that assumption: `main` and the branch had **diverged** -- main had moved 20 commits ahead since the branch was cut (HANDOVER.md updates, the Phase-3 donesync merge, `js/app.js` changes, routine `data/*.json` pipeline commits), none of which touched `fetch_inbox.py`. A **fast-forward was not possible**; this was a real two-parent merge commit, not a fast-forward. No file-level conflicts occurred -- the branch's 6 commits touched only `fetch_inbox.py` and `Archive/fetch_inbox_backup_*.py`, disjoint from every file main's 20 commits had touched.
+
+## Backup-and-verify sequence followed for both writes to main (this repo's own mandatory protocol)
+**`fetch_inbox.py`:**
+1. GET live main `fetch_inbox.py` via Contents API: sha `7117f63b579f331ec5377cf6097a87ccda5f0e46`, 132763 bytes, confirmed non-zero -- matches every prior checkpoint across all three passes.
+2. Timestamped backup `Archive/fetch_inbox_backup_20260821_1755.py` pushed to main, commit `6cb636a4`. Returned content sha (`7117f63b...`, 132763 bytes) verified identical to the pre-write live file.
+3. Merge performed via GitHub Merges API (`POST /repos/begb0037admin/work-inbox/merges`, base=`main`, head=`wi-absences-dedup-fix-21aug`): merge commit `2cd53528f7efd581ce72fa9134d6450c9da20954`, parents `6cb636a4` (main + backup) and `042eb12d` (branch tip). GPG-signed and verified by GitHub.
+4. Post-merge verification: main's `fetch_inbox.py` blob sha (`ba01178952dfeeb636f9b1d921592869159bb7f4`, 143362 bytes) matches the branch tip's blob sha exactly. Independently double-checked via `raw.githubusercontent.com` with a fresh cache-buster on both `main` and the branch ref -- byte-for-byte `diff` empty, SHA-256 checksums identical (`8298639db7f8775507cfd5f4e963efb2f53070c871898469fc8ba75bac9a4ce0` both sides).
+
+**`HANDOVER.md`** (this write): same sequence -- live sha `aa6521c2...`, 428223 bytes confirmed non-zero; timestamped backup `Archive/HANDOVER_backup_20260821_1755.md` pushed to main (commit `4486016a`), returned sha verified identical to pre-write content; this entry then prepended.
+
+## Post-merge dry-run
+Ran `python -m py_compile` against the merged, live `main` copy of `fetch_inbox.py` (fetched fresh via `raw.githubusercontent.com` with a cache-buster) -- compiles cleanly, no syntax errors. Did not run a full live Outlook COM pipeline pass against `main`'s merged code: doing so would trigger Phase 3/3.5/3.6's normal side effects (pushing `data/briefing.json`, `data/triage_ledger.json`, command-centre `tasks.json` updates), which the task explicitly said to favor avoiding unless clearly necessary. **`data/briefing.json` was not touched by this merge or this session** -- the next scheduled Task Scheduler run (`Run Inbox Briefing.bat`) will pick up the merged code naturally and regenerate it with correct absence data.
+
+## Outcome
+Merge commit on `main`: `2cd53528f7efd581ce72fa9134d6450c9da20954`. Michael O'Sullivan's absence label now correctly bridges a pure-weekend gap ("off today, returns Tuesday 25 August"); every other person in the audit (Kevin, Marie King, Anthony Kong, David Johnson, Simon Burford, Susan Pratt, Henry Acheampong, Julie Hickman) unaffected, confirmed byte-identical across the whole investigation. This closes out today's Absences panel investigation and fix in full.
+
+## Exact next action
+None outstanding from this investigation. The separately-flagged, out-of-scope Phase 1 pull-window-vs-eligibility-window mismatch (today+6 vs today+8, noted in the second-pass entry below) remains untouched -- still worth a deliberate decision in a future session, still doesn't affect the correctness of any label produced so far.
+
+---
+
 # Handover -- 21 August 2026, ~18:30 UTC (Drew) -- Absences-panel third-pass fix: bridge real windows only across a pure weekend gap -- resolves the Michael O'Sullivan tension flagged in the second-pass entry below, STILL HELD ON A BRANCH, not merged
 
 ## What this is
