@@ -1656,11 +1656,55 @@ for item in calendar:
 # absences data shape can only display one line per person (a real
 # limitation of today's data model, not addressed by this fix -- see
 # HANDOVER.md).
+def _gap_is_all_weekend(prev_end, next_start):
+    # True only if EVERY day strictly between prev_end and next_start is a
+    # Saturday or Sunday. No UK bank-holiday list or other non-working-day
+    # concept exists anywhere in this codebase to extend this with --
+    # checked live, 21 Aug 2026 (fetch_inbox.py's own next_workday() only
+    # ever skips weekday() >= 5, nothing else; the "non-working day" subject
+    # keyword elsewhere in this file is a different, personal-pattern
+    # concept -- see the tier-priority comment above -- not a public
+    # holiday calendar). Weekend-only is therefore the correct scope, not a
+    # cut corner. A zero-day gap (adjacent/overlapping) trivially returns
+    # True since the loop body never runs.
+    d = prev_end + timedelta(days=1)
+    while d < next_start:
+        if d.weekday() < 5:
+            return False
+        d += timedelta(days=1)
+    return True
+
+# THIRD PASS, 21 Aug 2026 -- refines the second pass's adjacency rule.
+# The second pass merged two real windows only on exact calendar-day
+# adjacency (zero gap). Kevin directly confirmed that's too strict: Michael
+# O'Sullivan has a real Fri 21 Aug entry and a real Mon 24 Aug entry with a
+# two-day numeric gap (Sat 22, Sun 23) -- but from his actual perspective
+# that's ONE continuous absence, since the gap is entirely non-working days
+# anyway. The second pass's strict-adjacency rule wrongly kept these
+# separate and picked "off today, returns Monday 24 August" (the current
+# Friday window, discarding the nearer relevance of Monday). Kevin's own
+# words, relayed via the coordinator: bridge two real entries only if
+# EVERY day in the gap is a non-working day (weekend, or an existing
+# non-working-day concept if the codebase had one -- it doesn't, see
+# _gap_is_all_weekend() above). If the gap contains any real working day,
+# keep the entries separate, per the second pass's already-correct logic.
+#
+# Verified live against real 2026 calendar dates (see
+# begb0037admin/drew/memory/wi-absences-dedup-third-pass-21aug.md for the
+# full day-of-week table): Michael's gap (Sat 22 / Sun 23) is 100% weekend
+# -> now bridges into one Fri 21-Mon 24 window, correctly producing "off
+# today, returns Tuesday 25 August". Kevin's gaps are NOT pure weekends --
+# Mon 24 -> Wed 26 has Tue 25 (a Tuesday) in the gap, and Wed 26 -> Fri 28
+# has Thu 27 (a Thursday) in the gap -- so his three entries correctly stay
+# separate and his label is unaffected.
 def _merge_adjacent_windows(cands):
     windows = sorted((dict(c) for c in cands), key=lambda c: c["start"])
     merged = []
     for c in windows:
-        if merged and c["start"] <= merged[-1]["end"] + timedelta(days=1):
+        if merged and (
+            c["start"] <= merged[-1]["end"] + timedelta(days=1)
+            or _gap_is_all_weekend(merged[-1]["end"], c["start"])
+        ):
             merged[-1]["end"] = max(merged[-1]["end"], c["end"])
             merged[-1]["all_day"] = merged[-1]["all_day"] or c["all_day"]
         else:
