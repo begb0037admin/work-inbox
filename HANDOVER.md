@@ -1,3 +1,49 @@
+# Handover -- 21 August 2026, ~19:30 UTC (Drew) -- Manual scheduled-equivalent pipeline run triggered post-merge, live dashboards verified -- closes the loop end-to-end on the Absences panel fix
+
+## What this is
+Kevin directly authorized triggering `Run Inbox Briefing.bat` manually right now rather than waiting for the next scheduled Task Scheduler slot, so both dashboards would pick up merge commit `2cd53528f7efd581ce72fa9134d6450c9da20954` (logged in the entry below) immediately instead of on a delay. This entry closes that loop: code fix -> merge -> live pipeline run -> live dashboard verification.
+
+## Confirmed the real scheduled-task invocation before running anything
+Did not assume any of the several `Run Inbox Briefing*.bat` copies on this machine (there are copies under `C:\Users\admin\Desktop`, `C:\Users\admin\Documents\Governance & Repository Management`, and `D:\OneDrive - lelitte.com\Desktop`) was the one Task Scheduler actually fires. Checked directly: `Get-ScheduledTask -TaskName 'Work Inbox Briefing'` shows the action is `wscript.exe "D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing Hidden.vbs"`, which in turn runs `"D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing.bat" /update` hidden. Ran that exact command (via PowerShell, since Git Bash's quoting mangled a direct `cmd //c` invocation of the same path) -- not an ad-hoc `python fetch_inbox.py` in some other checkout.
+
+Also found and flagged (not acted on further, out of scope for this task): the separate local clone at `C:\Users\admin\Documents\Claude\Projects\work-inbox` -- the actual execution directory the bat cd's into -- has a heavily drifted, uncommitted working tree relative to `origin/main` (hundreds of locally-deleted-but-still-tracked files, several modified core files). This does not affect pipeline correctness because the bat always re-downloads `fetch_inbox.py` fresh from `raw.githubusercontent.com/main` before every run (with a cache-buster) and every write goes out via the GitHub Contents API rather than local git commit/push -- confirmed the freshly-downloaded copy matched `origin/main` before the run executed. Worth a future session's attention as a standalone cleanup, not touched here.
+
+## Backup-and-verify: already built into the pipeline itself, confirmed by reading the code, not assumed
+Checked `fetch_inbox.py`'s own Phase 4 push logic (lines ~2691-2741 of the merged `main` copy) before running: it already does GET-live -> `validate_briefing_update()` safe-write guard -> `_backup_briefing_before_write()` (pushes `data/archive/briefing_<timestamp>.json`) -> conditional PUT with `sha` -> prints the resulting commit sha. Phase 3.6's Command Centre write has the same shape (`Archive/tasks_backup_<date>.json`, 404-guarded so it only backs up once per day). No manual extra backup step was needed beyond what the pipeline already does natively -- verified this rather than assuming it, per this repo's own mandatory protocol.
+
+## The run itself
+`"D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing.bat" /update`, exit code 0. Phase 1 (Outlook COM, both calendars) -> Phase 2 (Anthropic triage) -> Phase 3/3.2-3.9 (cards, summaries, absences window selection) -> Phase 4 (briefing pushed, commit `147f5b4`, backup `data/archive/briefing_20260821_192800.json`) -> Phase 5 (suggestions pushed, commit `467ce6e`) -> `publish_needs_reply.py` (`byte_identical_verified: true`, new sha `c3263215...`) -> `publish_drafted_replies.py` (`byte_identical_verified: true`, new sha `60263d88...`). This is the full scheduled-equivalent pipeline, not a partial invocation -- Phase 3.5/3.6 Command Centre writes and both downstream publishers ran as normal, expected behavior of this pipeline, not scope creep.
+
+## Live dashboard verification -- rendered pages, not just JSON
+Fetched `data/briefing.json` fresh via the GitHub Contents API (sha `d1aae81f15b1270acca384c34be6d6bcfe42195e`) to confirm the underlying data first. Then rendered both live dashboards with Playwright (headless Chromium, `wait_until="networkidle"`) and extracted actual page text via `page.inner_text("body")` -- not a static-HTML-only fetch, which would have missed the client-side JS render -- and took full-page screenshots as additional evidence.
+
+**https://begb0037admin.github.io/work-inbox/** -- rendered Absences panel:
+```
+Anthony Kong - off today, returns Monday 24 August
+David Johnson - off today, returns Monday 24 August
+Henry Acheampong - off next week, returns Friday 28 August
+Julie Hickman - off next week, returns Wednesday 2 September
+Kevin - off next week, returns Tuesday 25 August
+Marie King - off next week, returns Thursday 27 August
+Michael O'Sullivan - off today, returns Tuesday 25 August
+Simon Burford - off today, returns Monday 24 August
+Susan Pratt - off today, returns Monday 24 August
+```
+
+**https://begb0037admin.github.io/command-centre/** -- rendered sidebar Absences panel: byte-identical to the above. No `raw.githubusercontent.com` staleness encountered this run (command-centre's live-fetch with its own cache-buster returned the correct data on the first check, no retry needed).
+
+Michael O'Sullivan and Kevin both read exactly as expected on both live rendered pages. Marie King, Anthony Kong, and Simon Burford (today's other spot-check names) all render correctly with no dedup or date-labeling anomalies.
+
+One thing double-checked rather than assumed: `fetch_inbox.py`'s own run log printed a window-selection debug line for Kevin ("surfacing 2026-08-24..2026-08-24 (soonest upcoming), not dropping 2026-08-26..2026-08-26") that on first read looked like it might not match "returns Tuesday 25 August." Did not take that as a discrepancy without checking -- the debug line describes internal window-selection reasoning, not the final rendered label; the actual `absences[]` entry and both live dashboards all agree on "Kevin - off next week, returns Tuesday 25 August."
+
+## Outcome
+Pipeline run complete, both live dashboards verified directly against rendered output. This closes the loop end-to-end: code fix (three passes) -> merge to `main` (`2cd5352`) -> manual scheduled-equivalent pipeline run (Kevin-authorized) -> live dashboard verification on both work-inbox and command-centre. No open questions remain from this thread.
+
+## Exact next action
+None outstanding from this investigation or this run. The drifted local clone at `C:\Users\admin\Documents\Claude\Projects\work-inbox` (flagged above) is a good candidate for a future standalone cleanup session, not urgent -- it doesn't affect pipeline correctness today.
+
+---
+
 # Handover -- 21 August 2026, ~17:55 UTC (Drew) -- Absences-panel dedup/date-labeling fix MERGED TO MAIN -- closes out today's investigation
 
 ## What this is
