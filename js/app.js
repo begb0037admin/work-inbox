@@ -716,6 +716,68 @@ function priZoneDrop(e,sec){
   _priDragDropped=true;
 }
 
+// Staleness for "Priority actions - this week" (zone 'pw'), 21 Aug 2026 --
+// Phase 2 item 3, work-inbox stability plan. This is the SAME definition
+// used by command-centre's own lastActivityTs() fix, same day: genuine
+// activity is a manually-logged/untagged action entry, or one tagged
+// "(email: Kevin (sent to: ...)" -- Kevin's own sent reply. A routine
+// auto-logged inbound email, tagged "(email: <sender> - <subject>)" by
+// fetch_inbox.py Phase 3.5/3.6, does NOT reset the clock on its own. The
+// pw zone's default contents are command-centre's own tier:'week' tasks,
+// mirrored verbatim including their `actions[]` array (see fetch_inbox.py,
+// the "Command Centre loaded" block) -- so this reuses the exact same
+// action-log strings command-centre's fix reads, not a re-derived copy,
+// which is what makes the two dashboards' definitions actually the same
+// definition rather than two definitions that happen to agree today.
+// Threshold (21 days) matches command-centre's own CC_STALE_DAYS.week.
+// Scoped to 'pw' only, per Kevin's ask -- this is new aging visibility for
+// "Priorities This Week" specifically, not a redesign of the other five
+// board sections (todo/tomorrow/urgent/needs/fyi), which have no aging
+// signal built for them here and are deliberately left untouched.
+var WI_PW_STALE_DAYS=21;
+var WI_MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function _priLastActivityTs(p){
+  var best=0,earliest=Infinity,genuine=0;
+  if(p.dateAdded){var dv=new Date(p.dateAdded+'T12:00:00').getTime();if(!isNaN(dv)&&dv>best)best=dv;}
+  if(p.lastUpdated){var lv=new Date(p.lastUpdated).getTime();if(!isNaN(lv)&&lv>best)best=lv;}
+  var acts=p.actions;
+  if(acts){
+    if(!Array.isArray(acts))acts=[acts];
+    acts.forEach(function(a){
+      var s=String(a);
+      var m=/^\s*\[(\d{1,2})\s+([A-Za-z]{3})[A-Za-z]*\.?\s*(\d{4})?\]/.exec(s);
+      if(!m)return;
+      var mo=WI_MONTHS[m[2].toLowerCase()];
+      if(mo===undefined)return;
+      var yr=m[3]?parseInt(m[3],10):new Date().getFullYear();
+      var v=new Date(yr,mo,parseInt(m[1],10)).getTime();
+      if(isNaN(v))return;
+      if(v<earliest)earliest=v;
+      var hasEmailTag=/\(email:/i.test(s);
+      var isKevinSent=/\(email:\s*Kevin\s*\(sent to:/i.test(s);
+      if(hasEmailTag&&!isKevinSent)return;
+      if(v>genuine)genuine=v;
+    });
+  }
+  if(genuine>best)best=genuine;
+  if(!best&&earliest!==Infinity)best=earliest;
+  // Fallback for items dragged in from a raw email card (urgent/needs/fyi),
+  // which carry no actions[] log at all -- only the underlying message's
+  // own received_raw timestamp. Same "first-seen, never touched again"
+  // semantics as the actions-log earliest-entry fallback above: a single
+  // inbound receipt date is a genuine (if weak) aging anchor, since there
+  // is by definition no second inbound touch here to falsely reset it.
+  if(!best&&p.received_raw){var rv=new Date(p.received_raw).getTime();if(!isNaN(rv))best=rv;}
+  return best;
+}
+function _priStaleDays(p,sec){
+  if(sec!=='pw')return null; // scoped to "Priorities This Week" only, see comment above
+  var ts=_priLastActivityTs(p);
+  if(!ts)return null;
+  var days=Math.floor((Date.now()-ts)/(24*3600*1000));
+  return days>=WI_PW_STALE_DAYS?days:null;
+}
+
 // Single-card renderer -- extracted 20 Aug 2026 (drag-and-drop architecture
 // rework) from what used to be inline in renderPriorityCards' .map(). Now
 // the ONE place that knows how to render a priority card, used both by the
@@ -748,6 +810,13 @@ function _priRenderOneCard(p,sec){
   const newBadge=(!aiBadge&&createdDate&&createdDate>=_cutoff)?badge('NEW','green'):'';
   const updBadge=(!aiBadge&&!newBadge&&p.actions&&p.actions.some(a=>_recentPfxs4.some(pfx=>a.startsWith(pfx))))?badge('UPDATED','blue'):'';
   const theBadge=aiBadge||newBadge||updBadge;
+  // "Priorities This Week" staleness badge, 21 Aug 2026 (Phase 2 item 3) --
+  // additive, does not replace theBadge above. Only shown for the 'pw'
+  // zone (see _priStaleDays' own scope guard) and never on an already-
+  // ticked/done item, matching command-centre's own "!done" guard on its
+  // stale badge.
+  const staleDaysVal=(!ticked)?_priStaleDays(p,sec):null;
+  const staleBadge=(staleDaysVal!==null)?`<span class="badge badge-red" title="In Priorities This Week but no genuine activity logged for ${staleDaysVal} days">${staleDaysVal}D QUIET</span>`:'';
   let subText='';
   if(p.actions&&p.actions.length){
     const todo=p.actions.find(a=>a.startsWith('[TODO]')||a.startsWith('[AWAITING]'));
@@ -765,7 +834,7 @@ function _priRenderOneCard(p,sec){
         <div class="card-ph-title${ticked?' done':''}">${titleText}</div>
         ${subLine?`<div class="card-ph-sub">${sanitizeSub(subLine)}</div>`:''}
       </div>
-      <div class="card-ph-actions">${theBadge}${emailBtn}${ccBtn}</div>
+      <div class="card-ph-actions">${theBadge}${staleBadge}${emailBtn}${ccBtn}</div>
     </div>`;
 }
 function _priZonePlaceholderHtml(sec){return sec==='pfyi'?'Drop items here to park':'Drop items here';}
