@@ -385,8 +385,8 @@
     "received": "20 Aug",
     "received_raw": "2026-08-20 14:13:18.596000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman invites Kevin to add farewell messages for Beth on the Kudoboard.",
-    "needs_reply": true,
+    "ai_summary": "Julie Hickman invites Kevin to add farewell messages for Beth on the Kudoboard if he hasn't already.",
+    "needs_reply": false,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
@@ -405,7 +405,7 @@
     "received": "20 Aug",
     "received_raw": "2026-08-20 14:09:30.937000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman reports Chemistry's progress on 38-day balance work group estimates and expects further departmental updates.",
+    "ai_summary": "Julie Hickman updates Kevin on 38-day balance progress across departments with Chemistry's estimated figures.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -445,7 +445,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 16:29:30.947000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman provides contact names for Chemistry (Jenna Boyce, Alexia Leakey) and Maths teams on 38-day balance project.",
+    "ai_summary": "Julie Hickman provides Kevin with contact details for departmental leads working on the 38-day balance project (Chemistry, Maths, etc.).",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -465,7 +465,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford forwards application form query and asks Kevin to estimate FA workload impact on identifying internal candidates.",
+    "ai_summary": "Simon Burford asks Kevin to estimate from an FA perspective how much work is needed to identify internal candidates in application forms.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -485,7 +485,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:34:44.335000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman shares OneDrive file with timeframe information for 38-day balance task.",
+    "ai_summary": "Julie Hickman shares a OneDrive file with Kevin containing a timeframe of task for the 38-day balance project.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -505,8 +505,28 @@
     "received": "18 Aug",
     "received_raw": "2026-08-18 10:23:53.928000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Kevin Lelitte bumps Anna Carter-Windle's May 2026 request about GLAM Botanic Gardens and Ashmolean Security rostering requirements; needs attention from Kevin.",
-    "needs_reply": false,
+    "ai_summary": "Kevin Lelitte bumps a forwarded request from Anna Carter-Windle about GLAM Botanic Gardens and Ashmolean Security rostering requirement (original from May 2026).",
+    "needs_reply": true,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-21",
+   "last_confirmed": "2026-08-21"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F550000": {
+   "tier": "needs",
+   "card": {
+    "title": "Sickness Absence Data Catch-up",
+    "sub": "From <strong>Sarah Rowles</strong>. To discuss data completeness within the DWHS: OUTPUT_SicknessDataChecks_20260811.xlsx &lt;https://unioxfordnexus.sharepoint",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Sickness Absence Data Catch-up",
+    "from": "Sarah Rowles",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F550000",
+    "received": "21 Aug",
+    "received_raw": "2026-08-21 11:09:23.058000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Sarah Rowles asks Kevin to discuss sickness absence data completeness in the DWHS using the attached OUTPUT_SicknessDataChecks_20260811.xlsx file.",
+    "needs_reply": true,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
