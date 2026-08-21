@@ -1,3 +1,20 @@
+# Handover -- 21 August 2026, ~11:35 UTC (Drew) -- Archive modal per-date purge control ADDED, LIVE on main
+
+## What shipped
+Kevin approved via direct message to the coordinator in response to two screenshots (archive_modal_new_control.png, archive_panel_crop.png) -- exact words "go ahead and push". Added a new per-date purge action to the Archive modal, additive alongside the existing bulk "Purge older than N days" control (unchanged). Full backup-and-verify sequence run first: live js/app.js and css/styles.css backed up to `Archive/app_backup_20260821_1133.js` (commit `562b1e5b`) and `Archive/styles_backup_20260821_1133.css` (commit `181bf073`), both byte-verified against the pre-change live content via `git/blobs` before any write. Write commits: `js/app.js` -> `1151106e749f3551a06d002330efb58f0f057791`, `css/styles.css` -> `10a4fcc6e44bb74cbbeaeaa2c2aab3d10e719137`. Both byte-verified post-write against the intended patched content via `git/blobs` (bypasses the raw.githubusercontent.com CDN cache). Main tip after both writes: `10a4fcc6e44bb74cbbeaeaa2c2aab3d10e719137`. GitHub Pages build for that commit confirmed queued (`status: building`) at push time -- worth a live spot-check next session if not already confirmed.
+
+## What changed, precisely
+- Verified first (did not assume) that the existing "-" glyph on each archive date card (`js/app.js` `renderArchiveList()`/`toggleArchiveDay()`) is purely the collapse/expand arrow -- unrelated to deletion. Left it completely untouched.
+- New function `purgeArchiveDay(di)` in `js/app.js`: looks the target entry up fresh from `getArchiveData()[di]` by index at click time, confirm-gated (`Purge "<dateStr>" (<n> items)? This cannot be undone.`) matching the existing bulk purge (`purgeOldTicks()`)'s exact safety level -- single native `confirm()`, no backup step, instant on accept. Deletes only that date's `store` entry and its own prefixed `ticks` entries; reuses `saveStore`/`saveTicks`, so the same cross-machine tick sync to the Cloudflare Worker `cc-tasks-writer.kevinlelitte.workers.dev` (writes `data/ticks.json`) fires identically to the bulk purge -- confirmed live in local Playwright testing pre-push, not just assumed from reading the code.
+- New small red "x" button (`.archive-day-purge-btn`) on each date-card header, immediately left of the untouched arrow, `event.stopPropagation()` so it never also triggers the header's own collapse toggle. CSS-only additions in `css/styles.css` (`.archive-day-header-right`, `.archive-day-purge-btn`), reusing existing `--red`/`--red-bg`/`--red-border` theme vars.
+- `index.html` untouched -- the archive-day-header markup is generated entirely in `renderArchiveList()`.
+
+## Verification before push
+Local scratchpad copy of the live site (python http.server + Python Playwright) confirmed: header-text click still collapses/expands correctly; dismissing the new confirm changes nothing; accepting removes only the targeted date's store entry and only its own prefixed ticks, leaving ~130 unrelated real production tick keys (accidentally pulled in via the app's own `loadRemoteTicks()`, which fetches live `data/ticks.json` unconditionally on load) completely untouched. Confirmed via request-route-blocking that `saveTicks()` does attempt a real POST to the Worker matching the bulk purge's own behaviour -- blocked before it could leave the browser in that test, so no test data ever reached production.
+
+## Next action
+None required -- this closes the request. Optional follow-up next session: spot-check the live Pages-served `js/app.js`/`css/styles.css` byte-match the pushed blobs (Pages build was still "building" at push time), and do a real on-device click-through of the new purge button against Kevin's actual archived data.
+
 # Handover -- 21 August 2026, ~09:00 UTC (Drew) -- Phase 2 item 3 MERGED to main, verified live -- PHASE 2 CLOSED IN FULL
 
 ## What shipped
