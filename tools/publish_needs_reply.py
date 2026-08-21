@@ -62,6 +62,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from style_corpus_common import is_sensitive, recipient_tier
+from phase_failure_notify import notify_phase_failure
 
 GITHUB_API = "https://api.github.com"
 OWNER = "begb0037admin"
@@ -203,6 +204,12 @@ if __name__ == "__main__":
     token = os.environ.get("GITHUB_PAT")
     if not token:
         print("FATAL: GITHUB_PAT not set")
+        if not args.dry_run:
+            notify_phase_failure(
+                "Work Inbox Briefing - Needs Reply publish",
+                "GITHUB_PAT not set",
+                log_filename="needs_reply_failure_last.log",
+            )
         sys.exit(1)
 
     try:
@@ -211,4 +218,16 @@ if __name__ == "__main__":
         sys.exit(0)
     except Exception as e:
         print(f"FATAL: publish_needs_reply.py run failed - {type(e).__name__}: {e}")
+        # Real desktop toast, not just a log line -- this script fails
+        # silently to Kevin otherwise (see phase_failure_notify.py's own
+        # docstring / HANDOVER.md Phase 2, 20-21 Aug 2026). Skipped on
+        # --dry-run so manual/interactive test runs don't fire a false
+        # production alert. Best-effort: never allowed to mask the FATAL
+        # already printed above or change this script's own exit code.
+        if not args.dry_run:
+            notify_phase_failure(
+                "Work Inbox Briefing - Needs Reply publish",
+                f"{type(e).__name__}: {e}",
+                log_filename="needs_reply_failure_last.log",
+            )
         sys.exit(1)
