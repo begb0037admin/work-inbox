@@ -1826,6 +1826,13 @@ try:
     if not task_summaries:
         raise Exception("Command Centre tasks unavailable - skipping triage")
 
+    def _phase35_age_days(msg):
+        try:
+            rec_dt = datetime.fromisoformat((msg.get("received", "") or "").split("+")[0].split(" (")[0].strip())
+            return (datetime.now() - rec_dt).days
+        except Exception:
+            return None
+
     email_candidates = []
     for m in inbox:
         if categorise(m) in ("urgent", "needs"):
@@ -1834,7 +1841,20 @@ try:
                 "from":         m.get("from", ""),
                 "received":     (m.get("received", "") or "")[:16],
                 "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
-                "entry_id":     m.get("entry_id", "")
+                "entry_id":     m.get("entry_id", ""),
+                # 22 Aug 2026: these two signals already exist and are computed
+                # for Phase 3.2's needs_reply/no_action_needed judgment (see
+                # that phase's own comment re: Lauren's 10 Aug review finding
+                # ~20 of 24 flagged entries were cc-only or stale) but were
+                # never passed into this separate Phase 3.5 triage call, so
+                # Phase 3.5 had no way to apply the same judgment when
+                # deciding whether to create a Command Centre task. Root
+                # cause of the "attend the PUG meeting" / "Clockify" noise
+                # tiles Kevin flagged 22 Aug - not a missing prompt rule
+                # alone, but this missing context feeding it. Fixing both
+                # together (see TRIAGE_SYSTEM below).
+                "kevin_is_primary_recipient": m.get("kevin_is_primary_recipient", True),
+                "age_days":     _phase35_age_days(m)
             })
 
     for s in sent[:30]:
@@ -1849,24 +1869,54 @@ try:
 
     api_emails = [{"n": i, "direction": e.get("direction", "received"),
                    "subject": e["subject"], "from": e["from"],
-                   "received": e["received"], "body_preview": e["body_preview"]}
+                   "received": e["received"], "body_preview": e["body_preview"],
+                   "kevin_is_primary_recipient": e.get("kevin_is_primary_recipient", True),
+                   "age_days": e.get("age_days")}
                   for i, e in enumerate(email_candidates)]
 
     TRIAGE_SYSTEM = (
         "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
         "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
+        "Each received email carries two extra signals: kevin_is_primary_recipient (false means he was only cc'd, not directly "
+        "addressed) and age_days (how many days old the email is).\n"
         "Identify:\n"
-        "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Max 12. "
-        "Do not be over-cautious: if an email asks Kevin for something, or commits him to something, and no existing task covers it, propose it. "
-        "It is better to propose a task Kevin dismisses in one click than to leave real work invisible.\n"
-        "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
-        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 20. "
-        "A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
-        "If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
+        "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task, AND that "
+        "requires something beyond attending a meeting or acknowledging receipt. Max 12. "
+        "Do not be over-cautious about genuine work: if an email asks Kevin to review, decide, produce, chase, or respond to "
+        "something substantive, and no existing task covers it, propose it. It is better to propose a task Kevin dismisses in one "
+        "click than to leave real work invisible.\n"
+        "EXCLUDE - do not create a new_task OR a task_update for:\n"
+        "  - A meeting invite, reminder, calendar link, or RSVP confirmation whose entire content is meeting logistics. If Kevin has "
+        "accepted or is expected to attend, that attendance is already on his calendar - a Command Centre tile or action-log entry "
+        "would just duplicate it. The exception: if the email also asks Kevin to prepare something specific before the meeting, "
+        "make a decision, or describes follow-up work beyond attending, propose/log THAT work instead (not 'attend the meeting').\n"
+        "  - An email where kevin_is_primary_recipient is false (Kevin was only cc'd) UNLESS its content clearly and specifically "
+        "asks Kevin himself, personally, to do something - names him and requests his review/decision/action. Being copied for "
+        "visibility on other people's conversation is never sufficient by itself, no matter how relevant the topic looks.\n"
+        "  - An automated notification, newsletter, calendar accept/decline message, or out-of-office reply.\n"
+        "  - Anything with age_days over 21 that has not already surfaced as an existing task.\n"
+        "These exclusions apply whether or not some existing task's topic loosely overlaps - do not route an excluded email onto an "
+        "existing task just because it seems like the closest fit; reject it outright (list it in rejected) unless it genuinely "
+        "changes something Kevin needs to know or do (a reschedule, a cancellation, a newly-required decision), not merely a "
+        "restatement of logistics he already knows.\n"
+        "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in "
+        "your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
+        "2. task_updates - emails that are progress, replies or new information on an EXISTING task (subject to the same exclusions "
+        "above). Max 20. A task_update must be substantively, specifically about that task's own subject - same case number, same "
+        "named project, or same people AND topic. Do not attach a general broadcast, FYI, or organisation-wide notice (e.g. a "
+        "platform maintenance window, a KPI-presentation share, a social/farewell reminder) to a task just because it went out "
+        "around the same time or mentions an overlapping name - if a notice has no unique substantive connection to one specific "
+        "task beyond timing, omit it entirely rather than forcing it onto the closest-sounding task. "
+        "If no existing task is a clear, substantive match, do NOT force one: either propose it under new_tasks (subject to the "
+        "same exclusions) or omit it entirely.\n"
+        "3. rejected - every email_n excluded under the rules above. For each, give a short reason: meeting_logistics_only, "
+        "cc_only_no_direct_ask, stale, notification, or no_clear_task_match. This list is for logging only - it is never shown to "
+        "Kevin, so err on the side of listing anything you excluded.\n"
         "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
         "{\n"
         '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|tomorrow|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
-        '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}]\n'
+        '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}],\n'
+        '  "rejected": [{"email_n": <n>, "reason": "<meeting_logistics_only|cc_only_no_direct_ask|stale|notification|no_clear_task_match>"}]\n'
         "}\n"
         'Rules: tier "today" only if the deadline is today or overdue; "tomorrow" if it must happen the next working day; otherwise "week". '
         "Never invent case numbers or names. Automated notifications, newsletters, calendar "
@@ -1944,7 +1994,19 @@ try:
             "received":      src["received"],
             "entry_id":      src["entry_id"]
         })
-    print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} (suppressed_no_action:{suppressed_no_action}) updates:{len(suggestions['task_updates'])}")
+    # 22 Aug 2026: log-only visibility into what the judgment gate excluded
+    # this run, so the exclusion criteria (meeting-logistics-only, cc-only-
+    # no-direct-ask, stale, notification, no_clear_task_match) can be
+    # verified/tuned from real runs without surfacing anything extra to
+    # Kevin - `rejected` never touches suggestions.json or the dashboard.
+    rejected_list = t_out.get("rejected", [])
+    if rejected_list:
+        reason_counts = {}
+        for r in rejected_list:
+            reason_counts[r.get("reason", "unspecified")] = reason_counts.get(r.get("reason", "unspecified"), 0) + 1
+        print(f"Phase 3.5 gate rejected {len(rejected_list)} candidate(s): " +
+              ", ".join(f"{k}={v}" for k, v in reason_counts.items()))
+    print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} (suppressed_no_action:{suppressed_no_action}) updates:{len(suggestions['task_updates'])} rejected:{len(rejected_list)}")
 except Exception as e:
     if anthropic_available:
         print(f"WARNING: Phase 3.5 triage failed - {e}")
