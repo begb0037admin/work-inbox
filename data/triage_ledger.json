@@ -636,6 +636,40 @@
    },
    "first_tracked": "2026-08-24",
    "last_confirmed": "2026-08-24"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E80000": {
+   "tier": "needs",
+   "card": {
+    "title": "RE: OSM: No incoming emails will be processed this weekend",
+    "sub": "From <strong>Louise Piper</strong>. Good Morning,\r\n\r\n \r\n\r\nTo all OSM users. For information, no action required\r\n\r\n \r\n\r\nThe OSM email listener has been re-e",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "RE: OSM: No incoming emails will be processed this weekend",
+    "from": "Louise Piper",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E80000",
+    "received": "24 Aug",
+    "received_raw": "2026-08-24 08:40:58.082000+00:00",
+    "kevin_is_primary_recipient": false
+   },
+   "first_tracked": "2026-08-24",
+   "last_confirmed": "2026-08-24"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000": {
+   "tier": "needs",
+   "card": {
+    "title": "Re: PO ref E22033553 / Quality funded work",
+    "sub": "From <strong>Sophie Levy</strong>. Hello Kevin,\r\n\r\nWe are having our interbal transition call from sales to professional services this afternoon, the proje",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Re: PO ref E22033553 / Quality funded work",
+    "from": "Sophie Levy",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000",
+    "received": "24 Aug",
+    "received_raw": "2026-08-24 08:33:26.227000+00:00",
+    "kevin_is_primary_recipient": true
+   },
+   "first_tracked": "2026-08-24",
+   "last_confirmed": "2026-08-24"
   }
  }
 }
