@@ -1,16 +1,6 @@
 {
-  "generated_at": "2026-08-21 19:26",
+  "generated_at": "2026-08-24 07:44",
   "new_tasks": [
-    {
-      "title": "Resolve Cority Employee Import error 2026-08-21 17:00",
-      "tier": "today",
-      "description": "Cority Integration Platform reported an SFTP connection error on 21 August at 17:00 during scheduled employee data import. Kevin needs to review the error log and confirm resolution with James Salas Guillen / Cority support, similar to the 22 June incident (t030).",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-21 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-21 18:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000",
-      "auto_promoted": true
-    },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
       "tier": "week",
@@ -42,24 +32,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608191643001",
-      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
-      "note": "Julie Hickman sent farewell message reminder for Beth, who is leaving the team.",
-      "email_subject": "RE: Farewell wishes and gift for Beth",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-20 14:13",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F410000"
-    },
-    {
-      "task_id": "t2608171727070",
-      "task_title": "SHMS Tender (DTP1334) Session (final) on Microsoft Teams",
-      "note": "Kevin replied to Simon and James clarifying that the Cority Applicant Data Import report was originally built by Grace, not Lee, and has been handed over.",
-      "email_subject": "Re: Cority - Applicant Data Import file",
-      "email_from": "Kevin (sent to: Simon Burford; James Salas Guillen)",
-      "received": "2026-08-20 17:42",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ADFEA7630000"
-    }
-  ]
+  "task_updates": []
 }
