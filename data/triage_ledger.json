@@ -518,40 +518,6 @@
    "first_tracked": "2026-08-21",
    "last_confirmed": "2026-08-24"
   },
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C50000": {
-   "tier": "urgent",
-   "card": {
-    "title": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-    "sub": "From <strong>Simon Burford</strong>.",
-    "badge": "Act today",
-    "badgeType": "red",
-    "subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-    "from": "Simon Burford",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C50000",
-    "received": "17 Aug",
-    "received_raw": "2026-08-17 11:22:55.276000+00:00",
-    "kevin_is_primary_recipient": false
-   },
-   "first_tracked": "2026-08-24",
-   "last_confirmed": "2026-08-24"
-  },
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C40000": {
-   "tier": "urgent",
-   "card": {
-    "title": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-    "sub": "From <strong>Andrew Goff (IT Services)</strong>.",
-    "badge": "Act today",
-    "badgeType": "red",
-    "subject": "Re: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-    "from": "Andrew Goff (IT Services)",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C40000",
-    "received": "17 Aug",
-    "received_raw": "2026-08-17 11:19:47.842000+00:00",
-    "kevin_is_primary_recipient": false
-   },
-   "first_tracked": "2026-08-24",
-   "last_confirmed": "2026-08-24"
-  },
   "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7C20000": {
    "tier": "urgent",
    "card": {
@@ -667,6 +633,57 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true
+   },
+   "first_tracked": "2026-08-24",
+   "last_confirmed": "2026-08-24"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EB0000": {
+   "tier": "urgent",
+   "card": {
+    "title": "RE: Business rules for Data Warehouse",
+    "sub": "From <strong>Simon Burford</strong>. Hi both,\r\n\r\n \r\n\r\nI haven\u2019t had any response on this since our meeting in June. This is going to put the REF programme at",
+    "badge": "Act today",
+    "badgeType": "red",
+    "subject": "RE: Business rules for Data Warehouse",
+    "from": "Simon Burford",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EB0000",
+    "received": "24 Aug",
+    "received_raw": "2026-08-24 11:04:01.194000+00:00",
+    "kevin_is_primary_recipient": false
+   },
+   "first_tracked": "2026-08-24",
+   "last_confirmed": "2026-08-24"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F7E0000": {
+   "tier": "urgent",
+   "card": {
+    "title": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+    "sub": "From <strong>Crispin Muncaster</strong>.",
+    "badge": "Act today",
+    "badgeType": "red",
+    "subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
+    "from": "Crispin Muncaster",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F7E0000",
+    "received": "19 Aug",
+    "received_raw": "2026-08-19 07:48:08.468000+00:00",
+    "kevin_is_primary_recipient": false
+   },
+   "first_tracked": "2026-08-24",
+   "last_confirmed": "2026-08-24"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E90000": {
+   "tier": "needs",
+   "card": {
+    "title": "Re: Oxford Uni - Pre-project Authentication (Follow up)",
+    "sub": "From <strong>Peter Travers</strong>. Hello all,\r\n\r\nIn advance of this session on Wednesday, we can confirm that there are 2 domains setup on Evo: rhodeshouse",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Re: Oxford Uni - Pre-project Authentication (Follow up)",
+    "from": "Peter Travers",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E90000",
+    "received": "24 Aug",
+    "received_raw": "2026-08-24 09:25:05.643000+00:00",
+    "kevin_is_primary_recipient": false
    },
    "first_tracked": "2026-08-24",
    "last_confirmed": "2026-08-24"
