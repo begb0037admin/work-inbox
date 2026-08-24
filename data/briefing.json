@@ -42,27 +42,27 @@
   ],
   "needs": [
     {
-      "title": "We detected \"ain't that lovin' you\" on Deezer",
-      "sub": "From <strong>DistroKid</strong>. &lt;https://distrokid.com/images/logos/distrokid/hi-res-words-5000-light-background.png&gt; \t\r\nHi, \r\n\r\nWe detected your single",
+      "title": "RE: OSM: No incoming emails will be processed this weekend",
+      "sub": "From <strong>Louise Piper</strong>. Good Morning,\r\n\r\n \r\n\r\nTo all OSM users. For information, no action required\r\n\r\n \r\n\r\nThe OSM email listener has been re-e",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
-      "subject": "We detected \"ain't that lovin' you\" on Deezer",
-      "from": "DistroKid",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F570000",
-      "received": "22 Aug",
-      "received_raw": "2026-08-22 18:14:06.284000+00:00",
-      "kevin_is_primary_recipient": true
+      "subject": "RE: OSM: No incoming emails will be processed this weekend",
+      "from": "Louise Piper",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E80000",
+      "received": "24 Aug",
+      "received_raw": "2026-08-24 08:40:58.082000+00:00",
+      "kevin_is_primary_recipient": false
     },
     {
-      "title": "We detected \"paperdreamz\" on Deezer",
-      "sub": "From <strong>DistroKid</strong>. &lt;https://distrokid.com/images/logos/distrokid/hi-res-words-5000-light-background.png&gt; \t\r\nHi, \r\n\r\nWe detected your single",
+      "title": "Re: PO ref E22033553 / Quality funded work",
+      "sub": "From <strong>Sophie Levy</strong>. Hello Kevin,\r\n\r\nWe are having our interbal transition call from sales to professional services this afternoon, the proje",
       "badge": "Reply within 48hrs",
       "badgeType": "yellow",
-      "subject": "We detected \"paperdreamz\" on Deezer",
-      "from": "DistroKid",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F560000",
-      "received": "22 Aug",
-      "received_raw": "2026-08-22 14:10:10.762000+00:00",
+      "subject": "Re: PO ref E22033553 / Quality funded work",
+      "from": "Sophie Levy",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000",
+      "received": "24 Aug",
+      "received_raw": "2026-08-24 08:33:26.227000+00:00",
       "kevin_is_primary_recipient": true
     },
     {
@@ -204,9 +204,48 @@
       "needs_reply": true,
       "no_action_needed": false,
       "_carried_forward": true
+    },
+    {
+      "title": "We detected \"ain't that lovin' you\" on Deezer",
+      "sub": "From <strong>DistroKid</strong>. &lt;https://distrokid.com/images/logos/distrokid/hi-res-words-5000-light-background.png&gt; \t\r\nHi, \r\n\r\nWe detected your single",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "We detected \"ain't that lovin' you\" on Deezer",
+      "from": "DistroKid",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F570000",
+      "received": "22 Aug",
+      "received_raw": "2026-08-22 18:14:06.284000+00:00",
+      "kevin_is_primary_recipient": true,
+      "_carried_forward": true
+    },
+    {
+      "title": "We detected \"paperdreamz\" on Deezer",
+      "sub": "From <strong>DistroKid</strong>. &lt;https://distrokid.com/images/logos/distrokid/hi-res-words-5000-light-background.png&gt; \t\r\nHi, \r\n\r\nWe detected your single",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "We detected \"paperdreamz\" on Deezer",
+      "from": "DistroKid",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F560000",
+      "received": "22 Aug",
+      "received_raw": "2026-08-22 14:10:10.762000+00:00",
+      "kevin_is_primary_recipient": true,
+      "_carried_forward": true
     }
   ],
   "fyi": [
+    {
+      "title": "Automatic reply: PO ref E22033553 / Quality funded work",
+      "sub": "From <strong>Naomi Hood</strong>. Thank you for your email. I am out of the office on annual leave, returning on Wednesday 2nd September (afternoon). If y",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Automatic reply: PO ref E22033553 / Quality funded work",
+      "from": "Naomi Hood",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E70000",
+      "received": "24 Aug",
+      "received_raw": "2026-08-24 08:23:36.287000+00:00",
+      "kevin_is_primary_recipient": true,
+      "messageCount": 1
+    },
     {
       "title": "Sickness Absence Data Catch-up",
       "sub": "From <strong>Sarah Rowles</strong>.",
@@ -479,35 +518,9 @@
       "received_raw": "2026-08-17 10:55:36.589000+00:00",
       "kevin_is_primary_recipient": false,
       "messageCount": 1
-    },
-    {
-      "title": "FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance",
-      "sub": "From <strong>Michael O'Sullivan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance",
-      "from": "Michael O'Sullivan",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007AAB5BD9C0000",
-      "received": "17 Aug",
-      "received_raw": "2026-08-17 08:12:55.615000+00:00",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Review of intranet hyperlinks",
-      "sub": "From <strong>Julie Hickman</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Review of intranet hyperlinks",
-      "from": "Julie Hickman",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7BD0000",
-      "received": "17 Aug",
-      "received_raw": "2026-08-17 08:10:30.163000+00:00",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
     }
   ],
-  "fyiRawCount": 33,
+  "fyiRawCount": 32,
   "low": [
     {
       "title": "CONNECT Password changed successfully",
@@ -1408,5 +1421,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Monday 24 August · 07:44"
+  "refreshed_at": "Monday 24 August · 09:00"
 }
