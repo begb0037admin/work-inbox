@@ -1,3 +1,24 @@
+# Handover -- 25 August 2026 (Drew) -- Outlook connector `webLink` field verification (read-only)
+
+## What was checked
+At Kevin's request, checked whether the Phase 1-style Outlook connector JSON for the signed-in mailbox `kevin.lelitte@admin.ox.ac.uk` carries a web-opening link. The retained Work Inbox Phase 1 evidence uses the project’s reduced Outlook-COM dictionaries and does not retain this connector's raw response, so a fresh capped, read-only connector check was made.
+
+## Direct evidence
+Read 5 newest inbox messages and 5 calendar events. The connector returned an opening-link field populated on every sampled object: email 5/5 and calendar 5/5.
+
+Important adapter detail: although the connector's public schema calls the field `webLink`, the runtime JSON actually returned `web_link` (snake case). Literal `webLink` was absent from all 5/5 email and 5/5 event objects. Each also exposed `display_url` with the same underlying Outlook web URL.
+
+Redacted live shapes observed:
+- Email: `https://outlook.office.com/owa/?ItemID=<redacted>&exvsurl=1&viewmodel=ReadMessageItem`
+- Calendar event: `https://outlook.office.com/owa/?ItemID=<redacted>&exvsurl=1&path=/calendar/item`
+
+No mailbox state, events, messages, or production pipeline data were changed.
+
+## Exact next action
+For any consumer of this connector, read `web_link` first (and optionally tolerate documented `webLink` for forward compatibility); do not assume the public schema's camel-case spelling matches the runtime payload.
+
+---
+
 # Handover -- 21 August 2026, ~19:30 UTC (Drew) -- Manual scheduled-equivalent pipeline run triggered post-merge, live dashboards verified -- closes the loop end-to-end on the Absences panel fix
 
 ## What this is
