@@ -414,7 +414,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 16:29:30.947000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman providing contact details for department representatives (Chemistry, Maths, etc.) regarding 38 day balance decisions.",
+    "ai_summary": "Julie Hickman provides contact details for department representatives (Chemistry, Maths, etc.) regarding 38-day balance decisions; Kevin should note these contacts.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -434,7 +434,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford forwards application form query and requests Kevin to estimate work required from FA perspective on internal candidates identification.",
+    "ai_summary": "Simon Burford asks Kevin (as FA point of view) to estimate effort required for identifying internal candidates on application forms.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -454,7 +454,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:34:44.335000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman sharing OneDrive for Business file with timeframe of task details for 38 day balance update work.",
+    "ai_summary": "Julie Hickman shares a OneDrive file with Kevin containing timeframe information related to 38-day balance task.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -494,7 +494,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Automated error notification from Cority integration platform for OxfordUniversity employee import run on 21 August; review of attached log file needed.",
+    "ai_summary": "Cority system error notification from 21 August reports an import process failure; Kevin should review the attached log file for details.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -582,7 +582,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy is updating Kevin on internal transition call from sales to professional services this afternoon for PO E22033553 Quality funded work.",
+    "ai_summary": "Sophie Levy informs Kevin that an internal transition call from sales to professional services is happening this afternoon regarding PO E22033553 Quality funded work.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -738,6 +738,86 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 18:48:26.915000+00:00",
     "kevin_is_primary_recipient": true
+   },
+   "first_tracked": "2026-08-25",
+   "last_confirmed": "2026-08-25"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2EA0000": {
+   "tier": "needs",
+   "card": {
+    "title": "Video scoring is here. Learning you can see.",
+    "sub": "From <strong>Erik at Soundtrap</strong>. Six lesson plans are ready, and Decode the score takes one class period. \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c \u034f\u200c  \r\n &lt;https:",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Video scoring is here. Learning you can see.",
+    "from": "Erik at Soundtrap",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2EA0000",
+    "received": "25 Aug",
+    "received_raw": "2026-08-25 16:00:55.952000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Erik from Soundtrap promotes video scoring lesson plans; Kevin needs to review or discard this marketing email.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-25",
+   "last_confirmed": "2026-08-25"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2E90000": {
+   "tier": "needs",
+   "card": {
+    "title": "Automatic reply: Sickness absence survey \u2014 BA resource requirement and timelines",
+    "sub": "From <strong>Julie Hickman</strong>. \ufeffI am on annual leave from Friday 21 August and my next working day is Wednesday 2 September. \r\n\r\n \r\n\r\nPlease re-direct ",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Automatic reply: Sickness absence survey \u2014 BA resource requirement and timelines",
+    "from": "Julie Hickman",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2E90000",
+    "received": "25 Aug",
+    "received_raw": "2026-08-25 15:46:29.641000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Automatic reply from Julie Hickman confirming she is on leave until 2 September and requesting redirect of sickness absence survey to her colleague.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-25",
+   "last_confirmed": "2026-08-25"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2600008DFB9C6852DC5A43B72538034BBFF5350007B13CECEF0000": {
+   "tier": "needs",
+   "card": {
+    "title": "HR Systems Team Meeting - tomorrow",
+    "sub": "From <strong>Asta Palmer</strong>. Hello!\r\n\r\n \r\n\r\nIt\u2019s our team meeting tomorrow, and it\u2019s Presentations week.\r\n\r\n \r\n\r\nPlease let me know if you have somet",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "HR Systems Team Meeting - tomorrow",
+    "from": "Asta Palmer",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2600008DFB9C6852DC5A43B72538034BBFF5350007B13CECEF0000",
+    "received": "25 Aug",
+    "received_raw": "2026-08-25 13:35:46.237000+00:00",
+    "kevin_is_primary_recipient": false,
+    "ai_summary": "Asta Palmer reminds of HR Systems Team meeting tomorrow during Presentations week and asks if Kevin has content to present; Kevin is cc'd.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-25",
+   "last_confirmed": "2026-08-25"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000": {
+   "tier": "needs",
+   "card": {
+    "title": "RE: PDR 2026 \u2013 Friday 18 September",
+    "sub": "From <strong>Michael O'Sullivan</strong>. Hi Kevin,\r\n\r\nI\u2019m on leave on 18 September and the following week. With the annual leave year-end also approaching, would",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "RE: PDR 2026 \u2013 Friday 18 September",
+    "from": "Michael O'Sullivan",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000",
+    "received": "25 Aug",
+    "received_raw": "2026-08-25 13:28:29.503000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Michael O'Sullivan asks if PDR scheduled for Friday 18 September can be moved as he is on leave that week and year-end is approaching.",
+    "needs_reply": true,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-25",
    "last_confirmed": "2026-08-25"
