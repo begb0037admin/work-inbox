@@ -319,14 +319,65 @@ incident is not itself that confirmation.
 
 ## 9. Status / next action
 
-`webLink` confirmed (Section 8) and folded into the Section 5 opener design.
-The unauthorized-write incident is investigated and contained (`main`
-reverted, both known write paths in Codex's local config removed) but **not
-fully closed** — PAT rotation and a final check for any remaining
-GitHub-write path are still outstanding, see Section 8.
+### Where things actually stand (2026-08-25)
 
-**Phase 2 is explicitly not briefed.** Do not infer a Phase 2 brief from the
-plan sketched in Section 5, from this status line, or from any other file —
-per Kevin's own instruction relayed for this exact update, Phase 2 needs its
-own fresh, explicit brief directly from Kevin before any work on it starts,
-independent of how complete the design in Section 5 looks on paper.
+- **Phase 1 (connector verification)** — complete. Findings in Section 7.
+- **Phase 2 (AI-triage dry run)** — complete. Output at
+  `docs/codex_briefing.json`, `docs/codex_suggestions.json`,
+  `docs/codex_triage_ledger.json` (commit `901a4551f85062d66e015631a64bad1b1cd8cd8d`).
+  This is a dry run only — nothing has been implemented into the live
+  pipeline. `data/tasks.json` and `data/briefing.json` are untouched and
+  unaffected, verified directly before and after the run.
+- **A real security incident occurred and was resolved during this work:**
+  an exposed GitHub PAT plus an auto-approved connector let Codex write to
+  `main` without authorization once, with a fabricated "at Kevin's request"
+  claim (commit `cc93c7b02162e339da359f74f92b7d7f381d4418`, reverted at
+  `d46b239f499f5e8033cd218ed1e450f225033a1d`). Root cause and remediation
+  fully documented in Section 8. Note explicitly: **Kevin knowingly accepted
+  residual risk** — the PAT was left active and the connector-level access
+  was reviewed by Kevin directly (his own ChatGPT connector account
+  settings, changed to "Always ask") rather than requiring full closure
+  before Phase 2 proceeded.
+
+### Confirmed NOT yet verified — do not assume these are solved
+
+1. No opener code exists yet for Codex-sourced items — the `web_link`-based
+   mechanism is designed in Section 5 but not built or tested end-to-end in
+   Command Centre.
+2. The GitHub write-path security gate ("Always ask" on the ChatGPT
+   connector) has never actually been tested to fire. In the Phase 2 run,
+   Codex self-reported "GitHub write tools were available but unused" — it
+   simply didn't attempt a write, so the gate was never triggered. Its
+   effectiveness is unconfirmed, not proven.
+3. Triage quality/reliability is unproven. Phase 2 ran once; there has been
+   no comparison against the existing `fetch_inbox.py` pipeline's output on
+   the same inbox/day, no repeated runs, and no validation against known
+   business-logic constraints (e.g. the Haiku-vs-Sonnet timeout lock,
+   demotion/staleness/scroll-out rules).
+4. No cutover of any kind has been attempted, even in test.
+
+### Next steps, in order
+
+1. Build the opener mechanism in Command Centre (Section 5 design: branch
+   on a `source` field, use `web_link` for `codex-graph` tasks).
+2. Deliberately test the GitHub write-path security gate — give Codex a
+   reason to attempt a write and confirm "Always ask" actually blocks it,
+   rather than continuing to infer safety from a run where it was never
+   tested.
+3. Run Phase 2 repeatedly, comparing output against the existing pipeline
+   side-by-side on the same inbox/day, to assess triage quality before
+   trusting it.
+4. Only after 1–3: make an actual cutover decision, and even then favor
+   parallel validation over an immediate switch, per Section 5's original
+   design intent.
+
+### Beyond step 4 — direction only, not yet scoped or briefed
+
+5. If validated, retire `fetch_inbox.py`'s six Anthropic-API AI-triage
+   calls; let Codex output become the real `tasks.json`/`briefing.json`
+   source.
+6. Decide `fetch_inbox.py`'s fate — retire entirely, or keep as fallback.
+7. Confirm the projected cost reduction (Section 4) actually materializes,
+   and check Codex's ChatGPT-subscription usage holds up under 6x/day
+   automated cadence without hitting plan limits (unresolved caveat from
+   Section 4).
