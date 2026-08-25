@@ -1,0 +1,10 @@
+Yes—functionally, it exists on all 5 inbox messages and all 5 calendar events sampled.
+
+The runtime JSON field is `web_link` (snake_case), not literal `webLink` (camelCase). The connector schema advertises `webLink`, but the returned payload uses `web_link`.
+
+Redacted shapes:
+
+- Email: `https://outlook.office.com/owa/?ItemID=<redacted>&exvsurl=1&viewmodel=ReadMessageItem`
+- Calendar: `https://outlook.office.com/owa/?ItemID=<redacted>&exvsurl=1&path=/calendar/item`
+
+The result is checkpointed in Work Inbox at commit `cc93c7b`.
