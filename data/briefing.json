@@ -91,18 +91,6 @@
       "kevin_is_primary_recipient": true
     },
     {
-      "title": "RE: Cross-Team Process Improvement Working Group – 1st Meeting",
-      "sub": "From <strong>Otter Ho</strong>. Dear all, \r\n\r\nHope you are all well.\r\n\r\nUnfortunately, due to availability, one of our functions would not be represente",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Cross-Team Process Improvement Working Group – 1st Meeting",
-      "from": "Otter Ho",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EE0000",
-      "received": "24 Aug",
-      "received_raw": "2026-08-24 14:46:20.415000+00:00",
-      "kevin_is_primary_recipient": true
-    },
-    {
       "title": "RE: Business rules for Data Warehouse",
       "sub": "From <strong>Simon Burford</strong>. Hi Ewan,\r\n\r\n \r\n\r\nThanks for this. We have test data in our UOXU environment, but I don’t know if we have a DWH environme",
       "badge": "Reply within 48hrs",
@@ -124,18 +112,6 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000",
       "received": "24 Aug",
       "received_raw": "2026-08-24 12:25:29.517000+00:00",
-      "kevin_is_primary_recipient": false
-    },
-    {
-      "title": "Re: Oxford Uni - Pre-project Authentication (Follow up)",
-      "sub": "From <strong>Peter Travers</strong>. Hello all,\r\n\r\nIn advance of this session on Wednesday, we can confirm that there are 2 domains setup on Evo: rhodeshouse",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "Re: Oxford Uni - Pre-project Authentication (Follow up)",
-      "from": "Peter Travers",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E90000",
-      "received": "24 Aug",
-      "received_raw": "2026-08-24 09:25:05.643000+00:00",
       "kevin_is_primary_recipient": false
     },
     {
@@ -327,6 +303,32 @@
       "received_raw": "2026-08-22 14:10:10.762000+00:00",
       "kevin_is_primary_recipient": true,
       "_carried_forward": true
+    },
+    {
+      "title": "Re: Oxford Uni - Pre-project Authentication (Follow up)",
+      "sub": "From <strong>Peter Travers</strong>. Hello all,\r\n\r\nIn advance of this session on Wednesday, we can confirm that there are 2 domains setup on Evo: rhodeshouse",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Re: Oxford Uni - Pre-project Authentication (Follow up)",
+      "from": "Peter Travers",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E90000",
+      "received": "24 Aug",
+      "received_raw": "2026-08-24 09:25:05.643000+00:00",
+      "kevin_is_primary_recipient": false,
+      "_carried_forward": true
+    },
+    {
+      "title": "RE: Cross-Team Process Improvement Working Group – 1st Meeting",
+      "sub": "From <strong>Otter Ho</strong>. Dear all, \r\n\r\nHope you are all well.\r\n\r\nUnfortunately, due to availability, one of our functions would not be represente",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Cross-Team Process Improvement Working Group – 1st Meeting",
+      "from": "Otter Ho",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EE0000",
+      "received": "24 Aug",
+      "received_raw": "2026-08-24 14:46:20.415000+00:00",
+      "kevin_is_primary_recipient": true,
+      "_carried_forward": true
     }
   ],
   "fyi": [
@@ -357,6 +359,19 @@
       "messageCount": 1
     },
     {
+      "title": "We detected \"ain't that lovin' you\" on Deezer",
+      "sub": "From <strong>DistroKid</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "We detected \"ain't that lovin' you\" on Deezer",
+      "from": "DistroKid",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F570000",
+      "received": "22 Aug",
+      "received_raw": "2026-08-22 18:14:06.284000+00:00",
+      "kevin_is_primary_recipient": true,
+      "messageCount": 1
+    },
+    {
       "title": "Sickness Absence Data Catch-up",
       "sub": "From <strong>Sarah Rowles</strong>.",
       "badge": "FYI",
@@ -366,6 +381,19 @@
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F550000",
       "received": "21 Aug",
       "received_raw": "2026-08-21 11:09:23.058000+00:00",
+      "kevin_is_primary_recipient": true,
+      "messageCount": 1
+    },
+    {
+      "title": "Monthly support reports are they still required?",
+      "sub": "From <strong>Mike West</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Monthly support reports are they still required?",
+      "from": "Mike West",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F540000",
+      "received": "21 Aug",
+      "received_raw": "2026-08-21 09:58:06.124000+00:00",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
     },
@@ -576,61 +604,9 @@
       "received_raw": "2026-08-18 10:23:26.457000+00:00",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
-    },
-    {
-      "title": "HR Systems Team Meeting - Roadmap",
-      "sub": "From <strong>Sarah Rowles</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "HR Systems Team Meeting - Roadmap",
-      "from": "Sarah Rowles",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F690000",
-      "received": "18 Aug",
-      "received_raw": "2026-08-18 08:56:55.690000+00:00",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "Re: Appointment request",
-      "sub": "From <strong>Chris Little</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Re: Appointment request",
-      "from": "Chris Little",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F680000",
-      "received": "18 Aug",
-      "received_raw": "2026-08-18 08:50:25.090000+00:00",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
-      "sub": "From <strong>Michael O'Sullivan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Refresh both the UOXU and UOXC environments with a new clone of UOXP",
-      "from": "Michael O'Sullivan",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007ACBB5F100000",
-      "received": "18 Aug",
-      "received_raw": "2026-08-18 08:39:17.084000+00:00",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "Reminder: Updates to Clockify Free plan",
-      "sub": "From <strong>Clockify Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Reminder: Updates to Clockify Free plan",
-      "from": "Clockify Support",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F670000",
-      "received": "18 Aug",
-      "received_raw": "2026-08-18 07:50:50.046000+00:00",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
     }
   ],
-  "fyiRawCount": 33,
+  "fyiRawCount": 31,
   "low": [
     {
       "title": "CONNECT Password changed successfully",
@@ -1549,5 +1525,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Tuesday 25 August · 06:00"
+  "refreshed_at": "Tuesday 25 August · 09:00"
 }
