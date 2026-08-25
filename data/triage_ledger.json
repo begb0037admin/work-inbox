@@ -376,46 +376,6 @@
   "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000": "2026-08-25"
  },
  "tracked_needs_urgent": {
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F410000": {
-   "tier": "needs",
-   "card": {
-    "title": "RE: Farewell wishes and gift for Beth",
-    "sub": "From <strong>Julie Hickman</strong>. Hello everyone,\r\n\r\n \r\n\r\nIf you haven\u2019t already please add your messages to the Kudoboard &lt;https://www.kudoboard.com/boar",
-    "badge": "Overdue",
-    "badgeType": "red",
-    "subject": "RE: Farewell wishes and gift for Beth",
-    "from": "Julie Hickman",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F410000",
-    "received": "20 Aug",
-    "received_raw": "2026-08-20 14:13:18.596000+00:00",
-    "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman invites Kevin to add farewell messages for Beth on the Kudoboard.",
-    "needs_reply": false,
-    "no_action_needed": false
-   },
-   "first_tracked": "2026-08-21",
-   "last_confirmed": "2026-08-25"
-  },
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F400000": {
-   "tier": "needs",
-   "card": {
-    "title": "RE: 38 day balance for departments update and decisions needed",
-    "sub": "From <strong>Julie Hickman</strong>. Hello all,\r\n\r\n \r\n\r\nChemistry are still pulling their list of work groups together, but they estimate that there are appr",
-    "badge": "Overdue",
-    "badgeType": "red",
-    "subject": "RE: 38 day balance for departments update and decisions needed",
-    "from": "Julie Hickman",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F400000",
-    "received": "20 Aug",
-    "received_raw": "2026-08-20 14:09:30.937000+00:00",
-    "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman provides update on 38 day balance for departments with Chemistry estimate; Kevin is being kept informed of ongoing work.",
-    "needs_reply": false,
-    "no_action_needed": false
-   },
-   "first_tracked": "2026-08-21",
-   "last_confirmed": "2026-08-25"
-  },
   "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F880000": {
    "tier": "needs",
    "card": {
@@ -449,7 +409,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 16:29:30.947000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman shares contact details for Chemistry (Jenna Boyce, Alexia Leakey) and other departments for 38 day balance coordination.",
+    "ai_summary": "Julie Hickman providing contact details for department representatives (Chemistry, Maths, etc.) regarding 38 day balance decisions.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -469,7 +429,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford forwards an application form about identification of internal candidates and asks Kevin for FA workload estimate on implementation.",
+    "ai_summary": "Simon Burford forwards application form query and requests Kevin to estimate work required from FA perspective on internal candidates identification.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -489,7 +449,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:34:44.335000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman shares a OneDrive file with timeframe details for the 38 day balance task.",
+    "ai_summary": "Julie Hickman sharing OneDrive for Business file with timeframe of task details for 38 day balance update work.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -529,7 +489,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Cority integration error occurred during HR employee import on 2026-08-21; Kevin needs to review the attached log file for details.",
+    "ai_summary": "Automated error notification from Cority integration platform for OxfordUniversity employee import run on 21 August; review of attached log file needed.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -617,7 +577,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy informs Kevin of an internal transition call this afternoon from sales to professional services for project PO ref E22033553.",
+    "ai_summary": "Sophie Levy is updating Kevin on internal transition call from sales to professional services this afternoon for PO E22033553 Quality funded work.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -705,23 +665,6 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 14:46:20.415000+00:00",
     "kevin_is_primary_recipient": true
-   },
-   "first_tracked": "2026-08-24",
-   "last_confirmed": "2026-08-25"
-  },
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890ED0000": {
-   "tier": "needs",
-   "card": {
-    "title": "RE: Business rules for Data Warehouse",
-    "sub": "From <strong>Simon Burford</strong>. Hi Ewan,\r\n\r\n \r\n\r\nThanks for this. We have test data in our UOXU environment, but I don\u2019t know if we have a DWH environme",
-    "badge": "Reply within 48hrs",
-    "badgeType": "yellow",
-    "subject": "RE: Business rules for Data Warehouse",
-    "from": "Simon Burford",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890ED0000",
-    "received": "24 Aug",
-    "received_raw": "2026-08-24 14:37:57.705000+00:00",
-    "kevin_is_primary_recipient": false
    },
    "first_tracked": "2026-08-24",
    "last_confirmed": "2026-08-25"
