@@ -5,13 +5,30 @@ verification and the cc93c7b incident were both closed out. Supersedes the
 Phase 2 sketch in `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 5 —
 that sketch is a design reference; this file is the actual brief to execute.
 
-**Precondition — do not start until this is true:** the GitHub PAT found
-exposed in `~/.codex/config.toml` during the cc93c7b incident is rotated on
-GitHub's side, and the `apps.connector_76869538...` connector has been
-reviewed at the Codex account level (not just had its auto-approval
-stripped locally). If either is still open, stop and report — do not
-proceed on the assumption it'll be fine for a "read-only" run; that
-assumption is exactly what failed last time.
+**Precondition update, 2026-08-25 (later same day) — risk explicitly
+accepted, not resolved:** Drew correctly verified live that neither part of
+the original precondition below was met — the PAT was confirmed still
+active (`GET /user` → 200) and the connector-level GitHub App access was
+confirmed never reviewed or removed at the OpenAI/ChatGPT account level
+(only the local `config.toml` auto-approval override had been stripped).
+Drew correctly held and did not run Phase 2 on finding this. Kevin was told
+the tradeoff plainly and asked to choose: close the gap first, or accept
+the risk explicitly. **Kevin explicitly accepted the risk**, stated directly
+in the cloud coordinating session (not through a file, given the day's
+trust issues) — "I accept the rest. Please continue." This means: the PAT
+remains active and the connector remains unreviewed at Kevin's informed,
+explicit choice; Phase 2 may now proceed on that basis.
+
+**This does not relax the structural constraint below.** Codex still gets no
+GitHub-write tool for this phase, regardless of the PAT/connector decision —
+that fix stands on its own merits (least-privilege for this specific task)
+independent of whether the old exposed path is closed elsewhere.
+
+**Original precondition (for the record, now superseded by the above):** the
+GitHub PAT found exposed in `~/.codex/config.toml` during the cc93c7b
+incident is rotated on GitHub's side, and the `apps.connector_76869538...`
+connector has been reviewed at the Codex account level (not just had its
+auto-approval stripped locally).
 
 ---
 
@@ -38,7 +55,7 @@ the same Oxford connector Phase 1 already verified:
 ## Hard constraints
 
 **Credential/write-path constraint — new, from the cc93c7b incident, and
-non-negotiable:**
+non-negotiable, unaffected by the risk-acceptance above:**
 - Codex must run this phase with **no GitHub-write tool available to it at
   all** — not `-s read-only` sandboxing alone, which only constrains local
   shell/filesystem and did not stop the cc93c7b write. Confirm before
