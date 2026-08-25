@@ -1,7 +1,7 @@
 {
-  "date": "Monday 24 August 2026",
-  "subtitle": "11 unread messages - Outlook-only refresh",
-  "context": "Outlook has 11 unread messages from the last seven days, including 0 marked high importance. Review We detected \"ain't that lovin' you\" on Deezer from DistroKid. Review We detected \"paperdreamz\" on Deezer from DistroKid. Review [ERROR] Cority Employee Import Log File for OxfordUniversity: 2026-08-21 17:00 from Cority_Integration_Platform_Notifications@Cority.com. Outlook shows 6 timed meeting(s) today: FA Team Daily Catchup, H&S Roadmap, Busy. Outlook shows 7 timed meeting(s) tomorrow: FA Team Daily Catchup, Azure Integration Platform Sprint Review, Sickness Absence Survey working group. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation.",
+  "date": "Tuesday 25 August 2026",
+  "subtitle": "22 unread messages - Outlook-only refresh",
+  "context": "Outlook has 22 unread messages from the last seven days, including 1 marked high importance. Review RE: Business rules for Data Warehouse from Simon Burford. Review PDR status for HR Systems from Marie Cooksey. Review Listen to anything: Kindle, Google Docs, X ✨ from ElevenReader. Outlook shows 7 timed meeting(s) today: FA Team Daily Catchup, Azure Integration Platform Sprint Review, Sickness Absence Survey working group. Outlook shows 7 timed meeting(s) tomorrow: FA Team Daily Catchup, Busy, Keep free. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation.",
   "urgent": [
     {
       "title": "RE: Business rules for Data Warehouse",
@@ -42,6 +42,18 @@
     }
   ],
   "needs": [
+    {
+      "title": "PDR status for HR Systems",
+      "sub": "From <strong>Marie Cooksey</strong>. Hi All\r\n\r\n \r\n\r\nCan I please ask you to review and update the attached, and keep it updated so I have oversight of progre",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "PDR status for HR Systems",
+      "from": "Marie Cooksey",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890F20000",
+      "received": "24 Aug",
+      "received_raw": "2026-08-24 18:48:26.915000+00:00",
+      "kevin_is_primary_recipient": true
+    },
     {
       "title": "Listen to anything: Kindle, Google Docs, X ✨",
       "sub": "From <strong>ElevenReader</strong>. Your favorite eBooks and web content read aloud naturally ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏ ",
@@ -358,6 +370,19 @@
       "messageCount": 1
     },
     {
+      "title": "OSM: No incoming emails will be processed this weekend",
+      "sub": "From <strong>Sarah Warne</strong>.",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "OSM: No incoming emails will be processed this weekend",
+      "from": "Sarah Warne",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AE972F530000",
+      "received": "21 Aug",
+      "received_raw": "2026-08-21 07:37:52.867000+00:00",
+      "kevin_is_primary_recipient": false,
+      "messageCount": 1
+    },
+    {
       "title": "Kevin Lelitte shared the folder \"Archive\" with you",
       "sub": "From <strong>Kevin Lelitte</strong>.",
       "badge": "FYI",
@@ -603,19 +628,6 @@
       "received_raw": "2026-08-18 07:50:50.046000+00:00",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
-    },
-    {
-      "title": "Automatic reply: Planning for depts move to 38 day balance ",
-      "sub": "From <strong>Julie Hickman</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Automatic reply: Planning for depts move to 38 day balance ",
-      "from": "Julie Hickman",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AAB5B7CC0000",
-      "received": "17 Aug",
-      "received_raw": "2026-08-17 18:35:33.859000+00:00",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
     }
   ],
   "fyiRawCount": 33,
@@ -634,39 +646,6 @@
     }
   ],
   "calToday": [
-    {
-      "time": "09:30",
-      "title": "FA Team Daily Catchup",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "10:00",
-      "title": "H&S Roadmap",
-      "sub": "Christopher Sanders",
-      "ccTaskId": "t2608141501170"
-    },
-    {
-      "time": "11:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "12:30",
-      "title": "Keep free",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "14:30",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "16:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    }
-  ],
-  "calTomorrow": [
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
@@ -704,7 +683,7 @@
       "sub": "Kevin Lelitte"
     }
   ],
-  "calDay2": [
+  "calTomorrow": [
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
@@ -742,7 +721,7 @@
       "sub": "Kevin Lelitte"
     }
   ],
-  "calDay3": [
+  "calDay2": [
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
@@ -751,6 +730,48 @@
     {
       "time": "11:00",
       "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
+  "calDay3": [
+    {
+      "time": "All day",
+      "title": "Non - working day",
+      "sub": "Henry Acheampong"
+    },
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey"
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:00",
+      "title": "Asta Siautiaite - 1-1 Session",
       "sub": "Kevin Lelitte"
     },
     {
@@ -820,7 +841,7 @@
           "sub": "Kevin Lelitte"
         }
       ],
-      "isToday": true
+      "isToday": false
     },
     {
       "date": "2026-08-25",
@@ -867,7 +888,7 @@
           "sub": "Kevin Lelitte"
         }
       ],
-      "isToday": false
+      "isToday": true
     },
     {
       "date": "2026-08-26",
@@ -1062,10 +1083,9 @@
     "Henry Acheampong - off Thursday 27 August, returns Friday 28 August",
     "James Salas Guillen - off Friday 28 August, returns Tuesday 1 September",
     "Julie Hickman - off today, returns Wednesday 2 September",
-    "Kevin - off today, returns Tuesday 25 August",
-    "Marie King - off tomorrow, returns Thursday 27 August",
-    "Michael O'Sullivan - off today, returns Tuesday 25 August",
-    "Simon Burford - off Wednesday 26 August, returns Thursday 27 August"
+    "Kevin - off tomorrow, returns Thursday 27 August",
+    "Marie King - off today, returns Thursday 27 August",
+    "Simon Burford - off tomorrow, returns Thursday 27 August"
   ],
   "prioritiesToday": [
     {
@@ -1529,5 +1549,5 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Monday 24 August · 18:00"
+  "refreshed_at": "Tuesday 25 August · 06:00"
 }
