@@ -380,7 +380,10 @@
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F410000",
     "received": "20 Aug",
     "received_raw": "2026-08-20 14:13:18.596000+00:00",
-    "kevin_is_primary_recipient": true
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Julie Hickman invites Kevin to add farewell messages for Beth on the Kudoboard.",
+    "needs_reply": false,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
    "last_confirmed": "2026-08-25"
@@ -397,7 +400,10 @@
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F400000",
     "received": "20 Aug",
     "received_raw": "2026-08-20 14:09:30.937000+00:00",
-    "kevin_is_primary_recipient": true
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Julie Hickman provides update on 38 day balance for departments with Chemistry estimate; Kevin is being kept informed of ongoing work.",
+    "needs_reply": false,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
    "last_confirmed": "2026-08-25"
@@ -434,7 +440,10 @@
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F870000",
     "received": "19 Aug",
     "received_raw": "2026-08-19 16:29:30.947000+00:00",
-    "kevin_is_primary_recipient": true
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Julie Hickman shares contact details for Chemistry (Jenna Boyce, Alexia Leakey) and other departments for 38 day balance coordination.",
+    "needs_reply": false,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
    "last_confirmed": "2026-08-25"
@@ -451,7 +460,10 @@
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000",
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
-    "kevin_is_primary_recipient": true
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Simon Burford forwards an application form about identification of internal candidates and asks Kevin for FA workload estimate on implementation.",
+    "needs_reply": true,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
    "last_confirmed": "2026-08-25"
@@ -468,24 +480,10 @@
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F830000",
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:34:44.335000+00:00",
-    "kevin_is_primary_recipient": true
-   },
-   "first_tracked": "2026-08-21",
-   "last_confirmed": "2026-08-25"
-  },
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6D0000": {
-   "tier": "needs",
-   "card": {
-    "title": "Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-    "sub": "From <strong>Kevin Lelitte</strong>. bump\r\n________________________________\r\n\r\nFrom: Anna Carter-Windle &lt;anna.carter-windle@it.ox.ac.uk&gt;\r\nSent: 28 May 2026 1",
-    "badge": "Overdue",
-    "badgeType": "red",
-    "subject": "Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ",
-    "from": "Kevin Lelitte",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F6D0000",
-    "received": "18 Aug",
-    "received_raw": "2026-08-18 10:23:53.928000+00:00",
-    "kevin_is_primary_recipient": true
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Julie Hickman shares a OneDrive file with timeframe details for the 38 day balance task.",
+    "needs_reply": false,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
    "last_confirmed": "2026-08-25"
@@ -522,7 +520,10 @@
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000",
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
-    "kevin_is_primary_recipient": true
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Cority integration error occurred during HR employee import on 2026-08-21; Kevin needs to review the attached log file for details.",
+    "needs_reply": false,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-21",
    "last_confirmed": "2026-08-25"
@@ -578,40 +579,6 @@
    "first_tracked": "2026-08-24",
    "last_confirmed": "2026-08-25"
   },
-  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007ACBD052C0000": {
-   "tier": "needs",
-   "card": {
-    "title": "[Success] Cority Employee Import Log File for OxfordUniversity - 2026-08-19 14:27",
-    "sub": "From <strong>Cority_Integration_Platform_Notifications@Cority.com</strong>. Please find attached HRIE log file.",
-    "badge": "Overdue",
-    "badgeType": "red",
-    "subject": "[Success] Cority Employee Import Log File for OxfordUniversity - 2026-08-19 14:27",
-    "from": "Cority_Integration_Platform_Notifications@Cority.com",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007ACBD052C0000",
-    "received": "19 Aug",
-    "received_raw": "2026-08-19 15:28:19.053000+00:00",
-    "kevin_is_primary_recipient": true
-   },
-   "first_tracked": "2026-08-24",
-   "last_confirmed": "2026-08-25"
-  },
-  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007ACBD052B0000": {
-   "tier": "needs",
-   "card": {
-    "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-19 14:26",
-    "sub": "From <strong>Cority_Integration_Platform_Notifications@Cority.com</strong>. The import process ran into an issue connecting to the SFTP site. The Cority Hosted Integration (CHI) Team has been noti",
-    "badge": "Overdue",
-    "badgeType": "red",
-    "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-19 14:26",
-    "from": "Cority_Integration_Platform_Notifications@Cority.com",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007ACBD052B0000",
-    "received": "19 Aug",
-    "received_raw": "2026-08-19 15:27:15.947000+00:00",
-    "kevin_is_primary_recipient": true
-   },
-   "first_tracked": "2026-08-24",
-   "last_confirmed": "2026-08-25"
-  },
   "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E80000": {
    "tier": "needs",
    "card": {
@@ -641,7 +608,10 @@
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000",
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
-    "kevin_is_primary_recipient": true
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Sophie Levy informs Kevin of an internal transition call this afternoon from sales to professional services for project PO ref E22033553.",
+    "needs_reply": false,
+    "no_action_needed": false
    },
    "first_tracked": "2026-08-24",
    "last_confirmed": "2026-08-25"
