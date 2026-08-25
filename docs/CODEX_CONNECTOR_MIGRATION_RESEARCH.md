@@ -1,7 +1,7 @@
 # Codex Connector Migration — Research & Decision Log
 
-**Status:** Research complete, Phase 1 dispatched to Codex for verification. No production
-changes made yet.
+**Status:** Phase 1 verified and reviewed against real committed output. Opener-migration
+design drafted below. Phase 2 not yet briefed — one follow-up check needed first (Section 8).
 **Effort level:** Raised to high, 2026-08-25 (Kevin's explicit confirmation), for this task.
 **Started:** 2026-08-25, cloud Claude Code session.
 
@@ -58,7 +58,7 @@ Traced directly from `work-inbox/fetch_inbox.py` (2,819 lines) and
   Graph message IDs — a different format. **This will not work with
   `GetItemFromID` as-is.** Any migration needs a new opener mechanism (or a
   dual mechanism, see Section 5) — this is the single biggest breaking
-  dependency.
+  dependency. **Confirmed live in Section 7 below — no longer a hypothesis.**
 - **EntryID is threaded through the entire pipeline**, not just captured once:
   - Phase 1/1c (inbox, subfolder sweep, VIP sweep) — captured as `entry_id`
     on every card
@@ -88,7 +88,9 @@ Traced directly from `work-inbox/fetch_inbox.py` (2,819 lines) and
     back/6-day forward window, built specifically to dodge a UK-locale bug in
     `Restrict()+IncludeRecurrences`) is COM-specific; a Graph-sourced calendar
     has different recurrence-expansion behaviour requiring separate
-    validation.
+    validation. **Confirmed in Section 7: Graph expands recurring events into
+    `occurrence`/`exception` items with their own IDs — a different
+    complexity to design around, not the same locale bug, but real.**
 
 **Bottom line:** this is a migration of the canonical identifier the entire
 pipeline is built around, plus a decision about what happens to already-stored
@@ -126,28 +128,43 @@ COM-format IDs in production data — not a Phase-1 fetch-mechanism swap.
 
 ## 5. Plan
 
-**Phase 1 — connector verification + read-only fetch (Codex).**
-Brief sent to Kevin as `codex_briefs.md` (delivered via SendUserFile,
-2026-08-25). Has Codex: verify its own live connector permissions (read vs.
-write) against `kevin.lelitte@admin.ox.ac.uk`; report the exact ID format
-returned for messages/events/Teams; do one bounded read-only pull (50 inbox,
-20 sent, calendar ±week, Teams chat list) as JSON. No writes of any kind.
+**Phase 1 — connector verification + read-only fetch (Codex). COMPLETE.**
+Run 2026-08-25 via `codex exec -s read-only`, output committed as
+`docs/phase1_result.json` / `docs/phase1_brief.txt` (commit
+`c28c19166d40ee98072b804257592be607811ed6`). No writes made. See Section 7
+for findings and Section 8 for the one follow-up before Phase 2.
 
 **Phase 2 — AI-triage migration (Codex), gated on Phase 1 review.**
-Also in `codex_briefs.md`. Re-implements the six AI phases on Codex's model.
-Hard constraints: output only to new files (`codex_briefing.json`,
-`codex_suggestions.json`, `codex_triage_ledger.json`) — never overwrites
-`briefing.json`, `tasks.json`, or the existing `triage_ledger.json` directly;
-uses a separate dedup-ledger namespace so it never collides with the
-COM-keyed existing ledger; no sends/drafts/calendar writes/message posts;
-runs in parallel with the existing Anthropic pipeline for a validation period
-rather than an immediate cutover.
+Re-implements the six AI phases on Codex's model. Hard constraints: output
+only to new files (`codex_briefing.json`, `codex_suggestions.json`,
+`codex_triage_ledger.json`) — never overwrites `briefing.json`, `tasks.json`,
+or the existing `triage_ledger.json` directly; uses a separate dedup-ledger
+namespace so it never collides with the COM-keyed existing ledger; no
+sends/drafts/calendar writes/message posts; runs in parallel with the
+existing Anthropic pipeline for a validation period rather than an
+immediate cutover. **Not yet briefed — see Section 8.**
 
-**Not yet decided:** the actual opener-migration design (how Command Centre's
-Open-email button handles two ID formats, or whether/how existing COM-format
-`entryId`s get migrated). This depends on what Phase 1 reports back about the
-real Graph ID shape, and should be designed once that's in hand — see Section
-3.
+**Opener-migration design (resolved, see Section 7 for why):** Command
+Centre's Open-email button needs to branch on a `source` field per task,
+not assume one ID format:
+- Existing tasks (no `source` field, or `source: "outlook-com"`) — keep
+  using the current `openmail://<entryId>` → `open_email.py` →
+  `GetItemFromID` path. Nothing about these changes.
+- New Codex-sourced tasks (`source: "codex-graph"`) — do **not** attempt to
+  route these through `GetItemFromID` at all; it will not accept a Graph
+  id. Instead, store whatever the connector's `webLink` field provides (see
+  Section 8) and open it as a plain hyperlink in the browser (Outlook Web
+  Access), no custom protocol handler needed. This is simpler than the
+  original worry — it avoids building any Windows-registered equivalent for
+  Graph IDs.
+- `command-centre/data/tasks.json` gets one new optional field, `source`,
+  defaulting to absent/`"outlook-com"` for every existing task (no
+  migration needed for old data) and set to `"codex-graph"` only on tasks
+  Phase 3.6-equivalent Codex logic creates.
+- `triage_ledger.json` stays untouched by Codex; Codex's dedup ledger is a
+  separate file (`codex_triage_ledger.json`) keyed on Graph `id`, so the two
+  dedup systems coexist without collision, per Section 5's Phase 2
+  constraints.
 
 ## 6. Execution environment note (why this took multiple rounds to resolve)
 
@@ -161,13 +178,89 @@ This research session is a **cloud-hosted** Claude Code session
 (`environment_kind: anthropic_cloud`, confirmed via session metadata) —
 opened from the desktop app, but executing in Anthropic's cloud, not on the
 admin machine. It has no `codex` binary and no path to the admin machine, so
-it cannot run `codex exec` itself. Phase 1 must be run from a **local**
-terminal Claude Code session on the admin machine instead — that session
-starts cold (no memory of this conversation), hence this document and the
-`codex_briefs.md` file it should be pointed at.
+it cannot run `codex exec` itself. Phase 1 was run from a **local** terminal
+Claude Code session on the admin machine instead (dispatched as "Drew," the
+accountable lead for work-inbox per `AGENT_DIRECTORY.md`).
 
-## 7. Status / next action
+**Going forward: results should flow back via a GitHub push to this
+branch, not via pasted chat content.** The cloud session watches this PR
+and reads pushed files directly — see Section 7, read straight from the
+real committed `phase1_result.json`, not a relayed summary.
 
-Waiting on Phase 1 output from Codex (run via a local terminal Claude Code
-session on the admin machine, per Section 6). Once that's back, review
-against Section 3's opener/ID-format questions before authorizing Phase 2.
+## 7. Phase 1 findings (verified against the real committed file, not a relayed summary)
+
+Read directly from `docs/phase1_result.json` at commit
+`c28c19166d40ee98072b804257592be607811ed6`:
+
+**a. Live scope** — read confirmed across Inbox + 63 other folders, Sent
+Items, calendar (list/search/recurrence, 1,825-day connector search limit),
+Teams (chats/channels/messages/meeting transcripts/recordings). Write-capable
+actions exposed but not invoked: email draft/send/reply/forward/move/
+categorize/create-folder; calendar create/update/cancel/RSVP/add-attachment;
+Teams create chat or channel/send/reply; Planner create/update/delete. No
+email-delete action was exposed at all. **Important: this write-capable
+surface exists at the connector level — it was kept unused by the
+`-s read-only` sandbox flag, not by an inherent account restriction.** Phase
+2's tooling must enforce the same discipline explicitly; it cannot assume
+the connector itself is read-only.
+
+**b. ID formats — the answer Section 3 hinged on:**
+- Email: field `id`, Graph-style opaque value. An `internetMessageId` /
+  `internet_message_id` field was explicitly requested and did **not** come
+  back in either casing — there is no bridging ID between this connector and
+  anything COM-based.
+- Calendar: fields `id` (Graph-style) and `iCalUId` (present in schema, but
+  `null` on every live event returned).
+- Teams: chat `id` like `19:meeting_...@thread.v2` or `19:...@unq.gbl.spaces`;
+  canonical message routes `/chats/{chat_id}/messages/{message_id}` and
+  `/teams/{team_id}/channels/{channel_id}/messages/{root_id}` (with
+  `/replies/{reply_id}` for channel replies).
+- **Confirms the Section 3 risk exactly: this is not an Outlook-COM EntryID,
+  `mapi.GetItemFromID` will not accept it, and the obvious dedup workaround
+  (match on `internetMessageId`) is not available either.**
+
+**c. Bounded pull — partially incomplete, honestly flagged by the run
+itself:** server-side the pull succeeded (50 inbox / 20 sent / 144 calendar
+events / 100 Teams chats), but the full literal per-record JSON (314 records)
+was truncated by the connector's response transport at ~50,062 tokens before
+it could be written out. What's actually in `phase1_result.json` is schema
+shape + counts + error stats, not record-by-record JSON. A chunked re-run
+would be needed to get the full literal data, but is **not required** to
+proceed with the opener-migration design above — the ID-format answer is
+what mattered, and that came through clearly.
+
+**d. Failures:** 1 Teams membership lookup denied (`403 Forbidden /
+InsufficientPrivileges` — account not in that chat's roster), 6 rate-limited
+(`429 TooManyRequests`) — `member_count` missing for 7/100 chats. No email or
+calendar failures. Calendar recurrence expands into `occurrence`/`exception`
+events with their own IDs and typically `null` `recurrence` on the expanded
+item — status must be read from `type`/`seriesMasterId` instead.
+
+**No writes occurred.** Only `docs/phase1_brief.txt` and
+`docs/phase1_result.json` were added to this repo; `data/briefing.json`,
+`data/tasks.json`, and `data/triage_ledger.json` are untouched, confirmed via
+diff.
+
+## 8. One follow-up before Phase 2 is briefed
+
+Phase 1 didn't check whether the connector's email/calendar responses
+include a **`webLink`** field (the standard Microsoft Graph property that
+opens an item directly in Outlook Web Access). The opener design in Section
+5 assumes this exists — it's a standard Graph field, but per this project's
+own rule ("verify live, don't assume"), it needs one direct confirmation
+before being relied on for the Open-email button.
+
+**Next single action:** have Codex answer one question — "does the message/
+event JSON already pulled in Phase 1 include a `webLink` field, and what
+does a sample value look like?" — via `codex exec -s read-only` against the
+same account, no new pull needed (it can inspect what Phase 1 already
+returned in its own session, or do one bounded re-pull of 5 items if that
+context isn't available). Once that's confirmed, Phase 2 can be briefed
+using the Section 5 opener design as-is.
+
+## 9. Status / next action
+
+Confirm `webLink` (Section 8) → brief Phase 2 with the Section 5 design
+folded in → run Phase 2 via the local terminal session/Codex → review its
+output the same way Phase 1 was reviewed here (read the real committed
+file directly, not a relayed summary).
