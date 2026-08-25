@@ -1,33 +1,14 @@
 {
-  "generated_at": "2026-08-25 12:00",
+  "generated_at": "2026-08-25 15:00",
   "new_tasks": [
     {
-      "title": "Resolve Cority Employee Import SFTP error 2026-08-21 17:00",
-      "tier": "today",
-      "description": "Cority Integration Platform reported SFTP connection error on 21 August at 17:00 during scheduled employee data import. Kevin needs to confirm error resolution with James Salas Guillen and Cority support, following the same pattern as the 22 June incident (t030).",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-21 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-21 18:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000"
-    },
-    {
-      "title": "Estimate FA effort for application form internal candidate identification",
+      "title": "Estimate FA effort for internal candidate identification in application form",
       "tier": "week",
-      "description": "Simon Burford is requesting a Functional Analysis effort estimate for implementing internal candidate identification in the application form. Kevin needs to scope and provide an estimate to Simon.",
+      "description": "Simon Burford has forwarded a request asking Kevin to estimate the Functional Analysis effort required to implement identification of internal candidates in the application form. This is a scoping/estimation task needed for project planning.",
       "email_subject": "FW: Application form - identification of internal candidates",
       "email_from": "Simon Burford",
       "received": "2026-08-19 15:51",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000"
-    },
-    {
-      "title": "Confirm readiness for PeopleXD Quality project handover (Sophie Levy PO E22033553)",
-      "tier": "week",
-      "description": "Sophie Levy confirms the project is fully staffed and having internal transition from sales to professional services. Kevin's 24 Aug email response needs follow-up to ensure clear handover and any HR Systems dependencies are identified before project execution begins.",
-      "email_subject": "Re: PO ref E22033553 / Quality funded work",
-      "email_from": "Sophie Levy",
-      "received": "2026-08-24 08:33",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000",
-      "auto_promoted": true
     },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
@@ -62,76 +43,76 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Simon has followed up on DWH test data availability for College Data in PXD project; Kevin should clarify DWH environment setup with IT.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-24 14:37",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890ED0000"
+      "task_id": "t2608251201190",
+      "task_title": "Confirm readiness for PeopleXD Quality project handover (Sophie Levy PO E22033553)",
+      "note": "Sophie Levy confirms the Quality project is fully staffed with internal transition from sales to professional services happening 24 Aug afternoon; project ready to proceed.",
+      "email_subject": "Re: PO ref E22033553 / Quality funded work",
+      "email_from": "Sophie Levy",
+      "received": "2026-08-24 08:33",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000"
     },
     {
-      "task_id": "t005",
-      "task_title": "College Data in PXD Project -- set up REF2029 pay admin codes in UOXU",
-      "note": "Ewan Kilgour has scheduled a meeting tomorrow to prioritise Data Warehouse roadmap and Fabric items affecting the College Data/REF project.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Ewan Kilgour",
-      "received": "2026-08-24 12:25",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000"
+      "task_id": "t2608211926550",
+      "task_title": "Resolve Cority Employee Import error 2026-08-21 17:00",
+      "note": "Cority SFTP connection error occurred on 21 Aug at 17:00 during scheduled employee data import; Kevin needs to confirm resolution status.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-21 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-21 18:00",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000"
     },
     {
-      "task_id": "t030",
-      "task_title": "Cority SFTP production feed error -- 22 June",
-      "note": "Automated notification: OSM email listener has been re-enabled after weekend processing pause; no action required.",
-      "email_subject": "RE: OSM: No incoming emails will be processed this weekend",
-      "email_from": "Louise Piper",
-      "received": "2026-08-24 08:40",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890E80000"
+      "task_id": "t2608211926550",
+      "task_title": "Resolve Cority Employee Import error 2026-08-21 17:00",
+      "note": "Cority Employee Import succeeded on 19 Aug at 14:27; prior error on 14:26 has been resolved by CHI team.",
+      "email_subject": "[Success] Cority Employee Import Log File for OxfordUniversity - 2026-08-19 14:27",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-19 15:28",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007ACBD052C0000"
     },
     {
-      "task_id": "task-1787072363309",
-      "task_title": "URGENT -- Organisational Structure Update - August 2026 - FINAL",
-      "note": "Julie Hickman is coordinating team farewell messages for Beth on Kudoboard; this is team coordination activity only, no Kevin action required beyond personal contribution.",
-      "email_subject": "RE: Farewell wishes and gift for Beth",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-20 14:13",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F410000"
+      "task_id": "t2608211926550",
+      "task_title": "Resolve Cority Employee Import error 2026-08-21 17:00",
+      "note": "Cority SFTP connection error on 19 Aug at 14:26 during import; CHI team notified and working on resolution.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-19 14:26",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-19 15:27",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007ACBD052B0000"
     },
     {
-      "task_id": "t2608191643001",
-      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
-      "note": "Julie Hickman reports Chemistry estimates approximately 110 existing work groups that need configuration for 38-day balance rollout; this impacts the implementation timeline and resource planning.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-20 14:09",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ADFE8F400000"
+      "task_id": "t2608251201190",
+      "task_title": "Confirm readiness for PeopleXD Quality project handover (Sophie Levy PO E22033553)",
+      "note": "Kevin sent confirmation email to Sophie Levy on 24 Aug morning regarding project readiness and handover expectations.",
+      "email_subject": "Re: PO ref E22033553 / Quality funded work",
+      "email_from": "Kevin (sent to: Sophie Levy; Micia Cardozo)",
+      "received": "2026-08-24 08:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007AFD87D1B0000"
     },
     {
-      "task_id": "t2608191643001",
-      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
-      "note": "Julie Hickman has provided department contacts for 38-day balance configuration: Chemistry (Jenna Boyce, Alexia Leakey), Maths (Emma Harte), GLAM (Becky Fitzek).",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-19 16:29",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F870000"
+      "task_id": "task-1787645383808",
+      "task_title": "Book PDR sessions with Simon Burford and the FA team",
+      "note": "Kevin has scheduled Asta Siautilaite's 2026 PDR for Friday 25 September, 12:00-1:00pm.",
+      "email_subject": "PDR 2026 – Friday 25 September",
+      "email_from": "Kevin (sent to: Asta Siautilaite)",
+      "received": "2026-08-25 13:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B13C79250000"
     },
     {
-      "task_id": "t2608191643001",
-      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
-      "note": "Julie Hickman has shared updated OneDrive file 'Timeframe of tasks - 38 day balances.xlsx' with implementation schedule that Kevin needs to review.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-19 15:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F830000"
+      "task_id": "task-1787645383808",
+      "task_title": "Book PDR sessions with Simon Burford and the FA team",
+      "note": "Kevin has scheduled Michael O'Sullivan's 2026 PDR for Friday 18 September, 12:00-1:00pm.",
+      "email_subject": "PDR 2026 – Friday 18 September",
+      "email_from": "Kevin (sent to: Michael O'Sullivan)",
+      "received": "2026-08-25 13:17",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B13C79240000"
     },
     {
-      "task_id": "t2608031500570",
-      "task_title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
-      "note": "Crispin Muncaster sent follow-up on DTP1092 College Staff into PXD testing HRIS staging imports; context indicates testing discussion scheduled.",
-      "email_subject": "RE: DTP1092 College Staff into PXD - Testing HRIS Staging imports",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-08-19 07:48",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F7E0000"
+      "task_id": "task-1787645383808",
+      "task_title": "Book PDR sessions with Simon Burford and the FA team",
+      "note": "Kevin has scheduled James Salas Guillen's 2026 PDR for Monday 21 September, 12:00-1:00pm.",
+      "email_subject": "PDR 2026 – Monday 21 September",
+      "email_from": "Kevin (sent to: James Salas Guillen)",
+      "received": "2026-08-25 13:16",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B13C79230000"
     }
   ]
 }
