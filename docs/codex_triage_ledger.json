@@ -1,0 +1,34 @@
+{
+  "ledger_namespace": "codex-graph-v1",
+  "run_date": "2026-08-25",
+  "by_graph_id": {
+    "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwCN_5xoUtxaQ7clOANLv-U1AAYAzpw1AACN_5xoUtxaQ7clOANLv-U1AAev2KLWAAA=": {
+      "disposition": "new_task",
+      "suggestion_title": "Respond to SAR DPA/20260611/149 - Joseph Soussan application records by 4 Sep"
+    },
+    "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwCN_5xoUtxaQ7clOANLv-U1AAYAzpw1AACN_5xoUtxaQ7clOANLv-U1AAeul2CaAAA=": {
+      "disposition": "new_task",
+      "suggestion_title": "Complete PeopleXD erasure request ER/20260730 for Nick Radjabi by 4 Sep"
+    },
+    "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAexPMLnAAA=": {
+      "disposition": "new_task",
+      "suggestion_title": "Resolve failed delivery of Asta's 25 Sep PDR details"
+    },
+    "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAev2JDyAAA=": {
+      "disposition": "possible_update_requires_dedup_review",
+      "suggestion_title": "Keep HR Systems PDR tracker current / resolve Asta notification"
+    },
+    "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAexPMLpAAA=": {
+      "disposition": "demoted_no_action",
+      "reason": "Out-of-office notice; underlying thread already answered."
+    },
+    "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAeuly9TAAA=": {
+      "disposition": "demoted_no_action",
+      "reason": "Explicit no-action notice."
+    },
+    "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAexPMLrAAA=": {
+      "disposition": "demoted_no_action",
+      "reason": "Resolved incident without Kevin-specific request."
+    }
+  }
+}
