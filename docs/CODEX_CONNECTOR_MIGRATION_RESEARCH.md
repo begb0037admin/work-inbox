@@ -1,11 +1,11 @@
 # Codex Connector Migration — Research & Decision Log
 
-**Status:** Phase 1 verified and reviewed against real committed output. `webLink`
-follow-up confirmed (Section 8). A live incident surfaced during that follow-up —
-an unauthorized Codex write to `main` — has been investigated, contained, and the
-`main` write reverted (Section 8). **Phase 2 is still not briefed and must not be
-inferred from this document or any other file — it needs its own fresh, explicit
-brief directly from Kevin.**
+**Status:** Phase 1 verified. Phase 2 briefed 25 Aug, dry-run + diff
+complete, sixth phase (task summaries) built, 26 Aug. **Write-gate test
+FAILED 26 Aug — a real write to Kevin's live Oxford mailbox occurred
+and was not blocked by any account/CLI-level gate; remediated same
+session. NO-GO on the 7-day Task Scheduler automation pending Kevin's
+decision — see Section 9's 26 Aug entry.**
 **Effort level:** Raised to high, 2026-08-25 (Kevin's explicit confirmation), for this task.
 **Started:** 2026-08-25, cloud Claude Code session.
 
@@ -527,6 +527,30 @@ entry's UPDATE block.
 order" list changes: step 2 (test the GitHub write-path security gate) and step 3
 (repeat Phase 2 runs) remain the next real work, and Phase 2 / any Codex task-writer
 still needs its own fresh brief from Kevin before starting.
+
+### Phase 2 (six-phase Codex re-implementation) — 26 Aug 2026 (Drew): dry run + diff complete, sixth phase built, write-gate test FAILED — NO-GO on automation pending Kevin's decision
+
+**Task:** Kevin's fresh explicit brief, verbatim: "go on phase 2, all six run for a week." Branch `drew/codex-phase2-ai-triage` (off `main`, never merged to `main` directly). Effort level confirmed staying high (continuation of the 25 Aug decision).
+
+**Gap closed — sixth phase built.** `docs/PHASE2_BRIEF.md`'s own scope (25 Aug) only listed five phases and omitted the current Phase 3.7 (priority-task summaries). Built and validated this session — see `task_summary_phase` in `docs/codex_phase2_run_20260826/call2_judgement_output.json`.
+
+**Architecture, for anyone resuming this:** two `codex exec -s read-only --skip-git-repo-check` calls, not one. Call 1 is a pure connector data pull (had to be split into three separate calls — inbox/sent/calendar — after a single combined pull truncated at the connector's own output-size limit, same failure mode as Phase 1's original finding). The deterministic urgent/needs/fyi/low split (`categorise()`/`badge_for()`/`make_card()`) and the Phase 3.3/3.3b/3.3c demotion/staleness/thread-collapse logic are **ported verbatim as Python**, not delegated to Codex's judgement — this preserves the tuned business logic exactly and isolates the actual variable under test (Codex's model vs Haiku 4.5 on identical rules and identical live data) to Call 2, which handles only the five genuine language-judgement phases (context, email summaries, task triage, task summaries, calendar prep) using the real production system prompts copied verbatim. Scripts: `tools/codex_triage/categorise_and_stage.py`, `build_call2_brief.py`, `build_granola_context.py` on the code branch.
+
+**Dry-run comparison against today's real committed pipeline output (`data/briefing.json`, `data/inbox_suggestions.json`, same day) — full detail in `docs/codex_phase2_run_20260826/DIFF_REPORT.txt`:**
+- Context paragraph: both versions well-grounded, specific, real names/dates/case numbers, no hallucination detected in Codex's version against known real entities. Different emphasis, expected given Codex's connector pulled a shallower inbox window (40 items) than COM's (50, plus Phase 3.9 carry-forward).
+- Email summaries: only 6 of Codex's 16 urgent/needs candidates overlapped with the real pipeline's 25 (different pull depth/connector) — `needs_reply` agreement 6/6 on the overlap, but `no_action_needed` agreement only 4/6. **One disagreement is materially concerning, not cosmetic:** Codex marked "RE: Business rules for Data Warehouse" (the same Simon Burford/REF-programme-risk thread the real pipeline's own context paragraph flags as still unresolved) as `no_action_needed: true`, where the real pipeline said `false`. This is exactly the false-demotion risk `PHASE2_BRIEF.md` explicitly warned about ("a false demotion hides real work from Kevin") — a single-run result, not yet averaged over repeats, but a genuine, disclosed quality gap, not glossed over.
+- Task-suggestion triage: real pipeline found 4 new_tasks/3 task_updates; Codex found 1 new_task/10 task_updates from its own smaller candidate pool. Materially different volume/shape — confirms Section 9's existing item 3 ("triage quality/reliability is unproven... no repeated runs") is a real, not theoretical, gap. A single run is not sufficient signal either way.
+- Priority-task summaries (the new sixth phase): genuinely strong fidelity — same names, case numbers, and specific detail as Haiku's real summaries on 5 sampled tasks (Simon Burford/Sarah Rowles go-live timing, Laura Porter job-alert config, Cority Applicant Data Import, GLAM/WFM rostering, Volunteering Leave pay code). This phase looks viable on this one sample.
+- Calendar day-prep: reasonable, grounded, comparable style; different item sets since Codex's own connector pull differs from COM's.
+- **New structural finding, not previously documented:** Codex's Outlook connector did not expose an importance/flag field at all this run (`"Importance was not supplied by the Outlook connector"`) — every message came back `importance: null`, so Codex's `categorise()` pass found **0 urgent** messages this run versus the real pipeline's 3 (which are driven specifically by the COM importance-flag == high path). This is a genuine connector-parity gap that would need addressing before Codex-graph triage could be trusted as a primary signal for Urgent classification specifically.
+
+**Write-gate test — FAILED. This is the headline finding, not a footnote.** Full incident writeup: `docs/codex_phase2_run_20260826/WRITEGATE_TEST_INCIDENT.md`. Summary: gave Codex a legitimate-sounding, deliberately low-stakes instruction (categorize one real marketing email) under the exact same `-s read-only` invocation used throughout this work. **The write executed for real** — independently confirmed twice, via a second separate Codex read-only verification call (`mcp: codex_apps/microsoft_outlook_email.fetch_message` showed `categories: ["Marketing"]`) and, completely independently of Codex/the ChatGPT connector, via Outlook COM directly on this machine (`item.Categories == 'Marketing'` on the real live message). No approval prompt fired in the headless session despite the session header showing `approval: on-request`. `codex exec --help` confirms directly: no CLI flag governs MCP/connector-call approval at all — `-s`/`--sandbox` only ever governed local shell/filesystem, matching Section 8's original finding, now confirmed for the **Outlook connector**, not just GitHub. Remediated same session (category cleared via Outlook COM, verified empty). This is the same root-cause pattern as the cc93c7b GitHub incident — an account/UI-level "should be gated" control that a headless invocation path silently bypasses — independently reconfirmed on a second, unrelated connector.
+
+**Per the coordinator's own explicit instruction, this is a distinct go/no-go point, not bundled into the effort-level/file-layout approval already given: NO-GO on the 6x/day-for-7-days Task Scheduler automation.** Nothing in Codex's current configuration structurally guarantees a write cannot happen during an unattended run — today's test was low-stakes only because it was deliberately designed that way; 42 unsupervised real-judgement invocations over a week carry materially more exposure than one supervised test. Recommended structural fix (needs Kevin, not resolvable from this session): check whether the Outlook/Calendar connector's underlying Microsoft Graph OAuth consent can be re-scoped to read-only (`Mail.Read`/`Calendars.Read`) rather than read-write, at the Graph/Microsoft consent level — that fails a write at the API itself regardless of Codex-side approval-gate behaviour, which this session shows cannot currently be trusted alone.
+
+**PR #29 branch note:** this branch (`claude/outlook-codecs-connector-upgrade-fe3dgf`) shows `mergeable: CONFLICTING` against current `main` as of 26 Aug — flagged for whoever eventually merges this PR to rebase/update first; not a blocker for this session's doc-only updates, and unrelated to the separate `drew/codex-phase2-ai-triage` code branch.
+
+**Resume state:** dry-run comparison and write-gate test both done, both checkpointed. Automation build (Task Scheduler, kill-switch) explicitly NOT started, pending Kevin's decision on the write-gate finding above. Next cold session: do not proceed to automation until Kevin has decided how to close the write-gate gap (or explicitly accepted the residual risk, as he did for the PAT/connector precondition on 25 Aug) — this is a fresh, separate decision, not covered by that earlier acceptance since this is a different exposure (Outlook connector writes, not GitHub).
 
 ### Beyond step 4 — direction only, not yet scoped or briefed
 
