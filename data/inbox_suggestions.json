@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-26 07:37",
+  "generated_at": "2026-08-26 09:00",
   "new_tasks": [
     {
       "title": "Prepare presentation for HR Systems Team Meeting",
       "tier": "tomorrow",
-      "description": "Asta Palmer is asking if Kevin has something to present at tomorrow's HR Systems Team Meeting during Presentations week. Kevin should confirm whether he will contribute a presentation.",
+      "description": "Asta Palmer has flagged that tomorrow's team meeting is Presentations week and is asking if Kevin has something to share. Kevin should confirm whether he will present and prepare if needed.",
       "email_subject": "RE: PDR 2026 – Friday 18 September",
       "email_from": "Michael O'Sullivan",
       "received": "2026-08-25 13:28",
@@ -43,31 +43,22 @@
   ],
   "applied_updates": [
     {
-      "task_id": "task-1787645383808",
-      "task_title": "Book PDR sessions with Simon Burford and the FA team",
-      "note": "Asta Palmer reminder that HR Systems Team Meeting is tomorrow with Presentations week; Kevin should confirm if presenting.",
-      "email_subject": "RE: PDR 2026 – Friday 18 September",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-25 13:28",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
+      "task_id": "task-1787652746064",
+      "task_title": "Check project folders for unhanded-over WFM/SBS 'second batch' sickness data files (Smith's School, Geography)",
+      "note": "Julie Hickman is on annual leave from 21 August, returning Wednesday 2 September; any urgent sickness absence data queries should be redirected.",
+      "email_subject": "Automatic reply: Sickness absence survey — BA resource requirement and timelines",
+      "email_from": "Julie Hickman",
+      "received": "2026-08-25 15:46",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2E90000"
     },
     {
-      "task_id": "task-1787645383808",
-      "task_title": "Book PDR sessions with Simon Burford and the FA team",
-      "note": "Michael O'Sullivan cannot attend PDR on 18 September due to leave and requests rescheduling after annual leave year-end.",
+      "task_id": "t2608100901260",
+      "task_title": "Review Conor's Multi Company Setup work and align on next steps",
+      "note": "Ewan Kilgour has scheduled a meeting for 25 August to discuss Data Warehouse business rules, Fabric, and develop a prioritised roadmap.",
       "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-24 14:37",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890ED0000"
-    },
-    {
-      "task_id": "t031",
-      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
-      "note": "Simon Burford escalates Data Warehouse business rules delay as risk to REF programme; no response since June meeting.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-24 11:04",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EB0000"
+      "email_from": "Ewan Kilgour",
+      "received": "2026-08-24 12:25",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000"
     }
   ]
 }
