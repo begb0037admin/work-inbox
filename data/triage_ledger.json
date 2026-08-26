@@ -421,7 +421,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 16:29:30.947000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman provides department contact details (Chemistry, Maths, etc.) in response to a 38 day balance update query.",
+    "ai_summary": "Julie Hickman provides contact details for departments (Chemistry, Maths, etc.) in response to a query about 38-day balances.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -441,7 +441,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford forwards an application form query and asks Kevin to estimate the work effort from a Finance point of view for identifying internal candidates.",
+    "ai_summary": "Simon Burford asks Kevin to estimate how much work it would be from an FA perspective to identify internal candidates on an application form.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -461,7 +461,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:34:44.335000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman shares a OneDrive file with timeframe information related to the 38 day balance task for Kevin to review.",
+    "ai_summary": "Julie Hickman shares a OneDrive file with Kevin containing timeframe information for a task related to 38-day balance updates.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -501,7 +501,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Cority integration error notification for Oxford University employee import on 21 August; Kevin should review the attached log file for details.",
+    "ai_summary": "Cority integration error occurred during Employee Import on 21 August; Kevin should review the attached log file.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -589,7 +589,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy updates Kevin that a transition call from sales to professional services for PO E22033553 is happening this afternoon.",
+    "ai_summary": "Sophie Levy informs Kevin about an internal transition call this afternoon for PO E22033553 / Quality funded work project moving from sales to professional services.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -660,23 +660,6 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 14:46:20.415000+00:00",
     "kevin_is_primary_recipient": true
-   },
-   "first_tracked": "2026-08-24",
-   "last_confirmed": "2026-08-26"
-  },
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000": {
-   "tier": "needs",
-   "card": {
-    "title": "RE: Business rules for Data Warehouse",
-    "sub": "From <strong>Ewan Kilgour</strong>. Hi Simon,\r\n\r\nI have put in a meeting tomorrow to discuss the best way forward for this and come up with a prioritised ro",
-    "badge": "Reply within 48hrs",
-    "badgeType": "yellow",
-    "subject": "RE: Business rules for Data Warehouse",
-    "from": "Ewan Kilgour",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000",
-    "received": "24 Aug",
-    "received_raw": "2026-08-24 12:25:29.517000+00:00",
-    "kevin_is_primary_recipient": false
    },
    "first_tracked": "2026-08-24",
    "last_confirmed": "2026-08-26"
@@ -765,7 +748,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:28:29.503000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan is unavailable on 18 September and the following week and asks Kevin to reschedule the PDR meeting.",
+    "ai_summary": "Michael O'Sullivan asks Kevin to reschedule the PDR meeting from 18 September as he will be on leave that week.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -785,7 +768,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:35:46.237000+00:00",
     "kevin_is_primary_recipient": false,
-    "ai_summary": "Asta Palmer reminds Kevin that the HR Systems Team meeting is tomorrow during Presentations week and requests notification if Kevin has something to present.",
+    "ai_summary": "Asta Palmer reminds Kevin that the HR Systems Team meeting is tomorrow during Presentations week and asks if he has something to present.",
     "needs_reply": true,
     "no_action_needed": false
    },
