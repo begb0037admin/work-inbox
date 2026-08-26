@@ -1,3 +1,27 @@
+# Handover -- 26 August 2026, ~19:46 UTC (Drew) -- Codex Phase 2 (six-phase AI-triage re-implementation): dry-run + diff done, sixth phase built, write-gate test FAILED -- NO-GO on 7-day automation pending Kevin
+
+## What this is
+Kevin's fresh explicit brief today: "go on phase 2, all six run for a week." Full detail lives in `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, PR #29) Section 9's 26 Aug entry -- that document is the authoritative record for this work; this entry is the short pointer + resume instruction.
+
+## What's done
+- Built the sixth phase (priority-task summaries) that the 25 Aug `PHASE2_BRIEF.md` had omitted.
+- Re-architected as two `codex exec -s read-only` calls: a pure connector data pull (had to split into 3 sub-calls -- inbox/sent/calendar -- after a combined pull truncated), then a pure judgement call over locally-supplied context. The deterministic categorise()/badge_for()/make_card() split and the demotion/staleness logic are ported as real Python (`tools/codex_triage/` on branch `drew/codex-phase2-ai-triage`), not left to Codex's own judgement -- only the five genuine language-judgement phases go to Codex.
+- Ran a real dry run against today's live inbox and diffed it against today's actual committed `data/briefing.json`/`data/inbox_suggestions.json`. Full comparison in `docs/codex_phase2_run_20260826/DIFF_REPORT.txt` on that same code branch. Headline: priority-task summaries (the new sixth phase) look strong; task-suggestion triage volume differs substantially from the real pipeline (needs repeat runs before trusting); one concerning single-run no_action_needed disagreement on a real REF-programme-risk thread (Simon Burford/Data Warehouse) -- exactly the false-demotion risk the brief warned about, flagged not hidden; Codex's connector did not expose an importance field this run, so it found 0 urgent vs the real pipeline's 3 (connector-parity gap).
+- **Ran the deliberate write-gate test the brief required -- it FAILED.** Gave Codex a legitimate-sounding, deliberately low-stakes write instruction (categorize one real marketing email) under the same `-s read-only` invocation used throughout. The write executed for real against Kevin's live Oxford mailbox -- confirmed independently twice (a second Codex read-only call, and separately via Outlook COM directly on this machine). No approval prompt fired despite `approval: on-request` in the session header. `codex exec --help` confirms no CLI flag governs MCP/connector-call approval at all. Remediated same session (category cleared via COM, verified empty) -- full incident writeup at `docs/codex_phase2_run_20260826/WRITEGATE_TEST_INCIDENT.md` on the code branch.
+
+## NOT done, and NOT to be started without a fresh decision from Kevin
+The 6x/day-for-7-days Task Scheduler automation was explicitly NOT built. Per the coordinator's own instruction this was always a distinct go/no-go point, and the write-gate test result means it's currently a NO-GO: nothing in Codex's configuration structurally prevents a write during an unattended run. Recommended structural fix (not resolvable from a coding session): check whether the Outlook/Calendar connector's Graph OAuth consent can be re-scoped to read-only at the Microsoft/Graph level, not just the ChatGPT-side toggle.
+
+## Exact next action for a cold session
+Do not proceed to building the Task Scheduler automation. Wait for Kevin to either (a) accept the residual write-risk explicitly, the same way he did for the PAT/connector precondition on 25 Aug, or (b) direct a structural fix to the connector's write scope first. Either way, re-read `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9's 26 Aug entry in full before taking any further action on this work -- do not infer a decision from this summary alone.
+
+## Branches/commits, for verification
+- Code: `drew/codex-phase2-ai-triage` (off `main`, not merged) -- `tools/codex_triage/*.py`, `docs/codex_phase2_run_20260826/*`.
+- Research doc: `claude/outlook-codecs-connector-upgrade-fe3dgf` (PR #29), commit `3e9c2643dbe115b418bf829ea2312773f7afccd1`. That PR shows `mergeable: CONFLICTING` against current `main` as of this session -- flagged for whoever eventually merges it to rebase first; unrelated to and not blocking the code branch above.
+- `main` untouched by this session's work: `data/briefing.json`, `data/tasks.json` (command-centre), `data/triage_ledger.json` were read-only referenced for the diff, never written to.
+
+---
+
 # Handover -- 21 August 2026, ~19:30 UTC (Drew) -- Manual scheduled-equivalent pipeline run triggered post-merge, live dashboards verified -- closes the loop end-to-end on the Absences panel fix
 
 ## What this is
