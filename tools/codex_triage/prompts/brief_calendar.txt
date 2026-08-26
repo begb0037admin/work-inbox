@@ -1,0 +1,20 @@
+You have my Oxford University Microsoft 365 account (kevin.lelitte@admin.ox.ac.uk) connected via the Calendar connector. READ-ONLY pull only. Do not create, update, cancel, or RSVP any event.
+
+Pull every calendar event for today and the next working day (tomorrow, or Monday if today is Friday) at Oxford local time (Europe/London). Return ONLY a single JSON object, no prose, no markdown fences:
+
+{
+  "calendar": [
+    {
+      "title": "<subject>",
+      "start_utc": "<ISO8601>",
+      "end_utc": "<ISO8601>",
+      "all_day": true/false,
+      "organizer_name": "<display name>",
+      "day": "today" or "tomorrow",
+      "id": "<the Graph id - if a recurring event expands into an occurrence, use that occurrence's own id, not the series master's>"
+    }
+  ],
+  "errors": ["<any partial failure or truncation note>"]
+}
+
+Do not fabricate any field - use null if genuinely unavailable, but do not omit the item. You are read-only with no local filesystem write access - do not write any file. Return the JSON as your entire final response.
