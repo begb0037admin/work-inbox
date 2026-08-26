@@ -1,6 +1,26 @@
 {
-  "generated_at": "2026-08-26 12:00",
+  "generated_at": "2026-08-26 15:00",
   "new_tasks": [
+    {
+      "title": "Review REF2029 UDF promotion to UOXP",
+      "tier": "week",
+      "description": "Nathan Kirwan is flagging the promotion of the REF2029 UDF to UOXP production environment. Kevin needs to review the promotion details and any HR Systems implications or sign-off requirements.",
+      "email_subject": "REF29 UDF - Promotion to UOXP",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-08-26 14:51",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32130000",
+      "auto_promoted": true
+    },
+    {
+      "title": "Locate documentation on Grade 2 increment bar changes (2024 uplift)",
+      "tier": "week",
+      "description": "Michael O'Sullivan is asking Kevin whether he recalls any decisions or has documentation relating to Grade 2 increment bar changes made during the 2024 non-clinical uplift. Kevin needs to search records and respond.",
+      "email_subject": "2024 non clinical uplift_Incremental bar changes for Grade 2",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-26 12:06",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B21C6A640000",
+      "auto_promoted": true
+    },
     {
       "title": "Attend HR Systems Team Meeting tomorrow (27 Aug) - Presentations week",
       "tier": "tomorrow",
@@ -8,25 +28,8 @@
       "email_subject": "RE: PDR 2026 – Friday 18 September",
       "email_from": "Michael O'Sullivan",
       "received": "2026-08-25 13:28",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
-    },
-    {
-      "title": "Resolve Cority Employee Import error 2026-08-21 17:00",
-      "tier": "week",
-      "description": "Cority Integration Platform reported an SFTP connection error on 21 August at 17:00 during scheduled employee data import. Kevin needs to review the error log and confirm resolution with James/Cority support.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-21 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-21 18:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000"
-    },
-    {
-      "title": "Estimate FA effort for application form internal candidate identification",
-      "tier": "week",
-      "description": "Simon Burford has forwarded a request asking Kevin to estimate how much Functional Analysis work would be required to implement identification of internal candidates in the application form.",
-      "email_subject": "FW: Application form - identification of internal candidates",
-      "email_from": "Simon Burford",
-      "received": "2026-08-19 15:51",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007ACBB4F8A0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000",
+      "carried_forward": true
     },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
@@ -59,24 +62,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t031",
-      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
-      "note": "Ewan Kilgour has scheduled a meeting to discuss Data Warehouse business rules prioritisation, Fabric, and related roadmap items following Simon's escalation on REF programme risk.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Ewan Kilgour",
-      "received": "2026-08-24 12:25",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000"
-    },
-    {
-      "task_id": "task-1787645383808",
-      "task_title": "Book PDR sessions with Simon Burford and the FA team",
-      "note": "Kevin has declined the Cross-Team Process Improvement Working Group meeting due to a scheduling conflict.",
-      "email_subject": "Re: Cross-Team Process Improvement Working Group – 1st Meeting",
-      "email_from": "Kevin (sent to: Otter Ho)",
-      "received": "2026-08-19 13:34",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007ACBB39ED0000"
-    }
-  ]
+  "applied_updates": []
 }
