@@ -1,0 +1,66 @@
+======================================================================
+PHASE 1/2 (context paragraph) COMPARISON
+======================================================================
+REAL subtitle:  Cority integration crisis, absent staff blocking decisions, REF programme at risk
+CODEX subtitle: 38-day balance and overdue delivery risks
+
+REAL context:
+Julie Hickman is on annual leave from Friday 21 August and returns Wednesday 2 September, blocking the Sickness absence survey and BA resource requirement decisions which need her input before month-end. Asta Palmer's automatic reply shows she was scheduled to return Wednesday 25 August (yesterday), so she should be back for the HR Systems team meeting at 14:00 today. The Cority Employee Import Log File from 2026-08-21 failed with an SFTP connection error and requires urgent resolution with the Cority Hosted Integration Team before the Cority Consultancy project launches - Sophie Levy's transition call from sales to professional services happened on 24 August afternoon. Simon Burford's email about Data Warehouse business rules has been waiting without substantive response since 24 August at 11:04, putting the REF programme at risk per his own statement. The most critical deadline this week is the HR Systems team meeting today at 14:00 where you'll need input on the Organisational Structure Review and presentation prep. Open first: the unread email from Sophie Levy (Re: PO ref E22033553 / Quality funded work, received 24 August 08:33) as the Cority project transition call happened yesterday afternoon and requires your sign-off on staffing. The Cority integration failure from 21 August also needs immediate escalation to prevent project delays.
+
+CODEX context:
+Julie Hickman is on annual leave until Wednesday 2 September, leaving Marie Cooksey to circulate Chemistry's request on 38-day balance workgroups and delaying sickness absence survey BA queries that would normally go to Julie. Chemistry estimates about 110 workgroups for conversion, so Marie Cooksey needs Kevin's view on whether this is a significant HR Systems work package and how it relates to the 38-day balance implementation timeline. Simon Burford's Data Warehouse thread has had no resolution since the June meeting and warns that missing UOXU/DWH test-environment clarity could put the REF programme at risk. The DTP1334 SHSMS supplier-evaluation deadline of Friday 21 August is now overdue, so Helen Harbour's evaluation work needs an immediate status check. Asta Siautilaite's PDR invitation for Friday 25 September was undeliverable and must be corrected while Kevin continues booking the FA team and Simon Burford sessions. Open Marie Cooksey's 38-day balance workgroup request first, then use the 14:30 Oxford Uni pre-project authentication follow-up with Alex Manton-Jones to confirm ownership and next actions.
+
+======================================================================
+PHASE 3.2 (email summaries + needs_reply/no_action_needed) COMPARISON
+======================================================================
+Codex pulled 16 urgent+needs candidates (own connector, own categorise() pass).
+Real pipeline pulled 25 urgent+needs candidates (COM, same day).
+Subject-line-matched overlap: 6 emails present in both pulls.
+needs_reply agreement on overlap: 6/6 (0 disagreements)
+no_action_needed agreement on overlap: 4/6 (2 disagreements)
+Disagreements:
+  - 'Video scoring is here. Learning you can see.' no_action_needed: real=False codex=True
+  - 'RE: Business rules for Data Warehouse' no_action_needed: real=False codex=True
+
+======================================================================
+PHASE 3.5 (task-suggestion triage) COMPARISON
+======================================================================
+REAL Phase 3.5 (data/inbox_suggestions.json, generated 2026-08-26 18:00): new_tasks=4 task_updates=3
+CODEX task_triage_phase: new_tasks=1 task_updates=10
+
+REAL new_tasks titles:
+  - Reschedule PDR with Michael O'Sullivan
+  - Confirm Holiday Records 3 Reports scheduling with Alan Quirke
+  - Clarify availability for Cross-Team Process Improvement Working Group
+  - Attend planning meeting for departments moving to 38-day balance
+CODEX new_tasks titles:
+  - Resolve Data Warehouse business rules and test environment for REF programme
+
+======================================================================
+PHASE 3.7-equivalent (priority task summaries) COMPARISON
+======================================================================
+TASK: URGENT -- Organisational Structure Update - August 2026 - FINAL
+  REAL:  Org structure update FINAL received 19 Aug effective through 19 Aug; PeopleXD maintenance 28 Aug 8-10pm may impact implementation. Next: confirm readiness with Simon/Sarah on go-live timing and maintenance window impact.
+  CODEX: The final August organisational structure update was received on 19 August, but Kevin's response deadline was 19 August and Simon Burford has not supplied Sarah Rowles with the requested go-live timing. Kevin needs to establish whether a late HR Systems response or internal decision is still required.
+TASK: Auto job-alert notification email -- text changes (Laura Porter)
+  REAL:  Config change for job-alert email text approved Feb 2026 but failed to apply; raised Access Group ticket 08 Jul. Next: check ticket status, confirm config applies, send Laura Porter screenshot for sign-off before Live push.
+  CODEX: Laura Porter and Philip Taylor approved the job-alert wording changes, but the Access Group configuration still has not applied to outgoing emails. Check the support ticket, prove the change in a test email, and send Laura a screenshot before Live deployment.
+TASK: URGENT -- Cority Applicant Data Import file (James Salas Guillen / Sim
+  REAL:  Kevin replied 21 Aug clarifying Grace built the Cority Applicant Data Import report (not Lee) and handover is complete. Next: answer Simon Burford's two open questions on 18 Aug re null-value handling and UTF-8 encoding confirmation.
+  CODEX: James Salas Guillen confirmed that quotation marks are acceptable to Cority, and Kevin has clarified that Grace built and handed over the applicant import report. Simon Burford's remaining questions are null-value handling, UTF-8 encoding, and the report's original change-control history.
+TASK: WFM / GLAM Rostering -- set up resolution meeting
+  REAL:  GLAM capacity issue blocking rostering loads for SBS/PEDS/GLAM areas since 24 Jun; blocking Sarah's UC dashboards. Next: set up resolution meeting with Kevin, Simon, Marie, Michelle, Julie to understand what wasn't loaded and agree approach.
+  CODEX: SBS, PEDS and GLAM rostering remain outstanding, with GLAM's unloaded data blocking Sarah's UC dashboards and reports. Kevin needs to convene Simon Burford, Marie Cooksey, Michelle and potentially Julie Hickman to agree a recovery plan.
+TASK: Review volunteering leave pay code configuration work
+  REAL:  Volunteering Leave standalone pay code prioritisation decision still outstanding since 6 Jul; Marie clarified ownership 18 Aug. Next: Kevin to decide FA team prioritisation/timeline for build and review Michael O'Sullivan's TIMDEP04 report-update point.
+  CODEX: The Volunteering Leave standalone pay-code option remains awaiting Kevin's prioritisation against the FA backlog. Kevin must set a delivery timeline and consider Michael O'Sullivan's TIMDEP04 reporting update.
+(Codex returned summaries for 39/39 priority tasks; showing first 5 of that set above.)
+
+======================================================================
+PHASE 3.8 (calendar day-prep) COMPARISON
+======================================================================
+REAL calToday count: 7, calTomorrow count: 5
+CODEX calendar_prep_phase keys returned: 12 (own connector's own today/tomorrow pull, different item set/order than real pipeline's COM pull -- see checkpoint notes on importance-flag/connector gaps)
+  today_0: Review the GLAM leave and absence split: WFM annual-leave failures in Security and Front of House remain separate from the proposed 38-day balance conversion. A
+  today_1: Treat this as protected time and use it to resolve the most urgent delivery risk. Prioritise Marie Cooksey's 38-day balance workgroup request or the overdue DTP
+  today_2: Keep this slot free for focused preparation and follow-up. Check Asta Siautilaite's undeliverable PDR invitation and the unresolved Data Warehouse business-rule
