@@ -371,6 +371,55 @@ incident is not itself that confirmation.
    parallel validation over an immediate switch, per Section 5's original
    design intent.
 
+### Step 1 status — 2026-08-26 (Drew): opener BUILT on a branch, awaiting Kevin approval
+
+Step 1 above is implemented and verified, **branch-only, not merged, not
+deployed**. Awaiting Kevin's screenshot approval per Command Centre's UI
+approval gate.
+
+- **Code:** `begb0037admin/command-centre` branch
+  `drew/cc-codex-graph-opener-26aug` — commits `0e937b1` (pre-edit backup)
+  → `ad571b2` (opener change) → `9ea8913` (HANDOVER entry). `main`
+  untouched (`js/app.js` on `main` still content sha `ff31b15a…`). One
+  file changed: `js/app.js`.
+- **What it does, exactly as Section 5 intends:** the per-task Open-email
+  button keys strictly on `source === "codex-graph"`. Those tasks route
+  through a new `openEmailWeb()` that opens `web_link` (snake_case;
+  `display_url` fallback) as a plain new-tab Outlook Web Access hyperlink —
+  `GetItemFromID` / `openmail://` is never used for them. Every other task
+  (no `source`, `source:"outlook-com"`, or any other value) keeps the
+  byte-for-byte unchanged `openEmail(e,entryId)` → `openmail://<entryId>`
+  path. No `tasks.json` migration, no `fetch_inbox.py` change, no cutover.
+- **Hardening folded in from 3 Codex review passes:** each candidate link is
+  validated independently (an invalid `web_link` no longer masks a valid
+  `display_url`); only `https://` on an exact-hostname allowlist
+  (`outlook.office.com`, `outlook.office365.com`) is followed — userinfo
+  (`outlook.office.com@evil.example`), subdomain and path spoofs and plain
+  http are rejected → visible "unavailable" notice; the task id is read
+  from the card `data-id` via the clicked element, so nothing
+  task-controlled is interpolated into the inline handler. A codex-graph
+  task with no usable link shows a visibly de-emphasised button + an
+  explanatory `alert()` (never a silent no-op, never a throw).
+- **Verified:** `node --check`; 33/33 logic assertions against the real
+  extracted function bodies + render snippet; a live Playwright run over 6
+  fixture cards (legacy path unchanged for outlook-com; `window.open` to
+  the OWA URL for codex-graph web_link and display_url; alert-degrade for
+  no-link and non-allowlisted-host). Screenshots produced for the approval
+  gate.
+
+**Field-name collision found (verify against live data confirms it):**
+`source` is **not** a new field — all 80 live Command Centre tasks already
+carry a human-readable `source` provenance string that also renders as the
+card's source badge. Keying the opener on `source === "codex-graph"` is
+regression-safe today (no existing task has that value), but **before any
+Phase 2 Codex task-writer sets `source:"codex-graph"`, the machine
+routing discriminator must be separated from the human-readable provenance**
+(e.g. a dedicated `sourceType`/`mailOpener` field, or move provenance to
+`emailRef`/`origin`) — otherwise those cards show the literal text
+"codex-graph" as their provenance. Recommendation only; Kevin/Lauren's call.
+Section 5's bullet "`source`, defaulting to absent/`"outlook-com"` for
+every existing task" should be read with this correction.
+
 ### Beyond step 4 — direction only, not yet scoped or briefed
 
 5. If validated, retire `fetch_inbox.py`'s six Anthropic-API AI-triage
