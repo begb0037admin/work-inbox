@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-08-25 18:00",
+  "generated_at": "2026-08-26 07:37",
   "new_tasks": [
     {
-      "title": "Resolve Cority Employee Import SFTP error 2026-08-21 17:00",
-      "tier": "week",
-      "description": "Cority Integration Platform reported an SFTP connection error on 21 August at 17:00 during scheduled employee data import. Kevin needs to review the error log and confirm resolution with James Salas Guillen / Cority support, similar to the 22 June incident.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-21 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-21 18:00",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AE97F9690000"
+      "title": "Prepare presentation for HR Systems Team Meeting",
+      "tier": "tomorrow",
+      "description": "Asta Palmer is asking if Kevin has something to present at tomorrow's HR Systems Team Meeting during Presentations week. Kevin should confirm whether he will contribute a presentation.",
+      "email_subject": "RE: PDR 2026 – Friday 18 September",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-25 13:28",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
     },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
@@ -43,49 +43,31 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608111309071",
-      "task_title": "Attend HR Systems Management meeting",
-      "note": "Asta Palmer has sent reminder that HR Systems team meeting is tomorrow (Wednesday 26 August) and it is Presentations week.",
+      "task_id": "task-1787645383808",
+      "task_title": "Book PDR sessions with Simon Burford and the FA team",
+      "note": "Asta Palmer reminder that HR Systems Team Meeting is tomorrow with Presentations week; Kevin should confirm if presenting.",
       "email_subject": "RE: PDR 2026 – Friday 18 September",
       "email_from": "Michael O'Sullivan",
       "received": "2026-08-25 13:28",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
     },
     {
-      "task_id": "task-1787652746063",
-      "task_title": "Confirm approximate FA validation effort per department with Michael (capacity check)",
-      "note": "Kevin has sent follow-up to Marie and Simon on sickness absence survey BA resource requirements and timelines, noting he has spoken to Michael on capacity.",
-      "email_subject": "Sickness absence survey — BA resource requirement and timelines",
-      "email_from": "Kevin (sent to: Marie Cooksey; Simon Burford)",
-      "received": "2026-08-25 15:46",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B13C79260000"
+      "task_id": "task-1787645383808",
+      "task_title": "Book PDR sessions with Simon Burford and the FA team",
+      "note": "Michael O'Sullivan cannot attend PDR on 18 September due to leave and requests rescheduling after annual leave year-end.",
+      "email_subject": "RE: Business rules for Data Warehouse",
+      "email_from": "Simon Burford",
+      "received": "2026-08-24 14:37",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890ED0000"
     },
     {
-      "task_id": "t2608191643001",
-      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
-      "note": "Julie Hickman is on annual leave from 21 August with return 2 September; urgent queries to be redirected.",
-      "email_subject": "Automatic reply: Sickness absence survey — BA resource requirement and timelines",
-      "email_from": "Julie Hickman",
-      "received": "2026-08-25 15:46",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2E90000"
-    },
-    {
-      "task_id": "t2608111719550",
-      "task_title": "Follow up on Oxford Uni Pre-project Authentication call",
-      "note": "Louise Piper has confirmed that authentication issues logging into OSM have now been resolved.",
-      "email_subject": "UPDATE: OSM: Authentication Issues resolved",
-      "email_from": "Louise Piper",
-      "received": "2026-08-25 17:26",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2EB0000"
-    },
-    {
-      "task_id": "t2608111719550",
-      "task_title": "Follow up on Oxford Uni Pre-project Authentication call",
-      "note": "Louise Piper reported authentication issues logging into OSM affecting some users; follow-up email 0 confirms resolution.",
-      "email_subject": "OSM: Authentication Issues",
-      "email_from": "Louise Piper",
-      "received": "2026-08-25 15:31",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2E80000"
+      "task_id": "t031",
+      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
+      "note": "Simon Burford escalates Data Warehouse business rules delay as risk to REF programme; no response since June meeting.",
+      "email_subject": "RE: Business rules for Data Warehouse",
+      "email_from": "Simon Burford",
+      "received": "2026-08-24 11:04",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EB0000"
     }
   ]
 }
