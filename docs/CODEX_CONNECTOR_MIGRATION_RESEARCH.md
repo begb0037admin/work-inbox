@@ -463,7 +463,7 @@ Scope, per Kevin's own instruction ("proceed - there will be no PAT rotation"): 
 
 **Verdict: NOT clean going in — one additional live, broadly-reachable write-capable exposure existed, independent of the PAT and of both 2026-08-25 fixes. It has now been closed and byte-verified. No third *connector/MCP* path exists** (findings 1–2 above are clean); the additional path was a local shell-approval-cache mechanism the 2026-08-25 investigation did not cover, now closed.
 
-### Field-name collision fix — 2026-08-26 (Drew): `sourceType` field built, STAGED, awaiting Kevin's approval
+### Field-name collision fix — 2026-08-26 (Drew): `sourceType` field — MERGED, DEPLOYED, LIVE
 
 Resolves the "Field-name collision found" note above (Step 1 status entry). `js/app.js`'s
 opener no longer keys on `t.source==='codex-graph'`; it now keys on a new, dedicated,
@@ -508,9 +508,22 @@ evidence plus a direct re-read of the file, and an independent blob-hash cross-c
 against the pushed branch content) returned "safe to merge as-is," no defect found; pass
 3 (confirmation re-review) returned CLEAN, no new findings.
 
-**Next action:** awaiting Kevin's literal "approved" on the 4 screenshots in
-`C:\Users\admin\Downloads\cc-sourcetype-field-26aug\` before merge. Once merged and
-live, this collision is fully closed — nothing else on this document's "Next steps, in
+**UPDATE 2026-08-26 ~20:05 UTC — Kevin approved ("Approved."), merged and deployed.**
+Merge commit **`986584e140aec3e65257ca6bf30ee38523f10d4f`** on `begb0037admin/command-centre`
+`main` (two parents confirmed: mainline `d759f6c8`, pre-merge `main`, unmoved since the
+branch was cut; branch tip `5d2673c0`). `js/app.js` on `main` now content sha
+`397e6d6e4870aa91403efa0aa8fc30647a1abd9b` (48088 bytes) — confirmed identical to the
+reviewed/approved branch-tip content. `data/tasks.json` confirmed byte-identical before
+and after the merge (content sha `f9272cbe…`, 176687 bytes, 82 tasks) — no migration,
+exactly as designed. GitHub Pages build for the merge commit polled to `built`; the
+live-served `js/app.js` was fetched fresh (cache-busted) and byte/sha1-diffed identical
+to the approved content; a live Playwright pass against the real production URL (no
+fixture) rendered the board with zero page errors. Branch `drew/cc-sourcetype-field-26aug`
+deleted (remote confirmed gone via a 404 on the ref; no local clone of the repo ever had
+it checked out). Full detail in `command-centre/docs/HANDOVER.md`'s 26 Aug ~19:30 UTC
+entry's UPDATE block.
+
+**This collision is now fully closed.** Nothing else on this document's "Next steps, in
 order" list changes: step 2 (test the GitHub write-path security gate) and step 3
 (repeat Phase 2 runs) remain the next real work, and Phase 2 / any Codex task-writer
 still needs its own fresh brief from Kevin before starting.
