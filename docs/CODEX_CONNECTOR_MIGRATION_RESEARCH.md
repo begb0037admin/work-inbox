@@ -463,6 +463,58 @@ Scope, per Kevin's own instruction ("proceed - there will be no PAT rotation"): 
 
 **Verdict: NOT clean going in — one additional live, broadly-reachable write-capable exposure existed, independent of the PAT and of both 2026-08-25 fixes. It has now been closed and byte-verified. No third *connector/MCP* path exists** (findings 1–2 above are clean); the additional path was a local shell-approval-cache mechanism the 2026-08-25 investigation did not cover, now closed.
 
+### Field-name collision fix — 2026-08-26 (Drew): `sourceType` field built, STAGED, awaiting Kevin's approval
+
+Resolves the "Field-name collision found" note above (Step 1 status entry). `js/app.js`'s
+opener no longer keys on `t.source==='codex-graph'`; it now keys on a new, dedicated,
+optional field, `t.sourceType==='codex-graph'`. `source` reverts to being pure
+human-readable provenance/badge text with zero opener-logic dependency on its value —
+exactly the separation this section recommended.
+
+**Field design decision:** `sourceType` is optional; **absent means legacy**. No
+`data/tasks.json` migration was performed or is needed for any of the 82 live tasks —
+this mirrors exactly how `source` itself was originally introduced (Section 5's design)
+without back-filling a default value onto every existing task. The alternative (writing
+an explicit `sourceType:"outlook-com"` onto all 82 live tasks today) was considered and
+rejected: "absent" and an explicit "outlook-com" value currently mean exactly the same
+thing to the opener, so an explicit write would be a real `tasks.json` migration for zero
+behavioural gain — and the task brief this work came from explicitly asked to avoid a
+migration if reasonably possible. Only a future Phase 2 Codex task-writer would ever
+explicitly set `sourceType:"codex-graph"`.
+
+**Scope guardrails honoured:** schema + opener-logic change only. `fetch_inbox.py` not
+touched. No Phase 2 / Codex task-writer scoped or started. No task in `data/tasks.json`
+was given a `sourceType` value or a `source:"codex-graph"` value by this work.
+
+**State:** `begb0037admin/command-centre` branch `drew/cc-sourcetype-field-26aug`
+(cut from `main` at `d759f6c8`). **NOT merged — `main` untouched.** Commits: `d439b072`
+(pre-edit backup) → `84c9bffd` (the change, `js/app.js` content sha
+`397e6d6e4870aa91403efa0aa8fc30647a1abd9b`) → `5d2673c0` (HANDOVER.md). Full detail,
+verification methodology, and screenshot paths in `command-centre/docs/HANDOVER.md`'s
+26 Aug ~19:30 UTC entry.
+
+**Verification headline:** live `data/tasks.json` confirmed 82/82 tasks with 0
+`sourceType` and 0 `source==='codex-graph'` both before and after the change; a
+full DOM-level before/after render diff of the *entire* live 82-task population (not a
+sample) came back 82/82 byte-identical outerHTML, 0 differences; a synthetic fixture
+(2 test-only cards, never written to the live file) proved the new `sourceType`-keyed
+codex-graph opener works end-to-end (`window.open` to the stored `web_link`) while its
+`source` field still renders as plain provenance text, and proved a legacy card with no
+`sourceType` is completely unaffected.
+
+**Codex review (mandatory 3-touchpoint):** pass 1 (plan+diff) approved with 2 minor
+wording-only comment refinements adopted; pass 2 (end-to-end, given the full verification
+evidence plus a direct re-read of the file, and an independent blob-hash cross-check
+against the pushed branch content) returned "safe to merge as-is," no defect found; pass
+3 (confirmation re-review) returned CLEAN, no new findings.
+
+**Next action:** awaiting Kevin's literal "approved" on the 4 screenshots in
+`C:\Users\admin\Downloads\cc-sourcetype-field-26aug\` before merge. Once merged and
+live, this collision is fully closed — nothing else on this document's "Next steps, in
+order" list changes: step 2 (test the GitHub write-path security gate) and step 3
+(repeat Phase 2 runs) remain the next real work, and Phase 2 / any Codex task-writer
+still needs its own fresh brief from Kevin before starting.
+
 ### Beyond step 4 — direction only, not yet scoped or briefed
 
 5. If validated, retire `fetch_inbox.py`'s six Anthropic-API AI-triage
