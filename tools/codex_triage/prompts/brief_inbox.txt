@@ -1,0 +1,22 @@
+You have my Oxford University Microsoft 365 account (kevin.lelitte@admin.ox.ac.uk) connected via the Outlook connector. READ-ONLY pull only. Do not send, draft, reply, forward, move, categorize, or delete anything.
+
+Pull the newest 40 messages in the Inbox folder only (not subfolders), ordered newest-first. Return ONLY a single JSON object, no prose, no markdown fences:
+
+{
+  "inbox": [
+    {
+      "subject": "<subject>",
+      "from_name": "<display name>",
+      "from_email": "<smtp address>",
+      "kevin_is_primary_recipient": true/false (true if kevin.lelitte@admin.ox.ac.uk is in the To line, false if only Cc),
+      "received_utc": "<ISO8601>",
+      "is_read": true/false,
+      "importance": "normal|high|low",
+      "body_preview": "<first ~150 chars of plain text body, no HTML>",
+      "id": "<the Graph id>"
+    }
+  ],
+  "errors": ["<any partial failure or truncation note>"]
+}
+
+Do not fabricate any field - use null if genuinely unavailable, but do not omit the item. You are read-only with no local filesystem write access - do not write any file. Return the JSON as your entire final response.
