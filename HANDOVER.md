@@ -1,3 +1,23 @@
+# Handover -- 26 August 2026, ~20:12 UTC (Drew) -- Codex Phase 2 write-path investigation + quality-gate design done; automation still blocked, structural fix needs Kevin/Oxford IT
+
+## What this is
+Follow-up to the 19:46 entry below (read that first). Coordinator directed: pursue a structural fix for the failed write-gate test rather than accept the risk (Kevin said "continue" but did not explicitly accept it), design the quality gates, do not start automation. No consent/scope/config change made -- investigation only.
+
+## Findings (full detail on branch `drew/codex-phase2-ai-triage`: `docs/codex_phase2_run_20260826/CONNECTOR_WRITE_PATH_INVESTIGATION.md` + `PARALLEL_RUN_QUALITY_GATE_DESIGN.md`; research doc Section 9 updated, commit `0ec1904c7a1e6c23c0619bcfde80bd703e0331fa` on the PR #29 branch)
+
+**Read-only re-scope is NOT a Kevin-self-service action and is NOT locally adjustable.** The Outlook/Calendar/Teams connectors are OpenAI-managed apps; `~/.codex/auth.json` holds only a ChatGPT session, no Graph token -- the connector's Microsoft Graph permission grant lives entirely on OpenAI's backend and is fixed by OpenAI's app registration. Ranked fixes:
+1. Oxford tenant admin revokes the write-scoped Graph delegated permissions on the OpenAI enterprise app for Kevin's account (the real structural fix) -- Kevin raises an Oxford IT/IdM request; first establish whether the connector runs on user vs admin consent. Whether reads survive is empirical.
+2. Kevin checks ChatGPT -> Settings -> Connectors for any read-only/per-capability control beyond "Always ask" (~5 min, do first; "Always ask" alone is already proven not to gate headless `codex exec`).
+3. Local fallback (best candidate, UNPROVEN): `approval_mode` deny overrides in `~/.codex/config.toml` under `[apps.<connector_id>...]` for every state-changing tool -- same structure that auto-approved GitHub writes in the cc93c7b incident, used in reverse. Needs a discrete backed-up test (add block -> re-run write-gate test -> confirm blocked via COM -> confirm reads still work). Should be a named, explicitly-authorised step given the file's history.
+Confirmed dead ends: `codex exec` has no CLI flag for connector-tool approval; `network_proxy` wouldn't help (connector->Graph traffic is server-side).
+
+**Quality-gate design (not built):** false-demotion -> per-run `data/codex_runs/<ts>_codex_disagreements.json` + rollup; disqualifying metric is `codex_hides_work` (Codex `no_action_needed:true` on an email the real pipeline kept) -- one hit on a material thread fails auto-cutover. Missing-importance -> first try `$select`/per-id `fetch_message` full-detail to actually get the field; if not, exclude Urgent tier from fidelity scoring + design a thin COM shim reading only `importance`, joined on subject+received-time.
+
+## Exact next action for a cold session
+Automation stays blocked. Wait for: (a) Kevin's ChatGPT connector-settings check result, (b) the Oxford IT request outcome, and/or (c) Kevin's authorisation to run the backed-up `approval_mode` deny-override test on `~/.codex/config.toml`. Do NOT start the 7-day run until a preventive control is in place AND verified against a repeat of the write-gate test. Re-read research doc Section 9's two 26 Aug entries in full first.
+
+---
+
 # Handover -- 26 August 2026, ~19:46 UTC (Drew) -- Codex Phase 2 (six-phase AI-triage re-implementation): dry-run + diff done, sixth phase built, write-gate test FAILED -- NO-GO on 7-day automation pending Kevin
 
 ## What this is
