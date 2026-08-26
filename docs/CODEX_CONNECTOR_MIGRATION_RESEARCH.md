@@ -303,19 +303,32 @@ response):**
   explanation, original file preserved at
   `C:\Users\admin\.codex\config.toml.bak-20260825-drew-writepath-incident`).
   Config re-verified to still parse as valid TOML after the edit.
-- **Not yet done, still open:** the exposed PAT value itself has not been
-  revoked/rotated on GitHub's side — there is no API path available to
-  revoke an arbitrary classic PAT by value; this requires Kevin doing it via
-  GitHub's web UI (Settings → Developer settings → Personal access tokens).
-  Until that token is rotated, treat it as compromised. The
-  `apps.connector_76869538...` connector itself (as opposed to just its
+- **PAT rotation — DECLINED BY KEVIN, PERMANENT, 2026-08-26.** Kevin's own
+  explicit instruction, quoted verbatim: **"proceed - there will be no PAT
+  rotation."** This is a knowing, permanent risk acceptance, not a deferred
+  or pending action — do not describe it as "still open," "not yet done,"
+  or "outstanding" in any future summary of this incident. The exposed
+  classic PAT (`ghp_...`, plaintext in `config.toml`'s removed
+  `[mcp_servers.github]` block until 2026-08-25) remains valid and
+  unrotated on GitHub's side indefinitely, by Kevin's decision. Treat it as
+  permanently compromised for any future risk assessment, but do not treat
+  its rotation as a blocking task for anyone to pick up.
+- The `apps.connector_76869538...` connector itself (as opposed to just its
   auto-approval override) has not been reviewed/removed at the Codex account
-  level either — only its auto-approval was stripped locally.
+  level — only its auto-approval was stripped locally. This remains open
+  (not addressed by Kevin's PAT decision, which concerns the PAT only).
 
-**Phase 2 cannot start until the above is fully closed, not just noted here
-— specifically: the PAT is rotated, and someone has confirmed there is no
-third GitHub-write path still live for Codex.** This document recording the
-incident is not itself that confirmation.
+**Third-path write audit — CLOSED, 2026-08-26 (Drew, Kevin-authorized,
+"proceed - there will be no PAT rotation").** Full results in Section 9's
+2026-08-26 entry below: one additional live write-capable exposure was
+found (unrelated to the PAT and to either of the two 2026-08-25 fixes) and
+closed the same session.
+
+**Phase 2 still cannot start on today's work alone — it needs its own
+fresh, explicit brief directly from Kevin, per this document's standing
+instruction (see the top of this file). Today's audit closes the write-path
+review item from Section 9's "next steps" list; it does not itself
+authorise Phase 2.**
 
 ## 9. Status / next action
 
@@ -428,6 +441,27 @@ routing discriminator must be separated from the human-readable provenance**
 "codex-graph" as their provenance. Recommendation only; Kevin/Lauren's call.
 Section 5's bullet "`source`, defaulting to absent/`"outlook-com"` for
 every existing task" should be read with this correction.
+
+### Third-path write-audit result — 2026-08-26 (Drew): NOT clean — one new exposure found and closed; PAT rotation permanently declined
+
+Scope, per Kevin's own instruction ("proceed - there will be no PAT rotation"): close the write-path-audit blocker only. Phase 2 / any Codex task-writer explicitly NOT started, briefed, or scoped by this work.
+
+**PAT rotation is now recorded as a permanent, knowing risk acceptance, not a pending task** — see the updated bullet in Section 8. Do not re-open it as an action item without a fresh instruction from Kevin.
+
+**Write-path audit — fresh, direct inspection, not inferred from the 2026-08-25 record:**
+
+1. **`C:\Users\admin\.codex\config.toml` (234 lines, re-read in full) — clean.** No `mcp_servers.github` or any other GitHub-capable MCP server exists (only `node_repl`, `meeting-context`, `openaiDeveloperDocs` — none GitHub-branded, none holding a token). Zero live `[apps.*]` tables of any kind exist in the file — the `apps.connector_76869538...` override block removed on 2026-08-25 has not been re-added, for this connector or any other. No `approval_mode = "approve"` line exists anywhere live. The file's 12 enabled `[plugins.*]` entries are documents/spreadsheets/presentations/pdf/template-creator/visualize/chrome/browser/managers-meeting-work/hr-systems-roadmap-work/codex-app-tools/computer-use/sites — none GitHub-branded.
+2. **Cached "github" Codex plugin/connector — same connector as 2026-08-25, not a new path.** Read directly: `plugins/cache/openai-curated-remote/github/0.1.11-.../.codex-plugin/plugin.json` declares `"capabilities": ["Interactive", "Write"]`, and its `.app.json` resolves to `apps.github.id = "connector_76869538009648d5b282a4bb21c3d157"` — the exact same connector ID already handled on 2026-08-25. Confirmed there is no local override re-granting it auto-approval (per finding 1); its behaviour still depends on Codex's own default per-tool prompt plus Kevin's account-level "Always ask" toggle (Section 9's existing item #2 — that toggle's real-world effectiveness has still never been tested to fire, unchanged by today's work, still open).
+3. **NEW FINDING, not covered by the 2026-08-25 remediation — `C:\Users\admin\.codex\rules\default.rules` (Codex's local "remembered command approval" cache, 118 lines, last modified 28 Jul 2026 — predates the 2026-08-25 incident entirely and was never examined during it).** This file is a *different subsystem* from both the MCP server and the connector/app tool-override system checked on 2026-08-25 — it governs Codex's local shell-command approval memory, and is **not gated by Kevin's ChatGPT-side "Always ask" connector setting at all**, confirming the coordinator's concern that a local mechanism can bypass that account-level toggle. Of 118 rules (overwhelmingly long, fully-literal one-off command strings scoped to a single specific historical repo/branch/file, which only replay verbatim and are a narrow risk), exactly two were short, generic, unscoped write-capable prefixes reachable by any future command matching that prefix in any repo:
+   - `prefix_rule(pattern=["git", "push", "origin", "main"], decision="allow")` — would silently auto-approve `git push origin main` in *any* repo/cwd Codex is working in, riding on this machine's already-authenticated `gh`/`git` identity (`begb0037admin`, confirmed logged in via OS keyring) — a live GitHub-write path with zero dependency on the PAT, the removed MCP server, the removed connector override, or the ChatGPT "Always ask" setting.
+   - `prefix_rule(pattern=["gh", "api", "--method", "PUT"], decision="allow")` — would silently auto-approve *any* `gh api --method PUT ...` call to *any* repo/path — exactly the GitHub Contents API write-a-file mechanism used across this entire estate.
+
+**Remediated immediately, same session, per standing incident-response norms (bias toward closing an active exposure over waiting):**
+- Backup taken first and byte-verified identical before editing: `C:\Users\admin\.codex\rules\default.rules.bak-20260826_1043-drew-writepath-audit` (sha1 `cc9797e5a2f856eca2518f807e042f10e9e842f4`, matching the live file before the edit).
+- Both bare rules deleted from the live file (this rules-cache format has no comment syntax — confirmed by scanning all 118 original lines for any `#` — so deletion, not commenting-out, was the only safe option). Post-edit diff confirms **exactly those two lines removed and nothing else touched** (118 → 116 lines); every other rule, including all the long fully-literal one-off command strings, is untouched so Kevin's legitimate accumulated read-only/scoped approvals are not lost.
+- `auth.json` (Codex's own OpenAI/ChatGPT account auth) checked for key names only (not printed, to avoid echoing any live secret) — no GitHub token or PAT present there.
+
+**Verdict: NOT clean going in — one additional live, broadly-reachable write-capable exposure existed, independent of the PAT and of both 2026-08-25 fixes. It has now been closed and byte-verified. No third *connector/MCP* path exists** (findings 1–2 above are clean); the additional path was a local shell-approval-cache mechanism the 2026-08-25 investigation did not cover, now closed.
 
 ### Beyond step 4 — direction only, not yet scoped or briefed
 
