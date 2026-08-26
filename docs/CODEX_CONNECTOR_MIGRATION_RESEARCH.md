@@ -371,17 +371,26 @@ incident is not itself that confirmation.
    parallel validation over an immediate switch, per Section 5's original
    design intent.
 
-### Step 1 status — 2026-08-26 (Drew): opener BUILT on a branch, awaiting Kevin approval
+### Step 1 status — 2026-08-26 (Drew): opener MERGED, DEPLOYED, LIVE
 
-Step 1 above is implemented and verified, **branch-only, not merged, not
-deployed**. Awaiting Kevin's screenshot approval per Command Centre's UI
-approval gate.
+Step 1 above is **done — merged to `main` and live on production**, Kevin
+approved 2026-08-26 ("Approved - I'm happy with this. Please continue.").
 
-- **Code:** `begb0037admin/command-centre` branch
-  `drew/cc-codex-graph-opener-26aug` — commits `0e937b1` (pre-edit backup)
-  → `ad571b2` (opener change) → `9ea8913` (HANDOVER entry). `main`
-  untouched (`js/app.js` on `main` still content sha `ff31b15a…`). One
-  file changed: `js/app.js`.
+- **Code:** `begb0037admin/command-centre` `main` — merge commit
+  **`5054906ccfdb9d7ea07d0308b68cf372c0c4a3c2`** (`--no-ff` merge of
+  `drew/cc-codex-graph-opener-26aug`; `main` had not moved since the branch
+  was cut, so a clean merge). One production file changed: `js/app.js`
+  (+42/-1), content sha `c222a2b306e7d813a4ad92347da11492a8370bd8`.
+  `data/tasks.json` untouched. Branch deleted (local + remote) after merge.
+- **Deploy verified:** GitHub Pages build for `5054906` polled to `built`;
+  the live-served `js/app.js` was fetched and `cmp`-checked **byte-for-byte
+  identical** to the approved branch-tip content, and re-exercised live via
+  Playwright against the production URL (codex-graph + web_link → new-tab
+  `window.open` of the OWA URL; codex-graph + no link → the explanatory
+  alert; real production board renders with zero page errors).
+- **Revert path if needed:** `git revert -m 1 5054906` (mainline = pre-merge
+  `main` `08bd346`, `js/app.js` blob `ff31b15a…`), or restore from
+  `Archive/app_backup_20260826_0910.js`.
 - **What it does, exactly as Section 5 intends:** the per-task Open-email
   button keys strictly on `source === "codex-graph"`. Those tasks route
   through a new `openEmailWeb()` that opens `web_link` (snake_case;
