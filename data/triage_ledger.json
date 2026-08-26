@@ -419,7 +419,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 16:29:30.947000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman provides contact details for department representatives (Chemistry, Maths, etc.) regarding 38 day balance decisions.",
+    "ai_summary": "Julie Hickman provides department contact details (Chemistry, Maths, etc.) in response to a 38 day balance update query.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -439,7 +439,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:51:48.627000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford forwards a request for Kevin to estimate the work effort from an FA point of view on identifying internal candidates in an application form.",
+    "ai_summary": "Simon Burford forwards an application form query and asks Kevin to estimate the work effort from a Finance point of view for identifying internal candidates.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -459,7 +459,7 @@
     "received": "19 Aug",
     "received_raw": "2026-08-19 15:34:44.335000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Julie Hickman shares a OneDrive file with Kevin containing timeframe information related to the 38 day balance task.",
+    "ai_summary": "Julie Hickman shares a OneDrive file with timeframe information related to the 38 day balance task for Kevin to review.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -499,7 +499,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Cority system notification of an error in the Employee Import process for Oxford University dated 21 August 2026; Kevin should review the attached error log.",
+    "ai_summary": "Cority integration error notification for Oxford University employee import on 21 August; Kevin should review the attached log file for details.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -579,34 +579,17 @@
    "card": {
     "title": "Re: PO ref E22033553 / Quality funded work",
     "sub": "From <strong>Sophie Levy</strong>. Hello Kevin,\r\n\r\nWe are having our interbal transition call from sales to professional services this afternoon, the proje",
-    "badge": "Reply within 48hrs",
-    "badgeType": "yellow",
+    "badge": "Overdue",
+    "badgeType": "red",
     "subject": "Re: PO ref E22033553 / Quality funded work",
     "from": "Sophie Levy",
     "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2900008DFB9C6852DC5A43B72538034BBFF5350007AFD89AE00000",
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy informs Kevin that a sales-to-professional services transition call for project PO ref E22033553 is happening this afternoon.",
+    "ai_summary": "Sophie Levy updates Kevin that a transition call from sales to professional services for PO E22033553 is happening this afternoon.",
     "needs_reply": false,
     "no_action_needed": false
-   },
-   "first_tracked": "2026-08-24",
-   "last_confirmed": "2026-08-26"
-  },
-  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EB0000": {
-   "tier": "urgent",
-   "card": {
-    "title": "RE: Business rules for Data Warehouse",
-    "sub": "From <strong>Simon Burford</strong>. Hi both,\r\n\r\n \r\n\r\nI haven\u2019t had any response on this since our meeting in June. This is going to put the REF programme at",
-    "badge": "Act today",
-    "badgeType": "red",
-    "subject": "RE: Business rules for Data Warehouse",
-    "from": "Simon Burford",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EB0000",
-    "received": "24 Aug",
-    "received_raw": "2026-08-24 11:04:01.194000+00:00",
-    "kevin_is_primary_recipient": false
    },
    "first_tracked": "2026-08-24",
    "last_confirmed": "2026-08-26"
@@ -760,7 +743,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 16:00:55.952000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Erik from Soundtrap promotes video scoring lesson plans; Kevin needs to review or discard this marketing email.",
+    "ai_summary": "Erik from Soundtrap is promoting a video scoring product with lesson plans; Kevin needs to decide whether this marketing email is relevant to him.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -780,11 +763,31 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:28:29.503000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan asks Kevin to reschedule the PDR meeting from Friday 18 September as he will be on leave that week.",
+    "ai_summary": "Michael O'Sullivan is unavailable on 18 September and the following week and asks Kevin to reschedule the PDR meeting.",
     "needs_reply": true,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-25",
+   "last_confirmed": "2026-08-26"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2600008DFB9C6852DC5A43B72538034BBFF5350007B13CECEF0000": {
+   "tier": "needs",
+   "card": {
+    "title": "HR Systems Team Meeting - tomorrow",
+    "sub": "From <strong>Asta Palmer</strong>. Hello!\r\n\r\n \r\n\r\nIt\u2019s our team meeting tomorrow, and it\u2019s Presentations week.\r\n\r\n \r\n\r\nPlease let me know if you have somet",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "HR Systems Team Meeting - tomorrow",
+    "from": "Asta Palmer",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2600008DFB9C6852DC5A43B72538034BBFF5350007B13CECEF0000",
+    "received": "25 Aug",
+    "received_raw": "2026-08-25 13:35:46.237000+00:00",
+    "kevin_is_primary_recipient": false,
+    "ai_summary": "Asta Palmer reminds Kevin that the HR Systems Team meeting is tomorrow during Presentations week and requests notification if Kevin has something to present.",
+    "needs_reply": true,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-26",
    "last_confirmed": "2026-08-26"
   }
  }
