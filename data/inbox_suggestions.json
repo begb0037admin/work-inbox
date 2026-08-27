@@ -1,6 +1,25 @@
 {
-  "generated_at": "2026-08-27 15:00",
+  "generated_at": "2026-08-27 18:00",
   "new_tasks": [
+    {
+      "title": "Confirm IRIS/IEX incidents change timings with James and Amanda",
+      "tier": "week",
+      "description": "Marie Cooksey has copied Kevin and James in to provide timings on IRIS/IEX incidents changes. Amanda needs confirmation of when HR Systems can handle the implementation. Kevin needs to respond with realistic timelines.",
+      "email_subject": "RE: IRIS / IEX - Incidents Changes",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-27 15:53",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901D0000",
+      "auto_promoted": true
+    },
+    {
+      "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
+      "tier": "tomorrow",
+      "description": "Michael O'Sullivan cannot attend PDR on 18 September due to leave and year-end approaching. Kevin needs to reschedule Michael's PDR to a date before 18 September.",
+      "email_subject": "RE: PDR 2026 – Friday 18 September",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-25 13:28",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
+    },
     {
       "title": "Turn off REF29 UDF display on core portal",
       "tier": "tomorrow",
@@ -8,26 +27,8 @@
       "email_subject": "RE: REF29 UDF - Promotion to UOXP",
       "email_from": "Nathan Kirwan",
       "received": "2026-08-27 14:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000"
-    },
-    {
-      "title": "Confirm Cross-Team Process Improvement Working Group attendance - 28 Sept",
-      "tier": "week",
-      "description": "Michael O'Sullivan is confirming that Kevin has already accepted the 28 September meeting and noting that Otter is looking for at least one member from HR Systems to attend. Kevin should confirm his continued participation or reassign if needed.",
-      "email_subject": "FW: Cross-Team Process Improvement Working Group – 1st Meeting",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-27 09:18",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6B0000",
-      "auto_promoted": true
-    },
-    {
-      "title": "Reschedule PDR with Michael O'Sullivan",
-      "tier": "week",
-      "description": "Michael O'Sullivan is on leave on 18 September and the following week, and with year-end approaching, he's asking to reschedule his PDR to a later date. Kevin needs to propose alternative dates.",
-      "email_subject": "RE: PDR 2026 – Friday 18 September",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-25 13:28",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000",
+      "carried_forward": true
     },
     {
       "title": "Review Oxford Uni Pre-project Authentication follow-up notes",
@@ -72,49 +73,40 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608261500530",
-      "task_title": "Review REF2029 UDF promotion to UOXP",
-      "note": "Nathan confirms UDF is live but requests core portal display be turned off for now; Kevin should action this configuration change.",
-      "email_subject": "RE: REF29 UDF - Promotion to UOXP",
-      "email_from": "Nathan Kirwan",
-      "received": "2026-08-27 14:30",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000"
-    },
-    {
-      "task_id": "t2608270801360",
-      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
-      "note": "Michael has confirmed the 131 workgroups list was expected and will need amendment to reflect revised Holiday Scheme; provides clarification on scope.",
-      "email_subject": "RE: changing to 38 day balance - workgroups for updating  ",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-27 08:47",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000"
-    },
-    {
-      "task_id": "t016",
-      "task_title": "DSE data feed issues -- post go-live",
-      "note": "Simon confirms there is test data in UOXU but uncertain if DWH environment points at it; discussion scheduled for tomorrow to prioritise roadmap for DWH, Fabric and other items.",
-      "email_subject": "RE: Business rules for Data Warehouse",
+      "task_id": "t2608261500531",
+      "task_title": "Locate documentation on Grade 2 increment bar changes (2024 uplift)",
+      "note": "Simon has responded with details: employees on scale point 2.5 were moved to 2.6 during 2024 uplift, no one moved to 2.7 or 2.8; he has additional email from Tonya with more context.",
+      "email_subject": "RE: 2024 non clinical uplift_Incremental bar changes for Grade 2",
       "email_from": "Simon Burford",
-      "received": "2026-08-24 14:37",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890ED0000"
-    },
-    {
-      "task_id": "t016",
-      "task_title": "DSE data feed issues -- post go-live",
-      "note": "Ewan Kilgour has scheduled a meeting tomorrow to discuss Data Warehouse business rules and come up with a prioritised roadmap for DWH, Fabric and related work.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Ewan Kilgour",
-      "received": "2026-08-24 12:25",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000"
+      "received": "2026-08-27 17:09",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901F0000"
     },
     {
       "task_id": "t2608261500530",
       "task_title": "Review REF2029 UDF promotion to UOXP",
-      "note": "Kevin confirmed REF2029 UDF is now live in production; UDF display is currently visible to all users and Nathan is requesting it be turned off pending controlled rollout.",
+      "note": "Nathan confirms promotion can proceed; Kevin has completed the action of pushing REF2029 UDF to live production.",
+      "email_subject": "Re: REF29 UDF - Promotion to UOXP",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-08-27 17:08",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901E0000"
+    },
+    {
+      "task_id": "t2608271501000",
+      "task_title": "Confirm Cross-Team Process Improvement Working Group attendance - 28 Sept",
+      "note": "Michael confirms Kevin has already accepted the 28 September Cross-Team Process Improvement Working Group meeting.",
+      "email_subject": "FW: Cross-Team Process Improvement Working Group – 1st Meeting",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-27 09:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6B0000"
+    },
+    {
+      "task_id": "t2608261500530",
+      "task_title": "Review REF2029 UDF promotion to UOXP",
+      "note": "Kevin has clarified a limitation: REF2029 UDF cannot filter to show only for people with completed prior year record.",
       "email_subject": "Re: REF29 UDF - Promotion to UOXP",
       "email_from": "Kevin (sent to: Nathan Kirwan)",
-      "received": "2026-08-27 13:25",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B2798C2B0000"
+      "received": "2026-08-27 16:39",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B2798C2C0000"
     }
   ]
 }
