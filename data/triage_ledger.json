@@ -509,7 +509,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Cority integration error notification for Oxford University HR import dated 21 August with error log file attached requiring review.",
+    "ai_summary": "Cority integration error occurred during the Employee Import on 21 August 2026 at 17:00 and requires Kevin to review the attached log file.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -597,7 +597,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy updating Kevin that the sales-to-professional-services interbal transition call for PO E22033553 Quality funded work is happening this afternoon.",
+    "ai_summary": "Sophie Levy is updating Kevin on a PO E22033553 Quality funded work transition call happening this afternoon with sales to professional services handover.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -756,7 +756,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:28:29.503000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan asking if the PDR scheduled for Friday 18 September can be rescheduled as he is on leave then and the annual leave year-end is approaching.",
+    "ai_summary": "Michael O'Sullivan is asking if the PDR on Friday 18 September can be rescheduled as he will be on leave that week.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -776,8 +776,8 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 14:51:08.385000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Nathan Kirwan flagging the promotion of REF29 UDF to UOXP production environment and requesting Kevin's awareness or decision.",
-    "needs_reply": true,
+    "ai_summary": "Nathan Kirwan is flagging the promotion of REF29 UDF to UOXP for Kevin's awareness.",
+    "needs_reply": false,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-26",
@@ -796,7 +796,7 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 12:06:13.687000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan asking Kevin if he recalls any decisions or has documentation on Grade 2 increment bar changes from the 2024 non-clinical uplift.",
+    "ai_summary": "Michael O'Sullivan is asking Kevin if he recalls any decisions or has documentation relating to Grade 2 increment bar changes from the 2024 non-clinical uplift.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -836,7 +836,7 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 15:23:57.654000+00:00",
     "kevin_is_primary_recipient": false,
-    "ai_summary": "Alex Manton-Jones inviting Kevin to join a follow-up MS Teams call on Pre-project Authentication with meeting link provided.",
+    "ai_summary": "Alex Manton-Jones is sending a follow-up meeting invitation for Oxford Uni Pre-project Authentication discussion; Kevin is cc'd.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -856,8 +856,88 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 16:29:49.572000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Marie forwarding Chemistry's workgroup update request for 38-day balance changes and asking whether this is a significant policy change requiring escalation.",
+    "ai_summary": "Marie Cooksey forwards a workgroup update request from Chemistry regarding the 38-day balance change and is asking whether this is a significant piece of work.",
     "needs_reply": true,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-27"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B27990180000": {
+   "tier": "needs",
+   "card": {
+    "title": "Kevin Lelitte shared \"PeopleXD - Data Protection Impact Assessment v0.5\" with you",
+    "sub": "From <strong>Kevin Lelitte</strong>. Kevin Lelitte invited you to edit a file \r\n\r\n\t\r\nHere&#x27;s the document that Kevin Lelitte shared with you. \r\n\r\n&lt;https://uni",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Kevin Lelitte shared \"PeopleXD - Data Protection Impact Assessment v0.5\" with you",
+    "from": "Kevin Lelitte",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B27990180000",
+    "received": "27 Aug",
+    "received_raw": "2026-08-27 08:50:41.055000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Kevin Lelitte has shared a PeopleXD Data Protection Impact Assessment v0.5 document for Kevin to review and edit.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-27"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000": {
+   "tier": "needs",
+   "card": {
+    "title": "RE: changing to 38 day balance - workgroups for updating  ",
+    "sub": "From <strong>Michael O'Sullivan</strong>. Hi Marie,\r\n\r\n \r\n\r\nThe list of workgroups was expected, and it is the 131 workgroups listed that will need to be amended ",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "RE: changing to 38 day balance - workgroups for updating  ",
+    "from": "Michael O'Sullivan",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000",
+    "received": "27 Aug",
+    "received_raw": "2026-08-27 08:47:57.798000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Michael O'Sullivan confirms that 131 workgroups need to be amended for the 38-day balance change and is providing the list to Kevin.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-27"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32160000": {
+   "tier": "needs",
+   "card": {
+    "title": "Your meeting \"Oxford Uni - Pre-project Authentication (Follow up)\" is starting soon...",
+    "sub": "From <strong>Alex MantonJones via Clari Copilot</strong>. Hello,\r\n\r\nOur Meeting, Oxford Uni - Pre-project Authentication (Follow up) starts in a few minutes.\r\n\r\nTalk to you soon,",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Your meeting \"Oxford Uni - Pre-project Authentication (Follow up)\" is starting soon...",
+    "from": "Alex MantonJones via Clari Copilot",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32160000",
+    "received": "26 Aug",
+    "received_raw": "2026-08-26 15:22:12.403000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Meeting reminder notification that the Oxford Uni Pre-project Authentication meeting is starting soon.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-27"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2600008DFB9C6852DC5A43B72538034BBFF5350007B13CECEF0000": {
+   "tier": "needs",
+   "card": {
+    "title": "HR Systems Team Meeting - tomorrow",
+    "sub": "From <strong>Asta Palmer</strong>. Hello!\r\n\r\n \r\n\r\nIt\u2019s our team meeting tomorrow, and it\u2019s Presentations week.\r\n\r\n \r\n\r\nPlease let me know if you have somet",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "HR Systems Team Meeting - tomorrow",
+    "from": "Asta Palmer",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2600008DFB9C6852DC5A43B72538034BBFF5350007B13CECEF0000",
+    "received": "25 Aug",
+    "received_raw": "2026-08-25 13:35:46.237000+00:00",
+    "kevin_is_primary_recipient": false,
+    "ai_summary": "Asta Palmer reminds that the HR Systems Team meeting is tomorrow during Presentations week and asks for presentation topics; Kevin is cc'd.",
+    "needs_reply": false,
     "no_action_needed": false
    },
    "first_tracked": "2026-08-27",
