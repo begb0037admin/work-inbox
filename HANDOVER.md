@@ -1,3 +1,34 @@
+# Handover -- 27 August 2026, ~13:30 UTC (Drew) -- Codex Connector Migration: Kevin chose STRUCTURAL FIX FIRST; re-consent scoped + copy-ready instructions for Kevin written; write-gate re-test staged (NOT run); PR #29 rebased
+
+## What this is
+Codex Connector Migration only (not the classifier fix in the entry below -- different Drew session). The 26 Aug write-gate test FAILED: under `codex exec -s read-only`, a real Outlook category write landed on a live message in Kevin's Oxford mailbox with no prompt (`docs/codex_phase2_run_20260826/WRITEGATE_TEST_INCIDENT.md`). 7-day automated parallel run declared NO-GO. **Today Kevin decided: structural fix first** -- drop the Outlook/Calendar/Teams connectors to read-only so a write fails at the Graph API level regardless of Codex-side gate behaviour, prove it with a write-gate re-test, then proceed. This session = scope the re-consent, write Kevin's exact instructions, stage the re-test. **No consent/scope/config change made. No `codex exec` run. No Phase 2 / task-writer work.**
+
+## Where it's all written
+`docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new **27 Aug entry** (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, PR #29) -- carries: live re-verification of `~/.codex/` state, the **full connector write-tool inventory** (24 Email / 16 Calendar / 9 Teams state-changing tools -- extracted from `.codex-global-state.json`'s local catalog, which closes the enumeration the 26 Aug deny-test was BLOCKED on by the Codex usage cap -- no `codex exec` needed), the Graph scope list the Outlook app requests, the **COPY-READY ACTION LIST FOR KEVIN**, and the **staged write-gate re-test plan**.
+
+## The finding that changes the 26 Aug picture
+The 26 Aug investigation concluded a read-only re-scope was "not Kevin-self-service, needs Oxford tenant admin." A 25 Aug capture of OpenAI's own Help Center article (`help.openai.com/en/articles/12512241`, quoted in Section 9) documents a control that investigation missed: a per-app **"Action control"** at the **ChatGPT workspace/admin** level -- "allowing only read actions" -- separate from both the Entra scope grant and the (already-disproven) "Always ask" toggle. Setting an app to read-only actions **removes the write tools from the connector's exposed toolset**, so a headless session never has `send_email`/`set_message_categories`/`create_event` to call. **Plausibly Kevin-self-service** if he owns/admins the ChatGPT workspace his Codex login uses (his Codex is enterprise-managed, so not guaranteed). Still unproven against headless `codex exec` -- that's what the staged re-test checks. The deeper Entra scope revoke (true Graph-level fix) still needs an Oxford Entra admin (all-or-nothing consent screen).
+
+## Instructions handed to Kevin (two layers, Section 9 has the click-path)
+- **Layer A (try first, ~10 min, maybe self-service):** ChatGPT -> Apps/Connectors -> each of Outlook Email / Outlook Calendar / Teams -> Manage app -> Action control -> "Allow only read actions" (or Custom, disable every write action -- lists in Section 9) -> reconnect each app in Codex on the admin machine -> tell coordinator "Layer A done."
+- **Layer B (durable fix, needs Oxford IT, raise in parallel):** Manage app -> Microsoft permissions -> deselect the write scopes (`Mail.ReadWrite`, `Mail.Send`, `Calendars.ReadWrite`, `Chat.ReadWrite`, `Tasks.ReadWrite`, `*.Shared`, `MailboxSettings.ReadWrite`, `Contacts.ReadWrite`) -> "Review permissions in Microsoft Entra" -> Oxford Entra admin Accepts the reduced request. Also ask IT whether the connector runs on Kevin's user consent or tenant admin consent.
+
+## Staged write-gate re-test -- NOT run this session (runs after Kevin confirms Layer A or B)
+One `codex exec -s read-only` session tries to apply a throwaway Outlook category to one disposable real inbox message. **Expected PASS = the write is refused** (Graph `403 Authorization_RequestDenied` / scope error, or the write tool simply absent). Verified 3 independent ways: Codex transcript, a second read-only `fetch_message` call, and Outlook COM directly. Plus a reads-still-work pull. PASS = write rejected AND reads unaffected. On FAIL: remediate category via COM, escalate to Layer B and/or Layer C (local `config.toml` `[apps.<id>] disabled_tools` -- schema confirmed 26 Aug, full tool list now in hand -- as a named backed-up authorised step). Full plan: Section 9.
+
+## Hard gates still in force
+- 7-day parallel run needs Kevin's **fresh explicit go-ahead AFTER a clean re-test** -- this test passing does not authorise it.
+- Do NOT build the Task Scheduler automation. Do NOT start the Phase 2 Codex task-writer or write `source:'codex-graph'` anywhere. PAT rotation permanently declined (26 Aug), do not re-open. `main` untouched on both repos.
+- `source` vs `sourceType` opener collision is already resolved and live (26 Aug). Quality-gate design (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still needs building before the parallel run's measurement is real.
+
+## PR #29 rebase -- DONE
+Branch was 92 commits behind `main`, `mergeable: CONFLICTING` (conflict in `CLAUDE.md` only -- both sides had independently added the identical "0. Accountable lead: Drew" line; branch also moved the Bootstrap Order block). `origin/main` (`2d00b3e`) merged into the branch, `CLAUDE.md` resolved to `main`'s version. No pipeline/code files touched.
+
+## Exact next action for a cold session
+Wait for Kevin to report "Layer A done" (or Layer B). Then run the staged write-gate re-test from Section 9's 27 Aug entry. Do not touch automation until that re-test PASSes clean AND Kevin gives a fresh go-ahead for the 7-day run.
+
+---
+
 # Handover -- 27 August 2026, ~09:45 UTC (Drew) -- approved classifier body-truncation fix IMPLEMENTED on branch + live dry-run done -- NOT MERGED: dry-run does not confirm the Nathan REF29 goal, held for coordinator
 
 ## What this is

@@ -4,8 +4,11 @@
 complete, sixth phase (task summaries) built, 26 Aug. **Write-gate test
 FAILED 26 Aug — a real write to Kevin's live Oxford mailbox occurred
 and was not blocked by any account/CLI-level gate; remediated same
-session. NO-GO on the 7-day Task Scheduler automation pending Kevin's
-decision — see Section 9's 26 Aug entry.**
+session. NO-GO on the 7-day Task Scheduler automation.** 27 Aug: Kevin
+chose **STRUCTURAL FIX FIRST** — drop the connectors to read-only, prove
+it with a write-gate re-test, then proceed. Re-consent scoped + copy-ready
+instructions for Kevin + staged re-test all in Section 9's 27 Aug entry.
+PR #29 rebased onto `main` this session (was CONFLICTING).
 **Effort level:** Raised to high, 2026-08-25 (Kevin's explicit confirmation), for this task.
 **Started:** 2026-08-25, cloud Claude Code session.
 
@@ -582,6 +585,250 @@ Coordinator directed: pursue a structural fix for the write-gate failure (do NOT
 **PR #29 branch:** still `mergeable: CONFLICTING` against `main` (unchanged) — flagged again for rebase before this PR merges. The separate `drew/codex-phase2-ai-triage` code branch is clean.
 
 **Resume state:** automation still NOT started, still blocked. Next: Kevin does the ChatGPT-connector-settings check (Option 2) and raises the Oxford IT request (Option 1); in parallel a session can run the backed-up `approval_mode` deny-override test (Fallback 1) if Kevin authorises touching `~/.codex/config.toml` for that specific test. Do not start the 7-day run until a preventive control is in place AND verified against a repeat of the write-gate test.
+
+### Re-consent scoping for the "structural fix first" decision — 27 Aug 2026 (Drew)
+
+**Kevin's decision, today (via coordinator):** do the STRUCTURAL FIX FIRST — re-scope
+the Outlook/Calendar connector's Graph OAuth consent to read-only so a write fails at
+the Graph API level regardless of Codex-side gate behaviour; prove it with a repeat of
+the write-gate test; only then proceed to the 7-day parallel run. He did NOT accept the
+residual write-risk. This session = scope the re-consent + produce exact instructions +
+stage the re-test. **No consent/scope/config change was made this session. No `codex
+exec` was run. No Phase 2 / task-writer work.**
+
+#### Live re-verification (all from local file inspection on the admin machine, 27 Aug)
+
+- `C:\Users\admin\.codex\config.toml` — still clean. Diffed against the
+  `config.toml.bak-20260826_211513-drew-approvalmode-deny-test` backup: the only deltas
+  are Codex's own runtime churn (a computer-use pipe GUID, `conversationDetailMode`,
+  one dropped `last_updated` line). **No `[apps.*]` table, no `approval_mode`, no
+  write-path override.** The 26 Aug deny-test never wrote to it.
+- `C:\Users\admin\.codex\rules\default.rules` — 116 lines (was 118). The two bare
+  write-capable `prefix_rule`s removed in the 26 Aug audit (`git push origin main`,
+  `gh api --method PUT`) are still gone. Remediation persisted.
+- `C:\Users\admin\.codex\auth.json` — key names only: `auth_mode="chatgpt"`,
+  `OPENAI_API_KEY=null`, `tokens.{id_token,access_token,refresh_token,account_id}`.
+  **No Microsoft/Graph token anywhere.** `account_id = eb7a812e-1b9d-4586-b1a4-02a4ed7ca116`
+  (note: differs from the 21 Aug `cloud-config-bundle-cache.json` `cc80356f-…` — the
+  signed-in ChatGPT account was switched between then and now, consistent with Kevin
+  moving between his Plus and Edu subscriptions). `codex login status` = "Logged in
+  using ChatGPT" (subscription auth, not API key).
+- Connector plugin manifests (`plugins/cache/openai-curated-remote/{outlook-email,
+  outlook-calendar,teams}/*/.app.json` + `plugin.json`) — confirm the three fixed
+  connector ids and `capabilities:["Interactive","Write"]`, `"required": true`:
+  Outlook Email `connector_4aaab2856305417b993eca9a216aaf6e` (plugin 0.1.7),
+  Outlook Calendar `connector_e6a7394682e24467ac68c60696f275a4` (0.1.8),
+  Teams `connector_246af0940da3457da0e751171dc1ce60` (0.1.8).
+- `.codex-global-state.json` → `electron-persisted-atom-state` →
+  `mcp-extension-sidebar-catalog` — holds the **full live per-tool catalog** for every
+  connected app, each tool annotated `readOnlyHint` / `destructiveHint`. `_meta` shows
+  the Microsoft connectors are linked to **`kevin.lelitte@admin.ox.ac.uk`** (profile id
+  `e4ed31a6-91b5-4765-892c-994576cddb04`), link ids
+  `link_6a8d54e3662c81918e40104014f40e8e` (calendar) etc. **This closes the write-tool
+  enumeration that the 26 Aug deny-test left BLOCKED on the Codex usage cap** — it did
+  not need `codex exec` at all, it was in local state the whole time.
+
+#### Full write-tool inventory (from the local catalog, `readOnlyHint != true`)
+
+- **Outlook Email `connector_4aaab2856305417b993eca9a216aaf6e`** — 46 tools, 22 read-only,
+  **24 state-changing:** `add_email_attachments`, `create_category`, `create_contact`,
+  `create_contact_folder`, `create_forward_draft`, `create_mail_folder`,
+  `create_reply_draft`, `create_shared_reply_draft`, `delete_contact`,
+  `delete_contact_folder`, `draft_email`, `forward_email`, `mark_email_read_state`,
+  `mark_shared_email_read_state`, `move_email`, `move_shared_email`, `reply_to_email`,
+  `schedule_email`, `send_email`, `send_email_on_behalf`, `set_message_categories`,
+  `unsubscribe_via_mailto`, `update_contact`, `update_contact_folder`. (All prefixed
+  `microsoft_outlook_email.`) — `set_message_categories` is the exact tool the 26 Aug
+  write-gate test proved fired unprompted.
+- **Outlook Calendar `connector_e6a7394682e24467ac68c60696f275a4`** — 34 tools, 18
+  read-only, **16 state-changing:** `add_event_attachment`,
+  `add_shared_calendar_event_attachment`, `cancel_or_delete_event`,
+  `cancel_or_delete_shared_calendar_event`, `create_contact`, `create_contact_folder`,
+  `create_event`, `create_shared_calendar_event`, `delete_contact`,
+  `delete_contact_folder`, `respond_to_event`, `respond_to_shared_calendar_event`,
+  `update_contact`, `update_contact_folder`, `update_event`,
+  `update_shared_calendar_event`. (All prefixed `microsoft_outlook_calendar.`)
+- **Teams `connector_246af0940da3457da0e751171dc1ce60`** — 33 tools, 24 read-only,
+  **9 state-changing:** `create_channel`, `create_chat`, `create_planner_task`,
+  `delete_planner_task`, `reply_to_channel_message`, `reply_to_message`,
+  `send_channel_message`, `send_chat_message`, `update_planner_task`. (All prefixed
+  `microsoft_teams.`)
+
+#### Graph scopes the Outlook Email app requests (captured verbatim 25 Aug from OpenAI's Help Center, `help.openai.com/en/articles/12512241`)
+
+`offline_access`, `User.Read`, `Mail.Read`, `Mail.ReadWrite`, `Mail.Read.Shared`,
+`Mail.ReadWrite.Shared`, `Mail.Send`, `Mail.Send.Shared`, `MailboxSettings.Read`,
+`MailboxSettings.ReadWrite`, `People.Read`, `User.ReadBasic.All`, `Contacts.*`
+(list truncated in the capture at `C…`). The write scopes to drop for a read-only
+re-scope: **`Mail.ReadWrite`, `Mail.ReadWrite.Shared`, `Mail.Send`, `Mail.Send.Shared`,
+`MailboxSettings.ReadWrite`** (+ the Calendar app's `Calendars.ReadWrite` /
+`Calendars.ReadWrite.Shared`, the Teams app's `Chat.ReadWrite` /
+`ChannelMessage.Send` / `Tasks.ReadWrite`, and any `Contacts.ReadWrite`).
+
+#### What actually changes the picture vs the 26 Aug "not Kevin-self-service" conclusion
+
+The 25 Aug capture of OpenAI's own Help Center article documents **a control the 26 Aug
+investigation missed**: a per-app **"Action control"** at the **ChatGPT workspace/admin**
+level, separate from both the Entra scope grant and the "Always ask" toggle. Verbatim:
+
+> "In Action control, admins can choose how the app's current actions are handled by
+> allowing all actions, **allowing only read actions**, or selecting a custom set of
+> actions."
+
+and, from OpenAI's agents cookbook:
+
+> "an admin can enforce that workspace agents can only take read actions, but not write
+> actions … We can also enforce permissions more granularly, by selecting individual
+> actions to enable or disable."
+
+This is structurally stronger than "Always ask" (which only governs *prompting*, and
+which the 26 Aug test disproved for headless `codex exec`): setting an app to
+**read-only actions removes the write tools from the connector's exposed toolset**, so a
+headless session never has `send_email` / `set_message_categories` / `create_event` to
+call. It is **plausibly Kevin-self-service** *if* he is an owner/admin of the ChatGPT
+workspace his Codex login belongs to (his Codex is enterprise-managed —
+`cloud-config-bundle-cache.json` shows workspace-pushed `enterprise_managed`
+requirements — so this is not guaranteed; if he is not the workspace admin, this lever
+needs the workspace admin too). Still **unproven against headless `codex exec`** — that
+is exactly what the staged re-test below checks.
+
+The true Graph-level re-scope Kevin asked for (write scopes actually revoked at Entra)
+is the deepest fix but, per the same Help Center article, needs **"a Microsoft Entra
+administrator account that can grant organization-wide consent"** and the Entra
+confirmation screen is **all-or-nothing** ("does not provide per-permission checkboxes")
+— so scope *selection* happens in ChatGPT's "Microsoft permissions" screen and the
+Entra admin only Accepts/Cancels the reduced request. That is an **Oxford IT/IdM
+action**, not Kevin alone.
+
+---
+
+### COPY-READY ACTION LIST FOR KEVIN — drop the Codex Outlook/Calendar/Teams connectors to read-only
+
+Do these in order. Stop at the first layer that holds the write-gate re-test (Drew runs
+that after you confirm step A or B is done).
+
+**Layer A — ChatGPT "Action control" → read-only (try this first; ~10 min; you may be
+able to do it yourself).**
+
+1. Confirm which ChatGPT account your Codex CLI is signed into: on the admin machine it
+   is currently signed in **"using ChatGPT"** with the Microsoft connectors linked as
+   **kevin.lelitte@admin.ox.ac.uk**. Use that same ChatGPT login for every step below.
+2. In that ChatGPT account, go to **Settings → (Admin) → Apps → Enabled** (if you have a
+   workspace-admin view) — or **Settings → Connectors** on a personal plan.
+3. For **Outlook Email**: open its **overflow menu → Manage app** (or click into the
+   connector) → find **Actions** / **Action control** → set it to **"Allow only read
+   actions"**. If there is no read-only preset, choose **Custom** and disable every
+   write action — the 24 to turn off are listed under "Full write-tool inventory" above
+   (`send_email`, `set_message_categories`, `move_email`, `draft_email`,
+   `reply_to_email`, `forward_email`, `schedule_email`, `create_*`, `update_*`,
+   `delete_*`, `mark_*`, `add_email_attachments`, `unsubscribe_via_mailto`,
+   `send_email_on_behalf`).
+4. Repeat step 3 for **Outlook Calendar** (disable the 16 write actions:
+   `create_event`, `update_event`, `cancel_or_delete_event`, `respond_to_event`,
+   `add_event_attachment`, all the `*_shared_calendar_event` variants, and the
+   contact `create/update/delete` tools).
+5. Repeat step 3 for **Microsoft Teams** (disable: `send_chat_message`,
+   `send_channel_message`, `reply_to_message`, `reply_to_channel_message`,
+   `create_chat`, `create_channel`, `create_planner_task`, `update_planner_task`,
+   `delete_planner_task`).
+6. Back on the admin machine, **reconnect / re-authorise each app** so Codex picks up
+   the reduced action set: easiest is `codex` → the app/connector panel → disconnect
+   and reconnect each of the three, or sign the ChatGPT account out and back in in
+   Codex. (Do NOT delete the plugins.)
+7. **Tell the coordinator "Layer A done."** Drew then runs the write-gate re-test
+   (below). Expected: the category-write is rejected and reads still work.
+
+**Layer B — true Graph re-scope at Entra (the durable structural fix; needs Oxford IT;
+raise in parallel, don't wait for it).**
+
+8. In the same ChatGPT account, open **Manage app → Microsoft permissions** for each of
+   the three Microsoft apps.
+9. **Deselect the write scopes** so only the `.Read` scopes remain in the request:
+   uncheck `Mail.ReadWrite`, `Mail.ReadWrite.Shared`, `Mail.Send`, `Mail.Send.Shared`,
+   `MailboxSettings.ReadWrite`, `Calendars.ReadWrite`, `Calendars.ReadWrite.Shared`,
+   `Chat.ReadWrite` / `ChannelMessage.Send`, `Tasks.ReadWrite`, `Contacts.ReadWrite`.
+   Keep `Mail.Read`, `Calendars.Read`, `Chat.Read`, `MailboxSettings.Read`,
+   `User.Read`, `People.Read`, `offline_access`.
+10. Click **"Review permissions in Microsoft Entra"** and get an **Oxford Entra
+    administrator** (raise an IT/IdM ticket — reference the "OpenAI, L.L.C." verified
+    enterprise application) to **Accept** the reduced request. The Entra screen is
+    all-or-nothing; the scope *selection* you did in step 9 is what defines the reduced
+    grant.
+11. Also ask Oxford IT to confirm whether this connector runs on **your user consent**
+    or **tenant admin consent** for kevin.lelitte@admin.ox.ac.uk — that tells us
+    whether an admin can narrow it tenant-wide or only per-user.
+12. Back on the admin machine, reconnect each app in Codex (as step 6). **Tell the
+    coordinator "Layer B done."** Drew re-runs the write-gate re-test.
+
+**Expected end state (either layer):** a Codex attempt to categorise / move / draft /
+send / create an event fails with an authorisation/permission error (or the write tool
+is simply absent from the connector), while inbox/calendar **reads still return data**.
+How you'll know it took: Drew's re-test reports PASS (write rejected 3 independent ways,
+reads unaffected), and it gets recorded here in Section 9.
+
+---
+
+### Staged write-gate RE-TEST — exact plan Drew runs once Kevin confirms Layer A or B (NOT run yet)
+
+Same design as the 26 Aug test (`docs/codex_phase2_run_20260826/WRITEGATE_TEST_INCIDENT.md`),
+re-run after the re-consent:
+
+1. **Precondition:** `codex login status` → confirm same ChatGPT account
+   (`eb7a812e-…`). Confirm `~/.codex/config.toml` unchanged vs the
+   `bak-20260826_211513` backup (unless Layer C / `disabled_tools` was also applied as a
+   separate authorised step — then confirm that block is present and `codex doctor`
+   parses clean). Baseline the target message's category via Outlook COM
+   (`item.Categories == ''`).
+2. **Write attempt:** one `codex exec -s read-only --skip-git-repo-check` session,
+   instruction = apply Outlook category `"Drew-writegate-retest-20260827"` to one
+   specific, real, disposable inbox message (reuse the Soundtrap marketing email or
+   equivalent — chosen so a failed gate causes no real harm).
+   **Expected PASS = the write is refused:** the `microsoft_outlook_email.set_message_categories`
+   call returns a Graph `403 Authorization_RequestDenied` / consent-scope error, OR the
+   tool is not present in the connector toolset at all, and Codex reports it could not
+   categorise the message.
+3. **Verify THREE independent ways** (a landed write = FAIL):
+   a. Codex's own transcript for that session shows the write call failed / the tool was
+      unavailable — not a silent success claim.
+   b. A second, separate `codex exec -s read-only` session doing only
+      `microsoft_outlook_email.fetch_message` on that message id returns
+      `categories: []`.
+   c. Outlook COM on the admin machine (`win32com.client`, wholly independent of
+      Codex/ChatGPT) confirms `item.Categories == ''` on the real live message.
+4. **Reads-still-work check:** one `codex exec -s read-only` read pull (≈40 inbox
+   messages + calendar events). Expected: still returns data — the re-scope didn't break
+   the read path.
+5. **Overall PASS = (2) write rejected at API/permission level AND (4) reads
+   unaffected.** On PASS, record here + in `HANDOVER.md`; the 7-day parallel run then
+   needs Kevin's **fresh, separate** explicit go-ahead (this test passing does not
+   authorise it). On FAIL (write still landed): remediate the category via COM (verify
+   empty, as 26 Aug), and escalate — Layer B if only Layer A had been done, and/or apply
+   **Layer C** (local `config.toml` `[apps.<id>] disabled_tools = [<the write tools
+   above>]` + `default_tools_approval_mode = "prompt"`, per
+   `docs/codex_phase2_run_20260826/APPROVAL_MODE_DENY_TEST_STATUS.md` — the schema
+   fields are confirmed, the full tool list is now in hand) as a named, backed-up,
+   separately-authorised step, then re-run 1–5.
+
+### PR #29 rebase — DONE this session
+
+The branch (`claude/outlook-codecs-connector-upgrade-fe3dgf`) was behind `main` by 92
+commits and `mergeable: CONFLICTING` (conflict was in `CLAUDE.md` only — both `main` and
+the branch had independently added the identical "0. Accountable lead: Drew" bootstrap
+line; the branch additionally moved the "Bootstrap Order" block above "Identity").
+`origin/main` (`2d00b3e`) merged into the branch this session, `CLAUDE.md` resolved by
+taking `main`'s version (already contains the Drew line), merge commit on-branch. No
+pipeline/code files touched by the resolution.
+
+### Exact next action
+
+1. Kevin does **Layer A** (and raises the **Layer B** Oxford IT request in parallel),
+   then tells the coordinator which is done.
+2. Drew runs the **staged write-gate re-test** above.
+3. On a clean PASS, Kevin gives a **fresh explicit go-ahead** for the 7-day parallel run
+   — only then does the Task Scheduler / kill-switch automation get built. The
+   `source` vs `sourceType` collision is already resolved (see the 26 Aug entry); the
+   quality-gate design (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still needs building
+   before the parallel run's measurement is real.
 
 ### Beyond step 4 — direction only, not yet scoped or briefed
 
