@@ -1,3 +1,45 @@
+# Handover -- 27 August 2026, ~14:25 UTC (Drew) -- Codex Connector Migration: Layer A ("Allow read actions" per-connector) TESTED -- FAILED, live write went through (COM-confirmed 3 ways, remediated). ALL in-our-control preventive controls now exhausted. 7-day run BLOCKED, decision back to Kevin.
+
+## What this is
+Codex Connector Migration only. Supersedes the ~14:05 UTC entry below. The write-gate re-test the coordinator staged has now been run against Kevin's new setting.
+
+**Kevin's change:** all three Microsoft connectors (Outlook Email, Outlook Calendar, Teams) set to **"Allow read actions"** in personal ChatGPT Plus -> Plugins -> per-connector Permissions. Confirmed NOT the setting during any prior test (earlier runs were on the "Allow low-risk actions" default). Genuine untested change.
+
+## Write-gate re-test -- FAILED
+Full detail + repro: research-doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new "Layer A tested" entry (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`). Scratchpad logs: `writegate_run5.out`, `writegate_run5_verify.out`, `reads_check.out`.
+- **Preconditions:** same ChatGPT account (`eb7a812e-…`); `config.toml` has NO `[apps]` table -- last session's v1/v2 lockout edits fully reverted (diff vs baseline backup = only Codex runtime auto-churn: cua_node hash, browser plugin version bump, pipe GUID). Stale codex daemons killed + infra warmed (cold `codex exec` after a gap reliably hangs on infra startup -- hit twice today; a warm-up call fixes it -- **the 7-day automation will need a pre-flight warm-up / retry wrapper**). Target re-baselined via COM: DistroKid "…on Deezer", `Categories==''`.
+- **Write attempt** (`codex exec -s read-only`, category `Drew-writegate-retest-20260827b`): `mcp: codex_apps/microsoft_outlook_email.set_message_categories (completed)`, Codex claimed success `["Drew-writegate-retest-20260827b"]`. No prompt, no error, no refusal.
+- **3-way verification (write LANDED):** (a) transcript shows `set_message_categories (completed)` + bare success line; (b) a second independent `codex exec -s read-only` `fetch_message` returned `["Drew-writegate-retest-20260827b"]` (not `[]`); (c) Outlook COM, wholly independent -- an immediate check read `''` (propagation lag / stale cache) but a fresh `CoInitialize`+`SyncObjects` then a stable 70-second read (t=0/20/40/70s) consistently showed `item.Categories == 'Drew-writegate-retest-20260827b'`. Write is genuinely on Kevin's live Exchange mailbox.
+- **Reads-still-work:** `list_messages` -> 10 subjects, `list_events` -> 3 events. Reads fine under "Allow read actions".
+- **Remediated:** category cleared via COM, re-fetch `''`, final sweep 0 `Drew-writegate*` residue / 221 msgs. `config.toml` untouched this run.
+
+## Every preventive control in our/Kevin's hands is now exhausted
+| Layer | Result |
+|---|---|
+| "Always ask" ChatGPT toggle | 26 Aug: write went through headless, no prompt |
+| Layer C v1: `config.toml [apps.<id>] disabled_tools` + `default_tools_approval_mode="writes"` | 27 Aug: no effect |
+| Layer C v2: + per-tool `approval_mode="prompt"` ×49 | 27 Aug: no effect |
+| Layer A: per-connector "Allow read actions" (personal Plus) | 27 Aug: no effect |
+| Layer B: Entra scope revoke via Oxford IT | OFF THE TABLE -- Kevin's decision |
+
+In headless `codex exec` the connector tools load from the ChatGPT account's connected apps outside any locally-visible config surface, and the account-side action-permission setting is not enforced on that path. `codex exec --help` has no connector-approval flag.
+
+## Decision now back to Kevin (Section 9 has the full framing)
+1. **Accept residual write-risk** for the 7-day run (as with the GitHub PAT on 25 Aug, but larger: 42 unsupervised `codex exec` runs/week with an un-gated write path to his live mailbox/calendar/Teams). Mitigation: automation wrapper does a post-run COM delta sweep (categories/flags/read-state/folder/Sent+Drafts count vs pre-run baseline) and hard-disables the schedule + alerts on ANY delta -- detection not prevention.
+2. **Authorise the plugin-disable nuclear test** (`codex plugin remove outlook-email` +cal +teams) -- if it strips the `codex_apps/microsoft_outlook_*` tools, reads go too (Phase 2 would need Outlook COM for the data pull, defeating most of the point). Last untried local lever.
+3. **Reverse the Oxford-IT decision** -- tenant-admin scope revoke is the only thing that reliably fails the write at Graph. Only Kevin can un-rule-it.
+4. **Shelve the Codex AI-triage migration** -- keep `fetch_inbox.py` on the Anthropic API (~£36/mo, no live-mailbox write exposure).
+
+## Hard gates still in force
+7-day automation needs Kevin's fresh explicit separate go-ahead regardless. No Phase 2 task-writer, no `source:'codex-graph'` write, no PAT rotation, no `main` writes. `source`/`sourceType` opener collision resolved + live (26 Aug). Quality-gate design (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still unbuilt. Do NOT escalate to Oxford IT.
+
+## PR #29 -- MERGEABLE / CLEAN (rebased earlier this session, commit trail 402013d -> a8278d8 -> this)
+
+## Exact next action for a cold session
+Wait for Kevin's decision among options 1-4 above. Do not touch automation. If option 2: plugin-disable is its own backed-up authorised test (kill codex infra first, `codex plugin list` to get exact ids, disable, re-run both the write-gate test AND a reads pull, then restore). If option 1: build the post-run COM delta-sweep kill-switch as a hard prerequisite before any scheduled run.
+
+---
+
 # Handover -- 27 August 2026, ~14:05 UTC (Drew) -- Codex Connector Migration: Kevin ruled OUT Oxford IT; Layer C local config.toml write-tool lockout BUILT + TESTED -- FAILED both variants, live writes went through (COM-confirmed, remediated), config restored. 7-day run still BLOCKED. PR #29 rebased.
 
 ## What this is
