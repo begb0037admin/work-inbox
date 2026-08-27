@@ -1,15 +1,33 @@
 {
-  "generated_at": "2026-08-27 12:00",
+  "generated_at": "2026-08-27 15:00",
   "new_tasks": [
     {
-      "title": "Prepare presentation for HR Systems Team Meeting - presentations week",
+      "title": "Turn off REF29 UDF display on core portal",
       "tier": "tomorrow",
-      "description": "Asta Palmer is asking Kevin whether he has something to present at tomorrow's HR Systems Team Meeting, which is designated as 'Presentations week'. Kevin needs to confirm if he will present and prepare materials if required.",
-      "email_subject": "HR Systems Team Meeting - tomorrow",
-      "email_from": "Asta Palmer",
-      "received": "2026-08-25 13:35",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2600008DFB9C6852DC5A43B72538034BBFF5350007B13CECEF0000",
+      "description": "Nathan Kirwan is asking to turn off the display of the REF29 UDF on core portal for now, showing it only to specific people. This requires configuration work in the production environment following the promotion Kevin completed today.",
+      "email_subject": "RE: REF29 UDF - Promotion to UOXP",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-08-27 14:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000"
+    },
+    {
+      "title": "Confirm Cross-Team Process Improvement Working Group attendance - 28 Sept",
+      "tier": "week",
+      "description": "Michael O'Sullivan is confirming that Kevin has already accepted the 28 September meeting and noting that Otter is looking for at least one member from HR Systems to attend. Kevin should confirm his continued participation or reassign if needed.",
+      "email_subject": "FW: Cross-Team Process Improvement Working Group – 1st Meeting",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-27 09:18",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6B0000",
       "auto_promoted": true
+    },
+    {
+      "title": "Reschedule PDR with Michael O'Sullivan",
+      "tier": "week",
+      "description": "Michael O'Sullivan is on leave on 18 September and the following week, and with year-end approaching, he's asking to reschedule his PDR to a later date. Kevin needs to propose alternative dates.",
+      "email_subject": "RE: PDR 2026 – Friday 18 September",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-25 13:28",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
     },
     {
       "title": "Review Oxford Uni Pre-project Authentication follow-up notes",
@@ -19,16 +37,6 @@
       "email_from": "Alex Manton-Jones",
       "received": "2026-08-26 15:23",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32170000",
-      "carried_forward": true
-    },
-    {
-      "title": "Reschedule PDR with Michael O'Sullivan",
-      "tier": "week",
-      "description": "Michael O'Sullivan is on leave on 18 September and the following week, and cannot attend his originally scheduled PDR. Kevin needs to offer an alternative date before the annual leave year-end.",
-      "email_subject": "RE: PDR 2026 – Friday 18 September",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-25 13:28",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000",
       "carried_forward": true
     },
     {
@@ -64,58 +72,49 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608191643001",
-      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
-      "note": "Michael clarifies that the 131 workgroups flagged by Julie will need to be amended to reflect revised Holiday Scheme following the 38-day balance rollout.",
+      "task_id": "t2608261500530",
+      "task_title": "Review REF2029 UDF promotion to UOXP",
+      "note": "Nathan confirms UDF is live but requests core portal display be turned off for now; Kevin should action this configuration change.",
+      "email_subject": "RE: REF29 UDF - Promotion to UOXP",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-08-27 14:30",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000"
+    },
+    {
+      "task_id": "t2608270801360",
+      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
+      "note": "Michael has confirmed the 131 workgroups list was expected and will need amendment to reflect revised Holiday Scheme; provides clarification on scope.",
       "email_subject": "RE: changing to 38 day balance - workgroups for updating  ",
       "email_from": "Michael O'Sullivan",
       "received": "2026-08-27 08:47",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000"
     },
     {
-      "task_id": "t033",
-      "task_title": "HR Reporting SSO Migration -- Managed Desktop (Roadmap 179)",
-      "note": "Louise Piper notified all OSM users of current authentication issues affecting login; this may impact HR Reporting SSO Migration work.",
-      "email_subject": "OSM: Authentication Issues",
-      "email_from": "Louise Piper",
-      "received": "2026-08-25 15:31",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B13CC2E80000"
-    },
-    {
-      "task_id": "t031",
-      "task_title": "REF attributes via ESS -- end of July deadline (Sarah Rowles)",
-      "note": "Simon Burford replied to Ewan Kilgour regarding Data Warehouse business rules; noted uncertainty about DWH environment pointing at test data.",
+      "task_id": "t016",
+      "task_title": "DSE data feed issues -- post go-live",
+      "note": "Simon confirms there is test data in UOXU but uncertain if DWH environment points at it; discussion scheduled for tomorrow to prioritise roadmap for DWH, Fabric and other items.",
       "email_subject": "RE: Business rules for Data Warehouse",
       "email_from": "Simon Burford",
       "received": "2026-08-24 14:37",
       "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890ED0000"
     },
     {
-      "task_id": "t009",
-      "task_title": "DPIA -- awaiting Marie's signature",
-      "note": "Kevin shared updated DPIA v0.5 document; progress on signature/review process.",
-      "email_subject": "Kevin Lelitte shared \"PeopleXD - Data Protection Impact Assessment v0.5\" with you",
-      "email_from": "Kevin (sent to: Kevin Lelitte)",
-      "received": "2026-08-27 08:50",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B2798C280000"
-    },
-    {
-      "task_id": "task-1787645383808",
-      "task_title": "Book PDR sessions with Simon Burford and the FA team",
-      "note": "Kevin scheduled PDR for Asta Palmer (corrected recipient after initial email n15 sent to Asta Siautilaite) on Friday 25 September 12:00-1:00pm.",
-      "email_subject": "PDR 2026 – Friday 25 September",
-      "email_from": "Kevin (sent to: Asta Palmer)",
-      "received": "2026-08-27 10:47",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B2798C2A0000"
+      "task_id": "t016",
+      "task_title": "DSE data feed issues -- post go-live",
+      "note": "Ewan Kilgour has scheduled a meeting tomorrow to discuss Data Warehouse business rules and come up with a prioritised roadmap for DWH, Fabric and related work.",
+      "email_subject": "RE: Business rules for Data Warehouse",
+      "email_from": "Ewan Kilgour",
+      "received": "2026-08-24 12:25",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EC0000"
     },
     {
       "task_id": "t2608261500530",
       "task_title": "Review REF2029 UDF promotion to UOXP",
-      "note": "Kevin confirmed he will push REF2029 UDF promotion to live today and will notify Nathan when complete.",
+      "note": "Kevin confirmed REF2029 UDF is now live in production; UDF display is currently visible to all users and Nathan is requesting it be turned off pending controlled rollout.",
       "email_subject": "Re: REF29 UDF - Promotion to UOXP",
       "email_from": "Kevin (sent to: Nathan Kirwan)",
-      "received": "2026-08-27 10:45",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B2798C290000"
+      "received": "2026-08-27 13:25",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97700008DFB9C6852DC5A43B72538034BBFF5350007B2798C2B0000"
     }
   ]
 }
