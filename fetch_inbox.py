@@ -405,7 +405,7 @@ for msg in restrict_date(_inbox_folder, cutoff):
             "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
         }
         if not is_read:
-            entry["body_preview"] = (msg.Body or "")[:150]
+            entry["body_preview"] = (msg.Body or "")[:3000]
             unread_count += 1
         else:
             read_count += 1
@@ -436,7 +436,7 @@ for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
             "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
         }
         if not is_read:
-            entry["body_preview"] = (msg.Body or "")[:150]
+            entry["body_preview"] = (msg.Body or "")[:3000]
         inbox.append(entry)
         captured_ids.add(msg.EntryID)
     except:
@@ -505,7 +505,7 @@ def _build_subfolder_entry(msg, is_read, source_folder):
         "source_folder":   source_folder,
     }
     if not is_read:
-        entry["body_preview"] = (msg.Body or "")[:150]
+        entry["body_preview"] = (msg.Body or "")[:3000]
     return entry
 
 subfolder_unread = 0
@@ -930,7 +930,13 @@ def make_card(msg, category):
         "entry_id":  msg.get("entry_id", ""),
         "received":  received_str,
         "received_raw": msg.get("received", ""),
-        "kevin_is_primary_recipient": msg.get("kevin_is_primary_recipient", True)
+        "kevin_is_primary_recipient": msg.get("kevin_is_primary_recipient", True),
+        # Internal only: full link-cleaned body preview (pre-[:120] truncation)
+        # for the Phase 3.2 needs_reply classifier. Leading underscore so
+        # Phase 3.9's ledger writer (line ~2585) drops it automatically;
+        # also stripped before briefing.json assembly (line ~2670). Never
+        # reaches briefing.json / triage_ledger.json / the dashboard.
+        "_body_preview_full": preview
     }
     return card
 
@@ -1001,7 +1007,7 @@ if summary_candidates and anthropic_available:
                 "id":      str(i),
                 "subject": c["subject"],
                 "from":    c["from"],
-                "preview": (c.get("sub") or "")[:250],
+                "preview": (c.get("_body_preview_full") or c.get("sub") or "")[:2000],
                 "kevin_is_primary_recipient": c.get("kevin_is_primary_recipient", True),
                 "age_days": _age_days(c)
             }
@@ -2666,6 +2672,11 @@ try:
             print(f"WARNING: Phase 3.9 could not persist triage_ledger.json - {e}")
 except Exception as e:
     print(f"WARNING: Phase 3.9 scroll-out persistence failed entirely, Urgent/Needs left as fresh-pull-only this run - {e}")
+
+# Strip internal-only classifier field so it never reaches briefing.json
+# (Phase 3.9's ledger writer already drops it via its "_"-prefix filter).
+for _card in (urgent + needs + fyi + low):
+    _card.pop("_body_preview_full", None)
 
 briefing = {
     "date":         today_str,
