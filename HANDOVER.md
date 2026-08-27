@@ -1,3 +1,40 @@
+# Handover -- 27 August 2026, ~16:00 UTC (Drew) -- Codex Connector Migration: Kevin APPROVED Option 3 (connector-free CODEX_HOME + Outlook COM data pull). This session = build plan ONLY, written to `docs/OPTION3_BUILD_PLAN.md`. No build, no `codex login`, no config/pipeline edit, no automation. Machine at `b2a1a226` baseline.
+
+## What this is
+Codex Connector Migration. Supersedes the ~15:30 / ~14:55 / earlier entries below (same session chain). Every local + account-side write-block route is exhausted (prior entries). Kevin's call: **Option 3 APPROVED** -- disconnect the Microsoft connectors from the automation's ChatGPT identity, pull read data via Outlook COM, still move the six AI-triage phases to Codex (this is what zeros the ~GBP 36/mo). Kevin's steer, verbatim: *"our mission is the cost saving"* -- lost calendar/Teams connector-read breadth, the Graph `web_link` opener (COM `openmail://` fallback is fine), and connector-read parity are all secondary/tradeable; take the simpler path, note the trade-off, don't gold-plate; quality gate still matters (false-demotion) but scoped proportionately.
+
+## Deliverable this session
+`docs/OPTION3_BUILD_PLAN.md` -- new file on branch `claude/outlook-codecs-connector-upgrade-fe3dgf`. Shape mirrors `docs/PHASE2_BRIEF.md`, "Exact next action" line at the top. Full detail also in research doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new entry "Option 3 APPROVED by Kevin -- build plan written".
+
+## Key architecture finding
+**Option 3 is the existing Phase 2 dry-run machinery minus "Call 1".** The 26 Aug dry run (branch `drew/codex-phase2-ai-triage`) already built the reusable core: `tools/codex_triage/categorise_and_stage.py` (verbatim port of `categorise()`/`badge_for()`/`make_card()` -- stays deterministic Python), `build_call2_brief.py` (the six production system prompts copied verbatim), `build_granola_context.py`. "Call 1" = three `codex exec` connector pulls -> Option 3 **deletes it**, feeds `fetch_inbox.py`'s existing Outlook COM Phase 1 pull through a thin adapter. "Call 2" (the single AI `codex exec` call) is **already connector-free by design**; under Option 3 it runs under a connector-free `CODEX_HOME` so that's structural not instructed. New build: (1) COM->Codex adapter, (2) connector-free `CODEX_HOME` + identity, (3) warm-up/retry wrapper, (4) output writers + separate dedup ledger, (5) quality-gate harness, (6) parallel Task Scheduler job (last, separately gated).
+
+## Bonus: Option 3 fixes the missing-importance quality gap for free
+Dry run saw 0 urgent vs the real pipeline's 3 -- the Outlook *connector* did not expose `importance`. Outlook *COM* supplies `importance`/high-flag natively in the same pull, so `categorise()`'s `imp == 2 -> "urgent"` works again with no COM-shim join. The quality gate's whole "missing importance" section (B) is dropped; candidate-count/volume parity becomes a real signal (both sides consume the *same* pulled set -- cleanest possible Codex-vs-Haiku-4.5 A/B).
+
+## Connector-free ChatGPT identity -- EXPLICIT DECISION FOR KEVIN (not assumed)
+The connector-free property comes from the **ChatGPT account**, not `CODEX_HOME` (27 Aug plugin-disable test: the `microsoft_outlook_*` tools re-provision from the account every session). Local records (admin machine, 27 Aug): `~/.codex/auth.json` account `eb7a812e-1b9d-4586-b1a4-02a4ed7ca116` (personal Plus) **has** all three Microsoft connectors linked to `kevin.lelitte@admin.ox.ac.uk`; the other known account `cc80356f-959e-449f-9721-add87a9ba0a5` (Edu / enterprise-managed) has **connector state not visible in any local file**. **Neither is confirmed connector-free.**
+- **Option A (recommended):** dedicated new personal ChatGPT Plus identity for the automation only, Microsoft apps never connected. Connector-free by construction; isolates automation from Kevin's interactive quota. ~GBP 16/mo Plus fee -> net saving ~GBP 20/mo.
+- **Option B:** use `cc80356f` (Edu) *if* Kevin confirms in the ChatGPT web UI it has no Microsoft apps AND controls whether any can be added. Full GBP 36/mo saving, zero added cost, medium robustness (workspace-managed).
+- **Option C:** strip connectors from `eb7a812e`. Not recommended -- fragile (re-adding for interactive use silently re-arms the write path).
+
+## Machine state -- UNCHANGED, at baseline (nothing done this session but reading + doc writes)
+- `~/.codex/config.toml` sha1 **`b2a1a22661b3596b92384e081b6625f786346f0e`** -- re-verified, no `[apps]` table, no hook refs.
+- `codex doctor` clean bar the two standing warnings (Defender exclusions unverified; 0.150.1 update available).
+- Only the persistent `codex ... app-server` daemon running (PID observed, ~112 MB) -- respawns automatically, not a stray `exec`.
+- No `codex exec` run this session. No connector read re-run (not needed; the ~15:30 post-restore verification stands). No `CODEX_HOME` created. No `codex login`.
+- 27 Aug backups still retained: `config.toml.bak-20260827_134635-drew-writetool-lockout`, `config.toml.bak-20260827_142957-drew-plugindisable-test`, `_drew_plugindisable_backup_20260827_142957/`.
+
+## Hard gates in force
+No build, no `codex login`, no `CODEX_HOME` creation, no config change, no `fetch_inbox.py` edit, no deploy, no Task Scheduler entry -- until Kevin acknowledges Build Step 1's read-only tool-list verification. The 7-day run needs `PARALLEL_RUN_QUALITY_GATE_DESIGN.md` built first **and** Kevin's fresh explicit separate go-ahead. No Phase 2 Codex task-writer, no `source:'codex-graph'` write to `data/tasks.json`, no PAT rotation, no Oxford IT, no `main` writes without a per-change go-ahead. `source`/`sourceType` opener collision resolved + live (26 Aug). Every run's log prints a timestamp.
+
+## PR #29 -- branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, OPEN, MERGEABLE. Commit trail 402013d -> a8278d8 -> 7737789 -> f354851 -> c4ccbd1 -> this.
+
+## Exact next action for a cold session
+Build **Step 1 only, then stop for review** (per `docs/OPTION3_BUILD_PLAN.md`): (1) Kevin picks the identity (Option A/B/C above); (2) create `C:\CodexAutomation\.codex`, `set CODEX_HOME` to it, `codex login` as that identity; (3) one read-only `codex exec -s read-only --skip-git-repo-check` that lists available tools -- confirm **zero** `microsoft_outlook_email.*` / `microsoft_outlook_calendar.*` / `microsoft_teams.*` tools; (4) confirm `~/.codex/config.toml` still sha1 `b2a1a226...`; (5) report the tool list back. Do NOT build the COM adapter, wrapper, quality gate, or schedule until Kevin acknowledges that check passed.
+
+---
+
 # Handover -- 27 August 2026, ~15:30 UTC (Drew) -- Codex Connector Migration: Codex commissioned via `codex exec` to attempt a LOCAL fix. Investigation done (angles A-G). Best candidate = PreToolUse hook -- BUILT + TESTED -- FAILED (write executed, hook never fired; COM-remediated). VERDICT: NO local write-block preserves reads. Option 3 (connector-free CODEX_HOME + COM read pull) assessed feasible. Machine restored. 7-day run still BLOCKED, decision with Kevin.
 
 ## What this is
