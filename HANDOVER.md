@@ -1,3 +1,60 @@
+# Handover -- 27 August 2026, ~14:55 UTC (Drew) -- Codex Connector Migration: top-level "Always ask" AND plugin-disable BOTH TESTED -- BOTH FAILED, live writes went through (COM-confirmed, remediated). Machine restored. EVERY lever in Kevin's hands is exhausted. 7-day run BLOCKED, decision back to Kevin.
+
+## What this is
+Codex Connector Migration. Supersedes the ~14:25 / ~14:05 / ~13:30 entries below (same session chain). Two more preventive controls tested this run, both FAILED. Full detail + repro: research-doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new "top-level Always ask test" + "Plugin-disable test" entries (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`). Scratchpad logs: `aa_write.out`, `aa_verify_b.out`, `aa_reads.out`, `pdB_write.out`, `pdB_read.out`.
+
+## Test 1 -- top-level "Always ask" (strictest account-side setting) -- FAILED
+Kevin set the TOP-LEVEL Plugins -> Permissions radio to "Always ask" ("ChatGPT will ask before reading or making changes") -- broader scope than the 14:20 per-connector test, and the **first clean deliberate test of "Always ask" vs the Outlook connector** (the 26 Aug table line was entangled with GitHub). Preconditions verified (same account `eb7a812e-…`; `config.toml` baseline sha1 `b2a1a226…`, no `[apps]`; connectors normal; warmed).
+- **Write attempt** (`codex exec -s read-only`, cat `Drew-writegate-retest-20260827c`): `mcp: codex_apps/microsoft_outlook_email.set_message_categories (completed)`, Codex claimed `["Drew-writegate-retest-20260827c"]`. ~42s, normal timing. **No prompt, no hang, no timeout, no auto-deny -- silently proceeded.**
+- **3-way verify:** (a) transcript `(completed)` + success claim; (b) 2nd independent `codex exec` read-back = `null` (couldn't pin the msg that run -- inconclusive, not `[]`); (c) **Outlook COM** -- t=0 `''` (stale-cache false-clear), then **stable `Categories == 'Drew-writegate-retest-20260827c'` at t=20/45/70s**. Write LANDED on the live mailbox.
+- **Reads check:** `list_messages` + `list_events` + `get_mailbox_settings` all completed, 5 subjects + 2 events, "No changes made." Reads fully functional -- "Always ask" is neither fail-closed nor read-blocking headlessly; it is simply **not enforced at all** on the `codex exec` path.
+- Remediated via COM (`''`, 0 residue / 231 msgs). `config.toml` untouched (account-side change only).
+
+## Test 2 -- plugin-disable (ran under earlier authorisation, before the "hold it" msg -- completed rather than half-done) -- FAILED
+Backups first: `config.toml.bak-20260827_142957-drew-plugindisable-test` (sha1 `b2a1a226…`); the 3 connector cache dirs -> `~/.codex/_drew_plugindisable_backup_20260827_142957/*.tar.gz` + `STATE.txt` (connector app IDs + the 3 `remote_plugin_id`s).
+- `codex plugin remove` N/A -- these are `openai-curated-remote` remote plugins, not in `config.toml`/`[marketplaces.*]`, provisioned server-side from the ChatGPT account.
+- **Attempt A** -- `[plugins."<name>@openai-curated-remote"] enabled=false` x3: parsed OK, `codex doctor` clean, but **every `codex exec` hung on startup** (3x 90s warm-up failures vs. a single warm-up always fixing the ordinary cold-start hang). Not a supported path; breaks startup. Abandoned, config restored.
+- **Attempt B** -- physically moved the 3 cache dirs aside (`mv outlook-email DISABLED-drew-20260827-outlook-email` etc.): warm-up OK first try. **Write went through** (`set_message_categories (completed)`, COM-confirmed stable t=25/50/75s). **Reads worked** (`list_messages`/`list_events` completed). And **the cache dirs re-materialised in the same session** (fresh dirs at 14:47) -- Codex re-downloads them from the account on session start.
+- **Verdict:** the `codex_apps/microsoft_outlook_*` / `microsoft_teams_*` tools are bound to the ChatGPT account's connected apps and re-provisioned every session regardless of local config or plugin-cache state. Plugin-disable lever exhausted.
+
+## Machine state -- FULLY RESTORED (left as found)
+- Test category remediated (COM `''`, 0 `Drew-writegate*` residue / 231 msgs).
+- 3 connector cache dirs restored **byte-identical from tar**; `DISABLED-*` renames deleted; dir has exactly `outlook-email` / `outlook-calendar` / `teams` as found.
+- `config.toml` sha1 `b2a1a226…` -- no `[apps]` table, no plugin overrides, no diagnostic block.
+- `codex doctor` clean; warm-up OK; connector reads re-verified working (`get_recent_emails` completed).
+- Backups retained: `config.toml.bak-20260827_142957-drew-plugindisable-test`, `_drew_plugindisable_backup_20260827_142957/` (3 tars + STATE.txt).
+- Also from earlier this session: `config.toml.bak-20260827_134635-drew-writetool-lockout` (the pre-Layer-C baseline).
+
+## Every lever in Kevin's hands -- tested, all FAILED
+| Lever | Result |
+|---|---|
+| "Always ask" ChatGPT toggle (26 Aug, GitHub-entangled) | write went through |
+| Layer C v1: `config.toml [apps.<id>] disabled_tools` + `default_tools_approval_mode` | no effect |
+| Layer C v2: + per-tool `approval_mode="prompt"` x49 | no effect |
+| Per-connector "Allow read actions" (personal Plus) | no effect |
+| **Top-level "Always ask"** (strictest; clean Outlook test) | **no effect** |
+| **Plugin-disable** -- config `enabled=false` | breaks startup (non-viable) |
+| **Plugin-disable** -- physical cache removal | no effect, tools re-materialise |
+| Oxford Entra scope revoke | OFF THE TABLE -- Kevin's decision |
+
+In headless `codex exec` the connector tools load from the ChatGPT account's connected apps outside any local config/plugin surface; no account-side permission setting is enforced on that path. Reads + writes both always succeed, no prompt/hang/denial.
+
+## Decision back to Kevin (Section 9 has full framing)
+1. **Accept residual write-risk** for the 7-day run + build a post-run COM delta-sweep kill-switch (categories/flags/read-state/folder/Sent+Drafts vs pre-run baseline -> hard-disable + alert on any delta) as a hard prerequisite. Detection, not prevention.
+2. **Reverse the Oxford-IT decision** -- tenant-admin Graph scope revoke is the only thing that fails the write at the API.
+3. **Disconnect the connectors from the automation's ChatGPT account** and pull Phase 2's read data via Outlook COM (existing `fetch_inbox.py`); the six AI phases still move to Codex (zeros the ~£36/mo), no live-mailbox write path. Loses the Graph `web_link` opener + calendar/Teams read breadth.
+4. **Shelve the migration** -- keep `fetch_inbox.py` on Anthropic (~£36/mo, zero write exposure).
+
+## Hard gates in force
+7-day automation needs Kevin's fresh explicit separate go-ahead regardless + a pre-flight warm-up/retry loop in the wrapper (cold `codex exec` reliably hangs on infra startup). No Phase 2 task-writer, no `source:'codex-graph'` write, no PAT rotation, no `main` writes. `source`/`sourceType` opener collision resolved + live (26 Aug). `PARALLEL_RUN_QUALITY_GATE_DESIGN.md` still unbuilt. Do NOT escalate to Oxford IT.
+
+## PR #29 -- MERGEABLE / CLEAN (rebased earlier this session; commit trail 402013d -> a8278d8 -> 7737789 -> this)
+
+## Exact next action for a cold session
+Account-side + plugin-disable routes are BOTH exhausted (confirmed, not inferred). Do NOT re-test connector-permission or plugin settings. Wait for Kevin's pick among options 1-4 above. If option 1: build the post-run COM delta-sweep kill-switch as a hard prerequisite before any scheduled run. If option 3: scope the "connectors disconnected, COM data pull, Codex AI phases" variant. Do not touch automation until Kevin decides + gives a fresh go-ahead.
+
+---
+
 # Handover -- 27 August 2026, ~14:25 UTC (Drew) -- Codex Connector Migration: Layer A ("Allow read actions" per-connector) TESTED -- FAILED, live write went through (COM-confirmed 3 ways, remediated). ALL in-our-control preventive controls now exhausted. 7-day run BLOCKED, decision back to Kevin.
 
 ## What this is
