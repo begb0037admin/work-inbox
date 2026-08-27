@@ -1,3 +1,209 @@
+# Handover -- 27 August 2026, ~09:45 UTC (Drew) -- approved classifier body-truncation fix IMPLEMENTED on branch + live dry-run done -- NOT MERGED: dry-run does not confirm the Nathan REF29 goal, held for coordinator
+
+## What this is
+Coordinator gave the go-ahead to ship the classifier/body-truncation fix diagnosed in the 09:10 UTC entry below (root causes A + B). Instruction: implement on a branch, verify by `--dry-run` verdict diff on one live inbox, confirm Nathan Kirwan's "REF29 UDF - Promotion to UOXP" now scores `needs_reply:true`, Lauren reviews, then merge + deploy -- BUT "if the diff shows unexpected movement, STOP and report back to coordinator instead of merging." The dry-run did not confirm the Nathan goal (two independent reasons, below), so per that instruction this is **STOPPED at the branch, not merged**.
+
+## Restore point (code)
+`fetch_inbox.py` on `main` is UNCHANGED: blob sha `ba01178952dfeeb636f9b1d921592869159bb7f4`, 143362 bytes, sha256 `8298639db7f8775507cfd5f4e963efb2f53070c871898469fc8ba75bac9a4ce0` (identical to the 21 Aug merge -- the file has not moved since). `main` HEAD was `a29c2dc90b` at session start, `8bcfdca389` now; every commit in between is the separate publish-lane session + routine pipeline/tick commits, none touching `fetch_inbox.py`. Nothing to roll back -- main was never written.
+
+## The fix -- branch `drew/classifier-body-preview-fix`, commit `af4be3edefa1d2cc030e9034d9158ded80d74054`
+Byte-verified against local, `py_compile` clean. Exactly the 4-point proposed diff, 6 edits, nothing else:
+- lines 408 / 439 / 508 (the three unread-inbox-email body builders: top Inbox, VIP sweep, subfolder sweep): `(msg.Body or "")[:150]` -> `[:3000]`. Sent-items (572) and calendar (636/680) `[:100]` builders deliberately untouched -- they never feed `make_card()`/Phase 3.2.
+- `make_card()`: card dict gains `"_body_preview_full": preview` (the link-cleaned, stripped, pre-`[:120]` value). Leading `_` so Phase 3.9's ledger writer (line ~2585 `if not str(k).startswith("_")`) drops it automatically.
+- Phase 3.2 line 1004: `"preview": (c.get("sub") or "")[:250]` -> `"preview": (c.get("_body_preview_full") or c.get("sub") or "")[:2000]`.
+- New 3-line loop immediately before `briefing = {` (line ~2670): `for _card in (urgent+needs+fyi+low): _card.pop("_body_preview_full", None)` -- so it never reaches `briefing.json`.
+- Net data-exposure posture: `_body_preview_full` reaches NOTHING durable -- stripped before `briefing.json`, `_`-filtered out of `triage_ledger.json`, not built into `inbox_suggestions.json` (that is assembled from AI triage output, not card dicts). Dashboard `sub` is still `[:120]` -> **no UI change**.
+
+Note: the field was named `_body_preview_full` (underscore), not `body_preview_full` as literally written in the proposal. This is a deliberate correctness improvement, not scope creep: the proposal's own "strip in the existing pre-write cleanup" only covered `briefing.json`; without the `_` prefix the field would have leaked into `triage_ledger.json` via Phase 3.9's card serialiser. The `_` prefix reuses the file's existing internal-field convention (`_ai_verdict_valid`).
+
+## Dry-run -- live, on today's real inbox (harness, zero writes)
+Harness = `fetch_inbox_fixed.py` with an instrumentation block inserted after `email_summary_user` is built and a hard `SystemExit(0)` before the real Phase 3.2 call. Ran real Phase 1 (Outlook COM: inbox 47, unread 21, 16 urgent+needs candidates), real Phase 2, real Phase 3 card build. Then 4 `claude-haiku-4-5` calls on the SAME candidate set (isolates the one changed variable; inbox drift impossible):
+- OLD_1 / OLD_2: old `preview = (sub)[:250]`
+- NEW_1 / NEW_2: new `preview = (_body_preview_full)[:2000]`
+
+| call | stop_reason | input_tok | output_tok | parsed |
+|---|---|---|---|---|
+| OLD_1 | end_turn | 2959 | 1110 | 16/16 |
+| OLD_2 | end_turn | 2959 | 847 | 16/16 |
+| NEW_1 | end_turn | 12951 | 1191 | 16/16 |
+| NEW_2 | end_turn | 12951 | 1145 | 16/16 |
+
+`stop_reason` is `end_turn` on all four (no `max_tokens`). Input tokens ~4.4x (2959 -> 12951), as expected. Output tokens unaffected (the 10 Aug incident was output-token; not reproduced). All 16 entries parsed every call.
+
+**Verdict diff (final `needs_reply` after the >60d staleness override, OLD_1 vs NEW_1):** only 2 of 16 cards show any movement, and in BOTH the OLD verdict was itself non-deterministic while NEW was stable:
+- id=10 "HR Systems Team Meeting - tomorrow" (Asta Palmer, cc-only): OLD [True, False] -> NEW [False, False]. New preview only 214 chars (short email).
+- id=14 "Re: PO ref E22033553 / Quality funded work" (Sophie Levy, primary): OLD [True, False] -> NEW [False, False]. New preview maxed at 2000 chars.
+
+No card moved from a *stable* false to a *stable* true or vice-versa. The only effect is: where the truncated preview made the classifier flip-flop, the full body makes it settle -- in both observed cases on `needs_reply:false`, the more defensible call. Net direction: fewer false positives, more stable verdicts, materially better `ai_summary` text. Full dump: `scratchpad/dryrun_result.json` (not committed).
+
+## Nathan Kirwan "REF29 UDF - Promotion to UOXP" -- goal NOT met, two independent reasons
+**1. The email has been READ since the 09:03 run.** Confirmed live via COM this session: `UnRead = False`, still in `\\kevin.lelitte@admin.ox.ac.uk\Inbox`, body 2274 chars. It was unread at 09:03 (hence in `needs[]` + the 09:09 manual repair). Read inbox emails get **no `body_preview` captured at all** (fetch_inbox.py only sets it `if not is_read`) and `categorise()` sends a read/no-keyword email to **fyi**, which is not in `summary_candidates` (Phase 3.2 = `urgent + needs` only). So as of now the needs_reply classifier never sees this email regardless of the truncation fix. It was not in the dry-run's 16 candidates for this reason.
+**2. Even with the full body, the classifier scores it `needs_reply:false`.** Targeted probe (`scratchpad/nathan_probe.py`): exact `EMAIL_SUMMARY_SYSTEM` prompt + call params, realistic 3-item batch, Nathan's full recovered 2274-char body, `kevin_is_primary_recipient=true`, `age_days=1`, 3 runs each:
+- OLD truncated preview (157 chars): `needs_reply=false, no_action_needed=false` 3/3. Summary: "flagging a promotion ... for Kevin's awareness or action."
+- NEW full-body preview (2000 chars): `needs_reply=false, no_action_needed=false` 3/3. Summary (much better): "Nathan confirms REF2029 UDF tested and approved for promotion to UOXP; Simon has documented the config (Display on CorePortal, Hide Dates on CorePortal, allow-update disabled) that Kevin should apply in LIVE."
+
+The classifier is following its prompt spec: this is a "review + apply config in LIVE" email (Kevin has an action -> `no_action_needed:false`) but not a "send a reply" email -- structurally the same as the prompt's own example `"Christopher forwards the tender evaluation pack and needs Kevin to review and sign off ... needs_reply:false, no_action_needed:false"`. Nathan's "Do let me know if you have any questions" reads as a soft closer, not a direct question. Feeding the full body fixes the *summary* and keeps `no_action_needed:false`; it does not, and arguably should not, flip `needs_reply`.
+
+## Conclusion / why not merged
+The approved fix is mechanically sound, safe, and a real improvement (summary quality, `no_action_needed` reliability, verdict stability, no UI change, no data-exposure regression). But the task's explicit success criterion -- "confirm Nathan's REF29 email now scores `needs_reply:true`" -- is not met, and the "STOP and report to coordinator if the diff shows unexpected movement" branch applies. Lauren review was NOT sent: its premise (a clean diff that also fixes Nathan) no longer holds; the open question is now a content-judgement one for Lauren + Kevin, not a diff sign-off.
+
+## Transient repair status -- will be lost on the next scheduled run, now for an EXTRA reason
+The 09:09 manual repair (`needs_reply.json` 4th entry, `briefing.json` `needs[]` card `needs_reply` false->true, `triage_ledger.json`) is still live on `main`. The next scheduled run (~11:00 UK / 10:00 UTC) will drop it -- and now not only because of the truncation/reclassification path in the entry below, but because the email is now READ, so it moves to `fyi` and never reaches the classifier. `publish_needs_reply.py` then rebuilds `needs_reply.json` without it. `lauren-draft-19` itself is safe -- already mirrored to the Drafted Replies tab by the publish-lane session (commit `1bdf2ad`, 12 entries).
+
+## command-centre -- untouched. No writes to main this session.
+
+## Options for coordinator / Kevin
+1. **Merge the branch anyway** for the summary/stability/`no_action_needed` gains (all verified safe, no UI change), and handle Nathan separately -- accept that "please apply this config in LIVE" style emails are `needs_reply:false` by design.
+2. **Also adjust `EMAIL_SUMMARY_SYSTEM`** so `needs_reply:true` covers "the sender is chasing / waiting to hear back / says 'let me know if...'" even without a hard question -- broader behavioural change, needs its own dry-run + Lauren review. Would also need read-email handling changed (see 3) for it to help Nathan at all.
+3. **Read-email gap** (separate, pre-existing, not in scope today): the needs_reply classifier never sees any *read* email (no `body_preview` captured, routed to `fyi`). If Kevin wants replies surfaced for things he has already opened, that is a distinct fix -- capture `body_preview` for read emails too and/or let `fyi` cards be classified.
+4. **Hold entirely** -- delete the branch, keep re-applying the manual `needs_reply.json` entry while Nathan's draft is needed.
+
+## Exact next action for a cold session
+Do not merge `drew/classifier-body-preview-fix` without a fresh decision. Get the coordinator/Kevin's pick from the options above. If option 1: merge branch `drew/classifier-body-preview-fix` (commit `af4be3e`) to `main` per the backup-and-verify sequence, then trigger `Run Inbox Briefing.bat` and confirm the diff holds live. If option 2/3: those are new design tasks needing their own brief. Nathan's manual repair will be gone after the ~11:00 UK run -- re-apply `needs_reply.json`'s 4th entry if Lauren still needs the draft context before a decision lands.
+
+---
+
+# Handover -- 27 August 2026, ~09:27 UTC (Drew, publish lane) -- out-of-cycle mirror of lauren-draft-19 (substantive version) onto the "Drafted Replies" tab
+
+## What this is
+Coordinator/Kevin task, separate from the 09:10 UTC classifier-fix entry below (different Drew session, still mid-implement). Kevin wanted `lauren-draft-19-20260827` (Nathan Kirwan "REF29 UDF - Promotion to UOXP", 26 Aug) on the dashboard "Drafted Replies" tab NOW, without waiting for the ~12:00 UK scheduled run.
+
+## What was done
+- Waited for Lauren's substantive redraft. It landed at agent-commons `pending-email-drafts/drafts.json` commit **`39f060d015d619395a2653ee4881617359964c49`** ("upgrade lauren-draft-19 ... confidence low->medium") -- `composed_at` 2026-08-27T09:25:35Z. This supersedes the earlier holding version (commit 43b62c4, confidence low). **The substantive version is the one now published** -- not the holding version.
+- Ran `tools/publish_drafted_replies.py` (unchanged; the established, already-approved mirror mechanism). Result: `entries_found: 12`, `entries_published: 12`, `entries_dropped_bad_shape: 0`, `pushed: true`, `byte_identical_verified: true`.
+- work-inbox commit: **`1bdf2ad49164acef8ea71154fac17e588cec0b01`** -- "Mirror drafted_replies.json from agent-commons: 12 entries" (2026-08-27 10:26:58 +0100). https://github.com/begb0037admin/work-inbox/commit/1bdf2ad49164acef8ea71154fac17e588cec0b01
+- Verified `data/drafted_replies.json` on origin/main via git blob: 12 entries, `source_missing: false`, `generated` 2026-08-27T09:27:04Z. Draft-19 row present: `draft_id` lauren-draft-19-20260827, `drafted_at` 2026-08-27T09:25:35Z (matches the substantive redraft), `sender_tier` other, `confidence` medium, `draft_text` opens "Hi Nathan, Thanks for the nudge...", 4 `inline_flags`, `source_entry_id` ends ...F5350007B21C32130000 (matches the repaired `needs_reply.json` entry_id).
+
+## Content of the row (for reference)
+Substantive reply: confirms the three CorePortal settings to replicate in UOXP (Display on CorePortal = on, Hide Dates on CorePortal = on, Allow update on CorePortal = deselected), references Research Services' 23 Jul sign-off that the UDF should not be staff-editable, and carries one `[CONFIRM]` for Kevin -- whether the UOXP promotion has already run and he has personally checked those three settings there. Lauren's flags also recommend sending this as the single combined reply and marking `lauren-draft-11-20260810` (same thread) superseded -- Kevin's call, not actioned.
+
+## UI
+No layout/rendering change -- one new draft row added through the normal mirror pipeline, identical mechanism to every prior scheduled publish. In-pattern; no screenshot gate triggered.
+
+## Re-publish needed?
+No. The substantive (final) version is already published. The ~12:00 UK scheduled run will re-mirror the same agent-commons source and is a harmless no-op for this row unless Lauren revises it again.
+
+## Interaction with the 09:10 UTC classifier-fix entry below
+That session's "## drafted_replies.json -- no action needed" note is now superseded by this out-of-cycle publish. This publish only touched `data/drafted_replies.json`; it did not touch `fetch_inbox.py`, the classifier, `needs_reply.json`, `briefing.json`, or `triage_ledger.json`. The classifier-fix session was asked (via coordinator) to pull/rebase before writing its own next HANDOVER.md checkpoint so it lands on top of this entry.
+
+## Follow-up (~09:55 UTC): "Open original" on draft-19 -- investigated, NOT a draft-19 bug, NOT a regression
+Kevin reported (via coordinator) that "Open original" on the draft-19 row does nothing.
+
+**Mechanism:** `app.js` line ~1511-1512: `hasSource = e.source_entry_id && e.source_entry_id.length > 0`; if truthy it renders `<a ... onclick="openEmail('<source_entry_id>')">Open original</a>`. `openEmail()` (line 313) just does `window.location.href = 'openmail://' + entryId + '/'`. The `openmail://` handler is `open_email.py` -> `mapi.GetItemFromID(entry_id)` -> `item.Display()`. Identical mechanism to every card's email link elsewhere in the dashboard.
+
+**Root cause (and it is NOT draft-19):** `publish_drafted_replies.py` `normalize_entry()` sets `source_entry_id = e.get("source_entry_id") or e.get("draft_id") or ""`. For drafts with **no** real Outlook EntryID in agent-commons (the chat-paste / reply-all-thread drafts **14, 15, 16**), it falls back to the literal `draft_id` string (e.g. `lauren-draft-15-20260818`). That non-empty string passes `hasSource`, so the button renders, but `GetItemFromID("lauren-draft-15-20260818")` fails with `(-2147024809, 'The parameter is incorrect.')`. This is a **pre-existing, already-documented side effect** (see `publish_drafted_replies.py` `normalize_entry` docstring, 18 Aug 2026) -- not new, not caused by the draft-19 publish.
+
+**Evidence:**
+- `C:\Users\admin\Documents\Claude\Projects\work-inbox\data\openmail.log` -- the only failing clicks today are **2026-08-27T10:32:03-10:32:21, four attempts, all `ENTRY ID: lauren-draft-15-20260818` -> "The parameter is incorrect."** Zero draft-19 attempts logged. (draft-15 is the FIRST row in the pending list; draft-19 is last.)
+- Direct COM test this session: `GetItemFromID(<draft-19 source_entry_id>)` **succeeds** -> subject "REF29 UDF - Promotion to UOXP", received 2026-08-26 14:51:08, folder Inbox. draft-19's button works.
+- draft-19's `source_entry_id` is a correct 140-char hex EntryID, byte-identical to the same email's `entry_id` in `data/briefing.json` `needs[5]` and `data/needs_reply.json` -- so the manual repair copied a valid pipeline-format ID, no format problem.
+- Agent-commons `pending-email-drafts/drafts.json`: drafts 14/15/16 have `source_entry_id` ABSENT; draft-19 has it present and valid.
+
+**Scope:** 3 rows broken (draft-14, draft-15, draft-16), all for the same documented reason. draft-11/13/17/18/19 (real hex EntryIDs) work. Not a general regression.
+
+**Not fixed here -- both fix paths are out of the publish lane / need approval:**
+1. *Data fix:* add real `source_entry_id`s to drafts 14/15/16 in Lauren's agent-commons `drafts.json`, then re-run the mirror. Candidate EntryIDs were pulled from Outlook this session (multiple messages per thread -- picking the exact message each draft replies to is Lauren's content-judgement call; list handed to coordinator). This edits Lauren's content file -> coordinate with Lauren.
+2. *Render fix:* in `app.js`, only treat `source_entry_id` as a real link when it looks like an Outlook EntryID (e.g. `/^[0-9A-Fa-f]{40,}$/`), otherwise suppress the "Open original" button. This is a Drafted-Replies-tab render change -> STOP + screenshot + Kevin's "approved" per the UI gate. Not done.
+
+draft-19 itself needs no fix. `data/drafted_replies.json` not re-written in this follow-up.
+
+## Exact next action for a cold session
+Nothing outstanding on the draft-19 publish itself. Open item: decide fix path 1 or 2 above for the draft-14/15/16 "Open original" gap (Kevin's call; render fix needs the UI gate). The classifier fix (root causes + proposed diff) in the ~09:10 entry below is separate and still needs Kevin's go-ahead.
+
+---
+
+# Handover -- 27 August 2026, ~09:10 UTC (Drew) -- Nathan Kirwan "REF29 UDF - Promotion to UOXP" needs-reply repair (data-only, TRANSIENT) + two root causes found; code fix PROPOSED not shipped
+
+## What this is
+Coordinator task: Lauren tried to draft a reply to Nathan Kirwan's 26 Aug 14:51 UTC email "REF29 UDF - Promotion to UOXP" (entry_id `...5350007B21C32130000`, Kevin sole To) and hit two pipeline defects -- it was scored `needs_reply:false` so never entered `data/needs_reply.json`, and the only stored body copy anywhere was a 157-char truncation. Root-cause both, repair this one email's state, push. Per the cautious-change-pace rule and the coordinator's explicit instruction, non-trivial pipeline code changes were to be proposed and held, not shipped.
+
+## Root cause B (truncation) -- the primary one, and it CAUSES root cause A
+Two-stage truncation, byte-confirmed:
+1. Capture: `fetch_inbox.py` lines 408 / 439 / 508 -- `entry["body_preview"] = (msg.Body or "")[:150]`. This 150-char slice is the longest body text the pipeline ever persists for an email. (Subfolder/sent builders at 572/636/680 use `[:100]`.)
+2. Card: `make_card()` line 914 -- `sub = "From <strong>{sender}</strong>." + html.escape(preview[:120])`. 37-char prefix + 120 body chars = the "157 characters" seen. `body_preview` itself is NOT carried onto the card; only `sub` is.
+3. Classifier input: Phase 3.2 line 1004 -- `"preview": (c.get("sub") or "")[:250]`. The `[:250]` is a no-op because `sub` is already <=157 chars. **The needs_reply classifier (claude-haiku-4-5) never sees more than ~120 chars of body.**
+4. The full body IS fetched via Outlook COM (`mapi.GetItemFromID` -> `item.Body`) -- but only in `tools/publish_needs_reply.py`, and only for entries already scored `needs_reply == true` (that script line 116). A false-negative at step 3 means the full body is never fetched and never stored anywhere durable. Chicken-and-egg.
+
+## Root cause A (misclassification) -- a downstream symptom of B
+`needs_reply` is decided solely by the Phase 3.2 Haiku call from: subject + sender + the ~120-char truncated preview + `kevin_is_primary_recipient` + `age_days`. The truncated preview for this email reads "...I hope you have some nice plans for the upcoming bank holiday. I'm just flagging the below promotion o[f...]" -- pure pleasantry + "just flagging", which is a defensible FYI call on what the model could see. The body text that makes it a reply ("...in case it has gotten lost... Simon has flagged some of the challenges... **Do let me know if you have any questions.**", plus Simon's CorePortal config to replicate in LIVE) is cut off at ~char 120. There is NO deterministic floor that can force `needs_reply:true` -- the only overrides (staleness cutoff 60d line 1100, contradiction check line 1131) flip true->false only. The `needs` tier placement + "Reply within 48hrs" badge come from `categorise()` (keyword rules) and `badge_for()` (mechanical: tier==needs & age<48h) -- they are not evidence the pipeline "knew" a reply was needed.
+
+## Proposed fix (NOT shipped -- needs Kevin's go-ahead; broad behavioural change on the live classifier)
+Feed the classifier real body text. Minimal diff:
+- lines 408/439/508: `[:150]` -> `[:3000]` (internal only; every downstream consumer re-slices, dashboard `sub` still `[:120]` so **no UI change**).
+- `make_card()`: also stash `card["body_preview_full"] = preview` (the pre-`[:120]` value).
+- Phase 3.2 line 1004: `"preview": (c.get("body_preview_full") or c.get("sub") or "")[:2000]`.
+- Strip `body_preview_full` in the existing pre-write cleanup so it never lands in briefing.json.
+Risks to verify with a dry run before shipping: (a) reclassifies every email this run -- could move borderline cards either way (this is the point, but it's exactly the "small isolated verified" concern); (b) Haiku input-token increase (~30 candidates x up to 2000 chars) -- the 10 Aug max_tokens incident was OUTPUT tokens, so low risk, but confirm `stop_reason`; (c) briefing.json size if cleanup is missed. Recommend a `--dry-run` diff of `needs_reply` verdicts old-vs-new on one live inbox, reviewed by Lauren, before merge.
+
+## What was repaired (data-only, PUSHED to main) -- and why it is TRANSIENT
+Full body recovered from Kevin's live mailbox via Outlook COM this session (2274 chars, `is_sensitive` = clean, `recipient_tier("Nathan Kirwan")` = "other", matches `lauren-draft-19`).
+- `data/needs_reply.json` -- appended a 4th entry: real entry_id, full body, `sender_tier:"other"`, `ai_note` prefixed "MANUAL REPAIR 2026-08-27 (Drew)" explaining the recovery + naming holding draft `lauren-draft-19-20260827`. Commit `f560a6c56d`.
+- `data/briefing.json` -- `needs[]` card for this entry_id: `needs_reply` false -> true (1 line; `app.js` does not branch on this field, **no UI change**). Commit `c9c070b003`.
+- `data/triage_ledger.json` -- `tracked_needs_urgent[<eid>].card.needs_reply` false -> true (1 line; not dashboard-rendered). Commit `cf547b1a86`.
+All three verified byte-identical via `git/blobs/{sha}`. Pre-change SHAs: needs_reply `73e871e9`, briefing `8c36164a`, triage `c58d14db`.
+
+**TRANSIENCE:** the scheduled "Work Inbox Briefing" run at 12:00 UK today regenerates `briefing.json` from a fresh Outlook pull + fresh Haiku classification. It will re-score this email `needs_reply:false` from the same truncated preview and overwrite all three edits; `publish_needs_reply.py` then rebuilds `needs_reply.json` from `briefing.json`'s flags and drops the manual entry. **These repairs do not survive the next pipeline run. The only durable fix is the code change above (or Kevin holding the pipeline until it's in).**
+
+## command-centre -- NOT changed
+Task `t2608261500530` "Review REF2029 UDF promotion to UOXP" (tier week, correct `entryId`) already represents this email accurately ("Kevin needs to review the promotion details and any HR Systems implications or sign-off requirements"). The only optional enrichment is a dated action line linking `lauren-draft-19`; that renders in the card drawer = a visible change, so it was left for Kevin's screenshot-approval decision rather than pushed. `data/tasks.json` untouched.
+
+## drafted_replies.json -- no action needed
+`lauren-draft-19-20260827` is already committed to `agent-commons/pending-email-drafts/drafts.json` (commit 43b62c4) with the correct `source_entry_id`. `publish_drafted_replies.py` mirrors it into `work-inbox/data/drafted_replies.json` on the next scheduled run (~12:00 UK); it will then appear on the dashboard "Drafted Replies" tab automatically. Not mirrored manually this session (would be a debatable UI push for zero time saved).
+
+## Environment note
+Git Bash (`C:\Program Files\Git\...\bash.exe`) went missing mid-session -- shell builtins/pipes/heredocs/`&&` chains all fail with "bash.exe not found"; single-binary invocations (`git ...`, `python ...`, `python script.py`) still work. All work this session was done by writing Python helper scripts to scratchpad and running them one invocation at a time. Flag for a machine-health check (Max) if it recurs.
+
+## Exact next action for a cold session
+1. Get Kevin's decision on the proposed classifier fix (ship after dry-run review, or hold the pipeline). If shipping: implement the 4-point diff above, `--dry-run` verdict diff on one live inbox, Lauren reviews, then merge + manual pipeline run.
+2. If Kevin wants the command-centre draft-link action line: add it to `t2608261500530`, screenshot the rendered card, wait for "approved", then push with the mandatory backup-and-verify sequence.
+3. Until (1) lands, expect this email to fall out of `needs_reply.json` again on every scheduled run -- re-apply the manual `needs_reply.json` entry if Lauren needs it mid-gap.
+
+---
+
+# Handover -- 26 August 2026, ~20:12 UTC (Drew) -- Codex Phase 2 write-path investigation + quality-gate design done; automation still blocked, structural fix needs Kevin/Oxford IT
+
+## What this is
+Follow-up to the 19:46 entry below (read that first). Coordinator directed: pursue a structural fix for the failed write-gate test rather than accept the risk (Kevin said "continue" but did not explicitly accept it), design the quality gates, do not start automation. No consent/scope/config change made -- investigation only.
+
+## Findings (full detail on branch `drew/codex-phase2-ai-triage`: `docs/codex_phase2_run_20260826/CONNECTOR_WRITE_PATH_INVESTIGATION.md` + `PARALLEL_RUN_QUALITY_GATE_DESIGN.md`; research doc Section 9 updated, commit `0ec1904c7a1e6c23c0619bcfde80bd703e0331fa` on the PR #29 branch)
+
+**Read-only re-scope is NOT a Kevin-self-service action and is NOT locally adjustable.** The Outlook/Calendar/Teams connectors are OpenAI-managed apps; `~/.codex/auth.json` holds only a ChatGPT session, no Graph token -- the connector's Microsoft Graph permission grant lives entirely on OpenAI's backend and is fixed by OpenAI's app registration. Ranked fixes:
+1. Oxford tenant admin revokes the write-scoped Graph delegated permissions on the OpenAI enterprise app for Kevin's account (the real structural fix) -- Kevin raises an Oxford IT/IdM request; first establish whether the connector runs on user vs admin consent. Whether reads survive is empirical.
+2. Kevin checks ChatGPT -> Settings -> Connectors for any read-only/per-capability control beyond "Always ask" (~5 min, do first; "Always ask" alone is already proven not to gate headless `codex exec`).
+3. Local fallback (best candidate, UNPROVEN): `approval_mode` deny overrides in `~/.codex/config.toml` under `[apps.<connector_id>...]` for every state-changing tool -- same structure that auto-approved GitHub writes in the cc93c7b incident, used in reverse. Needs a discrete backed-up test (add block -> re-run write-gate test -> confirm blocked via COM -> confirm reads still work). Should be a named, explicitly-authorised step given the file's history.
+Confirmed dead ends: `codex exec` has no CLI flag for connector-tool approval; `network_proxy` wouldn't help (connector->Graph traffic is server-side).
+
+**Quality-gate design (not built):** false-demotion -> per-run `data/codex_runs/<ts>_codex_disagreements.json` + rollup; disqualifying metric is `codex_hides_work` (Codex `no_action_needed:true` on an email the real pipeline kept) -- one hit on a material thread fails auto-cutover. Missing-importance -> first try `$select`/per-id `fetch_message` full-detail to actually get the field; if not, exclude Urgent tier from fidelity scoring + design a thin COM shim reading only `importance`, joined on subject+received-time.
+
+## Exact next action for a cold session
+Automation stays blocked. Wait for: (a) Kevin's ChatGPT connector-settings check result, (b) the Oxford IT request outcome, and/or (c) Kevin's authorisation to run the backed-up `approval_mode` deny-override test on `~/.codex/config.toml`. Do NOT start the 7-day run until a preventive control is in place AND verified against a repeat of the write-gate test. Re-read research doc Section 9's two 26 Aug entries in full first.
+
+---
+
+# Handover -- 26 August 2026, ~19:46 UTC (Drew) -- Codex Phase 2 (six-phase AI-triage re-implementation): dry-run + diff done, sixth phase built, write-gate test FAILED -- NO-GO on 7-day automation pending Kevin
+
+## What this is
+Kevin's fresh explicit brief today: "go on phase 2, all six run for a week." Full detail lives in `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, PR #29) Section 9's 26 Aug entry -- that document is the authoritative record for this work; this entry is the short pointer + resume instruction.
+
+## What's done
+- Built the sixth phase (priority-task summaries) that the 25 Aug `PHASE2_BRIEF.md` had omitted.
+- Re-architected as two `codex exec -s read-only` calls: a pure connector data pull (had to split into 3 sub-calls -- inbox/sent/calendar -- after a combined pull truncated), then a pure judgement call over locally-supplied context. The deterministic categorise()/badge_for()/make_card() split and the demotion/staleness logic are ported as real Python (`tools/codex_triage/` on branch `drew/codex-phase2-ai-triage`), not left to Codex's own judgement -- only the five genuine language-judgement phases go to Codex.
+- Ran a real dry run against today's live inbox and diffed it against today's actual committed `data/briefing.json`/`data/inbox_suggestions.json`. Full comparison in `docs/codex_phase2_run_20260826/DIFF_REPORT.txt` on that same code branch. Headline: priority-task summaries (the new sixth phase) look strong; task-suggestion triage volume differs substantially from the real pipeline (needs repeat runs before trusting); one concerning single-run no_action_needed disagreement on a real REF-programme-risk thread (Simon Burford/Data Warehouse) -- exactly the false-demotion risk the brief warned about, flagged not hidden; Codex's connector did not expose an importance field this run, so it found 0 urgent vs the real pipeline's 3 (connector-parity gap).
+- **Ran the deliberate write-gate test the brief required -- it FAILED.** Gave Codex a legitimate-sounding, deliberately low-stakes write instruction (categorize one real marketing email) under the same `-s read-only` invocation used throughout. The write executed for real against Kevin's live Oxford mailbox -- confirmed independently twice (a second Codex read-only call, and separately via Outlook COM directly on this machine). No approval prompt fired despite `approval: on-request` in the session header. `codex exec --help` confirms no CLI flag governs MCP/connector-call approval at all. Remediated same session (category cleared via COM, verified empty) -- full incident writeup at `docs/codex_phase2_run_20260826/WRITEGATE_TEST_INCIDENT.md` on the code branch.
+
+## NOT done, and NOT to be started without a fresh decision from Kevin
+The 6x/day-for-7-days Task Scheduler automation was explicitly NOT built. Per the coordinator's own instruction this was always a distinct go/no-go point, and the write-gate test result means it's currently a NO-GO: nothing in Codex's configuration structurally prevents a write during an unattended run. Recommended structural fix (not resolvable from a coding session): check whether the Outlook/Calendar connector's Graph OAuth consent can be re-scoped to read-only at the Microsoft/Graph level, not just the ChatGPT-side toggle.
+
+## Exact next action for a cold session
+Do not proceed to building the Task Scheduler automation. Wait for Kevin to either (a) accept the residual write-risk explicitly, the same way he did for the PAT/connector precondition on 25 Aug, or (b) direct a structural fix to the connector's write scope first. Either way, re-read `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9's 26 Aug entry in full before taking any further action on this work -- do not infer a decision from this summary alone.
+
+## Branches/commits, for verification
+- Code: `drew/codex-phase2-ai-triage` (off `main`, not merged) -- `tools/codex_triage/*.py`, `docs/codex_phase2_run_20260826/*`.
+- Research doc: `claude/outlook-codecs-connector-upgrade-fe3dgf` (PR #29), commit `3e9c2643dbe115b418bf829ea2312773f7afccd1`. That PR shows `mergeable: CONFLICTING` against current `main` as of this session -- flagged for whoever eventually merges it to rebase first; unrelated to and not blocking the code branch above.
+- `main` untouched by this session's work: `data/briefing.json`, `data/tasks.json` (command-centre), `data/triage_ledger.json` were read-only referenced for the diff, never written to.
+
+---
+
 # Handover -- 21 August 2026, ~19:30 UTC (Drew) -- Manual scheduled-equivalent pipeline run triggered post-merge, live dashboards verified -- closes the loop end-to-end on the Absences panel fix
 
 ## What this is

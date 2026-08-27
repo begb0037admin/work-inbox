@@ -2,14 +2,6 @@
 > AI bootstrap entry point. Read this first.
 > Keep this file under 200 lines. Push details to linked docs.
 
-## Bootstrap Order
-0. **Accountable lead: Drew** (`agent-commons/AGENT_DIRECTORY.md`). Any local session working in this repo should dispatch to Drew immediately rather than operating as a generic session — Drew reads its own `AGENT.md`, `MEMORY.md`, and this file before doing anything.
-1. This file (orientation)
-2. `HANDOVER.md` (current state, known issues, roadmap)
-3. Read other docs on demand only.
-
-Do NOT ask Kevin for a recap. The docs above are the recap.
-
 ## Identity
 - **Project:** Work Inbox Dashboard
 - **Purpose:** Fully automated morning inbox briefing for Kevin Lelitte, HR Systems, University of Oxford. Pulls Outlook inbox, sent items, and calendar via Outlook COM → Anthropic API triage → pushes structured briefing.json to GitHub → renders live dashboard.
@@ -18,6 +10,14 @@ Do NOT ask Kevin for a recap. The docs above are the recap.
 - **Repo:** https://github.com/begb0037admin/work-inbox
 - **Live dashboard:** https://begb0037admin.github.io/work-inbox/
 - **Last updated:** 2026-06-09 (v1.3)
+
+## Bootstrap Order
+0. **Accountable lead: Drew** (`agent-commons/AGENT_DIRECTORY.md`). Any local session working in this repo should dispatch to Drew immediately rather than operating as a generic session — Drew reads its own `AGENT.md`, `MEMORY.md`, and this file before doing anything.
+1. This file (orientation)
+2. `HANDOVER.md` (current state, known issues, roadmap)
+3. Read other docs on demand only.
+
+Do NOT ask Kevin for a recap. The docs above are the recap.
 
 ## Architecture — Current Working State
 
