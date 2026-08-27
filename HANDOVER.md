@@ -1,3 +1,68 @@
+# Handover -- 27 August 2026, ~09:45 UTC (Drew) -- approved classifier body-truncation fix IMPLEMENTED on branch + live dry-run done -- NOT MERGED: dry-run does not confirm the Nathan REF29 goal, held for coordinator
+
+## What this is
+Coordinator gave the go-ahead to ship the classifier/body-truncation fix diagnosed in the 09:10 UTC entry below (root causes A + B). Instruction: implement on a branch, verify by `--dry-run` verdict diff on one live inbox, confirm Nathan Kirwan's "REF29 UDF - Promotion to UOXP" now scores `needs_reply:true`, Lauren reviews, then merge + deploy -- BUT "if the diff shows unexpected movement, STOP and report back to coordinator instead of merging." The dry-run did not confirm the Nathan goal (two independent reasons, below), so per that instruction this is **STOPPED at the branch, not merged**.
+
+## Restore point (code)
+`fetch_inbox.py` on `main` is UNCHANGED: blob sha `ba01178952dfeeb636f9b1d921592869159bb7f4`, 143362 bytes, sha256 `8298639db7f8775507cfd5f4e963efb2f53070c871898469fc8ba75bac9a4ce0` (identical to the 21 Aug merge -- the file has not moved since). `main` HEAD was `a29c2dc90b` at session start, `8bcfdca389` now; every commit in between is the separate publish-lane session + routine pipeline/tick commits, none touching `fetch_inbox.py`. Nothing to roll back -- main was never written.
+
+## The fix -- branch `drew/classifier-body-preview-fix`, commit `af4be3edefa1d2cc030e9034d9158ded80d74054`
+Byte-verified against local, `py_compile` clean. Exactly the 4-point proposed diff, 6 edits, nothing else:
+- lines 408 / 439 / 508 (the three unread-inbox-email body builders: top Inbox, VIP sweep, subfolder sweep): `(msg.Body or "")[:150]` -> `[:3000]`. Sent-items (572) and calendar (636/680) `[:100]` builders deliberately untouched -- they never feed `make_card()`/Phase 3.2.
+- `make_card()`: card dict gains `"_body_preview_full": preview` (the link-cleaned, stripped, pre-`[:120]` value). Leading `_` so Phase 3.9's ledger writer (line ~2585 `if not str(k).startswith("_")`) drops it automatically.
+- Phase 3.2 line 1004: `"preview": (c.get("sub") or "")[:250]` -> `"preview": (c.get("_body_preview_full") or c.get("sub") or "")[:2000]`.
+- New 3-line loop immediately before `briefing = {` (line ~2670): `for _card in (urgent+needs+fyi+low): _card.pop("_body_preview_full", None)` -- so it never reaches `briefing.json`.
+- Net data-exposure posture: `_body_preview_full` reaches NOTHING durable -- stripped before `briefing.json`, `_`-filtered out of `triage_ledger.json`, not built into `inbox_suggestions.json` (that is assembled from AI triage output, not card dicts). Dashboard `sub` is still `[:120]` -> **no UI change**.
+
+Note: the field was named `_body_preview_full` (underscore), not `body_preview_full` as literally written in the proposal. This is a deliberate correctness improvement, not scope creep: the proposal's own "strip in the existing pre-write cleanup" only covered `briefing.json`; without the `_` prefix the field would have leaked into `triage_ledger.json` via Phase 3.9's card serialiser. The `_` prefix reuses the file's existing internal-field convention (`_ai_verdict_valid`).
+
+## Dry-run -- live, on today's real inbox (harness, zero writes)
+Harness = `fetch_inbox_fixed.py` with an instrumentation block inserted after `email_summary_user` is built and a hard `SystemExit(0)` before the real Phase 3.2 call. Ran real Phase 1 (Outlook COM: inbox 47, unread 21, 16 urgent+needs candidates), real Phase 2, real Phase 3 card build. Then 4 `claude-haiku-4-5` calls on the SAME candidate set (isolates the one changed variable; inbox drift impossible):
+- OLD_1 / OLD_2: old `preview = (sub)[:250]`
+- NEW_1 / NEW_2: new `preview = (_body_preview_full)[:2000]`
+
+| call | stop_reason | input_tok | output_tok | parsed |
+|---|---|---|---|---|
+| OLD_1 | end_turn | 2959 | 1110 | 16/16 |
+| OLD_2 | end_turn | 2959 | 847 | 16/16 |
+| NEW_1 | end_turn | 12951 | 1191 | 16/16 |
+| NEW_2 | end_turn | 12951 | 1145 | 16/16 |
+
+`stop_reason` is `end_turn` on all four (no `max_tokens`). Input tokens ~4.4x (2959 -> 12951), as expected. Output tokens unaffected (the 10 Aug incident was output-token; not reproduced). All 16 entries parsed every call.
+
+**Verdict diff (final `needs_reply` after the >60d staleness override, OLD_1 vs NEW_1):** only 2 of 16 cards show any movement, and in BOTH the OLD verdict was itself non-deterministic while NEW was stable:
+- id=10 "HR Systems Team Meeting - tomorrow" (Asta Palmer, cc-only): OLD [True, False] -> NEW [False, False]. New preview only 214 chars (short email).
+- id=14 "Re: PO ref E22033553 / Quality funded work" (Sophie Levy, primary): OLD [True, False] -> NEW [False, False]. New preview maxed at 2000 chars.
+
+No card moved from a *stable* false to a *stable* true or vice-versa. The only effect is: where the truncated preview made the classifier flip-flop, the full body makes it settle -- in both observed cases on `needs_reply:false`, the more defensible call. Net direction: fewer false positives, more stable verdicts, materially better `ai_summary` text. Full dump: `scratchpad/dryrun_result.json` (not committed).
+
+## Nathan Kirwan "REF29 UDF - Promotion to UOXP" -- goal NOT met, two independent reasons
+**1. The email has been READ since the 09:03 run.** Confirmed live via COM this session: `UnRead = False`, still in `\\kevin.lelitte@admin.ox.ac.uk\Inbox`, body 2274 chars. It was unread at 09:03 (hence in `needs[]` + the 09:09 manual repair). Read inbox emails get **no `body_preview` captured at all** (fetch_inbox.py only sets it `if not is_read`) and `categorise()` sends a read/no-keyword email to **fyi**, which is not in `summary_candidates` (Phase 3.2 = `urgent + needs` only). So as of now the needs_reply classifier never sees this email regardless of the truncation fix. It was not in the dry-run's 16 candidates for this reason.
+**2. Even with the full body, the classifier scores it `needs_reply:false`.** Targeted probe (`scratchpad/nathan_probe.py`): exact `EMAIL_SUMMARY_SYSTEM` prompt + call params, realistic 3-item batch, Nathan's full recovered 2274-char body, `kevin_is_primary_recipient=true`, `age_days=1`, 3 runs each:
+- OLD truncated preview (157 chars): `needs_reply=false, no_action_needed=false` 3/3. Summary: "flagging a promotion ... for Kevin's awareness or action."
+- NEW full-body preview (2000 chars): `needs_reply=false, no_action_needed=false` 3/3. Summary (much better): "Nathan confirms REF2029 UDF tested and approved for promotion to UOXP; Simon has documented the config (Display on CorePortal, Hide Dates on CorePortal, allow-update disabled) that Kevin should apply in LIVE."
+
+The classifier is following its prompt spec: this is a "review + apply config in LIVE" email (Kevin has an action -> `no_action_needed:false`) but not a "send a reply" email -- structurally the same as the prompt's own example `"Christopher forwards the tender evaluation pack and needs Kevin to review and sign off ... needs_reply:false, no_action_needed:false"`. Nathan's "Do let me know if you have any questions" reads as a soft closer, not a direct question. Feeding the full body fixes the *summary* and keeps `no_action_needed:false`; it does not, and arguably should not, flip `needs_reply`.
+
+## Conclusion / why not merged
+The approved fix is mechanically sound, safe, and a real improvement (summary quality, `no_action_needed` reliability, verdict stability, no UI change, no data-exposure regression). But the task's explicit success criterion -- "confirm Nathan's REF29 email now scores `needs_reply:true`" -- is not met, and the "STOP and report to coordinator if the diff shows unexpected movement" branch applies. Lauren review was NOT sent: its premise (a clean diff that also fixes Nathan) no longer holds; the open question is now a content-judgement one for Lauren + Kevin, not a diff sign-off.
+
+## Transient repair status -- will be lost on the next scheduled run, now for an EXTRA reason
+The 09:09 manual repair (`needs_reply.json` 4th entry, `briefing.json` `needs[]` card `needs_reply` false->true, `triage_ledger.json`) is still live on `main`. The next scheduled run (~11:00 UK / 10:00 UTC) will drop it -- and now not only because of the truncation/reclassification path in the entry below, but because the email is now READ, so it moves to `fyi` and never reaches the classifier. `publish_needs_reply.py` then rebuilds `needs_reply.json` without it. `lauren-draft-19` itself is safe -- already mirrored to the Drafted Replies tab by the publish-lane session (commit `1bdf2ad`, 12 entries).
+
+## command-centre -- untouched. No writes to main this session.
+
+## Options for coordinator / Kevin
+1. **Merge the branch anyway** for the summary/stability/`no_action_needed` gains (all verified safe, no UI change), and handle Nathan separately -- accept that "please apply this config in LIVE" style emails are `needs_reply:false` by design.
+2. **Also adjust `EMAIL_SUMMARY_SYSTEM`** so `needs_reply:true` covers "the sender is chasing / waiting to hear back / says 'let me know if...'" even without a hard question -- broader behavioural change, needs its own dry-run + Lauren review. Would also need read-email handling changed (see 3) for it to help Nathan at all.
+3. **Read-email gap** (separate, pre-existing, not in scope today): the needs_reply classifier never sees any *read* email (no `body_preview` captured, routed to `fyi`). If Kevin wants replies surfaced for things he has already opened, that is a distinct fix -- capture `body_preview` for read emails too and/or let `fyi` cards be classified.
+4. **Hold entirely** -- delete the branch, keep re-applying the manual `needs_reply.json` entry while Nathan's draft is needed.
+
+## Exact next action for a cold session
+Do not merge `drew/classifier-body-preview-fix` without a fresh decision. Get the coordinator/Kevin's pick from the options above. If option 1: merge branch `drew/classifier-body-preview-fix` (commit `af4be3e`) to `main` per the backup-and-verify sequence, then trigger `Run Inbox Briefing.bat` and confirm the diff holds live. If option 2/3: those are new design tasks needing their own brief. Nathan's manual repair will be gone after the ~11:00 UK run -- re-apply `needs_reply.json`'s 4th entry if Lauren still needs the draft context before a decision lands.
+
+---
+
 # Handover -- 27 August 2026, ~09:27 UTC (Drew, publish lane) -- out-of-cycle mirror of lauren-draft-19 (substantive version) onto the "Drafted Replies" tab
 
 ## What this is
