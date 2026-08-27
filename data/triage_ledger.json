@@ -527,7 +527,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "An error occurred during the Cority Employee Import for Oxford University on 21 August 2026; Kevin should review the attached log file.",
+    "ai_summary": "Cority integration platform notification of an HR import error on 2026-08-21; Kevin should review the attached log file for details.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -598,7 +598,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy is informing Kevin that an interbal transition call from sales to professional services for PO E22033553 Quality funded work is happening this afternoon.",
+    "ai_summary": "Sophie Levy updates Kevin that a sales-to-professional services transition call is happening today for project PO ref E22033553 (Quality funded work).",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -740,7 +740,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:28:29.503000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan is asking Kevin to reschedule the PDR 2026 meeting from Friday 18 September as he will be on leave that week.",
+    "ai_summary": "Michael O'Sullivan tells Kevin he is on leave on 18 September and asks whether Kevin can reschedule the PDR meeting, citing year-end annual leave concerns.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -780,7 +780,7 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 12:06:13.687000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan is asking Kevin and another colleague if either can recall decisions or documentation relating to Grade 2 increment bar changes for the 2024 non-clinical uplift.",
+    "ai_summary": "Michael O'Sullivan asks Kevin and another recipient whether they recall decisions or have documentation about Grade 2 increment bar changes in the 2024 non-clinical uplift.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -920,7 +920,7 @@
     "received": "27 Aug",
     "received_raw": "2026-08-27 09:18:10.819000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan confirms Kevin has accepted the Cross-Team Process Improvement Working Group meeting on 28 September and is checking availability.",
+    "ai_summary": "Michael O'Sullivan notes Kevin has accepted a Cross-Team Process Improvement Working Group meeting on 28 September and mentions Otter's involvement.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -940,7 +940,47 @@
     "received": "27 Aug",
     "received_raw": "2026-08-27 08:47:57.798000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan is informing Kevin that 131 workgroups need to be amended for the 38-day balance change, copying him on discussion with Marie.",
+    "ai_summary": "Michael O'Sullivan discusses 131 workgroups that need to be amended for the 38-day leave balance change, with Kevin as a direct recipient.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-27"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901F0000": {
+   "tier": "needs",
+   "card": {
+    "title": "RE: 2024 non clinical uplift_Incremental bar changes for Grade 2",
+    "sub": "From <strong>Simon Burford</strong>. Hi Michael,\r\n\r\n \r\n\r\nEmployees on scale point 2.5 were moved to 2.6, no one was moved onto 2.7 or 2.8. I\u2019ve got an email ",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "RE: 2024 non clinical uplift_Incremental bar changes for Grade 2",
+    "from": "Simon Burford",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901F0000",
+    "received": "27 Aug",
+    "received_raw": "2026-08-27 17:09:35.656000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Simon Burford clarifies to Michael that employees on Grade 2 scale point 2.5 were moved to 2.6 only in the 2024 non-clinical uplift, and references further documentation.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-27"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901D0000": {
+   "tier": "needs",
+   "card": {
+    "title": "RE: IRIS / IEX - Incidents Changes",
+    "sub": "From <strong>Marie Cooksey</strong>. Hi Amanda\r\n\r\n \r\n\r\nI have copied in James and Kevin, who will respond in due course with timings. As you point out we nee",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "RE: IRIS / IEX - Incidents Changes",
+    "from": "Marie Cooksey",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901D0000",
+    "received": "27 Aug",
+    "received_raw": "2026-08-27 15:53:20.901000+00:00",
+    "kevin_is_primary_recipient": false,
+    "ai_summary": "Marie Cooksey has copied Kevin in on an IRIS/IEX incidents discussion and indicates he and James will respond in due course with timings.",
     "needs_reply": false,
     "no_action_needed": false
    },
