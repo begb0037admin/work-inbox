@@ -5,10 +5,17 @@ complete, sixth phase (task summaries) built, 26 Aug. **Write-gate test
 FAILED 26 Aug — a real write to Kevin's live Oxford mailbox occurred
 and was not blocked by any account/CLI-level gate; remediated same
 session. NO-GO on the 7-day Task Scheduler automation.** 27 Aug: Kevin
-chose **STRUCTURAL FIX FIRST** — drop the connectors to read-only, prove
-it with a write-gate re-test, then proceed. Re-consent scoped + copy-ready
-instructions for Kevin + staged re-test all in Section 9's 27 Aug entry.
-PR #29 rebased onto `main` this session (was CONFLICTING).
+chose STRUCTURAL FIX FIRST; ruled OUT Oxford org IT (personal ChatGPT Plus
+account). **Layer C — local `config.toml` write-tool lockout — was built
+and TESTED 27 Aug: FAILED both variants (`disabled_tools` +
+`default_tools_approval_mode`, and per-tool `approval_mode="prompt"` on all
+49 write tools). A live category write went through both times, COM-
+confirmed and remediated. `config.toml` restored to baseline.** The
+`[apps.*]` config surface has no effect on `codex exec`'s account-connected
+Microsoft connector tools. 7-day run stays BLOCKED. Only remaining
+in-our-control lever: Layer A (personal Plus → Settings → Connectors
+read-only toggle), Kevin to check. See Section 9's 27 Aug entries.
+PR #29 rebased onto `main` (was CONFLICTING).
 **Effort level:** Raised to high, 2026-08-25 (Kevin's explicit confirmation), for this task.
 **Started:** 2026-08-25, cloud Claude Code session.
 
@@ -819,16 +826,111 @@ line; the branch additionally moved the "Bootstrap Order" block above "Identity"
 taking `main`'s version (already contains the Drew line), merge commit on-branch. No
 pipeline/code files touched by the resolution.
 
+### Layer C attempt (local `config.toml` write-tool lockout) — TESTED 27 Aug 2026 (Drew): FAILED, both variants; config restored
+
+**Kevin's decision, verbatim intent (via coordinator, 27 Aug):** he is **NOT going to
+Oxford org IT**. He uses a personal ChatGPT Plus account; the Oxford
+`begb0037`/`admin.ox.ac.uk` link is optional to him. **Layer B (Entra scope revoke via
+Oxford Entra admin) is OFF THE TABLE — do not pursue it, do not raise a ticket.**
+Directed instead: do the structural fix fully in our control on the admin machine —
+Layer C (`config.toml` `[apps.<id>]` write-tool lockout), then the staged write-gate
+re-test; Layer A (personal Plus connector settings) only if it's a trivial one-click.
+The `config.toml` edit + one disposable-email test write were authorised; nothing beyond.
+
+**What was done, and the result — both FAILED:**
+
+Full artifacts in the scratchpad run logs (`writegate_run2.out` / `writegate_run3.out`),
+COM baseline/verify scripts, and `write_tools.json` (the 49-tool inventory). Target:
+one disposable personal automated email — DistroKid `mailbot@distrokid.com`, subject
+`We detected "ain't that lovin' you" on Deezer`, received 2026-08-22, read, in Inbox,
+`Categories == ''` baseline. Test category: `Drew-writegate-retest-20260827`.
+
+- **Backup first:** `C:\Users\admin\.codex\config.toml.bak-20260827_134635-drew-writetool-lockout`
+  (`cmp`-verified byte-identical to the live file, sha1
+  `29a15d9756aa8734887d44eeb1845b3b8403e541`).
+- **v1** — appended `[apps.<connector_id>]` blocks for all three connectors, each with
+  `disabled_tools = [ …all 49 state-changing tool names, namespaced form
+  `microsoft_outlook_email.set_message_categories` etc… ]` + `default_tools_approval_mode
+  = "writes"`. `python -m tomllib` parsed clean; `codex doctor` → `config.toml parse
+  ok`, `config loaded`, `MCP servers 3`. Killed all stale `codex` app-server /
+  code-mode-host processes (from this morning) so a fresh `codex exec` would reload.
+  Ran the write attempt under `codex exec -s read-only --skip-git-repo-check`.
+  **RESULT: the write went through.** Transcript shows
+  `mcp: codex_apps/microsoft_outlook_email.set_message_categories started …
+  (completed)`; Codex reported `["Drew-writegate-retest-20260827"]`.
+  **Confirmed independently via Outlook COM** (`GetItemFromID` → `item.Categories ==
+  'Drew-writegate-retest-20260827'`). **Remediated** (`item.Categories = ""; Save()`;
+  re-fetch confirms `''`).
+- **v2** — restored to baseline, then re-appended v1 **plus** explicit per-tool
+  `[apps.<connector_id>.tools."<name>"]` `approval_mode = "prompt"` blocks for **every
+  one of the 49 write tools** — the exact structure the 2026-08-25 cc93c7b incident used
+  in reverse (there it was `approval_mode = "approve"` and it *did* auto-approve GitHub
+  writes). `tomllib` + `codex doctor` clean; killed codex infra again; re-ran the same
+  write attempt. **RESULT: the write went through again** — identical transcript,
+  `set_message_categories (completed)`, `["Drew-writegate-retest-20260827"]`.
+  **COM-confirmed landed, remediated, re-verified `''`.**
+- **Reads were unaffected in both runs** (`search_messages`, `fetch_message` completed
+  normally) — so the config didn't break anything, it simply **had no effect on the
+  write path**.
+- **Config fully restored** to the pre-edit baseline (`cp` the `.bak`, `cmp`-verified,
+  sha1 back to `29a15d97…`, 239 lines, no `[apps]` table; `codex doctor` clean). All
+  `codex` processes cleared. Final COM sweep: target message matches baseline exactly,
+  **zero `Drew-writegate*` category residue across 201 scanned inbox messages.**
+
+**Why it failed — and it is the pessimistic outcome the 26 Aug docs flagged as
+possible:** in a plain `codex exec` session, the Microsoft connector tools
+(`codex_apps/microsoft_outlook_email.*` etc.) are **not** loaded through any
+config-file-visible path. `codex doctor` reports exactly **3** configured MCP servers
+(`node_repl`, `meeting-context`, `openaiDeveloperDocs`) — the Microsoft connectors are
+none of them; they are pulled automatically from the ChatGPT account's connected apps.
+The `[apps.<id>]` table (`disabled_tools` / `default_tools_approval_mode` /
+per-tool `approval_mode`) is read for a *different* connector-loading path (the desktop
+"apps" subsystem, and MCP servers that also have a local `[mcp_servers.*]` entry — which
+is how the cc93c7b GitHub auto-approval actually rode, alongside its
+`[mcp_servers.github]` PAT block). The Microsoft connectors have **no** local
+`[mcp_servers.*]` entry, so nothing in `config.toml` filters or gates them for
+`codex exec`. This matches the 26 Aug findings exactly: `codex exec --help` exposes no
+connector-approval flag, and the ChatGPT "Always ask" toggle does not fire headless.
+
+**Net: there is currently NO proven local control on the admin machine that prevents
+`codex exec` from writing to Kevin's live mailbox / calendar / Teams.** The 7-day
+parallel run stays **BLOCKED**.
+
+**Remaining in-our-control levers (none tried this session, none authorised):**
+1. **Layer A — personal ChatGPT Plus → Settings → Connectors**, per-connector
+   read-only / action toggle (or "allow only read actions"). Cannot be inspected from
+   the CLI / local files — Kevin's to check in the web UI. This is now the primary
+   remaining hope. If Plus exposes a one-click read-only per connector, that is the fix;
+   if it doesn't, there is nothing lighter left.
+2. **Plugin disable** — `[plugins."outlook-email@openai-curated-remote"] enabled = false`
+   / `codex plugin remove outlook-email` (+ calendar, teams). Almost certainly removes
+   the *read* tools too (defeating Phase 2's purpose), and unverified it even strips the
+   `codex_apps/microsoft_outlook_*` tools rather than just the skill wrapper. Nuclear,
+   needs its own authorised test.
+3. Per Kevin's decision: **do NOT escalate to Oxford org IT.**
+
 ### Exact next action
 
-1. Kevin does **Layer A** (and raises the **Layer B** Oxford IT request in parallel),
-   then tells the coordinator which is done.
-2. Drew runs the **staged write-gate re-test** above.
-3. On a clean PASS, Kevin gives a **fresh explicit go-ahead** for the 7-day parallel run
-   — only then does the Task Scheduler / kill-switch automation get built. The
-   `source` vs `sourceType` collision is already resolved (see the 26 Aug entry); the
-   quality-gate design (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still needs building
-   before the parallel run's measurement is real.
+1. **Kevin checks Layer A** in personal ChatGPT Plus → Settings → Connectors for a
+   per-connector read-only / "allow only read actions" control (see the COPY-READY
+   list's Layer A steps above, adapted for the personal-plan Connectors screen). Report
+   back whether such a toggle exists.
+2. **If Layer A exists:** Kevin sets all three Microsoft connectors to read-only,
+   reconnects them in Codex on the admin machine, tells the coordinator "Layer A done";
+   Drew re-runs the staged write-gate re-test (the `writegate_run*.out` procedure —
+   deliberate category write to the DistroKid message, verified 3 ways incl. direct
+   COM). PASS = write refused AND reads still return data.
+3. **If Layer A does not exist / doesn't hold:** the local route is exhausted. The
+   decision goes back to Kevin — either accept the residual write-risk explicitly for
+   the 7-day parallel run (as he did for the GitHub PAT on 25 Aug, but this is a
+   different, larger exposure — 42 unsupervised real-judgement invocations against a
+   live mailbox), or authorise the plugin-disable nuclear test, or shelve the Codex
+   AI-triage migration.
+4. Only after a real preventive control is in place **and** a clean write-gate re-test:
+   Kevin gives a **fresh explicit go-ahead** for the 7-day run; only then is the Task
+   Scheduler / kill-switch automation built. The `source`/`sourceType` collision is
+   already resolved (26 Aug); the quality-gate design
+   (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still needs building first.
 
 ### Beyond step 4 — direction only, not yet scoped or briefed
 
