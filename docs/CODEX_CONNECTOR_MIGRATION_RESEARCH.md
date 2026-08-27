@@ -1120,6 +1120,110 @@ repeatedly across 27 Aug; a throwaway warm-up call clears it), and the quality-g
 design (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still needs building first. The
 `source`/`sourceType` opener collision is already resolved (26 Aug).
 
+### Codex commissioned to attempt a local fix (`codex exec`) - 27 Aug 2026 ~15:30 (Drew): investigation done, PreToolUse-hook candidate BUILT + TESTED - FAILED. Verdict: NO local write-block that preserves reads. Option 3 (connector-free CODEX_HOME + COM read pull) assessed feasible.
+
+Per Kevin's decision ("pass the write-gate blocker to Codex to attempt a local fix, routed
+through Drew - Drew commissions, Codex investigates/proposes, Drew reviews and gates"),
+`codex exec` was commissioned on the admin machine as lead investigator - investigation +
+written proposal only (no config edits, no `main`, no state-changing connector calls except
+one authorised disposable COM-remediated category-write verify test). codex-cli **0.149.1**.
+Full Codex deliverable: `scratchpad/codex_investigation_result.out`. The failed hook files
+are preserved for the record at `scratchpad/FAILED_hooks.json.record` and
+`scratchpad/FAILED_deny_microsoft_connector_writes.ps1.record`.
+
+**`codex exec --help` (0.149.1) - no tool allow/deny surface.** No `--allowed-tools`,
+`--deny-tool`, or connector/tool-scoping flag exists. Relevant flags: `-p/--profile`
+(layers `$CODEX_HOME/<name>.config.toml`), `--ignore-user-config` (skips `config.toml`,
+**keeps** auth from `CODEX_HOME`), `--ignore-rules` (skips execpolicy `.rules`),
+`--disable <feature>` (per-run `-c features.<name>=false`), `--dangerously-bypass-hook-trust`.
+
+**Angle-by-angle result (A-G):**
+
+| # | Angle | Result |
+|---|---|---|
+| A | **PreToolUse hooks** (`~/.codex/hooks.json` + deny script, `permissionDecision:"deny"`) | **BUILT + TESTED - FAILED** (see below) |
+| B | `guardian_approval` feature (stable, on) | **NO** - no user-level per-connector deny surface in 0.149.1; approval settings (`approval_policy`, `[auto_review].policy`, managed `guardian_policy_config`) govern *eligible* approval requests, they do not retrofit approval onto a connector call the app-server bridge runs without asking |
+| C | Separate `CODEX_HOME` / connector-free ChatGPT account ("option 3") | **YES** for zero `microsoft_outlook_*`/`microsoft_teams.*` tools (they are account-provisioned Apps, not `mcp_servers` entries) - **but also removes connector reads**; Phase 2 data pull would move to Outlook COM (`fetch_inbox.py`) |
+| D | `--profile` / `--ignore-user-config` / disable Apps | **NO** for the read-preserving goal. `--profile` cannot subtract account-provisioned tools by omission; `--ignore-user-config` keeps the signed-in account + its apps. `codex exec --disable apps` **does** remove the whole Apps integration (feature `apps stable true`) - but kills reads too; zero-app emergency mode only |
+| E | `codex mcp` re-surface + filter | **NO** - `codex mcp` manages configured external MCP servers only (`list/get/add/remove/login/logout`); it does not list or manage the account-provisioned `codex_apps` bridge |
+| F | `.rules` / execpolicy | **NO** - `~/.codex/rules/default.rules` grammar is `prefix_rule(pattern=[...], decision=...)`, i.e. command-prefix execution policy for model-generated shell only; cannot gate `codex_apps/microsoft_*` (confirms 26 Aug) |
+| G | Other 0.149.1 features (`request_permissions_tool`, `exec_permission_approvals`, `tool_call_mcp_elicitation`, `non_prefixed_mcp_tool_names`) | **NO** - first two are disabled under-development features; elicitation is about user input not authz; the last is naming compatibility only |
+
+**Angle A - the one real candidate - built and tested, FAILED.** Codex's proposed
+fail-closed `PreToolUse` hook was created exactly as specified:
+`~/.codex/hooks.json` (matcher `^(?:codex_apps/)?microsoft_(?:outlook_email|outlook_calendar|teams)\.`,
+`type:"command"` -> PowerShell deny script) + `~/.codex/hooks/deny_microsoft_connector_writes.ps1`
+(positive read allowlist -> `exit 0`; any other Microsoft tool -> emit
+`{"hookSpecificOutput":{"permissionDecision":"deny",...}}`; logs every invocation to
+`deny_hook.log` before deciding).
+
+- **Verify test** (`scratchpad/hk_test.out`, `codex exec --dangerously-bypass-hook-trust -s read-only`,
+  category `Drew-writegate-retest-20260827d` on the disposable DistroKid
+  "...on Deezer" message): `mcp: codex_apps/microsoft_outlook_email.set_message_categories (completed)`.
+  Codex reported "Target message found and categorised." **The write executed.**
+- **`deny_hook.log` was never created** - the hook script did not run at all.
+- **Confirming probe** (`scratchpad/hk_confirm.out`): a second bypass-trust run doing a
+  connector *read* (`list_messages`, which the matcher should trip -> allowlist -> log an
+  `ALLOW` line) plus a shell `echo` - still **no `deny_hook.log`**. The `PreToolUse`
+  hook does not fire for `codex_apps/microsoft_*` calls in this build (whether it fires
+  for native shell tools was not needed and not established). Matches Codex's own doc
+  caveat that "specialised paths can opt out" of the hook system, and its own stated
+  PASS/FAIL rule ("if the write executes, the hook path does not cover this `codex_apps`
+  tool").
+- **COM remediation:** `Drew-writegate-retest-20260827d` cleared via Outlook COM by
+  `EntryID` (`scratchpad/com_fix_d.py`) - `Categories` stable `''` at t=20/45/70s after
+  forced `SyncObjects`; whole-inbox `Restrict("[Categories] <> ''")` sweep = 0 residue.
+  (Reconfirms the gotcha: a sweep over `Inbox.Items` in default order can miss an older
+  target - check the specific `EntryID` directly; a first COM read still gave a false
+  `''` at t=0 in the hook test, matching prior runs.)
+
+**Machine restored to baseline (left as found):**
+`~/.codex/hooks.json` + `~/.codex/hooks/` **removed** (failed diagnostic; not kept -
+copies at `scratchpad/FAILED_*.record`). `config.toml` sha1 **`b2a1a226...`**, no `[apps]`
+table, no `hook` references. `codex doctor` clean (pre-existing warnings only: Defender
+exclusions unverified, 0.150.1 update available). Connector reads re-verified working
+post-restore (`get_recent_emails` + `list_events` + `get_mailbox_settings` completed,
+"No changes were made" - `scratchpad/postrestore_read.out`). Only the persistent
+`codex ... app-server` daemon runs (respawns automatically; not a stray `exec`). 27 Aug
+backups retained (`config.toml.bak-20260827_134635-drew-writetool-lockout`,
+`config.toml.bak-20260827_142957-drew-plugindisable-test`,
+`_drew_plugindisable_backup_20260827_142957/`).
+
+**Verdict: NO.** Codex found no viable local write-block on this machine that preserves
+connector reads. Every angle is NO outright, or (A) tested and failed. Consistent with
+the 26-27 Aug findings: in headless `codex exec` the `codex_apps/microsoft_outlook_*` /
+`microsoft_teams_*` tools load from the ChatGPT account's connected Apps, outside any
+local config / plugin / hook / execpolicy / MCP surface, and no local or account-side
+permission control is enforced on that path.
+
+**Option 3 (connector-free automation account + Outlook COM read pull) - Codex's
+feasibility assessment:** feasible. A separate `CODEX_HOME` authenticated to a ChatGPT
+account with **no** Microsoft connected apps should expose **zero** `microsoft_outlook_*` /
+`microsoft_teams.*` tools - so a `codex exec` under it has no write path to the live
+mailbox/calendar/Teams at all. It necessarily also has no connector *reads*: Phase 2's
+data pull would come from Outlook COM (the existing `fetch_inbox.py` mechanism), the six
+AI-triage phases still move to Codex (which is what zeros the ~£36/mo), and the Graph
+`web_link` opener for codex-graph tasks + the calendar/Teams read breadth are lost
+(codex-graph tasks fall back to the COM `openmail://` path - already implemented). What
+it would take: create a dedicated connector-free ChatGPT identity for the automation,
+`codex login` a separate `CODEX_HOME` under it, wire `fetch_inbox.py`'s COM read output
+as the Codex input, keep the pre-flight warm-up/retry loop. This is exactly HANDOVER
+decision option 3.
+
+**Decision still with Kevin** - the four options in the "~14:55" entry above are
+unchanged; this run removes "a local Codex-side fix" as a possibility (it was the only
+outstanding unknown) and firms up option 3 as technically viable. No automation built;
+7-day run still needs Kevin's fresh explicit separate go-ahead + the quality-gate design
+(`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`, still unbuilt) + a warm-up/retry wrapper.
+
+**Cold-session resume:** All local write-block routes (account-side, plugin, `config.toml`
+`[apps.*]`, **PreToolUse hook**, execpolicy, `codex mcp`, profile/feature flags) are now
+exhausted and documented. Do NOT re-test any of them. Wait for Kevin to pick option 1-4
+in the "~14:55" entry. If option 3: scope the connector-free `CODEX_HOME` + `fetch_inbox.py`
+COM read-pull variant. If option 1: build the post-run COM delta-sweep kill-switch first.
+Do not touch automation until Kevin decides and gives a fresh go-ahead.
+
+
 ### Beyond step 4 — direction only, not yet scoped or briefed
 
 5. If validated, retire `fetch_inbox.py`'s six Anthropic-API AI-triage
