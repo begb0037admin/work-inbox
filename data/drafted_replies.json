@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-27T08:04:02.784871+00:00",
+  "generated": "2026-08-27T09:27:04.190973+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
@@ -379,6 +379,54 @@
             "source_subject": "Fw: 2026 Payroll Year End",
             "source_date": "2026-02-12",
             "relevance_note": "Not topically about NHS pensions \u2014 flagged honestly as a tone-only precedent. Shows Kevin's real terse one-line style when acknowledging/relaying payroll-adjacent administrative updates involving Michael ('Fyi- Sorry Michael, thought I copied you in. Best, Kevin'). Used for the short, no-filler acknowledgment register in this draft, not for any factual content."
+          }
+        ]
+      }
+    },
+    {
+      "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32130000",
+      "subject": "REF29 UDF - Promotion to UOXP",
+      "sender_tier": "other",
+      "draft_text": "Hi Nathan,\n\nThanks for the nudge, and no problem - hope you get a proper break over the bank holiday too.\n\nGood to see REF29 moving up to UOXP. I built this UDF in UOXU myself back on 6 July (person level, 12 fields across the four appointment slots, REFQUALCON Yes/No and REF Panel A/B/C/D), so I know the config well.\n\nOn Simon's CorePortal changes - noted, and they make sense. To confirm what needs replicating in UOXP:\n\n- Display on CorePortal: on\n- Hide Dates on CorePortal: on\n- Allow update on CorePortal: left deselected - agreed, this shouldn't be staff-editable, which matches what you and Research Services confirmed on 23 July.\n\n[CONFIRM: whether the promotion to UOXP has already run and you have checked those three settings there yourself, or whether that check is still outstanding. If it is done, say so; if not, add a line that you will confirm once it is in.]\n\nNo questions from me on the config itself.\n\nBest,\nKevin",
+      "drafted_at": "2026-08-27T09:25:35+00:00",
+      "confidence": {
+        "level": "medium",
+        "reason": "Full source email body now available - Drew recovered all 2274 chars live from Kevin's mailbox via Outlook COM (MANUAL REPAIR 2026-08-27) and stored it in work-inbox/data/needs_reply.json under the same source_entry_id. The body quotes Simon Burford's 21 Jul email verbatim, so the substantive ask is now known exactly: replicate Simon's CorePortal settings in the UOXP (LIVE) promotion - Display on CorePortal on, Hide Dates on CorePortal on, allow update on CorePortal deselected. Nathan's 23 Jul note in the same body confirms Research Services signed off on the UOXP promotion and that the UDF should not be staff-editable, which resolves the open assumption from draft-11. Strong verbatim content precedent for Kevin's first-hand authorship of this exact UDF (his own 'Copy of Test UDF for REF Outcomes' emails to Nathan, 6-7 Jul 2026). Not 'high': the current configuration state of the UDF in UOXP cannot be verified from any source available here, so one [CONFIRM] remains for Kevin. ('high' is also still reserved for corpus diff-pair-corroborated drafts, of which there are none yet.)"
+      },
+      "inline_flags": [
+        "[CONFIRM] Current UOXP state: has the REF29 UDF promotion to UOXP actually run yet, and have you personally checked that Display on CorePortal = on, Hide Dates on CorePortal = on, and allow update on CorePortal = deselected in UOXP? The draft is written so it works either way - fill in a confirmation line or a 'will check once it's in' line. This is the only genuine open item; it cannot be verified from any source available to Lauren.",
+        "Recipients/CC: reply to Nathan Kirwan, and Cc Simon Burford (his config change, and he was Cc'd on the 21 Jul / 23 Jul thread). Anne Mortimer / Research Services do not need this config-level confirmation. Check the actual To/Cc header in Outlook before sending.",
+        "Same thread as pending draft lauren-draft-11-20260810 ('REF29 UDF', Simon Burford, 21 Jul). The recovered 26 Aug body quotes Simon's 21 Jul email verbatim, so a single reply to Nathan (Cc Simon) covers both. RECOMMENDATION: send this draft-19 as the one combined reply and mark draft-11 superseded/withdrawn - do not send both. Kevin's call; not actioned here.",
+        "The draft-11 open assumption ('allow update on CorePortal should stay deselected') is now resolved by the thread itself: Nathan's 23 Jul message in the recovered body states Research Services are happy for the UDF to go to UOXP and that it 'is not a UDF that should be editable by staff'. The draft reflects that as settled rather than as an open question."
+      ],
+      "received": "2026-08-26 14:51:08 UTC. Full 2274-char body recovered by Drew via Outlook COM on 2026-08-27 and added as a MANUAL REPAIR entry to work-inbox/data/needs_reply.json (same source_entry_id). Well inside the current 60-day staleness window.",
+      "status": "pending",
+      "draft_id": "lauren-draft-19-20260827",
+      "corpus_provenance": {
+        "sent_items_baseline_count": 2837,
+        "diff_pairs_applied": 0,
+        "patterns_applied": [
+          "terse-direct-opener",
+          "signoff-best-kevin",
+          "no-filler-closing",
+          "acknowledge-then-confirm",
+          "light-reciprocal-pleasantry"
+        ],
+        "content_precedent": [
+          {
+            "source_subject": "Re: Copy of Test UDF for REF Outcomes",
+            "source_date": "2026-07-06",
+            "relevance_note": "Kevin's own email to Nathan Kirwan confirming he created the REF29 UDF in UOXU: person (employee) level, 12 fields covering four appointment slots, each with REFQUALCON (Yes/No) and REF Panel (A/B/C/D) dropdowns; Reference Code shortened to REF29 (template had REF2029) and Description to 'REF2029 Status - Univ & College Staff' to fit the system's 6-char / 40-char limits. Direct source for this draft's background paragraph. Same correspondent as the 26 Aug email."
+          },
+          {
+            "source_subject": "RE: Copy of Test UDF for REF Outcomes",
+            "source_date": "2026-07-07",
+            "relevance_note": "Follow-up the next day: Nathan reported the 12 fields not displaying in UOXU; Kevin resolved it by activating all the data labels. Confirms Kevin owns this config end to end and has already debugged a display issue with Nathan once - relevant if the UOXP promotion surfaces a similar display/label problem."
+          },
+          {
+            "source_subject": "REF29 UDF (Simon Burford, 21 Jul 2026 - quoted verbatim in the recovered 26 Aug body)",
+            "source_date": "2026-07-21",
+            "relevance_note": "Simon's original config request, now available in full via the recovered body: within the Advanced options against the REF29 UDF he set 'Display on CorePortal' and 'Hide Dates on CorePortal' on to make it show in employee self service, and left 'allow update on CorePortal' deselected so staff cannot edit the UDF directly. He asks Kevin to note this and ensure LIVE is configured the same way. This is the same ask that lauren-draft-11-20260810 was written against - the two drafts are the same thread."
           }
         ]
       }
