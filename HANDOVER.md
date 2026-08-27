@@ -1,3 +1,37 @@
+# Handover -- 27 August 2026, ~21:20 UTC (Drew) -- "Open original" on the Drafted Replies tab FIXED (branch only, awaits Kevin's screenshot approval). Root cause + the two proposed fix paths were written up in the 27 Aug ~09:27 entry's "Follow-up (~09:55 UTC)" subsection below. This implements a cleaned-up version of fix path 2 (render/discriminator fix), mirroring `command-centre` `js/app.js` `openEmailWeb()`. Branch `drew/drafted-open-original-fix` pushed; NOT merged, NOT deployed.
+
+## The bug (recap -- full write-up in the ~09:55 UTC subsection below)
+`tools/publish_drafted_replies.py` `normalize_entry()` set `source_entry_id = e.get("source_entry_id") or e.get("draft_id") or ""`. For drafts with no real Outlook EntryID (the chat-paste / reply-all-thread drafts 14/15/16, and any REF29-style manual-repair entry) it emitted the literal `draft_id` string. That non-empty value passed the dashboard's `hasSource` check, so an "Open original" button rendered, but `openmail://lauren-draft-15-20260818` -> `GetItemFromID` fails with "The parameter is incorrect". draft-19 and the other real-EntryID rows were always fine.
+
+## What shipped on the branch (3 files, one isolated change)
+- **`tools/publish_drafted_replies.py` `normalize_entry()`:**
+  - `source_entry_id` now means **strictly "a real Outlook COM EntryID, or empty"** -- the `or e.get("draft_id")` fallback is gone.
+  - New **`open_mode`** discriminator: `"com"` (real EntryID -> unchanged `openmail://<id>` -> `GetItemFromID` path), `"web"` (has a `web_link`/`display_url` -> open as a plain Outlook Web hyperlink), `"none"` (no resolvable original). This is the machine-readable routing field the task called for -- deliberately **not** overloaded onto `source` (which stays human-readable provenance for a future Phase 2 task-writer), mirroring `command-centre`'s `sourceType` field and the field-collision note in its `js/app.js`.
+  - New **`tick_id`**: the stable mark-sent/discard identity, `= source_entry_id or draft_id` -- i.e. **byte-identical to the value `source_entry_id` used to carry**. Verified against the live `data/ticks.json`: every existing `draft_*` key (7 hex-keyed + `draft_lauren-draft-16-20260818`) still matches, so **no tick resurrection** and no cross-row collision for draft-14/15 (distinct `draft_id`s). This is why the `source_entry_id = draft_id` fallback was *moved*, not simply deleted -- deleting it outright would have collided draft-14/15's tick state onto one empty key and, if identity then moved to `draft_id`, resurrected ~8 already sent/discarded drafts (17 Aug tick-resurrection incident class; `feedback-work-inbox-cautious-change-pace`).
+  - `web_link` / `display_url` (snake_case) now pass through untouched. **No draft carries one today**, so today's no-EntryID rows (14/15/16) render as `open_mode:"none"`.
+- **`js/app.js` `renderDraftedReplies()` + helpers:**
+  - Tick identity now via `draftIdentity(e)` (`tick_id` -> `source_entry_id` -> `draft_id`); used in the pending filter and both `markDraft(...)` calls.
+  - "Open original" branches on **`open_mode`**, never on `source_entry_id` format/length. `com` -> the existing `<a onclick="openEmail(entryId)">` (byte-identical). Otherwise -> `openDraftOriginal()`: validates `web_link`/`display_url` **exactly like `openEmailWeb()`** (`new URL()`, `https:` only, exact-hostname allowlist `outlook.office.com` + `outlook.office365.com`, rejects userinfo/subdomain/path spoofs and plain http) and `window.open(url,'_blank','noopener')`; if there's no usable link it renders the button **de-emphasised** (`.dr-btn-muted`, opacity .45) and shows an explanatory `alert()` on click -- never a silent no-op, never a throw, never a dead `openmail://`.
+- **`css/styles.css`:** `.dr-btn-muted{opacity:.45}` (+ hover no-op), matching `command-centre`'s treatment.
+
+## Verified (local render harness -- no live push)
+- `normalize_entry()` unit-run over the real 12 `agent-commons` drafts: `open_mode` = `com` for the 8 hex-EntryID drafts, `none` for 14/15/16; **every `tick_id` == the pre-change `source_entry_id` fallback value**.
+- Chromium render of `renderDraftedReplies()` (real `css/styles.css`, verbatim JS, payload = real mirror output + 2 synthetic rows: one valid `outlook.office.com` link, one spoofed `outlook.office.com.evil.example` host):
+  - realistic view (live `ticks.json` `draft_*` applied): 5 pending cards -- draft-11 (real EntryID) = normal "Open original" link; draft-14 + draft-15 = de-emphasised; synthetic-valid = normal button; synthetic-spoof = de-emphasised. **Every card has exactly one "Open original" control; zero dead buttons; zero console errors/warnings.**
+  - all-rows view (no ticks): 14 cards, 9 `com` links + 1 `web` button + 4 de-emphasised, one control each, clean console.
+  - interaction test: 4 de-emphasised buttons -> 4 explanatory `alert()`s (no throw); valid-link button -> `window.open` to the exact URL; spoofed host -> de-emphasised + alert, never navigates.
+- Screenshots for Kevin: `D:\OneDrive - lelitte.com\Desktop\drafted-open-original-fix-20260827\drafted_open_original_real.png` (primary) and `...\drafted_open_original_all.png`.
+- Backups (dated, committed on the branch): `Archive/app_backup_20260827_2209.js`, `Archive/styles_backup_20260827_2209.css`, `Archive/publish_drafted_replies_backup_20260827_2209.py` -- byte-verified against pre-edit.
+- Syntax: `node --check js/app.js` OK; `ast.parse` on the Python OK; CSS braces balanced. No CRLF issue (`core.autocrlf=true`, no `.gitattributes`; index blobs stay LF; edits made as text, not Python `"w"`).
+
+## Exact next action
+1. Kevin reviews `drafted_open_original_real.png` (and `_all.png`). This is the `command-centre` UI approval gate equivalent -- needs Kevin's literal **"approved"**, not "looks right".
+2. On approval: merge `drew/drafted-open-original-fix` -> `main` (per this repo's branch-and-merge protocol, merge immediately, don't leave it on the branch).
+3. The dashboard then serves the fixed `js/app.js` on next Pages build; the fixed `open_mode`/`tick_id` fields land in `data/drafted_replies.json` on the **next `publish_drafted_replies.py` run** (piggybacks the ~5x/day Work Inbox Briefing). Until that publish, stale payload rows have no `open_mode` -> app.js treats them as `none` (de-emphasised, self-heals on the next publish) -- transient and harmless.
+- Not in scope / untouched: `drew/classifier-body-preview-fix` (still unmerged, separate), the AI-triage backend (just cut over -- left alone), any mailbox write, `command-centre`.
+
+---
+
 # Handover -- 27 August 2026, ~18:30 UTC (Drew) -- CUT OVER. The AI-triage backend is now headless Claude Code on Kevin's Claude subscription, via ONE combined `claude -p` call. Live on `main` (PR #29, merge `5423c83`) + `Run Inbox Briefing.bat`. Verified on a real scheduled-task run: briefing pushed, CC sync + ledger intact, no mailbox effects. Metered `ANTHROPIC_API_KEY` path is retained as the one-line rollback.
 
 ## What shipped
