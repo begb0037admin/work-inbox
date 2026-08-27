@@ -1,3 +1,31 @@
+# Handover -- 27 August 2026, ~09:27 UTC (Drew, publish lane) -- out-of-cycle mirror of lauren-draft-19 (substantive version) onto the "Drafted Replies" tab
+
+## What this is
+Coordinator/Kevin task, separate from the 09:10 UTC classifier-fix entry below (different Drew session, still mid-implement). Kevin wanted `lauren-draft-19-20260827` (Nathan Kirwan "REF29 UDF - Promotion to UOXP", 26 Aug) on the dashboard "Drafted Replies" tab NOW, without waiting for the ~12:00 UK scheduled run.
+
+## What was done
+- Waited for Lauren's substantive redraft. It landed at agent-commons `pending-email-drafts/drafts.json` commit **`39f060d015d619395a2653ee4881617359964c49`** ("upgrade lauren-draft-19 ... confidence low->medium") -- `composed_at` 2026-08-27T09:25:35Z. This supersedes the earlier holding version (commit 43b62c4, confidence low). **The substantive version is the one now published** -- not the holding version.
+- Ran `tools/publish_drafted_replies.py` (unchanged; the established, already-approved mirror mechanism). Result: `entries_found: 12`, `entries_published: 12`, `entries_dropped_bad_shape: 0`, `pushed: true`, `byte_identical_verified: true`.
+- work-inbox commit: **`1bdf2ad49164acef8ea71154fac17e588cec0b01`** -- "Mirror drafted_replies.json from agent-commons: 12 entries" (2026-08-27 10:26:58 +0100). https://github.com/begb0037admin/work-inbox/commit/1bdf2ad49164acef8ea71154fac17e588cec0b01
+- Verified `data/drafted_replies.json` on origin/main via git blob: 12 entries, `source_missing: false`, `generated` 2026-08-27T09:27:04Z. Draft-19 row present: `draft_id` lauren-draft-19-20260827, `drafted_at` 2026-08-27T09:25:35Z (matches the substantive redraft), `sender_tier` other, `confidence` medium, `draft_text` opens "Hi Nathan, Thanks for the nudge...", 4 `inline_flags`, `source_entry_id` ends ...F5350007B21C32130000 (matches the repaired `needs_reply.json` entry_id).
+
+## Content of the row (for reference)
+Substantive reply: confirms the three CorePortal settings to replicate in UOXP (Display on CorePortal = on, Hide Dates on CorePortal = on, Allow update on CorePortal = deselected), references Research Services' 23 Jul sign-off that the UDF should not be staff-editable, and carries one `[CONFIRM]` for Kevin -- whether the UOXP promotion has already run and he has personally checked those three settings there. Lauren's flags also recommend sending this as the single combined reply and marking `lauren-draft-11-20260810` (same thread) superseded -- Kevin's call, not actioned.
+
+## UI
+No layout/rendering change -- one new draft row added through the normal mirror pipeline, identical mechanism to every prior scheduled publish. In-pattern; no screenshot gate triggered.
+
+## Re-publish needed?
+No. The substantive (final) version is already published. The ~12:00 UK scheduled run will re-mirror the same agent-commons source and is a harmless no-op for this row unless Lauren revises it again.
+
+## Interaction with the 09:10 UTC classifier-fix entry below
+That session's "## drafted_replies.json -- no action needed" note is now superseded by this out-of-cycle publish. This publish only touched `data/drafted_replies.json`; it did not touch `fetch_inbox.py`, the classifier, `needs_reply.json`, `briefing.json`, or `triage_ledger.json`. The classifier-fix session was asked (via coordinator) to pull/rebase before writing its own next HANDOVER.md checkpoint so it lands on top of this entry.
+
+## Exact next action for a cold session
+Nothing outstanding on the publish. The classifier fix (root causes + proposed diff) in the entry below is still the open work and still needs Kevin's go-ahead.
+
+---
+
 # Handover -- 27 August 2026, ~09:10 UTC (Drew) -- Nathan Kirwan "REF29 UDF - Promotion to UOXP" needs-reply repair (data-only, TRANSIENT) + two root causes found; code fix PROPOSED not shipped
 
 ## What this is
