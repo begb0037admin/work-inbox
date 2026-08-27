@@ -1,3 +1,328 @@
+# Handover -- 27 August 2026, ~18:00 UTC (Drew) -- CUTOVER ATTEMPT BLOCKED on auth. Both `C:\WorkInboxAI\{kevin,hope}` config dirs are NOT logged in -> the mandatory confirming run (cutover step 2, must force one hope@ failover) cannot execute -> steps 2/3/4 all blocked. NO `fetch_inbox.py` edit, NO PR #29 merge, NO `.bat`/scheduled-task change this session. Deliverable: `docs/COLLAPSE_TO_ONE_CALL_PLAN.md` (full implementation spec for the 5->1 collapse, ready to build once auth is fixed). `main` at `1539578` untouched; live `\Work Inbox Briefing` task undisturbed and still on `AI_BACKEND=api` (metered).
+
+## What happened
+Dispatched for the authorised direct cutover of the AI-triage backend to headless Claude Code (per the ~17:05 entry below + `docs/CLAUDE_CODE_BACKEND.md`). Task order: (1) build the 5->1 call collapse, (2) confirming end-to-end run in cutover config incl. a forced hope@ failover, (3) merge PR #29 + point the `.bat` at `AI_BACKEND=claude_code` with `ANTHROPIC_API_KEY` unset, (4) verify the next scheduled run.
+
+**Blocker found during pre-flight verification:** the dispatch stated `claude setup-token` was completed for both accounts, but live state on the admin machine is:
+- `C:\WorkInboxAI\kevin\` and `C:\WorkInboxAI\hope\` each contain only a 423-byte skeleton `.claude.json` + a "Not logged in" session log. **No `.credentials.json` in either** (checked with `-Force`).
+- `claude -p` with `CLAUDE_CONFIG_DIR` set to either returns `{"is_error":true,"result":"Not logged in - Please run /login"}`.
+- `CLAUDE_CODE_OAUTH_TOKEN` is **not set** (User or Machine scope).
+- `WI_CLAUDE_CONFIG_DIR` / `WI_CLAUDE_CONFIG_DIR_FALLBACK` ARE set correctly (`C:\WorkInboxAI\kevin` / `...\hope`).
+- Default `~/.claude` IS authed (`subscriptionType: pro`) -- but using it for the confirming run would (a) not test the production auth path, (b) can't do the hope@ failover, (c) burn Kevin's shared interactive pool. Not an acceptable substitute.
+
+`fetch_inbox.py`'s `_claude_code_once` sets `CLAUDE_CONFIG_DIR=<cfg_dir>` and relies on that dir being logged in. It is not. Cutover steps 2-4 are hard-blocked.
+
+## Why nothing was built this session
+The 5->1 collapse is a ~200-250 line reorder of `fetch_inbox.py` (hoist CC-load + cal-items + Granola fetch + the 5 system-prompt constants up to just after Phase 3 card-building, for the `claude_code` path only; one combined `claude -p` call; 5 memoised phase-slice returns). Per the standing "work-inbox cautious change pace" rule (17 Aug regression + revert), that must not ship without the confirming end-to-end run -- which is exactly what the auth blocker prevents. Building it untestable now would just be re-validated from scratch next session. Full design is captured instead in `docs/COLLAPSE_TO_ONE_CALL_PLAN.md` so the build is fast once unblocked.
+
+## Unblock (Kevin, interactive -- Drew cannot do this)
+For each account, in a fresh shell:
+```
+set CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin
+claude            -> /login as kevin@lelitte.co.uk  (writes C:\WorkInboxAI\kevin\.credentials.json)
+```
+then repeat with `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` -> `/login` as hope@lelitte.co.uk.
+Verify each: `echo hi | claude -p --output-format json` under that `CLAUDE_CONFIG_DIR` -> expect `"is_error":false`.
+(If you prefer `claude setup-token`: its minted token must also be exported as `CLAUDE_CODE_OAUTH_TOKEN` into the scheduled-task environment -- the `.bat`, not just your shell -- or the helper won't see it. The `/login`-writes-`.credentials.json` path is simpler and is what the current helper expects.)
+
+## State (all untouched this session)
+- `main` @ `1539578`. Branch `claude/outlook-codecs-connector-upgrade-fe3dgf` @ `ab27471` + this doc commit. PR #29 OPEN / MERGEABLE / CLEAN.
+- `\Work Inbox Briefing` scheduled task: unchanged, `wscript` -> `Run Inbox Briefing Hidden.vbs` -> `Run Inbox Briefing.bat /update` -> pulls `fetch_inbox.py` fresh from `raw.githubusercontent.com/.../main/` into `C:\Users\admin\Documents\Claude\Projects\work-inbox` and runs `python -u fetch_inbox.py` (no `AI_BACKEND` set -> `api` / metered). Triggers observed: 06:00 / 09:00 / 12:00 / 15:00 / 18:00 (note: 5 visible triggers, not the 6 documented as 7/9/11/1/3/5 -- flagged, NOT changed; cadence decision stays Kevin's).
+- `~/.codex/config.toml` sha1 `b2a1a226...` -- Codex not involved.
+- `ANTHROPIC_API_KEY` still set (needed for the live `api` path and for rollback).
+
+## Exact next action for a cold session
+1. Confirm Kevin has `/login`-ed BOTH `C:\WorkInboxAI\{kevin,hope}` (`claude -p` under each returns `is_error:false`). If not -> nothing to do, wait.
+2. Build the 5->1 collapse per `docs/COLLAPSE_TO_ONE_CALL_PLAN.md`. Back up `fetch_inbox.py` to `Archive/` first (dated). `python -m py_compile` clean. `api` path byte-identical (verify with a diff of an `AI_BACKEND=api` parallel run's `briefing.json`).
+3. Confirming run: `AI_BACKEND=claude_code WI_AI_PARALLEL=1 python fetch_inbox.py` from the branch working copy -- exactly ONE `claude -p` call, all 5 phase slices parsed, `data/claude_briefing.json` shape-equivalent to a recent `data/briefing.json`, one forced hope@ failover proven, `ai_backend_usage.jsonl` captured. If it fails -> STOP, do not merge.
+4. Cut over: merge PR #29 to `main` (state restore point = `main` commit before merge; merging is inert -- `AI_BACKEND` defaults to `api` and the `.bat` doesn't set it). Then edit `Run Inbox Briefing.bat` (just before the `powershell ... python -u ...` line ~100): add `set "AI_BACKEND=claude_code"` and `set "ANTHROPIC_API_KEY="`, plus an inline rollback comment (remove those two lines to revert to metered api). Leave cadence as-is.
+5. Verify: watch/trigger the next scheduled run -- briefing pushed, CC sync intact, ledger intact, no mailbox side effects. Record real per-run tokens from `ai_backend_usage.jsonl`; project 6x/day x weekdays vs the Pro weekly cap; if tight, recommend 3x/day (do not change cadence without Kevin).
+
+## Hard gates (unchanged)
+No `main` write until the confirming run passes. No scheduled-task / `.bat` change without that pass + it being the actual cutover step. Parallel mode only for the confirming run. Don't disturb live `\Work Inbox Briefing` runs or stage their data files. Every run prints a timestamp.
+
+---
+
+# Handover -- 27 August 2026, ~17:05 UTC (Drew) -- BUILD DONE (parallel, not cut over): headless Claude Code backend wired into `fetch_inbox.py`. `AI_BACKEND=api` still default (unchanged). `AI_BACKEND=claude_code` + `WI_AI_PARALLEL=1` proven end-to-end -- writes local `data/claude_*.json`, pushes nothing. Machine at `b2a1a226` baseline; live `\Work Inbox Briefing` task undisturbed.
+
+## What this is
+Supersedes the ~16:35 scope entry below (same session). Kevin: *"lets do it - we've spent enough time."* -> built the swap. Full detail: **`docs/CLAUDE_CODE_BACKEND.md`**.
+
+## Built (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`; PR #29 OPEN/MERGEABLE)
+- **`fetch_inbox.py`**: one `_ai_create()` helper behind `AI_BACKEND` (`api` default = byte-identical to before; `claude_code` = headless `claude -p`, subscription auth, tools+MCP disabled, same model `claude-haiku-4-5`, same verbatim prompts). All 5 call sites swapped (Phase 2/3.2/3.5/3.7/3.8). `WI_AI_PARALLEL=1` = do all COM+AI work, write `data/claude_briefing.json` + `data/claude_inbox_suggestions.json` LOCALLY, push nothing, no ledger/CC-sync. Dual-account failover in the helper (kevin@ primary -> hope@ overflow on usage-limit **or timeout stall**; Kevin-confirmed permanent). Backup: `Archive/fetch_inbox_backup_20260827_1640_pre_claudecode_backend.py`. `py_compile` clean.
+- **`docs/CLAUDE_CODE_BACKEND.md`** (build doc), `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` (scope), `docs/OPTION1_KILLSWITCH.md` + `tools/codex_triage/mailbox_guard.py` (kill-switch, PROOF-FIRED, now OPTIONAL -- no write path on this route), research doc Section 9 BUILD entry.
+
+## Verified (admin machine, 27 Aug)
+Headless subscription auth works (`ANTHROPIC_API_KEY` unset -> OAuth creds; account = **`pro`**, not Max). Haiku 4.5 selectable headless. No write path (`permission_denials: []`, 0 tools, 0 MCP). Full parallel run: 5 calls, wall ~7.5 min, output 41k tok (thinking-inflated via `claude -p`), cache_read 47k, cache_creation 53k, list-equiv $0.37 (NOT a real subscription charge). `data/claude_briefing.json` structurally sound. First cold run stalled on Pro rate-limit backoff (2x150s timeouts) -> retry loop now fails over on timeout; re-run clean.
+
+## 6x/day on Pro: NOT viable unmitigated
+~4.3M tok/week on a plan shared with all Kevin's agent work (already near-limit). Fits with **3x/day + collapse the 5 calls into 1 (old Codex "Call 2" design) + hope@ failover** (~<1M tok/week), or move to Max / dedicated account.
+
+## Kevin's action items before cutover
+1. Run `claude setup-token` TWICE -- one `CLAUDE_CONFIG_DIR` per account: `C:\WorkInboxAI\kevin` (kevin@), `C:\WorkInboxAI\hope` (hope@). Then set user env vars `WI_CLAUDE_CONFIG_DIR` / `WI_CLAUDE_CONFIG_DIR_FALLBACK`. **Drew can't -- needs his browser.**
+2. Decide cadence (3x/day recommended).
+3. After a short eyeball-validation window (`claude_briefing.json` vs live `briefing.json`), give an explicit cutover go-ahead.
+4. Optionally approve the collapse-to-one-call mitigation (recommended if staying on Pro).
+
+## Hard gates
+No `main` write. No scheduled-task change / no cutover without Kevin's fresh explicit go-ahead. Parallel mode only. Don't disturb the live `\Work Inbox Briefing` runs or stage their files. `~/.codex/config.toml` at `b2a1a226` (Codex not involved). Every run prints a timestamp.
+
+## Exact next action for a cold session
+Read `docs/CLAUDE_CODE_BACKEND.md`. If Kevin has done the two `setup-token` logins + picked a cadence: (a) optionally build the collapse-to-one-call mitigation; (b) run `AI_BACKEND=claude_code WI_AI_PARALLEL=1 python fetch_inbox.py` a few times over a couple of days, have Kevin/Lauren compare `data/claude_briefing.json` to the live `data/briefing.json`; (c) on his go-ahead, point the `\Work Inbox Briefing` wrapper at `AI_BACKEND=claude_code` with `ANTHROPIC_API_KEY` unset. If he hasn't done the logins: nothing to build, wait.
+
+---
+
+# Handover -- 27 August 2026, ~16:35 UTC (Drew) -- PIVOT: Codex route DROPPED. Moving to headless Claude Code on Kevin's Claude subscription for the six AI-triage phases (same model `claude-haiku-4-5`, same prompts -> billing-path swap, NOT a model swap, no A/B needed). Kill-switch BUILT + PROOF-FIRED (PASS) and retained as optional insurance. New deliverable: `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` (scope, no build). Machine at `b2a1a226` baseline. [SUPERSEDED by the ~17:05 BUILD entry above.]
+
+## What this is
+Supersedes the ~16:00 / ~15:30 / ~14:55 entries below (same session chain). Kevin's mid-session decision (via coordinator): stop pursuing Codex entirely -- every write-gate control failed 26-27 Aug and the connector-free route added cost/complexity. Instead run `fetch_inbox.py`'s 5 `claude-haiku-4-5` calls through **headless Claude Code** (`claude -p`) authed to Kevin's **Claude subscription** (flat fee) instead of the metered `ANTHROPIC_API_KEY` (~GBP 36/mo). Same model + same prompts = identical triage quality, no parallel A/B validation window.
+
+## Deliverables this session (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, commit trail `48f103f` -> this; PR #29 OPEN/MERGEABLE)
+1. **`tools/codex_triage/mailbox_guard.py`** -- post-run Outlook COM delta-sweep KILL-SWITCH. BUILT + PROOF-FIRED end-to-end (`prove` mode, all 12 checks PASS 16:26-16:29): synthetic category injected via COM onto a disposable DistroKid message -> diff caught exactly 1 `categories_changed` [critical] -> real dummy `schtasks` task confirmed `Disabled` -> BurntToast alert rc=0 -> incident record + `GUARD_TRIPPED.flag` written -> synthetic change remediated (settled re-read `''`) -> `Restrict` sweep 0 residue -> cleaned up. Doc: `docs/OPTION1_KILLSWITCH.md`. **Role downgraded** from hard prerequisite (Codex) to optional lightweight regression check -- headless Claude Code has no mailbox tool, so there is no write path to gate.
+2. **`docs/CLAUDE_CODE_HEADLESS_SCOPE.md`** -- NEW. The 6 scope questions answered, verified against the admin machine: feasibility + auth gotcha (`ANTHROPIC_API_KEY` is set and Claude Code prefers it -> scheduled run must unset it; subscription auth via `~/.claude/.credentials.json` or `claude setup-token`); model (`--model claude-haiku-4-5` identical to today, no A/B); which subscription (`kevin@`, recommend 3x/day to protect the shared usage pool); ToS (headless is a documented feature, within terms on one account); write-risk (**removed** -- no mailbox tool, `--allowedTools ""` + `--strict-mcp-config` = zero tools/MCP, COM is the pipeline's own Python); the swap (one `_ai_text()` helper behind `AI_BACKEND=api|claude_code`, 5 call sites, `api` default no-op, one-env-var rollback).
+3. **Research doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9** -- new "PIVOT" entry (27 Aug ~16:30), incl. the Codex default-model record Kevin asked for (`gpt-5.6-terra`, pinnable via `-m`/`-c model=`/profile; `gpt-5.6-sol`/`gpt-5.5` stronger; now only historical).
+
+## Codex-specific work HALTED (per the pivot)
+No Codex Call-2 wiring, no `codex exec` model-pinning build, no Codex usage-projection, no connector-free `CODEX_HOME`, no `codex login`. `docs/OPTION3_BUILD_PLAN.md` is dormant (not deleted).
+
+## Machine state -- BASELINE
+- `~/.codex/config.toml` sha1 **`b2a1a22661b3596b92384e081b6625f786346f0e`** -- untouched all session.
+- No `codex exec` run this session. No `CODEX_HOME`. No `codex login`. `fetch_inbox.py` unedited.
+- Mailbox clean: proof-test synthetic category remediated (COM settled re-read `''`), `Restrict("[Categories] <> ''")` sweep 0 `Drew-guard-selftest` residue; dummy `schtasks` task `Drew Guard Selftest Dummy` deleted; `data/codex_runs/GUARD_TRIPPED.flag` cleared.
+- `data/codex_runs/` proof evidence (`selftest_result_*.json` etc.) is local only -- `data/` is `.gitignore`d.
+
+## Hard gates in force
+No build on the Claude Code route until: (1) Kevin confirms plan tier + cadence on `kevin@lelitte.co.uk`; (2) Kevin runs `claude setup-token` and sets `CLAUDE_CODE_OAUTH_TOKEN` (Drew cannot -- needs his interactive login); (3) account decision (shared `kevin@` vs dedicated). Then Drew builds the `AI_BACKEND` helper, runs a one-off Phase 3.2 parity diff (Claude Code harness vs bare API), reports, waits for the flip go-ahead. No `main` writes. No Task Scheduler change without a fresh explicit go-ahead. Every run's log prints a timestamp. `source`/`sourceType` opener collision resolved + live (26 Aug).
+
+## Exact next action for a cold session
+Read `docs/CLAUDE_CODE_HEADLESS_SCOPE.md`. If Kevin has done setup-token + confirmed the plan/cadence/account: build section 6's `_ai_text()` helper in `fetch_inbox.py` behind `AI_BACKEND` (default `api` = no-op), back it up first, run one `AI_BACKEND=claude_code` manual run, diff `data/briefing.json` vs an `api` run of the same inbox, report. Do NOT flip the scheduled task or touch `main` without a fresh go-ahead. If Kevin has NOT done the prerequisites: nothing to build -- wait.
+
+---
+
+# Handover -- 27 August 2026, ~16:00 UTC (Drew) -- Codex Connector Migration: Kevin APPROVED Option 3 (connector-free CODEX_HOME + Outlook COM data pull). This session = build plan ONLY, written to `docs/OPTION3_BUILD_PLAN.md`. No build, no `codex login`, no config/pipeline edit, no automation. Machine at `b2a1a226` baseline. [SUPERSEDED by the ~16:35 pivot entry above -- Codex route dropped.]
+
+## What this is
+Codex Connector Migration. Supersedes the ~15:30 / ~14:55 / earlier entries below (same session chain). Every local + account-side write-block route is exhausted (prior entries). Kevin's call: **Option 3 APPROVED** -- disconnect the Microsoft connectors from the automation's ChatGPT identity, pull read data via Outlook COM, still move the six AI-triage phases to Codex (this is what zeros the ~GBP 36/mo). Kevin's steer, verbatim: *"our mission is the cost saving"* -- lost calendar/Teams connector-read breadth, the Graph `web_link` opener (COM `openmail://` fallback is fine), and connector-read parity are all secondary/tradeable; take the simpler path, note the trade-off, don't gold-plate; quality gate still matters (false-demotion) but scoped proportionately.
+
+## Deliverable this session
+`docs/OPTION3_BUILD_PLAN.md` -- new file on branch `claude/outlook-codecs-connector-upgrade-fe3dgf`. Shape mirrors `docs/PHASE2_BRIEF.md`, "Exact next action" line at the top. Full detail also in research doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new entry "Option 3 APPROVED by Kevin -- build plan written".
+
+## Key architecture finding
+**Option 3 is the existing Phase 2 dry-run machinery minus "Call 1".** The 26 Aug dry run (branch `drew/codex-phase2-ai-triage`) already built the reusable core: `tools/codex_triage/categorise_and_stage.py` (verbatim port of `categorise()`/`badge_for()`/`make_card()` -- stays deterministic Python), `build_call2_brief.py` (the six production system prompts copied verbatim), `build_granola_context.py`. "Call 1" = three `codex exec` connector pulls -> Option 3 **deletes it**, feeds `fetch_inbox.py`'s existing Outlook COM Phase 1 pull through a thin adapter. "Call 2" (the single AI `codex exec` call) is **already connector-free by design**; under Option 3 it runs under a connector-free `CODEX_HOME` so that's structural not instructed. New build: (1) COM->Codex adapter, (2) connector-free `CODEX_HOME` + identity, (3) warm-up/retry wrapper, (4) output writers + separate dedup ledger, (5) quality-gate harness, (6) parallel Task Scheduler job (last, separately gated).
+
+## Bonus: Option 3 fixes the missing-importance quality gap for free
+Dry run saw 0 urgent vs the real pipeline's 3 -- the Outlook *connector* did not expose `importance`. Outlook *COM* supplies `importance`/high-flag natively in the same pull, so `categorise()`'s `imp == 2 -> "urgent"` works again with no COM-shim join. The quality gate's whole "missing importance" section (B) is dropped; candidate-count/volume parity becomes a real signal (both sides consume the *same* pulled set -- cleanest possible Codex-vs-Haiku-4.5 A/B).
+
+## Connector-free ChatGPT identity -- EXPLICIT DECISION FOR KEVIN (not assumed)
+The connector-free property comes from the **ChatGPT account**, not `CODEX_HOME` (27 Aug plugin-disable test: the `microsoft_outlook_*` tools re-provision from the account every session). Local records (admin machine, 27 Aug): `~/.codex/auth.json` account `eb7a812e-1b9d-4586-b1a4-02a4ed7ca116` (personal Plus) **has** all three Microsoft connectors linked to `kevin.lelitte@admin.ox.ac.uk`; the other known account `cc80356f-959e-449f-9721-add87a9ba0a5` (Edu / enterprise-managed) has **connector state not visible in any local file**. **Neither is confirmed connector-free.**
+- **Option A (recommended):** dedicated new personal ChatGPT Plus identity for the automation only, Microsoft apps never connected. Connector-free by construction; isolates automation from Kevin's interactive quota. ~GBP 16/mo Plus fee -> net saving ~GBP 20/mo.
+- **Option B:** use `cc80356f` (Edu) *if* Kevin confirms in the ChatGPT web UI it has no Microsoft apps AND controls whether any can be added. Full GBP 36/mo saving, zero added cost, medium robustness (workspace-managed).
+- **Option C:** strip connectors from `eb7a812e`. Not recommended -- fragile (re-adding for interactive use silently re-arms the write path).
+
+## Machine state -- UNCHANGED, at baseline (nothing done this session but reading + doc writes)
+- `~/.codex/config.toml` sha1 **`b2a1a22661b3596b92384e081b6625f786346f0e`** -- re-verified, no `[apps]` table, no hook refs.
+- `codex doctor` clean bar the two standing warnings (Defender exclusions unverified; 0.150.1 update available).
+- Only the persistent `codex ... app-server` daemon running (PID observed, ~112 MB) -- respawns automatically, not a stray `exec`.
+- No `codex exec` run this session. No connector read re-run (not needed; the ~15:30 post-restore verification stands). No `CODEX_HOME` created. No `codex login`.
+- 27 Aug backups still retained: `config.toml.bak-20260827_134635-drew-writetool-lockout`, `config.toml.bak-20260827_142957-drew-plugindisable-test`, `_drew_plugindisable_backup_20260827_142957/`.
+
+## Hard gates in force
+No build, no `codex login`, no `CODEX_HOME` creation, no config change, no `fetch_inbox.py` edit, no deploy, no Task Scheduler entry -- until Kevin acknowledges Build Step 1's read-only tool-list verification. The 7-day run needs `PARALLEL_RUN_QUALITY_GATE_DESIGN.md` built first **and** Kevin's fresh explicit separate go-ahead. No Phase 2 Codex task-writer, no `source:'codex-graph'` write to `data/tasks.json`, no PAT rotation, no Oxford IT, no `main` writes without a per-change go-ahead. `source`/`sourceType` opener collision resolved + live (26 Aug). Every run's log prints a timestamp.
+
+## PR #29 -- branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, OPEN, MERGEABLE. Commit trail 402013d -> a8278d8 -> 7737789 -> f354851 -> c4ccbd1 -> this.
+
+## Exact next action for a cold session
+Build **Step 1 only, then stop for review** (per `docs/OPTION3_BUILD_PLAN.md`): (1) Kevin picks the identity (Option A/B/C above); (2) create `C:\CodexAutomation\.codex`, `set CODEX_HOME` to it, `codex login` as that identity; (3) one read-only `codex exec -s read-only --skip-git-repo-check` that lists available tools -- confirm **zero** `microsoft_outlook_email.*` / `microsoft_outlook_calendar.*` / `microsoft_teams.*` tools; (4) confirm `~/.codex/config.toml` still sha1 `b2a1a226...`; (5) report the tool list back. Do NOT build the COM adapter, wrapper, quality gate, or schedule until Kevin acknowledges that check passed.
+
+---
+
+# Handover -- 27 August 2026, ~15:30 UTC (Drew) -- Codex Connector Migration: Codex commissioned via `codex exec` to attempt a LOCAL fix. Investigation done (angles A-G). Best candidate = PreToolUse hook -- BUILT + TESTED -- FAILED (write executed, hook never fired; COM-remediated). VERDICT: NO local write-block preserves reads. Option 3 (connector-free CODEX_HOME + COM read pull) assessed feasible. Machine restored. 7-day run still BLOCKED, decision with Kevin.
+
+## What this is
+Codex Connector Migration. Supersedes the ~14:55 / ~14:25 / ~14:05 / ~13:30 entries below (same session chain). Per Kevin's decision, the write-gate blocker was passed to Codex (`codex exec`, routed through Drew: Drew commissions, Codex investigates/proposes, Drew reviews + gates) to try a machine-local fix. Full detail + repro: research-doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new entry "Codex commissioned to attempt a local fix" (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`). Scratchpad: `codex_investigation_result.out` (Codex's full deliverable), `hk_test.out` (hook verify test), `hk_confirm.out` (confirming probe), `com_fix_d.py` (COM remediation), `postrestore_read.out` (post-restore read check), `FAILED_hooks.json.record` + `FAILED_deny_microsoft_connector_writes.ps1.record` (the failed hook files, kept for the record).
+
+## What Codex checked (codex-cli 0.149.1) and found
+
+| # | Angle | Result |
+|---|---|---|
+| A | **PreToolUse hooks** (`~/.codex/hooks.json` + deny script -> `permissionDecision:"deny"`) | **BUILT + TESTED -- FAILED**: `set_message_categories` executed, category landed on the live disposable message, `deny_hook.log` never written (hook did not run); a confirming read-only probe also produced no hook log. `PreToolUse` does not intercept `codex_apps/microsoft_*` in this build. |
+| B | `guardian_approval` feature | **NO** -- no user-level per-connector deny surface in 0.149.1 |
+| C | Separate `CODEX_HOME` / connector-free ChatGPT account ("option 3") | **YES** for zero `microsoft_outlook_*`/`microsoft_teams.*` tools (account-provisioned Apps, not `mcp_servers`) -- **but removes connector reads too** |
+| D | `--profile` / `--ignore-user-config` / `--disable apps` | **NO** for read-preserving goal. `--disable apps` removes the whole Apps integration (reads too) -- emergency mode only |
+| E | `codex mcp` re-surface + filter | **NO** -- doesn't manage the `codex_apps` bridge |
+| F | `.rules` / execpolicy | **NO** -- model-generated shell only (confirms 26 Aug) |
+| G | Other 0.149.1 features (`request_permissions_tool`, `exec_permission_approvals`, `tool_call_mcp_elicitation`, `non_prefixed_mcp_tool_names`) | **NO** |
+
+`codex exec --help` (0.149.1) has **no** `--allowed-tools` / `--deny-tool` / tool-scoping flag.
+
+## Verdict: NO
+No viable local write-block on this machine that preserves connector reads. In headless `codex exec` the Outlook/Calendar/Teams tools load from the ChatGPT account's connected Apps, outside every local surface tried to date: `config.toml [apps.*]` (v1+v2), per-connector "Allow read actions", top-level "Always ask", plugin-disable (config + physical cache), **PreToolUse hook**, execpolicy `.rules`, `codex mcp`, `--profile`/feature flags. No local or account-side permission control is enforced on that path.
+
+## Option 3 -- feasibility (Codex's assessment): FEASIBLE
+A separate `CODEX_HOME` authed to a ChatGPT account with no Microsoft connected apps exposes zero `microsoft_outlook_*`/`microsoft_teams.*` tools -> no write path to the live mailbox/calendar/Teams at all. It also has no connector reads: Phase 2 data pull moves to Outlook COM (`fetch_inbox.py`); the six AI-triage phases still move to Codex (zeros the ~GBP 36/mo); the Graph `web_link` opener + calendar/Teams read breadth are lost (codex-graph tasks fall back to the already-built COM `openmail://` path). Work required: dedicated connector-free ChatGPT identity, `codex login` a separate `CODEX_HOME`, wire `fetch_inbox.py` COM output as Codex input, keep the pre-flight warm-up/retry loop.
+
+## Machine state -- RESTORED to baseline (left as found)
+- `~/.codex/hooks.json` + `~/.codex/hooks/` **removed** (failed diagnostic, not kept; copies at `scratchpad/FAILED_*.record`).
+- `config.toml` sha1 **`b2a1a226...`** -- no `[apps]` table, no `hook` refs.
+- `codex doctor` clean (pre-existing warnings only: Defender exclusions unverified; 0.150.1 update available).
+- Test category `Drew-writegate-retest-20260827d` remediated via Outlook COM by `EntryID` -- `Categories` stable `''` at t=20/45/70s after forced `SyncObjects`; whole-inbox `Restrict("[Categories] <> ''")` sweep = 0 residue.
+- Connector reads re-verified working post-restore (`get_recent_emails` + `list_events` + `get_mailbox_settings`, "No changes were made").
+- Only the persistent `codex ... app-server` daemon runs (respawns automatically; not a stray `exec`).
+- Backups retained: `config.toml.bak-20260827_134635-drew-writetool-lockout`, `config.toml.bak-20260827_142957-drew-plugindisable-test`, `_drew_plugindisable_backup_20260827_142957/`.
+
+## Reusable gotchas (reconfirmed)
+1. COM `Categories` read within seconds of a Graph-side write gives a false `''` -- force `SyncObjects` + re-read at t=20-70s.
+2. A COM residue sweep over `Inbox.Items` in default order can miss an older target message -- check the specific `EntryID` directly, or use `Items.Restrict("[Categories] <> ''")`.
+3. Cold `codex exec` after a gap reliably hangs on infra startup (hit repeatedly again on 27 Aug -- the first `--dangerously-bypass-hook-trust` warm-up hung ~90s). A throwaway warm-up clears it; the 7-day automation wrapper needs a pre-flight warm-up/retry loop.
+4. `codex exec` dumping full connector tool-catalog JSON into its own context can blow the context window and collapse the turn ("collab: Wait" spam) -- keep investigation briefs from asking Codex to paste large schemas.
+
+## Hard gates in force
+7-day automation needs Kevin's fresh explicit separate go-ahead regardless, + the warm-up/retry wrapper, + `PARALLEL_RUN_QUALITY_GATE_DESIGN.md` (still unbuilt). No Phase 2 task-writer, no `source:'codex-graph'` write, no PAT rotation, no `main` writes. Do NOT escalate to Oxford IT (Kevin's standing decision). `source`/`sourceType` opener collision resolved + live (26 Aug).
+
+## PR #29 -- branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, still open. (Rebased earlier same session; commit trail 402013d -> a8278d8 -> 7737789 -> f354851 -> this.)
+
+## Exact next action for a cold session
+All local write-block routes are now exhausted and documented (account-side, plugin, `config.toml [apps.*]`, PreToolUse hook, execpolicy, `codex mcp`, profile/feature flags). Do NOT re-test any of them. Wait for Kevin to pick among the four options in the "~14:55" entry below: (1) accept residual write-risk + build a post-run COM delta-sweep kill-switch; (2) reverse the Oxford-IT decision; (3) connector-free `CODEX_HOME` + Outlook COM read pull (now assessed feasible -- scope this variant); (4) shelve the migration, keep `fetch_inbox.py` on Anthropic. Do not touch automation until Kevin decides + gives a fresh go-ahead.
+
+---
+
+# Handover -- 27 August 2026, ~14:55 UTC (Drew) -- Codex Connector Migration: top-level "Always ask" AND plugin-disable BOTH TESTED -- BOTH FAILED, live writes went through (COM-confirmed, remediated). Machine restored. EVERY lever in Kevin's hands is exhausted. 7-day run BLOCKED, decision back to Kevin.
+
+## What this is
+Codex Connector Migration. Supersedes the ~14:25 / ~14:05 / ~13:30 entries below (same session chain). Two more preventive controls tested this run, both FAILED. Full detail + repro: research-doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new "top-level Always ask test" + "Plugin-disable test" entries (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`). Scratchpad logs: `aa_write.out`, `aa_verify_b.out`, `aa_reads.out`, `pdB_write.out`, `pdB_read.out`.
+
+## Test 1 -- top-level "Always ask" (strictest account-side setting) -- FAILED
+Kevin set the TOP-LEVEL Plugins -> Permissions radio to "Always ask" ("ChatGPT will ask before reading or making changes") -- broader scope than the 14:20 per-connector test, and the **first clean deliberate test of "Always ask" vs the Outlook connector** (the 26 Aug table line was entangled with GitHub). Preconditions verified (same account `eb7a812e-…`; `config.toml` baseline sha1 `b2a1a226…`, no `[apps]`; connectors normal; warmed).
+- **Write attempt** (`codex exec -s read-only`, cat `Drew-writegate-retest-20260827c`): `mcp: codex_apps/microsoft_outlook_email.set_message_categories (completed)`, Codex claimed `["Drew-writegate-retest-20260827c"]`. ~42s, normal timing. **No prompt, no hang, no timeout, no auto-deny -- silently proceeded.**
+- **3-way verify:** (a) transcript `(completed)` + success claim; (b) 2nd independent `codex exec` read-back = `null` (couldn't pin the msg that run -- inconclusive, not `[]`); (c) **Outlook COM** -- t=0 `''` (stale-cache false-clear), then **stable `Categories == 'Drew-writegate-retest-20260827c'` at t=20/45/70s**. Write LANDED on the live mailbox.
+- **Reads check:** `list_messages` + `list_events` + `get_mailbox_settings` all completed, 5 subjects + 2 events, "No changes made." Reads fully functional -- "Always ask" is neither fail-closed nor read-blocking headlessly; it is simply **not enforced at all** on the `codex exec` path.
+- Remediated via COM (`''`, 0 residue / 231 msgs). `config.toml` untouched (account-side change only).
+
+## Test 2 -- plugin-disable (ran under earlier authorisation, before the "hold it" msg -- completed rather than half-done) -- FAILED
+Backups first: `config.toml.bak-20260827_142957-drew-plugindisable-test` (sha1 `b2a1a226…`); the 3 connector cache dirs -> `~/.codex/_drew_plugindisable_backup_20260827_142957/*.tar.gz` + `STATE.txt` (connector app IDs + the 3 `remote_plugin_id`s).
+- `codex plugin remove` N/A -- these are `openai-curated-remote` remote plugins, not in `config.toml`/`[marketplaces.*]`, provisioned server-side from the ChatGPT account.
+- **Attempt A** -- `[plugins."<name>@openai-curated-remote"] enabled=false` x3: parsed OK, `codex doctor` clean, but **every `codex exec` hung on startup** (3x 90s warm-up failures vs. a single warm-up always fixing the ordinary cold-start hang). Not a supported path; breaks startup. Abandoned, config restored.
+- **Attempt B** -- physically moved the 3 cache dirs aside (`mv outlook-email DISABLED-drew-20260827-outlook-email` etc.): warm-up OK first try. **Write went through** (`set_message_categories (completed)`, COM-confirmed stable t=25/50/75s). **Reads worked** (`list_messages`/`list_events` completed). And **the cache dirs re-materialised in the same session** (fresh dirs at 14:47) -- Codex re-downloads them from the account on session start.
+- **Verdict:** the `codex_apps/microsoft_outlook_*` / `microsoft_teams_*` tools are bound to the ChatGPT account's connected apps and re-provisioned every session regardless of local config or plugin-cache state. Plugin-disable lever exhausted.
+
+## Machine state -- FULLY RESTORED (left as found)
+- Test category remediated (COM `''`, 0 `Drew-writegate*` residue / 231 msgs).
+- 3 connector cache dirs restored **byte-identical from tar**; `DISABLED-*` renames deleted; dir has exactly `outlook-email` / `outlook-calendar` / `teams` as found.
+- `config.toml` sha1 `b2a1a226…` -- no `[apps]` table, no plugin overrides, no diagnostic block.
+- `codex doctor` clean; warm-up OK; connector reads re-verified working (`get_recent_emails` completed).
+- Backups retained: `config.toml.bak-20260827_142957-drew-plugindisable-test`, `_drew_plugindisable_backup_20260827_142957/` (3 tars + STATE.txt).
+- Also from earlier this session: `config.toml.bak-20260827_134635-drew-writetool-lockout` (the pre-Layer-C baseline).
+
+## Every lever in Kevin's hands -- tested, all FAILED
+| Lever | Result |
+|---|---|
+| "Always ask" ChatGPT toggle (26 Aug, GitHub-entangled) | write went through |
+| Layer C v1: `config.toml [apps.<id>] disabled_tools` + `default_tools_approval_mode` | no effect |
+| Layer C v2: + per-tool `approval_mode="prompt"` x49 | no effect |
+| Per-connector "Allow read actions" (personal Plus) | no effect |
+| **Top-level "Always ask"** (strictest; clean Outlook test) | **no effect** |
+| **Plugin-disable** -- config `enabled=false` | breaks startup (non-viable) |
+| **Plugin-disable** -- physical cache removal | no effect, tools re-materialise |
+| Oxford Entra scope revoke | OFF THE TABLE -- Kevin's decision |
+
+In headless `codex exec` the connector tools load from the ChatGPT account's connected apps outside any local config/plugin surface; no account-side permission setting is enforced on that path. Reads + writes both always succeed, no prompt/hang/denial.
+
+## Decision back to Kevin (Section 9 has full framing)
+1. **Accept residual write-risk** for the 7-day run + build a post-run COM delta-sweep kill-switch (categories/flags/read-state/folder/Sent+Drafts vs pre-run baseline -> hard-disable + alert on any delta) as a hard prerequisite. Detection, not prevention.
+2. **Reverse the Oxford-IT decision** -- tenant-admin Graph scope revoke is the only thing that fails the write at the API.
+3. **Disconnect the connectors from the automation's ChatGPT account** and pull Phase 2's read data via Outlook COM (existing `fetch_inbox.py`); the six AI phases still move to Codex (zeros the ~£36/mo), no live-mailbox write path. Loses the Graph `web_link` opener + calendar/Teams read breadth.
+4. **Shelve the migration** -- keep `fetch_inbox.py` on Anthropic (~£36/mo, zero write exposure).
+
+## Hard gates in force
+7-day automation needs Kevin's fresh explicit separate go-ahead regardless + a pre-flight warm-up/retry loop in the wrapper (cold `codex exec` reliably hangs on infra startup). No Phase 2 task-writer, no `source:'codex-graph'` write, no PAT rotation, no `main` writes. `source`/`sourceType` opener collision resolved + live (26 Aug). `PARALLEL_RUN_QUALITY_GATE_DESIGN.md` still unbuilt. Do NOT escalate to Oxford IT.
+
+## PR #29 -- MERGEABLE / CLEAN (rebased earlier this session; commit trail 402013d -> a8278d8 -> 7737789 -> this)
+
+## Exact next action for a cold session
+Account-side + plugin-disable routes are BOTH exhausted (confirmed, not inferred). Do NOT re-test connector-permission or plugin settings. Wait for Kevin's pick among options 1-4 above. If option 1: build the post-run COM delta-sweep kill-switch as a hard prerequisite before any scheduled run. If option 3: scope the "connectors disconnected, COM data pull, Codex AI phases" variant. Do not touch automation until Kevin decides + gives a fresh go-ahead.
+
+---
+
+# Handover -- 27 August 2026, ~14:25 UTC (Drew) -- Codex Connector Migration: Layer A ("Allow read actions" per-connector) TESTED -- FAILED, live write went through (COM-confirmed 3 ways, remediated). ALL in-our-control preventive controls now exhausted. 7-day run BLOCKED, decision back to Kevin.
+
+## What this is
+Codex Connector Migration only. Supersedes the ~14:05 UTC entry below. The write-gate re-test the coordinator staged has now been run against Kevin's new setting.
+
+**Kevin's change:** all three Microsoft connectors (Outlook Email, Outlook Calendar, Teams) set to **"Allow read actions"** in personal ChatGPT Plus -> Plugins -> per-connector Permissions. Confirmed NOT the setting during any prior test (earlier runs were on the "Allow low-risk actions" default). Genuine untested change.
+
+## Write-gate re-test -- FAILED
+Full detail + repro: research-doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9, new "Layer A tested" entry (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`). Scratchpad logs: `writegate_run5.out`, `writegate_run5_verify.out`, `reads_check.out`.
+- **Preconditions:** same ChatGPT account (`eb7a812e-…`); `config.toml` has NO `[apps]` table -- last session's v1/v2 lockout edits fully reverted (diff vs baseline backup = only Codex runtime auto-churn: cua_node hash, browser plugin version bump, pipe GUID). Stale codex daemons killed + infra warmed (cold `codex exec` after a gap reliably hangs on infra startup -- hit twice today; a warm-up call fixes it -- **the 7-day automation will need a pre-flight warm-up / retry wrapper**). Target re-baselined via COM: DistroKid "…on Deezer", `Categories==''`.
+- **Write attempt** (`codex exec -s read-only`, category `Drew-writegate-retest-20260827b`): `mcp: codex_apps/microsoft_outlook_email.set_message_categories (completed)`, Codex claimed success `["Drew-writegate-retest-20260827b"]`. No prompt, no error, no refusal.
+- **3-way verification (write LANDED):** (a) transcript shows `set_message_categories (completed)` + bare success line; (b) a second independent `codex exec -s read-only` `fetch_message` returned `["Drew-writegate-retest-20260827b"]` (not `[]`); (c) Outlook COM, wholly independent -- an immediate check read `''` (propagation lag / stale cache) but a fresh `CoInitialize`+`SyncObjects` then a stable 70-second read (t=0/20/40/70s) consistently showed `item.Categories == 'Drew-writegate-retest-20260827b'`. Write is genuinely on Kevin's live Exchange mailbox.
+- **Reads-still-work:** `list_messages` -> 10 subjects, `list_events` -> 3 events. Reads fine under "Allow read actions".
+- **Remediated:** category cleared via COM, re-fetch `''`, final sweep 0 `Drew-writegate*` residue / 221 msgs. `config.toml` untouched this run.
+
+## Every preventive control in our/Kevin's hands is now exhausted
+| Layer | Result |
+|---|---|
+| "Always ask" ChatGPT toggle | 26 Aug: write went through headless, no prompt |
+| Layer C v1: `config.toml [apps.<id>] disabled_tools` + `default_tools_approval_mode="writes"` | 27 Aug: no effect |
+| Layer C v2: + per-tool `approval_mode="prompt"` ×49 | 27 Aug: no effect |
+| Layer A: per-connector "Allow read actions" (personal Plus) | 27 Aug: no effect |
+| Layer B: Entra scope revoke via Oxford IT | OFF THE TABLE -- Kevin's decision |
+
+In headless `codex exec` the connector tools load from the ChatGPT account's connected apps outside any locally-visible config surface, and the account-side action-permission setting is not enforced on that path. `codex exec --help` has no connector-approval flag.
+
+## Decision now back to Kevin (Section 9 has the full framing)
+1. **Accept residual write-risk** for the 7-day run (as with the GitHub PAT on 25 Aug, but larger: 42 unsupervised `codex exec` runs/week with an un-gated write path to his live mailbox/calendar/Teams). Mitigation: automation wrapper does a post-run COM delta sweep (categories/flags/read-state/folder/Sent+Drafts count vs pre-run baseline) and hard-disables the schedule + alerts on ANY delta -- detection not prevention.
+2. **Authorise the plugin-disable nuclear test** (`codex plugin remove outlook-email` +cal +teams) -- if it strips the `codex_apps/microsoft_outlook_*` tools, reads go too (Phase 2 would need Outlook COM for the data pull, defeating most of the point). Last untried local lever.
+3. **Reverse the Oxford-IT decision** -- tenant-admin scope revoke is the only thing that reliably fails the write at Graph. Only Kevin can un-rule-it.
+4. **Shelve the Codex AI-triage migration** -- keep `fetch_inbox.py` on the Anthropic API (~£36/mo, no live-mailbox write exposure).
+
+## Hard gates still in force
+7-day automation needs Kevin's fresh explicit separate go-ahead regardless. No Phase 2 task-writer, no `source:'codex-graph'` write, no PAT rotation, no `main` writes. `source`/`sourceType` opener collision resolved + live (26 Aug). Quality-gate design (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still unbuilt. Do NOT escalate to Oxford IT.
+
+## PR #29 -- MERGEABLE / CLEAN (rebased earlier this session, commit trail 402013d -> a8278d8 -> this)
+
+## Exact next action for a cold session
+Wait for Kevin's decision among options 1-4 above. Do not touch automation. If option 2: plugin-disable is its own backed-up authorised test (kill codex infra first, `codex plugin list` to get exact ids, disable, re-run both the write-gate test AND a reads pull, then restore). If option 1: build the post-run COM delta-sweep kill-switch as a hard prerequisite before any scheduled run.
+
+---
+
+# Handover -- 27 August 2026, ~14:05 UTC (Drew) -- Codex Connector Migration: Kevin ruled OUT Oxford IT; Layer C local config.toml write-tool lockout BUILT + TESTED -- FAILED both variants, live writes went through (COM-confirmed, remediated), config restored. 7-day run still BLOCKED. PR #29 rebased.
+
+## What this is
+Codex Connector Migration only (not the classifier fix further below -- different Drew session). Supersedes this session's earlier ~13:30 UTC entry. Chain of events:
+- 26 Aug write-gate test FAILED: under `codex exec -s read-only`, a real Outlook category write landed on a live message in Kevin's Oxford mailbox with no prompt (`docs/codex_phase2_run_20260826/WRITEGATE_TEST_INCIDENT.md`). 7-day automated parallel run = NO-GO.
+- 27 Aug ~13:30: Drew scoped the re-consent, wrote copy-ready Layer A/B instructions for Kevin, staged the write-gate re-test. Also extracted the **full connector write-tool inventory** (24 Email / 16 Calendar / 9 Teams = 49 state-changing tools) from `.codex-global-state.json`'s local catalog -- no `codex exec` needed, closing the enumeration the 26 Aug deny-test was blocked on. All in research-doc Section 9's 27 Aug entries.
+- 27 Aug ~14:00: **Kevin's decision (verbatim intent):** NOT going to Oxford org IT -- he uses a personal ChatGPT Plus account, the `admin.ox.ac.uk` link is optional to him. **Layer B (Entra scope revoke) is OFF THE TABLE.** Directed: do Layer C (local `config.toml` write-tool lockout), then the re-test; Layer A only if a trivial one-click. Authorised the config edit + one disposable-email test write, nothing beyond.
+
+## Layer C -- BUILT, TESTED, FAILED (both variants)
+Full detail + exact repro in research-doc Section 9's new "Layer C attempt" entry. Scratchpad artifacts: `writegate_run2.out` / `writegate_run3.out`, COM baseline/verify scripts, `write_tools.json`.
+- **Backup:** `C:\Users\admin\.codex\config.toml.bak-20260827_134635-drew-writetool-lockout` (`cmp`-verified, sha1 `29a15d97...`).
+- **v1:** `[apps.<connector_id>]` blocks (all 3 connectors) with `disabled_tools = [all 49 write tools, namespaced e.g. `microsoft_outlook_email.set_message_categories`]` + `default_tools_approval_mode = "writes"`. `tomllib` + `codex doctor` clean. Killed stale codex app-server/code-mode-host procs so `codex exec` reloads. Ran the write attempt (`codex exec -s read-only --skip-git-repo-check`, target = disposable DistroKid `mailbot@distrokid.com` "...on Deezer" email, `Categories==''` baseline, test cat `Drew-writegate-retest-20260827`). **RESULT: write went through** -- transcript `mcp: codex_apps/microsoft_outlook_email.set_message_categories (completed)`, Codex reported `["Drew-writegate-retest-20260827"]`. **COM-confirmed** (`GetItemFromID` -> `item.Categories == 'Drew-writegate-retest-20260827'`). **Remediated** (`Categories=""; Save()`; re-fetch `''`).
+- **v2:** v1 + explicit per-tool `[apps.<id>.tools."<name>"] approval_mode = "prompt"` for **every one of the 49 write tools** -- the exact structure the 25 Aug cc93c7b incident used in reverse (`approval_mode = "approve"` auto-approved GitHub writes there). Re-tested. **RESULT: write went through again**, identical. COM-confirmed, remediated, re-verified `''`.
+- **Reads unaffected both runs** (`search_messages`/`fetch_message` completed) -- the config simply had **no effect on the write path**.
+- **Config fully restored** to pre-edit baseline (`cp` the `.bak`, `cmp`-verified, sha1 `29a15d97...`, 239 lines, no `[apps]` table, `codex doctor` clean). All `codex` processes cleared. Final COM sweep: target matches baseline, **zero `Drew-writegate*` residue across 201 inbox msgs**.
+
+## Why it failed
+In a plain `codex exec`, the Microsoft connector tools (`codex_apps/microsoft_outlook_*`) are loaded automatically from the ChatGPT account's connected apps -- `codex doctor` shows only 3 configured MCP servers (`node_repl`, `meeting-context`, `openaiDeveloperDocs`), none of them Microsoft. The `[apps.*]` table only governs a *different* connector path (the desktop "apps" subsystem, and MCP servers that also carry a local `[mcp_servers.*]` entry -- which is how the cc93c7b GitHub auto-approval actually rode). The Microsoft connectors have **no** local `[mcp_servers.*]` entry, so **nothing in `config.toml` filters or gates them for `codex exec`.** This is the pessimistic outcome the 26 Aug docs flagged as possible.
+
+## Net status
+**There is currently NO proven local control on the admin machine that stops `codex exec` writing to Kevin's live mailbox / calendar / Teams. The 7-day parallel run stays BLOCKED.**
+
+Remaining in-our-control levers (none tried, none authorised):
+1. **Layer A -- personal ChatGPT Plus -> Settings -> Connectors** per-connector read-only / "allow only read actions" toggle. Not visible from the CLI/local files -- Kevin's to check in the web UI. Primary remaining hope.
+2. **Plugin disable** (`[plugins."outlook-email@openai-curated-remote"] enabled = false` / `codex plugin remove`). Almost certainly kills the read tools too; unverified it strips the `codex_apps/` tools at all. Nuclear, needs its own authorised test.
+3. Per Kevin: **do NOT escalate to Oxford org IT.**
+
+## Hard gates still in force
+- Do NOT build the Task Scheduler automation. Do NOT start the Phase 2 Codex task-writer or write `source:'codex-graph'`. PAT rotation permanently declined (26 Aug). `main` untouched on both repos. `source`/`sourceType` opener collision already resolved + live (26 Aug). Quality-gate design (`PARALLEL_RUN_QUALITY_GATE_DESIGN.md`) still unbuilt.
+
+## PR #29 rebase -- DONE (this session, ~13:30)
+Was 92 commits behind `main`, `mergeable: CONFLICTING` (conflict in `CLAUDE.md` only -- both sides independently added the identical "0. Accountable lead: Drew" line; branch also moved the Bootstrap Order block). `origin/main` (`2d00b3e`) merged into the branch, `CLAUDE.md` resolved to `main`'s version. Now `MERGEABLE` / `CLEAN`. No pipeline/code files touched.
+
+## Exact next action for a cold session
+Wait for Kevin to check **Layer A** in personal ChatGPT Plus -> Settings -> Connectors and report whether a per-connector read-only toggle exists. If yes: he sets all 3 to read-only + reconnects in Codex, then Drew re-runs the write-gate re-test (the `writegate_run*.out` procedure -- deliberate category write to the DistroKid message, verified 3 ways incl. direct COM; PASS = write refused AND reads still return data). If no: decision goes back to Kevin (explicitly accept residual write-risk for the 7-day run / authorise plugin-disable test / shelve the migration). Do NOT touch automation until a preventive control is proven AND Kevin gives a fresh go-ahead.
+
+---
+
 # Handover -- 27 August 2026, ~09:45 UTC (Drew) -- approved classifier body-truncation fix IMPLEMENTED on branch + live dry-run done -- NOT MERGED: dry-run does not confirm the Nathan REF29 goal, held for coordinator
 
 ## What this is

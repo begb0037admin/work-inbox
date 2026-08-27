@@ -22,6 +22,623 @@ GITHUB_PATH = "data/briefing.json"
 GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
 GITHUB_TIMEOUT = 30
 
+# --------------------------------------------------------------------------- #
+#  AI backend selection + parallel-validation mode  (added 2026-08-27, Drew)
+#  Codex-connector migration pivoted to headless Claude Code -- see
+#  docs/CLAUDE_CODE_HEADLESS_SCOPE.md and docs/CLAUDE_CODE_BACKEND.md.
+#
+#  AI_BACKEND=api          (default) -- unchanged: metered Anthropic API,
+#                          exact behaviour as before this change.
+#  AI_BACKEND=claude_code  -- the 5 claude-haiku-4-5 calls go through
+#                          `claude -p` (Claude Code, subscription auth), tools
+#                          disabled, no MCP. Same model, same verbatim prompts.
+#
+#  WI_AI_PARALLEL=1        -- parallel-validation run: do ALL the COM + AI work
+#                          but write claude_*-prefixed LOCAL files only, push
+#                          NOTHING, mutate no shared ledger / no Command Centre
+#                          sync. For diffing the claude_code output against the
+#                          live api pipeline before any cutover.
+#
+#  Account selection / dual-account failover (kevin@ primary, hope@ overflow):
+#  WI_CLAUDE_CONFIG_DIR           -- CLAUDE_CONFIG_DIR for the primary account
+#  WI_CLAUDE_CONFIG_DIR_FALLBACK  -- CLAUDE_CONFIG_DIR for the overflow account;
+#                          on a usage-limit error the call is retried once on
+#                          this account. Leave unset to disable failover.
+# --------------------------------------------------------------------------- #
+AI_BACKEND  = os.environ.get("AI_BACKEND", "api").strip().lower()
+AI_PARALLEL = os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
+PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
+_AI_OUT_PREFIX = "claude_" if AI_PARALLEL else ""
+CLAUDE_BIN          = os.environ.get("WI_CLAUDE_BIN", "claude")
+CLAUDE_CFG_PRIMARY  = os.environ.get("WI_CLAUDE_CONFIG_DIR", "").strip()
+CLAUDE_CFG_FALLBACK = os.environ.get("WI_CLAUDE_CONFIG_DIR_FALLBACK", "").strip()
+_AI_CALL_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ai_backend_usage.jsonl")
+_ai_call_seq = 0
+
+log(f"AI backend: {AI_BACKEND}"
+    + (f"  [PARALLEL VALIDATION MODE -- local claude_* files only, no push]" if AI_PARALLEL else "")
+    + (f"  primary_cfg={CLAUDE_CFG_PRIMARY or '(default)'}" if AI_BACKEND == "claude_code" else "")
+    + (f"  fallback_cfg={CLAUDE_CFG_FALLBACK}" if (AI_BACKEND == "claude_code" and CLAUDE_CFG_FALLBACK) else ""))
+
+
+class _AIText:
+    """Minimal stand-in for an anthropic Message: exposes .content[0].text and
+    .usage so the five existing call sites need no other change."""
+    __slots__ = ("content", "usage")
+    def __init__(self, text, usage):
+        self.content = [type("_Blk", (), {"text": text})()]
+        self.usage = usage
+
+
+def _looks_like_usage_limit(s):
+    s = (s or "").lower()
+    return any(k in s for k in (
+        "usage limit", "rate limit", "rate_limit", "rate-limit", " 429", "\"429\"",
+        "quota", "overloaded", "try again later", "capacity", "exceeded your",
+        "usage cap", "limit reached"))
+
+
+def _claude_code_once(model, system, user, timeout_s, cfg_dir):
+    cmd = [
+        CLAUDE_BIN, "-p",
+        "--model", model,
+        "--system-prompt", system,
+        "--exclude-dynamic-system-prompt-sections",
+        # triage is text-in / JSON-out: no tool use, no MCP, no write path.
+        "--disallowedTools",
+        "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,NotebookEdit,Task,TodoWrite,SlashCommand",
+        "--strict-mcp-config",
+        "--mcp-config", '{"mcpServers":{}}',
+        "--permission-mode", "default",
+        "--no-session-persistence",
+        "--output-format", "json",
+    ]
+    # Clean environment: no metered API key (force subscription billing), and
+    # drop the parent Claude Code session's IPC/session vars so this nested
+    # `claude -p` starts a fully independent session.
+    env = {k: v for k, v in os.environ.items()
+           if k != "ANTHROPIC_API_KEY"
+           and not k.startswith("CLAUDE_CODE")
+           and k not in ("CLAUDECODE", "CLAUDE_PID", "CLAUDE_EFFORT", "AI_AGENT")}
+    if cfg_dir:
+        env["CLAUDE_CONFIG_DIR"] = cfg_dir
+    p = subprocess.run(cmd, input=user, capture_output=True, text=True,
+                       timeout=timeout_s, env=env)
+    if p.returncode != 0:
+        raise RuntimeError(f"claude -p rc={p.returncode}: {(p.stderr or p.stdout or '')[-400:]}")
+    try:
+        obj = json.loads(p.stdout)
+    except Exception:
+        raise RuntimeError(f"claude -p produced non-JSON stdout: {p.stdout[:400]}")
+    if isinstance(obj, dict) and obj.get("is_error"):
+        raise RuntimeError(f"claude -p is_error: {str(obj.get('result'))[:400]}")
+    return obj
+
+
+_CC_LAST_ACCOUNT = "primary"
+
+
+def _claude_code_call(system, user, timeout_s):
+    """Run ONE `claude -p` with the dual-account (kevin@ primary -> hope@
+    overflow) failover loop. Returns the parsed `claude -p` JSON dict.
+    Raises RuntimeError if every account/try is exhausted.
+    A subprocess stall past `timeout_s` is treated as a rate-limit signal and
+    switches account (seen on a Pro plan under load, 27 Aug -- a stall, not a
+    crash)."""
+    global _CC_LAST_ACCOUNT
+    attempts = [("primary", CLAUDE_CFG_PRIMARY)]
+    if CLAUDE_CFG_FALLBACK:
+        attempts.append(("fallback", CLAUDE_CFG_FALLBACK))
+    last_err = None
+    for acct_label, cfg_dir in attempts:
+        for tryno in (1, 2):
+            t0 = datetime.now()
+            try:
+                obj = _claude_code_once("claude-haiku-4-5", system, user, timeout_s, cfg_dir)
+                _CC_LAST_ACCOUNT = acct_label
+                dur = (datetime.now() - t0).total_seconds()
+                log(f"claude_code call account={acct_label} try={tryno} wall={dur:.1f}s ok")
+                return obj
+            except subprocess.TimeoutExpired as e:
+                last_err = e
+                log(f"claude_code call account={acct_label} try={tryno} TIMED OUT after "
+                    f"{timeout_s:.0f}s -- treating as rate-limit stall, switching account.")
+                break   # a stall this long => try the fallback account
+            except Exception as e:  # noqa: BLE001
+                last_err = e
+                msg = str(e)
+                log(f"claude_code call account={acct_label} try={tryno} FAILED: {msg[:220]}")
+                if _looks_like_usage_limit(msg):
+                    break   # switch account rather than retry the same one
+                time.sleep(8)
+    raise RuntimeError(f"claude_code backend exhausted (last: {last_err})")
+
+
+# --------------------------------------------------------------------------- #
+#  claude_code backend: ONE combined `claude -p` call for all five phases
+#  (added 2026-08-27, Drew -- mitigation #2 in docs/CLAUDE_CODE_BACKEND.md,
+#  design ported from tools/codex_triage/build_call2_brief.py). Fired once,
+#  early (right after Phase 3 card-building, where every phase payload can be
+#  assembled); each phase block below then reads its slice from _CC_COMBINED
+#  via _ai_create(_phase=...). Removes 4x the per-`claude -p` cache-creation +
+#  harness overhead. The `api` backend is completely unaffected -- it still
+#  makes five separate client.messages.create() calls.
+# --------------------------------------------------------------------------- #
+_CC_COMBINED = None            # dict of the 5 phase slices, or None on failure
+_CC_COMBINED_USAGE = {}        # usage dict from the single combined call
+_PHASE_KEY = {
+    "context":       "context_phase",
+    "email_summary": "email_summary_phase",
+    "task_triage":   "task_triage_phase",
+    "task_summary":  "task_summary_phase",
+    "calendar_prep": "calendar_prep_phase",
+}
+
+# Verbatim phase system prompts, hoisted to module scope so the early combined
+# `claude -p` call can use them. The four Phase-3.x blocks below assign their
+# own name FROM these (EMAIL_SUMMARY_SYSTEM = _SYS_EMAIL_SUMMARY, etc.) so
+# there is exactly one source of truth and the api path is unchanged.
+_SYS_EMAIL_SUMMARY = (
+    "You are Kevin's inbox briefing assistant at Oxford University Personnel Services.\n"
+    "For each email, write ONE concise sentence summarising what it is actually about and "
+    "what, if anything, Kevin needs to do. Do not just repeat the subject line or copy the "
+    "opening words verbatim - genuinely summarise the content. Be specific - use names, "
+    "dates and case numbers where present. Plain ASCII punctuation only.\n"
+    "Also decide needs_reply: true if this email genuinely calls for Kevin to send a reply "
+    "(a question, a request, something someone is waiting to hear back on), false if it just "
+    "needs him to read it, take an offline action, or do nothing at all (e.g. a system "
+    "notification, an FYI, a failed-import alert, a case update that doesn't ask him anything "
+    "directly).\n"
+    "Also decide no_action_needed: true ONLY if Kevin genuinely has nothing to do with this "
+    "email at all - a pure FYI, an automated notification, a colleague-to-colleague thread "
+    "he's just cc'd on for visibility, a status update that doesn't need him to act. false if "
+    "needs_reply is true, OR if Kevin needs to do anything else even without writing a reply - "
+    "review something, approve something, action a request personally, follow up with someone, "
+    "or respond to a meeting invite that's specifically asking for his availability/decision. "
+    "no_action_needed must always be false whenever needs_reply is true - never set both true.\n"
+    "Weigh two extra signals given for each email:\n"
+    "- kevin_is_primary_recipient: false means Kevin was only cc'd, not directly addressed. "
+    "Default toward needs_reply: false for cc-only threads UNLESS the content clearly still "
+    "asks Kevin himself something directly (e.g. someone names him and asks a question even "
+    "on a cc'd thread) - don't flip mechanically, use judgement. Being cc'd does NOT by itself "
+    "mean no_action_needed: true - a cc'd thread can still need Kevin to review, approve, or "
+    "follow up on something even without a direct question. Only set no_action_needed: true "
+    "for a cc'd thread when it's genuinely visibility-only (e.g. two other people confirming "
+    "something between themselves that doesn't involve a decision or action of Kevin's) - if "
+    "in doubt whether a cc'd thread needs Kevin to do something, leave no_action_needed: "
+    "false.\n"
+    "- age_days: how many days old the email is. Default toward needs_reply: false for "
+    "anything genuinely old (multiple weeks+) - an unanswered thread that old is more likely "
+    "already resolved elsewhere than still genuinely awaiting Kevin's reply.\n"
+    "Return ONLY a valid JSON object mapping the given short id to an object with 'summary', "
+    "'needs_reply' and 'no_action_needed' - no preamble, no markdown.\n"
+    'Example: {"0": {"summary": "Marie confirms funding approved for SBS exclusion from '
+    'the DSE feed; no action needed from Kevin.", "needs_reply": false, "no_action_needed": '
+    'true}, "1": {"summary": "James is asking whether the FA KPI meeting can move to '
+    'Thursday.", "needs_reply": true, "no_action_needed": false}, "2": {"summary": '
+    '"Christopher forwards the tender evaluation pack and needs Kevin to review and sign off '
+    'before Friday.", "needs_reply": false, "no_action_needed": false}}'
+)
+
+_SYS_TRIAGE = (
+    "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
+    "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
+    "Identify:\n"
+    "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Max 12. "
+    "Do not be over-cautious: if an email asks Kevin for something, or commits him to something, and no existing task covers it, propose it. "
+    "It is better to propose a task Kevin dismisses in one click than to leave real work invisible.\n"
+    "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
+    "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 20. "
+    "A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
+    "If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
+    "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
+    "{\n"
+    '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|tomorrow|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
+    '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}]\n'
+    "}\n"
+    'Rules: tier "today" only if the deadline is today or overdue; "tomorrow" if it must happen the next working day; otherwise "week". '
+    "Never invent case numbers or names. Automated notifications, newsletters, calendar "
+    "accept/decline messages and out-of-office replies are never tasks. "
+    "Use direction=sent emails to log Kevin's own actions on existing tasks as task_updates "
+    "(e.g. 'Kevin replied to Reenu with the requested staff list') so the action log shows "
+    "both sides of the conversation. Never propose a new task for work that a sent email "
+    "shows Kevin has already handled."
+)
+
+_SYS_TASK_SUMMARY = (
+    "You are Kevin's task briefing assistant at Oxford University Personnel Services.\n"
+    "For each task, write a 1-2 sentence status summary: current state, what needs to happen next, any blockers.\n"
+    "Be specific - use names, dates and case numbers from the data. Plain ASCII punctuation only.\n"
+    "Return ONLY a valid JSON object mapping task id to summary string - no preamble, no markdown.\n"
+    "Example: {\"task-001\": \"Awaiting response from Jane Smith re HRIS migration. Next: chase by Friday 20 Jun.\"}"
+)
+
+_SYS_CAL = (
+    "You are Kevin's briefing assistant at Oxford University HR Systems.\n"
+    "For each meeting, write 2-3 concise sentences of prep context Kevin needs before walking in.\n"
+    "Where 'prev_meeting_notes' is provided, use it as your primary source -- it is the AI summary from the last time this meeting ran.\n"
+    "Prioritise: carry-forwards and open actions from last time, any live decision or blocker, who Kevin needs to speak to, and the most useful detail Kevin should remember.\n"
+    "Plain ASCII punctuation only. No filler like 'This meeting is about...'. Be direct and specific.\n"
+    "Return ONLY valid JSON: {\"day_idx\": \"2-3 concise sentences\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
+    "Example: {\"today_0\": \"Pick up the evaluation scoring from last week -- Helen still needs a decision on weightings. Confirm whether James has resolved the reporting extract and agree the next owner before Friday.\"}"
+)
+
+# Command Centre + Granola config -- hoisted to module scope so the early
+# combined call can use them (originals below just call the loader).
+COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
+COMMAND_CENTRE_PATH = "data/tasks.json"
+# Auto-create Command Centre tasks from inbox suggestions without review.
+# Enabled 2026-08-02 by Kevin's explicit instruction, overriding the default-off
+# stance taken because command-centre/CLAUDE.md reserves new-task creation as
+# his approval authority. Each promoted task still carries an
+# "origin": "inbox-auto" tag and an auto-created action-log entry so promoted
+# tasks stay distinguishable from ones Kevin created directly.
+AUTO_PROMOTE_NEW_TASKS = True
+GRANOLA_API_KEY = os.environ.get("GRANOLA_API_KEY", "")
+_granola_context = {}          # "day_idx" -> {"note_title": str, "summary": str}
+_all_day_candidates = []       # populated for claude_code by _cc_build_cal_candidates_early()
+priorities_today, priorities_tomorrow, priorities_week = [], [], []
+cc_content = []
+_cc_priorities_loaded = False
+
+
+def _granola_keywords(title):
+    t = re.sub(r'\b\d{1,2}/\d{2}\b', '', title)   # remove DD/MM dates
+    t = re.sub(r'\b\d{4}\b', '', t)                # remove years
+    t = re.sub(r'[—\-&]', ' ', t)             # dashes and ampersands to spaces
+    t = re.sub(r'[^\w\s]', '', t)                  # strip remaining punctuation
+    return set(w.lower() for w in t.split() if len(w) >= 2)
+
+
+def _granola_fetch(url):
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {GRANOLA_API_KEY}"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.loads(r.read().decode())
+
+
+def _non_all_day_candidates(items, day_label):
+    # "idx" (sequential 0-based within its day) is the ONLY index shown to the
+    # model; "real_idx" (true position in the day's item list) is used only for
+    # the local write-back. Fixes the calendar-summary offset bug (4 Aug 2026).
+    candidates = []
+    model_idx = 0
+    for real_idx, c in enumerate(items):
+        if c.get("time", "").lower() == "all day":
+            continue
+        candidates.append({
+            "idx": model_idx, "real_idx": real_idx, "day": day_label,
+            "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")
+        })
+        model_idx += 1
+    return candidates
+
+
+def _cc_load_priorities():
+    """Load Command Centre tasks.json -> cc_content + priorities_{today,
+    tomorrow,week}. Verbatim logic from the Phase 3 'Priority actions' block;
+    idempotent so the early claude_code call and the original site can both
+    invoke it."""
+    global _cc_priorities_loaded, cc_content
+    global priorities_today, priorities_tomorrow, priorities_week
+    if _cc_priorities_loaded:
+        return
+    _cc_priorities_loaded = True
+    priorities_today, priorities_tomorrow, priorities_week = [], [], []
+    cc_content = []
+    try:
+        cc_url = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
+        cc_headers = {
+            "Authorization": f"token {GITHUB_PAT}",
+            "Content-Type":  "application/json",
+            "User-Agent":    "work-inbox-script"
+        }
+        cc_req = urllib.request.Request(cc_url, headers=cc_headers)
+        with urllib.request.urlopen(cc_req, timeout=GITHUB_TIMEOUT) as r:
+            cc_data    = json.loads(r.read())
+            cc_content = json.loads(base64.b64decode(cc_data["content"]).decode("utf-8"))
+        task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+        for task in task_list:
+            if task.get("done"):
+                continue
+            tier = task.get("tier", "")
+            entry = {
+                "id":          task.get("id", ""),
+                "text":        task.get("title", ""),
+                "description": task.get("description", ""),
+                "actions":     task.get("actions", []),
+                "source":      task.get("source", ""),
+                "dateType":    "red" if tier == "today" else "orange"
+            }
+            if tier == "today":
+                priorities_today.append(entry)
+            elif tier == "tomorrow":
+                priorities_tomorrow.append(entry)
+            elif tier == "week":
+                priorities_week.append(entry)
+        print(f"Command Centre loaded - today:{len(priorities_today)} tomorrow:{len(priorities_tomorrow)} week:{len(priorities_week)}")
+    except Exception as e:
+        print(f"WARNING: Could not load Command Centre tasks - {e}")
+        priorities_today, priorities_tomorrow, priorities_week = [], [], []
+
+
+def _cc_build_cal_candidates_early():
+    """Build _all_day_candidates from the RAW per-day calendar lists (already
+    leave-filtered in Phase 2) so the calendar-prep payload is ready for the
+    single combined call BEFORE the absence-detection block that build_cal_items
+    depends on has run. real_idx = position in the start-sorted day list = the
+    index build_cal_items produces for cal_<day>_items (same sort, same length,
+    no absence substitution because leave items are pre-filtered), so Phase
+    3.8's write-back onto cal_<day>_items stays correct."""
+    global _all_day_candidates
+
+    def _adapt(day_list):
+        # Mirror build_cal_items()'s per-item shape (time as HH:MM or "All day",
+        # title from subject, sub from organizer) and its start-sort, so the
+        # model sees the same meeting times the api path shows it and real_idx
+        # lines up with cal_<day>_items for Phase 3.8's write-back.
+        out = []
+        for it in sorted(day_list, key=lambda x: x.get("start", "")):
+            if it.get("all_day"):
+                tstr = "All day"
+            else:
+                try:
+                    tstr = datetime.fromisoformat(it.get("start", "")).strftime("%H:%M")
+                except Exception:
+                    tstr = ""
+            out.append({
+                "time":  tstr,
+                "title": it.get("subject", ""),
+                "sub":   it.get("organizer", "") or "",
+            })
+        return out
+
+    _all_day_candidates = (
+        _non_all_day_candidates(_adapt(cal_today), "today") +
+        _non_all_day_candidates(_adapt(cal_tomorrow), "tomorrow") +
+        _non_all_day_candidates(_adapt(cal_day2), "day2") +
+        _non_all_day_candidates(_adapt(cal_day3), "day3")
+    )
+
+
+def _cc_fetch_granola(candidates):
+    """Populate _granola_context from recent Granola notes for the given
+    idx-fixed candidate list. Verbatim match/lookback logic from Phase 3.7b;
+    shared by the early claude_code call and the original site."""
+    global _granola_context
+    if not GRANOLA_API_KEY:
+        print("Phase 3.7 skipped - GRANOLA_API_KEY not set")
+        return
+    try:
+        _lookback = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        _g_notes  = _granola_fetch(
+            f"https://public-api.granola.ai/v1/notes?created_after={_lookback}").get("notes", [])
+        for cal_item in candidates:
+            cal_kw = _granola_keywords(cal_item["title"])
+            if not cal_kw:
+                continue
+            best_note, best_score = None, 0
+            for note in _g_notes:
+                score = len(cal_kw & _granola_keywords(note.get("title", "")))
+                if score > best_score:
+                    best_score, best_note = score, note
+            if best_note and best_score >= 1:
+                detail   = _granola_fetch(
+                    f"https://public-api.granola.ai/v1/notes/{best_note['id']}?include=transcript")
+                _raw_sum = detail.get("summary") or ""
+                if isinstance(_raw_sum, dict):
+                    summary = (_raw_sum.get("text") or _raw_sum.get("content") or "").strip()
+                else:
+                    summary = str(_raw_sum).strip()
+                if not summary:
+                    summary = (detail.get("summary_text") or detail.get("summary_markdown") or "").strip()
+                if summary:
+                    _granola_context[f"{cal_item['day']}_{cal_item['idx']}"] = {
+                        "note_title": best_note.get("title", ""), "summary": summary[:1500]}
+        print(f"Phase 3.7 done - Granola context for {len(_granola_context)} meetings")
+    except Exception as e:
+        print(f"WARNING: Phase 3.7 Granola fetch failed - {e}")
+
+
+def _p2_finalise(context, subtitle):
+    """Phase 2 tail: same-day preservation + Outlook-data fallback. Verbatim
+    from the original Phase 2 block; called from the api path in place and
+    from the claude_code path after the combined call."""
+    if same_briefing_date(existing_briefing, today_str):
+        if existing_briefing.get("context"):
+            context = existing_briefing["context"]
+            print("Phase 2 preservation - reused existing same-day context")
+        if existing_briefing.get("subtitle"):
+            subtitle = existing_briefing["subtitle"]
+    if not context:
+        context = build_fallback_context(inbox, cal_today, cal_tomorrow)
+        print("Phase 2 fallback - generated context directly from Outlook data")
+    if not subtitle:
+        subtitle = build_fallback_subtitle(inbox)
+    return context, subtitle
+
+
+def _cc_run_combined():
+    """Assemble ONE `claude -p` call covering all five judgement phases and
+    parse the combined JSON into _CC_COMBINED. Payloads are built with the
+    same deterministic logic each phase block rebuilds for its own downstream
+    index-mapping, so the response keys line up. claude_code backend only."""
+    global _CC_COMBINED, _CC_COMBINED_USAGE
+
+    # 1. context -- reuse Phase 2's already-built SYSTEM / USER verbatim
+    p1_sys, p1_user = SYSTEM, USER
+
+    # 2. email summaries
+    def _age_days(card):
+        try:
+            rec_dt = datetime.fromisoformat(card.get("received_raw", "").split("+")[0].split(" (")[0].strip())
+            return (datetime.now() - rec_dt).days
+        except Exception:
+            return None
+    _efs = [
+        {
+            "id":      str(i),
+            "subject": c["subject"],
+            "from":    c["from"],
+            "preview": (c.get("sub") or "")[:250],
+            "kevin_is_primary_recipient": c.get("kevin_is_primary_recipient", True),
+            "age_days": _age_days(c),
+        }
+        for i, c in enumerate(summary_candidates)
+    ]
+    p2_user = f"Today is {today_str}.\n\nEMAILS:\n{json.dumps(_efs, indent=1, ensure_ascii=True)}"
+
+    # 3. task triage
+    _tl = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
+    _tsum = [
+        {"id": t.get("id", ""), "title": t.get("title", ""),
+         "description": (t.get("description") or "")[:300], "emailRef": t.get("emailRef", "")}
+        for t in _tl
+    ]
+    _ec = []
+    for m in inbox:
+        if categorise(m) in ("urgent", "needs"):
+            _ec.append({
+                "subject":      m.get("subject", ""),
+                "from":         m.get("from", ""),
+                "received":     (m.get("received", "") or "")[:16],
+                "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
+                "entry_id":     m.get("entry_id", ""),
+            })
+    for s in sent[:30]:
+        _ec.append({
+            "subject":      s.get("subject", ""),
+            "from":         "Kevin (sent to: " + (s.get("to") or "") + ")",
+            "received":     (s.get("sent", "") or "")[:16],
+            "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
+            "entry_id":     s.get("entry_id", ""),
+            "direction":    "sent",
+        })
+    _api_emails = [
+        {"n": i, "direction": e.get("direction", "received"), "subject": e["subject"],
+         "from": e["from"], "received": e["received"], "body_preview": e["body_preview"]}
+        for i, e in enumerate(_ec)
+    ]
+    p3_user = (
+        f"Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.\n\n"
+        f"EXISTING TASKS:\n{json.dumps(_tsum, indent=1, ensure_ascii=True)}\n\n"
+        f"EMAILS (received urgent/needs + sent by Kevin, last 7 days):\n{json.dumps(_api_emails, indent=1, ensure_ascii=True)}"
+    )
+
+    # 4. task summaries
+    _all_pri = priorities_today + priorities_tomorrow + priorities_week
+    _tfs = [
+        {"id": e["id"], "title": e["text"], "description": (e.get("description") or "")[:300],
+         "actions": e.get("actions", [])[-5:]}
+        for e in _all_pri if e.get("id")
+    ]
+    p4_user = f"Today is {today_str}.\n\nTASKS:\n{json.dumps(_tfs, indent=1, ensure_ascii=True)}"
+
+    # 5. calendar prep
+    _cfs = [
+        dict(c, prev_meeting_notes=_granola_context.get(f"{c['day']}_{c['idx']}", {}).get("summary", ""))
+        for c in _all_day_candidates
+    ]
+    p5_user = f"Today is {today_str}.\n\nMEETINGS:\n{json.dumps(_cfs, indent=1, ensure_ascii=True)}"
+
+    combined_system = (
+        "You are Kevin's inbox / briefing assistant at Oxford University Personnel Services. "
+        "This one call performs five independent judgement phases over pre-fetched plain-text "
+        "data (no tools, no live fetches). Follow each phase's own verbatim instructions exactly. "
+        "Use only plain ASCII punctuation. Return ONLY a single JSON object (no prose, no markdown "
+        "fences) with exactly these five top-level keys: context_phase, email_summary_phase, "
+        "task_triage_phase, task_summary_phase, calendar_prep_phase -- each holding that phase's "
+        "specified output shape."
+    )
+    _q = '"""'
+    combined_user = (
+        f"=== 1. context_phase ===\nSystem instructions (verbatim):\n{_q}{p1_sys}{_q}\n{p1_user}\n"
+        f'Output shape: {{"context": "...", "subtitle": "..."}}\n\n'
+        f"=== 2. email_summary_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_EMAIL_SUMMARY}{_q}\n{p2_user}\n"
+        f'Output shape: {{"<id>": {{"summary": "...", "needs_reply": true/false, "no_action_needed": true/false}}, ...}} keyed by the "id" field above\n\n'
+        f"=== 3. task_triage_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_TRIAGE}{_q}\n{p3_user}\n"
+        f'Output shape: {{"new_tasks": [{{"email_n": <n>, "title": "...", "tier": "today|tomorrow|week", "description": "..."}}], "task_updates": [{{"email_n": <n>, "task_id": "...", "note": "..."}}]}}\n\n'
+        f"=== 4. task_summary_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_TASK_SUMMARY}{_q}\n{p4_user}\n"
+        f'Output shape: {{"<task id>": "<summary>", ...}}\n\n'
+        f"=== 5. calendar_prep_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_CAL}{_q}\n{p5_user}\n"
+        f'Output shape: {{"<day>_<idx>": "2-3 sentences", ...}} where <day>_<idx> is "today_0", "tomorrow_0", "day2_0" etc, matching each meeting\'s "day" and "idx" fields\n\n'
+        f"Return the single combined JSON object with all five keys now."
+    )
+
+    # Budget: one combined call does all five phases' generation in a single
+    # turn. Keep this comfortably under the scheduled task's ExecutionTimeLimit
+    # even if the primary account stalls and it fails over to hope@ (2 tries x
+    # primary + 1 x fallback).
+    t0 = datetime.now()
+    try:
+        obj = _claude_code_call(combined_system, combined_user, timeout_s=360.0)
+    except Exception as e:
+        log(f"Phase COMBINED claude_code FAILED (all accounts): {str(e)[:300]}")
+        return
+    dur = (datetime.now() - t0).total_seconds()
+    raw = (obj.get("result") or "").strip()
+    if raw.startswith("```"):
+        raw = "\n".join(raw.split("\n")[1:])
+    if raw.endswith("```"):
+        raw = "\n".join(raw.split("\n")[:-1])
+    raw = raw.strip()
+    _b = raw.find("{")
+    if _b > 0:
+        raw = raw[_b:]
+    try:
+        parsed = json.loads(raw)
+    except Exception as e:
+        log(f"Phase COMBINED parse FAILED: {str(e)[:200]} :: {raw[:300]}")
+        return
+    _CC_COMBINED = {k: parsed.get(k, {}) for k in
+                    ("context_phase", "email_summary_phase", "task_triage_phase",
+                     "task_summary_phase", "calendar_prep_phase")}
+    _CC_COMBINED_USAGE = obj.get("usage") or {}
+    _missing = [k for k in _CC_COMBINED if not parsed.get(k)]
+    u = _CC_COMBINED_USAGE
+    log(f"Phase COMBINED claude_code OK account={_CC_LAST_ACCOUNT} wall={dur:.1f}s "
+        f"in_tok={u.get('input_tokens')} out_tok={u.get('output_tokens')} "
+        f"cache_read={u.get('cache_read_input_tokens')} "
+        f"cache_creation={u.get('cache_creation_input_tokens')} "
+        f"cost_usd={obj.get('total_cost_usd')} missing_keys={_missing or 'none'}")
+    try:
+        with open(_AI_CALL_LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps({
+                "ts": datetime.now().isoformat(timespec="seconds"),
+                "seq": "combined", "account": _CC_LAST_ACCOUNT, "model": "claude-haiku-4-5",
+                "wall_s": round(dur, 1), "usage": u, "cost_usd": obj.get("total_cost_usd"),
+                "num_turns": obj.get("num_turns"), "missing_keys": _missing,
+                "phase_output_chars": {k: len(json.dumps(parsed.get(k, ""))) for k in _CC_COMBINED},
+            }) + "\n")
+    except Exception:
+        pass
+
+
+def _ai_create(model="claude-haiku-4-5", system="", messages=None,
+               max_tokens=1024, timeout=None, _phase=None, **_ignored):
+    """Drop-in for client.messages.create() at the five triage call sites.
+    AI_BACKEND=api        -> the real anthropic client, byte-for-byte as before.
+    AI_BACKEND=claude_code -> return this phase's slice of the single combined
+                              `claude -p` call (assembled once by
+                              _cc_run_combined() before the first phase block)."""
+    global _ai_call_seq
+    _ai_call_seq += 1
+    if AI_BACKEND != "claude_code":
+        kw = dict(model=model, system=system, messages=messages, max_tokens=max_tokens)
+        if timeout is not None:
+            kw["timeout"] = timeout
+        return client.messages.create(**kw)
+
+    pk = _PHASE_KEY.get(_phase)
+    if pk is not None:
+        if _CC_COMBINED is None:
+            raise RuntimeError(f"claude_code combined call unavailable (phase={_phase})")
+        return _AIText(json.dumps(_CC_COMBINED.get(pk, {}), ensure_ascii=True), _CC_COMBINED_USAGE)
+
+    # No recognised _phase (e.g. a future call site) -> run it standalone.
+    user = messages[0]["content"] if messages else ""
+    obj = _claude_code_call(system, user, float(timeout or 90.0) + 150.0)
+    return _AIText((obj.get("result") or "").strip(), obj.get("usage") or {})
+
 def load_existing_briefing():
     if GITHUB_PAT:
         try:
@@ -797,42 +1414,42 @@ CALENDAR TOMORROW:
 {json.dumps(cal_tomorrow, indent=2, ensure_ascii=True)}
 """
 
-client   = anthropic.Anthropic(timeout=60.0)
+# claude_code backend never touches the anthropic client -- and is typically
+# launched with ANTHROPIC_API_KEY unset (subscription billing), which would make
+# anthropic.Anthropic() raise at construction. Only build it for the api backend.
+client   = anthropic.Anthropic(timeout=60.0) if AI_BACKEND == "api" else None
 anthropic_available = True
 context  = ""
 subtitle = ""
-try:
-    response = client.messages.create(
-        model      = "claude-haiku-4-5",
-        max_tokens = 1024,
-        system     = SYSTEM,
-        messages   = [{"role": "user", "content": USER}]
-    )
+if AI_BACKEND == "claude_code":
+    # Phase 2's context is produced by the ONE combined `claude -p` call,
+    # assembled + fired just after Phase 3 card-building (the earliest point
+    # all five phase payloads exist). Parsed there via _p2_finalise().
+    print("Phase 2 - deferred to the single combined claude_code call")
+else:
+    try:
+        response = _ai_create(
+            model      = "claude-haiku-4-5",
+            max_tokens = 1024,
+            system     = SYSTEM,
+            messages   = [{"role": "user", "content": USER}],
+            _phase     = "context",
+        )
 
-    raw_text = response.content[0].text.strip()
-    if raw_text.startswith("```"):
-        raw_text = "\n".join(raw_text.split("\n")[1:])
-    if raw_text.endswith("```"):
-        raw_text = "\n".join(raw_text.split("\n")[:-1])
+        raw_text = response.content[0].text.strip()
+        if raw_text.startswith("```"):
+            raw_text = "\n".join(raw_text.split("\n")[1:])
+        if raw_text.endswith("```"):
+            raw_text = "\n".join(raw_text.split("\n")[:-1])
 
-    ai_output = json.loads(raw_text)
-    context  = ai_output.get("context", "")
-    subtitle = ai_output.get("subtitle", "")
-except Exception as e:
-    anthropic_available = False
-    print(f"WARNING: Phase 2 context failed - {e}")
-if same_briefing_date(existing_briefing, today_str):
-    if existing_briefing.get("context"):
-        context = existing_briefing["context"]
-        print("Phase 2 preservation - reused existing same-day context")
-    if existing_briefing.get("subtitle"):
-        subtitle = existing_briefing["subtitle"]
-if not context:
-    context = build_fallback_context(inbox, cal_today, cal_tomorrow)
-    print("Phase 2 fallback - generated context directly from Outlook data")
-if not subtitle:
-    subtitle = build_fallback_subtitle(inbox)
-print("Phase 2 done - context written")
+        ai_output = json.loads(raw_text)
+        context  = ai_output.get("context", "")
+        subtitle = ai_output.get("subtitle", "")
+    except Exception as e:
+        anthropic_available = False
+        print(f"WARNING: Phase 2 context failed - {e}")
+    context, subtitle = _p2_finalise(context, subtitle)
+    print("Phase 2 done - context written")
 
 # -- Phase 3 -- Python builds every card --
 log("Phase 3 - building cards from inbox...")
@@ -968,6 +1585,30 @@ summary_candidates = [c for c in (urgent + needs) if c.get("entry_id")]
 # see that phase's own comment for the full reasoning and its own scope
 # limits (12 Aug 2026, extending the same-day Phase 3.3 Needs fix).
 _noise_demoted_entry_ids = set()
+
+# ---------------------------------------------------------------------------
+# claude_code backend: assemble + fire the SINGLE combined `claude -p` call
+# now. All five phases (context / email summaries / task triage / task
+# summaries / calendar prep) go in ONE prompt; each phase block below then
+# reads its slice from _CC_COMBINED via _ai_create(_phase=...). The api
+# backend is untouched -- it keeps five separate client.messages.create()
+# calls. See docs/CLAUDE_CODE_BACKEND.md / docs/COLLAPSE_TO_ONE_CALL_PLAN.md.
+# ---------------------------------------------------------------------------
+if AI_BACKEND == "claude_code":
+    _cc_load_priorities()               # cc_content + priorities_{today,tomorrow,week}
+    _cc_build_cal_candidates_early()    # _all_day_candidates from raw per-day calendars
+    _cc_fetch_granola(_all_day_candidates)   # _granola_context
+    _cc_run_combined()                  # -> _CC_COMBINED (or None on failure)
+    _p2s = (_CC_COMBINED or {}).get("context_phase") or {}
+    context  = _p2s.get("context", "")  if isinstance(_p2s, dict) else ""
+    subtitle = _p2s.get("subtitle", "") if isinstance(_p2s, dict) else ""
+    context, subtitle = _p2_finalise(context, subtitle)
+    if _CC_COMBINED is None:
+        anthropic_available = False
+        print("Phase 2 - combined claude_code call FAILED; downstream AI phases will skip")
+    else:
+        print("Phase 2 done - context written (combined claude -p call)")
+
 if summary_candidates and anthropic_available:
     try:
         # Use short sequential ids in the API exchange, not the raw ~140-char
@@ -1007,52 +1648,12 @@ if summary_candidates and anthropic_available:
             }
             for i, c in enumerate(summary_candidates)
         ]
-        EMAIL_SUMMARY_SYSTEM = (
-            "You are Kevin's inbox briefing assistant at Oxford University Personnel Services.\n"
-            "For each email, write ONE concise sentence summarising what it is actually about and "
-            "what, if anything, Kevin needs to do. Do not just repeat the subject line or copy the "
-            "opening words verbatim - genuinely summarise the content. Be specific - use names, "
-            "dates and case numbers where present. Plain ASCII punctuation only.\n"
-            "Also decide needs_reply: true if this email genuinely calls for Kevin to send a reply "
-            "(a question, a request, something someone is waiting to hear back on), false if it just "
-            "needs him to read it, take an offline action, or do nothing at all (e.g. a system "
-            "notification, an FYI, a failed-import alert, a case update that doesn't ask him anything "
-            "directly).\n"
-            "Also decide no_action_needed: true ONLY if Kevin genuinely has nothing to do with this "
-            "email at all - a pure FYI, an automated notification, a colleague-to-colleague thread "
-            "he's just cc'd on for visibility, a status update that doesn't need him to act. false if "
-            "needs_reply is true, OR if Kevin needs to do anything else even without writing a reply - "
-            "review something, approve something, action a request personally, follow up with someone, "
-            "or respond to a meeting invite that's specifically asking for his availability/decision. "
-            "no_action_needed must always be false whenever needs_reply is true - never set both true.\n"
-            "Weigh two extra signals given for each email:\n"
-            "- kevin_is_primary_recipient: false means Kevin was only cc'd, not directly addressed. "
-            "Default toward needs_reply: false for cc-only threads UNLESS the content clearly still "
-            "asks Kevin himself something directly (e.g. someone names him and asks a question even "
-            "on a cc'd thread) - don't flip mechanically, use judgement. Being cc'd does NOT by itself "
-            "mean no_action_needed: true - a cc'd thread can still need Kevin to review, approve, or "
-            "follow up on something even without a direct question. Only set no_action_needed: true "
-            "for a cc'd thread when it's genuinely visibility-only (e.g. two other people confirming "
-            "something between themselves that doesn't involve a decision or action of Kevin's) - if "
-            "in doubt whether a cc'd thread needs Kevin to do something, leave no_action_needed: "
-            "false.\n"
-            "- age_days: how many days old the email is. Default toward needs_reply: false for "
-            "anything genuinely old (multiple weeks+) - an unanswered thread that old is more likely "
-            "already resolved elsewhere than still genuinely awaiting Kevin's reply.\n"
-            "Return ONLY a valid JSON object mapping the given short id to an object with 'summary', "
-            "'needs_reply' and 'no_action_needed' - no preamble, no markdown.\n"
-            'Example: {"0": {"summary": "Marie confirms funding approved for SBS exclusion from '
-            'the DSE feed; no action needed from Kevin.", "needs_reply": false, "no_action_needed": '
-            'true}, "1": {"summary": "James is asking whether the FA KPI meeting can move to '
-            'Thursday.", "needs_reply": true, "no_action_needed": false}, "2": {"summary": '
-            '"Christopher forwards the tender evaluation pack and needs Kevin to review and sign off '
-            'before Friday.", "needs_reply": false, "no_action_needed": false}}'
-        )
+        EMAIL_SUMMARY_SYSTEM = _SYS_EMAIL_SUMMARY  # verbatim; hoisted to module scope
         email_summary_user = (
             f"Today is {today_str}.\n\n"
             f"EMAILS:\n{json.dumps(emails_for_summary, indent=1, ensure_ascii=True)}"
         )
-        es_resp = client.messages.create(
+        es_resp = _ai_create(
             model      = "claude-haiku-4-5",
             # Raised 8000 -> 14000, 12 Aug 2026: the 10 Aug incident that
             # first hit stop_reason=max_tokens on this call used 5947/8000
@@ -1077,7 +1678,8 @@ if summary_candidates and anthropic_available:
             # client.messages.create() call sites haven't shown this issue.
             timeout    = 150.0,
             system     = EMAIL_SUMMARY_SYSTEM,
-            messages   = [{"role": "user", "content": email_summary_user}]
+            messages   = [{"role": "user", "content": email_summary_user}],
+            _phase     = "email_summary",
         )
         es_raw = es_resp.content[0].text.strip()
         if es_raw.startswith("```"):
@@ -1739,56 +2341,12 @@ for key, cands in absence_candidates.items():
 # appear in this list at all.
 absences = sorted(absence_map.values())
 
-# Priority actions -- pulled from Command Centre tasks.json
-COMMAND_CENTRE_REPO = "begb0037admin/command-centre"
-COMMAND_CENTRE_PATH = "data/tasks.json"
-# Auto-create Command Centre tasks from inbox suggestions without review.
-# Enabled 2026-08-02 by Kevin's explicit instruction, overriding the default-off
-# stance taken because command-centre/CLAUDE.md reserves new-task creation as
-# his approval authority. Each promoted task still carries an
-# "origin": "inbox-auto" tag and an auto-created action-log entry so promoted
-# tasks stay distinguishable from ones Kevin created directly.
-AUTO_PROMOTE_NEW_TASKS = True
-priorities_today    = []
-priorities_tomorrow = []
-priorities_week     = []
-cc_content = []
-try:
-    cc_url     = f"https://api.github.com/repos/{COMMAND_CENTRE_REPO}/contents/{COMMAND_CENTRE_PATH}"
-    cc_headers = {
-        "Authorization": f"token {GITHUB_PAT}",
-        "Content-Type":  "application/json",
-        "User-Agent":    "work-inbox-script"
-    }
-    cc_req = urllib.request.Request(cc_url, headers=cc_headers)
-    with urllib.request.urlopen(cc_req, timeout=GITHUB_TIMEOUT) as r:
-        cc_data    = json.loads(r.read())
-        cc_content = json.loads(base64.b64decode(cc_data["content"]).decode("utf-8"))
-    task_list = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
-    for task in task_list:
-        if task.get("done"):
-            continue
-        tier = task.get("tier", "")
-        entry = {
-            "id":          task.get("id", ""),
-            "text":        task.get("title", ""),
-            "description": task.get("description", ""),
-            "actions":     task.get("actions", []),
-            "source":      task.get("source", ""),
-            "dateType":    "red" if tier == "today" else "orange"
-        }
-        if tier == "today":
-            priorities_today.append(entry)
-        elif tier == "tomorrow":
-            priorities_tomorrow.append(entry)
-        elif tier == "week":
-            priorities_week.append(entry)
-    print(f"Command Centre loaded - today:{len(priorities_today)} tomorrow:{len(priorities_tomorrow)} week:{len(priorities_week)}")
-except Exception as e:
-    print(f"WARNING: Could not load Command Centre tasks - {e}")
-    priorities_today    = []
-    priorities_tomorrow = []
-    priorities_week     = []
+# Priority actions -- pulled from Command Centre tasks.json.
+# COMMAND_CENTRE_REPO / COMMAND_CENTRE_PATH / AUTO_PROMOTE_NEW_TASKS and the
+# loader itself are hoisted to module scope (near _ai_create) so the early
+# combined claude_code call can use them; _cc_load_priorities() is idempotent,
+# so for the api path this is the first + only call.
+_cc_load_priorities()
 
 # Phase 3.5 - AI triage: which emails should become Command Centre tasks
 log("Phase 3.5 - triaging inbox for task suggestions...")
@@ -1852,30 +2410,7 @@ try:
                    "received": e["received"], "body_preview": e["body_preview"]}
                   for i, e in enumerate(email_candidates)]
 
-    TRIAGE_SYSTEM = (
-        "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
-        "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
-        "Identify:\n"
-        "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Max 12. "
-        "Do not be over-cautious: if an email asks Kevin for something, or commits him to something, and no existing task covers it, propose it. "
-        "It is better to propose a task Kevin dismisses in one click than to leave real work invisible.\n"
-        "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
-        "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 20. "
-        "A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
-        "If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
-        "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
-        "{\n"
-        '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|tomorrow|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
-        '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}]\n'
-        "}\n"
-        'Rules: tier "today" only if the deadline is today or overdue; "tomorrow" if it must happen the next working day; otherwise "week". '
-        "Never invent case numbers or names. Automated notifications, newsletters, calendar "
-        "accept/decline messages and out-of-office replies are never tasks. "
-        "Use direction=sent emails to log Kevin's own actions on existing tasks as task_updates "
-        "(e.g. 'Kevin replied to Reenu with the requested staff list') so the action log shows "
-        "both sides of the conversation. Never propose a new task for work that a sent email "
-        "shows Kevin has already handled."
-    )
+    TRIAGE_SYSTEM = _SYS_TRIAGE  # verbatim; hoisted to module scope
 
     triage_user = (
         f"Today is {today_str}. Tomorrow (next working day) is {tomorrow_str}.\n\n"
@@ -1883,11 +2418,12 @@ try:
         f"EMAILS (received urgent/needs + sent by Kevin, last 7 days):\n{json.dumps(api_emails, indent=1, ensure_ascii=True)}"
     )
 
-    t_resp = client.messages.create(
+    t_resp = _ai_create(
         model      = "claude-haiku-4-5",
         max_tokens = 8000,
         system     = TRIAGE_SYSTEM,
-        messages   = [{"role": "user", "content": triage_user}]
+        messages   = [{"role": "user", "content": triage_user}],
+        _phase     = "task_triage",
     )
     t_raw = t_resp.content[0].text.strip()
     if t_raw.startswith("```"):
@@ -2027,7 +2563,9 @@ def _backup_briefing_before_write(remote_meta, headers):
     )
     print(f"Phase 4 backup created - {backup_path}")
 
-if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
+if AI_PARALLEL and (suggestions["task_updates"] or suggestions["new_tasks"]):
+    log("Phase 3.6 - PARALLEL VALIDATION MODE: NOT applying task updates to Command Centre / NOT writing triage_ledger.json (comparison only).")
+if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
     try:
         gh_headers = {"Authorization": f"token {GITHUB_PAT}",
                       "Content-Type":  "application/json",
@@ -2166,22 +2704,17 @@ if all_priorities and anthropic_available:
             }
             for e in all_priorities if e.get("id")
         ]
-        SUMMARY_SYSTEM = (
-            "You are Kevin's task briefing assistant at Oxford University Personnel Services.\n"
-            "For each task, write a 1-2 sentence status summary: current state, what needs to happen next, any blockers.\n"
-            "Be specific - use names, dates and case numbers from the data. Plain ASCII punctuation only.\n"
-            "Return ONLY a valid JSON object mapping task id to summary string - no preamble, no markdown.\n"
-            "Example: {\"task-001\": \"Awaiting response from Jane Smith re HRIS migration. Next: chase by Friday 20 Jun.\"}"
-        )
+        SUMMARY_SYSTEM = _SYS_TASK_SUMMARY  # verbatim; hoisted to module scope
         summary_user = (
             f"Today is {today_str}.\n\n"
             f"TASKS:\n{json.dumps(tasks_for_summary, indent=1, ensure_ascii=True)}"
         )
-        s_resp = client.messages.create(
+        s_resp = _ai_create(
             model      = "claude-haiku-4-5",
             max_tokens = 4096,
             system     = SUMMARY_SYSTEM,
-            messages   = [{"role": "user", "content": summary_user}]
+            messages   = [{"role": "user", "content": summary_user}],
+            _phase     = "task_summary",
         )
         s_raw = s_resp.content[0].text.strip()
         if s_raw.startswith("```"):
@@ -2257,99 +2790,25 @@ _attach_cc_task_ids(cal_day2_items)
 _attach_cc_task_ids(cal_day3_items)
 
 # -- Phase 3.7b -- Fetch recent Granola meeting notes for calendar context --
-GRANOLA_API_KEY = os.environ.get("GRANOLA_API_KEY", "")
-_granola_context = {}  # "day_idx" -> {"note_title": str, "summary": str}
-
-def _granola_keywords(title):
-    t = re.sub(r'\b\d{1,2}/\d{2}\b', '', title)   # remove DD/MM dates
-    t = re.sub(r'\b\d{4}\b', '', t)                # remove years
-    t = re.sub(r'[—\-&]', ' ', t)             # dashes and ampersands to spaces
-    t = re.sub(r'[^\w\s]', '', t)                  # strip remaining punctuation
-    return set(w.lower() for w in t.split() if len(w) >= 2)
-
-def _granola_fetch(url):
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {GRANOLA_API_KEY}"})
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return json.loads(r.read().decode())
-
-# Shared candidate builder for Phase 3.7b (Granola) and Phase 3.8 (AI prep
-# summaries) -- fixes the calendar-summary offset bug root-caused 4 Aug 2026
-# (memory/calendar-summary-offset-bug.md) but left unfixed since Phase 3.8
-# was closed pending Kevin explicitly reopening it. He did, 10 Aug 2026, by
-# asking to extend this exact phase to 4 days -- fixing it now rather than
-# extending the same bug across twice as many columns.
+# GRANOLA_API_KEY, _granola_context, _granola_keywords, _granola_fetch,
+# _non_all_day_candidates and the fetch loop (_cc_fetch_granola) are hoisted
+# to module scope so the early combined claude_code call can use them.
 #
-# Root cause: the old code did `enumerate(cal_X_items)` THEN filtered out
-# all-day items -- so if item 0 of a day is an all-day event (now much more
-# likely now leave items are filtered separately upstream, and any other
-# all-day entry), the surviving non-all-day items keep indices 1,2,3...
-# instead of starting at 0. claude-haiku-4-5 (the model both phases are
-# locked to) was found to sometimes echo output-position (0,1,2...) instead
-# of the literal idx value whenever it doesn't start at 0, silently writing
-# a summary onto the wrong meeting.
-#
-# Fix: every candidate now carries TWO indices -- "idx" (sequential 0-based
-# within its day, the ONLY index ever shown to the model, for both the
-# Granola match keys and the Phase 3.8 AI call) and "real_idx" (the true
-# position in cal_X_items, used ONLY for the final local write-back, never
-# sent to or read from the model).
-def _non_all_day_candidates(items, day_label):
-    candidates = []
-    model_idx = 0
-    for real_idx, c in enumerate(items):
-        if c.get("time", "").lower() == "all day":
-            continue
-        candidates.append({
-            "idx": model_idx, "real_idx": real_idx, "day": day_label,
-            "time": c["time"], "title": c["title"], "organizer": c.get("sub", "")
-        })
-        model_idx += 1
-    return candidates
-
-_all_day_candidates = (
-    _non_all_day_candidates(cal_today_items, "today") +
-    _non_all_day_candidates(cal_tomorrow_items, "tomorrow") +
-    _non_all_day_candidates(cal_day2_items, "day2") +
-    _non_all_day_candidates(cal_day3_items, "day3")
-)
-
-if GRANOLA_API_KEY:
-    try:
-        _lookback = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        _g_data   = _granola_fetch(f"https://public-api.granola.ai/v1/notes?created_after={_lookback}")
-        _g_notes  = _g_data.get("notes", [])
-
-        # Reuse the same idx-fixed candidate list built above for matching.
-        _cal_candidates = _all_day_candidates
-
-        for cal_item in _cal_candidates:
-            cal_kw = _granola_keywords(cal_item["title"])
-            if not cal_kw:
-                continue
-            best_note, best_score = None, 0
-            for note in _g_notes:
-                score = len(cal_kw & _granola_keywords(note.get("title", "")))
-                if score > best_score:
-                    best_score, best_note = score, note
-            if best_note and best_score >= 1:
-                # ?include=transcript required for the API to return the summary field
-                detail   = _granola_fetch(f"https://public-api.granola.ai/v1/notes/{best_note['id']}?include=transcript")
-                _raw_sum = detail.get("summary") or ""
-                if isinstance(_raw_sum, dict):
-                    summary = (_raw_sum.get("text") or _raw_sum.get("content") or "").strip()
-                else:
-                    summary = str(_raw_sum).strip()
-                if not summary:
-                    summary = (detail.get("summary_text") or detail.get("summary_markdown") or "").strip()
-                if summary:
-                    key = f"{cal_item['day']}_{cal_item['idx']}"
-                    _granola_context[key] = {"note_title": best_note.get("title", ""), "summary": summary[:1500]}
-
-        print(f"Phase 3.7 done - Granola context for {len(_granola_context)} meetings")
-    except Exception as e:
-        print(f"WARNING: Phase 3.7 Granola fetch failed - {e}")
-else:
-    print("Phase 3.7 skipped - GRANOLA_API_KEY not set")
+# The idx-fixed candidate list carries "idx" (sequential 0-based within its
+# day, the ONLY index shown to the model) and "real_idx" (true position in
+# cal_<day>_items, used only for Phase 3.8's local write-back) -- fixes the
+# calendar-summary offset bug root-caused 4 Aug 2026
+# (memory/calendar-summary-offset-bug.md).
+if AI_BACKEND != "claude_code":
+    _all_day_candidates = (
+        _non_all_day_candidates(cal_today_items, "today") +
+        _non_all_day_candidates(cal_tomorrow_items, "tomorrow") +
+        _non_all_day_candidates(cal_day2_items, "day2") +
+        _non_all_day_candidates(cal_day3_items, "day3")
+    )
+    _cc_fetch_granola(_all_day_candidates)
+# else: _all_day_candidates + _granola_context were built by the early
+# _cc_build_cal_candidates_early() / _cc_fetch_granola() before the combined call.
 
 # -- Phase 3.8 -- AI prep summaries for all 4 calendar day-view columns --
 # Reuse the same idx-fixed candidate list -- "idx" (sequential, model-facing)
@@ -2363,24 +2822,17 @@ _cal_for_summary = [
 ]
 if _cal_for_summary and anthropic_available:
     try:
-        CAL_SUM_SYSTEM = (
-            "You are Kevin's briefing assistant at Oxford University HR Systems.\n"
-            "For each meeting, write 2-3 concise sentences of prep context Kevin needs before walking in.\n"
-            "Where 'prev_meeting_notes' is provided, use it as your primary source -- it is the AI summary from the last time this meeting ran.\n"
-            "Prioritise: carry-forwards and open actions from last time, any live decision or blocker, who Kevin needs to speak to, and the most useful detail Kevin should remember.\n"
-            "Plain ASCII punctuation only. No filler like 'This meeting is about...'. Be direct and specific.\n"
-            "Return ONLY valid JSON: {\"day_idx\": \"2-3 concise sentences\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
-            "Example: {\"today_0\": \"Pick up the evaluation scoring from last week -- Helen still needs a decision on weightings. Confirm whether James has resolved the reporting extract and agree the next owner before Friday.\"}"
-        )
+        CAL_SUM_SYSTEM = _SYS_CAL  # verbatim; hoisted to module scope
         _cal_user = (
             f"Today is {today_str}.\n\n"
             f"MEETINGS:\n{json.dumps(_cal_for_summary, indent=1, ensure_ascii=True)}"
         )
-        _cs_resp = client.messages.create(
+        _cs_resp = _ai_create(
             model      = "claude-haiku-4-5",
             max_tokens = 900,
             system     = CAL_SUM_SYSTEM,
-            messages   = [{"role": "user", "content": _cal_user}]
+            messages   = [{"role": "user", "content": _cal_user}],
+            _phase     = "calendar_prep",
         )
         _cs_raw = _cs_resp.content[0].text.strip()
         if _cs_raw.startswith("```"): _cs_raw = "\n".join(_cs_raw.split("\n")[1:])
@@ -2524,7 +2976,7 @@ if same_briefing_date(existing_briefing, today_str) and not absences and existin
 # it wasn't asked for in this pass and isn't needed for the mechanism
 # itself to work correctly going forward; flagged to Kevin as a separate,
 # optional follow-up if he wants that historical recovery re-run.
-_WI_PHASE39_DRY_RUN = os.environ.get("WI_PHASE39_DRY_RUN", "").strip().lower() in ("1", "true", "yes")
+_WI_PHASE39_DRY_RUN = (os.environ.get("WI_PHASE39_DRY_RUN", "").strip().lower() in ("1", "true", "yes")) or AI_PARALLEL
 try:
     _persist_ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
     _persist_ro_headers = {"Authorization": f"token {GITHUB_PAT}", "User-Agent": "work-inbox-script"} if GITHUB_PAT else None
@@ -2647,7 +3099,8 @@ try:
         print(f"Phase 3.9 done - carried:{carried} dropped_resolved:{dropped_resolved} inconclusive_lookups_carried:{inconclusive} stale_over_90d:{stale_warnings} tracked_total:{len(tracked)}{dry_run_tag}")
 
     if _WI_PHASE39_DRY_RUN:
-        print("Phase 3.9 dry run - skipping triage_ledger.json write and briefing carry-forward injection.")
+        print("Phase 3.9 dry run - skipping triage_ledger.json write and briefing carry-forward injection."
+              + ("  [WI_AI_PARALLEL]" if AI_PARALLEL else ""))
         # Dry run intentionally still ran the resolution-signal checks above
         # for real (Outlook/CC/ticks), it just doesn't persist the ledger or
         # leave carried cards appended to urgent/needs -- undo the in-memory
@@ -2691,7 +3144,13 @@ briefing = {
 # -- Phase 4 -- push to GitHub --
 log("Phase 4 - pushing briefing to GitHub...")
 
-if not GITHUB_PAT:
+if AI_PARALLEL:
+    _parallel_briefing_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "data", "claude_briefing.json")
+    with open(_parallel_briefing_path, "w", encoding="utf-8") as _pf:
+        json.dump(briefing, _pf, indent=2, ensure_ascii=False)
+    log(f"Phase 4 - PARALLEL VALIDATION MODE: wrote {_parallel_briefing_path} locally, pushed NOTHING to GitHub.")
+elif not GITHUB_PAT:
     print("ERROR: GITHUB_PAT env var not set - cannot push.")
 else:
     try:
@@ -2742,7 +3201,13 @@ else:
 
 
 # Phase 5 - push task suggestions to GitHub (consumed by Command Centre dashboard)
-if GITHUB_PAT:
+if AI_PARALLEL:
+    _parallel_sug_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "data", "claude_inbox_suggestions.json")
+    with open(_parallel_sug_path, "w", encoding="utf-8") as _psf:
+        json.dump(suggestions, _psf, indent=2, ensure_ascii=False)
+    log(f"Phase 5 - PARALLEL VALIDATION MODE: wrote {_parallel_sug_path} locally, pushed NOTHING (no carry-forward from remote).")
+elif GITHUB_PAT:
     try:
         sug_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/inbox_suggestions.json"
         headers = {

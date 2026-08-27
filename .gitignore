@@ -4,3 +4,8 @@ msal_token_cache.json
 # Raw data output — never commit
 data/inbox_raw.json
 data/
+
+# Python bytecode
+__pycache__/
+*.pyc
+ai_backend_usage.jsonl

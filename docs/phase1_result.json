@@ -1,0 +1,78 @@
+1. Live connector scope
+
+Outlook Email — connected as `kevin.lelitte@admin.ox.ac.uk`.
+
+- Read: Inbox and 63 other discoverable folders (64 total, including Inbox subfolders, Sent Items, Archive, Drafts, Junk, Deleted Items); messages, attachments, contacts, categories, mailbox profile.
+- Write-capable actions exposed: draft, send, reply, forward, scheduled send, mark read/unread, move messages, set categories, create folders. No email-delete action was exposed.
+- Calendar read: calendars, mailbox settings, event lists/search/fetch, availability, recurring-series and recurrence-instance endpoints. A bounded calendar-view query succeeded for 2026-07-26 through 2026-09-01. The connector documentation states a 1,825-day search limit.
+- Calendar write-capable actions exposed: create, update, cancel/delete, RSVP/respond, add attachments.
+- Teams read: chats, chat members, chat messages, teams/channels/channel messages, meeting recordings/transcripts.
+- Teams write-capable actions exposed: create chat/channel, send chat/channel messages, reply to chat/channel messages, create/update/delete Planner tasks.
+- No write action was invoked.
+
+Calendar-view results expand recurring events into individual `occurrence` and `exception` events. Those have their own event IDs; `recurrence` is commonly null on the expanded item, so recurrence-derived status is identified by `type`, `seriesMasterId`, or `recurrence`.
+
+2. Live ID formats
+
+- Email: literal field `id`, returned as a Microsoft Graph-style value, e.g. `AAMkADRkYzlm...AAA=`. The connector’s returned payload used `sender.emailAddress.name` and `sender.emailAddress.address`. An attempted `internet_message_id` selection did not return either `internetMessageId` or `internet_message_id`.
+- Calendar: literal fields `id` and `iCalUId`. `id` is Graph-style, e.g. `AAMkADRkYzlm...AAA=`. `iCalUId` is exposed by schema but was `null` in the live list results inspected.
+- Teams: literal chat field `id`, e.g. `19:meeting_YWFm...@thread.v2` or `19:...@unq.gbl.spaces`. Canonical message routes exposed by the connector are `/chats/{chat_id}/messages/{message_id}` and `/teams/{team_id}/channels/{channel_id}/messages/{root_id}` (with `/replies/{reply_id}` for channel replies).
+
+```json
+{
+  "pull_status": {
+    "inbox": { "requested": 50, "returned": 50 },
+    "sent_items": { "requested": 20, "returned": 20 },
+    "calendar": {
+      "window": {
+        "start": "2026-07-26T00:00:00+01:00",
+        "end": "2026-09-01T00:00:00+01:00"
+      },
+      "returned": 144,
+      "event_types_seen": ["singleInstance", "occurrence", "exception"]
+    },
+    "teams_chats": { "returned": 100 }
+  },
+  "schema_used": {
+    "email": {
+      "subject": "string|null",
+      "sender_name": "string|null",
+      "sender_smtp": "string|null",
+      "received_datetime": "ISO-8601|null",
+      "unread": "boolean|null",
+      "folder_name": "Inbox|Sent Items",
+      "message_id": "Graph id",
+      "body_snippet": "string|null"
+    },
+    "calendar": {
+      "organizer_name": "string|null",
+      "organizer_smtp": "string|null",
+      "attendees": [{ "name": "string|null", "smtp": "string|null", "type": "required|optional|resource|null" }],
+      "subject": "string|null",
+      "start": { "dateTime": "ISO-8601", "timeZone": "string" },
+      "end": { "dateTime": "ISO-8601", "timeZone": "string" },
+      "event_id": "Graph id",
+      "recurrence_flag": "boolean",
+      "event_type": "singleInstance|occurrence|exception",
+      "iCalUId": "string|null"
+    },
+    "teams_chat": {
+      "topic": "string|null",
+      "last_updated": "ISO-8601|null",
+      "member_count": "number|null",
+      "chat_id": "Teams chat id"
+    }
+  },
+  "teams_member_count_unavailable": {
+    "count": 7,
+    "reasons": {
+      "forbidden_roster_membership": 1,
+      "rate_limited_429": 6
+    }
+  }
+}
+```
+
+Failures/denials: one Teams membership lookup returned `403 Forbidden / InsufficientPrivileges` because this account is not in that chat’s roster; six membership lookups were rate-limited (`429 TooManyRequests`). The chat list itself succeeded. No Teams message bodies were read.
+
+I cannot faithfully place the requested 314 full records (including 70 email snippets and 144 events) into one response block: the connector transcript was truncated at 50,062 tokens by the response transport. The live pull itself succeeded with the counts above; no records were omitted intentionally and no writes occurred.
