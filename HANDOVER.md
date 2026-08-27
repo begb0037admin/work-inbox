@@ -86,8 +86,29 @@ No. The substantive (final) version is already published. The ~12:00 UK schedule
 ## Interaction with the 09:10 UTC classifier-fix entry below
 That session's "## drafted_replies.json -- no action needed" note is now superseded by this out-of-cycle publish. This publish only touched `data/drafted_replies.json`; it did not touch `fetch_inbox.py`, the classifier, `needs_reply.json`, `briefing.json`, or `triage_ledger.json`. The classifier-fix session was asked (via coordinator) to pull/rebase before writing its own next HANDOVER.md checkpoint so it lands on top of this entry.
 
+## Follow-up (~09:55 UTC): "Open original" on draft-19 -- investigated, NOT a draft-19 bug, NOT a regression
+Kevin reported (via coordinator) that "Open original" on the draft-19 row does nothing.
+
+**Mechanism:** `app.js` line ~1511-1512: `hasSource = e.source_entry_id && e.source_entry_id.length > 0`; if truthy it renders `<a ... onclick="openEmail('<source_entry_id>')">Open original</a>`. `openEmail()` (line 313) just does `window.location.href = 'openmail://' + entryId + '/'`. The `openmail://` handler is `open_email.py` -> `mapi.GetItemFromID(entry_id)` -> `item.Display()`. Identical mechanism to every card's email link elsewhere in the dashboard.
+
+**Root cause (and it is NOT draft-19):** `publish_drafted_replies.py` `normalize_entry()` sets `source_entry_id = e.get("source_entry_id") or e.get("draft_id") or ""`. For drafts with **no** real Outlook EntryID in agent-commons (the chat-paste / reply-all-thread drafts **14, 15, 16**), it falls back to the literal `draft_id` string (e.g. `lauren-draft-15-20260818`). That non-empty string passes `hasSource`, so the button renders, but `GetItemFromID("lauren-draft-15-20260818")` fails with `(-2147024809, 'The parameter is incorrect.')`. This is a **pre-existing, already-documented side effect** (see `publish_drafted_replies.py` `normalize_entry` docstring, 18 Aug 2026) -- not new, not caused by the draft-19 publish.
+
+**Evidence:**
+- `C:\Users\admin\Documents\Claude\Projects\work-inbox\data\openmail.log` -- the only failing clicks today are **2026-08-27T10:32:03-10:32:21, four attempts, all `ENTRY ID: lauren-draft-15-20260818` -> "The parameter is incorrect."** Zero draft-19 attempts logged. (draft-15 is the FIRST row in the pending list; draft-19 is last.)
+- Direct COM test this session: `GetItemFromID(<draft-19 source_entry_id>)` **succeeds** -> subject "REF29 UDF - Promotion to UOXP", received 2026-08-26 14:51:08, folder Inbox. draft-19's button works.
+- draft-19's `source_entry_id` is a correct 140-char hex EntryID, byte-identical to the same email's `entry_id` in `data/briefing.json` `needs[5]` and `data/needs_reply.json` -- so the manual repair copied a valid pipeline-format ID, no format problem.
+- Agent-commons `pending-email-drafts/drafts.json`: drafts 14/15/16 have `source_entry_id` ABSENT; draft-19 has it present and valid.
+
+**Scope:** 3 rows broken (draft-14, draft-15, draft-16), all for the same documented reason. draft-11/13/17/18/19 (real hex EntryIDs) work. Not a general regression.
+
+**Not fixed here -- both fix paths are out of the publish lane / need approval:**
+1. *Data fix:* add real `source_entry_id`s to drafts 14/15/16 in Lauren's agent-commons `drafts.json`, then re-run the mirror. Candidate EntryIDs were pulled from Outlook this session (multiple messages per thread -- picking the exact message each draft replies to is Lauren's content-judgement call; list handed to coordinator). This edits Lauren's content file -> coordinate with Lauren.
+2. *Render fix:* in `app.js`, only treat `source_entry_id` as a real link when it looks like an Outlook EntryID (e.g. `/^[0-9A-Fa-f]{40,}$/`), otherwise suppress the "Open original" button. This is a Drafted-Replies-tab render change -> STOP + screenshot + Kevin's "approved" per the UI gate. Not done.
+
+draft-19 itself needs no fix. `data/drafted_replies.json` not re-written in this follow-up.
+
 ## Exact next action for a cold session
-Nothing outstanding on the publish. The classifier fix (root causes + proposed diff) in the entry below is still the open work and still needs Kevin's go-ahead.
+Nothing outstanding on the draft-19 publish itself. Open item: decide fix path 1 or 2 above for the draft-14/15/16 "Open original" gap (Kevin's call; render fix needs the UI gate). The classifier fix (root causes + proposed diff) in the ~09:10 entry below is separate and still needs Kevin's go-ahead.
 
 ---
 
