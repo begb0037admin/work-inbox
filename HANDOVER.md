@@ -1,4 +1,31 @@
-# Handover -- 27 August 2026, ~16:00 UTC (Drew) -- Codex Connector Migration: Kevin APPROVED Option 3 (connector-free CODEX_HOME + Outlook COM data pull). This session = build plan ONLY, written to `docs/OPTION3_BUILD_PLAN.md`. No build, no `codex login`, no config/pipeline edit, no automation. Machine at `b2a1a226` baseline.
+# Handover -- 27 August 2026, ~16:35 UTC (Drew) -- PIVOT: Codex route DROPPED. Moving to headless Claude Code on Kevin's Claude subscription for the six AI-triage phases (same model `claude-haiku-4-5`, same prompts -> billing-path swap, NOT a model swap, no A/B needed). Kill-switch BUILT + PROOF-FIRED (PASS) and retained as optional insurance. New deliverable: `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` (scope, no build). Machine at `b2a1a226` baseline.
+
+## What this is
+Supersedes the ~16:00 / ~15:30 / ~14:55 entries below (same session chain). Kevin's mid-session decision (via coordinator): stop pursuing Codex entirely -- every write-gate control failed 26-27 Aug and the connector-free route added cost/complexity. Instead run `fetch_inbox.py`'s 5 `claude-haiku-4-5` calls through **headless Claude Code** (`claude -p`) authed to Kevin's **Claude subscription** (flat fee) instead of the metered `ANTHROPIC_API_KEY` (~GBP 36/mo). Same model + same prompts = identical triage quality, no parallel A/B validation window.
+
+## Deliverables this session (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, commit trail `48f103f` -> this; PR #29 OPEN/MERGEABLE)
+1. **`tools/codex_triage/mailbox_guard.py`** -- post-run Outlook COM delta-sweep KILL-SWITCH. BUILT + PROOF-FIRED end-to-end (`prove` mode, all 12 checks PASS 16:26-16:29): synthetic category injected via COM onto a disposable DistroKid message -> diff caught exactly 1 `categories_changed` [critical] -> real dummy `schtasks` task confirmed `Disabled` -> BurntToast alert rc=0 -> incident record + `GUARD_TRIPPED.flag` written -> synthetic change remediated (settled re-read `''`) -> `Restrict` sweep 0 residue -> cleaned up. Doc: `docs/OPTION1_KILLSWITCH.md`. **Role downgraded** from hard prerequisite (Codex) to optional lightweight regression check -- headless Claude Code has no mailbox tool, so there is no write path to gate.
+2. **`docs/CLAUDE_CODE_HEADLESS_SCOPE.md`** -- NEW. The 6 scope questions answered, verified against the admin machine: feasibility + auth gotcha (`ANTHROPIC_API_KEY` is set and Claude Code prefers it -> scheduled run must unset it; subscription auth via `~/.claude/.credentials.json` or `claude setup-token`); model (`--model claude-haiku-4-5` identical to today, no A/B); which subscription (`kevin@`, recommend 3x/day to protect the shared usage pool); ToS (headless is a documented feature, within terms on one account); write-risk (**removed** -- no mailbox tool, `--allowedTools ""` + `--strict-mcp-config` = zero tools/MCP, COM is the pipeline's own Python); the swap (one `_ai_text()` helper behind `AI_BACKEND=api|claude_code`, 5 call sites, `api` default no-op, one-env-var rollback).
+3. **Research doc `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9** -- new "PIVOT" entry (27 Aug ~16:30), incl. the Codex default-model record Kevin asked for (`gpt-5.6-terra`, pinnable via `-m`/`-c model=`/profile; `gpt-5.6-sol`/`gpt-5.5` stronger; now only historical).
+
+## Codex-specific work HALTED (per the pivot)
+No Codex Call-2 wiring, no `codex exec` model-pinning build, no Codex usage-projection, no connector-free `CODEX_HOME`, no `codex login`. `docs/OPTION3_BUILD_PLAN.md` is dormant (not deleted).
+
+## Machine state -- BASELINE
+- `~/.codex/config.toml` sha1 **`b2a1a22661b3596b92384e081b6625f786346f0e`** -- untouched all session.
+- No `codex exec` run this session. No `CODEX_HOME`. No `codex login`. `fetch_inbox.py` unedited.
+- Mailbox clean: proof-test synthetic category remediated (COM settled re-read `''`), `Restrict("[Categories] <> ''")` sweep 0 `Drew-guard-selftest` residue; dummy `schtasks` task `Drew Guard Selftest Dummy` deleted; `data/codex_runs/GUARD_TRIPPED.flag` cleared.
+- `data/codex_runs/` proof evidence (`selftest_result_*.json` etc.) is local only -- `data/` is `.gitignore`d.
+
+## Hard gates in force
+No build on the Claude Code route until: (1) Kevin confirms plan tier + cadence on `kevin@lelitte.co.uk`; (2) Kevin runs `claude setup-token` and sets `CLAUDE_CODE_OAUTH_TOKEN` (Drew cannot -- needs his interactive login); (3) account decision (shared `kevin@` vs dedicated). Then Drew builds the `AI_BACKEND` helper, runs a one-off Phase 3.2 parity diff (Claude Code harness vs bare API), reports, waits for the flip go-ahead. No `main` writes. No Task Scheduler change without a fresh explicit go-ahead. Every run's log prints a timestamp. `source`/`sourceType` opener collision resolved + live (26 Aug).
+
+## Exact next action for a cold session
+Read `docs/CLAUDE_CODE_HEADLESS_SCOPE.md`. If Kevin has done setup-token + confirmed the plan/cadence/account: build section 6's `_ai_text()` helper in `fetch_inbox.py` behind `AI_BACKEND` (default `api` = no-op), back it up first, run one `AI_BACKEND=claude_code` manual run, diff `data/briefing.json` vs an `api` run of the same inbox, report. Do NOT flip the scheduled task or touch `main` without a fresh go-ahead. If Kevin has NOT done the prerequisites: nothing to build -- wait.
+
+---
+
+# Handover -- 27 August 2026, ~16:00 UTC (Drew) -- Codex Connector Migration: Kevin APPROVED Option 3 (connector-free CODEX_HOME + Outlook COM data pull). This session = build plan ONLY, written to `docs/OPTION3_BUILD_PLAN.md`. No build, no `codex login`, no config/pipeline edit, no automation. Machine at `b2a1a226` baseline. [SUPERSEDED by the ~16:35 pivot entry above -- Codex route dropped.]
 
 ## What this is
 Codex Connector Migration. Supersedes the ~15:30 / ~14:55 / earlier entries below (same session chain). Every local + account-side write-block route is exhausted (prior entries). Kevin's call: **Option 3 APPROVED** -- disconnect the Microsoft connectors from the automation's ChatGPT identity, pull read data via Outlook COM, still move the six AI-triage phases to Codex (this is what zeros the ~GBP 36/mo). Kevin's steer, verbatim: *"our mission is the cost saving"* -- lost calendar/Teams connector-read breadth, the Graph `web_link` opener (COM `openmail://` fallback is fine), and connector-read parity are all secondary/tradeable; take the simpler path, note the trade-off, don't gold-plate; quality gate still matters (false-demotion) but scoped proportionately.

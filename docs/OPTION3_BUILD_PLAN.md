@@ -1,5 +1,11 @@
 # Option 3 Build Plan — Connector-free `CODEX_HOME` + Outlook COM data pull
 
+> **DORMANT as of 27 Aug 2026 ~16:30 (Drew).** Kevin pivoted the whole approach
+> away from Codex to **headless Claude Code** — see
+> `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` and the "PIVOT" entry in
+> `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9. This file is kept for
+> history, not deleted; nothing in it is being built.
+
 **Status:** Written 2026-08-27 (Drew). Build plan only — nothing in this file
 has been built, logged in, configured, deployed, or scheduled. Same shape as
 `docs/PHASE2_BRIEF.md`. Supersedes HANDOVER option 3 as the concrete plan for it.

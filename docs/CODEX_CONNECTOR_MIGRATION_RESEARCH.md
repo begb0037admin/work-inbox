@@ -1319,3 +1319,113 @@ PR #29 OPEN, MERGEABLE.
    and check Codex's ChatGPT-subscription usage holds up under 6x/day
    automated cadence without hitting plan limits (unresolved caveat from
    Section 4).
+
+---
+
+### 27 Aug 2026 (~16:30) — PIVOT: Codex route dropped, moving to headless Claude Code. Kill-switch built + proof-fired and retained.
+
+**Kevin's decision (via coordinator, mid-session):** stop pursuing Codex
+entirely. Run `fetch_inbox.py`'s AI-triage model calls through **headless
+Claude Code on Kevin's Claude subscription** (flat fee) instead of the metered
+Anthropic API — same flat-fee-vs-per-token idea as the Codex plan, but on
+Claude, **keeping the exact same model (`claude-haiku-4-5`) and the exact same
+prompts**. Because model + prompts are unchanged, this is a **billing-path swap,
+not a model swap** — it does NOT need the 7-day A/B the Codex route required.
+
+**Codex route status: SUPERSEDED / dormant.** `docs/OPTION3_BUILD_PLAN.md` and
+the connector-free `CODEX_HOME` work are not being built. The account-side
+"Option 1" (accept residual write-risk on Kevin's existing ChatGPT account +
+mandatory COM kill-switch) is also moot — see below.
+
+**What was done this session before the pivot landed, and kept:**
+
+1. **`tools/codex_triage/mailbox_guard.py` — the post-run Outlook COM
+   delta-sweep kill-switch — BUILT and PROOF-FIRED (PASS, all 12 checks).**
+   Before/after COM snapshot (Inbox + 5 named subfolder trees + Sent/Drafts
+   counts + primary & HR-Systems-shared calendar windows; subjects SHA1-hashed);
+   on any unintended mailbox delta it hard-disables the named scheduled task
+   (with a hard refusal on the live `Work Inbox Briefing` name), alerts Kevin via
+   the pipeline's existing `Show-TaskNotification.ps1`/BurntToast path, and
+   writes a timestamped incident record + `GUARD_TRIPPED.flag` sentinel.
+   Proof-of-fire: synthetic category injected via COM onto a disposable
+   `mailbot@distrokid.com` message → diff caught exactly one `categories_changed`
+   [critical] delta → real dummy `schtasks` task confirmed `Disabled` → toast
+   rc=0 → incident + sentinel written → synthetic change remediated (settled
+   re-read `''`) → `Restrict("[Categories] <> ''")` sweep 0 residue → dummy task
+   deleted, sentinel cleared. Full transcript: `docs/OPTION1_KILLSWITCH.md`.
+   **Now downgraded from hard prerequisite to optional lightweight regression
+   check** — headless Claude Code has no mailbox tool, so there is no write path
+   to gate (see the scope doc, section 5). Kept as cheap before/after insurance
+   for the first few live runs.
+
+2. **Codex model recorded, for the record (the check Kevin asked for — now
+   only of historical interest since the route changed):** `codex exec` on this
+   machine (codex-cli 0.149.1) defaults to **`gpt-5.6-terra`** ("Balanced
+   agentic coding model", 272k ctx) — pinned in `~/.codex/config.toml` line 4
+   `model = "gpt-5.6-terra"`, line 5 `model_reasoning_effort = "medium"`.
+   Pinnable per-invocation via `-m/--model <slug>` or `-c model="<slug>"`, or per
+   profile (`-p <name>` layering `$CODEX_HOME/<name>.config.toml`). Stronger
+   options in the on-disk catalogue (`~/.codex/models_cache.json`, personal Plus
+   account `eb7a812e`): `gpt-5.6-sol` (frontier), `gpt-5.5` (frontier). Cheaper:
+   `gpt-5.6-luna`, `gpt-5.4-mini`. The Edu/enterprise account `cc80356f` has a
+   workspace model policy of `gpt-5.6-luna` (`cloud-config-bundle-cache.json`),
+   so a workspace admin could constrain slugs there. **Not carried forward** —
+   the pivot means Codex's model is no longer in play.
+
+3. **Codex Call-2 wiring, the `codex exec` usage-projection work, and the
+   quality-gate A/B doc — HALTED, not started/finished.** Superseded by the
+   scope doc.
+
+**New deliverable this session — `docs/CLAUDE_CODE_HEADLESS_SCOPE.md`** (scope,
+no build). Answers, verified against the admin machine 27 Aug:
+- **Feasibility:** `claude 2.1.247`, `claude -p --output-format json` headless
+  mode present; `--allowedTools`/`--disallowedTools`/`--tools`/
+  `--strict-mcp-config`/`--system-prompt`/`--exclude-dynamic-system-prompt-sections`/
+  `--model`/`--fallback-model` all present; `claude setup-token` exists for
+  long-lived headless auth. **Auth gotcha:** `ANTHROPIC_API_KEY` is set as a
+  Windows user env var (used by `fetch_inbox.py` today) and Claude Code prefers
+  it when present → the scheduled invocation MUST run with that var unset, with
+  subscription auth via `~/.claude/.credentials.json` (`claudeAiOauth`, present
+  and valid — this session runs on it) or a `CLAUDE_CODE_OAUTH_TOKEN` from
+  `setup-token`.
+- **Model:** `--model claude-haiku-4-5` = identical model to the pipeline's 5
+  `client.messages.create()` calls. Same model + verbatim prompts = no triage
+  A/B needed. One-off Phase 3.2 parity diff recommended (Claude Code's harness
+  system prompt vs a bare API call), mitigated with `--system-prompt` +
+  `--exclude-dynamic-system-prompt-sections`.
+- **Which subscription:** `kevin@lelitte.co.uk` (work-inbox is Kevin's). Adds
+  5 calls × 6 runs = 30 short Haiku calls/day, sharing the pool with Kevin's
+  interactive/agent usage (he is near a limit now). Recommend starting at
+  **3×/day**; a dedicated account is the isolation option. Kevin to confirm the
+  `subscriptionType`/`rateLimitTier` on his plan.
+- **ToS:** headless/scripted Claude Code is a documented feature; personal
+  self-consumed automation at 3–6×/day on one account is within terms
+  (boundaries: no reselling, no multi-account rate-limit evasion — do not shard
+  runs across `kevin@`/`hope@`/`adam@`). Use `setup-token`, not a lifted
+  interactive token.
+- **Write-risk:** **removed.** Claude Code has no Outlook/Exchange/Graph tool;
+  `fetch_inbox.py`'s COM is its own Python, invisible to the model; and unlike
+  `codex exec`, `claude -p` supports `--allowedTools ""` + `--strict-mcp-config`
+  so it runs with zero tools and zero MCP (the one global `github` MCP server is
+  not loaded). No path to the live mailbox. The whole 26–27 Aug write-gate
+  blocker does not apply. Kill-switch → optional insurance, not a gate.
+- **The swap:** one `_ai_text(system, user, max_tokens, temperature)` helper
+  behind `AI_BACKEND=api|claude_code`, replacing the 5 `client.messages.create()`
+  call sites (lines 805/1055/1886/2180/2379, all `claude-haiku-4-5`); JSON
+  repair/validation around each call untouched; `api` stays the default (no-op)
+  until Kevin flips the flag; one-env-var rollback.
+
+**Remaining before a build go-ahead:** (1) Kevin confirms plan tier + cadence;
+(2) Kevin runs `claude setup-token` and sets `CLAUDE_CODE_OAUTH_TOKEN` (Drew
+can't — needs his interactive login); (3) account decision (shared `kevin@` vs
+dedicated); then Drew builds the `AI_BACKEND` helper, runs the one-off Phase 3.2
+parity diff, reports, waits for the flip go-ahead.
+
+**Machine left at baseline:** `~/.codex/config.toml` sha1
+`b2a1a22661b3596b92384e081b6625f786346f0e` (untouched all session); no `codex
+exec` run this session; mailbox clean (proof-test category remediated, 0
+residue); dummy `schtasks` task deleted; `GUARD_TRIPPED.flag` cleared; no
+`CODEX_HOME` created; no `codex login`; `fetch_inbox.py` unedited.
+
+**Checkpoint:** branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, this
+commit (trail `48f103f` → this). PR #29 OPEN, MERGEABLE.
