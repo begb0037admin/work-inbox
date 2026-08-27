@@ -1,3 +1,51 @@
+# Handover -- 27 August 2026, ~09:10 UTC (Drew) -- Nathan Kirwan "REF29 UDF - Promotion to UOXP" needs-reply repair (data-only, TRANSIENT) + two root causes found; code fix PROPOSED not shipped
+
+## What this is
+Coordinator task: Lauren tried to draft a reply to Nathan Kirwan's 26 Aug 14:51 UTC email "REF29 UDF - Promotion to UOXP" (entry_id `...5350007B21C32130000`, Kevin sole To) and hit two pipeline defects -- it was scored `needs_reply:false` so never entered `data/needs_reply.json`, and the only stored body copy anywhere was a 157-char truncation. Root-cause both, repair this one email's state, push. Per the cautious-change-pace rule and the coordinator's explicit instruction, non-trivial pipeline code changes were to be proposed and held, not shipped.
+
+## Root cause B (truncation) -- the primary one, and it CAUSES root cause A
+Two-stage truncation, byte-confirmed:
+1. Capture: `fetch_inbox.py` lines 408 / 439 / 508 -- `entry["body_preview"] = (msg.Body or "")[:150]`. This 150-char slice is the longest body text the pipeline ever persists for an email. (Subfolder/sent builders at 572/636/680 use `[:100]`.)
+2. Card: `make_card()` line 914 -- `sub = "From <strong>{sender}</strong>." + html.escape(preview[:120])`. 37-char prefix + 120 body chars = the "157 characters" seen. `body_preview` itself is NOT carried onto the card; only `sub` is.
+3. Classifier input: Phase 3.2 line 1004 -- `"preview": (c.get("sub") or "")[:250]`. The `[:250]` is a no-op because `sub` is already <=157 chars. **The needs_reply classifier (claude-haiku-4-5) never sees more than ~120 chars of body.**
+4. The full body IS fetched via Outlook COM (`mapi.GetItemFromID` -> `item.Body`) -- but only in `tools/publish_needs_reply.py`, and only for entries already scored `needs_reply == true` (that script line 116). A false-negative at step 3 means the full body is never fetched and never stored anywhere durable. Chicken-and-egg.
+
+## Root cause A (misclassification) -- a downstream symptom of B
+`needs_reply` is decided solely by the Phase 3.2 Haiku call from: subject + sender + the ~120-char truncated preview + `kevin_is_primary_recipient` + `age_days`. The truncated preview for this email reads "...I hope you have some nice plans for the upcoming bank holiday. I'm just flagging the below promotion o[f...]" -- pure pleasantry + "just flagging", which is a defensible FYI call on what the model could see. The body text that makes it a reply ("...in case it has gotten lost... Simon has flagged some of the challenges... **Do let me know if you have any questions.**", plus Simon's CorePortal config to replicate in LIVE) is cut off at ~char 120. There is NO deterministic floor that can force `needs_reply:true` -- the only overrides (staleness cutoff 60d line 1100, contradiction check line 1131) flip true->false only. The `needs` tier placement + "Reply within 48hrs" badge come from `categorise()` (keyword rules) and `badge_for()` (mechanical: tier==needs & age<48h) -- they are not evidence the pipeline "knew" a reply was needed.
+
+## Proposed fix (NOT shipped -- needs Kevin's go-ahead; broad behavioural change on the live classifier)
+Feed the classifier real body text. Minimal diff:
+- lines 408/439/508: `[:150]` -> `[:3000]` (internal only; every downstream consumer re-slices, dashboard `sub` still `[:120]` so **no UI change**).
+- `make_card()`: also stash `card["body_preview_full"] = preview` (the pre-`[:120]` value).
+- Phase 3.2 line 1004: `"preview": (c.get("body_preview_full") or c.get("sub") or "")[:2000]`.
+- Strip `body_preview_full` in the existing pre-write cleanup so it never lands in briefing.json.
+Risks to verify with a dry run before shipping: (a) reclassifies every email this run -- could move borderline cards either way (this is the point, but it's exactly the "small isolated verified" concern); (b) Haiku input-token increase (~30 candidates x up to 2000 chars) -- the 10 Aug max_tokens incident was OUTPUT tokens, so low risk, but confirm `stop_reason`; (c) briefing.json size if cleanup is missed. Recommend a `--dry-run` diff of `needs_reply` verdicts old-vs-new on one live inbox, reviewed by Lauren, before merge.
+
+## What was repaired (data-only, PUSHED to main) -- and why it is TRANSIENT
+Full body recovered from Kevin's live mailbox via Outlook COM this session (2274 chars, `is_sensitive` = clean, `recipient_tier("Nathan Kirwan")` = "other", matches `lauren-draft-19`).
+- `data/needs_reply.json` -- appended a 4th entry: real entry_id, full body, `sender_tier:"other"`, `ai_note` prefixed "MANUAL REPAIR 2026-08-27 (Drew)" explaining the recovery + naming holding draft `lauren-draft-19-20260827`. Commit `f560a6c56d`.
+- `data/briefing.json` -- `needs[]` card for this entry_id: `needs_reply` false -> true (1 line; `app.js` does not branch on this field, **no UI change**). Commit `c9c070b003`.
+- `data/triage_ledger.json` -- `tracked_needs_urgent[<eid>].card.needs_reply` false -> true (1 line; not dashboard-rendered). Commit `cf547b1a86`.
+All three verified byte-identical via `git/blobs/{sha}`. Pre-change SHAs: needs_reply `73e871e9`, briefing `8c36164a`, triage `c58d14db`.
+
+**TRANSIENCE:** the scheduled "Work Inbox Briefing" run at 12:00 UK today regenerates `briefing.json` from a fresh Outlook pull + fresh Haiku classification. It will re-score this email `needs_reply:false` from the same truncated preview and overwrite all three edits; `publish_needs_reply.py` then rebuilds `needs_reply.json` from `briefing.json`'s flags and drops the manual entry. **These repairs do not survive the next pipeline run. The only durable fix is the code change above (or Kevin holding the pipeline until it's in).**
+
+## command-centre -- NOT changed
+Task `t2608261500530` "Review REF2029 UDF promotion to UOXP" (tier week, correct `entryId`) already represents this email accurately ("Kevin needs to review the promotion details and any HR Systems implications or sign-off requirements"). The only optional enrichment is a dated action line linking `lauren-draft-19`; that renders in the card drawer = a visible change, so it was left for Kevin's screenshot-approval decision rather than pushed. `data/tasks.json` untouched.
+
+## drafted_replies.json -- no action needed
+`lauren-draft-19-20260827` is already committed to `agent-commons/pending-email-drafts/drafts.json` (commit 43b62c4) with the correct `source_entry_id`. `publish_drafted_replies.py` mirrors it into `work-inbox/data/drafted_replies.json` on the next scheduled run (~12:00 UK); it will then appear on the dashboard "Drafted Replies" tab automatically. Not mirrored manually this session (would be a debatable UI push for zero time saved).
+
+## Environment note
+Git Bash (`C:\Program Files\Git\...\bash.exe`) went missing mid-session -- shell builtins/pipes/heredocs/`&&` chains all fail with "bash.exe not found"; single-binary invocations (`git ...`, `python ...`, `python script.py`) still work. All work this session was done by writing Python helper scripts to scratchpad and running them one invocation at a time. Flag for a machine-health check (Max) if it recurs.
+
+## Exact next action for a cold session
+1. Get Kevin's decision on the proposed classifier fix (ship after dry-run review, or hold the pipeline). If shipping: implement the 4-point diff above, `--dry-run` verdict diff on one live inbox, Lauren reviews, then merge + manual pipeline run.
+2. If Kevin wants the command-centre draft-link action line: add it to `t2608261500530`, screenshot the rendered card, wait for "approved", then push with the mandatory backup-and-verify sequence.
+3. Until (1) lands, expect this email to fall out of `needs_reply.json` again on every scheduled run -- re-apply the manual `needs_reply.json` entry if Lauren needs it mid-gap.
+
+---
+
 # Handover -- 26 August 2026, ~20:12 UTC (Drew) -- Codex Phase 2 write-path investigation + quality-gate design done; automation still blocked, structural fix needs Kevin/Oxford IT
 
 ## What this is
