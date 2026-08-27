@@ -22,6 +22,161 @@ GITHUB_PATH = "data/briefing.json"
 GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
 GITHUB_TIMEOUT = 30
 
+# --------------------------------------------------------------------------- #
+#  AI backend selection + parallel-validation mode  (added 2026-08-27, Drew)
+#  Codex-connector migration pivoted to headless Claude Code -- see
+#  docs/CLAUDE_CODE_HEADLESS_SCOPE.md and docs/CLAUDE_CODE_BACKEND.md.
+#
+#  AI_BACKEND=api          (default) -- unchanged: metered Anthropic API,
+#                          exact behaviour as before this change.
+#  AI_BACKEND=claude_code  -- the 5 claude-haiku-4-5 calls go through
+#                          `claude -p` (Claude Code, subscription auth), tools
+#                          disabled, no MCP. Same model, same verbatim prompts.
+#
+#  WI_AI_PARALLEL=1        -- parallel-validation run: do ALL the COM + AI work
+#                          but write claude_*-prefixed LOCAL files only, push
+#                          NOTHING, mutate no shared ledger / no Command Centre
+#                          sync. For diffing the claude_code output against the
+#                          live api pipeline before any cutover.
+#
+#  Account selection / dual-account failover (kevin@ primary, hope@ overflow):
+#  WI_CLAUDE_CONFIG_DIR           -- CLAUDE_CONFIG_DIR for the primary account
+#  WI_CLAUDE_CONFIG_DIR_FALLBACK  -- CLAUDE_CONFIG_DIR for the overflow account;
+#                          on a usage-limit error the call is retried once on
+#                          this account. Leave unset to disable failover.
+# --------------------------------------------------------------------------- #
+AI_BACKEND  = os.environ.get("AI_BACKEND", "api").strip().lower()
+AI_PARALLEL = os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
+PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
+_AI_OUT_PREFIX = "claude_" if AI_PARALLEL else ""
+CLAUDE_BIN          = os.environ.get("WI_CLAUDE_BIN", "claude")
+CLAUDE_CFG_PRIMARY  = os.environ.get("WI_CLAUDE_CONFIG_DIR", "").strip()
+CLAUDE_CFG_FALLBACK = os.environ.get("WI_CLAUDE_CONFIG_DIR_FALLBACK", "").strip()
+_AI_CALL_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ai_backend_usage.jsonl")
+_ai_call_seq = 0
+
+log(f"AI backend: {AI_BACKEND}"
+    + (f"  [PARALLEL VALIDATION MODE -- local claude_* files only, no push]" if AI_PARALLEL else "")
+    + (f"  primary_cfg={CLAUDE_CFG_PRIMARY or '(default)'}" if AI_BACKEND == "claude_code" else "")
+    + (f"  fallback_cfg={CLAUDE_CFG_FALLBACK}" if (AI_BACKEND == "claude_code" and CLAUDE_CFG_FALLBACK) else ""))
+
+
+class _AIText:
+    """Minimal stand-in for an anthropic Message: exposes .content[0].text and
+    .usage so the five existing call sites need no other change."""
+    __slots__ = ("content", "usage")
+    def __init__(self, text, usage):
+        self.content = [type("_Blk", (), {"text": text})()]
+        self.usage = usage
+
+
+def _looks_like_usage_limit(s):
+    s = (s or "").lower()
+    return any(k in s for k in (
+        "usage limit", "rate limit", "rate_limit", "rate-limit", " 429", "\"429\"",
+        "quota", "overloaded", "try again later", "capacity", "exceeded your",
+        "usage cap", "limit reached"))
+
+
+def _claude_code_once(model, system, user, timeout_s, cfg_dir):
+    cmd = [
+        CLAUDE_BIN, "-p",
+        "--model", model,
+        "--system-prompt", system,
+        "--exclude-dynamic-system-prompt-sections",
+        # triage is text-in / JSON-out: no tool use, no MCP, no write path.
+        "--disallowedTools",
+        "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,NotebookEdit,Task,TodoWrite,SlashCommand",
+        "--strict-mcp-config",
+        "--mcp-config", '{"mcpServers":{}}',
+        "--permission-mode", "default",
+        "--no-session-persistence",
+        "--output-format", "json",
+    ]
+    # Clean environment: no metered API key (force subscription billing), and
+    # drop the parent Claude Code session's IPC/session vars so this nested
+    # `claude -p` starts a fully independent session.
+    env = {k: v for k, v in os.environ.items()
+           if k != "ANTHROPIC_API_KEY"
+           and not k.startswith("CLAUDE_CODE")
+           and k not in ("CLAUDECODE", "CLAUDE_PID", "CLAUDE_EFFORT", "AI_AGENT")}
+    if cfg_dir:
+        env["CLAUDE_CONFIG_DIR"] = cfg_dir
+    p = subprocess.run(cmd, input=user, capture_output=True, text=True,
+                       timeout=timeout_s, env=env)
+    if p.returncode != 0:
+        raise RuntimeError(f"claude -p rc={p.returncode}: {(p.stderr or p.stdout or '')[-400:]}")
+    try:
+        obj = json.loads(p.stdout)
+    except Exception:
+        raise RuntimeError(f"claude -p produced non-JSON stdout: {p.stdout[:400]}")
+    if isinstance(obj, dict) and obj.get("is_error"):
+        raise RuntimeError(f"claude -p is_error: {str(obj.get('result'))[:400]}")
+    return obj
+
+
+def _ai_create(model="claude-haiku-4-5", system="", messages=None,
+               max_tokens=1024, timeout=None, **_ignored):
+    """Drop-in for client.messages.create() at the five triage call sites.
+    AI_BACKEND=api -> the real anthropic client, byte-for-byte as before.
+    AI_BACKEND=claude_code -> headless `claude -p`, same model + prompt."""
+    global _ai_call_seq
+    _ai_call_seq += 1
+    if AI_BACKEND != "claude_code":
+        kw = dict(model=model, system=system, messages=messages, max_tokens=max_tokens)
+        if timeout is not None:
+            kw["timeout"] = timeout
+        return client.messages.create(**kw)
+
+    user = messages[0]["content"] if messages else ""
+    # `claude -p` itself takes ~15-25s for a real triage batch; the extra
+    # headroom is for the account being rate-limited and backing off internally
+    # (seen on a Pro plan under load 27 Aug -- a stall, not a crash). A stall
+    # past this budget is treated as a usage-limit signal -> switch account.
+    cc_timeout = float(timeout or 90.0) + 150.0
+    attempts = [("primary", CLAUDE_CFG_PRIMARY)]
+    if CLAUDE_CFG_FALLBACK:
+        attempts.append(("fallback", CLAUDE_CFG_FALLBACK))
+    last_err = None
+    for acct_label, cfg_dir in attempts:
+        for tryno in (1, 2):
+            t0 = datetime.now()
+            try:
+                obj = _claude_code_once(model, system, user, cc_timeout, cfg_dir)
+                text = (obj.get("result") or "").strip()
+                usage = obj.get("usage") or {}
+                dur = (datetime.now() - t0).total_seconds()
+                log(f"AI call #{_ai_call_seq} claude_code account={acct_label} try={tryno} "
+                    f"model={model} wall={dur:.1f}s in_tok={usage.get('input_tokens')} "
+                    f"out_tok={usage.get('output_tokens')} "
+                    f"cache_read={usage.get('cache_read_input_tokens')} "
+                    f"cost_usd={obj.get('total_cost_usd')}")
+                try:
+                    with open(_AI_CALL_LOG, "a", encoding="utf-8") as f:
+                        f.write(json.dumps({
+                            "ts": datetime.now().isoformat(timespec="seconds"),
+                            "seq": _ai_call_seq, "account": acct_label, "try": tryno,
+                            "model": model, "wall_s": round(dur, 1), "usage": usage,
+                            "cost_usd": obj.get("total_cost_usd"),
+                            "num_turns": obj.get("num_turns"),
+                        }) + "\n")
+                except Exception:
+                    pass
+                return _AIText(text, usage)
+            except subprocess.TimeoutExpired as e:
+                last_err = e
+                log(f"AI call #{_ai_call_seq} claude_code account={acct_label} try={tryno} "
+                    f"TIMED OUT after {cc_timeout:.0f}s -- treating as rate-limit stall, switching account.")
+                break   # a stall this long on the primary => try the fallback account
+            except Exception as e:  # noqa: BLE001
+                last_err = e
+                msg = str(e)
+                log(f"AI call #{_ai_call_seq} claude_code account={acct_label} try={tryno} FAILED: {msg[:220]}")
+                if _looks_like_usage_limit(msg):
+                    break   # switch to the fallback account rather than retry the same one
+                time.sleep(8)
+    raise RuntimeError(f"claude_code backend exhausted (last: {last_err})")
+
 def load_existing_briefing():
     if GITHUB_PAT:
         try:
@@ -797,12 +952,15 @@ CALENDAR TOMORROW:
 {json.dumps(cal_tomorrow, indent=2, ensure_ascii=True)}
 """
 
-client   = anthropic.Anthropic(timeout=60.0)
+# claude_code backend never touches the anthropic client -- and is typically
+# launched with ANTHROPIC_API_KEY unset (subscription billing), which would make
+# anthropic.Anthropic() raise at construction. Only build it for the api backend.
+client   = anthropic.Anthropic(timeout=60.0) if AI_BACKEND == "api" else None
 anthropic_available = True
 context  = ""
 subtitle = ""
 try:
-    response = client.messages.create(
+    response = _ai_create(
         model      = "claude-haiku-4-5",
         max_tokens = 1024,
         system     = SYSTEM,
@@ -1052,7 +1210,7 @@ if summary_candidates and anthropic_available:
             f"Today is {today_str}.\n\n"
             f"EMAILS:\n{json.dumps(emails_for_summary, indent=1, ensure_ascii=True)}"
         )
-        es_resp = client.messages.create(
+        es_resp = _ai_create(
             model      = "claude-haiku-4-5",
             # Raised 8000 -> 14000, 12 Aug 2026: the 10 Aug incident that
             # first hit stop_reason=max_tokens on this call used 5947/8000
@@ -1883,7 +2041,7 @@ try:
         f"EMAILS (received urgent/needs + sent by Kevin, last 7 days):\n{json.dumps(api_emails, indent=1, ensure_ascii=True)}"
     )
 
-    t_resp = client.messages.create(
+    t_resp = _ai_create(
         model      = "claude-haiku-4-5",
         max_tokens = 8000,
         system     = TRIAGE_SYSTEM,
@@ -2027,7 +2185,9 @@ def _backup_briefing_before_write(remote_meta, headers):
     )
     print(f"Phase 4 backup created - {backup_path}")
 
-if GITHUB_PAT and (suggestions["task_updates"] or suggestions["new_tasks"]):
+if AI_PARALLEL and (suggestions["task_updates"] or suggestions["new_tasks"]):
+    log("Phase 3.6 - PARALLEL VALIDATION MODE: NOT applying task updates to Command Centre / NOT writing triage_ledger.json (comparison only).")
+if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
     try:
         gh_headers = {"Authorization": f"token {GITHUB_PAT}",
                       "Content-Type":  "application/json",
@@ -2177,7 +2337,7 @@ if all_priorities and anthropic_available:
             f"Today is {today_str}.\n\n"
             f"TASKS:\n{json.dumps(tasks_for_summary, indent=1, ensure_ascii=True)}"
         )
-        s_resp = client.messages.create(
+        s_resp = _ai_create(
             model      = "claude-haiku-4-5",
             max_tokens = 4096,
             system     = SUMMARY_SYSTEM,
@@ -2376,7 +2536,7 @@ if _cal_for_summary and anthropic_available:
             f"Today is {today_str}.\n\n"
             f"MEETINGS:\n{json.dumps(_cal_for_summary, indent=1, ensure_ascii=True)}"
         )
-        _cs_resp = client.messages.create(
+        _cs_resp = _ai_create(
             model      = "claude-haiku-4-5",
             max_tokens = 900,
             system     = CAL_SUM_SYSTEM,
@@ -2524,7 +2684,7 @@ if same_briefing_date(existing_briefing, today_str) and not absences and existin
 # it wasn't asked for in this pass and isn't needed for the mechanism
 # itself to work correctly going forward; flagged to Kevin as a separate,
 # optional follow-up if he wants that historical recovery re-run.
-_WI_PHASE39_DRY_RUN = os.environ.get("WI_PHASE39_DRY_RUN", "").strip().lower() in ("1", "true", "yes")
+_WI_PHASE39_DRY_RUN = (os.environ.get("WI_PHASE39_DRY_RUN", "").strip().lower() in ("1", "true", "yes")) or AI_PARALLEL
 try:
     _persist_ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
     _persist_ro_headers = {"Authorization": f"token {GITHUB_PAT}", "User-Agent": "work-inbox-script"} if GITHUB_PAT else None
@@ -2647,7 +2807,8 @@ try:
         print(f"Phase 3.9 done - carried:{carried} dropped_resolved:{dropped_resolved} inconclusive_lookups_carried:{inconclusive} stale_over_90d:{stale_warnings} tracked_total:{len(tracked)}{dry_run_tag}")
 
     if _WI_PHASE39_DRY_RUN:
-        print("Phase 3.9 dry run - skipping triage_ledger.json write and briefing carry-forward injection.")
+        print("Phase 3.9 dry run - skipping triage_ledger.json write and briefing carry-forward injection."
+              + ("  [WI_AI_PARALLEL]" if AI_PARALLEL else ""))
         # Dry run intentionally still ran the resolution-signal checks above
         # for real (Outlook/CC/ticks), it just doesn't persist the ledger or
         # leave carried cards appended to urgent/needs -- undo the in-memory
@@ -2691,7 +2852,13 @@ briefing = {
 # -- Phase 4 -- push to GitHub --
 log("Phase 4 - pushing briefing to GitHub...")
 
-if not GITHUB_PAT:
+if AI_PARALLEL:
+    _parallel_briefing_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "data", "claude_briefing.json")
+    with open(_parallel_briefing_path, "w", encoding="utf-8") as _pf:
+        json.dump(briefing, _pf, indent=2, ensure_ascii=False)
+    log(f"Phase 4 - PARALLEL VALIDATION MODE: wrote {_parallel_briefing_path} locally, pushed NOTHING to GitHub.")
+elif not GITHUB_PAT:
     print("ERROR: GITHUB_PAT env var not set - cannot push.")
 else:
     try:
@@ -2742,7 +2909,13 @@ else:
 
 
 # Phase 5 - push task suggestions to GitHub (consumed by Command Centre dashboard)
-if GITHUB_PAT:
+if AI_PARALLEL:
+    _parallel_sug_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "data", "claude_inbox_suggestions.json")
+    with open(_parallel_sug_path, "w", encoding="utf-8") as _psf:
+        json.dump(suggestions, _psf, indent=2, ensure_ascii=False)
+    log(f"Phase 5 - PARALLEL VALIDATION MODE: wrote {_parallel_sug_path} locally, pushed NOTHING (no carry-forward from remote).")
+elif GITHUB_PAT:
     try:
         sug_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/inbox_suggestions.json"
         headers = {

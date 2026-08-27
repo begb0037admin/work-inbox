@@ -1,4 +1,33 @@
-# Handover -- 27 August 2026, ~16:35 UTC (Drew) -- PIVOT: Codex route DROPPED. Moving to headless Claude Code on Kevin's Claude subscription for the six AI-triage phases (same model `claude-haiku-4-5`, same prompts -> billing-path swap, NOT a model swap, no A/B needed). Kill-switch BUILT + PROOF-FIRED (PASS) and retained as optional insurance. New deliverable: `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` (scope, no build). Machine at `b2a1a226` baseline.
+# Handover -- 27 August 2026, ~17:05 UTC (Drew) -- BUILD DONE (parallel, not cut over): headless Claude Code backend wired into `fetch_inbox.py`. `AI_BACKEND=api` still default (unchanged). `AI_BACKEND=claude_code` + `WI_AI_PARALLEL=1` proven end-to-end -- writes local `data/claude_*.json`, pushes nothing. Machine at `b2a1a226` baseline; live `\Work Inbox Briefing` task undisturbed.
+
+## What this is
+Supersedes the ~16:35 scope entry below (same session). Kevin: *"lets do it - we've spent enough time."* -> built the swap. Full detail: **`docs/CLAUDE_CODE_BACKEND.md`**.
+
+## Built (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`; PR #29 OPEN/MERGEABLE)
+- **`fetch_inbox.py`**: one `_ai_create()` helper behind `AI_BACKEND` (`api` default = byte-identical to before; `claude_code` = headless `claude -p`, subscription auth, tools+MCP disabled, same model `claude-haiku-4-5`, same verbatim prompts). All 5 call sites swapped (Phase 2/3.2/3.5/3.7/3.8). `WI_AI_PARALLEL=1` = do all COM+AI work, write `data/claude_briefing.json` + `data/claude_inbox_suggestions.json` LOCALLY, push nothing, no ledger/CC-sync. Dual-account failover in the helper (kevin@ primary -> hope@ overflow on usage-limit **or timeout stall**; Kevin-confirmed permanent). Backup: `Archive/fetch_inbox_backup_20260827_1640_pre_claudecode_backend.py`. `py_compile` clean.
+- **`docs/CLAUDE_CODE_BACKEND.md`** (build doc), `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` (scope), `docs/OPTION1_KILLSWITCH.md` + `tools/codex_triage/mailbox_guard.py` (kill-switch, PROOF-FIRED, now OPTIONAL -- no write path on this route), research doc Section 9 BUILD entry.
+
+## Verified (admin machine, 27 Aug)
+Headless subscription auth works (`ANTHROPIC_API_KEY` unset -> OAuth creds; account = **`pro`**, not Max). Haiku 4.5 selectable headless. No write path (`permission_denials: []`, 0 tools, 0 MCP). Full parallel run: 5 calls, wall ~7.5 min, output 41k tok (thinking-inflated via `claude -p`), cache_read 47k, cache_creation 53k, list-equiv $0.37 (NOT a real subscription charge). `data/claude_briefing.json` structurally sound. First cold run stalled on Pro rate-limit backoff (2x150s timeouts) -> retry loop now fails over on timeout; re-run clean.
+
+## 6x/day on Pro: NOT viable unmitigated
+~4.3M tok/week on a plan shared with all Kevin's agent work (already near-limit). Fits with **3x/day + collapse the 5 calls into 1 (old Codex "Call 2" design) + hope@ failover** (~<1M tok/week), or move to Max / dedicated account.
+
+## Kevin's action items before cutover
+1. Run `claude setup-token` TWICE -- one `CLAUDE_CONFIG_DIR` per account: `C:\WorkInboxAI\kevin` (kevin@), `C:\WorkInboxAI\hope` (hope@). Then set user env vars `WI_CLAUDE_CONFIG_DIR` / `WI_CLAUDE_CONFIG_DIR_FALLBACK`. **Drew can't -- needs his browser.**
+2. Decide cadence (3x/day recommended).
+3. After a short eyeball-validation window (`claude_briefing.json` vs live `briefing.json`), give an explicit cutover go-ahead.
+4. Optionally approve the collapse-to-one-call mitigation (recommended if staying on Pro).
+
+## Hard gates
+No `main` write. No scheduled-task change / no cutover without Kevin's fresh explicit go-ahead. Parallel mode only. Don't disturb the live `\Work Inbox Briefing` runs or stage their files. `~/.codex/config.toml` at `b2a1a226` (Codex not involved). Every run prints a timestamp.
+
+## Exact next action for a cold session
+Read `docs/CLAUDE_CODE_BACKEND.md`. If Kevin has done the two `setup-token` logins + picked a cadence: (a) optionally build the collapse-to-one-call mitigation; (b) run `AI_BACKEND=claude_code WI_AI_PARALLEL=1 python fetch_inbox.py` a few times over a couple of days, have Kevin/Lauren compare `data/claude_briefing.json` to the live `data/briefing.json`; (c) on his go-ahead, point the `\Work Inbox Briefing` wrapper at `AI_BACKEND=claude_code` with `ANTHROPIC_API_KEY` unset. If he hasn't done the logins: nothing to build, wait.
+
+---
+
+# Handover -- 27 August 2026, ~16:35 UTC (Drew) -- PIVOT: Codex route DROPPED. Moving to headless Claude Code on Kevin's Claude subscription for the six AI-triage phases (same model `claude-haiku-4-5`, same prompts -> billing-path swap, NOT a model swap, no A/B needed). Kill-switch BUILT + PROOF-FIRED (PASS) and retained as optional insurance. New deliverable: `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` (scope, no build). Machine at `b2a1a226` baseline. [SUPERSEDED by the ~17:05 BUILD entry above.]
 
 ## What this is
 Supersedes the ~16:00 / ~15:30 / ~14:55 entries below (same session chain). Kevin's mid-session decision (via coordinator): stop pursuing Codex entirely -- every write-gate control failed 26-27 Aug and the connector-free route added cost/complexity. Instead run `fetch_inbox.py`'s 5 `claude-haiku-4-5` calls through **headless Claude Code** (`claude -p`) authed to Kevin's **Claude subscription** (flat fee) instead of the metered `ANTHROPIC_API_KEY` (~GBP 36/mo). Same model + same prompts = identical triage quality, no parallel A/B validation window.

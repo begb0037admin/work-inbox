@@ -1429,3 +1429,60 @@ residue); dummy `schtasks` task deleted; `GUARD_TRIPPED.flag` cleared; no
 
 **Checkpoint:** branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, this
 commit (trail `48f103f` → this). PR #29 OPEN, MERGEABLE.
+
+---
+
+### 27 Aug 2026 (~17:00) — BUILD: headless Claude Code backend wired into `fetch_inbox.py` + parallel-validated. Not cut over.
+
+Kevin: *"lets do it - we've spent enough time."* Moved from scoping to build.
+Full detail: `docs/CLAUDE_CODE_BACKEND.md`. Summary:
+
+**Built (branch `claude/outlook-codecs-connector-upgrade-fe3dgf`):** one
+`_ai_create()` helper in `fetch_inbox.py` behind `AI_BACKEND=api|claude_code`
+(`api` default = byte-identical to before), all 5 `claude-haiku-4-5` call sites
+swapped, a `WI_AI_PARALLEL=1` mode that writes `data/claude_briefing.json` +
+`data/claude_inbox_suggestions.json` locally and pushes NOTHING / touches no
+ledger / no Command Centre sync. Backup:
+`Archive/fetch_inbox_backup_20260827_1640_pre_claudecode_backend.py`. Dual-account
+failover (kevin@ primary → hope@ overflow, Kevin-confirmed permanent) is in the
+helper: on a usage-limit error OR a timeout stall it retries once on the other
+`CLAUDE_CONFIG_DIR`.
+
+**`claude -p` invocation (verified working):**
+`claude -p --model claude-haiku-4-5 --system-prompt <verbatim> --exclude-dynamic-system-prompt-sections --disallowedTools "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,NotebookEdit,Task,TodoWrite,SlashCommand" --strict-mcp-config --mcp-config '{"mcpServers":{}}' --permission-mode default --no-session-persistence --output-format json`,
+user prompt on stdin, env with `ANTHROPIC_API_KEY` + all `CLAUDE_CODE*`/`CLAUDECODE`
+stripped.
+
+**Verified:** headless subscription auth works (`ANTHROPIC_API_KEY` unset → OAuth
+creds; account is `subscriptionType: pro` — **Pro, not Max**). Haiku 4.5 selectable
+headless (`canonicalModel: claude-haiku-4-5`). No write path — `permission_denials:
+[]`, zero tools, zero MCP; `mailbox_guard.py` kill-switch NOT needed for this route.
+ToS OK for personal 3–6×/day on one account.
+
+**Full parallel run (5 calls):** wall 451s (~7.5 min); output 41,285 tok
+(thinking-inflated — Haiku via `claude -p` uses extended thinking, the API
+pipeline doesn't); cache_read 47,369; cache_creation 53,485; list-equivalent
+$0.368 (NOT a real subscription charge). First cold run stalled (2×150s timeouts —
+Pro rate-limit backoff under load); retry loop now treats a timeout as a
+usage-limit signal and fails over; the re-run completed clean.
+`data/claude_briefing.json` came out structurally sound (full schema, sensible
+context/subtitle/cards).
+
+**6×/day on Pro: not viable unmitigated** (~4.3M tok/week on a plan shared with
+all Kevin's agent work, already near-limit). Fits with **3×/day + collapse the 5
+calls into 1 (old Codex "Call 2" design) + hope@ failover** (~<1M tok/week), or
+move to Max / a dedicated account.
+
+**Before cutover, Kevin must:** (1) run `claude setup-token` twice — one
+`CLAUDE_CONFIG_DIR` per account (kevin@, hope@) — Drew can't (needs his browser);
+(2) decide cadence (3×/day recommended); (3) after a short eyeball-validation
+window, give an explicit cutover go-ahead; (4) optionally approve the
+collapse-to-one-call mitigation. No `main` write / no scheduled-task change
+without that go-ahead.
+
+**Machine:** `~/.codex/config.toml` sha1 `b2a1a22661b3596b92384e081b6625f786346f0e`
+untouched; live `\Work Inbox Briefing` task undisturbed (parallel runs push
+nothing); mailbox clean.
+
+**Checkpoint:** branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, this
+commit. PR #29 OPEN, MERGEABLE.
