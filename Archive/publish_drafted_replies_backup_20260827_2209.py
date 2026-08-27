@@ -122,31 +122,18 @@ def normalize_entry(e):
     # (reply-all threads, no single needs_reply.json EntryID carried into
     # the draft record) -- they were silently dropped by this check even
     # though they're real, complete, reviewable drafts. FIX (18 Aug 2026,
-    # Drew): source_entry_id was made optional, falling back to the draft's
-    # own draft_id when absent.
-    #
-    # FIX (27 Aug 2026, Drew): that draft_id fallback was overloading
-    # source_entry_id -- a draft_id string (e.g. "lauren-draft-15-20260818")
-    # is non-empty, so it passed the dashboard's `hasSource` check and
-    # rendered an "Open original" button that then failed
-    # GetItemFromID("lauren-draft-15-...") with "The parameter is incorrect"
-    # (draft-14/15/16 -- HANDOVER 27 Aug ~09:55 UTC). source_entry_id now
-    # means strictly "a real Outlook COM EntryID, or empty". Two new fields
-    # split out its old dual role, mirroring command-centre js/app.js
-    # openEmailWeb()'s `sourceType` discriminator pattern:
-    #   * open_mode ("com" | "web" | "none") -- machine-readable: which
-    #     opener the dashboard should wire for this row. NOT `source`
-    #     (that stays human-readable provenance; a Phase 2 task-writer sets
-    #     it).
-    #   * tick_id -- stable per-row identity for the mark-sent/discard tick
-    #     dedup. Byte-identical to the old fallback value (EntryID when
-    #     present, else draft_id), so every existing data/ticks.json
-    #     `draft_*` key still matches -- no tick resurrection.
-    # web_link / display_url (snake_case) pass through untouched when Lauren
-    # supplies one; the dashboard validates and opens it as a plain new-tab
-    # Outlook Web hyperlink. No draft carries one today, so today's
-    # no-EntryID rows render the button de-emphasised with an explanatory
-    # click, never a dead openmail://.
+    # Drew): source_entry_id is now optional. When present, it's used as
+    # before (identity for tick-dedup + the "Open original" Outlook deep
+    # link). When absent, falls back to the draft's own draft_id, which is
+    # always unique and always present -- so tick-dedup (mark sent/discard)
+    # still works correctly and doesn't collide across entries that all
+    # lack a real EntryID. Known, disclosed side effect: for those entries
+    # the "Open original" button will still render (dashboard just checks
+    # for a non-empty string) but will call openEmail() with a draft_id
+    # instead of a real Outlook EntryID, so it won't successfully open the
+    # source email. Not fixed here -- would need an app.js-side change
+    # (hasSource check) and this fix is intentionally scoped to unblocking
+    # visibility only, not a same-night frontend change on top of it.
     core = {"subject", "sender_tier", "draft_text"}
     missing_core = core - e.keys()
     if missing_core:
@@ -162,39 +149,13 @@ def normalize_entry(e):
     if not timestamp:
         return None, "missing both composed_at and drafted_at"
 
-    real_entry_id = (e.get("source_entry_id") or "").strip()
-    web_link = e.get("web_link") or e.get("display_url") or ""
-    if real_entry_id:
-        open_mode = "com"
-    elif web_link:
-        open_mode = "web"
-    else:
-        open_mode = "none"
-
     normalized = {
-        # Real Outlook COM EntryID ONLY (resolvable by open_email.py ->
-        # GetItemFromID). Never a draft_id fallback -- see the block comment
-        # above (27 Aug 2026 fix).
-        "source_entry_id": real_entry_id,
-        # Opener discriminator for the dashboard. "com" -> openmail://<id>;
-        # "web" -> open web_link/display_url in a new tab; "none" -> no
-        # resolvable original, render the button de-emphasised.
-        "open_mode": open_mode,
-        # Stable tick-dedup identity: EntryID when present, else draft_id --
-        # byte-identical to the pre-27-Aug source_entry_id fallback value so
-        # existing ticks.json draft_* keys keep matching.
-        "tick_id": real_entry_id or e.get("draft_id") or "",
+        "source_entry_id": e.get("source_entry_id") or e.get("draft_id") or "",
         "subject": e["subject"],
         "sender_tier": e["sender_tier"],
         "draft_text": e["draft_text"],
         "drafted_at": timestamp,
     }
-    # Outlook Web deep links, passed through untouched (snake_case) when
-    # present so the dashboard can validate + open them itself. Absent on
-    # every draft today.
-    for link_field in ("web_link", "display_url"):
-        if e.get(link_field):
-            normalized[link_field] = e[link_field]
     # Pass through optional richer fields as-is when present -- these are
     # real content Lauren already produces (confidence level/reason,
     # inline_flags for anything she couldn't verify, corpus_provenance for

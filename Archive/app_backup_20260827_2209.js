@@ -1433,50 +1433,12 @@ setInterval(loadCcTicker, 60000);
 // just under a 'draft_' key prefix so it doesn't collide with per-day briefing ticks.
 const DRAFTED_REPLIES_API='https://github-proxy.lelitte.co.uk/work-inbox/data/drafted_replies.json';
 
-function draftTickKey(id){return 'draft_'+id;}
-function draftStatus(id){return getTicks()[draftTickKey(id)]||null;}
-function setDraftStatus(id,status){
+function draftTickKey(sourceEntryId){return 'draft_'+sourceEntryId;}
+function draftStatus(sourceEntryId){return getTicks()[draftTickKey(sourceEntryId)]||null;}
+function setDraftStatus(sourceEntryId,status){
   const ticks=getTicks();
-  ticks[draftTickKey(id)]=status;
+  ticks[draftTickKey(sourceEntryId)]=status;
   saveTicks(ticks);
-}
-// Stable per-row identity for the mark-sent/discard tick dedup. Prefers the
-// mirror's dedicated tick_id (publish_drafted_replies.py, 27 Aug 2026);
-// falls back to source_entry_id / draft_id for any pre-cutover payload.
-// tick_id is byte-identical to the old source_entry_id-with-draft_id-fallback
-// value, so existing data/ticks.json draft_* keys keep matching.
-function draftIdentity(e){return (e&&(e.tick_id||e.source_entry_id||e.draft_id))||'';}
-
-// Validate a candidate Outlook Web link exactly like command-centre
-// js/app.js openEmailWeb(): https only, exact-hostname allowlist, no
-// userinfo / subdomain / path-spoof tolerance (URL() parse + strict
-// hostname compare). Returns the first usable candidate or ''.
-function draftWebUrl(e){
-  const hosts={'outlook.office.com':1,'outlook.office365.com':1};
-  const cands=[e&&e.web_link,e&&e.display_url];
-  for(let i=0;i<cands.length;i++){
-    const c=cands[i];
-    if(!c) continue;
-    try{const u=new URL(c);if(u.protocol==='https:'&&hosts[u.hostname]) return c;}catch(_){/* not a URL */}
-  }
-  return '';
-}
-
-// "Open original" for drafts with no resolvable Outlook COM EntryID. Opens a
-// validated Outlook Web link in a new tab if one is present; otherwise says
-// so. Never a silent no-op, never a throw, never a dead openmail:// call.
-function openDraftOriginal(ev,btn){
-  if(ev){ev.preventDefault();ev.stopPropagation();}
-  const hosts={'outlook.office.com':1,'outlook.office365.com':1};
-  const raw=(btn&&btn.getAttribute)?btn.getAttribute('data-weburl'):'';
-  let url='';
-  if(raw){try{const u=new URL(raw);if(u.protocol==='https:'&&hosts[u.hostname]) url=raw;}catch(_){url='';}}
-  if(url){
-    window.open(url,'_blank','noopener');
-  }else{
-    const subj=(btn&&btn.getAttribute)?btn.getAttribute('data-subject'):'';
-    alert('This draft has no linked original message that can be opened from here'+(subj?' — find it in Outlook by subject:\n\n'+subj:'')+'.');
-  }
 }
 
 function drTierBadge(tier){
@@ -1504,9 +1466,9 @@ async function copyDraftText(id,ev){
   }
 }
 
-function markDraft(id,identity,status,ev){
+function markDraft(id,sourceEntryId,status,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
-  setDraftStatus(identity,status);
+  setDraftStatus(sourceEntryId,status);
   const card=document.getElementById('drcard_'+id);
   if(card) card.remove();
   refreshDraftedRepliesCount();
@@ -1535,7 +1497,7 @@ function renderDraftedReplies(payload){
   const panel=document.getElementById('draftedRepliesPanel');
   if(!panel) return;
   const entries=(payload&&payload.entries)||[];
-  const pending=entries.filter(e=>!draftStatus(draftIdentity(e)));
+  const pending=entries.filter(e=>!draftStatus(e.source_entry_id));
 
   if(pending.length===0){
     panel.innerHTML=`<div class="dr-header"><div class="dr-title">Drafted Replies</div></div><div class="dr-empty">No drafts waiting for review.</div>`;
@@ -1546,22 +1508,8 @@ function renderDraftedReplies(payload){
   const cards=pending.map((e,i)=>{
     const id='dr'+i;
     const draftEsc=escapeHtml(e.draft_text||'');
-    const idKey=draftIdentity(e);
-    // Opener routing keys on the mirror's machine-readable open_mode
-    // discriminator (publish_drafted_replies.py, 27 Aug 2026), never on the
-    // format/length of source_entry_id. "com" -> the openmail://<entryId>
-    // -> GetItemFromID path (unchanged). "web" -> a validated Outlook Web
-    // hyperlink. Anything else (incl. a stale pre-cutover payload with no
-    // open_mode) -> a de-emphasised button that explains itself on click;
-    // once the mirror next publishes, such rows get their real open_mode.
-    const openMode=e.open_mode||'none';
-    let openLink;
-    if(openMode==='com'&&e.source_entry_id){
-      openLink=`<a href="javascript:void(0)" class="dr-btn" onclick="openEmail('${e.source_entry_id}',event)">Open original</a>`;
-    }else{
-      const webUrl=draftWebUrl(e);
-      openLink=`<button type="button" class="dr-btn${webUrl?'':' dr-btn-muted'}" data-weburl="${escapeHtml(webUrl)}" data-subject="${escapeHtml(e.subject||'')}" title="${webUrl?'Open the original in Outlook on the web':'No linked original message is available for this draft'}" onclick="openDraftOriginal(event,this)">Open original</button>`;
-    }
+    const hasSource=e.source_entry_id&&e.source_entry_id.length>0;
+    const openLink=hasSource?`<a href="javascript:void(0)" class="dr-btn" onclick="openEmail('${e.source_entry_id}',event)">Open original</a>`:'';
 
     // Confidence -- Lauren's own design explicitly calls this "impossible to
     // miss, not a hover tooltip," so it renders as a visible badge + reason
@@ -1590,8 +1538,8 @@ function renderDraftedReplies(payload){
       <div class="dr-actions">
         <button class="dr-btn dr-btn-primary" onclick="copyDraftText('${id}',event)">Copy to clipboard</button>
         ${openLink}
-        <button class="dr-btn" onclick="markDraft('${id}','${idKey}','sent',event)">Mark sent</button>
-        <button class="dr-btn dr-btn-danger" onclick="markDraft('${id}','${idKey}','discarded',event)">Discard</button>
+        <button class="dr-btn" onclick="markDraft('${id}','${e.source_entry_id}','sent',event)">Mark sent</button>
+        <button class="dr-btn dr-btn-danger" onclick="markDraft('${id}','${e.source_entry_id}','discarded',event)">Discard</button>
       </div>
     </div>`;
   }).join('');

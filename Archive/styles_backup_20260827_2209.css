@@ -486,10 +486,6 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .dr-btn-primary:hover{background:var(--purple-border)}
 .dr-btn-danger{color:var(--red-text)}
 .dr-btn-danger:hover{background:var(--red-bg)}
-/* "Open original" when the draft has no resolvable original message -- still
-   clickable (shows an explanatory note) but visibly de-emphasised. */
-.dr-btn-muted{opacity:.45}
-.dr-btn-muted:hover{background:var(--card-bg)}
 
 /* Confidence + inline flags -- deliberately always visible, never a tooltip
    (Lauren's own design requirement: "impossible to miss"). */
