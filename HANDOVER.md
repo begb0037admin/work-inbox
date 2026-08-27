@@ -1,3 +1,48 @@
+# Handover -- 27 August 2026, ~18:00 UTC (Drew) -- CUTOVER ATTEMPT BLOCKED on auth. Both `C:\WorkInboxAI\{kevin,hope}` config dirs are NOT logged in -> the mandatory confirming run (cutover step 2, must force one hope@ failover) cannot execute -> steps 2/3/4 all blocked. NO `fetch_inbox.py` edit, NO PR #29 merge, NO `.bat`/scheduled-task change this session. Deliverable: `docs/COLLAPSE_TO_ONE_CALL_PLAN.md` (full implementation spec for the 5->1 collapse, ready to build once auth is fixed). `main` at `1539578` untouched; live `\Work Inbox Briefing` task undisturbed and still on `AI_BACKEND=api` (metered).
+
+## What happened
+Dispatched for the authorised direct cutover of the AI-triage backend to headless Claude Code (per the ~17:05 entry below + `docs/CLAUDE_CODE_BACKEND.md`). Task order: (1) build the 5->1 call collapse, (2) confirming end-to-end run in cutover config incl. a forced hope@ failover, (3) merge PR #29 + point the `.bat` at `AI_BACKEND=claude_code` with `ANTHROPIC_API_KEY` unset, (4) verify the next scheduled run.
+
+**Blocker found during pre-flight verification:** the dispatch stated `claude setup-token` was completed for both accounts, but live state on the admin machine is:
+- `C:\WorkInboxAI\kevin\` and `C:\WorkInboxAI\hope\` each contain only a 423-byte skeleton `.claude.json` + a "Not logged in" session log. **No `.credentials.json` in either** (checked with `-Force`).
+- `claude -p` with `CLAUDE_CONFIG_DIR` set to either returns `{"is_error":true,"result":"Not logged in - Please run /login"}`.
+- `CLAUDE_CODE_OAUTH_TOKEN` is **not set** (User or Machine scope).
+- `WI_CLAUDE_CONFIG_DIR` / `WI_CLAUDE_CONFIG_DIR_FALLBACK` ARE set correctly (`C:\WorkInboxAI\kevin` / `...\hope`).
+- Default `~/.claude` IS authed (`subscriptionType: pro`) -- but using it for the confirming run would (a) not test the production auth path, (b) can't do the hope@ failover, (c) burn Kevin's shared interactive pool. Not an acceptable substitute.
+
+`fetch_inbox.py`'s `_claude_code_once` sets `CLAUDE_CONFIG_DIR=<cfg_dir>` and relies on that dir being logged in. It is not. Cutover steps 2-4 are hard-blocked.
+
+## Why nothing was built this session
+The 5->1 collapse is a ~200-250 line reorder of `fetch_inbox.py` (hoist CC-load + cal-items + Granola fetch + the 5 system-prompt constants up to just after Phase 3 card-building, for the `claude_code` path only; one combined `claude -p` call; 5 memoised phase-slice returns). Per the standing "work-inbox cautious change pace" rule (17 Aug regression + revert), that must not ship without the confirming end-to-end run -- which is exactly what the auth blocker prevents. Building it untestable now would just be re-validated from scratch next session. Full design is captured instead in `docs/COLLAPSE_TO_ONE_CALL_PLAN.md` so the build is fast once unblocked.
+
+## Unblock (Kevin, interactive -- Drew cannot do this)
+For each account, in a fresh shell:
+```
+set CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin
+claude            -> /login as kevin@lelitte.co.uk  (writes C:\WorkInboxAI\kevin\.credentials.json)
+```
+then repeat with `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` -> `/login` as hope@lelitte.co.uk.
+Verify each: `echo hi | claude -p --output-format json` under that `CLAUDE_CONFIG_DIR` -> expect `"is_error":false`.
+(If you prefer `claude setup-token`: its minted token must also be exported as `CLAUDE_CODE_OAUTH_TOKEN` into the scheduled-task environment -- the `.bat`, not just your shell -- or the helper won't see it. The `/login`-writes-`.credentials.json` path is simpler and is what the current helper expects.)
+
+## State (all untouched this session)
+- `main` @ `1539578`. Branch `claude/outlook-codecs-connector-upgrade-fe3dgf` @ `ab27471` + this doc commit. PR #29 OPEN / MERGEABLE / CLEAN.
+- `\Work Inbox Briefing` scheduled task: unchanged, `wscript` -> `Run Inbox Briefing Hidden.vbs` -> `Run Inbox Briefing.bat /update` -> pulls `fetch_inbox.py` fresh from `raw.githubusercontent.com/.../main/` into `C:\Users\admin\Documents\Claude\Projects\work-inbox` and runs `python -u fetch_inbox.py` (no `AI_BACKEND` set -> `api` / metered). Triggers observed: 06:00 / 09:00 / 12:00 / 15:00 / 18:00 (note: 5 visible triggers, not the 6 documented as 7/9/11/1/3/5 -- flagged, NOT changed; cadence decision stays Kevin's).
+- `~/.codex/config.toml` sha1 `b2a1a226...` -- Codex not involved.
+- `ANTHROPIC_API_KEY` still set (needed for the live `api` path and for rollback).
+
+## Exact next action for a cold session
+1. Confirm Kevin has `/login`-ed BOTH `C:\WorkInboxAI\{kevin,hope}` (`claude -p` under each returns `is_error:false`). If not -> nothing to do, wait.
+2. Build the 5->1 collapse per `docs/COLLAPSE_TO_ONE_CALL_PLAN.md`. Back up `fetch_inbox.py` to `Archive/` first (dated). `python -m py_compile` clean. `api` path byte-identical (verify with a diff of an `AI_BACKEND=api` parallel run's `briefing.json`).
+3. Confirming run: `AI_BACKEND=claude_code WI_AI_PARALLEL=1 python fetch_inbox.py` from the branch working copy -- exactly ONE `claude -p` call, all 5 phase slices parsed, `data/claude_briefing.json` shape-equivalent to a recent `data/briefing.json`, one forced hope@ failover proven, `ai_backend_usage.jsonl` captured. If it fails -> STOP, do not merge.
+4. Cut over: merge PR #29 to `main` (state restore point = `main` commit before merge; merging is inert -- `AI_BACKEND` defaults to `api` and the `.bat` doesn't set it). Then edit `Run Inbox Briefing.bat` (just before the `powershell ... python -u ...` line ~100): add `set "AI_BACKEND=claude_code"` and `set "ANTHROPIC_API_KEY="`, plus an inline rollback comment (remove those two lines to revert to metered api). Leave cadence as-is.
+5. Verify: watch/trigger the next scheduled run -- briefing pushed, CC sync intact, ledger intact, no mailbox side effects. Record real per-run tokens from `ai_backend_usage.jsonl`; project 6x/day x weekdays vs the Pro weekly cap; if tight, recommend 3x/day (do not change cadence without Kevin).
+
+## Hard gates (unchanged)
+No `main` write until the confirming run passes. No scheduled-task / `.bat` change without that pass + it being the actual cutover step. Parallel mode only for the confirming run. Don't disturb live `\Work Inbox Briefing` runs or stage their data files. Every run prints a timestamp.
+
+---
+
 # Handover -- 27 August 2026, ~17:05 UTC (Drew) -- BUILD DONE (parallel, not cut over): headless Claude Code backend wired into `fetch_inbox.py`. `AI_BACKEND=api` still default (unchanged). `AI_BACKEND=claude_code` + `WI_AI_PARALLEL=1` proven end-to-end -- writes local `data/claude_*.json`, pushes nothing. Machine at `b2a1a226` baseline; live `\Work Inbox Briefing` task undisturbed.
 
 ## What this is
