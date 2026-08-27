@@ -516,7 +516,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Cority integration error occurred during the Employee Import on 21 August 2026 at 17:00 and requires Kevin to review the attached log file.",
+    "ai_summary": "Cority integration error occurred during Employee Import on 2026-08-21; Kevin should review the attached error log file.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -604,7 +604,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy is updating Kevin on a PO E22033553 Quality funded work transition call happening this afternoon with sales to professional services handover.",
+    "ai_summary": "Sophie Levy updates Kevin that an interbal transition call from sales to professional services for PO E22033553 Quality funded work is happening this afternoon.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -763,7 +763,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:28:29.503000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan is asking if the PDR on Friday 18 September can be rescheduled as he will be on leave that week.",
+    "ai_summary": "Michael O'Sullivan informs Kevin he is on leave 18 September and the following week, asking if they can reschedule Kevin's PDR currently booked for Friday 18 September.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -803,7 +803,7 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 12:06:13.687000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan is asking Kevin if he recalls any decisions or has documentation relating to Grade 2 increment bar changes from the 2024 non-clinical uplift.",
+    "ai_summary": "Michael O'Sullivan asks Kevin and another recipient whether they recall any decisions or documentation relating to Grade 2 increment bar changes from 2024 non-clinical uplift.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -890,26 +890,6 @@
    "first_tracked": "2026-08-27",
    "last_confirmed": "2026-08-27"
   },
-  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000": {
-   "tier": "needs",
-   "card": {
-    "title": "RE: changing to 38 day balance - workgroups for updating  ",
-    "sub": "From <strong>Michael O'Sullivan</strong>. Hi Marie,\r\n\r\n \r\n\r\nThe list of workgroups was expected, and it is the 131 workgroups listed that will need to be amended ",
-    "badge": "Reply within 48hrs",
-    "badgeType": "yellow",
-    "subject": "RE: changing to 38 day balance - workgroups for updating  ",
-    "from": "Michael O'Sullivan",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000",
-    "received": "27 Aug",
-    "received_raw": "2026-08-27 08:47:57.798000+00:00",
-    "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan confirms that 131 workgroups need to be amended for the 38-day balance change and is providing the list to Kevin.",
-    "needs_reply": false,
-    "no_action_needed": false
-   },
-   "first_tracked": "2026-08-27",
-   "last_confirmed": "2026-08-27"
-  },
   "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32160000": {
    "tier": "needs",
    "card": {
@@ -943,7 +923,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:35:46.237000+00:00",
     "kevin_is_primary_recipient": false,
-    "ai_summary": "Asta Palmer reminds that the HR Systems Team meeting is tomorrow during Presentations week and asks for presentation topics; Kevin is cc'd.",
+    "ai_summary": "Asta Palmer reminds team of tomorrow's HR Systems Team Meeting during Presentations week and asks for presentation topics; Kevin is only cc'd.",
     "needs_reply": false,
     "no_action_needed": false
    },
