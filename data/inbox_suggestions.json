@@ -1,6 +1,43 @@
 {
-  "generated_at": "2026-08-26 18:00",
+  "generated_at": "2026-08-27 08:01",
   "new_tasks": [
+    {
+      "title": "Assess 38-day balance workgroup update work for Chemistry",
+      "tier": "week",
+      "description": "Marie is asking whether the workgroup update request from Chemistry (in Julie's absence) represents significant planned work. Kevin needs to review the request, assess effort, and advise Marie on priority and resource allocation.",
+      "email_subject": "FW: changing to 38 day balance - workgroups for updating  ",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-26 16:29",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32190000",
+      "auto_promoted": true
+    },
+    {
+      "title": "Review Oxford Uni Pre-project Authentication follow-up call notes",
+      "tier": "week",
+      "description": "Alex Manton-Jones sent a follow-up email from an authentication call on 26 August. Kevin needs to review the full email content and determine any action items or decisions required from this call.",
+      "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
+      "email_from": "Alex Manton-Jones",
+      "received": "2026-08-26 15:23",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32170000"
+    },
+    {
+      "title": "Review REF2029 UDF promotion to UOXP and confirm readiness",
+      "tier": "week",
+      "description": "Nathan Kirwan is flagging the promotion of the REF2029 UDF to UOXP production environment. Kevin needs to review the promotion details, any HR Systems implications, and confirm sign-off or raise any blockers.",
+      "email_subject": "REF29 UDF - Promotion to UOXP",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-08-26 14:51",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32130000"
+    },
+    {
+      "title": "Locate Grade 2 increment bar change documentation (2024 uplift)",
+      "tier": "week",
+      "description": "Michael O'Sullivan is asking Kevin whether he recalls decisions or has documentation relating to Grade 2 increment bar changes made during the 2024 non-clinical uplift. Kevin needs to search records and respond.",
+      "email_subject": "2024 non clinical uplift_Incremental bar changes for Grade 2",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-26 12:06",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B21C6A640000"
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan",
       "tier": "week",
@@ -8,7 +45,8 @@
       "email_subject": "RE: PDR 2026 – Friday 18 September",
       "email_from": "Michael O'Sullivan",
       "received": "2026-08-25 13:28",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000"
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B13CE8FC0000",
+      "carried_forward": true
     },
     {
       "title": "Confirm Holiday Records 3 Reports scheduling with Alan Quirke",
@@ -41,33 +79,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608111719550",
-      "task_title": "Follow up on Oxford Uni Pre-project Authentication call",
-      "note": "Alex Manton-Jones has sent the follow-up email from the authentication call on 11 August; Kevin should review the content and determine required actions.",
-      "email_subject": "Oxford Uni - Pre-project Authentication (Follow up)",
-      "email_from": "Alex Manton-Jones",
-      "received": "2026-08-26 15:23",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32170000"
-    },
-    {
-      "task_id": "t2608261500530",
-      "task_title": "Review REF2029 UDF promotion to UOXP",
-      "note": "Nathan Kirwan is flagging the promotion of the REF2029 UDF to UOXP production environment and seeking Kevin's review.",
-      "email_subject": "REF29 UDF - Promotion to UOXP",
-      "email_from": "Nathan Kirwan",
-      "received": "2026-08-26 14:51",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B21C32130000"
-    },
-    {
-      "task_id": "t2608261500531",
-      "task_title": "Locate documentation on Grade 2 increment bar changes (2024 uplift)",
-      "note": "Michael O'Sullivan is asking Kevin to recall or locate documentation on Grade 2 increment bar changes from the 2024 non-clinical uplift.",
-      "email_subject": "2024 non clinical uplift_Incremental bar changes for Grade 2",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-08-26 12:06",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B21C6A640000"
-    }
-  ]
+  "applied_updates": []
 }
