@@ -535,7 +535,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Cority integration platform notification of an HR import error on 2026-08-21; Kevin should review the attached log file for details.",
+    "ai_summary": "Cority Integration Platform error notification for SFTP connection failure during 21 August 17:00 employee data import run; log file attached for review.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -606,7 +606,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy updates Kevin that a sales-to-professional services transition call is happening today for project PO ref E22033553 (Quality funded work).",
+    "ai_summary": "Sophie Levy confirms Quality project (PO E22033553) is fully staffed and internal transition from sales to professional services is happening; project ready to proceed.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -748,7 +748,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:28:29.503000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan tells Kevin he is on leave on 18 September and asks whether Kevin can reschedule the PDR meeting, citing year-end annual leave concerns.",
+    "ai_summary": "Michael requests to reschedule his PDR from 18 September due to leave on that date and the following week; asks if date can be moved back.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -788,7 +788,7 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 12:06:13.687000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan asks Kevin and another recipient whether they recall decisions or have documentation about Grade 2 increment bar changes in the 2024 non-clinical uplift.",
+    "ai_summary": "Michael asks Kevin to recall any decisions or locate documentation relating to Grade 2 increment bar changes made during the 2024 non-clinical uplift.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -915,26 +915,6 @@
    "first_tracked": "2026-08-27",
    "last_confirmed": "2026-08-27"
   },
-  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6B0000": {
-   "tier": "needs",
-   "card": {
-    "title": "FW: Cross-Team Process Improvement Working Group \u2013 1st Meeting",
-    "sub": "From <strong>Michael O'Sullivan</strong>. Morning,\r\n\r\n \r\n\r\nI noticed you\u2019ve already accepted the meeting on 28 September, and as Otter mentioned that she\u2019s lookin",
-    "badge": "Reply within 48hrs",
-    "badgeType": "yellow",
-    "subject": "FW: Cross-Team Process Improvement Working Group \u2013 1st Meeting",
-    "from": "Michael O'Sullivan",
-    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6B0000",
-    "received": "27 Aug",
-    "received_raw": "2026-08-27 09:18:10.819000+00:00",
-    "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan notes Kevin has accepted a Cross-Team Process Improvement Working Group meeting on 28 September and mentions Otter's involvement.",
-    "needs_reply": false,
-    "no_action_needed": false
-   },
-   "first_tracked": "2026-08-27",
-   "last_confirmed": "2026-08-27"
-  },
   "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000": {
    "tier": "needs",
    "card": {
@@ -948,7 +928,7 @@
     "received": "27 Aug",
     "received_raw": "2026-08-27 08:47:57.798000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan discusses 131 workgroups that need to be amended for the 38-day leave balance change, with Kevin as a direct recipient.",
+    "ai_summary": "Michael confirms that 131 workgroups are listed and will require amendment to reflect revised Holiday Scheme for 38-day balance implementation.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -968,7 +948,7 @@
     "received": "27 Aug",
     "received_raw": "2026-08-27 17:09:35.656000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon Burford clarifies to Michael that employees on Grade 2 scale point 2.5 were moved to 2.6 only in the 2024 non-clinical uplift, and references further documentation.",
+    "ai_summary": "Simon clarifies that Grade 2 increment bar changes during 2024 uplift moved employees from scale point 2.5 to 2.6, with additional context from Tonya available.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -988,7 +968,27 @@
     "received": "27 Aug",
     "received_raw": "2026-08-27 15:53:20.901000+00:00",
     "kevin_is_primary_recipient": false,
-    "ai_summary": "Marie Cooksey has copied Kevin in on an IRIS/IEX incidents discussion and indicates he and James will respond in due course with timings.",
+    "ai_summary": "Marie copies Kevin and James to provide incident timings to Amanda regarding IRIS/IEX changes; response expected urgently from Kevin.",
+    "needs_reply": true,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-27"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901E0000": {
+   "tier": "needs",
+   "card": {
+    "title": "Re: REF29 UDF - Promotion to UOXP",
+    "sub": "From <strong>Nathan Kirwan</strong>. Thanks for confirming Kevin. We can\u2019t have everything that we want!\r\n\r\nSent from Outlook for iOS &lt;https://aka.ms/o0ukef&gt;",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "Re: REF29 UDF - Promotion to UOXP",
+    "from": "Nathan Kirwan",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901E0000",
+    "received": "27 Aug",
+    "received_raw": "2026-08-27 17:08:13.798000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Nathan acknowledges Kevin's confirmation that REF2029 UDF will be pushed to live production and accepts the trade-off limitations.",
     "needs_reply": false,
     "no_action_needed": false
    },
