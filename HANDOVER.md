@@ -1,4 +1,34 @@
-# Handover -- 27 August 2026, ~18:00 UTC (Drew) -- CUTOVER ATTEMPT BLOCKED on auth. Both `C:\WorkInboxAI\{kevin,hope}` config dirs are NOT logged in -> the mandatory confirming run (cutover step 2, must force one hope@ failover) cannot execute -> steps 2/3/4 all blocked. NO `fetch_inbox.py` edit, NO PR #29 merge, NO `.bat`/scheduled-task change this session. Deliverable: `docs/COLLAPSE_TO_ONE_CALL_PLAN.md` (full implementation spec for the 5->1 collapse, ready to build once auth is fixed). `main` at `1539578` untouched; live `\Work Inbox Briefing` task undisturbed and still on `AI_BACKEND=api` (metered).
+# Handover -- 27 August 2026, ~18:30 UTC (Drew) -- CUT OVER. The AI-triage backend is now headless Claude Code on Kevin's Claude subscription, via ONE combined `claude -p` call. Live on `main` (PR #29, merge `5423c83`) + `Run Inbox Briefing.bat`. Verified on a real scheduled-task run: briefing pushed, CC sync + ledger intact, no mailbox effects. Metered `ANTHROPIC_API_KEY` path is retained as the one-line rollback.
+
+## What shipped
+- **`fetch_inbox.py` (main):** `_ai_create()` behind `AI_BACKEND=api|claude_code`. `api` is the default and byte-identical to before (5 separate `client.messages.create()`; the 5 call sites only gained an ignored `_phase=` kwarg). `claude_code` = **ONE combined `claude -p` call** for all five phases (`_cc_run_combined()`), authed to the subscription (kevin@ primary -> hope@ overflow via `CLAUDE_CONFIG_DIR` = `C:\WorkInboxAI\{kevin,hope}`), `ANTHROPIC_API_KEY` stripped from the subprocess env. Verbatim system prompts hoisted to `_SYS_*`; CC-load / Granola / cal-candidates hoisted (claude_code path only) so the combined call has every payload before the Phase 3.2 demotion chain. Downstream fence-strip + `json.loads` + validation unchanged. `py_compile` clean.
+- **`Run Inbox Briefing.bat` (Kevin's Desktop, not repo-tracked):** `setlocal` block around the `python -u fetch_inbox.py` line sets `AI_BACKEND=claude_code` + `ANTHROPIC_API_KEY=` (empty). Inline rollback note in the file.
+- **`\Work Inbox Briefing` task:** `ExecutionTimeLimit` raised `PT15M -> PT20M` (combined call runs ~4-6 min). Cadence UNCHANGED: **5x/day** (06/09/12/15/18 Mon-Fri) -- note 5, not the 6 older docs cite.
+- Docs: `docs/CLAUDE_CODE_BACKEND.md` -> "CUT OVER" + cutover record; `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9 closing entry; `docs/COLLAPSE_TO_ONE_CALL_PLAN.md` (the spec that was followed); `docs/collapse_confirming_run_20260827.log`.
+
+## Verified live (27 Aug)
+- **Auth pre-flight:** `C:\WorkInboxAI\kevin` + `...\hope` each `claude /login`-ed -- real `.credentials.json`, `claude -p` -> `is_error:false`, distinct accounts (kevin@ / hope@, distinct userIDs), both `pro`. (The ~18:00 "blocked" entry below was this session's earlier state, before Kevin ran `C:\WorkInboxAI\setup_logins.bat`.)
+- **Confirming run** (`AI_BACKEND=claude_code WI_AI_PARALLEL=1`, primary -> bogus dir to FORCE failover): ONE `claude -p` call; hope@ failover proven (primary x2 fail -> fallback ok, 321s); all 5 slices parsed (`missing_keys=none`); `data/claude_briefing.json` all 18 keys, schema-identical to live api `briefing.json` (count diffs = 2.5h-newer state + parallel-mode Phase 3.9 dry-run); calendar summaries mapped to the CORRECT meetings (idx/real_idx parity held).
+- **Cutover run** (real scheduled-task trigger, kevin@ primary, call wall 255s, total ~5.5 min): briefing pushed (`a544d8a`); Command Centre `tasks.json` got 7 task updates (`command-centre` `099c6f11`); `triage_ledger.json` written (`40e5f121`); Phase 4 archive backup made; no mailbox side effects.
+
+## Real usage vs the Pro cap
+One combined call ~= **~80k tok/run** (out ~23-28k incl. Haiku extended-thinking; cache_creation ~55k; cache_read 0 cold) vs ~142k for the old 5-call path -- **~44% less**. At 5x/day x weekdays ~= **~2.0M tok/week** (was ~3.55M). Shares Kevin's Pro pool with all his agent work; hope@ overflow absorbs spikes / a mid-week primary cap hit. **If still tight after a week of real data:** the lever is 3x/day (~1.2M/wk) -- do NOT change cadence without Kevin.
+
+## ONE-LINE ROLLBACK to metered API
+Delete the two `set` lines (`AI_BACKEND=claude_code`, `ANTHROPIC_API_KEY=`) from `Run Inbox Briefing.bat`. `fetch_inbox.py` then defaults to `AI_BACKEND=api` and uses the still-present `ANTHROPIC_API_KEY` user env var. Nothing else to touch. (Code rollback if ever needed: `git revert 5423c83`, or restore `Archive/fetch_inbox_backup_20260827_1746_pre_collapse_to_one_call.py`. Pre-cutover `main` = `c79d7c73956789087fad46f7bbaa132593bbb14c`.)
+
+## Watch over the next few days
+- First unattended scheduled run is **28 Aug 06:00**. Check `inbox_briefing_last_run.log` shows `AI backend: claude_code` + `Phase COMBINED claude_code OK` + a `briefing pushed` commit, and that `ai_backend_usage.jsonl` (gitignored, in the project dir) accrues one `seq:"combined"` line per run.
+- If a run ever logs `Phase COMBINED claude_code FAILED` on BOTH accounts, that run degrades to fallback context + skips the AI phases (same as an api outage) -- not a crash, but if it recurs, roll back.
+- `C:\WorkInboxAI\{kevin,hope}` must stay logged in. `claude` OAuth tokens auto-refresh, but if either account is signed out the failover chain shortens / breaks.
+- `WI_CLAUDE_CONFIG_DIR` / `WI_CLAUDE_CONFIG_DIR_FALLBACK` user env vars must stay set to those two dirs.
+
+## Exact next action for a cold session
+Nothing pending. Cutover is done and verified. If asked to check health: read `inbox_briefing_last_run.log` + the last few `ai_backend_usage.jsonl` lines + confirm recent `chore: update briefing` commits on `main`. Only touch the backend again on Kevin's instruction (e.g. cadence change, or if usage projections come back tight after a real week).
+
+---
+
+# Handover -- 27 August 2026, ~18:00 UTC (Drew) -- CUTOVER ATTEMPT BLOCKED on auth [SUPERSEDED ~18:30 -- Kevin then ran C:\WorkInboxAI\setup_logins.bat and the cutover completed]. Both `C:\WorkInboxAI\{kevin,hope}` config dirs are NOT logged in -> the mandatory confirming run (cutover step 2, must force one hope@ failover) cannot execute -> steps 2/3/4 all blocked. NO `fetch_inbox.py` edit, NO PR #29 merge, NO `.bat`/scheduled-task change this session. Deliverable: `docs/COLLAPSE_TO_ONE_CALL_PLAN.md` (full implementation spec for the 5->1 collapse, ready to build once auth is fixed). `main` at `1539578` untouched; live `\Work Inbox Briefing` task undisturbed and still on `AI_BACKEND=api` (metered).
 
 ## What happened
 Dispatched for the authorised direct cutover of the AI-triage backend to headless Claude Code (per the ~17:05 entry below + `docs/CLAUDE_CODE_BACKEND.md`). Task order: (1) build the 5->1 call collapse, (2) confirming end-to-end run in cutover config incl. a forced hope@ failover, (3) merge PR #29 + point the `.bat` at `AI_BACKEND=claude_code` with `ANTHROPIC_API_KEY` unset, (4) verify the next scheduled run.

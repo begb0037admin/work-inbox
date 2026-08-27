@@ -1,15 +1,37 @@
-# Headless Claude Code backend for `fetch_inbox.py` — BUILD
+# Headless Claude Code backend for `fetch_inbox.py`
 
-**Status:** Built + parallel-validated 2026-08-27 (Drew). On branch
-`claude/outlook-codecs-connector-upgrade-fe3dgf`. **Not cut over** — `AI_BACKEND`
-defaults to `api` (unchanged metered path); the `claude_code` path is proven by a
-full end-to-end parallel run but is not wired into any scheduled task. Supersedes
-the Codex route entirely (`CLAUDE_CODE_HEADLESS_SCOPE.md` scoped it;
-`OPTION3_BUILD_PLAN.md` / the Codex connector work are dormat).
+**Status: CUT OVER 2026-08-27 (Drew).** Live on `main` (PR #29, merge `5423c83`).
+The `\Work Inbox Briefing` scheduled task now runs the AI triage through **ONE
+combined `claude -p` call** on Kevin's Claude subscription (kevin@ primary → hope@
+overflow), not the metered Anthropic API. `AI_BACKEND` still **defaults to `api`**
+in the code — the cutover switch is two `set` lines in `Run Inbox Briefing.bat`.
+Supersedes the Codex route entirely.
 
-## What changed in `fetch_inbox.py`
+**ONE-LINE ROLLBACK to the metered API:** delete the two `set` lines
+(`AI_BACKEND=claude_code`, `ANTHROPIC_API_KEY=`) from `Run Inbox Briefing.bat`
+(Kevin's Desktop). `fetch_inbox.py` then defaults to `AI_BACKEND=api` and uses the
+still-present `ANTHROPIC_API_KEY` user env var. Pre-cutover `main` commit:
+`c79d7c73956789087fad46f7bbaa132593bbb14c`. Pre-collapse `fetch_inbox.py` backup:
+`Archive/fetch_inbox_backup_20260827_1746_pre_collapse_to_one_call.py`
+(pre-backend backup: `..._20260827_1640_pre_claudecode_backend.py`).
 
-One backup taken first: `Archive/fetch_inbox_backup_20260827_1640_pre_claudecode_backend.py`.
+## Cutover record (2026-08-27)
+
+| Item | Detail |
+|---|---|
+| Auth | `C:\WorkInboxAI\kevin` + `C:\WorkInboxAI\hope` each `claude /login`-ed (real `.credentials.json`, `claude -p` → `is_error:false`, distinct accounts kevin@/hope@, both `pro`). User env vars `WI_CLAUDE_CONFIG_DIR` / `WI_CLAUDE_CONFIG_DIR_FALLBACK` point at them — **must stay logged in**. |
+| Collapse 5→1 | `_cc_run_combined()` assembles all five phases (verbatim system prompts hoisted to `_SYS_*`, payloads built by the same deterministic logic each phase block rebuilds) into one prompt; `_ai_create(_phase=...)` returns that phase's slice of `_CC_COMBINED` so every downstream fence-strip + `json.loads` + validation runs unchanged. Fired once, right after Phase 3 cards (earliest point all payloads exist — needs CC-load + Granola + cal-candidates hoisted, done for the `claude_code` path only). |
+| Confirming run | `WI_AI_PARALLEL=1`, primary → bogus dir to force failover. ONE call; hope@ failover proven; 5 slices parsed (`missing_keys=none`); `claude_briefing.json` schema-identical to api `briefing.json`; calendar summaries on the correct meetings. |
+| Cutover run | Real scheduled-task trigger. kevin@ primary, call wall 255s. Briefing pushed (`a544d8a`); CC sync applied 7 updates (`command-centre` `099c6f11`); `triage_ledger.json` written (`40e5f121`); no mailbox effects. Task `ExecutionTimeLimit` raised `PT15M → PT20M`. |
+| Usage | ~80k tokens/run (out ~23–28k incl. Haiku thinking; cache_creation ~55k; cache_read 0 cold) vs ~142k for the old 5-call path — **~44% less**. ~2.0M tok/week at 5×/day×weekdays (was ~3.55M). Shares Kevin's Pro pool. If still tight after a week: 3×/day (~1.2M/wk), not without Kevin. |
+
+## What changed in `fetch_inbox.py` (original backend build — still accurate for the `api` path)
+
+Original backend backup: `Archive/fetch_inbox_backup_20260827_1640_pre_claudecode_backend.py`.
+The later 5→1 collapse (27 Aug) added `_cc_run_combined()` / `_claude_code_call()` /
+`_cc_load_priorities()` / `_cc_build_cal_candidates_early()` / `_cc_fetch_granola()` /
+`_p2_finalise()` and the `_SYS_*` hoisted prompts; `_ai_create()` gained `_phase=`.
+See the cutover record above and `docs/COLLAPSE_TO_ONE_CALL_PLAN.md`.
 
 | Change | Detail |
 |---|---|

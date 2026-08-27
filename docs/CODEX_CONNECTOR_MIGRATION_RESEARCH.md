@@ -1486,3 +1486,55 @@ nothing); mailbox clean.
 
 **Checkpoint:** branch `claude/outlook-codecs-connector-upgrade-fe3dgf`, this
 commit. PR #29 OPEN, MERGEABLE.
+
+---
+
+### 27 Aug 2026 (~18:20) — CUT OVER. Section 9 closes here.
+
+The AI-triage backend migration is **complete**. It did NOT go the Codex-connector
+route (every write-gate control failed 26–27 Aug, documented above) — it went to
+**headless Claude Code on Kevin's Claude subscription**, and as of this entry it
+is **live**.
+
+**What shipped:**
+- `fetch_inbox.py` `_ai_create()` behind `AI_BACKEND=api|claude_code`. `api`
+  stays the default and is byte-identical to before (5 separate
+  `client.messages.create()` calls). `claude_code` makes **ONE combined
+  `claude -p` call** for all five judgement phases (context / email summaries /
+  task triage / task summaries / calendar prep), authed to the Claude
+  subscription (kevin@ primary → hope@ overflow via `CLAUDE_CONFIG_DIR` =
+  `C:\WorkInboxAI\{kevin,hope}`), `ANTHROPIC_API_KEY` stripped from the
+  subprocess env. Merged to `main` in **PR #29** (merge commit `5423c83`;
+  pre-merge `main` = `c79d7c73956789087fad46f7bbaa132593bbb14c`).
+- `Run Inbox Briefing.bat` (Kevin's Desktop, not repo-tracked): a `setlocal`
+  block around the `python -u fetch_inbox.py` line sets `AI_BACKEND=claude_code`
+  and `ANTHROPIC_API_KEY=` (empty). Inline rollback note in the file.
+- `\Work Inbox Briefing` scheduled task `ExecutionTimeLimit` raised `PT15M → PT20M`
+  (the combined call runs ~4–6 min). Cadence unchanged: **5×/day** (06/09/12/15/18
+  Mon–Fri) — note this is 5, not the 6 the older docs cite.
+
+**Verified live (27 Aug):**
+- Confirming run (`WI_AI_PARALLEL=1`, primary pointed at a bogus dir to force
+  failover): ONE `claude -p` call, hope@ failover proven, all 5 slices parsed,
+  `data/claude_briefing.json` schema-identical to the live api `briefing.json`,
+  calendar summaries mapped to the correct meetings.
+- Cutover run (real scheduled-task trigger, kevin@ primary, wall 255s for the
+  call): briefing pushed (`a544d8a`), Command Centre sync applied 7 task updates
+  (`command-centre` `099c6f11`), `triage_ledger.json` written (`40e5f121`), no
+  mailbox side effects.
+
+**Real usage:** one combined call ≈ **~80k tokens/run** (output ~23–28k incl.
+Haiku extended-thinking, cache_creation ~55k, cache_read 0 cold) vs ~142k for the
+old 5-call path — **~44% less**. Projection at 5×/day×weekdays ≈ **~2.0M tok/week**
+(was ~3.55M). Shares Kevin's Pro pool with all his agent work; hope@ absorbs
+spikes. If still tight after a week of real data, the lever is 3×/day (~1.2M/wk) —
+not to be changed without Kevin.
+
+**One-line rollback to the metered API:** delete the two `set` lines
+(`AI_BACKEND` / `ANTHROPIC_API_KEY`) from `Run Inbox Briefing.bat`. `fetch_inbox.py`
+then defaults to `AI_BACKEND=api` and uses the still-present `ANTHROPIC_API_KEY`
+user env var. (Code rollback if ever needed: revert merge `5423c83`, or restore
+`Archive/fetch_inbox_backup_20260827_1746_pre_collapse_to_one_call.py`.)
+
+`~/.codex/config.toml` sha1 `b2a1a226…` untouched — Codex was never involved in
+the final solution.
