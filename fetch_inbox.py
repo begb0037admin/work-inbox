@@ -17,6 +17,34 @@ def log(msg):
 
 log("fetch_inbox.py run started")
 
+# --------------------------------------------------------------------------- #
+#  Failure-toast helper. Defined here (near the top) so connect_to_outlook()
+#  can use it -- moved up from further down the file on 2026-08-28 (Drew).
+#  Reuses the exact same mechanism already wired to the run
+#  (Show-TaskNotification.ps1 / BurntToast). Writes a dedicated one-line
+#  detail file so the toast text is deterministic regardless of what the
+#  shared run log looks like by the time the toast script reads it.
+#  Best-effort only: a failure to raise the toast must never mask or replace
+#  the exception the caller is already handling, and must never crash the run.
+# --------------------------------------------------------------------------- #
+NOTIFY_SCRIPT_PATH = r"D:\OneDrive - lelitte.com\Desktop\Show-TaskNotification.ps1"
+
+def _notify_phase_failure(task_name, detail):
+    try:
+        detail_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phase_failure_last.log")
+        with open(detail_path, "w", encoding="utf-8") as f:
+            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {task_name} failed: {detail}\n")
+        if os.path.exists(NOTIFY_SCRIPT_PATH):
+            subprocess.run(
+                ["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-File", NOTIFY_SCRIPT_PATH,
+                 "-Status", "Failure", "-TaskName", task_name, "-LogPath", detail_path],
+                timeout=20, capture_output=True
+            )
+        else:
+            print(f"WARNING: failure toast skipped for '{task_name}' - notification script not found at {NOTIFY_SCRIPT_PATH}")
+    except Exception as notify_err:
+        print(f"WARNING: failure toast for '{task_name}' could not be sent - {notify_err}")
+
 GITHUB_REPO = "begb0037admin/work-inbox"
 GITHUB_PATH = "data/briefing.json"
 GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
@@ -792,36 +820,142 @@ def build_fallback_subtitle(inbox_items):
     unread = sum(1 for item in inbox_items if not item.get("is_read", True))
     return f"{unread} unread messages - Outlook-only refresh"
 
-# Outlook's COM automation layer occasionally rejects the very first call of
-# a run with pywintypes.com_error (-2147418111, 'Call was rejected by
-# callee.', None, None) -- Outlook is momentarily busy (mid-sync, a modal
-# dialog open, etc.), not a real fault. Confirmed transient twice on
-# 2026-08-11: a manual retry a few minutes later succeeded cleanly both
-# times. Retry is scoped ONLY to this initial connection step (Dispatch +
-# GetNamespace + first folder handle) -- deliberately not applied to COM
-# calls later in the script, so a real error deeper in Phase 1+ still fails
-# immediately instead of being masked by a blind retry.
+# Two DISTINCT first-call failure modes, handled differently (2026-08-28, Drew):
+#
+#  1. TRANSIENT BUSY -- pywintypes.com_error (-2147418111, 'Call was rejected
+#     by callee.'). Outlook is momentarily busy (mid-sync, a modal dialog
+#     open, etc.), not a real fault. Confirmed transient twice on 2026-08-11.
+#     -> wait retry_wait_seconds and retry, up to max_attempts. Unchanged.
+#
+#  2. OUTLOOK NOT RUNNING / NOT CONNECTED -- pywintypes.com_error
+#     (-2147352567 / inner -2147221231, 'The file <profile>.ost cannot be
+#     accessed. You must connect to Microsoft Exchange at least once...'),
+#     an AttributeError on the late-bound Dispatch (COM server still coming
+#     up), or CO_E_SERVER_EXEC_FAILURE / RPC-unavailable. Confirmed
+#     2026-08-28: a 13:30 reboot left classic OUTLOOK.EXE closed and every
+#     scheduled run failed here; the old blind 3x45s wait could never
+#     recover it. -> try to LAUNCH classic Outlook once, give it a startup
+#     grace period, then retry for real; if it still won't come up (usually
+#     an interactive Windows Security / Oxford sign-in prompt only Kevin can
+#     clear) fire a SPECIFIC toast telling him exactly what to do.
+#
+# Retry stays scoped ONLY to this initial connection step -- a real error
+# deeper in Phase 1+ still fails immediately instead of being masked.
+
+CLASSIC_OUTLOOK_EXE_CANDIDATES = [
+    r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE",
+    r"C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE",
+    r"C:\Program Files\Microsoft Office\Office16\OUTLOOK.EXE",
+    r"C:\Program Files (x86)\Microsoft Office\Office16\OUTLOOK.EXE",
+]
+OUTLOOK_STARTUP_GRACE_S = 120
+
+def _launch_classic_outlook():
+    """Best-effort start of classic OUTLOOK.EXE. Returns the launched path, or None.
+
+    Launches via explorer.exe so the new Outlook process starts under the
+    shell, NOT inside this run's Task Scheduler job object -- that job is
+    torn down (killing its child processes) the moment the task ends, so an
+    Outlook started as a plain subprocess child would die with the run and
+    the next run would have to start it all over again."""
+    for exe in CLASSIC_OUTLOOK_EXE_CANDIDATES:
+        if os.path.exists(exe):
+            try:
+                subprocess.Popen(["explorer.exe", exe], close_fds=True)
+                return exe
+            except Exception as launch_err:
+                log(f"Phase 1 - could not launch classic Outlook ({exe}): {launch_err}")
+                return None
+    log("Phase 1 - classic OUTLOOK.EXE not found in any known location; cannot auto-start it.")
+    return None
+
+def _wait_for_outlook_mapi(grace_s):
+    """Poll until a fresh COM connect + store mount succeeds, or grace_s elapses."""
+    deadline = time.time() + grace_s
+    while time.time() < deadline:
+        time.sleep(10)
+        try:
+            probe = win32com.client.dynamic.Dispatch("Outlook.Application")
+            probe.GetNamespace("MAPI").GetDefaultFolder(6).Items.Count
+            log("Phase 1 - classic Outlook is now MAPI-ready.")
+            return True
+        except (pywintypes.com_error, AttributeError):
+            continue
+    log(f"Phase 1 - classic Outlook did not become MAPI-ready within {grace_s}s.")
+    return False
+
+def _is_outlook_not_ready_error(exc):
+    """True if exc means classic Outlook is not running / not MAPI-ready / not
+    connected to Exchange -- as opposed to the transient busy-callee case."""
+    if isinstance(exc, AttributeError):
+        return True
+    if isinstance(exc, pywintypes.com_error):
+        hr    = exc.args[0] if exc.args else None
+        inner = exc.args[2] if len(exc.args) > 2 and exc.args[2] else None
+        scode = inner[5] if inner and len(inner) > 5 else None
+        text  = (inner[2] or "") if inner and len(inner) > 2 else ""
+        blob  = f"{exc} {text}".lower()
+        if hr in (-2147221231,   # MAPI_E_FAILONEPROVIDER / logon failed
+                  -2147221219,   # MAPI_E_NETWORK_ERROR
+                  -2146959355,   # CO_E_SERVER_EXEC_FAILURE (Outlook not running, can't auto-start)
+                  -2147023174,   # RPC_S_SERVER_UNAVAILABLE
+                  -2147417846):  # 'The server threw an exception' / RPC unavailable (alt)
+            return True
+        if scode in (-2147221231, -2147221219):
+            return True
+        if (".ost" in blob and "cannot be accessed" in blob) or "connect to microsoft exchange" in blob:
+            return True
+    return False
+
 def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
-    last_error = None
+    last_error   = None
+    tried_launch = False
     for attempt in range(1, max_attempts + 1):
         try:
             # Late binding avoids failures caused by a corrupt win32com.gen_py cache.
-            outlook_app = win32com.client.dynamic.Dispatch("Outlook.Application")
-            mapi_ns     = outlook_app.GetNamespace("MAPI")
-            # Touch the inbox folder now too -- today's real failures happened
-            # here, not at Dispatch/GetNamespace, so the probe has to reach
-            # this far to actually catch the busy-callee condition.
+            outlook_app  = win32com.client.dynamic.Dispatch("Outlook.Application")
+            mapi_ns      = outlook_app.GetNamespace("MAPI")
+            # Reach far enough to actually catch a non-mounting Exchange store:
+            # touch the folder handle AND force its Items collection to resolve.
             inbox_folder = mapi_ns.GetDefaultFolder(6)
+            _ = inbox_folder.Items.Count
             if attempt > 1:
                 log(f"Phase 1 - Outlook COM connection succeeded on attempt {attempt}/{max_attempts}.")
             return outlook_app, mapi_ns, inbox_folder
-        except pywintypes.com_error as e:
+        except (pywintypes.com_error, AttributeError) as e:
             last_error = e
             log(f"Phase 1 - Outlook COM connection attempt {attempt}/{max_attempts} failed: {e}")
-            if attempt < max_attempts:
-                log(f"Phase 1 - Outlook automation layer appears busy (transient). Waiting {retry_wait_seconds}s before retrying...")
+            if attempt >= max_attempts:
+                break
+            if _is_outlook_not_ready_error(e):
+                if not tried_launch:
+                    tried_launch = True
+                    launched = _launch_classic_outlook()
+                    if launched:
+                        log(f"Phase 1 - classic Outlook is not running / not connected; started "
+                            f"{launched}. Waiting up to {OUTLOOK_STARTUP_GRACE_S}s for MAPI...")
+                        _wait_for_outlook_mapi(OUTLOOK_STARTUP_GRACE_S)
+                    else:
+                        log("Phase 1 - classic Outlook is not running and could not be "
+                            "auto-started.")
+                        time.sleep(retry_wait_seconds)
+                else:
+                    log("Phase 1 - classic Outlook still not MAPI-ready after auto-start - "
+                        "most likely an interactive Windows Security / Oxford sign-in prompt "
+                        "that only Kevin can clear.")
+                    time.sleep(retry_wait_seconds)
+            else:
+                log(f"Phase 1 - Outlook automation layer appears busy (transient). "
+                    f"Waiting {retry_wait_seconds}s before retrying...")
                 time.sleep(retry_wait_seconds)
     log(f"Phase 1 - Outlook COM connection failed after {max_attempts} attempts. Giving up.")
+    if _is_outlook_not_ready_error(last_error):
+        _notify_phase_failure(
+            "Work Inbox Briefing - Outlook not connected",
+            "Classic Outlook is not open / not connected to Exchange. Open "
+            r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE, complete any "
+            "Windows Security / Oxford sign-in prompt, confirm the status bar reads "
+            "'Connected to: Microsoft Exchange' (not Work Offline), then re-run the briefing.")
     raise last_error
 
 outlook, mapi, _inbox_folder = connect_to_outlook()
@@ -2515,23 +2649,10 @@ except Exception as e:
 # Best-effort only, by design: a failure to raise the toast must never mask
 # or replace the original exception already being handled by the caller's
 # own except block, and must never itself crash the run.
-NOTIFY_SCRIPT_PATH = r"D:\OneDrive - lelitte.com\Desktop\Show-TaskNotification.ps1"
-
-def _notify_phase_failure(task_name, detail):
-    try:
-        detail_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phase_failure_last.log")
-        with open(detail_path, "w", encoding="utf-8") as f:
-            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {task_name} failed: {detail}\n")
-        if os.path.exists(NOTIFY_SCRIPT_PATH):
-            subprocess.run(
-                ["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-File", NOTIFY_SCRIPT_PATH,
-                 "-Status", "Failure", "-TaskName", task_name, "-LogPath", detail_path],
-                timeout=20, capture_output=True
-            )
-        else:
-            print(f"WARNING: failure toast skipped for '{task_name}' - notification script not found at {NOTIFY_SCRIPT_PATH}")
-    except Exception as notify_err:
-        print(f"WARNING: failure toast for '{task_name}' could not be sent - {notify_err}")
+#
+# _notify_phase_failure() and NOTIFY_SCRIPT_PATH were MOVED to the top of
+# this file on 2026-08-28 (Drew) so connect_to_outlook() can also use them.
+# The definition now lives just after log(); this is only a pointer.
 
 # Phase 3.6 - apply task updates directly to Command Centre tasks.json
 def _gh_get(url, headers):
