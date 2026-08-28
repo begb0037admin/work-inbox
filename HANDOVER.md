@@ -1,3 +1,61 @@
+# Handover -- 28 August 2026, ~18:40 UTC (Drew) -- CONSOLIDATED: both Outlook-COM pipelines failed after a 13:30 reboot left classic Outlook closed. Root cause identical for both. Preventive fixes built, tested, and DEPLOYED. Operational restore is BLOCKED on Kevin completing an interactive Windows Security / Oxford sign-in prompt that classic Outlook is sitting on.
+
+## What failed, and for how long
+| Pipeline | Cadence (Mon-Fri) | Last success | Failed runs (28 Aug) | Next scheduled |
+|---|---|---|---|---|
+| Work Inbox Briefing | 06/09/12/15/18:00 | **28 Aug 12:06:18** (`ai_backend_usage.jsonl` `seq:"combined"`; GitHub `chore: update briefing 2026-08-28 12:06`) | **15:00, 18:00** (2 runs, ~4.5h) | Mon 31 Aug 06:00 |
+| Draft Diff Capture | 06/09/12/15/18:30 | 28 Aug ~12:30 (pre-reboot) | **15:30, 18:30** (2 runs, ~3h) | Mon 31 Aug 06:30 |
+
+Both scheduled tasks show `LastTaskResult=1`. No further scheduled runs before Monday, so no more failure toasts this weekend.
+
+## Root cause (ONE cause, both pipelines) -- confirmed from live evidence
+The admin machine **rebooted at 13:30 UTC on 28 Aug** (`Win32_OperatingSystem.LastBootUpTime = 28/08/2026 13:30:45`) and **classic Outlook (`OUTLOOK.EXE`) was not relaunched**. Every scheduled job that automates Outlook over COM then failed at its first Outlook call, because with classic Outlook not already running the late-bound `Dispatch("Outlook.Application")` returns a shell object that cannot mount the cached Exchange OST:
+- **Briefing** (`fetch_inbox.py` Phase 1 `connect_to_outlook()` -> `GetDefaultFolder(6)`, line 814): `pywintypes.com_error (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The file C:\\Users\\admin\\AppData\\Local\\Microsoft\\Outlook\\begb0037@ox.ac.uk.ost cannot be accessed. You must connect to Microsoft Exchange at least once before you can use your Outlook data file (.ost).', None, 0, -2147221231), None)`. All 3 retry attempts (45s apart) hit the identical error -- the old loop treated every `com_error` as the transient busy-callee case and just waited.
+- **Draft Diff Capture** (`tools/draft_final_diff_capture.py` line 225, bare `outlook.GetNamespace("MAPI")`, **no retry / no error handling**): `FATAL: draft_final_diff_capture.py run failed - AttributeError: Outlook.Application.GetNamespace` (fails one step earlier than the briefing, raw `AttributeError`, immediate exit 1).
+
+**NOT a code regression. NOT the 27 Aug AI-backend cutover** -- that only touches `AI_BACKEND`/`ANTHROPIC_API_KEY` and the `_ai_create`/`_cc_run_combined` path, which runs *after* Phase 1; the briefing ran clean on the `claude_code` backend 4x (27 Aug 18:19; 28 Aug 07:25/09:05/12:06) before the reboot.
+
+**Aggravating factor:** New Outlook (`olk.exe`, PID 3352) is running and signed in ("Inbox - Kevin Lelitte - Outlook"), which can mask the fact that classic Outlook is down. New Outlook has **no COM interface** and cannot stand in for the pipeline. If Windows ever migrates the default/only client to it, both pipelines break with no workaround.
+
+## Operational restore -- IN PROGRESS, BLOCKED ON KEVIN
+Drew launched classic Outlook (`C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE`, PID 18136) at ~18:11 UTC. It has been stuck on the "Opening - Outlook" splash for 25+ min because it raised a **"Windows Security" credential prompt** (`CredentialUIBroker` PID 3944 still open, `BasicEmbeddedBrowser` child) -- the Oxford modern-auth / MFA sign-in. **Only Kevin can complete this** (Drew cannot enter credentials / approve MFA).
+
+### Kevin: exact steps
+1. On the admin machine, find the **"Windows Security"** dialog (taskbar / Alt+Tab; or click the "Opening - Outlook" splash). Sign in with the Oxford account and approve MFA.
+2. Classic Outlook should finish opening. Confirm the status bar reads **"Connected to: Microsoft Exchange"** (not **Work Offline**); let folders sync; press **F9**.
+3. **Leave classic Outlook running.**
+4. Verify (either Kevin or a follow-up Drew dispatch -- do NOT assume, the coordinator wants it verified):
+   - Briefing: `schtasks /run /tn "Work Inbox Briefing"` (or the `.bat`, option U). Health check = new `seq:"combined"` line in `ai_backend_usage.jsonl` + a fresh `chore: update briefing ...` commit on GitHub.
+   - Draft Diff: `schtasks /run /tn "Draft Diff Capture"`. Health check = `tools/draft_diff_capture_last_run.log` ends without `FATAL`, exit 0.
+If the sign-in is left undone, Monday's runs will still try -- the new preflight (below) will start classic Outlook headless, but if the modern-auth token is still expired it will re-raise the same interactive prompt. Best to complete it now.
+
+## Preventive fixes -- BUILT, TESTED, DEPLOYED (Part 2)
+
+### Change A -- `fetch_inbox.py` `connect_to_outlook()` rework (commit `5f3fce5`, work-inbox `main`)
+Restore point: `main` `f9ffb54` / `fetch_inbox.py` blob `d195da4517a54557db4d158043da22f5bb221c9f`. Rollback = `git revert 5f3fce5`.
+- New `_is_outlook_not_ready_error()` distinguishes "Outlook not running / not connected" (`AttributeError` on Dispatch; HRESULTs -2147221231 / -2147221219 / -2146959355 CO_E_SERVER_EXEC_FAILURE / RPC-unavailable; the `.ost`/"connect to Microsoft Exchange" message text) from the transient busy-callee (`-2147418111`).
+- On the not-ready class: **launch classic Outlook once via `explorer.exe`** (so it is not inside the Task Scheduler job object that gets torn down at run end), poll MAPI readiness up to 120s, then retry for real -- skips the pointless 3x45s wait.
+- If still not ready (usually the interactive sign-in prompt): fires a **specific** BurntToast, `"Work Inbox Briefing - Outlook not connected"`, with exact instructions, then raises.
+- Transient busy-callee path behaviour unchanged. Success probe now also forces `inbox_folder.Items.Count` so a non-mounting store is caught at connect time.
+- `_notify_phase_failure()` + `NOTIFY_SCRIPT_PATH` moved to the top of the file so `connect_to_outlook` can use them (pointer left at old site).
+- **Verified:** `py_compile` + a 6-scenario mocked control-flow test (clean / busy x2 then OK / not-connected then auto-recover / not-connected persistent -> toast+raise / AttributeError -> auto-recover / busy exhausted -> raise, no toast). Not yet exercised against real Outlook (blocked on the sign-in) -- that happens on the Part 1 verification re-run.
+
+### Change B -- `Ensure-ClassicOutlook.ps1` preflight, wired into BOTH `.bat` wrappers
+New Desktop helper `D:\OneDrive - lelitte.com\Desktop\Ensure-ClassicOutlook.ps1` (reference copy committed to the repo at `docs/desktop-scripts/Ensure-ClassicOutlook.ps1`, commit `1b08b28`). Starts classic Outlook via `explorer.exe` if `OUTLOOK.EXE` is not running, warns if only New Outlook (`olk.exe`) is up, polls MAPI readiness up to 120s, **always exits 0** (never fails the run).
+- `Run Inbox Briefing.bat` -- backup `Run Inbox Briefing.bat.backup-20260828-182721`; added `set "PREFLIGHT_SCRIPT=..."` + an `if exist ... powershell -File "%PREFLIGHT_SCRIPT%"` block in `:run_script` before the AI-backend section.
+- `Run Draft Diff Capture.bat` -- backup `Run Draft Diff Capture.bat.backup-20260828-183209`; same two edits before the python line.
+- Neither `.bat` is repo-tracked (local Desktop only); restore = copy the timestamped backup back.
+- **Verified:** ran `Ensure-ClassicOutlook.ps1` standalone -- correctly detected classic Outlook already running, polled MAPI for 120s, and (because the sign-in is still pending) emitted its "may be waiting on an interactive Windows Security / Oxford sign-in prompt" warning and exited 0 without hanging. `.bat` `if exist (...) else (...)` block matches the wrappers' existing pattern; no shell-metacharacter hazard.
+
+### New Outlook guard
+Covered in both places: `Ensure-ClassicOutlook.ps1` prints a WARNING if `olk.exe` is running while `OUTLOOK.EXE` is not; `connect_to_outlook()`'s failure toast/log names the classic-vs-New distinction.
+
+## Proposed, NOT done (for Kevin's decision)
+1. **Logon scheduled task** "Start Classic Outlook" (`explorer.exe OUTLOOK.EXE` at logon) -- the true root-cause fix for "reboot leaves Outlook closed". The preflight now covers the briefing/draft-diff paths, so this is belt-and-braces; a 2-minute add if wanted.
+2. **`draft_final_diff_capture.py`** should import/share `fetch_inbox.py`'s `connect_to_outlook()` (retry + classification + auto-launch) instead of its bare `Dispatch().GetNamespace()` -- defence in depth beyond the preflight.
+
+---
+
 # Handover -- 28 August 2026, ~18:40 UTC (Drew) -- DIAGNOSIS ONLY, no code/pipeline change. "Work Inbox Briefing -- FAILED" toast (`pywintypes.com_error`). Root cause: the admin machine **rebooted at 13:30 today** and **classic Outlook (OUTLOOK.EXE) was not relaunched**; the 15:00 and 18:00 scheduled runs each spun up a headless Outlook via COM that could not mount the cached Exchange OST. NOT a regression and NOT related to the 27 Aug AI-backend cutover. Fix is operational: open classic Outlook, let it connect to Exchange, then re-run. No more scheduled runs until **Mon 31 Aug 06:00 UK**.
 
 ## Evidence
