@@ -1,3 +1,48 @@
+# Handover -- 28 August 2026, ~23:30 UTC (Drew) -- IMAP+OAuth2 mail-pull migration: DESIGNED + BUILT behind a flag, default OFF, NOT cut over. Spike (run by the coordinator while Drew was rate-limited) PASSED. No `.bat` / scheduled-task change. `MAIL_BACKEND=com` path is byte-identical to before.
+
+## Spike result folded in (was standalone `docs/IMAP_OAUTH2_SPIKE_20260828.md`)
+IMAP+OAuth2 against Exchange Online is a **live option at Oxford where MS Graph is not**. Proven from the admin machine, 28 Aug ~21:46-21:49 UTC:
+- Token with **no Oxford IT / no admin consent / no app registration** via device-code flow + **Mozilla Thunderbird's public client id `9e5f94bc-e8a4-4e73-b8be-63364c29d753`**, authority `.../organizations`, scope `https://outlook.office365.com/IMAP.AccessAsUser.All`.
+- IMAP **enabled for `begb0037@ox.ac.uk`** -- `SELECT INBOX` -> **558 messages**, header fetched, `AUTHENTICATE completed.`
+- **Silent refresh confirmed** -- second run used `acquire_token_silent`, no prompt (reboot/unattended survival path works).
+- MS Office first-party client id `d3590ed6-…` **fails** `AADSTS65002` for IMAP -- Thunderbird's id is the one that works.
+- Caveat: the granted bundle includes `SMTP.Send` (Thunderbird's client requests the whole mail bundle). Accepted -- mitigation is architectural: `imap_mail.py` imports `imaplib` only, no agent-with-tools on this path. See migration plan §3.
+- Spike artefacts were throwaway in the coordinator's scratchpad (script + a live token cache incl. SMTP.Send) -- **that scratchpad cache must be deleted**; this build has its own credential handling and its own cache path.
+
+## What was built this session (all `main`, flag default OFF)
+| File | What |
+|---|---|
+| `imap_mail.py` **new** | MSAL silent-refresh token + read-only IMAP (`EXAMINE`) pull of INBOX / VIP sweep / 5 subfolder trees / Sent, mapped to the **exact** Phase 1 dict shape. Raises `ImapReauthRequired` on silent-refresh failure -- never prompts, never hangs (verified). Also `message_still_in_inbox()` for the Phase 3.9 follow-up. |
+| `reauth_imap.py` + `Re-auth Work Inbox IMAP.bat` **new** | Device-code sign-in Kevin runs once, and again when the "mail sign-in expired" toast fires. PS 5.1-callable. Prints timestamps, verifies with a read-only INBOX check. |
+| `diff_mail_pull.py` **new** | Field-by-field COM-vs-IMAP parity diff (subject/from_email/is_read/has_attachments/importance/kevin_is_primary_recipient exact; received ±120s; derived tier; set diffs). Writes `data/parallel/parity_<ts>.json`. |
+| `fetch_inbox.py` | `MAIL_BACKEND=com\|imap` (default `com`) + `WI_MAIL_PARALLEL=1`, mirroring `AI_BACKEND`. Four COM mail loops guarded `for X in ([] if MAIL_BACKEND=="imap" else <orig>)`; `imap` path calls `imap_mail.pull()`. `connect_to_outlook()` non-fatal under `imap` (calendar degrades to empty+warning, mail briefing continues); `mapi is None` calendar guard. `_imap_reauth_toast_due()` 1/hour stamp (mirrors WS1 keepalive stamp). **Restore point:** blob `bd02b41089850678b8268318a0afab5e6d457e8a`, snapshot `Archive/fetch_inbox_backup_20260828_*_pre_mail_backend_flag.py`. |
+| `.gitignore` | + `msal_imap_token_cache.bin`, `*.bin` |
+| `docs/PHASE1_IMAP_MIGRATION_AUDIT.md` **new** | The Phase 1 audit -- see next section. |
+| `docs/MAIL_BACKEND_MIGRATION_PLAN.md` **new** | Credential decision, flag mechanics, verification gate, cutover checklist, open decisions. |
+
+## Audit headlines (full detail in `docs/PHASE1_IMAP_MIGRATION_AUDIT.md`)
+- **Outlook Categories: ZERO dependence.** `fetch_inbox.py` never reads `msg.Categories` -- confirmed by full-repo grep (only hit is the abandoned `tools/codex_triage/mailbox_guard.py`). `categorise()` is a keyword function, unrelated. Nothing breaks; no IMAP equivalent needed.
+- **`importance`: real, cleanly recoverable.** Used by `categorise()` (`imp==2 -> urgent`) + ordering. IMAP equivalent = MIME `Importance:` / `X-Priority:` / `X-MSMail-Priority:` -> 0/1/2 (the same map Outlook uses). Implemented.
+- **`EntryID` / `openmail://` -- two consumers.** (a) Dashboard opener: replace with OWA search deep-link `https://outlook.office.com/mail/search?query=<Message-ID>` stored as `web_link`, `mail_backend:"imap"` discriminator, reuse command-centre `openEmailWeb` validation. **Dashboard JS branch NOT yet written -- needs Kevin screenshot approval; until then IMAP cards would hit a dead `openmail://`.** (b) Phase 3.9 resolution tracking (`mapi.GetItemFromID(eid).Parent`): under `imap` this fails into the existing per-eid `try/except` -> `unknown` -> fail-open carry. **Degrades safely, does NOT crash** (verified against the outer try at ~3101 / except ~3241). Proper fix = key on `message_id` + `imap_mail.message_still_in_inbox()` (follow-up #1).
+- Calendar (3.7/3.8) stays on COM. Classic Outlook must stay runnable -> WS1 keepalive stays relevant. IMAP shrinks, does not remove, the Outlook dependency.
+
+## Hard gates still in force -- nothing below has happened
+- **No cutover.** `MAIL_BACKEND` unset everywhere; scheduled task + `.bat` untouched.
+- Cutover requires, in order: `diff_mail_pull.py` clean over 3-4 cycles / 2-3 days -> Kevin+Lauren eyeball -> dashboard JS opener branch shipped+approved -> Phase 3.9 decision -> **Kevin's fresh explicit go-ahead for the cutover step** -> update the *local Desktop* `.bat` (`set MAIL_BACKEND=imap` + also `git checkout origin/main -- imap_mail.py`), timestamped backup first. Rollback = one line in the `.bat`.
+
+## Open decisions for Kevin (none block starting the parity run)
+1. Graceful calendar degradation under `imap` (dead Outlook -> empty calendar + warning instead of whole-run failure) -- accept?
+2. Phase 3.9: re-wire to `message_id` before cutover, or run fail-open-carry for week 1?
+3. `SMTP.Send` in the token bundle -- accept the architectural mitigation (recommended), or pursue a dedicated app registration (needs Oxford IT, currently ruled out)?
+
+## Exact next action
+Kevin runs `Re-auth Work Inbox IMAP.bat` once to prime the token cache, then a tester runs `fetch_inbox.py` with `WI_MAIL_PARALLEL=1` on both `MAIL_BACKEND=com` and `=imap` in the same window and `python diff_mail_pull.py`. Report parity. Do NOT flip the scheduled task.
+
+## Commits this session
+See the commit trailer for this entry's push (clickable links in Drew's report).
+
+---
+
 # Handover -- 28 August 2026, ~19:35 UTC (Drew) -- ChatGPT Outlook connector route: fresh Codex second-opinion pass (routed through Drew) + Drew's engineering assessment. VERDICT: NOT VIABLE as framed. Codex and Drew converge. No config/pipeline change; `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged start-to-end.
 
 Kevin wants to revisit the connector route as preferred IF the write-gate is solvable, and specifically questions whether an unintended EMAIL SEND (vs the category/flag writes prior analysis focused on) is realistic. Commissioned a fresh `codex exec` analytical pass on 4 questions -- Codex analyses, Drew reviews + gates. Prior route history: abandoned 27 Aug, superseded by the live headless Claude Code cutover (see the 27 Aug entries + `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` on closed branch `claude/outlook-codecs-connector-upgrade-fe3dgf`).

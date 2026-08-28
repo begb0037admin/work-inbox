@@ -1,6 +1,8 @@
 # Token cache — never commit
 msal_token_cache.json
+msal_imap_token_cache.bin
 *.token
+*.bin
 # Raw data output — never commit
 data/inbox_raw.json
 data/

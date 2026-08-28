@@ -45,6 +45,24 @@ def _notify_phase_failure(task_name, detail):
     except Exception as notify_err:
         print(f"WARNING: failure toast for '{task_name}' could not be sent - {notify_err}")
 
+def _imap_reauth_toast_due(min_interval_s=3600):
+    """1-per-hour gate for the IMAP mail re-auth toast, mirroring the WS1
+    Classic-Outlook-keepalive stamp mechanism (a .stamp file under
+    %LOCALAPPDATA%\\WorkInboxAI, 1/hour). Returns True if a toast should be
+    raised now, and touches the stamp when it does. Fails OPEN (True) on any
+    stamp error -- never suppress a real re-auth alert over bookkeeping."""
+    try:
+        d = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "WorkInboxAI")
+        os.makedirs(d, exist_ok=True)
+        stamp = os.path.join(d, "imap_reauth_toast.stamp")
+        if os.path.exists(stamp) and (time.time() - os.path.getmtime(stamp)) < min_interval_s:
+            return False
+        with open(stamp, "w", encoding="utf-8") as f:
+            f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        return True
+    except Exception:
+        return True
+
 GITHUB_REPO = "begb0037admin/work-inbox"
 GITHUB_PATH = "data/briefing.json"
 GITHUB_PAT  = os.environ.get("GITHUB_PAT", "")
@@ -74,7 +92,25 @@ GITHUB_TIMEOUT = 30
 #                          this account. Leave unset to disable failover.
 # --------------------------------------------------------------------------- #
 AI_BACKEND  = os.environ.get("AI_BACKEND", "api").strip().lower()
-AI_PARALLEL = os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
+# --------------------------------------------------------------------------- #
+#  Mail-pull backend selection  (added 2026-08-28, Drew)
+#  MAIL_BACKEND=com   (default) -- Phase 1 mail pull (inbox / VIP sweep /
+#                     subfolders / Sent) via Outlook COM, byte-identical to
+#                     before this change.
+#  MAIL_BACKEND=imap  -- that same mail pull via IMAP+OAuth2 (imap_mail.py).
+#                     Calendar phases 3.7/3.8 stay on Outlook COM regardless.
+#                     Do NOT set this on the scheduled task until
+#                     diff_mail_pull.py parity is clean over several cycles
+#                     AND Kevin has given a fresh explicit go-ahead. See
+#                     docs/MAIL_BACKEND_MIGRATION_PLAN.md.
+#  WI_MAIL_PARALLEL=1 -- dump the raw COM/IMAP mail lists to data/parallel/
+#                     for diff_mail_pull.py and push / mutate NOTHING
+#                     (folds into the same no-write posture as WI_AI_PARALLEL).
+# --------------------------------------------------------------------------- #
+MAIL_BACKEND  = os.environ.get("MAIL_BACKEND", "com").strip().lower()
+MAIL_PARALLEL = os.environ.get("WI_MAIL_PARALLEL", "").strip().lower() in ("1", "true", "yes")
+AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
+               or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
 _AI_OUT_PREFIX = "claude_" if AI_PARALLEL else ""
 CLAUDE_BIN          = os.environ.get("WI_CLAUDE_BIN", "claude")
@@ -87,6 +123,8 @@ log(f"AI backend: {AI_BACKEND}"
     + (f"  [PARALLEL VALIDATION MODE -- local claude_* files only, no push]" if AI_PARALLEL else "")
     + (f"  primary_cfg={CLAUDE_CFG_PRIMARY or '(default)'}" if AI_BACKEND == "claude_code" else "")
     + (f"  fallback_cfg={CLAUDE_CFG_FALLBACK}" if (AI_BACKEND == "claude_code" and CLAUDE_CFG_FALLBACK) else ""))
+log(f"Mail backend: {MAIL_BACKEND}"
+    + ("  [WI_MAIL_PARALLEL -- raw mail dumps to data/parallel/, no push]" if MAIL_PARALLEL else ""))
 
 
 class _AIText:
@@ -958,7 +996,18 @@ def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
             "'Connected to: Microsoft Exchange' (not Work Offline), then re-run the briefing.")
     raise last_error
 
-outlook, mapi, _inbox_folder = connect_to_outlook()
+if MAIL_BACKEND == "imap":
+    # Mail comes from IMAP this run; classic Outlook COM is only needed for
+    # the calendar phases (3.7/3.8). A wedged or closed classic Outlook must
+    # NOT block the mail briefing -- that is the whole point of the migration.
+    try:
+        outlook, mapi, _inbox_folder = connect_to_outlook()
+    except Exception as _com_e:
+        log(f"Phase 1 - MAIL_BACKEND=imap: Outlook COM unavailable ({_com_e}); "
+            f"calendar phases will be skipped this run, mail pull continues via IMAP")
+        outlook = mapi = _inbox_folder = None
+else:
+    outlook, mapi, _inbox_folder = connect_to_outlook()
 cutoff  = datetime.now() - timedelta(days=7)
 today   = datetime.now().date()
 
@@ -1135,7 +1184,7 @@ def _kevin_is_primary_recipient(msg):
 # Reuses the folder handle connect_to_outlook() already opened (and retried)
 # above, rather than issuing a second unretried GetDefaultFolder(6) call --
 # this is exactly the call site both of today's real failures hit.
-for msg in restrict_date(_inbox_folder, cutoff):
+for msg in ([] if MAIL_BACKEND == "imap" else restrict_date(_inbox_folder, cutoff)):
     try:
         if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
             break
@@ -1168,7 +1217,7 @@ inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 
 # VIP sweep -- pick up any VIP emails missed by the cap
 captured_ids = {e["entry_id"] for e in inbox}
-for msg in restrict_date(mapi.GetDefaultFolder(6), cutoff):
+for msg in ([] if MAIL_BACKEND == "imap" else restrict_date(mapi.GetDefaultFolder(6), cutoff)):
     try:
         if msg.EntryID in captured_ids:
             continue
@@ -1262,7 +1311,7 @@ def _build_subfolder_entry(msg, is_read, source_folder):
 subfolder_unread = 0
 subfolder_read   = 0
 subfolder_count  = 0
-for tree_name in SUBFOLDER_TREES:
+for tree_name in ([] if MAIL_BACKEND == "imap" else SUBFOLDER_TREES):
     try:
         top_folder = None
         for f in _inbox_folder.Folders:
@@ -1312,7 +1361,7 @@ inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 print(f"Phase 1c subfolder sweep done - added {subfolder_count} (unread:{subfolder_unread} read:{subfolder_read}) from {len(SUBFOLDER_TREES)} named trees - total inbox now: {len(inbox)}")
 
 sent = []
-for msg in mapi.GetDefaultFolder(5).Items:
+for msg in ([] if MAIL_BACKEND == "imap" else mapi.GetDefaultFolder(5).Items):
     try:
         t = dt(msg.SentOn)
         if t and t >= cutoff:
@@ -1325,6 +1374,46 @@ for msg in mapi.GetDefaultFolder(5).Items:
             })
     except:
         continue
+
+# -- MAIL_BACKEND=imap: the four COM loops above ran empty; source the mail
+#    lists from IMAP+OAuth2 instead. Calendar block below is untouched (COM). --
+if MAIL_BACKEND == "imap":
+    import imap_mail
+    try:
+        _imap_res = imap_mail.pull(
+            cutoff,
+            kevin_email=KEVIN_EMAIL,
+            vip_names=VIP_NAMES, vip_emails=VIP_EMAILS,
+            subfolder_trees=SUBFOLDER_TREES,
+            max_unread=MAX_UNREAD, max_read=MAX_READ,
+            sub_max_unread=SUBFOLDER_MAX_UNREAD, sub_max_read=SUBFOLDER_MAX_READ,
+            log=log,
+        )
+    except imap_mail.ImapReauthRequired as _re:
+        _rmsg = (f"IMAP mail sign-in expired - run 'Re-auth Work Inbox IMAP' "
+                 f"on the Desktop. ({_re})")
+        log(f"Phase 1 - {_rmsg}")
+        if _imap_reauth_toast_due():
+            _notify_phase_failure("Work Inbox Briefing", _rmsg)
+        raise SystemExit(1)
+    inbox = _imap_res["inbox"]
+    sent  = _imap_res["sent"]
+    print(f"Phase 1 - IMAP mail pull: inbox {len(inbox)} "
+          f"(unread {_imap_res['meta']['inbox_unread']}) sent {len(sent)}")
+
+# -- WI_MAIL_PARALLEL: dump raw mail lists for diff_mail_pull.py, push nothing --
+if MAIL_PARALLEL:
+    _pdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "parallel")
+    try:
+        os.makedirs(_pdir, exist_ok=True)
+        _pfx = "imap" if MAIL_BACKEND == "imap" else "com"
+        with open(os.path.join(_pdir, f"{_pfx}_inbox_raw.json"), "w", encoding="utf-8") as _f:
+            json.dump(inbox, _f, indent=2, default=str)
+        with open(os.path.join(_pdir, f"{_pfx}_sent_raw.json"), "w", encoding="utf-8") as _f:
+            json.dump(sent, _f, indent=2, default=str)
+        log(f"Phase 1 - WI_MAIL_PARALLEL wrote {_pfx}_inbox_raw.json / {_pfx}_sent_raw.json")
+    except Exception as _pe:
+        log(f"WARNING: WI_MAIL_PARALLEL dump failed - {_pe}")
 
 # PR_SENDER_NAME (MAPI proptag 0x0C1A001E) -- the display name of
 # whoever actually submitted/booked the item. For entries booked by an
@@ -1364,9 +1453,15 @@ def _get_is_recurring(item):
 week_end = today + timedelta(days=6)
 lookback  = today - timedelta(days=30)  # catch multi-day absences spanning today
 calendar = []
-_cal_items = mapi.GetDefaultFolder(9).Items
-_cal_items.IncludeRecurrences = True
-_cal_items.Sort("[Start]")
+if mapi is None:
+    # MAIL_BACKEND=imap and classic Outlook COM was unavailable this run.
+    _cal_items = []
+    print("WARNING: Outlook COM unavailable - primary calendar not pulled this run "
+          "(MAIL_BACKEND=imap); calendar phases degrade to empty, mail briefing continues")
+else:
+    _cal_items = mapi.GetDefaultFolder(9).Items
+    _cal_items.IncludeRecurrences = True
+    _cal_items.Sort("[Start]")
 for item in _cal_items:
     try:
         t = dt(item.Start)
