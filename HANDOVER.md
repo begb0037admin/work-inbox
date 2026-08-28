@@ -1,3 +1,35 @@
+# Handover -- 28 August 2026, ~18:40 UTC (Drew) -- DIAGNOSIS ONLY, no code/pipeline change. "Work Inbox Briefing -- FAILED" toast (`pywintypes.com_error`). Root cause: the admin machine **rebooted at 13:30 today** and **classic Outlook (OUTLOOK.EXE) was not relaunched**; the 15:00 and 18:00 scheduled runs each spun up a headless Outlook via COM that could not mount the cached Exchange OST. NOT a regression and NOT related to the 27 Aug AI-backend cutover. Fix is operational: open classic Outlook, let it connect to Exchange, then re-run. No more scheduled runs until **Mon 31 Aug 06:00 UK**.
+
+## Evidence
+- `inbox_briefing_last_run.log` (18:00:08 run): Phase 1 `connect_to_outlook()` failed all 3 retry attempts, each with
+  `pywintypes.com_error (-2147352567, 'Exception occurred.', (4096, 'Microsoft Outlook', 'The file C:\\Users\\admin\\AppData\\Local\\Microsoft\\Outlook\\begb0037@ox.ac.uk.ost cannot be accessed. You must connect to Microsoft Exchange at least once before you can use your Outlook data file (.ost).', None, 0, -2147221231), None)`.
+  Traceback tip: `fetch_inbox.py` line 814 `inbox_folder = mapi_ns.GetDefaultFolder(6)` (inside `connect_to_outlook`), re-raised at line 825, called at line 827.
+- This is a **different** COM error from the 11 Aug incident. 11 Aug = `-2147418111 'Call was rejected by callee'` (Outlook busy, genuinely transient, self-heals on retry). This one = `-2147352567` + inner Outlook error 4096 "must connect to Microsoft Exchange" = Outlook not running / not connected; the 3x45s retry loop cannot fix it because it treats every `com_error` as "busy (transient)".
+- `Get-CimInstance Win32_OperatingSystem).LastBootUpTime` = **28 Aug 2026 13:30:45**. Sits exactly between last success (12:06) and first failure (15:00).
+- `ai_backend_usage.jsonl` last successful combined `claude -p` call: **28 Aug 12:06:18** (`wall_s` 333.7, `missing_keys` []). No entries for the 15:00 or 18:00 slots -> both died in Phase 1, before the AI call. GitHub `data/briefing.json` history confirms: last push `chore: update briefing 2026-08-28 12:06` (commit 2026-08-28T11:06:25Z); nothing since.
+- `tasklist` -> **no OUTLOOK.EXE process**. `OUTLOOK.EXE` file version 16.0.20326.20112 (Click-to-Run), not updated today (lastwrite 28 Aug 10:52). Application event log: Outlook provider Error id 65 at 15:30:05 + info events at 15:00 / 15:30 / 18:00 (the failed runs' headless launches).
+- **New Outlook (`olk.exe`, PID 3352) IS running** (started 16:01:50). HKCU Outlook profiles: `Outlook` + `NewOutlook-ProfileForPstFiles-Iter1`. New Outlook's presence did not by itself cause this failure, but it is a standing risk -- New Outlook has **no COM automation interface**, so if Windows ever migrates the default/only client to it, this entire pipeline breaks with no workaround. Worth Kevin keeping classic Outlook as default and declining the New Outlook migration.
+- 27 Aug cutover ruled out: it only added `AI_BACKEND=claude_code` + empty `ANTHROPIC_API_KEY` to `Run Inbox Briefing.bat` and the `_ai_create()` / `_cc_run_combined()` code path, which runs *after* Phase 1's Outlook connection. Pipeline ran clean on the `claude_code` backend 4x (27 Aug 18:19; 28 Aug 07:25, 09:05, 12:06) before the reboot. Phase 1 / `connect_to_outlook()` is untouched by the cutover.
+- The failure toast Kevin saw is fired by `Run Inbox Briefing Hidden.vbs` (non-zero exit -> `Show-TaskNotification.ps1` -> BurntToast), showing the tail of `inbox_briefing_last_run.log`, i.e. the `pywintypes.com_error` line. Only 2 briefing failures today (15:00, 18:00); the "20+ stacked notifications" are unrelated/backlog.
+
+## Is it safe to just re-run? -- NO, not blindly
+A re-run with classic Outlook still closed fails identically. Safe + correct once classic Outlook is confirmed open and connected. The pull is idempotent (re-pulls last 7 days), so one good catch-up run fully restores the briefing.
+
+## EXACT NEXT ACTION (operational -- Kevin, on the admin machine)
+1. Launch **classic Outlook**: `C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE`.
+2. Confirm status bar reads **Connected to: Microsoft Exchange** (complete any Oxford SSO/MFA prompt; make sure it is NOT in Work Offline mode); folders sync.
+3. Press F9 (Send/Receive), confirm the OST syncs with no error.
+4. Leave classic Outlook running.
+5. Re-run the briefing: double-click `D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing.bat` (choose **U**), or run `schtasks /run /tn "Work Inbox Briefing"`. Otherwise it self-recovers at the next scheduled run, Mon 31 Aug 06:00 UK, *provided classic Outlook is open then*.
+6. Health check: `ai_backend_usage.jsonl` gets a new `seq:"combined"` line and GitHub gets a fresh `chore: update briefing ...` commit.
+
+## Proposed engineering follow-ups (NOT actioned -- for Kevin's decision, per the cautious-change-pace rule)
+1. **Auto-start / preflight classic Outlook.** In `Run Inbox Briefing.bat` (or the VBS): if `OUTLOOK.EXE` is not running, `start "" "<path>\OUTLOOK.EXE"` and wait ~60-90s for MAPI to be ready before Phase 1. Or add classic Outlook to the logon Startup set. Directly prevents the "reboot with no Outlook" failure class.
+2. **Classify the COM error in `connect_to_outlook()`.** Detect `-2147352567` + inner 4096 (or HRESULT `-2147221231` MAPI_E_LOGON_FAILED) as a *distinct, non-transient* "Outlook not open / not connected to Exchange" condition -- skip the 3x45s wait, emit a specific toast ("classic Outlook is not open / not connected"), optionally attempt to launch Outlook.
+3. **New Outlook guard / note.** Document the `olk.exe`-only risk; consider a preflight check that warns if classic Outlook is absent while New Outlook is running.
+
+---
+
 # Handover -- 27 August 2026, ~21:30 UTC (Drew) -- "Open original" on the Drafted Replies tab FIXED and MERGED. Kevin reviewed the screenshot and gave literal approval ("approved and push"). Merged to `main` via PR #30, merge commit `7e1f0cc`. Restore point (pre-merge `main`) = `fc86916`. GitHub Pages build for `7e1f0cc` completed clean; live-served `js/app.js` + `css/styles.css` (Pages + github-proxy) byte-verified identical to `main`. Root cause + the two proposed fix paths are in the 27 Aug ~09:27 entry's "Follow-up (~09:55 UTC)" subsection below. This shipped a cleaned-up fix path 2 (render/discriminator fix), mirroring `command-centre` `js/app.js` `openEmailWeb()`.
 
 ## MERGED / deploy state (27 Aug ~21:30 UTC)
