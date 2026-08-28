@@ -536,7 +536,7 @@
     "received": "21 Aug",
     "received_raw": "2026-08-21 18:00:49.263000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Cority Integration Platform reports SFTP connection error during scheduled employee data import on 21 August at 17:00, requiring investigation of the error log.",
+    "ai_summary": "Cority Integration Platform automated alert reporting an SFTP error during employee data import on 21 August at 17:00 UTC; log file attached for analysis and resolution.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -607,7 +607,7 @@
     "received": "24 Aug",
     "received_raw": "2026-08-24 08:33:26.227000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Sophie Levy confirms the Quality project (PO E22033553) is fully staffed and undergoing internal transition from sales to professional services.",
+    "ai_summary": "Sophie Levy from Access Group is confirming the PeopleXD Quality project (PO E22033553) is fully staffed with internal transition from sales to professional services proceeding and project ready to proceed.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -749,7 +749,7 @@
     "received": "25 Aug",
     "received_raw": "2026-08-25 13:28:29.503000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael O'Sullivan requests his 2026 PDR (currently scheduled Friday 18 September) be moved to a later date because he will be on leave that week.",
+    "ai_summary": "Michael O'Sullivan is requesting to reschedule his PDR from Friday 18 September because he will be on leave that date and the following week, citing annual leave year-end considerations.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -789,7 +789,7 @@
     "received": "26 Aug",
     "received_raw": "2026-08-26 12:06:13.687000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Michael asks Kevin and Simon to recall or locate documentation on Grade 2 increment bar changes from the 2024 non-clinical uplift.",
+    "ai_summary": "Michael O'Sullivan is asking Kevin and Simon whether they recall any decisions or have documentation relating to Grade 2 increment bar changes made during the 2024 non-clinical uplift.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -909,7 +909,7 @@
     "received": "27 Aug",
     "received_raw": "2026-08-27 17:09:35.656000+00:00",
     "kevin_is_primary_recipient": true,
-    "ai_summary": "Simon provides documentation on the 2024 non-clinical uplift confirming that Grade 2 employees on scale point 2.5 were moved to 2.6, with no movements to 2.7 or 2.8; he has additional context from Tonya.",
+    "ai_summary": "Simon Burford is providing details from the 2024 non-clinical uplift: employees on scale point 2.5 were moved to 2.6 scale point only, with no moves to 2.7 or 2.8; he has additional context from Tonya.",
     "needs_reply": false,
     "no_action_needed": false
    },
@@ -929,7 +929,7 @@
     "received": "27 Aug",
     "received_raw": "2026-08-27 15:53:20.901000+00:00",
     "kevin_is_primary_recipient": false,
-    "ai_summary": "Marie Cooksey tells Amanda that Kevin and James will respond with realistic timings for IRIS/IEX incidents changes implementation.",
+    "ai_summary": "Marie Cooksey is telling Amanda that Kevin and James Salas Guillen will provide incident change timing details in due course for IRIS and IEX implementation.",
     "needs_reply": true,
     "no_action_needed": false
    },
@@ -954,6 +954,66 @@
     "no_action_needed": false
    },
    "first_tracked": "2026-08-27",
+   "last_confirmed": "2026-08-28"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B373E8F50000": {
+   "tier": "needs",
+   "card": {
+    "title": "RE: 2024 non clinical uplift_Incremental bar changes for Grade 2",
+    "sub": "From <strong>Michael O'Sullivan</strong>. Hi Simon,\r\n\r\n \r\n\r\nThat\u2019s a really helpful bit of background knowledge, so thanks for that. I did see some SQL code in Ni",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "RE: 2024 non clinical uplift_Incremental bar changes for Grade 2",
+    "from": "Michael O'Sullivan",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B373E8F50000",
+    "received": "28 Aug",
+    "received_raw": "2026-08-28 07:38:20.890000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Michael O'Sullivan is thanking Simon for background on Grade 2 increment bar changes and noting SQL code found in Nik's folder suggesting development work was undertaken.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-28",
+   "last_confirmed": "2026-08-28"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6B0000": {
+   "tier": "needs",
+   "card": {
+    "title": "FW: Cross-Team Process Improvement Working Group \u2013 1st Meeting",
+    "sub": "From <strong>Michael O'Sullivan</strong>. Morning,\r\n\r\n \r\n\r\nI noticed you\u2019ve already accepted the meeting on 28 September, and as Otter mentioned that she\u2019s lookin",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "FW: Cross-Team Process Improvement Working Group \u2013 1st Meeting",
+    "from": "Michael O'Sullivan",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6B0000",
+    "received": "27 Aug",
+    "received_raw": "2026-08-27 09:18:10.819000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Michael O'Sullivan is confirming Kevin has already accepted the 28 September Cross-Team Process Improvement Working Group meeting and noting Otter Ho seeks continued HR Systems participation.",
+    "needs_reply": true,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-28",
+   "last_confirmed": "2026-08-28"
+  },
+  "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000": {
+   "tier": "needs",
+   "card": {
+    "title": "RE: changing to 38 day balance - workgroups for updating  ",
+    "sub": "From <strong>Michael O'Sullivan</strong>. Hi Marie,\r\n\r\n \r\n\r\nThe list of workgroups was expected, and it is the 131 workgroups listed that will need to be amended ",
+    "badge": "Reply within 48hrs",
+    "badgeType": "yellow",
+    "subject": "RE: changing to 38 day balance - workgroups for updating  ",
+    "from": "Michael O'Sullivan",
+    "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007B2797C6A0000",
+    "received": "27 Aug",
+    "received_raw": "2026-08-27 08:47:57.798000+00:00",
+    "kevin_is_primary_recipient": true,
+    "ai_summary": "Michael O'Sullivan is clarifying to Marie that the 131 workgroups identified for 38-day balance scheme updates is the expected scope and all will require amendment to reflect the revised Holiday Scheme.",
+    "needs_reply": false,
+    "no_action_needed": false
+   },
+   "first_tracked": "2026-08-28",
    "last_confirmed": "2026-08-28"
   }
  }
