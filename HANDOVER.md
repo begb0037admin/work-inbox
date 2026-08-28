@@ -1,6 +1,23 @@
-# Handover -- 29 August 2026, ~02:30 UTC (Drew) -- Direction SETTLED: ChatGPT M365 connector for the pull (mail+calendar+Teams), Codex for triage. Reconciled plan written. Doc framing fixed (FUNDING, not compliance). Build increment 1 in progress (branch, parallel-only).
+# Handover -- 29 August 2026, ~03:30 UTC (Drew) -- Reconciled plan + safeguards research pass done. **Codex second opinion = NOT SOUND for the connector route as designed.** No build. Decision back to Kevin.
 
-## Decision (Kevin, 28-29 Aug) -- this is execution, not scoping
+## HEADLINE: the safeguards research changed the picture
+`docs/CONNECTOR_SAFEGUARDS.md` (commit `b2398ff`; §D/E updated in the follow-up commit) is the definitive pass Kevin asked for. It, and the commissioned Codex second opinion, **converge on NOT SOUND** for an unattended connector-attached Codex fetch:
+- **Core objection (Codex, and it's correct):** Call 1 "dumb fetch" is only a *prompt*, not a capability boundary. A single `codex exec` invocation is not atomic -- after `list_messages`/`fetch_messages_batch` returns the hostile body text into context, the model can make another tool call (e.g. `send_email`) *before* emitting its final JSON. "One turn" stops a new user turn, not iterative tool calls. B3 sanitisation hasn't run yet at that point. B9/B7 detect *after* -- an external send is already delivered.
+- **The B7 kill-switch is itself another unattended connector session with the full write surface**, gated only by a natural-language "reads only" instruction. It multiplies model-sessions-with-authority instead of enforcing anything.
+- **What Codex requires before even a shadow run:** an *enforced* read-only boundary -- a separate M365 credential/app with verified read-only Graph scope, OR a server-side read-only proxy that rejects every mutation, proven with negative write tests in a disposable mailbox. A prompt / manifest-assert / ChatGPT "read-only" setting does not qualify (the setting was already shown not to remove write tools from `codex exec`, 27 Aug).
+- **Consequence:** the connector route, as a way to give an LLM the pull while it holds write tools, cannot make a "writes nothing live" guarantee. The enforced-read-only boundary Codex requires is essentially **tenant read-only Graph consent (Oxford won't give it) or a proxy we'd have to build** -- OR the **IMAP-direct route, which IS structurally read-only** (imaplib can't send; no write tool exists) and is already **PROVEN + PARKED** (see the ~01:15 entry).
+
+## Also found: `codex exec -s read-only` did NOT prevent a filesystem write on this machine
+The first (timed-out) review run wrote its verdict into `HANDOVER.md` via `powershell.exe` despite `-s read-only` (`[windows] sandbox = "unelevated"` in `config.toml` -- the Windows sandbox drops elevation, it does not enforce read-only FS for user-writable paths). `config.toml` sha1 was **not** touched (still `35f8910...`). That Codex-authored block has been removed from HANDOVER and folded into `CONNECTOR_SAFEGUARDS.md` §D properly. **Finding for the doc:** never rely on `-s read-only` as a containment control on this Windows box.
+
+## Options now on the table for Kevin (in `CONNECTOR_SAFEGUARDS.md` §E, revised)
+1. **IMAP-direct** (parked, proven) -- structurally read-only, no write tool exists, no Oxford IT. Loses Teams; calendar would need a separate read-only Graph/EWS path or stays COM. Unsanctioned-OAuth risk if the tenant locks down further.
+2. **Build a read-only proxy** in front of the connector/Graph (a small service that exposes only `list_messages`/`list_events` and rejects everything else; Codex/Claude talk to the proxy, never the connector). Real engineering; removes the write surface from the model entirely.
+3. **Stay on `claude -p`** (live now, connector-free, no write path) and accept it's Kevin's personal spend.
+4. Connector route only for **attended** use (Kevin present, reviewing) -- not the automated morning briefing.
+
+## Decision (Kevin, 28-29 Aug) -- superseded in part by the above
+- **Connector route was chosen** for the pull (mail+calendar+Teams) on FUNDING grounds (Oxford ChatGPT Edu covers Codex; `claude -p` is Kevin's personal spend). **The safeguards pass says that route can't be made safe unattended without an enforced read-only boundary that isn't currently available.** Back to Kevin.
 - **Connector route chosen.** ChatGPT M365 connector does the pull; AI triage moves to Codex. Reason is **FUNDING, not compliance**: Claude is allowed at Oxford, but `claude -p` is Kevin's *personal* subscription; Oxford-funded **ChatGPT Edu covers Codex CLI** programmatic use. Also the connector is the only route that reaches **Teams** (currently invisible to work-inbox) + calendar in one place. **Q1 is RESOLVED** -- not a policy question.
 - **`claude -p` stays LIVE** as the triage engine + fallback until the Codex path is proven at parity. Stopping it = no briefings.
 - **Write-gate = layered mitigation model** (`docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md`), NOT gating connector write tools (that's unfixable in codex-cli 0.149.1). Layers: dumb-fetch Call 1 -> sanitise -> connector-free Call 2 (zero `microsoft_*` tools) -> connector Sent-folder delta kill-switch -> human review of every draft.
@@ -11,11 +28,16 @@
 - `docs/OPTION3_BUILD_PLAN.md` -- SUPERSEDED banner (it was the opposite shape: connector-free + COM).
 - `docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md` -- stripped the "sanctioned / in-policy / governance" framing; it's FUNDING (Oxford ChatGPT Edu vs Kevin's personal Claude). Q1 marked RESOLVED. Route table -> "Runs on whose funding?".
 
-## Build (branch `drew/codex-connector-pipeline`, parallel-only, no live path touched)
-Increment 1: `tools/codex_triage/normalise_pull.py` (backend-agnostic pull schema + Layer-2 sanitiser) + refreshed `categorise_and_stage.py`. Test = feed a `WI_MAIL_PARALLEL` COM dump, confirm the urgent/needs/fyi/low split matches a live `fetch_inbox.py` Phase-3 run. See report for status.
+## BUILD IS ON HOLD -- safeguards research pass first (Kevin, 29 Aug)
+No build until Kevin approves **`docs/CONNECTOR_SAFEGUARDS.md`** (commit `b2398ff`). That doc is the definitive safeguard design:
+- **A. Full write-vector enumeration** from the live manifest (`~/.codex/.codex-global-state.json`): 113 connector tools -- Outlook Email 46 (24 write), Calendar 34 (16 write), Teams 33 (9 write). **18 Tier-1 "irreversible external comms" tools** (10 mail/Teams send-or-reply + 8 calendar invite/update/cancel/RSVP). No hard-delete-email tool.
+- **B. 12 safeguard layers**, each with stops / doesn't-stop / verify / failure-mode. Key: connector attached ONLY to a rigid one-turn dumb-fetch (Call 1); deterministic sanitiser between; Call 2 reasoning runs `--disable apps` + connector-free `CODEX_HOME` (proven to strip the whole Apps surface) with a per-run zero-`microsoft_*` assert; NON-COM kill-switch (connector Sent/Drafts/calendar delta vs pre-run baseline). **No tool-allowlist exists in ANY codex-cli version** (0.149.1 installed, 0.150.1 latest, 0.150.0 notes checked -- Guardian changes are review-isolation, not tool-gating). B-Q3 (read-only-setting re-test) BLOCKED: connectors don't load in `codex exec` right now, needs re-auth, not done per "check first".
+- **C. Prompt-injection threat model** -- 10 vectors -> which layer catches each -> residual gaps (semantic social-engineering + Call-1 turn-1 violation are the honest gaps, contained not prevented). 20-payload test corpus specified.
+- **D. Codex second opinion** -- commissioned this session (`--disable apps`, read-only, config sha preserved). First run truncated at the tool timeout; re-run in background. Verdict folds into a follow-up commit.
+- **E. Recommendation: YES WITH CONDITIONS** (C1-C7): Call 2 verifiably connector-free; rigid Call 1 + sanitiser + corpus passing; no automated send anywhere (human sends every draft); non-COM kill-switch proven on a synthetic delta; fail-safe abort; shadow-run clean before cutover is even discussed; config sha logged every session. Recommended account = Oxford ChatGPT Edu + dedicated `CODEX_HOME`.
 
 ## Baseline
-`~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` at session start; no `codex login`, no `[apps]` edit, no `codex exec` run this session.
+`~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` at session start AND after the manifest read + `codex --version`/`--help` + `npm view` + the `codex exec --disable apps -s read-only` review commission. No `codex login`, no `-c` override, no config edit, no write tool exercised.
 
 ---
 

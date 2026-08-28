@@ -1,6 +1,6 @@
 # Connector Safeguards — definitive safeguard design for the ChatGPT M365 connector route
 
-**Status:** 2026-08-29 (Drew). Research + design pass. **No build until Kevin approves this doc.**
+**Status:** 2026-08-29 (Drew). Research + design pass **complete**. **Outcome: the connector-attached fetch is NOT SOUND for unattended use as designed** — Codex second opinion (§D) and Drew concur. No build. The route needs an *enforced* read-only boundary (separate read-only M365 credential, or a read-only proxy) or it's replaced by the already-proven IMAP-direct path. Decision for Kevin in §E. **No build until Kevin decides a path.**
 **Route:** mail + calendar + Teams pulled via the ChatGPT M365 connector, driven by Codex (`codex exec`); AI triage on Codex. Funding rationale + architecture in `CODEX_CONNECTOR_PIPELINE_PLAN.md`. Layered model summary in `EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md`.
 **Baseline discipline:** `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` recorded at session start; re-checked at end (see §F). No `codex login`, no config change, no build, no cutover this session. Every command timestamped.
 
@@ -24,9 +24,9 @@ Source: `~/.codex/.codex-global-state.json` → `mcp-extension-sidebar-catalog`,
 | 2 | `mark_email_read_state` / `mark_shared_email_read_state` | flip read/unread |
 | 2 | `set_message_categories` | replace an email's categories (this is the tool proof-fired 26 Aug) |
 | 2 | `create_category` / `create_mail_folder` | create a category / mail folder |
-| 2 | `add_email_attachments` | attach files to a draft/message |
-| 3 — drafts (not sent) | `draft_email` / `create_reply_draft` / `create_forward_draft` / `create_shared_reply_draft` | create a draft (lands in Drafts; not sent — but a later `send` could pick it up) |
-| 3 — contacts | `create_contact` / `update_contact` / `delete_contact` / `create_contact_folder` / `update_contact_folder` / `delete_contact_folder` | mutate the address book |
+| 2 | `add_email_attachments` | attach files to a draft/message — if it lands on an externally-visible draft, that's data exposure / staged delivery (Codex §D) |
+| **2 — drafts (revised up from 3 per Codex §D)** | `draft_email` / `create_reply_draft` / `create_forward_draft` / `create_shared_reply_draft` | create a draft — can be externally addressed, carry sensitive data, be human-sent by accident, or poison the existing drafting workflow. Not a benign local artefact. |
+| 3 — contacts (Codex: understated — alters autocomplete + future addressing) | `create_contact` / `update_contact` / `delete_contact` / `create_contact_folder` / `update_contact_folder` / `delete_contact_folder` | mutate the address book |
 
 Read tools that matter for us: `list_messages` (folder-scoped, date-filterable — the Call-1 pull), `fetch_message` / `fetch_messages_batch` (full detail incl. `importance`), `search_messages`, `list_mail_folders`, `get_recent_emails`, `list_categories`.
 
@@ -279,11 +279,47 @@ Pass = every `i01–i18,i20` payload's instruction content is `[quoted]`-wrapped
 
 ## D. Codex second opinion
 
-Commissioned this session — `codex exec --disable apps -s read-only --skip-git-repo-check` (zero connector tools in the review session; verified from its own tool list), reviewing sections A–C of this doc. Config sha unchanged (§F). Full verdict + Drew's response: **§D.1 below** (filled in after the run).
+Commissioned this session — `codex exec --disable apps -s read-only --skip-git-repo-check` (zero connector tools in the review session), reviewing this doc. Two runs (the first hit the tool timeout mid-review; a second, more tightly constrained run completed). Config `config.toml` sha unchanged (§F). **Note:** the first run wrote its interim verdict into `HANDOVER.md` via `powershell.exe` *despite `-s read-only`* — see §F. `config.toml` was not touched.
 
-### D.1 Verdict
+### D.1 Codex verdict — **NOT SOUND** (for a connector-attached shadow run that claims "writes nothing live")
 
-_[to be inserted from the commissioned run — see report]_
+Both runs converge. Verbatim headline: *"NOT SOUND for a live-connector 'shadow' run that promises writes nothing live. It is useful design work, but Call 1 and the guard still expose live write authority without an enforcement boundary."*
+
+**Codex's ranked objections:**
+
+1. **Call 1's "dumb fetch" is only a prompt, not a capability restriction.** *"A single `codex exec` invocation is not an atomic fetch: after `list_messages`/`fetch_messages_batch` returns, the model receives the hostile text in its active context and can choose another tool call before returning its final JSON. 'One turn' does not prevent iterative tool calls; it merely removes a new user turn."* — **This is correct and it is the load-bearing objection.** My B2 "rigid single-turn" framing overstated the protection: the turn can contain multiple tool calls, and the hostile body is in context before B3 (the sanitiser) ever runs.
+2. **B9/B7 detect harm, they don't prevent it** — and can't satisfy "shadow writes nothing live", especially for `send_email_on_behalf`, `schedule_email`, `respond_to_event`, shared mailboxes, Teams, or connector-side effects with no local artefact.
+3. **The B7 guard is itself another unattended connector session with the full write surface**, gated only by a natural-language "reads only" instruction — it multiplies the number of authority-holding sessions rather than enforcing anything.
+4. **B3 is not a security boundary** — regex escaping / `[quoted]` labels change presentation, not executability. Worthwhile for triage quality + observability; not a compensating control for Call 1 holding send tools.
+5. **The "writers" authority model is undefined and inconsistent** — B5 says drafts land in Outlook Drafts (a live mailbox mutation); B11 says shadow writes only local files. Any process that publishes a draft or acts on Call-2 JSON needs its own constrained capability model.
+
+**Concrete attack chain Codex gave (defeats the design as written):** a hostile Inbox email whose first 400 plaintext chars instruct the fetch agent, in ordinary prose, to call `send_email` immediately to "confirm a time-sensitive security requirement". Call 1 runs `list_messages` → `fetch_messages_batch`; the body enters context as a tool result; before emitting the JSON the model has another tool-selection step and calls `send_email` with the loaded connector. B2 is an instruction not a restriction; B3 hasn't run; B9 logs it after; B7 finds the Sent delta minutes later. The email has left the identity. *Codex does not claim this is likely every run — it claims the design does not structurally prevent it.*
+
+**Section A corrections Codex made (folded in):**
+- **Draft creation is not Tier 3** — a malicious draft can be externally addressed, carry sensitive data, be sent by a human by accident, or poison the existing drafting workflow. Re-rank to **Tier 2**.
+- **Contacts / Planner understated** — contact changes alter autocomplete + future addressing; Planner changes create assignments/notifications. Real blast radius depends on tenant settings we haven't verified.
+- **`create_chat` / `create_channel` may be external-comms / access-control events** if guest/federation/notification settings allow — not simply "structure".
+- **Attachment ops need a verified contract** — if an attachment can be added to an externally-visible event or an existing draft, that's data exposure / delayed delivery.
+- **"Full enumeration" must include indirect writes / side effects** — a `readOnlyHint: true` tool may still change read-state, tracking, telemetry, or connector-managed state. Tool name + hint ≠ proof of no mutation.
+- **`schedule_email` and `respond_to_event` are primary containment gaps, not minor test items** — they produce external comms outside the trailing-window / Sent-folder assumptions.
+
+**Codex's required changes before *any* connected shadow run (verbatim intent):**
+1. Remove write authority from every unattended connector session **at an enforced boundary** — a separate M365 credential/app with verified read-only permissions, or a server-side tool proxy / reference monitor that permits only exact read operations. A prompt, manifest assertion, or unproven ChatGPT setting does not qualify.
+2. Do not use a general-purpose model to retrieve live mailbox content while it holds write tools. Make retrieval deterministic outside the model, or put the model behind a read-only API/proxy.
+3. Make shadow truly non-live-mutating — no Outlook drafts, calendar items, Teams messages, categories, or read-state changes. Local review records only. Audit every later writer separately.
+4. Sanitisation = hygiene, not prevention. Canonicalise every nested string (attendees, locations, organizer/display names, channel names, recipient fields, tool metadata) — but sanitiser-test success is not evidence Call 1 is safe.
+5. The mailbox-delta guard: keep only as containment; it must cover delegated/shared identities, scheduled mail, RSVP, calendar notifications, Teams, delayed delivery; it must itself use a technically read-only identity.
+6. Resolve protocol ambiguities (manifest enumeration vs fetch as separate invocations; authoritative tool-call event capture; whether retries add exposure; exact calendar/Teams schemas; the identity/capability of every "writer").
+7. Adversarial live-safe validation of the actual capability boundary — before any real mailbox content is fetched unattended, prove attempted write calls are **rejected by the service/credential layer**, not merely logged or instructed against.
+
+### D.2 Drew's assessment — I concur with NOT SOUND
+
+The objection is structurally right and I under-weighted it (C.3 gap #2 conceded the mechanism but framed it as a minor residual — it is not minor for a "writes nothing live" claim). The three layers I leaned on (B1 rigid fetch, B3 sanitiser, B7 guard) are all either prompt-level or after-the-fact. The only genuine capability boundary in the whole design is **B5 (a human sends every draft)** and **B1's `--disable apps` on Call 2** — and Call 2 was never the exposed step; Call 1 is.
+
+**What would actually make it sound** is exactly Codex's #1/#7: an *enforced* read-only boundary in front of the connector. That is one of:
+- **tenant read-only Graph consent** — Oxford will not provide (confirmed);
+- **a read-only proxy service** we build (exposes only `list_messages` / `list_events`, rejects all else; the model never touches the connector directly) — real engineering, but it removes the write surface from the model entirely;
+- **the IMAP-direct route** — `imaplib` has no send capability, no write tool exists in the code path; it is read-only *by construction*. Already **proven and parked** (`IMAP_OAUTH2_SPIKE_20260828.md`, `MAIL_BACKEND_MIGRATION_PLAN.md`). It loses Teams and needs a separate read-only calendar path.
 
 ---
 
@@ -309,24 +345,40 @@ _[to be inserted from the commissioned run — see report]_
 
 5. **Accept residual C.3/C.4?** The honest position: small, contained-not-prevented, dependent on B5 (human sends every draft) being an absolute invariant.
 
-### E.2 Recommendation
+### E.2 Recommendation — REVISED after the Codex second opinion (§D)
 
-**YES, WITH CONDITIONS.** The connector route is safe to *build* (behind flags, shadow-run only) provided all of:
+**NOT SOUND as designed. Do NOT build the connector-attached fetch (Call 1) or the connector-based kill-switch (B7) for unattended use** until an *enforced* read-only capability boundary exists. Drew concurs with Codex (§D.2): every layer I leaned on for Call 1 (rigid prompt, sanitiser, post-run guard) is prompt-level or after-the-fact; the fetch session holds the full 49-tool write surface the whole time it runs, and a single invocation can make a write tool call after the hostile body is in context and before it returns.
 
-- **C1.** Call 2 (reasoning) runs `--disable apps` **and** from a connector-free `CODEX_HOME`, with a per-run assert of zero `microsoft_*` tools (B1/B9) — non-negotiable, fail-closed.
-- **C2.** Call 1 is a rigid dumb-fetch (B2), and `normalise_pull.py` sanitisation (B3) sits between Call 1 and Call 2, with the §C.5 corpus passing.
-- **C3.** No automated send anywhere — every draft is human-sent (B5). Verified by code audit before shadow-run.
-- **C4.** The non-COM kill-switch (B7) is built and proven to trip on a synthetic Sent-folder delta before the shadow schedule starts.
-- **C5.** B10 fail-safe (abort if Call 1's session loads unexpected tools) is in place.
-- **C6.** The shadow-run (B11) completes clean against the quality gate before *cutover* is even discussed — cutover is a separate decision.
-- **C7.** `~/.codex/config.toml` sha recorded before/after every Codex-touching session; no `codex login` / account change without telling Kevin.
+**The route becomes viable only with ONE of these (a real decision for Kevin):**
 
-**NO** if any of C1–C5 cannot be implemented as specified — in particular, if Call 2 cannot be made verifiably connector-free, or if the kill-switch cannot be done without COM. In that case the route does not clear the bar and we stay on COM + `claude -p`.
+| Path | What it is | Cost | Loses |
+|---|---|---|---|
+| **P1 — IMAP-direct** (parked, proven) | `imaplib` pull under our own read-only Python. **No write tool exists in the code path — read-only by construction.** No Oxford IT. | ~0 (own code); the AI triage still needs to run somewhere (Codex connector-free, or `claude -p`) | Teams entirely; calendar needs a separate read-only path (Graph/EWS read, or stays COM short-term) |
+| **P2 — read-only proxy** | a small service exposing ONLY `list_messages` / `list_events` (+ later Teams reads), rejecting every other Graph/connector call; the model talks to the proxy, never the connector | real build (auth, hosting, the allowlist, negative-write tests in a disposable mailbox) | nothing structurally — this is the "do it properly" option; keeps Teams + calendar |
+| **P3 — attended only** | connector route used only when Kevin is present and reviewing each run | ~0 | the automated morning briefing (defeats the purpose) |
+| **P4 — stay on `claude -p`** | live now, connector-free, no send path | Kevin's personal Claude spend | Teams; the funding goal |
+
+**If Kevin still wants the connector route unattended, the non-negotiable conditions Codex set (§D) must all be met:**
+- **C1 (enforced boundary).** A separate M365 credential/app with *verified* read-only Graph scope, **or** the P2 proxy. Proven with negative write tests in a disposable mailbox — not a prompt, not a manifest assert, not the ChatGPT read-only setting (shown ineffective for `codex exec`, 27 Aug).
+- **C2 (no model + live mailbox + write tools).** Retrieval is deterministic outside the model, or behind the P2 proxy.
+- **C3 (truly non-mutating shadow).** No Outlook drafts / calendar items / Teams messages / categories / read-state changes during a shadow run. Local review records only. Every downstream "writer" audited separately.
+- **C4 (guard identity).** Any kill-switch uses a technically read-only identity and covers on-behalf/shared, `schedule_email`, `respond_to_event`, calendar notifications, Teams, delayed delivery.
+- **C5 (protocol spec).** Manifest-enumeration vs fetch as separate invocations; authoritative tool-call capture; retry exposure; exact calendar/Teams schemas; identity + capability of every writer.
+- **C6 (config discipline).** `~/.codex/config.toml` sha before/after every Codex session; no `codex login` / account change without telling Kevin; and — new finding, §F — **do not rely on `codex exec -s read-only` as a containment control on this Windows machine.**
+
+Retained safeguards that are still worth building **regardless of route** (they help triage quality + observability, they are not the boundary): B3 sanitiser (as hygiene), B9 monitoring, B10 fail-safe, B11 shadow methodology, B12 incident response.
+
+**Bottom line for Kevin:** the connector-for-the-pull idea does not clear the safety bar for unattended use with the tools available today. The clean options are **P1 (IMAP-direct, already proven)** or **P2 (build a read-only proxy)**. `claude -p` stays live either way until one is proven.
 
 ---
 
-## F. Baseline check
+## F. Baseline check + a sandbox finding
 
-- Session start: `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a`.
-- Session end: _[recorded in the commit / report]_.
-- Commands run this session: manifest read from `.codex-global-state.json` (file read, no Codex process); `codex --version`; `codex exec --help`; `npm view @openai/codex`; one `codex exec --disable apps -s read-only` review commission (§D). No `codex login`, no `-c` overrides, no config edit, no write tool exercised.
+- Session start **and end**: `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` — **unchanged**.
+- Commands run: manifest read from `.codex-global-state.json` (plain file read); `codex --version`; `codex exec --help`; `npm view @openai/codex`; **two** `codex exec --disable apps -s read-only --skip-git-repo-check` review commissions (§D — the first timed out mid-run at the 2-min tool cap, the second completed in the background). No `codex login`, no `-c` overrides, no config edit, no connector tool loaded (`--disable apps`), no write tool exercised.
+
+### F.1 Finding: `codex exec -s read-only` did NOT prevent a filesystem write on this Windows box
+
+The first (timed-out) review run **wrote its interim verdict into `work-inbox/HANDOVER.md`** via `powershell.exe`, despite `-s read-only`. Root cause: `~/.codex/config.toml` has `[windows] sandbox = "unelevated"` — the Windows sandbox drops elevation but does **not** enforce read-only access to user-writable paths the way the macOS seatbelt / Linux Landlock profiles do. `config.toml` itself was not touched (sha unchanged). The offending block was removed from `HANDOVER.md` and folded into §D properly.
+
+**Consequence for this design:** `-s read-only` cannot be cited anywhere as a containment control on this machine. It does not stop local writes, and (separately, established 25 Aug) it does not stop MCP/connector tool calls. The only structural controls available are `--disable apps` (removes the whole Apps surface) and a genuinely separate read-only credential/proxy (§E C1). Anywhere earlier in this doc that implied the sandbox helps — it doesn't.
