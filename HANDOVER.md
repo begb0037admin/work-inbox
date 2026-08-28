@@ -1,3 +1,73 @@
+# Handover -- 28 August 2026, ~19:00 UTC (Drew) -- Kevin: "a reboot shouldn't break things - this is weak." 3 workstreams: WS1 boot/watchdog resilience (BUILT + DEPLOYED), WS2 sign-in recurrence (DIAGNOSED), WS3 IMAP+OAuth2 feasibility (ASSESSED -- qualified yes, spike first). Operational restore still BLOCKED on Kevin completing the interactive Oxford sign-in.
+
+## WS2 -- does a reboot force interactive re-auth every time? -- NO (it's periodic, not reboot-triggered)
+Evidence:
+- **Device is Azure-AD *registered* (Workplace Joined), NOT Azure-AD *joined*, and has NO Primary Refresh Token** (`dsregcmd /status`: `AzureAdJoined: NO`, `DomainJoined: NO`, `WorkplaceJoined: YES` to `lelitte.com` + `Nexus365`, `AzureAdPrt: NO`, `NgcSet: NO`, `WorkplaceMdmUrl:` empty = not Intune-enrolled). No PRT => no device-wide silent SSO; every Office app renews its own cached refresh token, and when one expires or a Conditional Access sign-in-frequency / MFA-claim event fires, there is **no silent path** -- Office must show an interactive prompt.
+- **Reboots alone do not break it.** The pipeline ran clean through TWO reboots in the prior 24h: 27 Aug 07:53 (after a 26 Aug 21:40 *unexpected* shutdown, Event 6008/41) and 27 Aug 23:30 (clean, Start-menu restart). Briefing succeeded 28 Aug 06:00 (logged 07:25) right after that second reboot. Today's 13:30 reboot was **clean** (Event 6006 only, no 6008/41).
+- **Token caches persist across reboot** -- `%LOCALAPPDATA%\Microsoft\{OneAuth (37 files), TokenBroker\Cache (77), IdentityCache (107)}` and `...\AAD.BrokerPlugin\...\TokenBroker` (215) all have pre-today files; nothing was wiped. `SignedOutOneAuthMigrationComplete=1`, `ConnectedOneAuthAccountId` present.
+- Credential Manager: `MicrosoftAccount:target=SSO_POP_Device` is **"Saved for this logon only"** (re-minted each logon) -- consistent with no-PRT. No `MicrosoftOffice16*` / ADAL cred entries (modern Office uses OneAuth/WAM, not Cred Manager -- expected).
+- Cached Exchange Mode is ON (2.58 GB `begb0037@ox.ac.uk.ost`). The "*.ost cannot be accessed / must connect to Microsoft Exchange*" error in cached mode = the profile's **auth/identity state is invalid and cannot be silently renewed**, so Outlook refuses to even open the cached store.
+
+**Conclusion:** the interactive prompt recurs on a **periodic** cadence (Conditional Access sign-in frequency and/or ~90-day rolling refresh-token limit / a token-revocation event), NOT on every reboot. Today's reboot merely cleared the in-memory session that had been masking an already-due re-auth. It **will** recur (days-to-weeks); a headless GUI-Outlook launch is stuck whenever it does.
+
+### WS2 proposed fixes (NOT actioned -- Kevin's call; do not change credentials without him)
+1. **Best:** ask Oxford IT to **Hybrid-Azure-AD-Join or Intune-enrol** the desktop so it gets a PRT -> silent SSO, prompts essentially stop. (Kevin may not want MDM on a personal-ish machine.)
+2. Ask Oxford IT whether `begb0037` / this device can be **exempted from an aggressive sign-in-frequency Conditional Access policy** for desktop Outlook.
+3. When Kevin next signs in, ensure **"Stay signed in"** is ticked.
+4. Accept periodic prompts + rely on WS1 watchdog toast + pursue WS3.
+PS 5.1 command for Kevin to snapshot device state next time it breaks: `dsregcmd /status | Select-String 'AzureAdPrt|AzureAdJoined|WorkplaceJoined'`
+
+## WS1 -- boot/logon resilience + keepalive watchdog -- BUILT, TESTED, DEPLOYED
+**Restore point:** no such scheduled task existed before; removal = `Unregister-ScheduledTask -TaskName 'Classic Outlook Keepalive' -Confirm:$false` (or run `Unregister-ClassicOutlookKeepalive.ps1`). Desktop scripts are harmless without the task.
+
+- **`Ensure-ClassicOutlook.ps1`** (Desktop; repo ref copy `docs/desktop-scripts/`, commit `1d3cd12`) -- rewritten from the earlier preflight-only version into a health-model script, always exits 0:
+  - classic Outlook running + quick MAPI probe OK -> healthy, exit in ~2s (fast path).
+  - not running / only `olk.exe` up -> launch `OUTLOOK.EXE` via `explorer.exe` (escapes any Task Scheduler job object).
+  - launched / still starting -> poll MAPI up to 120s.
+  - still not ready -> raise ONE desktop toast ("Classic Outlook needs sign-in", via `Show-TaskNotification.ps1`/BurntToast), **rate-limited to 1/hour** via `%LOCALAPPDATA%\WorkInboxAI\classic_outlook_signin_toast.stamp`; stamp cleared on recovery.
+- **`Run Classic Outlook Keepalive Hidden.vbs`** (Desktop; ref copy commit `00f5d48`) -- hidden fire-and-forget launcher, same pattern as the briefing's hidden VBS.
+- **Scheduled task `Classic Outlook Keepalive`** (registered live on the admin machine; ref scripts `Register-/Unregister-ClassicOutlookKeepalive.ps1`, commits `b3ac4f5` / `66a7fc9`):
+  - Triggers: **AtLogOn** (DESKTOP-MJDJM64\admin) + a **time trigger repeating every 10 min** for 3650 days.
+  - Principal: `admin`, **Interactive**, **Limited** (never elevated -- Outlook must not run as admin).
+  - Settings: `MultipleInstances=IgnoreNew`, `ExecutionTimeLimit=PT5M`, `StartWhenAvailable`, battery-agnostic.
+  - Action: `wscript.exe "...Run Classic Outlook Keepalive Hidden.vbs"`.
+- Also still wired as the **synchronous preflight** in `Run Inbox Briefing.bat` (backup `...backup-20260828-182721`) and `Run Draft Diff Capture.bat` (backup `...backup-20260828-183209`).
+- **Verified:** standalone run against the currently-stuck Outlook -> correctly waited 120s, raised the toast, wrote the stamp; immediate re-run -> "toast suppressed - last one 3 min ago" (rate-limit works). Task registered, config confirmed (`Get-ScheduledTask`), test-run `LastTaskResult=0`. Healthy fast-path is verified by inspection only (can't reach a healthy Outlook until the sign-in is done).
+
+**Known limitation (by design, per WS2):** the keepalive cannot complete an interactive Oxford sign-in. When that's what's blocking, it relaunches Outlook (so the prompt is on screen) and toasts Kevin hourly. Kevin still has to click.
+
+## WS3 -- IMAP + OAuth2 to drop the GUI-Outlook dependency -- QUALIFIED YES, run a spike before any rearchitecture
+Answering the coordinator's specific questions, against the 24-27 Aug history (ChatGPT connector rejected for ungateable writes; MS Graph rejected as admin-consent-gated / Oxford-IT-decision = Kevin-only, confirmed dead end):
+
+1. **IMAP reachable + OAuth2-capable at the service:** `outlook.office365.com:993` reachable from the Oxford network (not blocked). IMAP banner OK; `CAPABILITY` returns **`AUTH=XOAUTH2 LOGINDISABLED`** -- OAuth2 bearer auth supported, Basic Auth off (expected). `msal` 1.37.0 already installed on the machine. Oxford tenant `cc95de1b-97f5-4f93-b4ba-fe68b852cf91`, namespace **Managed** (not federated), cloud MFA.
+2. **IMAP enabled for the *mailbox* `begb0037@ox.ac.uk`?** -- UNKNOWN, cannot confirm without admin or a live OAuth token. Oxford tenants sometimes disable IMAP per-mailbox/policy. **This is the #1 spike question.**
+3. **App registration / consent -- is it admin-gated like Graph was?** -- Looks **NO**, and this is the key difference from Graph. A device-code flow for scope `https://outlook.office365.com/IMAP.AccessAsUser.All offline_access` **started successfully** (user_code issued, no rejection) against Oxford's tenant using BOTH the **Microsoft Office first-party client id** `d3590ed6-52b3-4102-aeff-aad2292ab01c` (pre-consented in virtually all tenants -- **needs no Oxford app registration at all**) and the Thunderbird public client id. Consent *completion* still needs Kevin to actually authenticate once -- but with the MS Office 1P client there is very likely no separate admin-consent step (unlike Graph's `Mail.Read` app permission). If a Conditional-Access app-control or app-consent-policy blocks it at the consent step, IMAP dies for the same class of reason Graph did -- the spike will tell us in ~10 min.
+4. **Headless auth flow + reboot survival:** device-code once (Kevin, interactive, ~1 min) -> MSAL persists a refresh token to `msal_token_cache.bin` -> the scheduled job calls `acquire_token_silent()` every run, which **survives reboots fine**. Periodic re-auth still happens (no PRT -- same root as WS2, Conditional-Access sign-in-frequency / ~90-day rolling), BUT it surfaces as a clean catchable `invalid_grant` / `AADSTS50173`/`AADSTS700082` error the Python job **detects and toasts**, instead of a wedged GUI. Net: doesn't eliminate periodic re-auth, converts it from a silent hang to a loud, non-blocking notify.
+5. **No write surface / no connector-style risk:** IMAP is read + folder-ops only; it has **no concept of Outlook categories** (only `\Seen \Flagged \Deleted` + custom keywords + COPY/MOVE/EXPUNGE). `fetch_inbox.py` Phase 1 is already **read-only** and there is **no autonomous agent with tools** -- it's our own deterministic Python -- so the ChatGPT-connector "ungateable write" problem does **not** recur. (Note: MS publishes no narrower delegated IMAP scope than `IMAP.AccessAsUser.All`, so the "no write" guarantee is "our code never calls a write", not a token-level restriction.)
+6. **Rewrite cost -- `fetch_inbox.py` Phase 1 field mapping:**
+   - sender / subject / received-time / unread -> IMAP `ENVELOPE` + `INTERNALDATE` + `FLAGS` -- easy.
+   - body preview -> `BODY[TEXT]` -- easy.
+   - **Importance / X-Priority** -> recoverable from MIME headers via `BODY[HEADER.FIELDS (IMPORTANCE X-PRIORITY)]` -- moderate.
+   - Follow-up flag -> IMAP `\Flagged` -- easy.
+   - **Outlook Categories** -> **NOT available over IMAP.** Needs a code audit of how much Phase 1 tiering / VIP logic depends on categories; either drop it or keep a tiny separate call (Graph dead, so COM).
+   - **Outlook EntryID / `openmail://` opener** -> NOT available. Switch "Open email" to an OWA deep-link keyed on the internet Message-ID (`ENVELOPE` gives it). **Precedent already in the estate:** command-centre `sourceType=codex-graph` -> `web_link` OWA-hyperlink opener (26 Aug).
+   - subfolders (Phase 1c, 5 trees), Sent (VIP sweep), Drafts (`draft_final_diff_capture.py`) -> IMAP `LIST`/`SELECT` -- fine.
+   - **Calendar (Phase 3.7 raw + Phase 3.8 AI summaries + the Calendar tab)** -> **IMAP has no calendar at all.** Stays on Outlook COM (or EWS, retiring Oct 2026, or Graph, dead). **So IMAP shrinks the Outlook dependency a lot but does not remove it** unless calendar is dropped or split to its own path.
+
+### WS3 recommendation
+**Qualified yes.** Do NOT rearchitect yet. Run a ~30-min spike: Kevin completes one device-code auth with client id `d3590ed6-52b3-4102-aeff-aad2292ab01c`; a throwaway Python script does `acquire_token_silent` -> IMAP `SELECT INBOX` -> fetch 1 message. 
+- **Pass** -> phased migration: move the **mail pull** to IMAP+OAuth2 (kills the fragile 2.6 GB OST + GUI + sign-in-hang dependency for the daily briefing's mail half); keep a **much smaller calendar-only** Outlook COM surface (calendar automation doesn't lean on the giant OST the way the mail pull does, so it's far less exposed to the "must connect to Exchange" failure). Net robustness win.
+- **Fail** (IMAP disabled for the mailbox, or consent blocked) -> IMAP is out for the same policy reason as Graph; report and stop; fall back to WS1 + WS2-option-1 (get a PRT).
+
+## Operational restore -- STILL BLOCKED ON KEVIN (unchanged)
+Classic Outlook (PID 18136) launched by Drew ~18:11, still stuck on the "Windows Security" / Oxford sign-in prompt (`CredentialUIBroker` PID 3944 still open) as of 19:00. Steps for Kevin unchanged (see the ~18:40 entry below). After he signs in, verify BOTH pipelines with `schtasks /run` (do not assume).
+
+## Commits this session (all work-inbox `main` unless noted)
+`f9ffb54` diagnosis HANDOVER · `5f3fce5` fetch_inbox.py connect_to_outlook rework · `1b08b28` first preflight PS1 · `ab2fa46` consolidated HANDOVER · `1d3cd12` Ensure-ClassicOutlook.ps1 (WS1 rewrite) · `00f5d48` keepalive VBS · `b3ac4f5` Register-ClassicOutlookKeepalive.ps1 · `66a7fc9` Unregister-ClassicOutlookKeepalive.ps1 · (this entry).
+Drew memory: `017ac4c`, confirmed-fact `03f0668`.
+
+---
+
 # Handover -- 28 August 2026, ~18:40 UTC (Drew) -- CONSOLIDATED: both Outlook-COM pipelines failed after a 13:30 reboot left classic Outlook closed. Root cause identical for both. Preventive fixes built, tested, and DEPLOYED. Operational restore is BLOCKED on Kevin completing an interactive Windows Security / Oxford sign-in prompt that classic Outlook is sitting on.
 
 ## What failed, and for how long
