@@ -1,10 +1,12 @@
 {
-  "generated": "2026-08-27T17:19:21.013498+00:00",
+  "generated": "2026-08-28T06:25:36.421495+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
     {
-      "source_entry_id": "lauren-draft-15-20260818",
+      "source_entry_id": "",
+      "open_mode": "none",
+      "tick_id": "lauren-draft-15-20260818",
       "subject": "RE: Organisational Structure Update - August 2026 - DRAFT",
       "sender_tier": "senior-management",
       "draft_text": "Hi all,\n\nThanks Simon -- agreed the PeopleXD impact looks limited overall, and the three new management units (0C01 Kellogg, 0C02 St Cross, 0C03 Reuben) make sense to properly align the Societies area.\n\nOn the H&S dashboard mapping risk you flagged: that one I want to check myself before this goes live, rather than assume it carries through cleanly -- I'll validate the data-warehouse org-structure mapping tables (the ones David and Christopher built for the dashboard) against the Colleges/Societies L2->L3 move.\n\nSarah -- on your timing question: [CONFIRM: proposed go-live date for this change, and whether it can be scheduled to avoid your Monday 24 Aug HESA generate]\n\nNo further errors or omissions to flag from our side beyond the above -- this reply covers our feedback ahead of Wednesday's deadline.\n\nBest,\nKevin",
@@ -41,6 +43,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079A4937640000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079A4937640000",
       "subject": "REF29 UDF",
       "sender_tier": "senior-management",
       "draft_text": "Hi Simon,\n\nNoted, thanks \u2014 I built this UDF in UOXU myself on 6 July with Nathan (REFQUALCON Yes/No and REF Panel A/B/C/D dropdowns across the four appointment slots), so I know the config well. [CONFIRM: agree the \"allow update on CorePortal\" option should stay deselected, per your assumption] \u2014 I'll make sure it's set up the same way in LIVE.\n\nBest,\nKevin",
@@ -75,6 +79,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000",
       "subject": "Re: My Development Insight reports",
       "sender_tier": "other",
       "draft_text": "Hi Julie,\n\nSorry for the delay on this \u2014 answers below, pulling in some history from the Talent Module UAT work with Access Group (Case 67835089) last November, though some of this may have moved on since:\n\n1. [CONFIRM: exact live-availability date for all People Management Administrators] \u2014 this was part of the same UAT round; as of last November we were still working to promote these once validated, so worth confirming the actual go-live date before I put one in writing.\n2. [CONFIRM: whether these can still move to the Professional Development section] \u2014 I don't have anything on this specific point, sorry \u2014 genuinely nothing in my records covers it.\n3. The Gender Analysis report was designed to give a gender breakdown per employee, though the criteria for which employees are included was still being clarified as of last November \u2014 [CONFIRM: whether that's since been finalised]. Worth flagging that the test environment had 241 active employees showing as Gender Unknown at that point, in case that's still relevant.\n4. Gender on the Review Status report was one of the priority items from the same UAT round \u2014 Access Group confirmed they could add it, but as of November were still reviewing it in Live. [CONFIRM: current status] \u2014 nothing more recent than that on my side.\n\nBest,\nKevin",
@@ -116,6 +122,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998600000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998600000",
       "subject": "Multi Company Setup",
       "sender_tier": "other",
       "draft_text": "Hi Conor,\n\nThanks for the heads up \u2014 enjoy the time off, and appreciate Laurence covering while you're away.\n\nBest,\nKevin",
@@ -141,6 +149,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000751A5367B0000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000751A5367B0000",
       "subject": "Urgent request for an SQL report please to help identify balance code",
       "sender_tier": "other",
       "draft_text": "Hi Anna,\n\n[CONFIRM: this request is from 10 April \u2014 four months old. Please check whether it's already been actioned or overtaken by events before sending anything.]\n\nIf it's still live: happy to take a look \u2014 could you send over the department list and any documentation on the balance code matrix you're working from? I'll review and reach out to Access Group for a quote and timeline on the SQL report, same as we've done for similar ad hoc report requests, and let you know next steps once I hear back from them.\n\nBest,\nKevin",
@@ -173,6 +183,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000",
       "subject": "DTP1092 College Staff into PXD - Testing",
       "sender_tier": "other",
       "draft_text": "Hi Crispin,\n\nHappy to talk this through. Good timing on our side too \u2014 the College post profiles went into UOXU in early July, and Nathan set up some dummy staff records once those landed, ready for further testing.\n\n[CONFIRM: whether the open items from the spring config sessions (the Company 90 pay scale code, and the downstream-systems/BizTalk-CUD exclusion check) have since been signed off \u2014 worth confirming those are cleared before we lock in the testing assumptions.]\n\nI'll make sure the right people from HR Systems are in the session. Let me know if there's anything you'd like us to come prepared with beforehand.\n\nBest,\nKevin",
@@ -211,6 +223,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B73828F0000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B73828F0000",
       "subject": "RE: #External# PeopleXD Insight Reporting \u2013 Quote Request for Holiday Records Reports",
       "sender_tier": "other",
       "draft_text": "Hi Alan,\n\nApologies for the delay coming back to you \u2014 good to hear this is approved and ready to move. I've got a few slots that could work for a kickoff/scoping call with you and Conor, pending final confirmation on my side: Tuesday 18 August, 1:30\u20132:15pm; Thursday 20 August, 1:30\u20132:15pm; or Monday 24 August, 10:00\u201310:45am. Let me know which works best for you both, or send over a couple of alternatives if none of these fit.\n\nBest,\nKevin",
@@ -231,7 +245,9 @@
       }
     },
     {
-      "source_entry_id": "lauren-draft-14-20260818",
+      "source_entry_id": "",
+      "open_mode": "none",
+      "tick_id": "lauren-draft-14-20260818",
       "subject": "Re: Auto job alert notification email - text changes",
       "sender_tier": "other",
       "draft_text": "Hi Laura,\n\nApologies for the delay \u2013 I said I'd pick this back up towards the end of July and it's now mid-August, so this is later than I intended.\n\n[CONFIRM: current status/ETA on the Access Group support ticket \u2013 I don't have a live status for this beyond \"still open as of 8 Jul, root cause not yet fixed,\" so please fill in the actual latest before sending] I'm still working through the backend issue with Access Group \u2013 the saved config change isn't yet taking effect on the outgoing notification emails.\n\nOnce it's confirmed working in test, I'll send you a screenshot for your sign-off before we push it to Live, as agreed.\n\nBest,\nKevin",
@@ -269,7 +285,9 @@
       }
     },
     {
-      "source_entry_id": "lauren-draft-16-20260818",
+      "source_entry_id": "",
+      "open_mode": "none",
+      "tick_id": "lauren-draft-16-20260818",
       "subject": "RE: Cority - Applicant Data Import file",
       "sender_tier": "other",
       "draft_text": "Hi both,\n\nThanks for working through this -- good progress narrowing down the header and date-of-birth issues.\n\nJames -- good that you've already got a ticket open with Cority support on the column-mapping mismatch; let us know what they come back with.\n\nOn Simon's two open questions from Friday:\n1. Null value handling for the automated CSV export: [CONFIRM: preferred null-value handling -- blank / NULL / N/A / dash]\n2. UTF-8 encoding: [CONFIRM: encoding requirements -- confirm UTF-8 is fine for Cority's import, or what they require instead]\n\nOn the network folder for an automated export: [CONFIRM: destination folder/location to point this at]\n\nOn where this report came from -- I know it's not sitting right that it's not on the QA server and has no change request behind it, especially given it's now a live interface file. [CONFIRM: what do you know about this report's origin from Lee's handover?] I'll dig into what I have and come back to you both.\n\nBest,\nKevin",
@@ -315,6 +333,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186E90000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186E90000",
       "subject": "RE: Kevin Lelitte shared \"KPI presentation - July 2026\" with you",
       "sender_tier": "direct-report",
       "draft_text": "Hi Michael,\n\nThanks for flagging \u2014 that's not an error, the two figures are pulling from different things. Slide 4's Incident Tasks total is the full \u201cIncident \u2013 Other\u201d category for the month; Slide 5's is a filtered subset (the Non-HR Self Service Incident Tasks breakdown) that deliberately excludes categories like Pensions, Applicant, My Development, Applications/Software and BizTalk/SSIS & Azure \u2014 which is why it comes out lower (62 vs 100).\n\nFair point that it reads as inconsistent sitting on two slides like that though. [CONFIRM: want me to add a short footnote on Slide 5 clarifying it's a filtered subset, so this doesn't come up again next month?]\n\nBest,\nKevin",
@@ -349,6 +369,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A8968C280000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A8968C280000",
       "subject": "FW: Support Call# 11701239: NHS Pension tiers new pay ranges",
       "sender_tier": "direct-report",
       "draft_text": "Hi Michael,\n\nThanks for flagging \u2014 yes, worth keeping me in the loop on this one. I saw Athena's reply to you on the 13th confirming we only need the Employer Contribution Rates for our statutory reporting, not the full tier bandings.\n\nLooking at what you've sent through: this looks like the employee tier table (5.2%\u201312.5% bands), and you've said those percentages are unchanged \u2014 it's just the pensionable pay ranges that have moved. [CONFIRM: does the employer contribution rate itself need updating too, or is it only these employee bands changing? If it's only the employee bands, this shouldn't actually affect what Athena needs for reporting.]\n\nSounds like you've already got Linda checking the weekly/monthly thresholds before this goes into UOXU for testing \u2014 happy to take a look once that's done if it'd help.\n\nBest,\nKevin",
@@ -385,6 +407,8 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000",
+      "open_mode": "com",
+      "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000",
       "subject": "RE: REF29 UDF - Promotion to UOXP",
       "sender_tier": "other",
       "draft_text": "Hi Nathan,\n\nNo problem, and thanks for flagging it. You've got the right idea - \"Display on CorePortal\" is the setting that's doing this.\n\nThe one thing I can't do is have it show only for people who already have a completed record. That setting is a straight on or off for everyone in scope - there's nothing in between, so there's no way to show it just for the people whose form has been filled in. It's either visible to all staff, with most of them seeing a blank form for now, or hidden from everyone, including the people who do have data.\n\nMy suggestion is to leave it on, the way Simon set it up. It affects very few people, a blank record does no harm, and the form is read-only so nobody can change anything by mistake - it just means the people who do need it can see and use it straight away.\n\n[CONFIRM for Kevin: as written, this holds the line and leaves Display on. Nathan did also ask for it \"off for now\" - if you'd rather concede that, say so and I'll add a line offering to switch Display off until more records are populated. Everything else in the reply stands either way.]\n\nLet me know how you'd like to leave it.\n\nBest,\nKevin",
