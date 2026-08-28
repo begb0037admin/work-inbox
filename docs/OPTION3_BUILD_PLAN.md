@@ -1,10 +1,19 @@
 # Option 3 Build Plan — Connector-free `CODEX_HOME` + Outlook COM data pull
 
-> **DORMANT as of 27 Aug 2026 ~16:30 (Drew).** Kevin pivoted the whole approach
-> away from Codex to **headless Claude Code** — see
-> `docs/CLAUDE_CODE_HEADLESS_SCOPE.md` and the "PIVOT" entry in
-> `docs/CODEX_CONNECTOR_MIGRATION_RESEARCH.md` Section 9. This file is kept for
-> history, not deleted; nothing in it is being built.
+> **SUPERSEDED as of 29 Aug 2026 (Drew) by `docs/CODEX_CONNECTOR_PIPELINE_PLAN.md`.**
+> Kevin decided 28 Aug to use the ChatGPT M365 **connector** for the pull
+> (mail + calendar + Teams) — the *opposite* shape to this plan, which was
+> connector-*free* + Outlook COM. The write-gate is handled by the layered
+> mitigation model in `docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md`, and the
+> end state is **COM-free** (no classic Outlook, no desktop app). This file is
+> kept for history only — nothing in it is being built. The reusable pieces it
+> references (`categorise_and_stage.py`, `build_call2_brief.py`,
+> `build_granola_context.py` on branch `drew/codex-phase2-ai-triage`) carry
+> forward into the new plan.
+>
+> _Earlier banner (27 Aug): pivoted away from Codex to headless Claude Code.
+> That `claude -p` pipeline is live now and stays live as the fallback until
+> the connector path is proven at parity._
 
 **Status:** Written 2026-08-27 (Drew). Build plan only — nothing in this file
 has been built, logged in, configured, deployed, or scheduled. Same shape as

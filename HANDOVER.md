@@ -1,3 +1,24 @@
+# Handover -- 29 August 2026, ~02:30 UTC (Drew) -- Direction SETTLED: ChatGPT M365 connector for the pull (mail+calendar+Teams), Codex for triage. Reconciled plan written. Doc framing fixed (FUNDING, not compliance). Build increment 1 in progress (branch, parallel-only).
+
+## Decision (Kevin, 28-29 Aug) -- this is execution, not scoping
+- **Connector route chosen.** ChatGPT M365 connector does the pull; AI triage moves to Codex. Reason is **FUNDING, not compliance**: Claude is allowed at Oxford, but `claude -p` is Kevin's *personal* subscription; Oxford-funded **ChatGPT Edu covers Codex CLI** programmatic use. Also the connector is the only route that reaches **Teams** (currently invisible to work-inbox) + calendar in one place. **Q1 is RESOLVED** -- not a policy question.
+- **`claude -p` stays LIVE** as the triage engine + fallback until the Codex path is proven at parity. Stopping it = no briefings.
+- **Write-gate = layered mitigation model** (`docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md`), NOT gating connector write tools (that's unfixable in codex-cli 0.149.1). Layers: dumb-fetch Call 1 -> sanitise -> connector-free Call 2 (zero `microsoft_*` tools) -> connector Sent-folder delta kill-switch -> human review of every draft.
+- **COM-free end state** (Kevin, 29 Aug): Kevin does not run classic Outlook. Zero dependency on it -- incl. calendar (connector reads it) and the kill-switch (reworked to a connector Sent read, NOT the COM sweep). Retirement list in the plan; nothing removed yet.
+
+## Docs this session
+- **NEW `docs/CODEX_CONNECTOR_PIPELINE_PLAN.md`** -- the one coherent plan for a cold session. Architecture (2 Codex calls split by connector attachment), reused components (the 26-Aug branch scripts), normalised pull schema, build increments, COM-free kill-switch (§6a), parity-via-`briefing.json`-history (§6b, no manual COM runs), retirement list (§8), hard gates.
+- `docs/OPTION3_BUILD_PLAN.md` -- SUPERSEDED banner (it was the opposite shape: connector-free + COM).
+- `docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md` -- stripped the "sanctioned / in-policy / governance" framing; it's FUNDING (Oxford ChatGPT Edu vs Kevin's personal Claude). Q1 marked RESOLVED. Route table -> "Runs on whose funding?".
+
+## Build (branch `drew/codex-connector-pipeline`, parallel-only, no live path touched)
+Increment 1: `tools/codex_triage/normalise_pull.py` (backend-agnostic pull schema + Layer-2 sanitiser) + refreshed `categorise_and_stage.py`. Test = feed a `WI_MAIL_PARALLEL` COM dump, confirm the urgent/needs/fyi/low split matches a live `fetch_inbox.py` Phase-3 run. See report for status.
+
+## Baseline
+`~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` at session start; no `codex login`, no `[apps]` edit, no `codex exec` run this session.
+
+---
+
 # Handover -- 29 August 2026, ~01:15 UTC (Drew) -- IMAP+OAuth2 = PROVEN, now PARKED (not abandoned). Direction change from Kevin: Oxford sanctions ONLY the ChatGPT M365 connector as the approved mailbox bridge; direct OAuth (IMAP/Thunderbird client, Graph-direct) works today but is unsanctioned and a locking-down tenant may block it. Oxford IT will NOT grant tenant read-only Graph consent. New brief: `docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md` (commit 4412ea2).
 
 ## IMAP+OAuth2 -- status: PROVEN, PARKED

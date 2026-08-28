@@ -6,13 +6,13 @@
 
 work-inbox needs to pull mail (and ideally calendar) for AI triage 5x/weekday. Three routes to the Microsoft 365 cloud mailbox exist:
 
-| Route | Token holder | Sanctioned by Oxford? | Status |
+| Route | Token holder | Runs on whose funding? | Status |
 |---|---|---|---|
-| IMAP (OAuth2, Thunderbird public client) | our own read-only Python | No — rides a Microsoft first-party preauthorization | **Proven, parked** (`IMAP_OAUTH2_SPIKE_20260828.md`) |
-| Graph-direct (OAuth2) | our own read-only Python | No — untested, likely admin-gated | Not attempted |
-| **ChatGPT M365 connector** | **Codex (`codex exec`)** | **Yes — Oxford has consented the ChatGPT enterprise app** | Write-gate unresolved |
+| IMAP (OAuth2, Thunderbird public client) | our own read-only Python | n/a (own code, no AI cost) — but rides a Microsoft first-party preauthorization Oxford didn't grant | **Proven, parked** (`IMAP_OAUTH2_SPIKE_20260828.md`) |
+| Graph-direct (OAuth2) | our own read-only Python | n/a — untested, likely admin-gated | Not attempted |
+| **ChatGPT M365 connector** | **Codex (`codex exec`)** | **Oxford** — ChatGPT Edu (Oxford-funded) covers Codex CLI use; also the only route that reaches Teams + calendar | **CHOSEN 28 Aug.** Write-gate handled by the layered mitigation model below, not by gating connector tools. |
 
-Kevin's position (28 Aug): a tenant that is locking down to "ChatGPT only" is exactly the kind that will later block unsanctioned OAuth clients — which would kill IMAP-direct and Graph-direct both. The ChatGPT connector may become the only governance-durable route to mail **and** calendar.
+Kevin's position (28 Aug): this is a **funding** choice, not a compliance one. Using Claude is allowed at Oxford; the issue is that `claude -p` runs on Kevin's **personal** Claude subscription, whereas Oxford pays for **ChatGPT Edu**, and ChatGPT Edu's entitlement **does** cover Codex CLI / programmatic use (confirmed). Moving the pipeline to Codex shifts the running cost from Kevin's personal spend onto Oxford's paid entitlement. Kevin also has a personal ChatGPT Plus account. Separately, the ChatGPT M365 connector is the only route that also reaches **Teams** (currently invisible to work-inbox) and calendar in one place.
 
 ## The core risk
 
@@ -41,12 +41,12 @@ In headless `codex exec` these tools **cannot be reliably denied**. Every local 
 
 - Layers 1–2 do the real work: if the connector never reasons over untrusted content, the injection surface nearly closes.
 - Layers 3–6 are backstops of decreasing strength. Layer 5 (human-in-the-loop on every draft) is the only hard guarantee.
-- Stacked, residual risk of an unintended external send is **small but non-zero**. There is no perfect enforcement on the Oxford-sanctioned path.
-- This is a **risk-acceptance decision for Kevin**: accept a small, mitigated residual to stay on the sanctioned, calendar-capable, New-Outlook-proof path — versus stay on COM + the `Classic Outlook Keepalive` watchdog (zero external-send risk, but a hard cliff for calendar when New Outlook is forced).
+- Stacked, residual risk of an unintended external send is **small but non-zero**. There is no perfect enforcement of the connector's write tools; the layered model is what makes the residual acceptable.
+- This is a **risk-acceptance decision for Kevin** (made 28 Aug: proceed with the connector): accept a small, mitigated residual to move running cost onto Oxford-funded ChatGPT Edu and gain Teams + calendar in one path — versus stay on COM + `claude -p` on Kevin's personal spend (zero external-send risk, no Teams, and a hard cliff for calendar when New Outlook is forced).
 
 ## Open questions to resolve before committing
 
-1. **Is Claude Code in-policy at Oxford, or is ChatGPT the only sanctioned AI tool?** The triage currently runs on headless Claude Code (`claude -p`, cut over 27 Aug). If only ChatGPT is sanctioned, the triage engine also has to move, not just the mail pull. — Kevin / governance.
+1. **RESOLVED (28 Aug, Kevin): not a policy question — a funding one.** Claude is allowed; the point is that `claude -p` is Kevin's personal spend and Oxford-funded ChatGPT Edu covers Codex CLI use. Both the mail pull *and* the triage engine move to Codex so the running cost sits on Oxford's entitlement. `claude -p` stays live as the fallback until the Codex path is proven at parity.
 2. **Does the connector actually expose a `send` / `reply` / `forward` / `draft-create` tool?** One read-only `codex exec` tool-manifest enumeration answers it definitively. — Drew.
 3. **Does the connector "read-only" / "allow read actions only" setting hold for `codex exec` in the current codex-cli?** Re-test; it did not in 0.149.1 as of 27 Aug. — Drew.
 
@@ -74,7 +74,7 @@ In headless `codex exec` these tools **cannot be reliably denied**. Every local 
 - The 27 Aug write-gate re-test could **not** be repeated: with zero connector tools in the `codex exec` session there is nothing to apply a read-only restriction to.
 - **Assume the 27 Aug finding still stands** (the ChatGPT read-only setting did NOT remove the write tools from a headless `codex exec` tool list) until it can be re-verified against a session that actually loads the connectors -- nothing in the CLI has changed to fix it.
 
-### Q1 -- stays open (governance, Kevin): is headless Claude Code in-policy at Oxford, or is ChatGPT the only sanctioned AI tool? If only ChatGPT, the triage engine (currently `claude -p`, cut over 27 Aug) also has to move.
+### Q1 -- RESOLVED (28 Aug, Kevin): FUNDING, not policy. Claude is allowed; `claude -p` is Kevin's personal spend while Oxford-funded ChatGPT Edu covers Codex CLI programmatic use. Both mail pull and triage move to Codex to put running cost on Oxford's entitlement. `claude -p` stays the live fallback until the Codex path is proven at parity.
 
 ## Not changing anything yet
 
