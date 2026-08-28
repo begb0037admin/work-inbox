@@ -50,6 +50,32 @@ In headless `codex exec` these tools **cannot be reliably denied**. Every local 
 2. **Does the connector actually expose a `send` / `reply` / `forward` / `draft-create` tool?** One read-only `codex exec` tool-manifest enumeration answers it definitively. — Drew.
 3. **Does the connector "read-only" / "allow read actions only" setting hold for `codex exec` in the current codex-cli?** Re-test; it did not in 0.149.1 as of 27 Aug. — Drew.
 
+## Q2 / Q3 findings -- read-only investigation, 2026-08-28 ~22:05 UTC (Drew)
+
+**Baseline discipline held.** `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` **before and after, unchanged**. No `codex login`, no `[apps]` edits, no writes, no Outlook/mail/calendar/Teams action. One `codex exec -s read-only --skip-git-repo-check --json` enumeration run (10s, exit 0; JSONL shows a single `agent_message`, **zero tool calls**), plus `codex mcp list` and `codex features list` (read-only status). codex-cli **0.149.1** (no 0.150.x on the machine; not updated). Artifacts in the session scratchpad, not committed.
+
+### Q2 -- does the connector expose send / reply / forward / draft-create?
+
+**Two-level answer:**
+
+1. **In the connector's published manifest (ChatGPT account catalog, `~/.codex/.codex-global-state.json` -> `mcp-extension-sidebar-catalog`): YES.** The "Microsoft Outlook Email" connector (`connector_4aaab2856305417b993eca9a216aaf6e`) is still catalogued today; its tool set (per the 28 Aug enumeration in HANDOVER) includes `send_email`, `send_email_on_behalf`, `reply_to_email`, `forward_email`, `schedule_email`, `draft_email`, `create_reply_draft`, `create_forward_draft`, `create_shared_reply_draft`, `move_email`, `mark_email_read_state`, `set_message_categories` (46 tools, ~24 state-changing). "Microsoft Outlook Calendar" (`connector_e6a7394...`) and "Microsoft Teams" (`connector_246af09...`) are also catalogued. **So the connector definition does contain send/reply/forward/draft-create tools.**
+
+2. **In an actual headless `codex exec -s read-only` session right now: NONE of them load.** The live tool manifest returned was **only**: `functions.exec`, `functions.wait`, `collaboration.spawn_agent`, `collaboration.followup_task`, `collaboration.interrupt_agent`, `collaboration.list_agents`, `collaboration.send_message`, `collaboration.wait_agent`. **Zero `microsoft_*` / `outlook` / `email` / `teams` / `calendar` / `github` tools.** This is a **change from 26-27 Aug**, when `microsoft_outlook_email.set_message_categories` was proven callable from `codex exec`.
+   - `codex features list`: `apps` = stable/**true** (Apps enabled), `enable_mcp_apps` = under development/false.
+   - `codex mcp list`: only `meeting-context`, `node_repl`, `openaiDeveloperDocs`, and `cua_repl` (**disabled** -- the `ChatGPT.exe` bridge). No connector MCP entries (connectors are "Apps", bridged via the ChatGPT app-server, not `mcp_servers`).
+   - **Why the connectors aren't loading into `codex exec` is undetermined.** Candidates: connector-side auth expired ("not currently logged in for connectors"); the `cua_repl` / ChatGPT app-server bridge being disabled/not running; residual state from the 27 Aug plugin-disable tests. Resolving it needs `codex login` / launching the ChatGPT app -- which the brief says not to do -- so per instruction, **STOPPED here**.
+
+**Net:** the send tools are real and defined, but as of this check they are **not reachable from `codex exec`**. Do NOT treat this as a durable safety property -- it is an unexplained current state, not an enforced control; a `codex login` / connector re-auth / ChatGPT-app launch could restore them.
+
+### Q3 -- does the "read-only" / "allow read actions only" setting hold for `codex exec` now?
+
+**Currently untestable, and the underlying mechanism is unchanged from 27 Aug.**
+- codex-cli is still **0.149.1**. `exec_permission_approvals` (the feature that would gate connector tools) = still "under development / disabled". No `--allowed-tools` / `--deny-tool` in `codex exec --help`.
+- The 27 Aug write-gate re-test could **not** be repeated: with zero connector tools in the `codex exec` session there is nothing to apply a read-only restriction to.
+- **Assume the 27 Aug finding still stands** (the ChatGPT read-only setting did NOT remove the write tools from a headless `codex exec` tool list) until it can be re-verified against a session that actually loads the connectors -- nothing in the CLI has changed to fix it.
+
+### Q1 -- stays open (governance, Kevin): is headless Claude Code in-policy at Oxford, or is ChatGPT the only sanctioned AI tool? If only ChatGPT, the triage engine (currently `claude -p`, cut over 27 Aug) also has to move.
+
 ## Not changing anything yet
 
 COM + `Classic Outlook Keepalive` watchdog remains the live mail path. IMAP is parked as proven. This brief is analysis only — no route change without Kevin's explicit go-ahead.
