@@ -70,7 +70,8 @@ _CACHE_DIR = os.path.join(
 TOKEN_CACHE_PATH = os.path.join(_CACHE_DIR, "msal_imap_token_cache.bin")
 
 # Header fields we pull per message (cheap; one FETCH round trip).
-_HEADER_FIELDS = "SUBJECT FROM TO CC DATE MESSAGE-ID IMPORTANCE X-PRIORITY X-MSMAIL-PRIORITY"
+_HEADER_FIELDS = ("SUBJECT FROM TO CC DATE MESSAGE-ID IMPORTANCE X-PRIORITY "
+                  "X-MSMAIL-PRIORITY CONTENT-CLASS LIST-UNSUBSCRIBE LIST-ID PRECEDENCE")
 
 # Exchange Online IMAP hierarchy separator is "/".
 _SEP = "/"
@@ -177,15 +178,20 @@ def _decode_hdr(raw):
                 out.append(txt.decode(enc or "utf-8", errors="replace"))
             else:
                 out.append(txt)
-        return "".join(out).strip()
+        # Collapse header folding (CRLF+WSP) and any internal whitespace runs
+        # to single spaces -- COM's msg.Subject returns clean single-line text,
+        # so the parity diff must too.
+        return re.sub(r"\s+", " ", "".join(out)).strip()
     except Exception:
-        return str(raw)
+        return re.sub(r"\s+", " ", str(raw)).strip()
 
 
 def _parse_from(raw_from):
-    """-> (display_name, smtp_address_lower)."""
+    """-> (display_name, smtp_address). Address case is PRESERVED to match COM's
+    msg.SenderEmailAddress (which keeps the sender's original casing);
+    case-insensitive handling is done at every comparison site instead."""
     name, addr = email.utils.parseaddr(_decode_hdr(raw_from))
-    return name.strip(), (addr or "").lower().strip()
+    return name.strip(), (addr or "").strip()
 
 
 def _importance_from_headers(msg):
@@ -213,47 +219,98 @@ def _importance_from_headers(msg):
     return 1
 
 
+# Every SMTP address that resolves to Kevin's mailbox. kevin.lelitte@... is the
+# primary; begb0037@ox.ac.uk is the alias a lot of external/marketing mail is
+# addressed to. COM's PropertyAccessor GAL-resolves the alias to the primary,
+# so it counts begb0037@ as "Kevin"; the raw IMAP To: header does not -- hence
+# this explicit alias set. Extended at runtime with the authenticated UPN.
+_KEVIN_ADDRS = {"kevin.lelitte@admin.ox.ac.uk", "begb0037@ox.ac.uk"}
+
+
 def _kevin_is_primary_recipient(msg, kevin_email):
-    """True if Kevin's address is in To. Over IMAP the raw RFC822 To: header
-    carries real SMTP addresses (no Exchange GAL display-name substitution),
-    so this is simpler and more reliable than the COM PropertyAccessor path.
-    Fails OPEN (True) on any parse failure -- same philosophy as the COM
-    version: never silently suppress a real email over a read failure."""
+    """True if any address that resolves to Kevin's mailbox is in To. Over IMAP
+    the raw RFC822 To: carries real SMTP addresses (no GAL display-name
+    substitution). Fails OPEN (True) on parse failure / no To: header -- same
+    philosophy as the COM version: never silently suppress a real email."""
+    addrs = {a.lower() for a in _KEVIN_ADDRS} | {(kevin_email or "").lower()}
     try:
-        tos = email.utils.getaddresses([msg.get("To", "")])
+        raw_to = msg.get("To", "") or ""
+        if not raw_to.strip():
+            return True  # no To header at all -> can't tell -> fail open, like COM
+        tos = email.utils.getaddresses([raw_to])
         for _n, a in tos:
-            if a and a.lower().strip() == kevin_email.lower():
+            if a and a.lower().strip() in addrs:
                 return True
+        # A parseable To: that doesn't contain Kevin -> he's not the direct
+        # recipient. (COM can't always resolve this and fails OPEN; over IMAP
+        # the raw To: is authoritative, so a small number of marketing-blast
+        # rows will legitimately read False here where COM read True -- the
+        # parity report surfaces those for eyeballing rather than us copying
+        # COM's fail-open quirk.)
         return False
     except Exception:
         return True
 
 
-def _has_attachments(bodystructure_bytes):
-    """Heuristic: an 'attachment' disposition token anywhere in BODYSTRUCTURE.
-    Parity-diff (diff_mail_pull.py) will surface any mismatch vs COM's
-    msg.Attachments.Count > 0 (which also counts inline images COM-side)."""
-    if not bodystructure_bytes:
+def _has_attachments(full_msg):
+    """True if the parsed message carries a real attachment -- any part with a
+    filename, an explicit attachment disposition, or a non-text/non-multipart/
+    non-message content type. Approximates COM's msg.Attachments.Count > 0
+    (which also counts inline images); residual diffs on inline-only mail are
+    surfaced by diff_mail_pull.py."""
+    if full_msg is None:
         return False
-    s = bodystructure_bytes.decode("utf-8", errors="replace").lower()
-    return '"attachment"' in s or "(\"attachment\"" in s
+    try:
+        if not full_msg.is_multipart():
+            return False
+        for part in full_msg.walk():
+            if part.is_multipart():
+                continue
+            if part.get_filename():
+                return True
+            disp = (part.get("Content-Disposition") or "").lower()
+            if "attachment" in disp:
+                return True
+            ct = (part.get_content_type() or "").lower()
+            maintype = ct.split("/", 1)[0]
+            if maintype not in ("text", "multipart", "message"):
+                return True
+        return False
+    except Exception:
+        return False
 
 
 def _text_preview(raw_message_bytes, limit=150):
+    def _decode_part(part):
+        raw = part.get_payload(decode=True) or b""
+        return raw.decode(part.get_content_charset() or "utf-8", errors="replace")
+
     try:
         m = email.message_from_bytes(raw_message_bytes)
-        body = ""
+        plain = ""
+        html_txt = ""
         if m.is_multipart():
             for part in m.walk():
-                if part.get_content_type() == "text/plain" and not part.get_filename():
-                    body = part.get_payload(decode=True) or b""
-                    charset = part.get_content_charset() or "utf-8"
-                    body = body.decode(charset, errors="replace")
-                    break
+                ct = part.get_content_type()
+                if part.get_filename():
+                    continue
+                if ct == "text/plain" and not plain:
+                    plain = _decode_part(part)
+                elif ct == "text/html" and not html_txt:
+                    html_txt = _decode_part(part)
         else:
-            payload = m.get_payload(decode=True) or b""
-            charset = m.get_content_charset() or "utf-8"
-            body = payload.decode(charset, errors="replace")
+            if m.get_content_type() == "text/html":
+                html_txt = _decode_part(m)
+            else:
+                plain = _decode_part(m)
+        body = plain
+        if not body.strip() and html_txt:
+            # crude tag strip -- COM's msg.Body returns plain text even for
+            # HTML-only mail, so the preview must too.
+            body = re.sub(r"(?is)<(script|style).*?</\1>", " ", html_txt)
+            body = re.sub(r"(?s)<[^>]+>", " ", body)
+            body = re.sub(r"&nbsp;?", " ", body)
+            body = re.sub(r"&amp;", "&", body)
         body = re.sub(r"\s+", " ", body).strip()
         return body[:limit]
     except Exception:
@@ -288,47 +345,55 @@ def _uid_search_since(M, cutoff):
     return data[0].split()
 
 
-def _fetch_one(M, uid, want_body):
-    """Return an email.message.Message of the headers we care about, plus
-    (flags_bytes, internaldate_dt, bodystructure_bytes, raw_full_or_None)."""
-    items = f"(FLAGS INTERNALDATE BODYSTRUCTURE BODY.PEEK[HEADER.FIELDS ({_HEADER_FIELDS})]"
-    items += " BODY.PEEK[])" if want_body else ")"
-    typ, data = M.uid("FETCH", uid, items)
+def _fetch_one(M, uid, want_body=True):
+    """-> (headers_msg, flags_bytes, internaldate_dt, raw_full_bytes_or_None).
+
+    Two FETCH calls: one for FLAGS/INTERNALDATE/headers, one for BODY.PEEK[]
+    (the full raw message). Combining multiple BODY.PEEK[...] literals in one
+    FETCH makes imaplib's response hard to parse reliably -- that is why
+    body_preview came back empty on the first live run. raw_full is always
+    fetched (attachment detection needs it, not just the preview)."""
+    typ, data = M.uid(
+        "FETCH", uid,
+        f"(FLAGS INTERNALDATE BODY.PEEK[HEADER.FIELDS ({_HEADER_FIELDS})])",
+    )
     if typ != "OK" or not data:
         return None
     header_blob = b""
-    raw_full = None
     flags = b""
-    bodystructure = b""
     internaldate = None
     for part in data:
-        if isinstance(part, tuple):
-            meta, payload = part[0], part[1]
-            if b"HEADER.FIELDS" in meta:
-                header_blob = payload
-            elif meta.rstrip().endswith(b"BODY[]") or b"BODY[]" in meta:
-                raw_full = payload
-            if b"FLAGS" in meta:
-                fm = re.search(rb"FLAGS \(([^)]*)\)", meta)
-                if fm:
-                    flags = fm.group(1)
-            im = re.search(rb'INTERNALDATE "([^"]+)"', meta)
-            if im:
-                internaldate = im.group(1).decode("ascii", "replace")
-            bm = re.search(rb"BODYSTRUCTURE (.+)", meta, re.S)
-            if bm:
-                bodystructure = bm.group(1)
+        meta = part[0] if isinstance(part, tuple) else part
+        if isinstance(part, tuple) and b"HEADER" in (part[0] or b""):
+            header_blob = part[1]
+        if b"FLAGS" in meta:
+            fm = re.search(rb"FLAGS \(([^)]*)\)", meta)
+            if fm:
+                flags = fm.group(1)
+        im = re.search(rb'INTERNALDATE "([^"]+)"', meta)
+        if im:
+            internaldate = im.group(1).decode("ascii", "replace")
     if not header_blob:
         return None
     msg = email.message_from_bytes(header_blob)
     idt = _parse_internaldate(internaldate)
     if idt is None:
-        # fall back to the RFC822 Date header
         try:
             idt = email.utils.parsedate_to_datetime(msg.get("Date"))
         except Exception:
             idt = None
-    return msg, flags, idt, bodystructure, raw_full
+
+    raw_full = None
+    try:
+        t2, d2 = M.uid("FETCH", uid, "(BODY.PEEK[])")
+        if t2 == "OK":
+            for part in d2:
+                if isinstance(part, tuple) and part[1]:
+                    raw_full = part[1]
+                    break
+    except Exception:
+        raw_full = None
+    return msg, flags, idt, raw_full
 
 
 def _parse_internaldate(s):
@@ -363,16 +428,22 @@ def _received_str(dt_obj):
     return dt_obj.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def _build_entry(msg, flags, idt, bodystructure, raw_full, kevin_email, source_folder=None):
+def _build_entry(msg, flags, idt, raw_full, kevin_email, source_folder=None):
     is_read = b"\\Seen" in (flags or b"")
     name, addr = _parse_from(msg.get("From"))
+    full = None
+    if raw_full:
+        try:
+            full = email.message_from_bytes(raw_full)
+        except Exception:
+            full = None
     entry = {
         "subject": _decode_hdr(msg.get("Subject")),
         "from": name or addr,
         "from_email": addr,
         "received": _received_str(idt),
         "is_read": is_read,
-        "has_attachments": _has_attachments(bodystructure),
+        "has_attachments": _has_attachments(full),
         "importance": _importance_from_headers(msg),
         "entry_id": "",  # no IMAP equivalent -- see migration plan
         "message_id": (msg.get("Message-ID") or "").strip(),
@@ -406,15 +477,23 @@ def _scan_mailbox(M, mailbox, cutoff, cap_unread, cap_read, kevin_email,
         if counters["unread"] >= cap_unread and counters["read"] >= cap_read:
             break
         try:
-            fetched = _fetch_one(M, uid, want_body=True)
+            fetched = _fetch_one(M, uid)
             if not fetched:
                 continue
-            msg, flags, idt, bodystructure, raw_full = fetched
+            msg, flags, idt, raw_full = fetched
             # client-side re-apply of the exact cutoff (SINCE is date-only)
             if idt is not None:
                 naive = idt.replace(tzinfo=None) if idt.tzinfo else idt
                 if naive < cutoff:
                     continue
+            # COM's inbox pull is effectively mail-only (it throws + skips on
+            # IPM.Schedule.* items). Match that: drop meeting responses so the
+            # briefing doesn't gain "Accepted:/Declined:" rows it never had.
+            if "calendarmessage" in (msg.get("Content-Class") or "").lower():
+                continue
+            if re.match(r"^\s*(accepted|declined|tentative|tentatively accepted|"
+                        r"not accepted):\s", _decode_hdr(msg.get("Subject")), re.I):
+                continue
             mid = (msg.get("Message-ID") or "").strip()
             if mid and mid in captured_ids:
                 continue
@@ -423,7 +502,7 @@ def _scan_mailbox(M, mailbox, cutoff, cap_unread, cap_read, kevin_email,
                 continue
             if not is_read and counters["unread"] >= cap_unread:
                 continue
-            entry = _build_entry(msg, flags, idt, bodystructure, raw_full,
+            entry = _build_entry(msg, flags, idt, raw_full,
                                  kevin_email, source_folder=source_folder)
             counters["inbox"].append(entry)
             if mid:
@@ -440,7 +519,20 @@ def _imap_quote(name):
     return '"' + name.replace('"', '\\"') + '"'
 
 
+def _mutf7_encode_ascii(name):
+    """Minimal IMAP modified-UTF-7 for the ASCII folder names we use: only '&'
+    needs escaping ('&' -> '&-'). Exchange Online returns e.g. 'INBOX/H&-S' for
+    a folder named 'H&S'. None of the SUBFOLDER_TREES contain non-ASCII, so the
+    full codec isn't needed here."""
+    return name.replace("&", "&-")
+
+
+_LIST_RE = re.compile(rb'^\((?P<flags>[^)]*)\)\s+(?P<sep>"[^"]*"|NIL)\s+(?P<name>.+)$')
+
+
 def _list_mailboxes(M):
+    """-> [(name_str, flags_str), ...] over the whole account. name_str is left
+    in the server's modified-UTF-7 form (compare against _mutf7_encode_ascii)."""
     typ, data = M.list()
     out = []
     if typ != "OK" or not data:
@@ -448,10 +540,14 @@ def _list_mailboxes(M):
     for row in data:
         if not row:
             continue
-        s = row.decode("utf-8", errors="replace")
-        m = re.search(r'\(([^)]*)\)\s+"?([^"]*)"?\s+"?(.+?)"?$', s)
-        if m:
-            out.append(m.group(3))
+        m = _LIST_RE.match(row.strip())
+        if not m:
+            continue
+        name = m.group("name").decode("ascii", "replace").strip()
+        if name.startswith('"') and name.endswith('"'):
+            name = name[1:-1]
+        flags = m.group("flags").decode("ascii", "replace")
+        out.append((name, flags))
     return out
 
 
@@ -471,6 +567,8 @@ def pull(cutoff, *, kevin_email, vip_names, vip_emails, subfolder_trees,
     """
     log(f"IMAP mail pull starting ({_now()}) - cutoff {cutoff:%Y-%m-%d %H:%M}")
     token, upn = acquire_token_silent(log=log)
+    if upn:
+        _KEVIN_ADDRS.add(upn.lower())
     M = _imap_connect(token, upn, log=log)
     try:
         captured_ids = set()
@@ -493,7 +591,7 @@ def pull(cutoff, *, kevin_email, vip_names, vip_emails, subfolder_trees,
         for e in vip_counter["inbox"]:
             if e["message_id"] and e["message_id"] in captured_ids:
                 continue
-            if (e["from"] or "").strip() in vip_names_l or (e["from_email"] or "") in vip_emails_l:
+            if (e["from"] or "").strip() in vip_names_l or (e["from_email"] or "").lower() in vip_emails_l:
                 inbox.append(e)
                 if e["message_id"]:
                     captured_ids.add(e["message_id"])
@@ -502,15 +600,16 @@ def pull(cutoff, *, kevin_email, vip_names, vip_emails, subfolder_trees,
         log(f"IMAP - VIP sweep added {vip_added} - total {len(inbox)}")
 
         # --- named subfolder trees ---
-        all_boxes = _list_mailboxes(M)
+        all_boxes = [n for (n, _f) in _list_mailboxes(M)]
         sub_counter = {"inbox": [], "unread": 0, "read": 0}
         sub_added_before = len(inbox)
         for tree in subfolder_trees:
-            target = "INBOX" + _SEP + tree
+            target = "INBOX" + _SEP + _mutf7_encode_ascii(tree)
             matches = [b for b in all_boxes
                        if b == target or b.startswith(target + _SEP)]
             if not matches:
-                log(f"IMAP - no subfolder matching {target!r} - skipped this run")
+                log(f"IMAP - no subfolder matching {target!r} "
+                    f"(tree {tree!r}) - skipped this run")
                 continue
             for box in matches:
                 if (sub_counter["unread"] >= sub_max_unread
@@ -574,23 +673,67 @@ def _pull_sent(M, cutoff, log=print):
         return []
 
     out = []
+    seen_mids = set()
+    _resp_prefix = re.compile(
+        r"^\s*(accepted|declined|tentative|tentatively accepted|not accepted|"
+        r"cancelled|canceled):\s", re.I)
     for uid in sorted(_uid_search_since(M, cutoff), key=lambda b: int(b), reverse=True):
         try:
-            fetched = _fetch_one(M, uid, want_body=True)
+            fetched = _fetch_one(M, uid)
             if not fetched:
                 continue
-            msg, flags, idt, _bs, raw_full = fetched
+            msg, flags, idt, raw_full = fetched
             if idt is not None:
                 naive = idt.replace(tzinfo=None) if idt.tzinfo else idt
                 if naive < cutoff:
                     continue
+            subject = _decode_hdr(msg.get("Subject"))
+            # Exclude meeting requests / responses / calendar-invite copies that
+            # land in Sent Items -- the COM Sent pull never surfaces these (its
+            # dt(msg.SentOn) filter drops IPM.Schedule.* items). Match COM's
+            # clean set: Content-Class header (covers requests AND responses),
+            # subject prefix, or a text/calendar part.
+            if "calendarmessage" in (msg.get("Content-Class") or "").lower():
+                continue
+            if _resp_prefix.match(subject or ""):
+                continue
+            full = None
+            if raw_full:
+                try:
+                    full = email.message_from_bytes(raw_full)
+                except Exception:
+                    full = None
+            if full is not None:
+                if "calendar" in (full.get_content_type() or ""):
+                    continue
+                if full.is_multipart() and any(
+                    p.get_content_type() == "text/calendar" for p in full.walk()
+                ):
+                    continue
+            # Exchange strips the iCal part from the SENT copy of a meeting
+            # request / calendar-share, leaving a plain text/html item that has
+            # no header or MIME tell -- but COM excludes it via MessageClass
+            # (IPM.Schedule.*). The one reliable remaining signal on this
+            # mailbox is the invite body preamble.
+            _bt = _text_preview(raw_full or b"", limit=400).lower()
+            if _bt.startswith("microsoft outlook web access:"):
+                continue
+            if ("\nwhen:" in _bt or " when:" in _bt[:80]) and \
+               ("\nwhere:" in _bt or "\nlocation:" in _bt or "outlook web access" in _bt):
+                continue
+            mid = (msg.get("Message-ID") or "").strip()
+            mid_norm = mid.strip("<>").lower()
+            if mid_norm and mid_norm in seen_mids:
+                continue
+            if mid_norm:
+                seen_mids.add(mid_norm)
             out.append({
-                "subject": _decode_hdr(msg.get("Subject")),
+                "subject": subject,
                 "to": _decode_hdr(msg.get("To")),
                 "sent": _received_str(idt),
                 "body_preview": _text_preview(raw_full or b"", limit=100),
                 "entry_id": "",
-                "message_id": (msg.get("Message-ID") or "").strip(),
+                "message_id": mid,
             })
         except Exception:
             continue

@@ -1,3 +1,24 @@
+# Handover -- 29 August 2026, ~01:15 UTC (Drew) -- IMAP+OAuth2 = PROVEN, now PARKED (not abandoned). Direction change from Kevin: Oxford sanctions ONLY the ChatGPT M365 connector as the approved mailbox bridge; direct OAuth (IMAP/Thunderbird client, Graph-direct) works today but is unsanctioned and a locking-down tenant may block it. Oxford IT will NOT grant tenant read-only Graph consent. New brief: `docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md` (commit 4412ea2).
+
+## IMAP+OAuth2 -- status: PROVEN, PARKED
+- **Proven** (28 Aug spike + this session's live runs): device-code auth via Thunderbird public client, silent token refresh survives restart, INBOX/subfolders/Sent all readable, mapped to the exact Phase 1 dict shape. `MAIL_BACKEND=com` (default, unset everywhere) is byte-identical to before -- the `imap` path is dead code until explicitly enabled.
+- **Parked, not abandoned.** No further work on the IMAP path or the parity harness pending Kevin's route decision (COM+watchdog vs sanctioned ChatGPT connector). All code stays on `main` behind the unset flag.
+- **Live mail path unchanged:** Outlook COM + the `Classic Outlook Keepalive` scheduled task (WS1).
+- Reason parked: the connector is the governance-durable route (survives a tenant lockdown and covers calendar + New-Outlook); IMAP-direct might get blocked.
+
+## Parity harness -- state at park (better than expected; do not sink more time in)
+The coordinator's park note assumed "common=0 / Sent over-collects / 2 subfolders unresolved". This session actually fixed those BEFORE the redirect landed -- committed so the work isn't lost, then stopped:
+- **Message-ID join now works** -- `diff_mail_pull.py` joins COM<->IMAP on the internet Message-ID (COM side captures `PR_INTERNET_MESSAGE_ID` **only** under `WI_MAIL_PARALLEL=1`; zero live-pipeline change otherwise). Last run: INBOX common 48/52, **SENT parity OK (10==10)**, **REAL parity issues: 0** (+31 benign X.500->SMTP address-format improvements, +5 read-cap-boundary churn on read fyi-tier items).
+- **Parity path is now Phase-1-only** -- `fetch_inbox.py` exits right after the `WI_MAIL_PARALLEL` mail dump: no Granola, no calendar, no AI call, no push. Each capture ~10-20s (was ~8 min with two `claude -p` calls). This is what made the earlier run look "stuck on Granola".
+- **imap_mail.py hardened**: separate BODY.PEEK[] fetch (body previews were empty), HTML->text preview fallback, `_has_attachments` from the parsed message, header whitespace/folding normalised, `from_email` case preserved to match COM, IMAP modified-UTF-7 subfolder match (`H&S`->`INBOX/H&-S`), Sent filters meeting requests/responses + dedups on Message-ID, meeting-response items filtered from the INBOX pull to match COM's effective mail-only behaviour, Kevin's `begb0037@ox.ac.uk` alias counted as a primary-recipient address.
+- **Known residual (not chased, by direction):** `INBOX/Bi-monthly CDR/PD working group` is not visible over IMAP (the `/` in the folder name collides with the IMAP hierarchy separator) -- low traffic, skipped + logged. The 5 read-cap-churn items are meeting-response/NDR noise near the 30-read cap.
+- Desktop `Run Mail Parity Test.bat` writes `mail_parity_last_run.log` (full stdout+stderr) and `data/parallel/parity_<ts>.json`.
+
+## Connector technical questions Q2/Q3 -- investigation (read-only, no build/cutover/config change)
+See `docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md` "Open questions". Q2 (does the connector expose send/reply/forward/draft-create?) and Q3 (does the ChatGPT "read-only" setting hold for `codex exec` on the current CLI?) -- answered below / in the brief. Q1 (is Claude Code in-policy at Oxford) stays open, governance question for Kevin.
+
+---
+
 # Handover -- 29 August 2026, ~00:10 UTC (Drew) -- IMAP migration: DEPLOYMENT GAP CLOSED. The build (commit 6c8be03) had only landed in the repo, not on the machine, so the parity test could not start. Now fixed. Still NOT cut over; `MAIL_BACKEND` unset; live `\Work Inbox Briefing` task untouched.
 
 ## What was missing and what was done

@@ -1150,6 +1150,22 @@ KEVIN_EMAIL = "kevin.lelitte@admin.ox.ac.uk"
 PR_SMTP_ADDRESS = "http://schemas.microsoft.com/mapi/proptag/0x39FE001E"
 olTo = 1
 
+# PR_INTERNET_MESSAGE_ID (Unicode). Captured on each COM mail item ONLY during
+# a WI_MAIL_PARALLEL parity capture, so diff_mail_pull.py can join COM<->IMAP
+# rows on the stable internet Message-ID (COM EntryID and IMAP UID are
+# different namespaces). Outside parity mode this returns "" without touching
+# COM at all -> zero change to the live pipeline (no extra PropertyAccessor
+# call, and message_id is stripped in inbox_for_api regardless).
+PR_INTERNET_MESSAGE_ID = "http://schemas.microsoft.com/mapi/proptag/0x1035001F"
+
+def _com_message_id(msg):
+    if not MAIL_PARALLEL:
+        return ""
+    try:
+        return (msg.PropertyAccessor.GetProperty(PR_INTERNET_MESSAGE_ID) or "").strip()
+    except Exception:
+        return ""
+
 def _kevin_is_primary_recipient(msg):
     """True if Kevin's address appears in To (addressed directly), False if
     only in CC (or not found at all -- distribution lists/aliases mean this
@@ -1202,6 +1218,7 @@ for msg in ([] if MAIL_BACKEND == "imap" else restrict_date(_inbox_folder, cutof
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance,
             "entry_id":        msg.EntryID,
+            "message_id":      _com_message_id(msg),
             "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
         }
         if not is_read:
@@ -1233,6 +1250,7 @@ for msg in ([] if MAIL_BACKEND == "imap" else restrict_date(mapi.GetDefaultFolde
             "has_attachments": msg.Attachments.Count > 0,
             "importance":      msg.Importance,
             "entry_id":        msg.EntryID,
+            "message_id":      _com_message_id(msg),
             "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg)
         }
         if not is_read:
@@ -1301,6 +1319,7 @@ def _build_subfolder_entry(msg, is_read, source_folder):
         "has_attachments": msg.Attachments.Count > 0,
         "importance":      msg.Importance,
         "entry_id":        msg.EntryID,
+        "message_id":      _com_message_id(msg),
         "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg),
         "source_folder":   source_folder,
     }
@@ -1370,7 +1389,8 @@ for msg in ([] if MAIL_BACKEND == "imap" else mapi.GetDefaultFolder(5).Items):
                 "to":           msg.To,
                 "sent":         str(msg.SentOn),
                 "body_preview": (msg.Body or "")[:100],
-                "entry_id":     msg.EntryID
+                "entry_id":     msg.EntryID,
+                "message_id":   _com_message_id(msg)
             })
     except:
         continue
@@ -1401,19 +1421,33 @@ if MAIL_BACKEND == "imap":
     print(f"Phase 1 - IMAP mail pull: inbox {len(inbox)} "
           f"(unread {_imap_res['meta']['inbox_unread']}) sent {len(sent)}")
 
-# -- WI_MAIL_PARALLEL: dump raw mail lists for diff_mail_pull.py, push nothing --
+# -- WI_MAIL_PARALLEL: dump the raw mail lists for diff_mail_pull.py, then EXIT.
+#    The parity test compares mail fields only (subject / from / importance /
+#    is_read / ...). Everything after this point -- calendar (COM), Granola
+#    (Phase 3.7), the combined AI call, card building, push -- is pure latency
+#    and failure risk for the parity test and is deliberately skipped. This
+#    also removes the classic-Outlook-for-calendar dependency from the parity
+#    run. Gated entirely on WI_MAIL_PARALLEL, which only "Run Mail Parity
+#    Test.bat" sets -- the live briefing never sets it, so live behaviour
+#    (Granola included) is untouched. --
 if MAIL_PARALLEL:
     _pdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "parallel")
+    _pfx = "imap" if MAIL_BACKEND == "imap" else "com"
+    _dump_ok = False
     try:
         os.makedirs(_pdir, exist_ok=True)
-        _pfx = "imap" if MAIL_BACKEND == "imap" else "com"
         with open(os.path.join(_pdir, f"{_pfx}_inbox_raw.json"), "w", encoding="utf-8") as _f:
             json.dump(inbox, _f, indent=2, default=str)
         with open(os.path.join(_pdir, f"{_pfx}_sent_raw.json"), "w", encoding="utf-8") as _f:
             json.dump(sent, _f, indent=2, default=str)
-        log(f"Phase 1 - WI_MAIL_PARALLEL wrote {_pfx}_inbox_raw.json / {_pfx}_sent_raw.json")
+        _dump_ok = True
+        log(f"Phase 1 - WI_MAIL_PARALLEL wrote {_pfx}_inbox_raw.json "
+            f"({len(inbox)} items) / {_pfx}_sent_raw.json ({len(sent)} items)")
     except Exception as _pe:
-        log(f"WARNING: WI_MAIL_PARALLEL dump failed - {_pe}")
+        log(f"ERROR: WI_MAIL_PARALLEL dump failed - {type(_pe).__name__}: {_pe}")
+    log(f"Phase 1 - WI_MAIL_PARALLEL ({_pfx}) mail-only capture done; skipping "
+        f"calendar / Granola / AI / push. Exiting {'0' if _dump_ok else '1'}.")
+    raise SystemExit(0 if _dump_ok else 1)
 
 # PR_SENDER_NAME (MAPI proptag 0x0C1A001E) -- the display name of
 # whoever actually submitted/booked the item. For entries booked by an
@@ -1615,7 +1649,7 @@ cal_tomorrow = _cal_for_date(tomorrow)
 cal_day2     = _cal_for_date(day2)
 cal_day3     = _cal_for_date(day3)
 
-inbox_for_api = [{k: v for k, v in m.items() if k != "entry_id"} for m in inbox]
+inbox_for_api = [{k: v for k, v in m.items() if k not in ("entry_id", "message_id")} for m in inbox]
 
 SYSTEM = """You are Kevin's morning inbox briefing assistant at Oxford University Personnel Services.
 Your ONLY job is to write the context paragraph. You do not categorise emails. You do not produce cards.
