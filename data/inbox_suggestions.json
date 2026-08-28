@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28 07:25",
+  "generated_at": "2026-08-28 09:05",
   "new_tasks": [
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
@@ -62,5 +62,15 @@
       "carried_forward": true
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t2608261500531",
+      "task_title": "Locate documentation on Grade 2 increment bar changes (2024 uplift)",
+      "note": "Michael O'Sullivan is continuing the Grade 2 increment bar changes inquiry, noting SQL code evidence in Nik's folder suggesting development work was started.",
+      "email_subject": "One class period, no production required",
+      "email_from": "Erik at Soundtrap",
+      "received": "2026-08-27 21:37",
+      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B27990200000"
+    }
+  ]
 }
