@@ -1,3 +1,28 @@
+# Handover -- 29 August 2026, ~00:10 UTC (Drew) -- IMAP migration: DEPLOYMENT GAP CLOSED. The build (commit 6c8be03) had only landed in the repo, not on the machine, so the parity test could not start. Now fixed. Still NOT cut over; `MAIL_BACKEND` unset; live `\Work Inbox Briefing` task untouched.
+
+## What was missing and what was done
+- **Run dir** `C:\Users\admin\Documents\Claude\Projects\work-inbox` now has `imap_mail.py`, `reauth_imap.py`, `diff_mail_pull.py` (curl-pulled from `main`), and `fetch_inbox.py` refreshed to `main` (byte-identical `com` behaviour; `.backup-*-pre-mailbackend-siblings` kept). All four `py_compile` clean in place. The run-dir git clone is heavily drifted (HEAD `c8ab371`) -- used `curl`, never `git pull`.
+- **`D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat`** -- primes the IMAP token. Pulls `imap_mail.py`+`reauth_imap.py` fresh into the run dir, runs `reauth_imap.py`, `pause`s. Reference copy `docs/desktop-scripts/`.
+- **`D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat`** -- one click: pulls `fetch_inbox.py`+`imap_mail.py`+`diff_mail_pull.py` fresh, runs `MAIL_BACKEND=com WI_MAIL_PARALLEL=1`, then `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1`, then `diff_mail_pull.py`. Sets `MAIL_BACKEND` per-process only; unsets before the diff. Pushes/mutates nothing. Reference copy `docs/desktop-scripts/`.
+- Stale repo-root `Re-auth Work Inbox IMAP.bat` (the `git fetch`-based first cut) removed; `docs/desktop-scripts/` copies are canonical.
+- Smoke-tested on the machine: both `.bat`s present on Desktop; `import reauth_imap, imap_mail, diff_mail_pull` OK from the run dir; `diff_mail_pull.py` runs (exit 2 = "no captures yet", correct).
+
+## Kevin's exact sequence (PowerShell 5.1) -- every path exists now
+```
+# (a) prime the IMAP token once (approve the device code in a browser)
+& "D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat"
+# (b) run the parity capture + diff (classic Outlook must be running + Connected to Exchange)
+& "D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat"
+# (c) output here:
+Get-ChildItem "C:\Users\admin\Documents\Claude\Projects\work-inbox\data\parallel"
+```
+Repeat (b) across 3-4 windows over 2-3 days. Then Kevin+Lauren eyeball, dashboard JS opener branch ships+approved, Phase 3.9 decision, then Kevin's fresh explicit go-ahead before any cutover.
+
+## Commits
+Deployment-plumbing commit on `main` (see Drew's report for the clickable link). No change to `fetch_inbox.py` logic beyond what 6c8be03 already shipped.
+
+---
+
 # Handover -- 28 August 2026, ~23:30 UTC (Drew) -- IMAP+OAuth2 mail-pull migration: DESIGNED + BUILT behind a flag, default OFF, NOT cut over. Spike (run by the coordinator while Drew was rate-limited) PASSED. No `.bat` / scheduled-task change. `MAIL_BACKEND=com` path is byte-identical to before.
 
 ## Spike result folded in (was standalone `docs/IMAP_OAUTH2_SPIKE_20260828.md`)

@@ -98,6 +98,30 @@ Compares, per message (matched on `Message-ID`, falling back to subject+sender+t
 
 Writes `data/parallel/parity_<ts>.json` + a console report. Exit 0 only on total parity.
 
+### Deployment (done 28 Aug 2026 — the parity test is self-contained)
+The scheduled `\Work Inbox Briefing` task pulls **only** `fetch_inbox.py` fresh from `raw.githubusercontent.com/.../main/` into the run dir `C:\Users\admin\Documents\Claude\Projects\work-inbox` — it does not fetch sibling modules. So:
+- `imap_mail.py`, `reauth_imap.py`, `diff_mail_pull.py` were pulled from `main` into the run dir directly, and `fetch_inbox.py` there was refreshed to `main` (byte-identical `com` behaviour; a `.backup-*-pre-mailbackend-siblings` copy was kept). All four compile in place.
+- **`D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat`** — primes the token. Pulls `imap_mail.py` + `reauth_imap.py` fresh into the run dir, then runs `reauth_imap.py`. Reference copy: `docs/desktop-scripts/Re-auth Work Inbox IMAP.bat`.
+- **`D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat`** — one-click parity run. Pulls `fetch_inbox.py` + `imap_mail.py` + `diff_mail_pull.py` fresh into the run dir, runs the `com` capture, the `imap` capture, then `diff_mail_pull.py`. Sets `MAIL_BACKEND` per-process only; unsets it before the diff. Reference copy: `docs/desktop-scripts/Run Mail Parity Test.bat`.
+- The run-dir local git clone is heavily drifted (HEAD `c8ab371`, large uncommitted delete diff) — the `.bat`s deliberately use `curl` raw pulls, never `git pull`, on that dir.
+
+### Exact commands for Kevin (PowerShell 5.1)
+```powershell
+# (a) prime the IMAP token once — approve the device code in a browser
+& "D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat"
+
+# (b) run the COM + IMAP parallel capture and diff (classic Outlook must be
+#     running and "Connected to: Microsoft Exchange" for the com half)
+& "D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat"
+
+# (c) parity output:
+#     C:\Users\admin\Documents\Claude\Projects\work-inbox\data\parallel\
+#       com_inbox_raw.json / imap_inbox_raw.json / com_sent_raw.json / imap_sent_raw.json
+#       parity_<timestamp>.json  (+ the console report the .bat echoes)
+Get-ChildItem "C:\Users\admin\Documents\Claude\Projects\work-inbox\data\parallel"
+```
+Repeat (b) across 3–4 windows over 2–3 days. The `.bat` pushes nothing and mutates nothing.
+
 ### Acceptance gate before cutover
 1. `diff_mail_pull.py` shows **no `only_in_*` and no field mismatches** (bar the known-benign `from_email` X.500→SMTP improvement and sub-second `received` jitter) across **at least 3–4 scheduled cycles over 2–3 days**.
 2. Kevin and/or Lauren eyeball a couple of those `imap` briefings on the dashboard for "does this look right".
@@ -106,7 +130,7 @@ Writes `data/parallel/parity_<ts>.json` + a console report. Exit 0 only on total
 5. **Kevin gives a fresh explicit go-ahead for the cutover step specifically.**
 
 ### Cutover (only after all of the above)
-- Update the run wrapper (`Run Inbox Briefing.bat` / `.ps1`, local Desktop, not repo-tracked) to `set MAIL_BACKEND=imap` **and** to `git checkout origin/main -- imap_mail.py` alongside the existing `fetch_inbox.py` checkout (otherwise `imap_mail.py` is never freshened before a run).
+- Update the run wrapper (`Run Inbox Briefing.bat`, live Desktop, not repo-tracked) to `set MAIL_BACKEND=imap` **and** to add a `curl` raw-pull of `imap_mail.py` into the run dir alongside the existing `fetch_inbox.py` pull (otherwise `imap_mail.py` is never freshened before a scheduled run — same reason the parity `.bat` pulls it).
 - Timestamped `.bat` backup first, same convention as the 28 Aug preflight changes.
 - Watch the next 2–3 live runs. Rollback = flip `MAIL_BACKEND` back to `com` (or unset) in the `.bat` — one line, instant, no code revert needed.
 
@@ -118,11 +142,14 @@ Writes `data/parallel/parity_<ts>.json` + a console report. Exit 0 only on total
 |---|---|---|
 | `imap_mail.py` | **new** | none — dead code unless `MAIL_BACKEND=imap` |
 | `reauth_imap.py` | **new** | none — only run by hand |
-| `Re-auth Work Inbox IMAP.bat` | **new** | none |
 | `diff_mail_pull.py` | **new** | none — read-only analysis tool |
+| `docs/desktop-scripts/Re-auth Work Inbox IMAP.bat` | **new** | none — reference copy; live copy on the Desktop |
+| `docs/desktop-scripts/Run Mail Parity Test.bat` | **new** | none — reference copy; live copy on the Desktop |
 | `fetch_inbox.py` | flag + 4 loop guards + imap injection + non-fatal COM under `imap` + `mapi is None` calendar guard + `_imap_reauth_toast_due()` | **`com` path byte-identical**; `imap` path is new and unverified |
 | `.gitignore` | added `msal_imap_token_cache.bin`, `*.bin` | none |
 | `docs/PHASE1_IMAP_MIGRATION_AUDIT.md`, this file | **new** | none |
+
+Deployed to the machine 28 Aug: the three `.py` siblings into the run dir; both `.bat`s onto `D:\OneDrive - lelitte.com\Desktop\`. The stale `git fetch`-based repo-root `Re-auth Work Inbox IMAP.bat` from the first commit was removed — the `docs/desktop-scripts/` copies are canonical.
 
 **Restore point for the `fetch_inbox.py` change:** `main` `9a52b07`, `fetch_inbox.py` blob `bd02b41089850678b8268318a0afab5e6d457e8a`, snapshot `Archive/fetch_inbox_backup_20260828_*_pre_mail_backend_flag.py`. Rollback = `git revert <this commit>` or restore the blob.
 
