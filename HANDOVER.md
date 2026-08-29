@@ -14,9 +14,15 @@
 ## CUTOVER BLOCKER: `INBOX/Bi-monthly CDR/PD working group` subfolder (`/` in the Outlook folder name = the IMAP hierarchy separator)
 - Still skipped over IMAP. **Fix scoped, diagnostic-gated -- must be closed + re-verified before cutover, not carried.** `parity_vs_briefing.py`'s folder diagnostic prints the real server name. Then: change `imap_mail.pull()` subfolder matching so a `tree` containing `/` matches any `LIST` entry whose name (with `/` and `&-` stripped, lowercased) contains the tree's normalised form, and `SELECT` that entry's exact server string verbatim -- handles both "server nests it" and "server substitutes the `/`" without guessing. See plan §4b.
 
+## Phase 5 first run (29 Aug) -- IMAP capture fine, script FATAL'd on GitHub fetch -> HARDENED (`ab8630a`)
+`parity_vs_briefing.py` v1 died: `UnicodeEncodeError('latin-1', 'token ghp_zjKu...')` building `Authorization: token <PAT>` -- the stored `GITHUB_PAT` had a non-ASCII char (bullet U+2022, from a bad paste; Kevin set the var several times this session). IMAP half was fine (inbox 48 / sent 10, silent broker token, no Outlook).
+- **`ab8630a` hardening:** `_init_gh_auth()` strips + asserts `pat.isascii()`, prints each offending char (index + codepoint) + re-set hint, raises `RuntimeError` (caught, no traceback). `Authorization: Bearer <pat>`. `_gh_get()` -> one-line `HTTP <code> <reason> <hint> [url]` / `network error [url]`, never bare. Briefing body via contents API `Accept: application/vnd.github.raw` (private-repo-safe, no base64).
+- **REORDERED:** the folder diagnostic (`NAMESPACE` + `LIST` rows near `Bi-monthly CDR/PD working group`) now runs + prints FIRST and is persisted to the `<ts>.json` immediately -- the CDR server name is captured even if the briefing fetch fails. Briefing-fetch failure -> diagnosis line + folder-diag-only json + exit 2.
+- Kevin asked to verify `GITHUB_PAT` (len 40, clean ASCII, `ghp_` prefix) and re-set it, then re-run.
+
 ## STILL: NO `codex login`, NO build, NO cutover, desktop pipeline + `claude -p` LIVE. `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged.
 
-(Earlier this session: Phase 3 first parallel run auto-launched `OUTLOOK.EXE` — the COM connect ran unconditionally before the `WI_MAIL_PARALLEL` skip-exit; fixed in `d5447b9` as summarised above. Commits `0900b3f` (Lane A auth/imports/flag) then `d5447b9` (no-launch) then `4a7ce21` (Phase 5 script).)
+(Session commit trail: `0900b3f` Lane A auth/imports/`CAL_BACKEND` -> `d5447b9` `MAIL_BACKEND=imap` never launches Outlook -> `4a7ce21` `parity_vs_briefing.py` -> `f45875e` docs -> `ab8630a` parity fetch hardening.)
 
 ---
 
