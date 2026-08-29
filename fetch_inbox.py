@@ -1,9 +1,32 @@
 import json, os, base64, html, re, urllib.request, urllib.error, subprocess, time
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
-import win32com.client
-import pywintypes
-import anthropic
+
+# win32com / pywintypes / anthropic are path-specific, not universal:
+#   - win32com + pywintypes: any Outlook COM work (MAIL_BACKEND=com, or the
+#     COM calendar pull). A COM-free host (the Oxford laptop running
+#     MAIL_BACKEND=imap) never needs them; connect_to_outlook() is already
+#     wrapped under MAIL_BACKEND=imap so a missing module degrades to
+#     "calendar skipped", not a crash.
+#   - anthropic: only AI_BACKEND=api constructs a client (see ~line 1690).
+# Guarded so a COM-free / anthropic-free box can still run. On every host that
+# has them installed (both current machines do) this is byte-identical to a
+# plain `import`.
+try:
+    import win32com.client
+    import pywintypes
+except ImportError:
+    win32com = None
+    pywintypes = None
+try:
+    import anthropic
+except ImportError:
+    anthropic = None
+
+# com_error base for `except` clauses -- real class when pywin32 is present
+# (both current machines), a never-matching stand-in otherwise so the except
+# sites below stay valid on a COM-free box.
+_COM_ERROR = pywintypes.com_error if pywintypes is not None else OSError
 
 # Suppress Windows git gc --auto interactive prompts
 subprocess.run(["git", "config", "gc.auto", "0"], capture_output=True,
@@ -109,6 +132,23 @@ AI_BACKEND  = os.environ.get("AI_BACKEND", "api").strip().lower()
 # --------------------------------------------------------------------------- #
 MAIL_BACKEND  = os.environ.get("MAIL_BACKEND", "com").strip().lower()
 MAIL_PARALLEL = os.environ.get("WI_MAIL_PARALLEL", "").strip().lower() in ("1", "true", "yes")
+# --------------------------------------------------------------------------- #
+#  Calendar-source backend  (added 2026-08-29, Drew -- laptop migration Phase 3)
+#  CAL_BACKEND=com        (default) -- calendar phases 3.7/3.8 pull the primary
+#                         + "People Department - HR Systems" calendars via
+#                         Outlook COM, byte-identical to before.
+#  CAL_BACKEND=connector  -- pull the calendar via the Lane B ChatGPT M365
+#                         connector (codex exec). NOT IMPLEMENTED YET -- Lane B
+#                         is not built until 1 Sept (see docs/
+#                         LANE_B_TEAMS_CAL_DESIGN.md). Any value other than
+#                         "com" currently logs a warning and falls back to com.
+# --------------------------------------------------------------------------- #
+CAL_BACKEND   = os.environ.get("CAL_BACKEND", "com").strip().lower()
+if CAL_BACKEND != "com":
+    log(f"Calendar backend: '{CAL_BACKEND}' requested but NOT IMPLEMENTED -- "
+        f"falling back to 'com' (Lane B calendar lands 1 Sept; "
+        f"see docs/LANE_B_TEAMS_CAL_DESIGN.md)")
+    CAL_BACKEND = "com"
 AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
                or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
@@ -125,6 +165,7 @@ log(f"AI backend: {AI_BACKEND}"
     + (f"  fallback_cfg={CLAUDE_CFG_FALLBACK}" if (AI_BACKEND == "claude_code" and CLAUDE_CFG_FALLBACK) else ""))
 log(f"Mail backend: {MAIL_BACKEND}"
     + ("  [WI_MAIL_PARALLEL -- raw mail dumps to data/parallel/, no push]" if MAIL_PARALLEL else ""))
+log(f"Calendar backend: {CAL_BACKEND}")
 
 
 class _AIText:
@@ -917,7 +958,7 @@ def _wait_for_outlook_mapi(grace_s):
             probe.GetNamespace("MAPI").GetDefaultFolder(6).Items.Count
             log("Phase 1 - classic Outlook is now MAPI-ready.")
             return True
-        except (pywintypes.com_error, AttributeError):
+        except (_COM_ERROR, AttributeError):
             continue
     log(f"Phase 1 - classic Outlook did not become MAPI-ready within {grace_s}s.")
     return False
@@ -927,7 +968,7 @@ def _is_outlook_not_ready_error(exc):
     connected to Exchange -- as opposed to the transient busy-callee case."""
     if isinstance(exc, AttributeError):
         return True
-    if isinstance(exc, pywintypes.com_error):
+    if isinstance(exc, _COM_ERROR):
         hr    = exc.args[0] if exc.args else None
         inner = exc.args[2] if len(exc.args) > 2 and exc.args[2] else None
         scode = inner[5] if inner and len(inner) > 5 else None
@@ -960,7 +1001,7 @@ def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
             if attempt > 1:
                 log(f"Phase 1 - Outlook COM connection succeeded on attempt {attempt}/{max_attempts}.")
             return outlook_app, mapi_ns, inbox_folder
-        except (pywintypes.com_error, AttributeError) as e:
+        except (_COM_ERROR, AttributeError) as e:
             last_error = e
             log(f"Phase 1 - Outlook COM connection attempt {attempt}/{max_attempts} failed: {e}")
             if attempt >= max_attempts:

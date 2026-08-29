@@ -1,21 +1,26 @@
 r"""
-reauth_imap.py -- one-time / on-demand device-code sign-in for the work-inbox
-IMAP+OAuth2 mail backend.
+reauth_imap.py -- one-time / on-demand sign-in that seeds the work-inbox
+IMAP+OAuth2 token cache.
 
 Kevin runs this:
   - once, to prime the token cache before MAIL_BACKEND=imap is ever used, and
-  - again whenever the "Outlook mail sign-in expired" toast fires (the silent
-    refresh in imap_mail.py could not renew the cached token -- expected
-    periodically because this device has no Primary Refresh Token; see the
-    no-PRT confirmed-fact memory).
+  - again whenever the "IMAP mail sign-in expired" toast fires (the silent
+    refresh in imap_mail.acquire_token_silent could not renew the cached
+    token -- expected periodically: Conditional-Access sign-in-frequency /
+    ~90d refresh-token roll).
 
-How to run (PowerShell 5.1, which is all Kevin has):
+Default = system-browser sign-in. Proven on the Oxford laptop 2026-08-29
+(docs/LAPTOP_MIGRATION_PLAN.md Phase 2(i)): the Thunderbird client id is NOT
+WAM/broker-interactive-capable, but a plain system-browser sign-in on the
+PRT-joined laptop is ONE account click -- no password, no MFA. The scheduled
+runs then refresh silently via imap_mail.acquire_token_silent (broker-app
+path) from the cache this seeds.
+
     cd "C:\path\to\work-inbox"
-    python .\reauth_imap.py
-or just double-click  "Re-auth Work Inbox IMAP.bat".
+    python .\reauth_imap.py                 # opens a browser, one click
+    python .\reauth_imap.py --device-code   # fallback: sign in on another device
 
-It prints a short code and a URL, waits for Kevin to approve in a browser
-(any device), then writes the refreshed token to
+Writes the refreshed token to
 %LOCALAPPDATA%\WorkInboxAI\msal_imap_token_cache.bin and verifies it with a
 read-only INBOX check. Nothing is sent anywhere. No secret is stored (the
 client id is Mozilla Thunderbird's public one). Prints timestamps.
@@ -33,9 +38,12 @@ def _ts():
 
 
 def main():
-    print(f"[{_ts()}] work-inbox IMAP re-auth starting")
+    device_code = "--device-code" in sys.argv[1:]
+    mode = "device-code" if device_code else "system-browser"
+    print(f"[{_ts()}] work-inbox IMAP re-auth starting ({mode} mode)")
     if imap_mail.msal is None:
-        print(f"[{_ts()}] FATAL: msal is not installed -- `python -m pip install msal`")
+        print(f"[{_ts()}] FATAL: msal is not installed -- "
+              f"`python -m pip install \"msal[broker]\"`")
         return 2
 
     cache = imap_mail._load_cache()
@@ -43,20 +51,26 @@ def main():
         imap_mail.CLIENT_ID, authority=imap_mail.AUTHORITY, token_cache=cache
     )
 
-    flow = app.initiate_device_flow(scopes=imap_mail.SCOPES)
-    if "user_code" not in flow:
-        print(f"[{_ts()}] FATAL: could not start device flow: {flow}")
-        return 2
+    if device_code:
+        flow = app.initiate_device_flow(scopes=imap_mail.SCOPES)
+        if "user_code" not in flow:
+            print(f"[{_ts()}] FATAL: could not start device flow: {flow}")
+            return 2
+        # Canonical https://microsoft.com/devicelogin -- the shortlink
+        # https://login.microsoft.com/device misbehaved in the 28 Aug spike.
+        print()
+        print(f"[{_ts()}] To sign in, open:  https://microsoft.com/devicelogin")
+        print(f"[{_ts()}] Enter code:        {flow['user_code']}")
+        print(f"[{_ts()}] (this window will wait up to {flow.get('expires_in', 900)}s)")
+        print()
+        result = app.acquire_token_by_device_flow(flow)  # blocks until done/expired
+    else:
+        # PATH B from the Phase 2(i) proof: plain interactive, system browser,
+        # NO broker. On the PRT-joined laptop this is one account click.
+        print(f"[{_ts()}] a browser window will open -- pick the ad-oak\\begb0037 "
+              f"account (one click; no password expected on the PRT-joined laptop)")
+        result = app.acquire_token_interactive(imap_mail.SCOPES)
 
-    # Use the canonical https://microsoft.com/devicelogin -- the shortlink
-    # https://login.microsoft.com/device misbehaved in the 28 Aug spike.
-    print()
-    print(f"[{_ts()}] To sign in, open:  https://microsoft.com/devicelogin")
-    print(f"[{_ts()}] Enter code:        {flow['user_code']}")
-    print(f"[{_ts()}] (this window will wait up to {flow.get('expires_in', 900)}s)")
-    print()
-
-    result = app.acquire_token_by_device_flow(flow)  # blocks until done/expired
     imap_mail._save_cache(cache)
 
     if not result or "access_token" not in result:

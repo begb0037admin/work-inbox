@@ -108,40 +108,78 @@ def _save_cache(cache):
         pass  # non-fatal; next run just does another silent refresh
 
 
+def _broker_app(cache):
+    """A broker-enabled PublicClientApplication, or None when pymsalruntime
+    (msal[broker]) is not importable on this host.
+
+    Proven on the Oxford laptop 2026-08-29 (docs/LAPTOP_MIGRATION_PLAN.md
+    Phase 2(i)): the broker CANNOT do the *interactive* acquisition with the
+    Thunderbird client id (`broker_error / Status_ApiContractViolation`, twice)
+    -- reauth_imap.py does that via the system browser instead -- BUT the
+    broker CAN serve a *silent* token from the file cache that browser sign-in
+    seeds, and a cold scheduled run resolves its token exactly this way. On the
+    admin desktop (no msal[broker]) this returns None and behaviour is
+    unchanged (plain app only)."""
+    try:
+        import pymsalruntime  # noqa: F401
+    except Exception:
+        return None
+    try:
+        return msal.PublicClientApplication(
+            CLIENT_ID, authority=AUTHORITY, token_cache=cache,
+            enable_broker_on_windows=True,
+        )
+    except Exception:
+        return None
+
+
 def acquire_token_silent(log=print):
     """Return (access_token, upn). Raise ImapReauthRequired on any failure that
-    a human device-code sign-in would fix."""
+    a human sign-in (reauth_imap.py -> system browser) would fix.
+
+    Tries, in the order proven on the laptop: broker-app silent, then plain-app
+    silent, both off the shared file cache at TOKEN_CACHE_PATH. Neither prompts.
+    """
     if msal is None:
         raise ImapReauthRequired(f"msal not importable: {_MSAL_IMPORT_ERROR!r}")
 
     cache = _load_cache()
-    app = msal.PublicClientApplication(
-        CLIENT_ID, authority=AUTHORITY, token_cache=cache
-    )
-    accounts = app.get_accounts()
-    if not accounts:
-        raise ImapReauthRequired(
-            "no cached account -- run reauth_imap.py once to sign in"
-        )
+    apps = []
+    _b = _broker_app(cache)
+    if _b is not None:
+        apps.append(("broker", _b))
+    apps.append(("plain", msal.PublicClientApplication(
+        CLIENT_ID, authority=AUTHORITY, token_cache=cache)))
 
-    account = accounts[0]
-    result = app.acquire_token_silent(SCOPES, account=account)
-    _save_cache(cache)
-
-    if not result or "access_token" not in result:
-        err = (result or {}).get("error", "unknown")
-        desc = (result or {}).get("error_description", "")
+    errors = []
+    for label, app in apps:
+        accounts = app.get_accounts()
+        if not accounts:
+            errors.append(f"{label}: no cached account")
+            continue
+        account = accounts[0]
+        try:
+            result = app.acquire_token_silent(SCOPES, account=account)
+        except Exception as e:  # pragma: no cover - broker/runtime edge
+            errors.append(f"{label}: silent raised {e!r}")
+            continue
+        if result and "access_token" in result:
+            _save_cache(cache)
+            upn = account.get("username") or result.get(
+                "id_token_claims", {}).get("preferred_username", "")
+            log(f"IMAP - silent OAuth2 token OK for {upn} via {label}-app ({_now()})")
+            return result["access_token"], upn
         # Common: invalid_grant / AADSTS50173 (token revoked, password change)
         # / AADSTS700082 (refresh token expired past its rolling window).
-        raise ImapReauthRequired(
-            f"silent token refresh failed: {err} {desc[:160]}".strip()
-        )
+        err = (result or {}).get("error", "unknown")
+        desc = (result or {}).get("error_description", "")
+        errors.append(f"{label}: {err} {desc[:120]}".strip())
 
-    upn = account.get("username") or result.get("id_token_claims", {}).get(
-        "preferred_username", ""
+    _save_cache(cache)
+    raise ImapReauthRequired(
+        "silent token refresh failed [" + " | ".join(errors)
+        + "] -- run 'Re-auth Work Inbox IMAP' once to sign in"
     )
-    log(f"IMAP - silent OAuth2 token OK for {upn} ({_now()})")
-    return result["access_token"], upn
 
 
 # --------------------------------------------------------------------------- #
