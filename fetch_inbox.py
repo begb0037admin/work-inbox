@@ -140,15 +140,17 @@ MAIL_PARALLEL = os.environ.get("WI_MAIL_PARALLEL", "").strip().lower() in ("1", 
 #  CAL_BACKEND=connector  -- pull the calendar via the Lane B ChatGPT M365
 #                         connector (codex exec). NOT IMPLEMENTED YET -- Lane B
 #                         is not built until 1 Sept (see docs/
-#                         LANE_B_TEAMS_CAL_DESIGN.md). Any value other than
-#                         "com" currently logs a warning and falls back to com.
+#                         LANE_B_TEAMS_CAL_DESIGN.md). Until then it means "no
+#                         COM calendar source this run": calendar phases go
+#                         empty + warning, and classic Outlook is NOT opened.
 # --------------------------------------------------------------------------- #
-CAL_BACKEND   = os.environ.get("CAL_BACKEND", "com").strip().lower()
-if CAL_BACKEND != "com":
-    log(f"Calendar backend: '{CAL_BACKEND}' requested but NOT IMPLEMENTED -- "
-        f"falling back to 'com' (Lane B calendar lands 1 Sept; "
-        f"see docs/LANE_B_TEAMS_CAL_DESIGN.md)")
-    CAL_BACKEND = "com"
+_CAL_BACKEND_REQ = os.environ.get("CAL_BACKEND", "com").strip().lower()
+CAL_BACKEND = _CAL_BACKEND_REQ if _CAL_BACKEND_REQ in ("com", "connector") else "com"
+CAL_CONNECTOR_NYI = (CAL_BACKEND == "connector")
+if CAL_CONNECTOR_NYI:
+    log("Calendar backend: 'connector' requested -- NOT IMPLEMENTED yet (Lane B "
+        "lands 1 Sept, see docs/LANE_B_TEAMS_CAL_DESIGN.md). Calendar will be "
+        "empty this run; mail briefing continues; Outlook COM will not be used.")
 AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
                or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
@@ -986,7 +988,12 @@ def _is_outlook_not_ready_error(exc):
             return True
     return False
 
-def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
+def connect_to_outlook(max_attempts=3, retry_wait_seconds=45, allow_launch=True):
+    # allow_launch=False: never auto-start OUTLOOK.EXE. That WS1-era auto-start
+    # belongs ONLY to the legacy desktop path (MAIL_BACKEND=com). On the laptop
+    # (MAIL_BACKEND=imap) a missing/not-connected classic Outlook must degrade
+    # to "calendar unavailable this run", never open the app -- that dependency
+    # is the whole point of the migration, and Kevin does not want it opening.
     last_error   = None
     tried_launch = False
     for attempt in range(1, max_attempts + 1):
@@ -1007,6 +1014,11 @@ def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
             if attempt >= max_attempts:
                 break
             if _is_outlook_not_ready_error(e):
+                if not allow_launch:
+                    log("Phase 1 - classic Outlook is not running / not connected "
+                        "and allow_launch=False -- NOT starting it. Giving up on COM "
+                        "(the caller degrades the calendar to empty).")
+                    break
                 if not tried_launch:
                     tried_launch = True
                     launched = _launch_classic_outlook()
@@ -1028,7 +1040,7 @@ def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
                     f"Waiting {retry_wait_seconds}s before retrying...")
                 time.sleep(retry_wait_seconds)
     log(f"Phase 1 - Outlook COM connection failed after {max_attempts} attempts. Giving up.")
-    if _is_outlook_not_ready_error(last_error):
+    if allow_launch and _is_outlook_not_ready_error(last_error):
         _notify_phase_failure(
             "Work Inbox Briefing - Outlook not connected",
             "Classic Outlook is not open / not connected to Exchange. Open "
@@ -1038,15 +1050,30 @@ def connect_to_outlook(max_attempts=3, retry_wait_seconds=45):
     raise last_error
 
 if MAIL_BACKEND == "imap":
-    # Mail comes from IMAP this run; classic Outlook COM is only needed for
-    # the calendar phases (3.7/3.8). A wedged or closed classic Outlook must
-    # NOT block the mail briefing -- that is the whole point of the migration.
-    try:
-        outlook, mapi, _inbox_folder = connect_to_outlook()
-    except Exception as _com_e:
-        log(f"Phase 1 - MAIL_BACKEND=imap: Outlook COM unavailable ({_com_e}); "
-            f"calendar phases will be skipped this run, mail pull continues via IMAP")
+    # Mail comes from IMAP. Outlook COM is now ONLY a calendar source, and only
+    # in the pre-1-Sept interim (CAL_BACKEND=com). Attempt it ONLY when the
+    # calendar phases will genuinely use a COM source this run:
+    #   - CAL_BACKEND == "com", AND
+    #   - not a mail-only parallel capture (WI_MAIL_PARALLEL exits before calendar), AND
+    #   - CAL_BACKEND was not requested as 'connector' (Lane B, not built yet).
+    # And even then: never auto-launch OUTLOOK.EXE (allow_launch=False). A
+    # missing/not-connected classic Outlook degrades to empty calendar + warning.
+    _need_com_cal = (CAL_BACKEND == "com" and not MAIL_PARALLEL and not CAL_CONNECTOR_NYI)
+    if not _need_com_cal:
+        _why = ("WI_MAIL_PARALLEL mail-only capture" if MAIL_PARALLEL
+                else "CAL_BACKEND=connector (Lane B not built yet)" if CAL_CONNECTOR_NYI
+                else "calendar not in COM scope this run")
+        log(f"Phase 1 - MAIL_BACKEND=imap: NOT connecting Outlook COM ({_why}); "
+            f"classic Outlook will not be opened. Calendar phases degrade to empty.")
         outlook = mapi = _inbox_folder = None
+    else:
+        try:
+            outlook, mapi, _inbox_folder = connect_to_outlook(allow_launch=False)
+        except Exception as _com_e:
+            log(f"Phase 1 - MAIL_BACKEND=imap: Outlook COM calendar source unavailable "
+                f"({_com_e}); calendar phases degrade to empty, mail briefing continues "
+                f"(classic Outlook was NOT launched).")
+            outlook = mapi = _inbox_folder = None
 else:
     outlook, mapi, _inbox_folder = connect_to_outlook()
 cutoff  = datetime.now() - timedelta(days=7)
