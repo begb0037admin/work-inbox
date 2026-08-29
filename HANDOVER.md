@@ -1,3 +1,24 @@
+# Handover -- 29 August 2026, ~night UTC (Drew) -- LAPTOP MIGRATION: Phase 3 first parallel run PASSED (inbox 48 / sent 10) BUT auto-launched classic Outlook -> FIXED (commit `d5447b9`). Kevin re-runs the §7 parallel capture to confirm no Outlook launch, then Phase 5. NO build, NO cutover.
+
+## Phase 3 first laptop parallel run (29 Aug) -- IMAP capture good, one bug
+- **Good:** `reauth_imap.py` -> one browser click, no password, EXAMINE INBOX 558. `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1 python fetch_inbox.py`: `IMAP - silent OAuth2 token OK ... via broker-app` -> INBOX 38 -> +VIP 0 -> +subfolders 10 -> Sent 10 -> `IMAP mail pull: inbox 48 (unread 19) sent 10` -> wrote `data\parallel\imap_inbox_raw.json (48)` / `imap_sent_raw.json (10)` -> `Exiting 0`. Subfolder `INBOX/Bi-monthly CDR/PD working group` still skipped (`/` in the name collides with the IMAP hierarchy separator -- known, unresolved, accepted).
+- **BUG:** it auto-launched `OUTLOOK.EXE`. The COM connect ran unconditionally at Phase 1 start (with the WS1 auto-start-Outlook logic) BEFORE the `WI_MAIL_PARALLEL` skip-calendar exit.
+
+## FIX -- commit `d5447b9` (`fetch_inbox.py`), `MAIL_BACKEND=imap` must never open classic Outlook
+1. Under `MAIL_BACKEND=imap`, COM is attempted ONLY when a COM calendar source is genuinely in scope this run: `CAL_BACKEND=com` AND not `WI_MAIL_PARALLEL` AND `CAL_BACKEND` not requested as `connector`. Otherwise `mapi=None`, a log line says why, **no COM connect at all**.
+2. New `connect_to_outlook(allow_launch=...)`. `MAIL_BACKEND=imap` passes `allow_launch=False` -> in the "Outlook not ready" branch it does NOT call `_launch_classic_outlook()` / `_wait_for_outlook_mapi()`; it breaks and raises, caller degrades calendar to empty + warning. The `_notify_phase_failure` "open Outlook" toast is also gated on `allow_launch`.
+3. `CAL_BACKEND=connector` now recorded as `CAL_CONNECTOR_NYI` (calendar empty + warning, no COM) instead of coerced to `com`.
+- **`MAIL_BACKEND=com` / default path byte-identical:** `allow_launch` defaults `True`; every new branch gated on `not allow_launch` / `CAL_CONNECTOR_NYI`; `CAL_BACKEND` unset -> `com` -> no new log. `python -m py_compile` clean, diff reviewed.
+- **Plan §9 item 3 DEFAULTED:** calendar-source unavailable (Outlook not up pre-1-Sept, or connector not loaded post-1-Sept) -> empty calendar + warning, mail briefing continues. Confirm with Kevin but this is what's shipped.
+- Plan note added: classic Outlook IS installed + working on the laptop (Oxford image) but the pipeline must never touch/launch it; uninstalled at cutover.
+
+## NEXT: Kevin re-runs the §7 "Phase 3 parallel run" (now with `d5447b9`)
+Same commands. Expect a `Phase 1 - MAIL_BACKEND=imap: NOT connecting Outlook COM (WI_MAIL_PARALLEL mail-only capture); classic Outlook will not be opened` line and **no `OUTLOOK.EXE` process**, otherwise identical (inbox ~48 / sent ~10, `Exiting 0`). Then Phase 5: field-diff `imap_*_raw.json` vs `data/briefing.json` GitHub history.
+
+## STILL: NO `codex login`, NO build, NO cutover, desktop pipeline + `claude -p` LIVE. `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged.
+
+---
+
 # Handover -- 29 August 2026, ~late evening UTC (Drew) -- LAPTOP MIGRATION: Phase 2(i) PASSED. Phase 3 Lane A code on `main` behind the unset flag (commit `0900b3f`). NEXT: Kevin runs the §7 "Phase 3 parallel run" (MAIL_BACKEND=imap WI_MAIL_PARALLEL=1) on the laptop. NO build, NO cutover.
 
 ## Phase 2(i) -- PASSED (`broker_imap_proof.py` v2, 2 runs on the laptop)
