@@ -1,3 +1,27 @@
+# Handover -- 29 August 2026, ~evening UTC (Drew) -- LAPTOP MIGRATION: Phase 1 COMPLETE on the laptop (verified). Phase 2(i) script `broker_imap_proof.py` shipped -- the MSAL-broker silent-IMAP-token make-or-break. Awaiting Kevin's two-run result. NO build, NO cutover.
+
+## Phase 1 -- DONE (laptop `ad-oak\begb0037`, verified 29 Aug)
+Python 3.12.10 (per-user) / Node 24.19.0 / npm 11.17.0 / Git 2.55.0.3 / Claude Code 2.1.251 (`claude login` personal done, `claude -p` -> "ready") / **Codex CLI 0.151.0** (npm global, NO `codex login` -- deferred to 1 Sept) / `msal` 1.38.0 + `pymsalruntime` OK / `pywin32` + `anthropic` OK / `GITHUB_PAT` set (User) / `ANTHROPIC_API_KEY` unset (User+Machine) -> subscription billing / 4 pipeline scripts in `%USERPROFILE%\work-inbox\`, all `py_compile` 0. PS 5.1.26100.8875, ExecutionPolicy RemoteSigned (CurrentUser).
+- **Account split (important for Phase 4):** Kevin elevates only as a SEPARATE local admin account `begb0037-a` (no PRT, not domain-joined). The pipeline account `ad-oak\begb0037` is a STANDARD user and HOLDS THE PRT. All per-user installs went in fine as `ad-oak\begb0037` without elevation. Scheduled task must run as `ad-oak\begb0037`; anything needing elevation is a separate manual `begb0037-a` step (and would have no PRT, so no auth work runs there).
+- Codex 0.151.0 is newer than the desktop's 0.149.1 -- the Lane B design must re-verify tool-gating on 0.151.x (still no `--allowed-tools` as of 0.150.1; re-check).
+
+## Phase 2(i) -- MAKE-OR-BREAK #1: `broker_imap_proof.py` (repo root, shipped this session)
+Single self-contained script. READ-ONLY -- writes only its own MSAL token cache at `%LOCALAPPDATA%\WorkInboxAI\msal_imap_token_cache.bin`; IMAP `EXAMINE` (read-only) of INBOX, prints count + one header, mutates nothing.
+- MSAL `PublicClientApplication`, Thunderbird client `9e5f94bc-...`, authority `.../organizations`, `enable_broker_on_windows=True` (uses `pymsalruntime`/WAM), serializable file cache.
+- Tries `acquire_token_silent` FIRST (off any broker/WAM account); only falls back to `acquire_token_interactive(parent_window_handle=CONSOLE_WINDOW_HANDLE)` if silent can't; then an immediate second silent call to seed the cache; then IMAP XOAUTH2 `SELECT INBOX` readonly.
+- Timestamped, clear `=== PASS / PARTIAL / FAIL ===`, exit 0 / 1 / 3. Prints exactly what any dialog asked for.
+- **Kevin runs it, then runs it AGAIN cold.** Run 2 MUST reach `=== PASS ===` with NO prompt. That is the proof.
+- **How to run (2 lines):**
+  ```powershell
+  cd $env:USERPROFILE\work-inbox ; $t=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds() ; iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/broker_imap_proof.py?t=$t" -OutFile broker_imap_proof.py
+  python broker_imap_proof.py    # approve the sign-in IF prompted; then run this exact line again -- run 2 must NOT prompt
+  ```
+- **PASS** => Phase 3 folds the broker path from this script into `imap_mail.py`. **FAIL** (run 2 prompts / no token / IMAP auth fails) => STOP; reassess (device-code fallback via `reauth_imap.py`, or a different client id). Also informs the Phase 4 "does WAM silent need an interactive session" question.
+
+## STILL: NO `codex login`, NO build, NO cutover, desktop pipeline + `claude -p` stay LIVE. `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged (no codex activity this session).
+
+---
+
 # Handover -- 29 August 2026, ~afternoon UTC (Drew) -- TWO-LANE LAPTOP MIGRATION plan, REV 2 (Kevin decided all 4 open questions). `docs/LAPTOP_MIGRATION_PLAN.md` + NEW `docs/LANE_B_TEAMS_CAL_DESIGN.md`. Kevin's action list + Phase 1 command sequence ready. NO build, NO cutover. Kevin runs Phase 1, reports back, THEN Phase 2.
 
 ## Kevin's 4 decisions (29 Aug, this rev)

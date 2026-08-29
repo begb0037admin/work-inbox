@@ -35,14 +35,27 @@ The desktop pipeline (COM + `claude -p` + `Classic Outlook Keepalive` watchdog) 
 
 | Fact | Value | Verified |
 |---|---|---|
-| Machine / profile | Oxford laptop, Windows user `begb0037.AD-OAK` (Oxford AD domain account) | this session (Kevin) |
-| Join state | `AzureAdJoined: YES`, `DomainJoined: YES`, **`AzureAdPrt: YES`** — tenant `cc95de1b-97f5-4f93-b4ba-fe68b852cf91`; PRT auto-renews ~14 days on the Oxford network | this session (Kevin) |
-| Python / Node / Claude Code / Codex CLI | **none installed** | this session |
-| Admin rights | **local admin only** (not domain admin) | this session |
+| Machine / profile | Oxford laptop, Windows user `ad-oak\begb0037` (the pipeline account — **standard user**, Oxford AD domain account) | Phase 1, Kevin |
+| Join state | `AzureAdJoined: YES`, `DomainJoined: YES`, **`AzureAdPrt: YES`** — tenant `cc95de1b-97f5-4f93-b4ba-fe68b852cf91`; PRT auto-renews ~14 days on the Oxford network | Phase 1, Kevin |
+| **Admin account split** | Kevin can only elevate as a **separate local admin account `begb0037-a`** (no PRT, not domain-joined). The pipeline account `ad-oak\begb0037` is a standard user **and holds the PRT**. All Phase 1 per-user installs succeeded as `ad-oak\begb0037` with no elevation. **Consequence:** the scheduled task runs as `ad-oak\begb0037`; anything that genuinely needs elevation is a separate manual step done as `begb0037-a` (which would NOT have the PRT — so no auth work runs there). | Phase 1, Kevin |
 | Power | stays **docked and on** | Kevin's commitment |
-| `%LOCALAPPDATA%` | `C:\Users\begb0037.AD-OAK\AppData\Local` — token caches + toast stamps live here | inferred from profile name |
+| `%LOCALAPPDATA%` | `C:\Users\begb0037.AD-OAK\AppData\Local` — token caches + toast stamps live here (`WorkInboxAI\`) | Phase 1 |
+| PowerShell | 5.1.26100.8875; ExecutionPolicy `RemoteSigned` (CurrentUser) | Phase 1 |
 
-**Execution reality:** Drew runs on the desktop and cannot execute on the laptop. Every laptop step is copy-paste-ready PowerShell 5.1 for Kevin to run and paste back. Kevin is the hands for installs, `claude login`, `codex login`, and the first interactive auth consent.
+**Execution reality:** Drew runs on the desktop and cannot execute on the laptop. Every laptop step is copy-paste-ready PowerShell 5.1 / a single Python script for Kevin to run and paste back. Kevin is the hands for installs, `claude login`, `codex login`, and the first interactive auth consent.
+
+### Phase 1 — COMPLETE (verified, 29 Aug)
+
+| Component | Installed |
+|---|---|
+| Python | 3.12.10 (per-user, `%LOCALAPPDATA%\Programs\Python\Python312`) |
+| Node / npm | 24.19.0 (Program Files) / 11.17.0 |
+| Git | 2.55.0.3 (Program Files) |
+| Claude Code | 2.1.251 (`%USERPROFILE%\.local\bin`) — `claude login` done (Kevin's personal account); `claude -p` returns "ready" |
+| Codex CLI | **0.151.0** (npm global, `%APPDATA%\npm`) — **no `codex login`** (deferred to 1 Sept). Note: newer than the desktop's 0.149.1; the Lane B design must re-verify tool-gating on 0.151.x (still no `--allowed-tools` as of 0.150.1 per `CONNECTOR_SAFEGUARDS.md` §B6 — re-check). |
+| Python pkgs (pip `--user`) | `msal` 1.38.0 + `pymsalruntime` import OK; `pywin32` + `anthropic` import OK |
+| Env | `GITHUB_PAT` set (User scope); `ANTHROPIC_API_KEY` unset (User + Machine both blank) → `claude -p` bills the subscription |
+| Scripts in `%USERPROFILE%\work-inbox\` | `fetch_inbox.py`, `imap_mail.py`, `reauth_imap.py`, `diff_mail_pull.py` — all `py_compile` exit 0 |
 
 ---
 
@@ -228,10 +241,10 @@ Because Lane B rides Kevin's interactive Edu account, a connector he re-adds (or
 
 | # | Phase | Output | Gate |
 |---|---|---|---|
-| **1** | **Laptop toolchain** — Python 3.12, Node LTS, Git, Claude Code (+ `claude login`, personal), Codex CLI **install only** (no `codex login`), Python packages, `GITHUB_PAT` env var, first pull of the pipeline scripts, `py_compile` clean | pasted command output | this doc's review |
-| **2(i)** | **MAKE-OR-BREAK #1.** MSAL broker acquires an **IMAP** token silently off the PRT — prove `SELECT INBOX`, target zero prompts after ≤1 first-run click. | proof log | **STOP + report.** If it fails, the "no prompts" premise breaks — reassess. |
-| **3** | Wire Lane A in: broker path in `imap_mail.py`; make `fetch_inbox.py`'s `win32com`/`pywintypes`/`anthropic` imports lazy; `CAL_BACKEND=com\|connector` flag (default `com`); dashboard JS `mail_backend==="imap"` → OWA opener branch (screenshot for Kevin). `com`/default paths stay byte-identical. | diffs + restore point | Kevin go-ahead to push code |
-| **4** | Scheduled task(s) on the laptop under `begb0037.AD-OAK`, "run whether logged on or not", 5×/weekday matching the current cadence (confirm against the live desktop `\Work Inbox Briefing` task); `powercfg` never-sleep; every run timestamped. **Parallel — writes `docs/*` / `data/parallel/*` / `data/codex_runs/*` only, never `data/briefing.json`.** | task XML + `powercfg` | Kevin go-ahead |
+| **1** | Laptop toolchain | **DONE — §1 "Phase 1 COMPLETE"** | — |
+| **2(i)** | **MAKE-OR-BREAK #1.** MSAL broker acquires an **IMAP** token silently off the PRT — prove `SELECT INBOX`, target zero prompts after ≤1 first-run click. **Script: `broker_imap_proof.py`** (repo root; read-only, writes only its own token cache). Kevin runs it, then runs it **again cold** — the second run must NOT prompt. | proof log (both runs) | **STOP + report.** If run 2 prompts, or no token, or IMAP auth fails → the "no prompts" premise breaks; reassess (device-code fallback, or a different client id). |
+| **3** | Wire Lane A in: broker path into `imap_mail.py` (from the proven `broker_imap_proof.py` code); make `fetch_inbox.py`'s `win32com`/`pywintypes`/`anthropic` imports lazy; `CAL_BACKEND=com\|connector` flag (default `com`); dashboard JS `mail_backend==="imap"` → OWA opener branch (screenshot for Kevin). `com`/default paths stay byte-identical. | diffs + restore point | Kevin go-ahead to push code |
+| **4** | Scheduled task(s) on the laptop as **`ad-oak\begb0037`** (the PRT-holding standard user — **not** `begb0037-a`), 5×/weekday matching the current cadence (confirm against the live desktop `\Work Inbox Briefing` task); `powercfg` never-sleep; every run timestamped. **Parallel — writes `docs/*` / `data/parallel/*` / `data/codex_runs/*` only, never `data/briefing.json`.** **Risk to settle here:** WAM/broker silent-token acquisition may require an *interactive* user session — if so the task is "run only when user is logged on" and the laptop stays logged in (it's docked + on anyway). Phase 2(i)'s cold-run result informs this. | task XML + `powercfg` | Kevin go-ahead |
 | **5** | Parallel-run: laptop mail pull vs the live desktop `data/briefing.json` GitHub history — field-level diff (`diff_mail_pull.py`), several days, Kevin/Lauren eyeball | parity reports | — |
 
 ### Lane B — FROM 1 SEPT
