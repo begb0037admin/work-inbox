@@ -74,7 +74,16 @@ The desktop pipeline (COM + `claude -p` + `Classic Outlook Keepalive` watchdog) 
 - **`fetch_inbox.py` (`d5447b9`) — `MAIL_BACKEND=imap` must never open classic Outlook.** The first laptop parallel run (29 Aug) auto-launched `OUTLOOK.EXE` because the COM connect ran unconditionally at Phase 1 start, before the `WI_MAIL_PARALLEL` skip-exit. Fixed: under `imap`, COM is attempted **only** when a COM calendar source is genuinely in scope (`CAL_BACKEND=com` AND not `WI_MAIL_PARALLEL` AND `CAL_BACKEND` not requested as `connector`), and even then with **`connect_to_outlook(allow_launch=False)`** — a missing/not-connected classic Outlook degrades to *empty calendar + warning*, never auto-starts the app. The "open Outlook" failure toast is gated on `allow_launch` too. `CAL_BACKEND=connector` is recorded as `CAL_CONNECTOR_NYI` (calendar empty + warning, no COM) rather than coerced to `com`. `com`/default path byte-identical (`allow_launch` defaults `True`; every new branch gated on `not allow_launch` / `CAL_CONNECTOR_NYI`).
 - **First laptop parallel capture (29 Aug, `WI_MAIL_PARALLEL=1`):** `IMAP - silent OAuth2 token OK ... via broker-app` → INBOX 38 → +VIP 0 → +subfolders 10 → Sent 10 → `IMAP mail pull: inbox 48 (unread 19) sent 10` → `imap_inbox_raw.json (48)` / `imap_sent_raw.json (10)` → `Exiting 0`. `INBOX/Bi-monthly CDR/PD working group` skipped (`/` in name — §4b, unresolved/accepted). **Re-run needed after `d5447b9` to confirm no Outlook launch.**
 - **Still pending in Phase 3:** the dashboard JS `mail_backend==="imap"` → OWA-opener branch — needs a screenshot for Kevin (command-centre-style UI gate) before it ships.
-- **Next:** Kevin re-pulls + re-runs the §7 "Phase 3 parallel run" (now with `d5447b9`) — expect **no `OUTLOOK.EXE` launch**, a `NOT connecting Outlook COM (WI_MAIL_PARALLEL mail-only capture)` line, otherwise identical. Then Phase 5 field-diff vs `data/briefing.json` history.
+- **Phase 3 re-run (29 Aug, after `d5447b9`) — CLEAN:** `Phase 1 - MAIL_BACKEND=imap: NOT connecting Outlook COM (WI_MAIL_PARALLEL mail-only capture); classic Outlook will not be opened` → `silent OAuth2 token OK ... via broker-app` → `inbox 48 (unread 19) sent 10` → `Exiting 0`. `Get-Process OUTLOOK` → nothing. **No Outlook launched.**
+
+### Phase 5 — mail parity (`parity_vs_briefing.py`, commit `4a7ce21`)
+
+- **Strict same-window field parity was already PROVEN on the admin desktop** (29 Aug, `diff_mail_pull.py`): INBOX common 48/52, SENT 10==10, **REAL parity issues 0** (+31 benign X.500→SMTP, +5 read-cap churn). The Phase 3 code changes (broker auth, guarded imports, no-launch) do not touch `imap_mail.pull()`'s message logic, so that result stands. A fresh strict re-confirm would need a desktop COM capture (`Run Mail Parity Test.bat`) — optional, not blocking.
+- **`parity_vs_briefing.py`** is the **self-contained laptop** check for ongoing confidence across inbox states: pulls the live desktop `data/briefing.json` (+ optionally last N commits) from GitHub, runs a fresh `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1` capture, and checks the IMAP pull **surfaces the same messages, attributed the same way**. `briefing.json` is a triaged artifact (no `message_id`, no per-card `is_read`/`importance`/`has_attachments`, sender is a display name) and a snapshot from an earlier run, so this is a **coverage + attribution sanity check**, not a byte diff — drift (new mail since, items filed/read) is reported as *expected*, not failure.
+  - **Real flags:** `only_in_briefing` in `needs`/`urgent` (COM surfaced it, IMAP missed it) · `only_in_imap` unread `needs`/`urgent` the briefing lacked · `kevin_is_primary_recipient` mismatch on a matched pair.
+  - **Soft / expected (reported, not counted):** `only_in_briefing` `fyi`/`low` predating the snapshot · `only_in_imap` arrived-after-snapshot · grouped-thread siblings of a matched `fyi` card · read-cap boundary churn · derived-tier differences (the script uses `diff_mail_pull._tier()`; `briefing.json` uses the full `categorise()`).
+  - Also folds in a **folder diagnostic** (`NAMESPACE` + `LIST` rows near the CDR folder) — see §4b.
+- **Run:** `python parity_vs_briefing.py` once now, then ~once a day for 3–4 days; Kevin/Lauren eyeball. Command in §7 "Phase 5 parity".
 
 ---
 
@@ -169,7 +178,7 @@ Behind the **unset** `MAIL_BACKEND` flag (`com` default = byte-identical to toda
 - **Phase 3.9** (inbox-resolution tracking) keys on Outlook `EntryID`; under IMAP it degrades to fail-open-carry unless re-wired to `message_id` + `imap_mail.message_still_in_inbox()`. Open decision: re-wire before cutover, or accept fail-open-carry for week 1.
 - **`SMTP.Send` in the token bundle** — Thunderbird's client returns the whole mail bundle. Mitigation is architectural and unchanged: `imap_mail.py` imports `imaplib` only, never `smtplib`; no agent-with-tools on this path. (This is the exact property that makes Lane A "safe" and Lane B "eyes-open".)
 - **Outlook Categories** — zero dependence confirmed by full-repo grep; nothing to replace.
-- **Subfolder `INBOX/Bi-monthly CDR/PD working group` is not visible over IMAP** — the `/` in the folder name collides with the Exchange Online IMAP hierarchy separator, so `LIST` can't resolve it. `imap_mail.py` skips it and logs. Low-traffic folder; **unresolved, accepted for now.** Confirmed still skipped in the 29 Aug laptop parallel capture.
+- **Subfolder `INBOX/Bi-monthly CDR/PD working group` — CUTOVER BLOCKER, fix scoped (diagnostic-gated).** The `/` in the Outlook folder name is also the Exchange Online IMAP hierarchy separator. `imap_mail.pull()` builds `target = "INBOX/" + tree` and requires `list_name == target` (or a child); the current skip means either (a) the server nests it as a 3-segment path with no intermediate `Bi-monthly CDR` folder so `SELECT` fails, or (b) the server substitutes the `/` in the returned `LIST` name. **Cannot fix blind.** `parity_vs_briefing.py`'s folder diagnostic prints `NAMESPACE` + every `LIST` row containing `cdr`/`working group`/`bi-monthly` + all `INBOX/` children. Once we see the real server name: change `imap_mail.pull()`'s subfolder matching so a `tree` containing `/` matches any `LIST` entry whose name — with `/` and `&-` stripped and lowercased — contains the tree's normalised form, then `SELECT` that entry's **exact server string verbatim** (handles both (a) and (b) without guessing). Must be closed and re-verified before cutover — not carried.
 - **Classic Outlook on the laptop** — IS installed + configured (Oxford standard image) and works, BUT the pipeline must never depend on it or launch it. `MAIL_BACKEND=imap` now never opens it (fix in commit `d5447b9`). It is uninstalled at cutover per §6 "Cutover"; until then it is simply left untouched.
 
 ---
@@ -264,9 +273,9 @@ Because Lane B rides Kevin's interactive Edu account, a connector he re-adds (or
 |---|---|---|---|
 | **1** | Laptop toolchain | **DONE — §1 "Phase 1 COMPLETE"** | — |
 | **2(i)** | MAKE-OR-BREAK #1 — silent IMAP token off the PRT | **DONE / PASS — §1 "Phase 2(i) PASSED"** (`broker_imap_proof.py` v2; cold run 2 = silent FULL WIN; first-time/periodic seed = one browser click) | — |
-| **3** | Wire Lane A in | **Code DONE — commits `0900b3f` + `d5447b9`** (`imap_mail.py` broker+plain silent chain; `reauth_imap.py` → system-browser default; `fetch_inbox.py` guarded imports + `CAL_BACKEND` flag + **`MAIL_BACKEND=imap` never opens/launches classic Outlook**). `com`/default byte-identical. First laptop parallel capture PASSED (inbox 48 / sent 10) but auto-launched Outlook → fixed in `d5447b9`. **Pending: (a) Kevin re-runs the §7 parallel capture to confirm no Outlook launch; (b) dashboard JS `mail_backend==="imap"` → OWA opener branch — screenshot for Kevin before it ships.** | Kevin's clean re-run output; then screenshot approval for the JS branch |
+| **3** | Wire Lane A in | **Code DONE — `0900b3f` + `d5447b9`.** Re-run 29 Aug CLEAN (no Outlook launched, inbox 48 / sent 10, `Exiting 0`). **Pending: dashboard JS `mail_backend==="imap"` → OWA opener branch — screenshot for Kevin before it ships.** | screenshot approval for the JS branch |
 | **4** | Scheduled task(s) on the laptop as **`ad-oak\begb0037`** (the PRT-holding standard user — **not** `begb0037-a`), 5×/weekday matching the current cadence (confirm against the live desktop `\Work Inbox Briefing` task); `powercfg` never-sleep; every run timestamped. **Parallel — writes `docs/*` / `data/parallel/*` / `data/codex_runs/*` only, never `data/briefing.json`.** Phase 2(i) settled the WAM question: day-to-day silent runs are fine unattended; the periodic re-auth needs a logged-in session for the one browser click (laptop stays logged in — docked + on). | task XML + `powercfg` | Kevin go-ahead |
-| **5** | Parallel-run: laptop mail pull vs the live desktop `data/briefing.json` GitHub history — field-level diff (`diff_mail_pull.py`), several days, Kevin/Lauren eyeball | parity reports | — |
+| **5** | **Mail parity.** Strict field parity already PROVEN on the desktop (`diff_mail_pull.py`, 0 real issues, 29 Aug). `parity_vs_briefing.py` (`4a7ce21`) = self-contained laptop coverage check vs live `data/briefing.json` — Kevin runs it now + ~daily for 3–4 days, Kevin/Lauren eyeball. **Cutover blocker surfaced: the `Bi-monthly CDR/PD working group` `/`-in-name subfolder gap — fix scoped (§4b), diagnostic-gated.** | 3–4 clean daily runs (0 real flags) + the CDR subfolder fix landed & re-verified |
 
 ### Lane B — FROM 1 SEPT
 
@@ -410,6 +419,22 @@ Get-ChildItem .\data\parallel
 
 # Paste 3a's verify line + 3b's console output (the "Phase 1 - IMAP mail pull: inbox N ... sent N"
 # line and the "WI_MAIL_PARALLEL ... capture done" line) + 3d if you ran it. Back to Drew.
+```
+
+### Phase 5 parity (NOW, then ~once a day for 3–4 days — laptop, as `ad-oak\begb0037`)
+
+```powershell
+cd $env:USERPROFILE\work-inbox
+$t=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+foreach ($f in 'fetch_inbox.py','imap_mail.py','diff_mail_pull.py','parity_vs_briefing.py') {
+  iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/$f`?t=$t" -OutFile $f
+}
+python .\parity_vs_briefing.py            # fresh IMAP capture + pull live briefing.json + diff
+#   or:  python .\parity_vs_briefing.py --history 5   # also diff the last 5 briefing snapshots
+
+# Writes data\parallel\parity_vs_briefing_<ts>.json. Paste the console summary
+# (the "REAL FLAGS: N" lines + the "folder diagnostic" block) back to Drew.
+# It runs its own capture -- no Outlook opens; no push; reads only.
 ```
 
 Expected on 3b: `Calendar backend: com`, `Mail backend: imap  [WI_MAIL_PARALLEL ...]`, `IMAP - silent OAuth2 token OK for begb0037@ox.ac.uk via broker-app`, `Phase 1 - IMAP mail pull: inbox <N> ... sent <N>`, `WI_MAIL_PARALLEL (imap) mail-only capture done ... Exiting 0`.

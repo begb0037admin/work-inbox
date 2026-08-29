@@ -1,21 +1,22 @@
-# Handover -- 29 August 2026, ~night UTC (Drew) -- LAPTOP MIGRATION: Phase 3 first parallel run PASSED (inbox 48 / sent 10) BUT auto-launched classic Outlook -> FIXED (commit `d5447b9`). Kevin re-runs the §7 parallel capture to confirm no Outlook launch, then Phase 5. NO build, NO cutover.
+# Handover -- 29 August 2026, ~late night UTC (Drew) -- LAPTOP MIGRATION: Phase 3 re-run CLEAN (no Outlook launched). Phase 5 script `parity_vs_briefing.py` shipped (`4a7ce21`). Kevin runs it now + ~daily x3-4. CDR `/`-in-name subfolder = cutover blocker, fix scoped. NO build, NO cutover.
 
-## Phase 3 first laptop parallel run (29 Aug) -- IMAP capture good, one bug
-- **Good:** `reauth_imap.py` -> one browser click, no password, EXAMINE INBOX 558. `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1 python fetch_inbox.py`: `IMAP - silent OAuth2 token OK ... via broker-app` -> INBOX 38 -> +VIP 0 -> +subfolders 10 -> Sent 10 -> `IMAP mail pull: inbox 48 (unread 19) sent 10` -> wrote `data\parallel\imap_inbox_raw.json (48)` / `imap_sent_raw.json (10)` -> `Exiting 0`. Subfolder `INBOX/Bi-monthly CDR/PD working group` still skipped (`/` in the name collides with the IMAP hierarchy separator -- known, unresolved, accepted).
-- **BUG:** it auto-launched `OUTLOOK.EXE`. The COM connect ran unconditionally at Phase 1 start (with the WS1 auto-start-Outlook logic) BEFORE the `WI_MAIL_PARALLEL` skip-calendar exit.
+## Phase 3 re-run (29 Aug, after `d5447b9`) -- CLEAN
+`Phase 1 - MAIL_BACKEND=imap: NOT connecting Outlook COM (WI_MAIL_PARALLEL mail-only capture); classic Outlook will not be opened` -> `silent OAuth2 token OK ... via broker-app` -> `inbox 48 (unread 19) sent 10` -> `Exiting 0`. `Get-Process OUTLOOK` -> nothing. Fix confirmed.
 
-## FIX -- commit `d5447b9` (`fetch_inbox.py`), `MAIL_BACKEND=imap` must never open classic Outlook
-1. Under `MAIL_BACKEND=imap`, COM is attempted ONLY when a COM calendar source is genuinely in scope this run: `CAL_BACKEND=com` AND not `WI_MAIL_PARALLEL` AND `CAL_BACKEND` not requested as `connector`. Otherwise `mapi=None`, a log line says why, **no COM connect at all**.
-2. New `connect_to_outlook(allow_launch=...)`. `MAIL_BACKEND=imap` passes `allow_launch=False` -> in the "Outlook not ready" branch it does NOT call `_launch_classic_outlook()` / `_wait_for_outlook_mapi()`; it breaks and raises, caller degrades calendar to empty + warning. The `_notify_phase_failure` "open Outlook" toast is also gated on `allow_launch`.
-3. `CAL_BACKEND=connector` now recorded as `CAL_CONNECTOR_NYI` (calendar empty + warning, no COM) instead of coerced to `com`.
-- **`MAIL_BACKEND=com` / default path byte-identical:** `allow_launch` defaults `True`; every new branch gated on `not allow_launch` / `CAL_CONNECTOR_NYI`; `CAL_BACKEND` unset -> `com` -> no new log. `python -m py_compile` clean, diff reviewed.
-- **Plan §9 item 3 DEFAULTED:** calendar-source unavailable (Outlook not up pre-1-Sept, or connector not loaded post-1-Sept) -> empty calendar + warning, mail briefing continues. Confirm with Kevin but this is what's shipped.
-- Plan note added: classic Outlook IS installed + working on the laptop (Oxford image) but the pipeline must never touch/launch it; uninstalled at cutover.
+## Phase 5 -- mail parity
+- **Strict same-window field parity was already PROVEN on the admin desktop** (29 Aug, `diff_mail_pull.py`): INBOX common 48/52, SENT 10==10, **REAL parity issues 0** (+31 benign X.500->SMTP, +5 read-cap churn). Phase 3's code changes don't touch `imap_mail.pull()` message logic, so it stands. Optional fresh re-confirm = a desktop `Run Mail Parity Test.bat` run.
+- **NEW `parity_vs_briefing.py` (`4a7ce21`)** -- self-contained on the laptop, no COM. Pulls the live desktop `data/briefing.json` (+ `--history N` for last N commits) from GitHub, runs a fresh `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1` capture, checks the IMAP pull surfaces the same messages, attributed the same way. `briefing.json` is triaged (no message-id / per-card is_read / importance; sender is a display name) and a snapshot from an earlier run -> **coverage + attribution sanity check across drifting state**, not a byte diff. Drift (new mail since, items filed/read) reported as expected.
+  - REAL flags: `only_in_briefing` needs/urgent (COM had it, IMAP missed) · `only_in_imap` unread needs/urgent the briefing lacked · `kevin_is_primary_recipient` mismatch on a matched pair.
+  - Soft/expected (reported, not counted): only-in-briefing fyi/low predating the snapshot · only-in-imap arrived-after · grouped-thread siblings · read-cap churn · derived-tier diff (script uses `diff_mail_pull._tier()`, briefing uses full `categorise()`).
+  - Folds in a FOLDER DIAGNOSTIC (`NAMESPACE` + `LIST` rows near the CDR folder) to scope the subfolder gap in the same run.
+  - Run: `python parity_vs_briefing.py` now, then ~once a day for 3-4 days; Kevin/Lauren eyeball. Command in plan §7 "Phase 5 parity".
 
-## NEXT: Kevin re-runs the §7 "Phase 3 parallel run" (now with `d5447b9`)
-Same commands. Expect a `Phase 1 - MAIL_BACKEND=imap: NOT connecting Outlook COM (WI_MAIL_PARALLEL mail-only capture); classic Outlook will not be opened` line and **no `OUTLOOK.EXE` process**, otherwise identical (inbox ~48 / sent ~10, `Exiting 0`). Then Phase 5: field-diff `imap_*_raw.json` vs `data/briefing.json` GitHub history.
+## CUTOVER BLOCKER: `INBOX/Bi-monthly CDR/PD working group` subfolder (`/` in the Outlook folder name = the IMAP hierarchy separator)
+- Still skipped over IMAP. **Fix scoped, diagnostic-gated -- must be closed + re-verified before cutover, not carried.** `parity_vs_briefing.py`'s folder diagnostic prints the real server name. Then: change `imap_mail.pull()` subfolder matching so a `tree` containing `/` matches any `LIST` entry whose name (with `/` and `&-` stripped, lowercased) contains the tree's normalised form, and `SELECT` that entry's exact server string verbatim -- handles both "server nests it" and "server substitutes the `/`" without guessing. See plan §4b.
 
 ## STILL: NO `codex login`, NO build, NO cutover, desktop pipeline + `claude -p` LIVE. `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged.
+
+(Earlier this session: Phase 3 first parallel run auto-launched `OUTLOOK.EXE` — the COM connect ran unconditionally before the `WI_MAIL_PARALLEL` skip-exit; fixed in `d5447b9` as summarised above. Commits `0900b3f` (Lane A auth/imports/flag) then `d5447b9` (no-launch) then `4a7ce21` (Phase 5 script).)
 
 ---
 
