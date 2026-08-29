@@ -29,14 +29,14 @@ Run once now, then ~once a day for 3-4 days to eyeball parity across states.
 Every run prints timestamps. Reads only; pushes / mutates nothing.
 """
 
-import base64
 import json
 import os
 import re
 import subprocess
 import sys
+import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -102,16 +102,71 @@ def _parse_dt(s):
     return None
 
 
-def _gh_get(url):
+_GH_AUTH = None            # "Bearer <pat>" once _init_gh_auth() has validated it
+_GH_AUTH_READY = False
+
+
+def _init_gh_auth():
+    """Validate GITHUB_PAT and build an ASCII-clean Authorization header value.
+    A non-ASCII / whitespace-polluted PAT (bad paste, smart quote) is a clean
+    exit with a fix hint -- NOT a raw UnicodeEncodeError deep in urllib."""
+    global _GH_AUTH, _GH_AUTH_READY
+    _GH_AUTH_READY = True
+    raw = os.environ.get("GITHUB_PAT", "")
+    pat = raw.strip()
+    if not pat:
+        log("GITHUB_PAT not set -- trying the GitHub API unauthenticated "
+            "(works only if the repo is public; low rate limit).")
+        return
+    if pat != raw:
+        log("note: GITHUB_PAT had surrounding whitespace -- stripped it.")
+    if not pat.isascii():
+        bad = [f"index {i} = U+{ord(c):04X} {c!r}" for i, c in enumerate(pat) if not c.isascii()]
+        log("GITHUB_PAT contains NON-ASCII characters -- cannot form an HTTP header:")
+        for b in bad[:6]:
+            log(f"    {b}")
+        log("  Re-set it clean (classic token: 40 chars, ^ghp_[A-Za-z0-9]{36}$):")
+        log("    [Environment]::SetEnvironmentVariable('GITHUB_PAT','<paste token>','User')")
+        log("  then open a NEW shell and check:")
+        log("    $env:GITHUB_PAT.Length   ;   $env:GITHUB_PAT -match '^[\\x21-\\x7E]+$'")
+        raise RuntimeError("GITHUB_PAT contains non-ASCII characters -- re-set it (see above)")
+    if len(pat) < 20 or " " in pat:
+        log(f"warning: GITHUB_PAT looks malformed (len {len(pat)}) -- if the fetch 401s, re-set it.")
+    _GH_AUTH = "Bearer " + pat
+
+
+def _gh_get(url, accept="application/vnd.github+json"):
+    """GET api.github.com. Returns parsed JSON, or the raw text body when
+    `accept` ends in 'raw'. Any auth/network/HTTP error -> RuntimeError with a
+    one-line diagnosis + the URL (never a bare traceback)."""
+    if not _GH_AUTH_READY:
+        _init_gh_auth()
     req = urllib.request.Request(url, headers={
-        "Accept": "application/vnd.github+json",
+        "Accept": accept,
         "User-Agent": "work-inbox-parity",
+        "X-GitHub-Api-Version": "2022-11-28",
     })
-    pat = os.environ.get("GITHUB_PAT", "").strip()
-    if pat:
-        req.add_header("Authorization", "token " + pat)
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read().decode("utf-8"))
+    if _GH_AUTH:
+        req.add_header("Authorization", _GH_AUTH)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = r.read()
+    except urllib.error.HTTPError as e:
+        body = ""
+        try:
+            body = e.read().decode("utf-8", "replace")
+        except Exception:
+            pass
+        hint = ""
+        if e.code in (401, 403):
+            hint = " -- GITHUB_PAT missing/expired/insufficient scope (needs repo read)"
+        elif e.code == 404:
+            hint = " -- repo/path/ref not found, or the PAT can't see a private repo"
+        raise RuntimeError(f"HTTP {e.code} {e.reason}{hint}  [{url}]  {body[:200]}")
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"network error: {e.reason}  [{url}]")
+    text = data.decode("utf-8", "replace")
+    return text if accept.rstrip().endswith("raw") else json.loads(text)
 
 
 def fetch_briefings(history):
@@ -120,14 +175,18 @@ def fetch_briefings(history):
     n = max(1, history)
     commits = _gh_get(
         f"https://api.github.com/repos/{REPO}/commits?path={BRIEFING_PATH}&per_page={n}")
+    if not isinstance(commits, list) or not commits:
+        raise RuntimeError(f"commits API returned no history for {BRIEFING_PATH} "
+                           f"(repo {REPO})")
     out = []
     for c in commits[:n]:
         sha = c["sha"]
         when = c["commit"]["committer"]["date"]            # e.g. 2026-08-28T12:06:41Z
         as_of = _parse_dt(when)
         body = _gh_get(
-            f"https://api.github.com/repos/{REPO}/contents/{BRIEFING_PATH}?ref={sha}")
-        doc = json.loads(base64.b64decode(body["content"]).decode("utf-8"))
+            f"https://api.github.com/repos/{REPO}/contents/{BRIEFING_PATH}?ref={sha}",
+            accept="application/vnd.github.raw")
+        doc = json.loads(body)
         out.append((as_of, sha[:9], doc))
     return out
 
@@ -312,6 +371,24 @@ def folder_diagnostic():
     return diag
 
 
+def _print_folder_diag(diag):
+    print("\n--- folder diagnostic (for the 'Bi-monthly CDR/PD working group' "
+          "'/'-in-name subfolder fix) ---")
+    if diag.get("error"):
+        print(f"  ERROR: {diag['error']}")
+        return
+    print(f"  upn: {diag.get('upn')}")
+    print(f"  NAMESPACE: {diag.get('namespace')}")
+    rows = diag.get("list_rows_matching_cdr") or []
+    print(f"  LIST rows matching cdr / working group / bi-monthly ({len(rows)}):")
+    for s in rows:
+        print(f"       {s}")
+    if not rows:
+        print("       (none returned by LIST at all -- inspect all_inbox_children:)")
+        for s in (diag.get("all_inbox_children") or [])[:40]:
+            print(f"       {s}")
+
+
 # --------------------------------------------------------------------------- #
 #  main
 # --------------------------------------------------------------------------- #
@@ -346,10 +423,31 @@ def main(argv):
     log(f"IMAP capture: {len(imap)} inbox entries "
         f"({sum(1 for e in imap if not e.get('is_read', True))} unread)")
 
+    os.makedirs(PDIR, exist_ok=True)
+    out = os.path.join(PDIR, f"parity_vs_briefing_{datetime.now():%Y%m%d_%H%M%S}.json")
+
+    # ---- FOLDER DIAGNOSTIC FIRST -- the priority output. Runs and prints even
+    #      if the briefing fetch below fails (bad PAT / offline). ----
+    diag = folder_diagnostic()
+    _print_folder_diag(diag)
+    # persist immediately so a later failure can't lose it
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump({"generated": _ts(), "imap_count": len(imap),
+                   "reports": [], "folder_diagnostic": diag,
+                   "note": "briefing diff not run yet"}, f, indent=2)
+
+    # ---- briefing fetch (graceful) ----
     try:
         briefings = fetch_briefings(history)
     except Exception as e:
-        log(f"FATAL: could not fetch briefing.json from GitHub: {e!r}")
+        log(f"could not fetch briefing.json from GitHub: {e}")
+        log("  The folder diagnostic above is valid. Fix GITHUB_PAT / connectivity "
+            "and re-run for the parity diff.")
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump({"generated": _ts(), "imap_count": len(imap),
+                       "reports": [], "folder_diagnostic": diag,
+                       "briefing_fetch_error": str(e)}, f, indent=2)
+        log(f"wrote {out} (folder diagnostic only)")
         return 2
 
     reports = []
@@ -357,10 +455,6 @@ def main(argv):
         rep = diff_one(as_of, sha, doc, imap)
         reports.append(rep)
 
-    diag = folder_diagnostic()
-
-    out = os.path.join(PDIR, f"parity_vs_briefing_{datetime.now():%Y%m%d_%H%M%S}.json")
-    os.makedirs(PDIR, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         json.dump({"generated": _ts(), "imap_count": len(imap),
                    "reports": reports, "folder_diagnostic": diag}, f, indent=2)
@@ -388,20 +482,7 @@ def main(argv):
         print(f"  expected/soft (drift, read-cap churn, grouped threads, tier-fn diff): {exp}")
         if not rep["cdr_subfolder_present_in_imap"]:
             print("  !! SUBFOLDER GAP: no IMAP entry from 'Bi-monthly CDR/PD working group' "
-                  "-- '/' in the name. PHASE 5 BLOCKER -- see folder_diagnostic in the json.")
-
-    print("\n--- folder diagnostic (for the CDR '/'-in-name fix) ---")
-    if diag.get("error"):
-        print(f"  {diag['error']}")
-    else:
-        print(f"  namespace: {diag.get('namespace')}")
-        rows = diag.get("list_rows_matching_cdr") or []
-        print(f"  LIST rows matching cdr/working group/bi-monthly ({len(rows)}):")
-        for s in rows:
-            print(f"       {s}")
-        if not rows:
-            print("       (none -- the folder is not returned by LIST at all; "
-                  "check all_inbox_children in the json)")
+                  "-- '/' in the name. PHASE 5 BLOCKER -- see the folder diagnostic above / the json.")
 
     total_real = sum(r["REAL_FLAGS"] for r in reports)
     print(f"\n[{_ts()}] wrote {out}")
