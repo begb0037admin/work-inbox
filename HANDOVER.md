@@ -1,4 +1,26 @@
-# Handover -- 29 August 2026, ~late night UTC (Drew) -- LAPTOP MIGRATION: Phase 3 re-run CLEAN (no Outlook launched). Phase 5 script `parity_vs_briefing.py` shipped (`4a7ce21`). Kevin runs it now + ~daily x3-4. CDR `/`-in-name subfolder = cutover blocker, fix scoped. NO build, NO cutover.
+# Handover -- 29 August 2026, ~night UTC (Drew) -- LAPTOP MIGRATION: Phase 5 first run OK (0 still-live messages missed). CDR subfolder = stale config, REMOVED (`9eafeef`), not a blocker. parity headline honesty fixed. Phase 4 shadow-task scripts READY. NO build, NO cutover.
+
+## Phase 5 first run (29 Aug, PAT fixed) -- IMAP pull matches the live briefing's coverage
+`cards=63 imap=48 matched=39`, "REAL FLAGS: 9" -- but all 9 were `only_in_briefing` needs/urgent tagged `[pre-dates this briefing]` against a **~30h-stale** briefing snapshot (2026-08-28 11:06): items Kevin filed/read/deleted since (incl. "We detected paperdreamz on Deezer", "Video scoring is here"). **Zero cases of IMAP missing a still-live message.**
+
+## Honest-headline fix (`9eafeef`, `parity_vs_briefing.py`)
+A briefing card's email always pre-dates the briefing, so the old "older than the snapshot" test fired for every only-in-briefing card and inflated `REAL FLAGS`. Now keyed on **SNAPSHOT AGE**: only-in-briefing needs/urgent counts as a REAL flag **only when the snapshot is <= 6h old**; older -> `only_in_briefing_aged_out_needs_urgent_NOT_a_flag` (reported, not counted). Verdict line now consistent with the count. Smoke-tested: fresh snapshot + unmatched needs card -> 1 flag; stale -> 0 + aged-out. Report carries `snapshot_age_hours`. **Run parity in the hour or two after a live briefing (09:xx/11:xx/...) for the real signal** -- the Phase-4 task does this automatically.
+
+## CDR subfolder -- RESOLVED, was never a real gap (`9eafeef`, `fetch_inbox.py`)
+`/`-in-name hypothesis WRONG: laptop `LIST "" "*"` + `LSUB "" "*"` showed the folder absent entirely, and **Kevin: "I don't have a CDR or PDR folder"** -- deleted/renamed since 18 Aug. COM sweep was `top_folder is None` -> WARNING+skip every run; IMAP found no LIST match. **Removed `Bi-monthly CDR/PD working group` from `SUBFOLDER_TREES`: 5 -> 4** (`Senior Management`, `H&S`, `Team`, `Projects`). One constant, shared COM+IMAP, stays in sync. **`com`/default byte-identical** -- COM collected nothing there; only a spurious WARNING + a "N named trees" count change. `parity_vs_briefing.py` folder diagnostic reworked to a one-time census (full LIST/LSUB + a resolve check per surviving tree). `Senior Management` still to be eyeballed against Kevin's first full-LIST output.
+
+## Phase 4 -- laptop shadow scheduled task: SCRIPTS READY (this commit)
+`docs/desktop-scripts/Run Laptop Parity Shadow.ps1` + `Register-LaptopParityShadow.ps1`. Task `Work Inbox Laptop Parity Shadow`, as `ad-oak\begb0037` (PRT-holding standard user, **not** `begb0037-a`), **07:00/09:00/11:00/13:00/15:00/17:00 Mon-Fri** (matches the live desktop `Work Inbox Briefing`), `Interactive`/`Limited`, `IgnoreNew`, `PT15M`, `StartWhenAvailable`, battery-agnostic; `powercfg` AC standby+hibernate -> 0. Runs `parity_vs_briefing.py` -> **writes `data\parallel\*` + `logs\parity_shadow.log` only, never pushes, never opens Outlook**, always `exit 0`. Auto-accumulates Phase 5's daily parity evidence across varying inbox states + snapshot ages. Kevin registers it (plan §7 "Phase 4"). Gate = his go-ahead / smoke test.
+
+## Remaining before Phase 6 (cutover, still gated): 3-4 more parity runs incl. fresh-snapshot slots; dashboard JS `mail_backend==="imap"` OWA-opener branch (screenshot for Kevin).
+
+## STILL: NO `codex login`, NO build, NO cutover, desktop pipeline + `claude -p` LIVE. `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged.
+
+(Session commit trail: `0900b3f` Lane A auth/imports/`CAL_BACKEND` -> `d5447b9` `MAIL_BACKEND=imap` never launches Outlook -> `4a7ce21` `parity_vs_briefing.py` -> `f45875e` docs -> `ab8630a` parity GitHub-fetch hardening -> `9eafeef` CDR removed + honest headline.)
+
+---
+
+# Handover -- 29 August 2026, ~late night UTC (Drew) -- Phase 3 re-run CLEAN (no Outlook launched); Phase 5 script `parity_vs_briefing.py` shipped (`4a7ce21`). [Partly superseded by the entry above.]
 
 ## Phase 3 re-run (29 Aug, after `d5447b9`) -- CLEAN
 `Phase 1 - MAIL_BACKEND=imap: NOT connecting Outlook COM (WI_MAIL_PARALLEL mail-only capture); classic Outlook will not be opened` -> `silent OAuth2 token OK ... via broker-app` -> `inbox 48 (unread 19) sent 10` -> `Exiting 0`. `Get-Process OUTLOOK` -> nothing. Fix confirmed.

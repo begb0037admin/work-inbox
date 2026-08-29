@@ -178,7 +178,7 @@ Behind the **unset** `MAIL_BACKEND` flag (`com` default = byte-identical to toda
 - **Phase 3.9** (inbox-resolution tracking) keys on Outlook `EntryID`; under IMAP it degrades to fail-open-carry unless re-wired to `message_id` + `imap_mail.message_still_in_inbox()`. Open decision: re-wire before cutover, or accept fail-open-carry for week 1.
 - **`SMTP.Send` in the token bundle** — Thunderbird's client returns the whole mail bundle. Mitigation is architectural and unchanged: `imap_mail.py` imports `imaplib` only, never `smtplib`; no agent-with-tools on this path. (This is the exact property that makes Lane A "safe" and Lane B "eyes-open".)
 - **Outlook Categories** — zero dependence confirmed by full-repo grep; nothing to replace.
-- **Subfolder `INBOX/Bi-monthly CDR/PD working group` — CUTOVER BLOCKER, fix scoped (diagnostic-gated).** The `/` in the Outlook folder name is also the Exchange Online IMAP hierarchy separator. `imap_mail.pull()` builds `target = "INBOX/" + tree` and requires `list_name == target` (or a child); the current skip means either (a) the server nests it as a 3-segment path with no intermediate `Bi-monthly CDR` folder so `SELECT` fails, or (b) the server substitutes the `/` in the returned `LIST` name. **Cannot fix blind.** `parity_vs_briefing.py`'s folder diagnostic prints `NAMESPACE` + every `LIST` row containing `cdr`/`working group`/`bi-monthly` + all `INBOX/` children. Once we see the real server name: change `imap_mail.pull()`'s subfolder matching so a `tree` containing `/` matches any `LIST` entry whose name — with `/` and `&-` stripped and lowercased — contains the tree's normalised form, then `SELECT` that entry's **exact server string verbatim** (handles both (a) and (b) without guessing). Must be closed and re-verified before cutover — not carried.
+- **Subfolder `Bi-monthly CDR/PD working group` — RESOLVED (was never a real gap).** The `/`-in-name hypothesis was wrong: the laptop folder diagnostic (`LIST "" "*"` + `LSUB "" "*"`) showed the folder **absent from IMAP entirely** — and Kevin then confirmed **"I don't have a CDR or PDR folder"** (deleted/renamed since the config was written 18 Aug). The COM sweep had been hitting `top_folder is None` → `WARNING` + skip every run; the IMAP pull found no `LIST` match. Removed from `SUBFOLDER_TREES` in `fetch_inbox.py` (commit `9eafeef`), **5 trees → 4** (`Senior Management`, `H&S`, `Team`, `Projects`) — one constant, shared by the COM sweep and `imap_mail.pull()`, so both stay in sync. `com`/default byte-identical (COM collected nothing there anyway; only a spurious `WARNING` line + a "N named trees" count change). `parity_vs_briefing.py`'s folder diagnostic now does a one-time census: full `LIST`/`LSUB` + a resolve check for each of the 4 surviving trees (`Senior Management` still to be eyeballed against Kevin's first full-`LIST` output).
 - **Classic Outlook on the laptop** — IS installed + configured (Oxford standard image) and works, BUT the pipeline must never depend on it or launch it. `MAIL_BACKEND=imap` now never opens it (fix in commit `d5447b9`). It is uninstalled at cutover per §6 "Cutover"; until then it is simply left untouched.
 
 ---
@@ -274,8 +274,8 @@ Because Lane B rides Kevin's interactive Edu account, a connector he re-adds (or
 | **1** | Laptop toolchain | **DONE — §1 "Phase 1 COMPLETE"** | — |
 | **2(i)** | MAKE-OR-BREAK #1 — silent IMAP token off the PRT | **DONE / PASS — §1 "Phase 2(i) PASSED"** (`broker_imap_proof.py` v2; cold run 2 = silent FULL WIN; first-time/periodic seed = one browser click) | — |
 | **3** | Wire Lane A in | **Code DONE — `0900b3f` + `d5447b9`.** Re-run 29 Aug CLEAN (no Outlook launched, inbox 48 / sent 10, `Exiting 0`). **Pending: dashboard JS `mail_backend==="imap"` → OWA opener branch — screenshot for Kevin before it ships.** | screenshot approval for the JS branch |
-| **4** | Scheduled task(s) on the laptop as **`ad-oak\begb0037`** (the PRT-holding standard user — **not** `begb0037-a`), 5×/weekday matching the current cadence (confirm against the live desktop `\Work Inbox Briefing` task); `powercfg` never-sleep; every run timestamped. **Parallel — writes `docs/*` / `data/parallel/*` / `data/codex_runs/*` only, never `data/briefing.json`.** Phase 2(i) settled the WAM question: day-to-day silent runs are fine unattended; the periodic re-auth needs a logged-in session for the one browser click (laptop stays logged in — docked + on). | task XML + `powercfg` | Kevin go-ahead |
-| **5** | **Mail parity.** Strict field parity already PROVEN on the desktop (`diff_mail_pull.py`, 0 real issues, 29 Aug). `parity_vs_briefing.py` (`4a7ce21`) = self-contained laptop coverage check vs live `data/briefing.json` — Kevin runs it now + ~daily for 3–4 days, Kevin/Lauren eyeball. **Cutover blocker surfaced: the `Bi-monthly CDR/PD working group` `/`-in-name subfolder gap — fix scoped (§4b), diagnostic-gated.** | 3–4 clean daily runs (0 real flags) + the CDR subfolder fix landed & re-verified |
+| **4** | **Laptop shadow scheduled task — SCRIPTS READY** (`docs/desktop-scripts/Run Laptop Parity Shadow.ps1` + `Register-LaptopParityShadow.ps1`, commit pending). Task `Work Inbox Laptop Parity Shadow`, as `ad-oak\begb0037` (PRT-holding standard user — **not** `begb0037-a`), **07:00/09:00/11:00/13:00/15:00/17:00 Mon–Fri** (matches the live desktop `Work Inbox Briefing`), `Interactive`/`Limited`, `IgnoreNew`, `PT15M` limit, `StartWhenAvailable`, battery-agnostic; `powercfg` AC standby+hibernate → 0. Runs `parity_vs_briefing.py` → **writes `data/parallel/*` + `logs/parity_shadow.log` only, never pushes, never opens Outlook.** This also *auto-accumulates* Phase 5's daily parity evidence across varying inbox states and briefing-snapshot ages. | Kevin runs `Register-LaptopParityShadow.ps1` + a `Start-ScheduledTask` smoke test |
+| **5** | **Mail parity.** Strict field parity PROVEN on the desktop (`diff_mail_pull.py`, 0 real issues, 29 Aug). `parity_vs_briefing.py` = self-contained laptop coverage check vs live `data/briefing.json`. **First run (29 Aug): `cards=63 imap=48 matched=39`, 0 still-live messages missed** (9 `only_in_briefing` needs/urgent were all aged-out against a ~30h-stale snapshot; honest-headline fix in `9eafeef` so `REAL FLAGS` now excludes aged-out). CDR subfolder = resolved stale config (§4b), not a blocker. Remaining: 3–4 more runs against **fresher** snapshots (the Phase-4 task's 09:00/11:00/… slots diff against same-morning briefings — the real-flag signal actually engages there). | 3–4 runs incl. fresh-snapshot slots, 0 real flags, Kevin/Lauren eyeball |
 
 ### Lane B — FROM 1 SEPT
 
@@ -433,11 +433,27 @@ python .\parity_vs_briefing.py            # fresh IMAP capture + pull live brief
 #   or:  python .\parity_vs_briefing.py --history 5   # also diff the last 5 briefing snapshots
 
 # Writes data\parallel\parity_vs_briefing_<ts>.json. Paste the console summary
-# (the "REAL FLAGS: N" lines + the "folder diagnostic" block) back to Drew.
-# It runs its own capture -- no Outlook opens; no push; reads only.
+# (the "REAL FLAGS: N" line, the aged-out list, and the "folder diagnostic"
+# block -- esp. the "configured subfolder trees" resolve check and the full
+# LIST "" "*"). It runs its own capture -- no Outlook opens; no push; reads only.
 ```
 
-Expected on 3b: `Calendar backend: com`, `Mail backend: imap  [WI_MAIL_PARALLEL ...]`, `IMAP - silent OAuth2 token OK for begb0037@ox.ac.uk via broker-app`, `Phase 1 - IMAP mail pull: inbox <N> ... sent <N>`, `WI_MAIL_PARALLEL (imap) mail-only capture done ... Exiting 0`.
+For the strongest signal, run it in the hour or two after a live desktop briefing (09:xx / 11:xx / …) so the snapshot is < 6h old and any real miss actually flags. Once the Phase-4 task is registered (below) this happens automatically 6×/weekday.
+
+### Phase 4 — register the laptop shadow task (laptop, as `ad-oak\begb0037`, once)
+
+```powershell
+cd $env:USERPROFILE\work-inbox
+$t=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+foreach ($f in 'Run Laptop Parity Shadow.ps1','Register-LaptopParityShadow.ps1') {
+  iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/docs/desktop-scripts/$([uri]::EscapeDataString($f))`?t=$t" -OutFile $f
+}
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\Register-LaptopParityShadow.ps1"
+Start-ScheduledTask -TaskName 'Work Inbox Laptop Parity Shadow'      # smoke test
+Start-Sleep 90 ; Get-Content .\logs\parity_shadow.log -Tail 40
+```
+
+Task = `Work Inbox Laptop Parity Shadow`, 07:00/09:00/11:00/13:00/15:00/17:00 Mon–Fri, runs `parity_vs_briefing.py`. **Writes `data\parallel\*` + `logs\parity_shadow.log` only — never pushes, never `briefing.json`, never opens Outlook.** `exit 0` always (a shadow must not raise a Task Scheduler failure). Remove with `Unregister-ScheduledTask -TaskName 'Work Inbox Laptop Parity Shadow' -Confirm:$false`.
 
 ---
 
