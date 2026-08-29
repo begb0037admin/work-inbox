@@ -1,22 +1,29 @@
-# Handover -- 29 August 2026, ~evening UTC (Drew) -- LAPTOP MIGRATION: Phase 1 COMPLETE on the laptop (verified). Phase 2(i) script `broker_imap_proof.py` shipped -- the MSAL-broker silent-IMAP-token make-or-break. Awaiting Kevin's two-run result. NO build, NO cutover.
+# Handover -- 29 August 2026, ~evening UTC (Drew) -- LAPTOP MIGRATION: Phase 1 COMPLETE. Phase 2(i) run 1 -- MSAL BROKER PATH FAILED for the Thunderbird client id (`broker_error / Status_ApiContractViolation`, instant, no dialog). `broker_imap_proof.py` REWORKED to v2 (broker+real-HWND, then plain system-browser fallback). Awaiting Kevin's two-run result of v2. NO build, NO cutover.
+
+## Phase 2(i) v1 FINDING -- MSAL broker/WAM does NOT work with the Thunderbird client id
+Run 1 (29 Aug 15:18Z on the laptop): `enable_broker_on_windows=True` + `acquire_token_interactive(parent_window_handle=CONSOLE_WINDOW_HANDLE)` returned in 1.6s with **no dialog** and `error=broker_error desc=... Status: Response_Status.Status_ApiContractViolation, Error code: 3399614473`. `get_accounts()` was 0 (first run, empty cache).
+- **Cause:** the Thunderbird public client `9e5f94bc-...` is **not WAM/broker-enabled** -- no `ms-appx-web://microsoft.aad.brokerplugin/<id>` redirect URI registered; it's a device-code + loopback-browser public client. (Secondary possible: `CONSOLE_WINDOW_HANDLE` sentinel not accepted by this pymsalruntime -- v2's real-HWND retry rules that in/out.)
+- **We cannot swap the client id:** Thunderbird's is the ONLY one confirmed to get `IMAP.AccessAsUser.All` at Oxford (MS Office `d3590ed6` -> `AADSTS65002`; Graph-family clients are Graph-scoped and Graph is blocked at Oxford).
+- **Consequence for the "silent forever" premise:** if the broker can't be used, the *periodic* re-auth (CA sign-in-frequency / ~90d refresh-token roll) can't be made broker-silent. Day-to-day scheduled runs can still be silent via `acquire_token_silent` off the persisted MSAL file cache -- the periodic re-auth becomes **one system-browser SSO click on the laptop (PRT-SSO'd -> no password, no MFA)**. That is the "acceptable win" grade.
+
+## Phase 2(i) v2 -- `broker_imap_proof.py` REWORKED (repo root, shipped this session)
+Same "run it twice" contract. READ-ONLY (writes only its own cache at `%LOCALAPPDATA%\WorkInboxAI\msal_imap_token_cache.bin`; IMAP `EXAMINE` only). Tries, logging which path wins:
+1. **silent first** -- broker app then plain app, off the persisted file cache.
+2. **PATH A** -- broker `acquire_token_interactive` with a REAL top-level HWND (`GetConsoleWindow`, else `GetDesktopWindow`; restype `c_void_p` to dodge 64-bit truncation). If it still `ApiContractViolation`s -> the client id is the blocker, move on (no loop).
+3. **PATH B** -- plain `acquire_token_interactive` (no broker), system browser. PRT-SSO'd -> expect 0-1 clicks, no password/MFA. Persist the file cache.
+4. Immediate re-silent to seed the cache; then IMAP XOAUTH2 `SELECT INBOX` readonly.
+- Grades itself: broker (A) works -> `=== PASS === FULL WIN`. Fallback (B) + run 2 silent -> `=== PASS === ACCEPTABLE WIN` (documented reality: silent day-to-day, one SSO click every few weeks) -> proceed to Phase 3. Run 2 still prompts / no token -> `=== FAIL ===` -> escalate (device-code via `reauth_imap.py` last resort).
+- **How to run (2 lines):**
+  ```powershell
+  cd $env:USERPROFILE\work-inbox ; $t=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds() ; iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/broker_imap_proof.py?t=$t" -OutFile broker_imap_proof.py
+  python broker_imap_proof.py    # do the SSO click if a browser opens; then run this exact line again -- run 2 must reach PASS with NO prompt
+  ```
+- Whichever path wins, Phase 3 folds that exact auth code into `imap_mail.py`. Also informs the Phase 4 "does the scheduled task need an interactive session" question (fallback = yes for the periodic re-auth; silent runs are fine unattended).
 
 ## Phase 1 -- DONE (laptop `ad-oak\begb0037`, verified 29 Aug)
 Python 3.12.10 (per-user) / Node 24.19.0 / npm 11.17.0 / Git 2.55.0.3 / Claude Code 2.1.251 (`claude login` personal done, `claude -p` -> "ready") / **Codex CLI 0.151.0** (npm global, NO `codex login` -- deferred to 1 Sept) / `msal` 1.38.0 + `pymsalruntime` OK / `pywin32` + `anthropic` OK / `GITHUB_PAT` set (User) / `ANTHROPIC_API_KEY` unset (User+Machine) -> subscription billing / 4 pipeline scripts in `%USERPROFILE%\work-inbox\`, all `py_compile` 0. PS 5.1.26100.8875, ExecutionPolicy RemoteSigned (CurrentUser).
 - **Account split (important for Phase 4):** Kevin elevates only as a SEPARATE local admin account `begb0037-a` (no PRT, not domain-joined). The pipeline account `ad-oak\begb0037` is a STANDARD user and HOLDS THE PRT. All per-user installs went in fine as `ad-oak\begb0037` without elevation. Scheduled task must run as `ad-oak\begb0037`; anything needing elevation is a separate manual `begb0037-a` step (and would have no PRT, so no auth work runs there).
 - Codex 0.151.0 is newer than the desktop's 0.149.1 -- the Lane B design must re-verify tool-gating on 0.151.x (still no `--allowed-tools` as of 0.150.1; re-check).
-
-## Phase 2(i) -- MAKE-OR-BREAK #1: `broker_imap_proof.py` (repo root, shipped this session)
-Single self-contained script. READ-ONLY -- writes only its own MSAL token cache at `%LOCALAPPDATA%\WorkInboxAI\msal_imap_token_cache.bin`; IMAP `EXAMINE` (read-only) of INBOX, prints count + one header, mutates nothing.
-- MSAL `PublicClientApplication`, Thunderbird client `9e5f94bc-...`, authority `.../organizations`, `enable_broker_on_windows=True` (uses `pymsalruntime`/WAM), serializable file cache.
-- Tries `acquire_token_silent` FIRST (off any broker/WAM account); only falls back to `acquire_token_interactive(parent_window_handle=CONSOLE_WINDOW_HANDLE)` if silent can't; then an immediate second silent call to seed the cache; then IMAP XOAUTH2 `SELECT INBOX` readonly.
-- Timestamped, clear `=== PASS / PARTIAL / FAIL ===`, exit 0 / 1 / 3. Prints exactly what any dialog asked for.
-- **Kevin runs it, then runs it AGAIN cold.** Run 2 MUST reach `=== PASS ===` with NO prompt. That is the proof.
-- **How to run (2 lines):**
-  ```powershell
-  cd $env:USERPROFILE\work-inbox ; $t=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds() ; iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/broker_imap_proof.py?t=$t" -OutFile broker_imap_proof.py
-  python broker_imap_proof.py    # approve the sign-in IF prompted; then run this exact line again -- run 2 must NOT prompt
-  ```
-- **PASS** => Phase 3 folds the broker path from this script into `imap_mail.py`. **FAIL** (run 2 prompts / no token / IMAP auth fails) => STOP; reassess (device-code fallback via `reauth_imap.py`, or a different client id). Also informs the Phase 4 "does WAM silent need an interactive session" question.
 
 ## STILL: NO `codex login`, NO build, NO cutover, desktop pipeline + `claude -p` stay LIVE. `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged (no codex activity this session).
 
