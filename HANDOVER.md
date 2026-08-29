@@ -1,3 +1,26 @@
+# Handover -- 29 August 2026, ~13:xx UTC (Drew) -- TWO-LANE LAPTOP MIGRATION plan written (Kevin-approved direction). `docs/LAPTOP_MIGRATION_PLAN.md`. Phase 1 command sequence ready for Kevin. Lane B B1/B2 findings done. NO build, NO cutover. Stop for Kevin's review before Phase 2.
+
+## What changed
+Kevin decided this session: move the work-inbox pull off Outlook COM to a **two-lane architecture on Kevin's Oxford laptop** (`begb0037.AD-OAK` -- verified `AzureAdPrt: YES`, so MSAL can broker tokens SILENTLY off the PRT; the desktop's no-PRT refresh churn was the 28 Aug outage root cause). This supersedes the 03:30 "NOT SOUND, back to Kevin" position below.
+- **Lane A (mail + calendar): our own read-only Python.** IMAP (`imap_mail.py`, already on `main` behind the unset `MAIL_BACKEND` flag, parity harness DONE) + a NEW EWS-or-Graph calendar reader. Tokens via MSAL broker (`enable_broker_on_windows=True`, `pymsalruntime`). No send tool exists in the code path -- this IS the enforced read-only boundary Codex said was missing.
+- **Lane B (Teams only): the ChatGPT M365 connector, retained ONLY for Teams** (chat / in-meeting chat / meeting recordings+transcripts -- no other route). DEDICATED single-connector ChatGPT identity, dumb-fetch `codex exec`, Teams kill-switch, manifest logging + auto-disable. Kevin has explicitly accepted the residual ("worst case a stray Teams message"). Codex's "NOT SOUND" caveat still applies -- Lane B's justification is narrower blast radius + no alternative, not that the objection was answered.
+- **Triage: `claude -p` UNCHANGED.** Both lanes feed it after sanitisation.
+- **Desktop pipeline (COM + `claude -p` + `Classic Outlook Keepalive`) stays LIVE throughout** as fallback. Nothing retired until both lanes proven + Kevin's fresh explicit cutover go-ahead (Phase 6).
+
+## Deliverables this session (commit link in Drew's report)
+- **NEW `docs/LAPTOP_MIGRATION_PLAN.md`** -- reconciled two-lane plan: host facts, architecture diagram, what already exists on `main` (don't rebuild), Lane A auth/calendar detail (EWS-vs-Graph bake-off -- **EWS is announced for retirement ~1 Oct 2026, Graph delegated self-calendar read is the presumptive choice**), Lane B design, phases, hard gates, open decisions, restore points.
+- **Phase 1 command sequence for Kevin** (PS 5.1, in the doc §7) -- Python 3.12 + Node LTS + Git + Claude Code (`irm https://claude.ai/install.ps1 | iex`, native, matches the desktop) + `claude login` on Kevin's personal account + `pip install "msal[broker]" pywin32 anthropic exchangelib` + first script pull + `py_compile`. All additive on a fresh machine; touches nothing live.
+- **Lane B B1 (DONE):** `microsoft_teams` = **33 tools, 9 write / 24 read** (live read of `~/.codex/.codex-global-state.json`, config.toml sha1 `35f8910...` unchanged, no `codex exec`). Full read/write split + proposed Call-1 allowlist in the doc §5b. Meeting transcripts = scheduled meetings only, keyed off an event ID from the Lane A calendar pull.
+- **Lane B B2 (DONE):** connectors are per-account, independently linkable -> "Teams only" is achievable on a fresh account. Kevin's personal Plus is disqualified (already carries GitHub 89 + Outlook + Teams + ...). Oxford Edu NOT recommended as the dedicated identity (shared quota, admin-policy exposure, likely already hosts the Outlook connector). **Recommend a dedicated separate ChatGPT Plus account (~£16/mo), only the Teams connector, signed into `begb0037@ox.ac.uk`.** SINGLE BLOCKING UNKNOWN: does the ChatGPT/OpenAI Teams connector get USER consent at Oxford or need TENANT-ADMIN consent (same class that killed Graph-direct)? Kevin / an Oxford ChatGPT workspace admin must check before any Lane B build. No account created, no connector linked, no `codex login` -- scope only.
+
+## Exact next action
+Kevin reads `docs/LAPTOP_MIGRATION_PLAN.md`, decides the open questions in §9 (esp. #1 Graph-vs-EWS for calendar, #2 Lane B account spend, #3 Lane B consent check), then gives the go-ahead for **Phase 1** (Kevin runs the §7 commands on the laptop, pastes output back). Phase 2 (broker silent-auth proof -- the make-or-break) does NOT start until Kevin has reviewed this plan.
+
+## Baseline
+`~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` -- before and after this session's single read of `.codex-global-state.json`. No `codex login`, no `codex exec`, no config edit.
+
+---
+
 # Handover -- 29 August 2026, ~03:30 UTC (Drew) -- Reconciled plan + safeguards research pass done. **Codex second opinion = NOT SOUND for the connector route as designed.** No build. Decision back to Kevin.
 
 ## HEADLINE: the safeguards research changed the picture
