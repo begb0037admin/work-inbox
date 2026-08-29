@@ -1344,17 +1344,18 @@ print(f"Phase 1 VIP sweep done - total inbox now: {len(inbox)}")
 # Live folder names were verified via COM before hardcoding (18 Aug 2026,
 # diag_subfolders.py, read-only) -- two of Kevin's five requested names did
 # not match the live folder name exactly:
-#   - "Bi-Monthly CDRPD Working Group" -> live name is
-#     "Bi-monthly CDR/PD working group" (lowercase, "CDR/PD" with a slash)
 #   - "Health and Safety" -> no folder by that name exists; the live folder
 #     is "H&S" (confirmed as the intended tree -- it's also referenced by
 #     the sibling folder "DTP1334 - H&S System Evaluation" under Projects,
-#     same abbreviation convention). Flagged to Kevin in HANDOVER.md; using
-#     "H&S" here since it is unambiguous.
+#     same abbreviation convention).
+#   - "Bi-Monthly CDRPD Working Group" -> was configured as
+#     "Bi-monthly CDR/PD working group". REMOVED 29 Aug 2026: Kevin confirmed
+#     "I don't have a CDR or PDR folder" -- it no longer exists (deleted/
+#     renamed since). Both the COM sweep (WARNING + skip) and the IMAP pull
+#     (no LIST match) were silently getting nothing from it. Down to 4 trees.
 # "Senior Management", "Team" and "Projects" matched exactly as given.
 SUBFOLDER_TREES = [
     "Senior Management",
-    "Bi-monthly CDR/PD working group",
     "H&S",
     "Team",
     "Projects",

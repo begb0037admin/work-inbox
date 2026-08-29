@@ -261,15 +261,30 @@ def diff_one(as_of, sha, doc, imap):
 
     only_imap = [e for e in imap_pool if id(e) not in used]
 
-    # classify only_briefing
-    ob_hard, ob_soft = [], []
+    # classify only_briefing.
+    # A briefing card's email always arrived BEFORE the briefing was generated,
+    # so "older than the snapshot" is meaningless. What matters is the SNAPSHOT'S
+    # OWN AGE: if it is only a few hours old, a needs/urgent card that IMAP's
+    # fresh capture lacks is a genuine concern; if the snapshot is a day stale,
+    # that card was almost certainly filed/read/deleted since and is NOT a flag.
+    FRESH_H = 6
+    age_h = (datetime.now() - as_of).total_seconds() / 3600.0 if as_of else None
+    snapshot_is_fresh = age_h is not None and age_h <= FRESH_H
+
+    ob_flag, ob_aged, ob_soft = [], [], []
     matched_subs = {_nsub(b["subject"]) for b, _ in matched}
     for b in only_briefing:
-        old = (bdt := _parse_dt(b["received"])) and as_of and bdt < as_of
-        row = {"subject": b["subject"], "tier": b["tier"], "received": b["received"],
-               "note": "pre-dates this briefing (may have been filed/read/deleted since)"
-                       if old else "NOT older than the briefing -- unexpected"}
-        (ob_hard if b["tier"] in _HARD_TIERS else ob_soft).append(row)
+        base = {"subject": b["subject"], "tier": b["tier"], "received": b["received"]}
+        if b["tier"] not in _HARD_TIERS:
+            ob_soft.append({**base, "note": "fyi/low only in the briefing -- not a concern"})
+        elif snapshot_is_fresh:
+            ob_flag.append({**base, "note":
+                f"briefing snapshot is only {age_h:.1f}h old but IMAP's capture lacks "
+                f"this needs/urgent item -- REVIEW"})
+        else:
+            ob_aged.append({**base, "note":
+                f"briefing snapshot is {age_h:.0f}h stale -- almost certainly filed/read/"
+                f"deleted since; NOT a flag"})
 
     # classify only_imap
     oi_new, oi_sibling, oi_hard, oi_soft = [], [], [], []
@@ -303,22 +318,20 @@ def diff_one(as_of, sha, doc, imap):
         if bt != it:
             tier_soft.append({"subject": b["subject"], "briefing_tier": bt, "imap_tier": it})
 
-    # subfolder gap check
-    cdr_seen = any("cdr" in (e.get("source_folder", "") or "").lower()
-                   or "working group" in (e.get("source_folder", "") or "").lower()
-                   for e in imap)
-
-    real_flags = len(ob_hard) + len(oi_hard) + len(kipr_mismatch)
+    real_flags = len(ob_flag) + len(oi_hard) + len(kipr_mismatch)
     return {
         "briefing_sha": sha,
         "briefing_as_of": as_of.strftime("%Y-%m-%d %H:%M:%S") if as_of else None,
+        "snapshot_age_hours": round(age_h, 1) if age_h is not None else None,
+        "snapshot_is_fresh_<=6h": snapshot_is_fresh,
         "counts": {
             "briefing_cards": len(bmsgs),
             "imap_entries": len(imap),
             "matched": len(matched),
         },
         "REAL_FLAGS": real_flags,
-        "only_in_briefing_HARD_needs_urgent": ob_hard,
+        "only_in_briefing_REAL_needs_urgent_fresh_snapshot": ob_flag,
+        "only_in_briefing_aged_out_needs_urgent_NOT_a_flag": ob_aged,
         "only_in_briefing_soft_fyi_low": ob_soft,
         "only_in_imap_arrived_after": oi_new,
         "only_in_imap_grouped_thread_sibling": oi_sibling,
@@ -326,13 +339,26 @@ def diff_one(as_of, sha, doc, imap):
         "only_in_imap_soft_readcap_or_drift": oi_soft,
         "kevin_is_primary_recipient_mismatch_REAL": kipr_mismatch,
         "derived_tier_differs_SOFT": tier_soft,
-        "cdr_subfolder_present_in_imap": cdr_seen,
     }
 
 
+def _dec(row):
+    return row.decode("ascii", "replace") if isinstance(row, bytes) else str(row)
+
+
+# The subfolder trees fetch_inbox.py sweeps (must match SUBFOLDER_TREES there).
+# 'Bi-monthly CDR/PD working group' was removed 29 Aug 2026 -- Kevin: "I don't
+# have a CDR or PDR folder" (it no longer exists). This diagnostic now just
+# confirms the surviving 4 map to real IMAP folders and shows the full folder
+# set for a one-time sanity check.
+_CONFIGURED_TREES = ["Senior Management", "H&S", "Team", "Projects"]
+_GONE_TREE = "Bi-monthly CDR/PD working group"  # removed; confirm it's truly absent
+
+
 def folder_diagnostic():
-    """Dump NAMESPACE + LIST rows near the 'Bi-monthly CDR/PD working group'
-    folder so the '/'-in-name gap can be closed. Reuses imap_mail's auth."""
+    """One-time IMAP folder census: full LIST "" "*" + LSUB "" "*", and a
+    resolve check for each configured subfolder tree. Reuses imap_mail's auth.
+    Read-only."""
     try:
         import imap_mail
     except Exception as e:
@@ -342,27 +368,39 @@ def folder_diagnostic():
         M = imap_mail._imap_connect(token, upn, log=log)
     except Exception as e:
         return {"error": f"IMAP connect failed: {e!r}"}
+
     diag = {"upn": upn}
+
+    def _grab(fn, label, *args):
+        try:
+            typ, data = fn(*args)
+            rows = [_dec(r) for r in (data or []) if r]
+            diag[label] = {"typ": typ, "rows": rows}
+            return rows
+        except Exception as e:
+            diag[label] = {"error": f"{e!r}"}
+            return []
+
     try:
         try:
-            diag["namespace"] = [x.decode("ascii", "replace") if isinstance(x, bytes) else str(x)
-                                 for x in (M.namespace()[1] or [])]
+            diag["namespace"] = [_dec(x) for x in (M.namespace()[1] or [])]
         except Exception as e:
             diag["namespace"] = f"namespace() failed: {e!r}"
-        typ, data = M.list()
-        rows = []
-        for row in (data or []):
-            if not row:
-                continue
-            s = row.decode("ascii", "replace") if isinstance(row, bytes) else str(row)
-            low = s.lower()
-            if "cdr" in low or "working group" in low or "bi-monthly" in low:
-                rows.append(s)
-        diag["list_rows_matching_cdr"] = rows
-        diag["all_inbox_children"] = [
-            (row.decode("ascii", "replace") if isinstance(row, bytes) else str(row))
-            for row in (data or []) if row and b"INBOX/" in (row if isinstance(row, bytes) else row.encode())
-        ][:60]
+
+        list_all = _grab(M.list, 'LIST "" "*"', '""', '*')
+        lsub_all = _grab(M.lsub, 'LSUB "" "*"', '""', '*')
+        hay_low = [s.lower() for s in (list_all + lsub_all)]
+
+        diag["configured_trees"] = {
+            t: ("resolves" if any(("inbox/" + t.replace("&", "&-")).lower() in s
+                                  for s in hay_low) else "NOT FOUND")
+            for t in _CONFIGURED_TREES
+        }
+        diag["removed_tree"] = _GONE_TREE
+        diag["removed_tree_still_present"] = any(
+            n in s for s in hay_low
+            for n in ("cdr", "working group", "bi-monthly", "bimonthly", "pd working"))
+        diag["counts"] = {"list_all": len(list_all), "lsub_all": len(lsub_all)}
     finally:
         try:
             M.logout()
@@ -372,21 +410,23 @@ def folder_diagnostic():
 
 
 def _print_folder_diag(diag):
-    print("\n--- folder diagnostic (for the 'Bi-monthly CDR/PD working group' "
-          "'/'-in-name subfolder fix) ---")
+    print("\n--- folder diagnostic: IMAP folder census + configured-tree check ---")
     if diag.get("error"):
         print(f"  ERROR: {diag['error']}")
         return
-    print(f"  upn: {diag.get('upn')}")
-    print(f"  NAMESPACE: {diag.get('namespace')}")
-    rows = diag.get("list_rows_matching_cdr") or []
-    print(f"  LIST rows matching cdr / working group / bi-monthly ({len(rows)}):")
-    for s in rows:
+    print(f"  upn: {diag.get('upn')}   namespace: {diag.get('namespace')}   "
+          f"counts: {diag.get('counts')}")
+    print("  configured subfolder trees (must all 'resolve'):")
+    for t, state in (diag.get("configured_trees") or {}).items():
+        print(f"       {'OK ' if state == 'resolves' else '!! '}{t}  -> {state}")
+    print(f"  removed tree '{diag.get('removed_tree')}' still present in the mailbox? "
+          f"{diag.get('removed_tree_still_present')}  (expected: False)")
+    print('  full LIST "" "*":')
+    for s in (diag.get('LIST "" "*"', {}).get("rows") or []):
         print(f"       {s}")
-    if not rows:
-        print("       (none returned by LIST at all -- inspect all_inbox_children:)")
-        for s in (diag.get("all_inbox_children") or [])[:40]:
-            print(f"       {s}")
+    print('  LSUB "" "*":')
+    for s in (diag.get('LSUB "" "*"', {}).get("rows") or []):
+        print(f"       {s}")
 
 
 # --------------------------------------------------------------------------- #
@@ -462,11 +502,13 @@ def main(argv):
     # ---- console summary ----
     for rep in reports:
         c = rep["counts"]
+        age = rep.get("snapshot_age_hours")
+        fresh = rep.get("snapshot_is_fresh_<=6h")
         print(f"\n=== briefing {rep['briefing_sha']} as of {rep['briefing_as_of']} "
-              f"vs IMAP now ===")
+              f"({age}h old, {'FRESH' if fresh else 'stale'}) vs IMAP now ===")
         print(f"  cards={c['briefing_cards']}  imap={c['imap_entries']}  matched={c['matched']}")
         print(f"  REAL FLAGS: {rep['REAL_FLAGS']}")
-        for label in ("only_in_briefing_HARD_needs_urgent",
+        for label in ("only_in_briefing_REAL_needs_urgent_fresh_snapshot",
                       "only_in_imap_HARD_unread_needs_urgent",
                       "kevin_is_primary_recipient_mismatch_REAL"):
             rows = rep[label]
@@ -474,21 +516,31 @@ def main(argv):
                 print(f"  !! {label} ({len(rows)}):")
                 for x in rows[:12]:
                     print(f"       - {x.get('subject','')[:90]}  [{x.get('note','')}]")
+        aged = rep["only_in_briefing_aged_out_needs_urgent_NOT_a_flag"]
+        if aged:
+            print(f"  aged-out only-in-briefing needs/urgent ({len(aged)}) -- snapshot is "
+                  f"{age}h stale, these were filed/read/deleted since; NOT flags:")
+            for x in aged[:12]:
+                print(f"       - {x.get('subject','')[:90]}")
         exp = (len(rep["only_in_briefing_soft_fyi_low"])
                + len(rep["only_in_imap_arrived_after"])
                + len(rep["only_in_imap_grouped_thread_sibling"])
                + len(rep["only_in_imap_soft_readcap_or_drift"])
                + len(rep["derived_tier_differs_SOFT"]))
         print(f"  expected/soft (drift, read-cap churn, grouped threads, tier-fn diff): {exp}")
-        if not rep["cdr_subfolder_present_in_imap"]:
-            print("  !! SUBFOLDER GAP: no IMAP entry from 'Bi-monthly CDR/PD working group' "
-                  "-- '/' in the name. PHASE 5 BLOCKER -- see the folder diagnostic above / the json.")
-
     total_real = sum(r["REAL_FLAGS"] for r in reports)
+    total_aged = sum(len(r["only_in_briefing_aged_out_needs_urgent_NOT_a_flag"]) for r in reports)
     print(f"\n[{_ts()}] wrote {out}")
-    print(f"[{_ts()}] TOTAL REAL FLAGS across {len(reports)} briefing snapshot(s): {total_real}")
-    print(f"[{_ts()}] 0 real flags + only soft/expected rows = IMAP pull matches the live "
-          f"briefing's mail coverage. Run again tomorrow to see it across a different state.")
+    print(f"[{_ts()}] TOTAL REAL FLAGS across {len(reports)} briefing snapshot(s): {total_real}"
+          + (f"   (+{total_aged} aged-out only-in-briefing items -- snapshot stale, NOT flags)"
+             if total_aged else ""))
+    if total_real == 0:
+        print(f"[{_ts()}] PASS -- the IMAP pull matches the live briefing's mail coverage "
+              f"(no still-live needs/urgent message missed). Re-run against a FRESH snapshot "
+              f"(< 6h old) for the strongest signal.")
+    else:
+        print(f"[{_ts()}] REVIEW the {total_real} real flag(s) above -- these are needs/urgent "
+              f"messages one side surfaced and the other did not, not explained by drift.")
     return 0 if total_real == 0 else 1
 
 
