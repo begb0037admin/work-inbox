@@ -57,6 +57,23 @@ The desktop pipeline (COM + `claude -p` + `Classic Outlook Keepalive` watchdog) 
 | Env | `GITHUB_PAT` set (User scope); `ANTHROPIC_API_KEY` unset (User + Machine both blank) → `claude -p` bills the subscription |
 | Scripts in `%USERPROFILE%\work-inbox\` | `fetch_inbox.py`, `imap_mail.py`, `reauth_imap.py`, `diff_mail_pull.py` — all `py_compile` exit 0 |
 
+### Phase 2(i) — PASSED (29 Aug)
+
+`broker_imap_proof.py` v2, two runs on the laptop:
+- **Broker interactive is NOT available for the Thunderbird client id** — `enable_broker_on_windows=True` + `acquire_token_interactive` returned `broker_error / Status_ApiContractViolation` instantly, twice (with `CONSOLE_WINDOW_HANDLE` and with a real HWND). The Thunderbird public client `9e5f94bc-…` has no WAM/broker redirect registered. **We keep this client** — it is the only one that gets `IMAP.AccessAsUser.All` at Oxford.
+- **PATH B works:** plain `acquire_token_interactive` (system browser, no broker) → **one SSO account click, no password, no MFA** (~22s) on the PRT-joined laptop. Token carried `IMAP.AccessAsUser.All`; cache persisted (9298 bytes); IMAP `EXAMINE INBOX` → 558 messages.
+- **Run 2 (cold) = FULL WIN:** `silent[broker]: SILENT token OK` — the broker CAN serve a silent token from the browser-seeded file cache. `auth_path: silent(broker-app)`, IMAP OK, `=== PASS ===`.
+
+**Operational reality:** day-to-day scheduled runs are **fully silent** (`acquire_token_silent`, broker-app path). The **first-time seed and the periodic re-auth** (CA sign-in-frequency / ~90-day refresh-token roll, weeks apart) are **one system-browser SSO click on the laptop — no password, no MFA**, via `reauth_imap.py`. Not in the scheduled path.
+
+### Phase 3 — Lane A code (commit `0900b3f`, on `main` behind the unset flag — NOT cut over)
+
+- **`imap_mail.py`** — `acquire_token_silent()` now tries broker-app silent then plain-app silent off the shared cache (`%LOCALAPPDATA%\WorkInboxAI\msal_imap_token_cache.bin`); `ImapReauthRequired` with the combined error otherwise. `_broker_app()` returns `None` when `msal[broker]`/`pymsalruntime` is absent → the admin desktop is plain-app-only, unchanged.
+- **`reauth_imap.py`** — default is now plain system-browser `acquire_token_interactive` (the proven PATH B); `--device-code` kept as an any-other-device fallback.
+- **`fetch_inbox.py`** — `win32com`/`pywintypes`/`anthropic` imports guarded (byte-identical where installed = both current machines); `_COM_ERROR` alias keeps the `except` sites valid COM-free. **`CAL_BACKEND=com|connector`** flag added, default `com`; `connector` is **NOT IMPLEMENTED** (Lane B lands 1 Sept) → logs a warning, falls back to `com`. **`com` / default behaviour unchanged** (two added log lines only).
+- **Still pending in Phase 3:** the dashboard JS `mail_backend==="imap"` → OWA-opener branch — needs a screenshot for Kevin (command-centre-style UI gate) before it ships.
+- **Next:** Kevin pulls the updated scripts to the laptop and runs a `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1` parallel capture (writes only `data/parallel/*`, no push, no `briefing.json`, no CC sync) — see §7 "Phase 3 parallel run".
+
 ---
 
 ## 2. Target architecture
@@ -242,9 +259,9 @@ Because Lane B rides Kevin's interactive Edu account, a connector he re-adds (or
 | # | Phase | Output | Gate |
 |---|---|---|---|
 | **1** | Laptop toolchain | **DONE — §1 "Phase 1 COMPLETE"** | — |
-| **2(i)** | **MAKE-OR-BREAK #1.** MSAL broker acquires an **IMAP** token silently off the PRT — prove `SELECT INBOX`, target zero prompts after ≤1 first-run click. **Script: `broker_imap_proof.py`** (repo root; read-only, writes only its own token cache). Kevin runs it, then runs it **again cold** — the second run must NOT prompt. | proof log (both runs) | **STOP + report.** If run 2 prompts, or no token, or IMAP auth fails → the "no prompts" premise breaks; reassess (device-code fallback, or a different client id). |
-| **3** | Wire Lane A in: broker path into `imap_mail.py` (from the proven `broker_imap_proof.py` code); make `fetch_inbox.py`'s `win32com`/`pywintypes`/`anthropic` imports lazy; `CAL_BACKEND=com\|connector` flag (default `com`); dashboard JS `mail_backend==="imap"` → OWA opener branch (screenshot for Kevin). `com`/default paths stay byte-identical. | diffs + restore point | Kevin go-ahead to push code |
-| **4** | Scheduled task(s) on the laptop as **`ad-oak\begb0037`** (the PRT-holding standard user — **not** `begb0037-a`), 5×/weekday matching the current cadence (confirm against the live desktop `\Work Inbox Briefing` task); `powercfg` never-sleep; every run timestamped. **Parallel — writes `docs/*` / `data/parallel/*` / `data/codex_runs/*` only, never `data/briefing.json`.** **Risk to settle here:** WAM/broker silent-token acquisition may require an *interactive* user session — if so the task is "run only when user is logged on" and the laptop stays logged in (it's docked + on anyway). Phase 2(i)'s cold-run result informs this. | task XML + `powercfg` | Kevin go-ahead |
+| **2(i)** | MAKE-OR-BREAK #1 — silent IMAP token off the PRT | **DONE / PASS — §1 "Phase 2(i) PASSED"** (`broker_imap_proof.py` v2; cold run 2 = silent FULL WIN; first-time/periodic seed = one browser click) | — |
+| **3** | Wire Lane A in | **Code DONE — commit `0900b3f`** (`imap_mail.py` broker+plain silent chain; `reauth_imap.py` → system-browser default; `fetch_inbox.py` guarded imports + `CAL_BACKEND` flag). `com`/default byte-identical. **Pending: dashboard JS `mail_backend==="imap"` → OWA opener branch — screenshot for Kevin before it ships.** **Now: Kevin runs the §7 Phase-3 parallel capture on the laptop.** | Kevin's parallel-run output; then screenshot approval for the JS branch |
+| **4** | Scheduled task(s) on the laptop as **`ad-oak\begb0037`** (the PRT-holding standard user — **not** `begb0037-a`), 5×/weekday matching the current cadence (confirm against the live desktop `\Work Inbox Briefing` task); `powercfg` never-sleep; every run timestamped. **Parallel — writes `docs/*` / `data/parallel/*` / `data/codex_runs/*` only, never `data/briefing.json`.** Phase 2(i) settled the WAM question: day-to-day silent runs are fine unattended; the periodic re-auth needs a logged-in session for the one browser click (laptop stays logged in — docked + on). | task XML + `powercfg` | Kevin go-ahead |
 | **5** | Parallel-run: laptop mail pull vs the live desktop `data/briefing.json` GitHub history — field-level diff (`diff_mail_pull.py`), several days, Kevin/Lauren eyeball | parity reports | — |
 
 ### Lane B — FROM 1 SEPT
@@ -360,6 +377,38 @@ $after  = (Get-FileHash "$env:USERPROFILE\.codex\config.toml" -Algorithm SHA1).H
 "config.toml sha1 before=$before after=$after (must match)"
 # Paste the tool list + both hashes back to Drew - this is Phase 2 make-or-break #2.
 ```
+
+### Phase 3 parallel run (NOW — laptop, as `ad-oak\begb0037`)
+
+Pulls the Phase-3 scripts and does a `MAIL_BACKEND=imap` capture side-by-side with a `com` capture. **`WI_MAIL_PARALLEL=1` makes `fetch_inbox.py` write only `data/parallel/*` and exit — no push, no `briefing.json`, no command-centre sync, no calendar/Granola/AI.**
+
+```powershell
+# 3a. one-time: seed the IMAP token via the system browser (one account click, no password)
+cd $env:USERPROFILE\work-inbox
+$t=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','diff_mail_pull.py') {
+  iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/main/$f`?t=$t" -OutFile $f
+}
+python .\reauth_imap.py        # browser opens -> pick ad-oak\begb0037 -> "verified: EXAMINE INBOX OK, 558 messages"
+
+# 3b. IMAP parallel capture (writes data\parallel\imap_inbox_raw.json + imap_sent_raw.json, then exits)
+$env:MAIL_BACKEND='imap'; $env:WI_MAIL_PARALLEL='1'
+python .\fetch_inbox.py
+Remove-Item Env:MAIL_BACKEND; Remove-Item Env:WI_MAIL_PARALLEL
+
+# 3c. (on the DESKTOP, or any box with classic Outlook connected) COM parallel capture
+#     for the baseline half -- OR skip and diff against data/briefing.json history later.
+#     $env:MAIL_BACKEND='com'; $env:WI_MAIL_PARALLEL='1'; python .\fetch_inbox.py ; Remove-Item Env:*
+
+# 3d. diff (if both captures exist in data\parallel\)
+python .\diff_mail_pull.py
+Get-ChildItem .\data\parallel
+
+# Paste 3a's verify line + 3b's console output (the "Phase 1 - IMAP mail pull: inbox N ... sent N"
+# line and the "WI_MAIL_PARALLEL ... capture done" line) + 3d if you ran it. Back to Drew.
+```
+
+Expected on 3b: `Calendar backend: com`, `Mail backend: imap  [WI_MAIL_PARALLEL ...]`, `IMAP - silent OAuth2 token OK for begb0037@ox.ac.uk via broker-app`, `Phase 1 - IMAP mail pull: inbox <N> ... sent <N>`, `WI_MAIL_PARALLEL (imap) mail-only capture done ... Exiting 0`.
 
 ---
 

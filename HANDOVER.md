@@ -1,4 +1,21 @@
-# Handover -- 29 August 2026, ~evening UTC (Drew) -- LAPTOP MIGRATION: Phase 1 COMPLETE. Phase 2(i) run 1 -- MSAL BROKER PATH FAILED for the Thunderbird client id (`broker_error / Status_ApiContractViolation`, instant, no dialog). `broker_imap_proof.py` REWORKED to v2 (broker+real-HWND, then plain system-browser fallback). Awaiting Kevin's two-run result of v2. NO build, NO cutover.
+# Handover -- 29 August 2026, ~late evening UTC (Drew) -- LAPTOP MIGRATION: Phase 2(i) PASSED. Phase 3 Lane A code on `main` behind the unset flag (commit `0900b3f`). NEXT: Kevin runs the §7 "Phase 3 parallel run" (MAIL_BACKEND=imap WI_MAIL_PARALLEL=1) on the laptop. NO build, NO cutover.
+
+## Phase 2(i) -- PASSED (`broker_imap_proof.py` v2, 2 runs on the laptop)
+- **Broker interactive is NOT usable with the Thunderbird client id** -- `enable_broker_on_windows=True` + `acquire_token_interactive` returned `broker_error / Status_ApiContractViolation` instantly, TWICE (CONSOLE_WINDOW_HANDLE and a real HWND). No WAM/broker redirect on the Thunderbird public client. **We keep that client** -- only one that gets `IMAP.AccessAsUser.All` at Oxford.
+- **PATH B works:** plain `acquire_token_interactive` (system browser, no broker) = ONE SSO account click, no password, no MFA, ~22s, on the PRT laptop. IMAP EXAMINE INBOX -> 558.
+- **Run 2 cold = FULL WIN:** `silent[broker]: SILENT token OK` -> `auth_path: silent(broker-app)` -> IMAP OK -> `=== PASS ===`. **The broker CAN serve a silent token from the browser-seeded file cache.**
+- **Operational reality:** day-to-day scheduled runs fully silent (`acquire_token_silent`, broker-app). First-time seed + periodic re-auth (CA sign-in-frequency / ~90d RT roll, weeks apart) = one system-browser click via `reauth_imap.py`, no password. Not in the scheduled path. Phase 4 note: the periodic click needs a logged-in session -> "run only when user logged on" + laptop stays logged in (docked+on).
+
+## Phase 3 -- Lane A code (commit `0900b3f`, `main`, behind the UNSET flag -- NOT cut over)
+- **`imap_mail.py`** -- `acquire_token_silent()` tries broker-app silent then plain-app silent off the shared cache `%LOCALAPPDATA%\WorkInboxAI\msal_imap_token_cache.bin`; `ImapReauthRequired` (combined error) otherwise. New `_broker_app()` returns `None` when `msal[broker]`/`pymsalruntime` absent -> **admin desktop = plain-app-only, unchanged.**
+- **`reauth_imap.py`** -- default now plain system-browser `acquire_token_interactive` (proven PATH B); `--device-code` kept as an other-device fallback.
+- **`fetch_inbox.py`** -- `win32com`/`pywintypes`/`anthropic` imports guarded (byte-identical where installed = both machines); `_COM_ERROR` alias keeps the 3 `except` sites valid COM-free. **`CAL_BACKEND=com|connector`** flag added, default `com`; `connector` NOT IMPLEMENTED (Lane B lands 1 Sept) -> logs a warning + falls back to `com`. **`com`/default behaviour unchanged -- only two added log lines** (`Calendar backend: com`). Verified: `python -m py_compile` clean; diff reviewed; every guard resolves identically where the modules exist.
+- **PENDING in Phase 3:** dashboard JS `mail_backend==="imap"` -> OWA-opener branch -- needs a screenshot for Kevin (command-centre-style UI gate) before it ships. Not started.
+
+## NEXT: Kevin runs the §7 "Phase 3 parallel run" on the laptop
+`reauth_imap.py` (one browser click) then `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1 python fetch_inbox.py` -- writes only `data\parallel\imap_*_raw.json`, exits 0, NO push / NO briefing.json / NO CC sync / NO calendar / NO AI. Paste the console output back. Then Phase 5 field-diff vs `data/briefing.json` history over several days.
+
+## STILL: NO `codex login`, NO build, NO cutover, desktop pipeline + `claude -p` stay LIVE. `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` unchanged (no codex activity).
 
 ## Phase 2(i) v1 FINDING -- MSAL broker/WAM does NOT work with the Thunderbird client id
 Run 1 (29 Aug 15:18Z on the laptop): `enable_broker_on_windows=True` + `acquire_token_interactive(parent_window_handle=CONSOLE_WINDOW_HANDLE)` returned in 1.6s with **no dialog** and `error=broker_error desc=... Status: Response_Status.Status_ApiContractViolation, Error code: 3399614473`. `get_accounts()` was 0 (first run, empty cache).
