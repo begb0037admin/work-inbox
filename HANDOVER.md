@@ -1,4 +1,24 @@
-# Handover -- 29 August 2026, ~night UTC (Drew) -- LAPTOP MIGRATION: Phase 5 first run OK (0 still-live messages missed). CDR subfolder = stale config, REMOVED (`9eafeef`), not a blocker. parity headline honesty fixed. Phase 4 shadow-task scripts READY. NO build, NO cutover.
+# Handover -- 30 August 2026, ~afternoon UTC (Drew) -- URGENT LAPTOP BRIDGE stood up: desktop M365 device-registration broken (0x8004dec5), Outlook COM briefings on DESKTOP-MJDJM64 down. Running REAL mail-only briefings from the Oxford laptop as a bridge. Desktop "Work Inbox Briefing" task DISABLED. Scripts built + pushed (`102c280`). Supervised run PENDING.
+
+## LAPTOP BRIDGE (30 Aug) -- why + what
+
+**Trigger:** the admin desktop's Oxford workplace-join / device registration failed (`0x8004dec5`); classic Outlook COM there is dead, so the scheduled COM briefing is down. Last good briefing = a manual desktop trigger that pushed 13:12 UTC 30 Aug (`29047e2`). Kevin + Max repair the desktop separately (maybe today, maybe needs Oxford IT Monday). Kevin approved + re-confirmed running REAL mail-only briefings from the laptop (`101L-DE013193` / `begb0037.AD-OAK`, user `ad-oak\begb0037`) as a bridge -- actual `briefing.json` pushes + command-centre sync, not the parity shadow.
+
+**Built + pushed (`102c280`, `docs/desktop-scripts/`):**
+- **`Run Laptop Bridge Briefing.ps1`** -- refreshes `fetch_inbox.py`/`imap_mail.py`/`reauth_imap.py` from main, sets `MAIL_BACKEND=imap`, `CAL_BACKEND=com` (param, `connector` also supported), `AI_BACKEND=claude_code`, `ANTHROPIC_API_KEY=""`, `WI_CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin` (kevin@ isolated cfg -> `claude -p` gets `CLAUDE_CONFIG_DIR` = that), **no `WI_CLAUDE_CONFIG_DIR_FALLBACK`** (single account -- Pro-cap hit degrades that one run, accepted for a short bridge), **no `WI_MAIL_PARALLEL`** (real run). Runs `fetch_inbox.py` (Phase 1 IMAP -> combined `claude -p` -> Phase 4 push -> Phase 5 CC sync), then best-effort `publish_needs_reply.py` / `publish_drafted_replies.py` (never fail the run). `-CoreOnly` for the supervised run. Timestamped log -> `%USERPROFILE%\work-inbox\logs\bridge_briefing_*.log`.
+- **`Register-LaptopBridgeBriefing.ps1`** -- registers task `Work Inbox Bridge Briefing` as `ad-oak\begb0037`, Interactive/Limited (run only when logged on -- broker auth needs the session), `IgnoreNew`, `PT20M`, `StartWhenAvailable`, battery-agnostic, powercfg never-sleep. `-Cadence Bridge` (default) = 09:00/12:00/15:00 Mon-Fri; `-Cadence Full` = 06:00/09:00/12:00/15:00/18:00.
+
+**Calendar:** none. `CAL_BACKEND=com` + no classic Outlook on the laptop -> `fetch_inbox.py` degrades the calendar phases to empty + a warning (handled path, verified in code at lines 1052-1076 / 1559-1563, not a crash). Bridge briefing has no calendar section. `-CalBackend connector` skips the COM attempt entirely if COM activation misbehaves on the laptop (same empty result).
+
+**Desktop side (done on DESKTOP-MJDJM64):**
+- `Work Inbox Briefing` scheduled task **DISABLED** (`Disable-ScheduledTask`) so two machines don't both push `briefing.json`. **RE-ENABLE when the desktop is fixed:** `Enable-ScheduledTask -TaskName 'Work Inbox Briefing'`.
+- `Draft Diff Capture` + `Classic Outlook Keepalive` left untouched (Ready).
+
+**PENDING:** one supervised laptop run (`-CoreOnly`), verify (IMAP pull OK / `claude -p` uses `primary_cfg=C:\WorkInboxAI\kevin` not the default login / `chore: update briefing` commit lands / CC sync OK / empty calendar handled), report, THEN register the recurring task with Kevin's go-ahead.
+
+**END OF BRIDGE:** `Unregister-ScheduledTask -TaskName 'Work Inbox Bridge Briefing' -Confirm:$false` (laptop) + `Enable-ScheduledTask -TaskName 'Work Inbox Briefing'` (desktop).
+
+## Phase 5 first run (29 Aug, PAT fixed) -- IMAP pull matches the live briefing's coverage
 
 ## Phase 5 first run (29 Aug, PAT fixed) -- IMAP pull matches the live briefing's coverage
 `cards=63 imap=48 matched=39`, "REAL FLAGS: 9" -- but all 9 were `only_in_briefing` needs/urgent tagged `[pre-dates this briefing]` against a **~30h-stale** briefing snapshot (2026-08-28 11:06): items Kevin filed/read/deleted since (incl. "We detected paperdreamz on Deezer", "Video scoring is here"). **Zero cases of IMAP missing a still-live message.**
