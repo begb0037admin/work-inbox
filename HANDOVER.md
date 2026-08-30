@@ -1,24 +1,49 @@
-# Handover -- 30 August 2026, ~afternoon UTC (Drew) -- URGENT LAPTOP BRIDGE stood up: desktop M365 device-registration broken (0x8004dec5), Outlook COM briefings on DESKTOP-MJDJM64 down. Running REAL mail-only briefings from the Oxford laptop as a bridge. Desktop "Work Inbox Briefing" task DISABLED. Scripts built + pushed (`102c280`). Supervised run PENDING.
+# Handover -- 30 August 2026, ~afternoon UTC (Drew) -- LAPTOP BRIDGE PROVEN + LIVE-PUSHING. Desktop M365 device-registration broken (`0x8004dec5`); Outlook COM briefings on DESKTOP-MJDJM64 down. Real mail-only briefings now run from the Oxford laptop. Two supervised runs done; 14:11 run pushed for real (`7c755bb`). Desktop `Work Inbox Briefing` task DISABLED. Recurring laptop task + desktop toast watcher = scripts ready, register commands with Kevin.
 
-## LAPTOP BRIDGE (30 Aug) -- why + what
+## LAPTOP BRIDGE (30 Aug) -- why
 
-**Trigger:** the admin desktop's Oxford workplace-join / device registration failed (`0x8004dec5`); classic Outlook COM there is dead, so the scheduled COM briefing is down. Last good briefing = a manual desktop trigger that pushed 13:12 UTC 30 Aug (`29047e2`). Kevin + Max repair the desktop separately (maybe today, maybe needs Oxford IT Monday). Kevin approved + re-confirmed running REAL mail-only briefings from the laptop (`101L-DE013193` / `begb0037.AD-OAK`, user `ad-oak\begb0037`) as a bridge -- actual `briefing.json` pushes + command-centre sync, not the parity shadow.
+The admin desktop's Oxford workplace-join / device registration failed (`0x8004dec5`); classic Outlook COM there is dead, so the scheduled COM briefing is down. Last good desktop briefing = a manual trigger that pushed 13:12 UTC (`29047e2`). Kevin + Max repair the desktop separately (maybe Oxford IT, Monday). Kevin approved running REAL mail-only briefings from the laptop (`101L-DE013193` / `begb0037.AD-OAK`, user `ad-oak\begb0037`) as a bridge -- actual `briefing.json` pushes + command-centre sync, NOT the parity shadow.
 
-**Built + pushed (`102c280`, `docs/desktop-scripts/`):**
-- **`Run Laptop Bridge Briefing.ps1`** -- refreshes `fetch_inbox.py`/`imap_mail.py`/`reauth_imap.py` from main, sets `MAIL_BACKEND=imap`, `CAL_BACKEND=com` (param, `connector` also supported), `AI_BACKEND=claude_code`, `ANTHROPIC_API_KEY=""`, `WI_CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin` (kevin@ isolated cfg -> `claude -p` gets `CLAUDE_CONFIG_DIR` = that), **no `WI_CLAUDE_CONFIG_DIR_FALLBACK`** (single account -- Pro-cap hit degrades that one run, accepted for a short bridge), **no `WI_MAIL_PARALLEL`** (real run). Runs `fetch_inbox.py` (Phase 1 IMAP -> combined `claude -p` -> Phase 4 push -> Phase 5 CC sync), then best-effort `publish_needs_reply.py` / `publish_drafted_replies.py` (never fail the run). `-CoreOnly` for the supervised run. Timestamped log -> `%USERPROFILE%\work-inbox\logs\bridge_briefing_*.log`.
-- **`Register-LaptopBridgeBriefing.ps1`** -- registers task `Work Inbox Bridge Briefing` as `ad-oak\begb0037`, Interactive/Limited (run only when logged on -- broker auth needs the session), `IgnoreNew`, `PT20M`, `StartWhenAvailable`, battery-agnostic, powercfg never-sleep. `-Cadence Bridge` (default) = 09:00/12:00/15:00 Mon-Fri; `-Cadence Full` = 06:00/09:00/12:00/15:00/18:00.
+## What shipped (all on `main`, `docs/desktop-scripts/`)
 
-**Calendar:** none. `CAL_BACKEND=com` + no classic Outlook on the laptop -> `fetch_inbox.py` degrades the calendar phases to empty + a warning (handled path, verified in code at lines 1052-1076 / 1559-1563, not a crash). Bridge briefing has no calendar section. `-CalBackend connector` skips the COM attempt entirely if COM activation misbehaves on the laptop (same empty result).
+- **`Run Laptop Bridge Briefing.ps1`** (`102c280`) -- refreshes `fetch_inbox.py`/`imap_mail.py`/`reauth_imap.py` from main, then runs `fetch_inbox.py` with `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `WI_BRIDGE_ALLOW_EMPTY_CALENDAR=1`, `AI_BACKEND=claude_code`, `ANTHROPIC_API_KEY=""`, `WI_CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin` (kevin@ isolated cfg), **no** `WI_CLAUDE_CONFIG_DIR_FALLBACK` (single account -- Pro-cap hit degrades one run, accepted), **no** `WI_MAIL_PARALLEL`. Then best-effort `publish_needs_reply.py` / `publish_drafted_replies.py` (never fail the run; may SKIP on the laptop if `tools/` deps can't download -- non-fatal). `-CoreOnly` skips the publishers. `-CalBackend connector` skips the COM calendar attempt entirely. Timestamped log -> `%USERPROFILE%\work-inbox\logs\bridge_briefing_*.log`.
+- **`Register-LaptopBridgeBriefing.ps1`** (`102c280`) -- task `Work Inbox Bridge Briefing`, as `ad-oak\begb0037`, Interactive/Limited (run only when logged on -- broker auth needs the session), `IgnoreNew`, `PT20M`, `StartWhenAvailable`, battery-agnostic, powercfg never-sleep. `-Cadence Bridge` (default) = **07:00/12:00/16:00 Mon-Fri** (3x/day -- safe for the single Pro account); `-Cadence Full` = 06:00/09:00/12:00/15:00/18:00.
+- **`fetch_inbox.py`** -- `WI_BRIDGE_ALLOW_EMPTY_CALENDAR=1` (`ec68fa6`, refined `8e76d0a`): `validate_briefing_update()` gains `allow_empty_calendar` (default `False` -> desktop/api path byte-identical, self-tested). When set, the 3 calendar-source vetoes (calendar summaries removed / dropped / absences cleared) downgrade to warnings; **every other safe-write check (context degradation etc.) stays fatal**. Briefing gets `calendarUnavailable: true` + a context-appended "Calendar unavailable this run (bridge mode)" note whenever calendar summaries = 0. Absences still carry forward from the last full briefing (existing "Absence preservation" logic).
+- **`Watch-BridgeBriefing.ps1` + `Register-BridgeBriefingToastWatcher.ps1`** (`a4f1acf`) -- desktop-side, task `Work Inbox Briefing Toast Watcher`, every 5 min as `admin` (Interactive/Limited). Read-only GitHub commits-API poll for `data/briefing.json`; on a new `chore: update briefing` SHA -> BurntToast "Work Inbox Briefing updated (bridge)". State `%LOCALAPPDATA%\WorkInboxAI\bridge_toast_state.json`, log `..\bridge_toast_watcher.log`. No Outlook/M365 dependency. TEMPORARY -- permanent notification routing (pipeline's permanent home) is **Markey scope**. Live copy already on the Desktop; watcher already seeded silently at `7c755bb` (first real toast = next new briefing commit).
 
-**Desktop side (done on DESKTOP-MJDJM64):**
-- `Work Inbox Briefing` scheduled task **DISABLED** (`Disable-ScheduledTask`) so two machines don't both push `briefing.json`. **RE-ENABLE when the desktop is fixed:** `Enable-ScheduledTask -TaskName 'Work Inbox Briefing'`.
-- `Draft Diff Capture` + `Classic Outlook Keepalive` left untouched (Ready).
+## Verified (14:11 UTC bridge re-run, via GitHub API)
 
-**PENDING:** one supervised laptop run (`-CoreOnly`), verify (IMAP pull OK / `claude -p` uses `primary_cfg=C:\WorkInboxAI\kevin` not the default login / `chore: update briefing` commit lands / CC sync OK / empty calendar handled), report, THEN register the recurring task with Kevin's go-ahead.
+| Check | Result |
+|---|---|
+| Phase 4 push | `7c755bb` `chore: update briefing 2026-08-30 14:11` |
+| Phase 4 pre-write backup | `2d5d74a` `backup: briefing before refresh ...` |
+| Phase 5 suggestions | `744f5f3` `chore: update task suggestions ...` |
+| command-centre sync | `2ce89b8` `inbox: apply 3 task update(s) 2026-08-30 14:11` |
+| triage ledger + scroll-out | `65b7783`, `31161bd` |
+| briefing.json | date "Sunday 30 August 2026", refreshed 14:11, urgent 1 / needs 42 / fyi 23, `calToday` 0, `absences` 7 (carried forward from 13:12) |
+| calendar degradation | no crash, no `OUTLOOK.EXE` process; `calToday` empty |
+| `claude -p` account / silent IMAP token | Kevin's console shows `Granola context for 3 meetings` + combined call OK; `primary_cfg=C:\WorkInboxAI\kevin` line to be pasted for the record |
+| `calendarUnavailable` flag | NOT in the 14:11 briefing (that run pre-dated the `8e76d0a` refinement -- old guard needed absences empty too). FIXED -- next run sets it. |
 
-**END OF BRIDGE:** `Unregister-ScheduledTask -TaskName 'Work Inbox Bridge Briefing' -Confirm:$false` (laptop) + `Enable-ScheduledTask -TaskName 'Work Inbox Briefing'` (desktop).
+The first supervised run (13:56) failed ONLY at Phase 4 on the `same-day calendar summaries would be removed` safe-write veto -- root cause + fix above. Everything upstream (IMAP pull 47/10, silent broker token, `claude -p` on `cfg=C:\WorkInboxAI\kevin` account=primary, Phase 3.5/3.6) worked on that run too.
 
-## Phase 5 first run (29 Aug, PAT fixed) -- IMAP pull matches the live briefing's coverage
+## Desktop side (done on DESKTOP-MJDJM64)
+
+- `Work Inbox Briefing` task **DISABLED** (`Disable-ScheduledTask`) so two machines don't both push. **RE-ENABLE when the desktop is fixed:** `Enable-ScheduledTask -TaskName 'Work Inbox Briefing'`.
+- `Draft Diff Capture` + `Classic Outlook Keepalive` left untouched (`Ready`).
+
+## Still to do this sitting
+
+1. Kevin registers `Work Inbox Bridge Briefing` on the laptop (`Register-LaptopBridgeBriefing.ps1`, default cadence) + smoke test.
+2. Kevin registers `Work Inbox Briefing Toast Watcher` on the desktop (`Register-BridgeBriefingToastWatcher.ps1`) + smoke test.
+3. Next bridge run: confirm `calendarUnavailable: true` + the context note appear.
+
+## END OF BRIDGE (when the desktop M365 is fixed)
+
+1. Laptop: `Unregister-ScheduledTask -TaskName 'Work Inbox Bridge Briefing' -Confirm:$false`
+2. Desktop: `Unregister-ScheduledTask -TaskName 'Work Inbox Briefing Toast Watcher' -Confirm:$false`
+3. Desktop: `Enable-ScheduledTask -TaskName 'Work Inbox Briefing'`
+4. `WI_BRIDGE_ALLOW_EMPTY_CALENDAR` stays harmless when unset (desktop never sets it).
 
 ## Phase 5 first run (29 Aug, PAT fixed) -- IMAP pull matches the live briefing's coverage
 `cards=63 imap=48 matched=39`, "REAL FLAGS: 9" -- but all 9 were `only_in_briefing` needs/urgent tagged `[pre-dates this briefing]` against a **~30h-stale** briefing snapshot (2026-08-28 11:06): items Kevin filed/read/deleted since (incl. "We detected paperdreamz on Deezer", "Video scoring is here"). **Zero cases of IMAP missing a still-live message.**

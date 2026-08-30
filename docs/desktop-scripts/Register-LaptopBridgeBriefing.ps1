@@ -10,8 +10,8 @@ pull -> claude -p triage -> Phase 4 GitHub push -> Phase 5 command-centre sync
 RUN THIS ONCE, in a normal (NON-elevated) PowerShell, signed in as ad-oak\begb0037
 (the PRT-holding standard user -- NOT begb0037-a).
 
-  -Cadence Bridge   (default)  09:00 / 12:00 / 15:00 Mon-Fri   (3x/day -- safer for a single Pro account)
-  -Cadence Full                06:00 / 09:00 / 12:00 / 15:00 / 18:00 Mon-Fri   (matches the old desktop task)
+  -Cadence Bridge   (default)  07:00 / 12:00 / 16:00 Mon-Fri   (3x/day -- safer for a single Pro account, no hope@ overflow on the laptop)
+  -Cadence Full                06:00 / 09:00 / 12:00 / 15:00 / 18:00 Mon-Fri   (matches the old desktop task -- only if a real week shows the Pro cap is fine)
 
 LogonType = Interactive: the task only runs while ad-oak\begb0037 is logged on.
 That is required -- the MSAL broker silent-token path and the periodic one-click
@@ -38,7 +38,7 @@ if (-not (Test-Path 'C:\WorkInboxAI\kevin\.credentials.json')) {
   throw "C:\WorkInboxAI\kevin\.credentials.json missing -- kevin@ isolated Claude config not logged in. Fix that before registering (the task would fail every run)."
 }
 
-$times = if ($Cadence -eq 'Full') { '06:00','09:00','12:00','15:00','18:00' } else { '09:00','12:00','15:00' }
+$times = if ($Cadence -eq 'Full') { '06:00','09:00','12:00','15:00','18:00' } else { '07:00','12:00','16:00' }
 
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
   -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$wrapper`""
