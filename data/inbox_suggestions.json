@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-30 13:12",
+  "generated_at": "2026-08-30 14:11",
   "new_tasks": [
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
@@ -64,13 +64,49 @@
   ],
   "applied_updates": [
     {
+      "task_id": "t2608211926550",
+      "task_title": "Resolve Cority Employee Import error 2026-08-21 17:00",
+      "note": "Another Cority employee import error on 28 August 17:00; latest in series of import failures requiring investigation and resolution with Cority support.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": ""
+    },
+    {
       "task_id": "t2608251201190",
       "task_title": "Confirm readiness for PeopleXD Quality project handover (Sophie Levy PO E22033553)",
-      "note": "Sophie confirms Quality project (PO E22033553) is fully staffed with internal transition from sales to professional services proceeding.",
-      "email_subject": "RE: Business rules for Data Warehouse",
-      "email_from": "Simon Burford",
-      "received": "2026-08-24 11:04",
-      "entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007AFD890EB0000"
+      "note": "Sophie Levy confirms Cority Quality project (PO E22033553) is fully staffed with transition from sales to professional services proceeding.",
+      "email_subject": "Re: PO ref E22033553 / Quality funded work",
+      "email_from": "Sophie Levy",
+      "received": "2026-08-24 08:33",
+      "entry_id": ""
+    },
+    {
+      "task_id": "t2608261500530",
+      "task_title": "Review REF2029 UDF promotion to UOXP",
+      "note": "Kevin sent confirmation that REF2029 UDF is now live in UOXP production.",
+      "email_subject": "Re: REF29 UDF - Promotion to UOXP",
+      "email_from": "Kevin (sent to: Nathan Kirwan <nathan.kirwan@admin.ox.ac.uk>)",
+      "received": "2026-08-27 13:25",
+      "entry_id": ""
+    },
+    {
+      "task_id": "t2608261500530",
+      "task_title": "Review REF2029 UDF promotion to UOXP",
+      "note": "Kevin sent commitment to push REF29 UDF to live and notify Nathan Kirwan upon completion.",
+      "email_subject": "Re: REF29 UDF - Promotion to UOXP",
+      "email_from": "Kevin (sent to: Nathan Kirwan <nathan.kirwan@admin.ox.ac.uk>)",
+      "received": "2026-08-27 10:45",
+      "entry_id": ""
+    },
+    {
+      "task_id": "t2608251201190",
+      "task_title": "Confirm readiness for PeopleXD Quality project handover (Sophie Levy PO E22033553)",
+      "note": "Kevin sent confirmation to Cority that project is ready to proceed following Rachel's email.",
+      "email_subject": "Re: PO ref E22033553 / Quality funded work",
+      "email_from": "Kevin (sent to: Sophie Levy <Sophie.Levy@cority.com>, Micia Cardozo <Micia.Cardozo@cority.com>)",
+      "received": "2026-08-24 08:23",
+      "entry_id": ""
     }
   ]
 }
