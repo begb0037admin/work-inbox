@@ -1,6 +1,15 @@
 {
-  "generated_at": "2026-08-30 14:11",
+  "generated_at": "2026-08-30 14:50",
   "new_tasks": [
+    {
+      "title": "Resolve Cority Employee Import error -- 28 August 17:00",
+      "tier": "tomorrow",
+      "description": "The Cority Integration Platform reported an SFTP connection error on 28 August at 17:00 during scheduled employee data import, blocking the HR data import process. Kevin needs to review the attached error log file to diagnose the issue and coordinate with Cority support to restore the import.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": ""
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -64,48 +73,30 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t2608211926550",
-      "task_title": "Resolve Cority Employee Import error 2026-08-21 17:00",
-      "note": "Another Cority employee import error on 28 August 17:00; latest in series of import failures requiring investigation and resolution with Cority support.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-28 18:00",
+      "task_id": "t2608270801360",
+      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
+      "note": "Marie providing update on 38-day balance workgroup discussions; she met with Michelle who will discuss responses with Julie on return.",
+      "email_subject": "RE: changing to 38 day balance - workgroups for updating",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-28 11:52",
       "entry_id": ""
     },
     {
-      "task_id": "t2608251201190",
-      "task_title": "Confirm readiness for PeopleXD Quality project handover (Sophie Levy PO E22033553)",
-      "note": "Sophie Levy confirms Cority Quality project (PO E22033553) is fully staffed with transition from sales to professional services proceeding.",
-      "email_subject": "Re: PO ref E22033553 / Quality funded work",
-      "email_from": "Sophie Levy",
-      "received": "2026-08-24 08:33",
+      "task_id": "t2608271501000",
+      "task_title": "Confirm Cross-Team Process Improvement Working Group attendance - 28 Sept",
+      "note": "Michael confirms Kevin's prior acceptance of 28 September Cross-Team Process Improvement Working Group meeting.",
+      "email_subject": "FW: Cross-Team Process Improvement Working Group – 1st Meeting",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-08-27 09:18",
       "entry_id": ""
     },
     {
-      "task_id": "t2608261500530",
-      "task_title": "Review REF2029 UDF promotion to UOXP",
-      "note": "Kevin sent confirmation that REF2029 UDF is now live in UOXP production.",
-      "email_subject": "Re: REF29 UDF - Promotion to UOXP",
-      "email_from": "Kevin (sent to: Nathan Kirwan <nathan.kirwan@admin.ox.ac.uk>)",
-      "received": "2026-08-27 13:25",
-      "entry_id": ""
-    },
-    {
-      "task_id": "t2608261500530",
-      "task_title": "Review REF2029 UDF promotion to UOXP",
-      "note": "Kevin sent commitment to push REF29 UDF to live and notify Nathan Kirwan upon completion.",
-      "email_subject": "Re: REF29 UDF - Promotion to UOXP",
-      "email_from": "Kevin (sent to: Nathan Kirwan <nathan.kirwan@admin.ox.ac.uk>)",
-      "received": "2026-08-27 10:45",
-      "entry_id": ""
-    },
-    {
-      "task_id": "t2608251201190",
-      "task_title": "Confirm readiness for PeopleXD Quality project handover (Sophie Levy PO E22033553)",
-      "note": "Kevin sent confirmation to Cority that project is ready to proceed following Rachel's email.",
-      "email_subject": "Re: PO ref E22033553 / Quality funded work",
-      "email_from": "Kevin (sent to: Sophie Levy <Sophie.Levy@cority.com>, Micia Cardozo <Micia.Cardozo@cority.com>)",
-      "received": "2026-08-24 08:23",
+      "task_id": "t009",
+      "task_title": "DPIA -- awaiting Marie's signature",
+      "note": "Kevin shared updated PeopleXD Data Protection Impact Assessment v0.5 document for editing.",
+      "email_subject": "Kevin Lelitte shared \"PeopleXD - Data Protection Impact Assessment v0.5\" with you",
+      "email_from": "Kevin (sent to: <kevin.lelitte@admin.ox.ac.uk>)",
+      "received": "2026-08-27 08:50",
       "entry_id": ""
     }
   ]
