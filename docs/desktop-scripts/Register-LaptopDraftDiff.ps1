@@ -16,12 +16,15 @@ RUN THIS ONCE, in a normal (NON-elevated) PowerShell, signed in as ad-oak\begb00
   -Cadence Full               06:30 / 09:30 / 12:30 / 15:30 / 18:30 Mon-Fri   (matches the
                               desktop "Draft Diff Capture" task exactly)
 
-  -WithAI          pass -WithAI through to the wrapper (edit_type/note
-                   classification -- requires ANTHROPIC_API_KEY on the laptop;
-                   off by default, the 27 Aug cutover removed the key).
+  -NoAI            pass -NoAI through to the wrapper: correlation + redaction
+                   only, no `claude -p` enrichment (pairs stage for later).
+                   DEFAULT is enrichment ON via headless `claude -p`
+                   (subscription auth, CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin,
+                   ANTHROPIC_API_KEY stripped -- no metered key needed).
 
 LogonType = Interactive: runs only while ad-oak\begb0037 is logged on -- required
-for the MSAL broker silent-token path. Keep the laptop docked + logged in.
+for the MSAL broker silent-token path AND the `claude -p` subscription session.
+Keep the laptop docked + logged in.
 StartWhenAvailable is deliberately OFF (mirrors the desktop task): a skipped
 catch-up costs nothing -- Thread-Index correlation picks up any pending pair on
 the next real run.
@@ -33,7 +36,7 @@ Then on the admin desktop (to restore the old path):
 #>
 param(
   [ValidateSet('Bridge','Full')] [string]$Cadence = 'Bridge',
-  [switch]$WithAI
+  [switch]$NoAI
 )
 
 $ErrorActionPreference = 'Stop'
@@ -51,7 +54,7 @@ if (-not (Test-Path (Join-Path $root 'Push-LaptopRunStatus.ps1'))) {
 $times = if ($Cadence -eq 'Full') { '06:30','09:30','12:30','15:30','18:30' } else { '07:30','12:30','16:30' }
 
 $argLine = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$wrapper`""
-if ($WithAI) { $argLine += ' -WithAI' }
+if ($NoAI) { $argLine += ' -NoAI' }
 $argLine += " -Cadence $Cadence"
 
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $argLine
@@ -74,7 +77,7 @@ Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $triggers `
   -Principal $principal -Settings $settings -Force `
   -Description "work-inbox draft/final diff capture on the laptop over IMAP (no Outlook COM). Writes local-only staging + one tiny GitHub run-status file. Replaces the desktop 'Draft Diff Capture' task -- disable that once this is proven."
 
-Write-Host "Registered '$taskName'  (cadence: $Cadence -> $($times -join ', ') Mon-Fri, WithAI=$WithAI, as $env:USERDOMAIN\$env:USERNAME, run-only-when-logged-on)."
+Write-Host "Registered '$taskName'  (cadence: $Cadence -> $($times -join ', ') Mon-Fri, enrichment=$(if($NoAI){'OFF (-NoAI)'}else{'claude -p'}), as $env:USERDOMAIN\$env:USERNAME, run-only-when-logged-on)."
 (Get-ScheduledTask -TaskName $taskName).Triggers | Format-Table -AutoSize
 Write-Host ""
 Write-Host "Smoke test now:  Start-ScheduledTask -TaskName '$taskName'"

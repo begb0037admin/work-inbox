@@ -126,11 +126,35 @@ CLASSIFY_SYSTEM = (
 )
 
 
+_CLASSIFY_USER_TEMPLATE = (
+    "DRAFT:\n{draft}\n\n---\n\nFINAL (as sent):\n{final}\n\n"
+    "Classify the edit per the system instructions."
+)
+
+
+def _parse_classification(raw_text):
+    """Shared fence-strip + JSON parse + enum validation for both AI backends.
+    Returns (edit_type, note, err)."""
+    raw_text = (raw_text or "").strip()
+    if raw_text.startswith("```"):
+        raw_text = "\n".join(raw_text.split("\n")[1:])
+    if raw_text.endswith("```"):
+        raw_text = "\n".join(raw_text.split("\n")[:-1])
+    raw_text = raw_text.strip()
+    try:
+        parsed = json.loads(raw_text)
+    except Exception as e:
+        return None, None, f"{type(e).__name__}: {e}"
+    edit_type = parsed.get("edit_type")
+    note = parsed.get("note", "")
+    if edit_type not in EDIT_TYPES:
+        return None, None, f"invalid edit_type returned: {edit_type!r}"
+    return edit_type, note, None
+
+
 def classify_edit(client, draft_text, final_text):
-    user = (
-        f"DRAFT:\n{draft_text}\n\n---\n\nFINAL (as sent):\n{final_text}\n\n"
-        "Classify the edit per the system instructions."
-    )
+    """AI_BACKEND=api path -- direct anthropic SDK. Unchanged."""
+    user = _CLASSIFY_USER_TEMPLATE.format(draft=draft_text, final=final_text)
     try:
         response = client.messages.create(
             model="claude-haiku-4-5",
@@ -151,6 +175,97 @@ def classify_edit(client, draft_text, final_text):
         return edit_type, note, None
     except Exception as e:
         return None, None, f"{type(e).__name__}: {e}"
+
+
+# --------------------------------------------------------------------------- #
+#  AI_BACKEND=claude_code -- headless `claude -p` classification, mirroring
+#  fetch_inbox.py's claude_code backend (subscription auth, no metered key,
+#  tools/MCP disabled, JSON envelope out). Used so the enrichment step can run
+#  on the laptop, which deliberately has no ANTHROPIC_API_KEY.
+# --------------------------------------------------------------------------- #
+AI_BACKEND = os.environ.get("AI_BACKEND", "api").strip().lower()
+CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "claude")
+CLAUDE_MODEL = "claude-haiku-4-5"          # same model the SDK call uses
+CLAUDE_CFG_DIR = (os.environ.get("WI_CLAUDE_CONFIG_DIR")
+                  or os.environ.get("CLAUDE_CONFIG_DIR") or "").strip()
+
+
+def _looks_like_usage_limit(s):
+    s = (s or "").lower()
+    return any(k in s for k in (
+        "usage limit", "rate limit", "rate_limit", "rate-limit", " 429", '"429"',
+        "quota", "overloaded", "try again later", "capacity", "exceeded your",
+        "usage cap", "limit reached"))
+
+
+def _cc_classify_once(system, user, cfg_dir, timeout_s):
+    """One headless `claude -p` call. Byte-for-byte the same CLI shape as
+    fetch_inbox.py _claude_code_once: no tools, no MCP, no session persistence,
+    ANTHROPIC_API_KEY stripped from the child env. Returns (result_text, usage)."""
+    import subprocess
+    cmd = [
+        CLAUDE_BIN, "-p",
+        "--model", CLAUDE_MODEL,
+        "--system-prompt", system,
+        "--exclude-dynamic-system-prompt-sections",
+        "--disallowedTools",
+        "Bash,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,NotebookEdit,Task,TodoWrite,SlashCommand",
+        "--strict-mcp-config",
+        "--mcp-config", '{"mcpServers":{}}',
+        "--permission-mode", "default",
+        "--no-session-persistence",
+        "--output-format", "json",
+    ]
+    env = {k: v for k, v in os.environ.items()
+           if k != "ANTHROPIC_API_KEY"
+           and not k.startswith("CLAUDE_CODE")
+           and k not in ("CLAUDECODE", "CLAUDE_PID", "CLAUDE_EFFORT", "AI_AGENT")}
+    if cfg_dir:
+        env["CLAUDE_CONFIG_DIR"] = cfg_dir
+    p = subprocess.run(cmd, input=user, capture_output=True, text=True,
+                       timeout=timeout_s, env=env)
+    if p.returncode != 0:
+        raise RuntimeError(f"claude -p rc={p.returncode}: {(p.stderr or p.stdout or '')[-400:]}")
+    try:
+        obj = json.loads(p.stdout)
+    except Exception:
+        raise RuntimeError(f"claude -p produced non-JSON stdout: {p.stdout[:400]}")
+    if isinstance(obj, dict) and obj.get("is_error"):
+        raise RuntimeError(f"claude -p is_error: {str(obj.get('result'))[:400]}")
+    text = obj.get("result") if isinstance(obj, dict) else None
+    if not isinstance(text, str):
+        raise RuntimeError(f"claude -p JSON had no string 'result': {str(obj)[:300]}")
+    usage = (obj.get("usage") if isinstance(obj, dict) else None) or {}
+    usage = dict(usage)
+    if isinstance(obj, dict) and obj.get("total_cost_usd") is not None:
+        usage["total_cost_usd"] = obj.get("total_cost_usd")
+    return text, usage
+
+
+def classify_edit_claude_code(draft_text, final_text, cfg_dir, timeout_s=90.0, log=print):
+    """AI_BACKEND=claude_code counterpart of classify_edit(). Same prompt, same
+    {edit_type, note} schema, same (edit_type, note, err) contract. Logs wall
+    time + token usage like fetch_inbox.py's claude_code calls. On failure it
+    returns an err (never raises) -- the caller then re-stages the pair in the
+    backlog, so a cap hit just defers the enrichment, never loses the pair."""
+    user = _CLASSIFY_USER_TEMPLATE.format(draft=draft_text, final=final_text)
+    t0 = datetime.now()
+    try:
+        raw_text, usage = _cc_classify_once(CLASSIFY_SYSTEM, user, cfg_dir, timeout_s)
+    except Exception as e:
+        dur = (datetime.now() - t0).total_seconds()
+        log(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] classify_edit via `claude -p` "
+            f"FAILED after {dur:.1f}s: {type(e).__name__}: {e}")
+        return None, None, f"{type(e).__name__}: {e}"
+    dur = (datetime.now() - t0).total_seconds()
+    log(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] classify_edit via `claude -p` "
+        f"wall={dur:.1f}s in_tok={usage.get('input_tokens')} out_tok={usage.get('output_tokens')} "
+        f"cache_read={usage.get('cache_read_input_tokens')} cost_usd={usage.get('total_cost_usd')}")
+    # claude -p can prepend prose before the JSON object -- trim to the first {.
+    _b = raw_text.find("{")
+    if _b > 0:
+        raw_text = raw_text[_b:]
+    return _parse_classification(raw_text)
 
 
 # ---------------------------------------------------------------------------
@@ -353,6 +468,7 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
             "backlog_size_after_this_run": len(backlog),
             "window_hours": window_hours,
             "mail_backend": backend,
+            "ai_backend": AI_BACKEND,
             "note": "stats-only: no AI calls made, nothing published",
         }
         if sent_index is not None:
@@ -365,21 +481,36 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
     # Anthropic API calls in one unattended run -- the overflow simply
     # waits for the next scheduled run rather than being processed anyway.
     client = None
+    ai_backend = AI_BACKEND
     if use_ai:
-        try:
-            import anthropic
-            client = anthropic.Anthropic(timeout=60.0, max_retries=2)
-        except Exception as e:
-            ai_unavailable = True
-            print(f"WARNING: Anthropic client unavailable this run ({type(e).__name__}: {e}) "
-                  f"-- {len(backlog)} pair(s) staying in the backlog for a future run.")
+        if ai_backend == "claude_code":
+            if not CLAUDE_CFG_DIR:
+                ai_unavailable = True
+                print("WARNING: AI_BACKEND=claude_code but no WI_CLAUDE_CONFIG_DIR / CLAUDE_CONFIG_DIR set "
+                      f"-- {len(backlog)} pair(s) staying in the backlog for a future run.")
+            else:
+                print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] AI_BACKEND=claude_code: "
+                      f"classifying via `claude -p` (cfg={CLAUDE_CFG_DIR}, model={CLAUDE_MODEL}, "
+                      f"metered key stripped)")
+        else:
+            try:
+                import anthropic
+                client = anthropic.Anthropic(timeout=60.0, max_retries=2)
+            except Exception as e:
+                ai_unavailable = True
+                print(f"WARNING: Anthropic client unavailable this run ({type(e).__name__}: {e}) "
+                      f"-- {len(backlog)} pair(s) staying in the backlog for a future run.")
 
     if use_ai and not ai_unavailable:
         to_process = backlog[:max_classifications_per_run]
         remaining_backlog = backlog[max_classifications_per_run:]
 
         for item in to_process:
-            edit_type, note, err = classify_edit(client, item["draft_body"], item["final_body"])
+            if ai_backend == "claude_code":
+                edit_type, note, err = classify_edit_claude_code(
+                    item["draft_body"], item["final_body"], CLAUDE_CFG_DIR, log=print)
+            else:
+                edit_type, note, err = classify_edit(client, item["draft_body"], item["final_body"])
             if edit_type is None:
                 item["retry_count"] = item.get("retry_count", 0) + 1
                 if item["retry_count"] >= MAX_CLASSIFICATION_RETRIES:
@@ -432,6 +563,7 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
         "max_classifications_per_run": max_classifications_per_run,
         "window_hours": window_hours,
         "mail_backend": backend,
+        "ai_backend": ai_backend,
     }
 
     # (stats_only already returned above -- everything below only runs for a

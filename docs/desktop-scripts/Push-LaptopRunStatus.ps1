@@ -57,7 +57,7 @@ try {
     try {
       $s = Get-Content -Raw -LiteralPath $StatsFile | ConvertFrom-Json
       # whitelist -- pure counts / flags / paths, no email content is possible here
-      $keep = 'mail_backend','drafts_tracked_now','drafts_vanished_since_last_run',
+      $keep = 'mail_backend','ai_backend','drafts_tracked_now','drafts_vanished_since_last_run',
               'abandoned_or_discarded','draft_final_pairs_found','pairs_excluded_by_redaction',
               'pairs_classified_this_run','pairs_permanently_failed','backlog_size_after_this_run',
               'ai_unavailable_this_run','total_diffs_accumulated','window_hours','run_time','error'

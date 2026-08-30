@@ -11,17 +11,14 @@ IMAP+OAuth2 -- the same MSAL broker-silent auth as "Run Laptop Bridge Briefing.p
                          (no win32com, no classic Outlook)
   ->  ConversationID-equivalent correlation via the Thread-Index header
   ->  whole-pair redaction (style_corpus_common.py), same as on the desktop
-  ->  LOCAL-ONLY staging dir  %USERPROFILE%\Documents\CorpusStaging\draft_watch_imap\
+  AI_BACKEND=claude_code  ->  edit_type/note enrichment via headless `claude -p`
+                         (subscription auth, CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin,
+                         ANTHROPIC_API_KEY stripped) -- drains
+                         pending_classification.json in the same run. A `claude -p`
+                         failure just re-stages the pair (never hard-fails the run).
+  ->  LOCAL-ONLY staging dir  <MyDocuments>\CorpusStaging\draft_watch_imap\
       (its own ledger -- the key scheme differs from the COM ledger, so a first
        run here re-baselines and produces ZERO pairs, by design)
-
-AI classification: OFF by default. The script's edit_type/note step uses the
-Anthropic SDK directly and needs ANTHROPIC_API_KEY; the laptop deliberately has
-none (the 27 Aug cutover stopped the ~GBP 36/mo API charge). With -WithAI the
-wrapper requires ANTHROPIC_API_KEY in the environment and drops --no-ai.
-Without it, correlated + redacted pairs accumulate in pending_classification.json
-for a later keyed drain -- the capture (the time-critical part: the draft text
-before it vanishes) is fully preserved; only the enrichment waits.
 
 This wrapper WRITES a tiny run-status file to GitHub via Push-LaptopRunStatus.ps1:
   data/laptop_status/draftdiff_status.json   (counts + exit code ONLY, never
@@ -29,21 +26,22 @@ This wrapper WRITES a tiny run-status file to GitHub via Push-LaptopRunStatus.ps
   failure while the pipeline is on the laptop. Nothing else is pushed.
 
 PARAMS
-  -WithAI        run edit_type/note classification (requires ANTHROPIC_API_KEY).
-  -Cadence      Bridge (default) | Full   -- only affects the reference text in
-                Register-LaptopDraftDiff.ps1; this wrapper itself is cadence-agnostic.
+  -NoAI          correlation + redaction only; skip the `claude -p` enrichment.
+                 Pairs stage in pending_classification.json for a later run.
+  -Cadence      Bridge (default) | Full  -- cosmetic here; drives Register-LaptopDraftDiff.ps1.
   -NoStatusPush skip the GitHub status-file push (local run only).
 
 LIVE COPY   %USERPROFILE%\work-inbox\Run Laptop Draft Diff.ps1
 REFERENCE   work-inbox/docs/desktop-scripts/Run Laptop Draft Diff.ps1
 REGISTERED  Register-LaptopDraftDiff.ps1  ->  task "Work Inbox Laptop Draft Diff"
+NEEDS ALSO  %USERPROFILE%\work-inbox\Push-LaptopRunStatus.ps1   (pull it alongside this file)
 
 END OF MIGRATION (desktop fixed, if ever reverting)
   1. laptop:  Unregister-ScheduledTask -TaskName 'Work Inbox Laptop Draft Diff' -Confirm:$false
   2. desktop: Enable-ScheduledTask -TaskName 'Draft Diff Capture'
 #>
 param(
-  [switch]$WithAI,
+  [switch]$NoAI,
   [ValidateSet('Bridge','Full')] [string]$Cadence = 'Bridge',
   [switch]$NoStatusPush
 )
@@ -55,10 +53,11 @@ $logdir = Join-Path $root 'logs'
 $stage  = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'CorpusStaging\draft_watch_imap'
 New-Item -ItemType Directory -Force -Path $root, $logdir, $stage | Out-Null
 
-$stamp  = [DateTime]::Now.ToString('yyyyMMdd-HHmmss')
-$log    = Join-Path $logdir "draft_diff_$stamp.log"
-$latest = Join-Path $logdir 'draft_diff_last_run.log'
+$stamp    = [DateTime]::Now.ToString('yyyyMMdd-HHmmss')
+$log      = Join-Path $logdir "draft_diff_$stamp.log"
+$latest   = Join-Path $logdir 'draft_diff_last_run.log'
 $statsOut = Join-Path $env:TEMP "wi_draft_diff_stats_$stamp.json"
+$pusher   = Join-Path $PSScriptRoot 'Push-LaptopRunStatus.ps1'
 
 function Log($m) {
   $line = "$([DateTime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))  $m"
@@ -66,10 +65,36 @@ function Log($m) {
   Add-Content -LiteralPath $log -Value $line
 }
 
+function Publish-Status([int]$code) {
+  if ($NoStatusPush) { return }
+  try {
+    if (Test-Path $pusher) {
+      $a = @{ Kind = 'draftdiff'; ExitCode = $code }
+      if (Test-Path $statsOut) { $a['StatsFile'] = $statsOut }
+      & $pusher @a 2>&1 | ForEach-Object { Log "status: $_" }
+    } else {
+      Log "status: Push-LaptopRunStatus.ps1 not found at $pusher -- skipped"
+    }
+  } catch { Log "status: publish failed (non-fatal): $($_.Exception.Message)" }
+}
+
 Log "=== Laptop Draft Diff START  (user $env:USERDOMAIN\$env:USERNAME  host $env:COMPUTERNAME) ==="
-Log "params: WithAI=$WithAI  Cadence=$Cadence  NoStatusPush=$NoStatusPush"
+Log "params: NoAI=$NoAI  Cadence=$Cadence  NoStatusPush=$NoStatusPush"
 Log "staging dir (local only): $stage"
 Set-Location $root
+
+# --- isolated Claude Code config: kevin@ (only needed when the enrichment runs) ---
+$kevinCfg = 'C:\WorkInboxAI\kevin'
+if (-not $NoAI) {
+  if (-not (Test-Path (Join-Path $kevinCfg '.credentials.json'))) {
+    Log "FATAL: $kevinCfg\.credentials.json not found -- the kevin@ isolated Claude Code config is not logged in."
+    Log "FIX:   `$env:CLAUDE_CONFIG_DIR='$kevinCfg'; claude /login   (sign in as kevin@lelitte.co.uk), then re-run."
+    Log "  (or run with -NoAI to capture correlated+redacted pairs now and enrich later.)"
+    Copy-Item $log $latest -Force
+    Publish-Status 3
+    exit 3
+  }
+}
 
 # --- refresh the scripts this needs from main (cache-busted raw pull) ---
 $t    = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
@@ -90,19 +115,19 @@ foreach ($name in $need.Keys) {
   }
 }
 
-# --- environment: mirror the bridge briefing minus Outlook, minus AI unless -WithAI ---
-$env:MAIL_BACKEND = 'imap'
-$env:PYTHONUTF8   = '1'
-$aiArgs = @('--no-ai')
-if ($WithAI) {
-  if (-not $env:ANTHROPIC_API_KEY) {
-    Log "FATAL: -WithAI given but ANTHROPIC_API_KEY is not set in this session. Aborting (would degrade to --no-ai silently otherwise)."
-    Copy-Item $log $latest -Force
-    if (-not $NoStatusPush) { & (Join-Path $PSScriptRoot 'Push-LaptopRunStatus.ps1') -Kind draftdiff -ExitCode 3 -Note 'WithAI requested, no ANTHROPIC_API_KEY' 2>&1 | Tee-Object -FilePath $log -Append }
-    exit 3
-  }
+# --- environment: mirror the bridge briefing minus Outlook ---
+$env:MAIL_BACKEND      = 'imap'
+$env:PYTHONUTF8        = '1'
+$env:ANTHROPIC_API_KEY = ''            # force subscription billing (belt-and-braces; the subprocess also strips it)
+if ($NoAI) {
+  $aiArgs = @('--no-ai')
+  $env:AI_BACKEND = 'api'              # irrelevant with --no-ai; keep explicit
+  Log "NoAI: correlation + redaction only; pairs stage in pending_classification.json"
+} else {
   $aiArgs = @()
-  Log "WithAI: ANTHROPIC_API_KEY present -- edit_type/note classification enabled this run."
+  $env:AI_BACKEND          = 'claude_code'
+  $env:WI_CLAUDE_CONFIG_DIR = $kevinCfg
+  Log "AI_BACKEND=claude_code  cfg=$kevinCfg  -- edit_type/note enrichment via claude -p this run"
 }
 
 $ledger = Join-Path $stage 'ledger.json'
@@ -116,17 +141,7 @@ $rc = $LASTEXITCODE
 Log "draft_final_diff_capture.py exit $rc"
 
 Copy-Item $log $latest -Force
-
-# --- publish the run-status file to GitHub (counts + exit code only) ---
-if (-not $NoStatusPush) {
-  $pushArgs = @('-Kind', 'draftdiff', '-ExitCode', $rc)
-  if (Test-Path $statsOut) { $pushArgs += @('-StatsFile', $statsOut) }
-  try {
-    & (Join-Path $PSScriptRoot 'Push-LaptopRunStatus.ps1') @pushArgs 2>&1 | Tee-Object -FilePath $log -Append
-  } catch {
-    Log "WARN: status push failed (non-fatal): $($_.Exception.Message)"
-  }
-}
+Publish-Status $rc
 if (Test-Path $statsOut) { Remove-Item $statsOut -Force -ErrorAction SilentlyContinue }
 
 if ($rc -ne 0) {

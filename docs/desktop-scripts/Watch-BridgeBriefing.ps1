@@ -149,10 +149,12 @@ try {
       if ([string]$o.result -eq 'failed') {
         Toast 'Work Inbox Draft Diff - FAILED (laptop)' "exit $($o.exit_code)  -  $([string]$o.ts)" 'The laptop draft/final diff capture did not complete. Check logs\draft_diff_last_run.log on the laptop.'
       } else {
-        $pairs = if ($o.stats -and ($o.stats.PSObject.Properties.Name -contains 'draft_final_pairs_found')) { $o.stats.draft_final_pairs_found } else { '?' }
-        $bk    = if ($o.stats -and ($o.stats.PSObject.Properties.Name -contains 'backlog_size_after_this_run')) { $o.stats.backlog_size_after_this_run } else { '?' }
-        $van   = if ($o.stats -and ($o.stats.PSObject.Properties.Name -contains 'drafts_vanished_since_last_run')) { $o.stats.drafts_vanished_since_last_run } else { '?' }
-        Toast 'Work Inbox Draft Diff ran (laptop)' "vanished $van  /  pairs $pairs  /  backlog $bk" "$([string]$o.ts) - correlated+redacted pairs staged locally on the laptop."
+        function _st($n) { if ($o.stats -and ($o.stats.PSObject.Properties.Name -contains $n)) { $o.stats.$n } else { '?' } }
+        $van = _st 'drafts_vanished_since_last_run'
+        $pairs = _st 'draft_final_pairs_found'
+        $cls = _st 'pairs_classified_this_run'
+        $bk = _st 'backlog_size_after_this_run'
+        Toast 'Work Inbox Draft Diff ran (laptop)' "vanished $van  /  pairs $pairs  /  classified $cls  /  backlog $bk" "$([string]$o.ts) - correlated+redacted pairs staged locally; enrichment via claude -p."
       }
       $state.lastDraftDiffSha = $ds.sha; Save-State
     } else {
