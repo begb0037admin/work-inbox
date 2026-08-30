@@ -76,6 +76,7 @@ $env:WI_CLAUDE_CONFIG_DIR         = $kevinCfg     # -> claude -p gets CLAUDE_CON
 $env:WI_CLAUDE_CONFIG_DIR_FALLBACK = ''           # explicit: single account, no hope@ overflow
 $env:MAIL_BACKEND                 = 'imap'
 $env:CAL_BACKEND                  = $CalBackend
+$env:WI_BRIDGE_ALLOW_EMPTY_CALENDAR = '1'         # no calendar source on the laptop -> empty calendar/absences must not veto the Phase 4 push
 $env:WI_MAIL_PARALLEL            = ''             # explicit: this is a REAL run, not a parallel capture
 $env:PYTHONUTF8                  = '1'
 
@@ -98,8 +99,10 @@ $rc = $LASTEXITCODE
 Log "fetch_inbox.py exit $rc"
 
 if ($rc -ne 0) {
-  Log "CORE FAILED (exit $rc). NOT running publishers."
-  if ($rc -eq 1) { Log "exit 1 is most likely an expired IMAP token -> run 'Re-auth Work Inbox IMAP.bat' (one browser click), then re-run this." }
+  Log "CORE FAILED (exit $rc). NOT running publishers. Check the log above for the failing phase."
+  if ($rc -eq 1) {
+    Log "exit 1 = a phase raised. Common causes: (a) expired IMAP token -> the log shows 'IMAP mail sign-in expired'; fix with:  cd `"$root`"; python reauth_imap.py   (one browser click) then re-run.  (b) a Phase 4 safe-write veto -> the log shows 'Safe write blocked briefing update: ...'."
+  }
   Copy-Item $log $latest -Force
   Log "=== Laptop Bridge Briefing END (core failed) ==="
   exit $rc

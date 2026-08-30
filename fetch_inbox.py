@@ -147,6 +147,17 @@ MAIL_PARALLEL = os.environ.get("WI_MAIL_PARALLEL", "").strip().lower() in ("1", 
 _CAL_BACKEND_REQ = os.environ.get("CAL_BACKEND", "com").strip().lower()
 CAL_BACKEND = _CAL_BACKEND_REQ if _CAL_BACKEND_REQ in ("com", "connector") else "com"
 CAL_CONNECTOR_NYI = (CAL_BACKEND == "connector")
+
+#  WI_BRIDGE_ALLOW_EMPTY_CALENDAR=1 -- "laptop bridge" mode. The laptop has no
+#  calendar source (no classic Outlook; Lane B not built), so calendar summaries
+#  AND calendar-derived absences are legitimately empty this run. When set, the
+#  Phase-4 safe-write guard does NOT veto the push for "same-day calendar
+#  summaries would be removed" / "calendar summaries dropped" / "same-day
+#  absences would be cleared" -- it downgrades each to a WARNING. Every other
+#  safe-write check (context degradation, etc.) is unchanged. Set by
+#  "Run Laptop Bridge Briefing.ps1". See docs/LAPTOP_MIGRATION_PLAN.md.
+BRIDGE_ALLOW_EMPTY_CALENDAR = os.environ.get(
+    "WI_BRIDGE_ALLOW_EMPTY_CALENDAR", "").strip().lower() in ("1", "true", "yes")
 if CAL_CONNECTOR_NYI:
     log("Calendar backend: 'connector' requested -- NOT IMPLEMENTED yet (Lane B "
         "lands 1 Sept, see docs/LANE_B_TEAMS_CAL_DESIGN.md). Calendar will be "
@@ -167,7 +178,9 @@ log(f"AI backend: {AI_BACKEND}"
     + (f"  fallback_cfg={CLAUDE_CFG_FALLBACK}" if (AI_BACKEND == "claude_code" and CLAUDE_CFG_FALLBACK) else ""))
 log(f"Mail backend: {MAIL_BACKEND}"
     + ("  [WI_MAIL_PARALLEL -- raw mail dumps to data/parallel/, no push]" if MAIL_PARALLEL else ""))
-log(f"Calendar backend: {CAL_BACKEND}")
+log(f"Calendar backend: {CAL_BACKEND}"
+    + ("  [WI_BRIDGE_ALLOW_EMPTY_CALENDAR -- empty calendar/absences will not veto the Phase 4 push]"
+       if BRIDGE_ALLOW_EMPTY_CALENDAR else ""))
 
 
 class _AIText:
@@ -828,7 +841,11 @@ def weak_calendar_summary_count(briefing_doc):
         if item.get("summary") and weak_calendar_summary(item.get("summary"))
     )
 
-def validate_briefing_update(new_doc, old_doc):
+def validate_briefing_update(new_doc, old_doc, allow_empty_calendar=False):
+    # allow_empty_calendar=True (laptop bridge, WI_BRIDGE_ALLOW_EMPTY_CALENDAR):
+    # a run with no calendar source legitimately produces zero calendar summaries
+    # and zero calendar-derived absences -- downgrade those three vetoes to
+    # warnings. Every other check is unchanged.
     fatal = []
     warnings = []
     context_text = (new_doc.get("context") or "").strip()
@@ -846,14 +863,23 @@ def validate_briefing_update(new_doc, old_doc):
     old_summaries = calendar_summary_count(old_doc)
     new_summaries = calendar_summary_count(new_doc)
     if same_day and old_summaries and new_summaries == 0:
-        fatal.append("same-day calendar summaries would be removed")
+        if allow_empty_calendar:
+            warnings.append("same-day calendar summaries removed (bridge mode: no calendar source) - allowed")
+        else:
+            fatal.append("same-day calendar summaries would be removed")
     elif same_day and old_summaries >= 3 and new_summaries < max(1, old_summaries // 2):
-        fatal.append(f"calendar summaries dropped from {old_summaries} to {new_summaries}")
+        if allow_empty_calendar:
+            warnings.append(f"calendar summaries dropped from {old_summaries} to {new_summaries} (bridge mode) - allowed")
+        else:
+            fatal.append(f"calendar summaries dropped from {old_summaries} to {new_summaries}")
 
     old_absences = len(old_doc.get("absences") or [])
     new_absences = len(new_doc.get("absences") or [])
     if same_day and old_absences and new_absences == 0:
-        fatal.append("same-day absences would be cleared")
+        if allow_empty_calendar:
+            warnings.append("same-day absences cleared (bridge mode: no calendar source) - allowed")
+        else:
+            fatal.append("same-day absences would be cleared")
 
     weak_count = weak_calendar_summary_count(new_doc)
     if weak_count:
@@ -3460,6 +3486,14 @@ briefing = {
     "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
 }
 
+# Laptop bridge: make the missing calendar explicit rather than silently absent.
+if BRIDGE_ALLOW_EMPTY_CALENDAR and calendar_summary_count(briefing) == 0 and not briefing["absences"]:
+    briefing["calendarUnavailable"] = True
+    _bridge_note = ("Calendar unavailable this run (bridge mode - the laptop has no calendar "
+                    "source); no meetings or colleague absences are shown below.")
+    briefing["context"] = ((context + " " + _bridge_note).strip() if context else _bridge_note)
+    log("Phase 4 - bridge mode: calendar/absences empty; flagged calendarUnavailable + noted it in context.")
+
 # -- Phase 4 -- push to GitHub --
 log("Phase 4 - pushing briefing to GitHub...")
 
@@ -3492,7 +3526,9 @@ else:
             if e.code != 404:
                 raise
 
-        fatal, warnings = validate_briefing_update(briefing, remote_briefing)
+        fatal, warnings = validate_briefing_update(
+            briefing, remote_briefing,
+            allow_empty_calendar=BRIDGE_ALLOW_EMPTY_CALENDAR)
         for warning in warnings:
             print(f"Phase 4 safe-write warning - {warning}")
         if fatal:
