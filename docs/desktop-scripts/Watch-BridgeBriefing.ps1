@@ -1,28 +1,31 @@
 <#
 Watch-BridgeBriefing.ps1
 =======================
-BRIDGE-PERIOD desktop toast watcher. While the work-inbox pipeline runs on the
+BRIDGE / MIGRATION-PERIOD desktop toast watcher. While work-inbox runs on the
 Oxford LAPTOP (desktop M365 device-registration broken), the desktop's own
-"Work Inbox Briefing" task is disabled and fires no "briefing updated" toast.
-This polls GitHub for a new data/briefing.json commit and fires one instead.
+scheduled tasks are disabled and fire no toasts. This polls GitHub every few
+minutes and toasts for:
 
-Read-only. No Outlook, no M365, no local pipeline dependency -- just an
-authenticated GitHub commits API call + a BurntToast pop-up.
+  1. BRIEFING OK    -- a new "chore: update briefing" commit on data/briefing.json
+  2. BRIEFING FAIL  -- data/laptop_status/briefing_status.json flips to result=failed
+  3. DRAFT DIFF     -- data/laptop_status/draftdiff_status.json changes:
+                       result=ok    -> "ran (pairs N / backlog M)"
+                       result=failed-> "FAILED (exit N)"
 
-  - GET https://api.github.com/repos/begb0037admin/work-inbox/commits?path=data/briefing.json&per_page=1
-  - if the newest commit's message starts with "chore: update briefing" AND its
-    SHA differs from the last one we toasted -> toast + remember the SHA.
-  - first run (no state file) seeds the SHA silently (no toast for a commit that
-    pre-dates the watcher).
+Read-only GitHub API only (commits API for #1, contents API for #2/#3). No
+Outlook, no M365, no local pipeline dependency.
 
 State:  %LOCALAPPDATA%\WorkInboxAI\bridge_toast_state.json
 Log:    %LOCALAPPDATA%\WorkInboxAI\bridge_toast_watcher.log   (appended, timestamped)
 
-TEMPORARY. Remove when the pipeline's permanent home + notification routing is
-settled (that design is Markey's, not this). Unregister:
+TEMPORARY. This is deliberately a dumb poll+toast -- just "don't regress
+notifications while the pipeline is migrating". The proper consolidated
+notification design (briefing / draft-diff / failure routing across machines)
+is queued for MARKEY, not this. Unregister:
   Unregister-ScheduledTask -TaskName 'Work Inbox Briefing Toast Watcher' -Confirm:$false
 #>
 $ErrorActionPreference = 'Continue'
+$repo = 'begb0037admin/work-inbox'
 
 $stateDir = Join-Path $env:LOCALAPPDATA 'WorkInboxAI'
 New-Item -ItemType Directory -Force -Path $stateDir | Out-Null
@@ -33,59 +36,130 @@ function Log($m) {
   try { Add-Content -LiteralPath $logFile -Value ("{0}  {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $m) } catch {}
 }
 
+function Toast($title, $line2, $line3) {
+  try {
+    Import-Module BurntToast -ErrorAction Stop
+    New-BurntToastNotification -Text @($title, $line2, $line3) | Out-Null
+    Log "TOASTED  [$title] $line2"
+  } catch {
+    Log "toast failed: $($_.Exception.Message)"
+  }
+}
+
+# --- load state ---
+$state = [ordered]@{ lastSha = $null; lastBriefingStatusSha = $null; lastDraftDiffSha = $null }
+if (Test-Path $stateFile) {
+  try {
+    $j = Get-Content -Raw -LiteralPath $stateFile | ConvertFrom-Json
+    foreach ($k in @('lastSha','lastBriefingStatusSha','lastDraftDiffSha')) {
+      if ($j.PSObject.Properties.Name -contains $k) { $state[$k] = $j.$k }
+    }
+  } catch {}
+}
+function Save-State { ($state | ConvertTo-Json) | Set-Content -LiteralPath $stateFile }
+
 try {
   $pat = [Environment]::GetEnvironmentVariable('GITHUB_PAT','User')
   if (-not $pat) { $pat = [Environment]::GetEnvironmentVariable('GITHUB_PAT','Machine') }
   if (-not $pat) { $pat = $env:GITHUB_PAT }
   if (-not $pat) { Log 'no GITHUB_PAT available -- cannot poll. Exiting 0.'; exit 0 }
+  $pat = $pat.Trim()
 
   $headers = @{
     Authorization = "Bearer $pat"
     'User-Agent'  = 'work-inbox-bridge-toast-watcher'
     Accept        = 'application/vnd.github+json'
   }
-  $url = 'https://api.github.com/repos/begb0037admin/work-inbox/commits?path=data/briefing.json&per_page=1'
-  $resp = Invoke-RestMethod -Uri $url -Headers $headers -TimeoutSec 30 -ErrorAction Stop
-  if (-not $resp -or -not $resp[0].sha) { Log 'commits API returned nothing usable. Exiting 0.'; exit 0 }
 
-  $sha     = [string]$resp[0].sha
-  $msg     = [string]$resp[0].commit.message
-  $isoDate = [string]$resp[0].commit.committer.date
-  try { $when = ([DateTimeOffset]::Parse($isoDate)).ToLocalTime().ToString('ddd HH:mm') } catch { $when = $isoDate }
-
-  $lastSha = $null
-  if (Test-Path $stateFile) {
-    try { $lastSha = (Get-Content -Raw -LiteralPath $stateFile | ConvertFrom-Json).lastSha } catch {}
-  }
-
-  if (-not $lastSha) {
-    ($([ordered]@{ lastSha = $sha; seededAt = (Get-Date -Format 's') }) | ConvertTo-Json) | Set-Content -LiteralPath $stateFile
-    Log "seeded (no toast) at $($sha.Substring(0,7))  msg=[$($msg.Split("`n")[0])]"
-    exit 0
-  }
-
-  if ($sha -eq $lastSha) { Log "no change ($($sha.Substring(0,7)))"; exit 0 }
-
-  if ($msg -notmatch '^chore: update briefing') {
-    # a non-briefing commit touched briefing.json (rare) -- advance the pointer, don't toast
-    ($([ordered]@{ lastSha = $sha; seededAt = (Get-Date -Format 's') }) | ConvertTo-Json) | Set-Content -LiteralPath $stateFile
-    Log "new SHA $($sha.Substring(0,7)) but msg not a briefing update -- pointer advanced, no toast. msg=[$($msg.Split("`n")[0])]"
-    exit 0
-  }
-
+  # ------------------------------------------------------------------ #
+  #  1. BRIEFING OK -- newest commit on data/briefing.json
+  # ------------------------------------------------------------------ #
   try {
-    Import-Module BurntToast -ErrorAction Stop
-    New-BurntToastNotification -Text @(
-      'Work Inbox Briefing updated (bridge)',
-      "$when  -  commit $($sha.Substring(0,7))",
-      'Running on the laptop while the desktop is offline. Refresh the dashboard.'
-    ) | Out-Null
-    Log "TOASTED  $($sha.Substring(0,7))  ($when)"
-  } catch {
-    Log "toast failed: $($_.Exception.Message)"
+    $url  = "https://api.github.com/repos/$repo/commits?path=data/briefing.json&per_page=1"
+    $resp = Invoke-RestMethod -Uri $url -Headers $headers -TimeoutSec 30 -ErrorAction Stop
+    if ($resp -and $resp[0].sha) {
+      $sha     = [string]$resp[0].sha
+      $msg     = [string]$resp[0].commit.message
+      try { $when = ([DateTimeOffset]::Parse([string]$resp[0].commit.committer.date)).ToLocalTime().ToString('ddd HH:mm') } catch { $when = '' }
+      if (-not $state.lastSha) {
+        $state.lastSha = $sha; Save-State
+        Log "seeded briefing pointer (no toast) at $($sha.Substring(0,7))"
+      } elseif ($sha -ne $state.lastSha) {
+        if ($msg -match '^chore: update briefing') {
+          Toast 'Work Inbox Briefing updated (laptop)' "$when  -  commit $($sha.Substring(0,7))" 'Running on the laptop while the desktop is offline. Refresh the dashboard.'
+        } else {
+          Log "briefing.json new SHA $($sha.Substring(0,7)) but msg not a briefing update -- pointer advanced, no toast."
+        }
+        $state.lastSha = $sha; Save-State
+      } else {
+        Log "briefing: no change ($($sha.Substring(0,7)))"
+      }
+    }
+  } catch { Log "briefing-commit poll error (non-fatal): $($_.Exception.Message)" }
+
+  # ------------------------------------------------------------------ #
+  #  helper: GET a contents-API file -> @{ sha=..; obj=<parsed json> } or $null (incl. 404)
+  # ------------------------------------------------------------------ #
+  function Get-StatusFile($path) {
+    try {
+      $u = "https://api.github.com/repos/$repo/contents/$path`?ref=main"
+      $r = Invoke-RestMethod -Uri $u -Headers $headers -TimeoutSec 30 -ErrorAction Stop
+      if (-not $r.sha) { return $null }
+      $json = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(($r.content -replace '\s','')))
+      return @{ sha = [string]$r.sha; obj = ($json | ConvertFrom-Json) }
+    } catch {
+      $code = $null
+      if ($_.Exception.Response) { $code = $_.Exception.Response.StatusCode.value__ }
+      if ($code -ne 404) { Log "contents poll $path error (non-fatal): $($_.Exception.Message)" }
+      return $null
+    }
   }
 
-  ($([ordered]@{ lastSha = $sha; seededAt = (Get-Date -Format 's') }) | ConvertTo-Json) | Set-Content -LiteralPath $stateFile
+  # ------------------------------------------------------------------ #
+  #  2. BRIEFING FAIL -- data/laptop_status/briefing_status.json
+  # ------------------------------------------------------------------ #
+  $bs = Get-StatusFile 'data/laptop_status/briefing_status.json'
+  if ($bs) {
+    if (-not $state.lastBriefingStatusSha) {
+      $state.lastBriefingStatusSha = $bs.sha; Save-State
+      Log "seeded briefing_status pointer (no toast) at $($bs.sha.Substring(0,7))"
+    } elseif ($bs.sha -ne $state.lastBriefingStatusSha) {
+      if ([string]$bs.obj.result -eq 'failed') {
+        $ts = [string]$bs.obj.ts
+        Toast 'Work Inbox Briefing - FAILED (laptop)' "exit $($bs.obj.exit_code)  -  $ts" 'The laptop briefing run did not complete. Check logs\bridge_briefing_last_run.log on the laptop.'
+      } else {
+        Log "briefing_status new ($($bs.sha.Substring(0,7))) result=$($bs.obj.result) -- no toast (success covered by the commit poll)."
+      }
+      $state.lastBriefingStatusSha = $bs.sha; Save-State
+    } else {
+      Log "briefing_status: no change ($($bs.sha.Substring(0,7)))"
+    }
+  }
+
+  # ------------------------------------------------------------------ #
+  #  3. DRAFT DIFF -- data/laptop_status/draftdiff_status.json
+  # ------------------------------------------------------------------ #
+  $ds = Get-StatusFile 'data/laptop_status/draftdiff_status.json'
+  if ($ds) {
+    if (-not $state.lastDraftDiffSha) {
+      $state.lastDraftDiffSha = $ds.sha; Save-State
+      Log "seeded draftdiff_status pointer (no toast) at $($ds.sha.Substring(0,7))"
+    } elseif ($ds.sha -ne $state.lastDraftDiffSha) {
+      $o = $ds.obj
+      if ([string]$o.result -eq 'failed') {
+        Toast 'Work Inbox Draft Diff - FAILED (laptop)' "exit $($o.exit_code)  -  $([string]$o.ts)" 'The laptop draft/final diff capture did not complete. Check logs\draft_diff_last_run.log on the laptop.'
+      } else {
+        $pairs = if ($o.stats -and ($o.stats.PSObject.Properties.Name -contains 'draft_final_pairs_found')) { $o.stats.draft_final_pairs_found } else { '?' }
+        $bk    = if ($o.stats -and ($o.stats.PSObject.Properties.Name -contains 'backlog_size_after_this_run')) { $o.stats.backlog_size_after_this_run } else { '?' }
+        $van   = if ($o.stats -and ($o.stats.PSObject.Properties.Name -contains 'drafts_vanished_since_last_run')) { $o.stats.drafts_vanished_since_last_run } else { '?' }
+        Toast 'Work Inbox Draft Diff ran (laptop)' "vanished $van  /  pairs $pairs  /  backlog $bk" "$([string]$o.ts) - correlated+redacted pairs staged locally on the laptop."
+      }
+      $state.lastDraftDiffSha = $ds.sha; Save-State
+    } else {
+      Log "draftdiff_status: no change ($($ds.sha.Substring(0,7)))"
+    }
+  }
+
   exit 0
 }
 catch {

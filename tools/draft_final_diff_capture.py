@@ -218,16 +218,32 @@ MAX_CLASSIFICATION_RETRIES = 3  # give a transient API failure a few runs to
 
 
 def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
-        max_classifications_per_run=25):
-    import win32com.client.dynamic
-
-    outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
-    mapi = outlook.GetNamespace("MAPI")
-    drafts_folder = mapi.GetDefaultFolder(16)  # olFolderDrafts
-    sent_folder = mapi.GetDefaultFolder(5)     # olFolderSentMail
+        max_classifications_per_run=25, mail_backend=None):
+    # MAIL_BACKEND mirrors fetch_inbox.py: "com" (default) is the Outlook COM
+    # path, unchanged and byte-identical; "imap" reads Drafts + Sent Items over
+    # IMAP+OAuth2 (draft_diff_imap.py) and never imports win32com.
+    backend = (mail_backend or os.environ.get("MAIL_BACKEND", "com")).strip().lower()
 
     previous_ledger = load_ledger(ledger_path)
-    current_snapshot = snapshot_drafts(drafts_folder)
+
+    sent_folder = None   # COM path only
+    sent_index = None    # IMAP path only
+
+    if backend == "imap":
+        import draft_diff_imap
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
+              f"MAIL_BACKEND=imap: reading Drafts + Sent over IMAP (no Outlook COM)")
+        current_snapshot = draft_diff_imap.snapshot_drafts_imap(log=print)
+        sent_index = draft_diff_imap.SentIndex(window_hours, log=print)
+    else:
+        import win32com.client.dynamic
+
+        outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
+        mapi = outlook.GetNamespace("MAPI")
+        drafts_folder = mapi.GetDefaultFolder(16)  # olFolderDrafts
+        sent_folder = mapi.GetDefaultFolder(5)     # olFolderSentMail
+        current_snapshot = snapshot_drafts(drafts_folder)
+
     vanished_keys = set(previous_ledger.keys()) - set(current_snapshot.keys())
 
     # Ledger update happens unconditionally, before anything AI-related --
@@ -255,19 +271,34 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
             last_seen_dt = datetime.fromisoformat(draft["last_seen"])
         except Exception:
             continue
-        final_msg = find_sent_match(sent_folder, conv_id, last_seen_dt, window_hours)
-        if final_msg is None:
+        if backend == "imap":
+            final = sent_index.find(conv_id, last_seen_dt)
+        else:
+            final_msg = find_sent_match(sent_folder, conv_id, last_seen_dt, window_hours)
+            if final_msg is None:
+                final = None
+            else:
+                try:
+                    final = {
+                        "subject": final_msg.Subject or "",
+                        "body": final_msg.Body or "",
+                        "to": final_msg.To or "",
+                        "entry_id": final_msg.EntryID,
+                        "message_id": "",
+                        "sent": str(final_msg.SentOn),
+                    }
+                except Exception:
+                    continue
+        if final is None:
             abandoned_count += 1
             continue
 
-        try:
-            final_subject = final_msg.Subject or ""
-            final_body = final_msg.Body or ""
-            final_to = final_msg.To or ""
-            final_entry_id = final_msg.EntryID
-            final_sent = str(final_msg.SentOn)
-        except Exception:
-            continue
+        final_subject = final["subject"]
+        final_body = final["body"]
+        final_to = final["to"]
+        final_entry_id = final["entry_id"]
+        final_message_id = final["message_id"]
+        final_sent = final["sent"]
 
         pairs_found += 1
 
@@ -276,15 +307,18 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
         combined_cats = sorted(set(draft_cats) | set(final_cats))
         if combined_cats:
             pairs_redacted += 1
-            redaction_log.append({
+            _rl = {
                 "conversation_id": conv_id,
                 "final_entry_id": final_entry_id,
                 "sent": final_sent,
                 "categories": combined_cats,
-            })
+            }
+            if final_message_id:
+                _rl["final_message_id"] = final_message_id
+            redaction_log.append(_rl)
             continue
 
-        backlog.append({
+        _bl = {
             "conversation_id": conv_id,
             "draft_body": draft["body"],
             "final_body": final_body,
@@ -294,7 +328,10 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
             "recipient_tier": recipient_tier(final_to),
             "window_hours": window_hours,
             "retry_count": 0,
-        })
+        }
+        if final_message_id:
+            _bl["final_message_id"] = final_message_id
+        backlog.append(_bl)
 
     if backlog:
         save_backlog(backlog_path, backlog)
@@ -315,8 +352,11 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
             "pairs_excluded_by_redaction": pairs_redacted,
             "backlog_size_after_this_run": len(backlog),
             "window_hours": window_hours,
+            "mail_backend": backend,
             "note": "stats-only: no AI calls made, nothing published",
         }
+        if sent_index is not None:
+            sent_index.close()
         return stats
 
     # Phase 2 -- classify up to the per-run cap from the backlog (oldest
@@ -366,10 +406,12 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
                 "note": note,
                 "recipient_tier": item["recipient_tier"],
                 "confirmed_via": (
-                    f"draft_final_diff_capture.py, matched via ConversationID + sent within "
-                    f"{item['window_hours']}h of last-seen draft snapshot "
+                    f"draft_final_diff_capture.py, matched via "
+                    f"{'ConversationID' if item['final_entry_id'] else 'Thread-Index conversation key (IMAP)'}"
+                    f" + sent within {item['window_hours']}h of last-seen draft snapshot "
                     f"(last_seen={item['last_seen']}, sent={item['final_sent']}), "
-                    f"final_entry_id={item['final_entry_id']}"
+                    + (f"final_entry_id={item['final_entry_id']}" if item['final_entry_id']
+                       else f"final_message_id={item.get('final_message_id', '')}")
                 ),
             })
 
@@ -389,6 +431,7 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
         "ai_unavailable_this_run": ai_unavailable,
         "max_classifications_per_run": max_classifications_per_run,
         "window_hours": window_hours,
+        "mail_backend": backend,
     }
 
     # (stats_only already returned above -- everything below only runs for a
@@ -427,6 +470,9 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
     stats["diffs_path"] = diffs_path
     stats["total_diffs_accumulated"] = len(existing_diffs)
 
+    if sent_index is not None:
+        sent_index.close()
+
     return stats
 
 
@@ -439,6 +485,16 @@ if __name__ == "__main__":
     parser.add_argument("--no-ai", action="store_true", help="Skip edit_type/note classification (diagnostic only)")
     parser.add_argument("--stats-only", action="store_true", help="No writes, no AI calls, aggregate counts only")
     parser.add_argument(
+        "--mail-backend", default=None, choices=["com", "imap"],
+        help="Override the MAIL_BACKEND env var. 'com' (default) = Outlook COM, unchanged. "
+             "'imap' = read Drafts + Sent Items over IMAP+OAuth2 (draft_diff_imap.py), no win32com.",
+    )
+    parser.add_argument(
+        "--stats-out", default=None,
+        help="Also write the final result dict (counts / paths only -- never any email content) "
+             "as single-line JSON to this path, for a wrapper to publish a run-status file.",
+    )
+    parser.add_argument(
         "--max-classifications-per-run", type=int, default=25,
         help="Cap on live Anthropic API calls per run -- protects against an unbounded cost/rate-limit "
              "spike if many drafts vanish at once (real burst or a ledger bug). Overflow waits in the "
@@ -450,6 +506,15 @@ if __name__ == "__main__":
     # Outlook COM not reachable, disk full) must exit non-zero so the .bat
     # wrapper's own exit-code handling and Task Scheduler's failure/restart
     # settings actually see it as a failure, not a silent no-op success.
+    def _write_stats_out(obj):
+        if not args.stats_out:
+            return
+        try:
+            with open(args.stats_out, "w", encoding="utf-8") as _sf:
+                json.dump(obj, _sf)
+        except Exception as _e:
+            print(f"WARNING: could not write --stats-out {args.stats_out}: {type(_e).__name__}: {_e}")
+
     try:
         result = run(
             args.ledger_path, args.out_dir,
@@ -457,10 +522,18 @@ if __name__ == "__main__":
             use_ai=not args.no_ai,
             stats_only=args.stats_only,
             max_classifications_per_run=args.max_classifications_per_run,
+            mail_backend=args.mail_backend,
         )
+        _write_stats_out(result)
         print(json.dumps(result, indent=2))
         sys.exit(0)
     except Exception as e:
+        _write_stats_out({
+            "result": "failed",
+            "error": f"{type(e).__name__}: {e}",
+            "mail_backend": (args.mail_backend or os.environ.get("MAIL_BACKEND", "com")),
+            "run_time": datetime.now().isoformat(),
+        })
         print(f"FATAL: draft_final_diff_capture.py run failed - {type(e).__name__}: {e}")
         sys.exit(1)
 

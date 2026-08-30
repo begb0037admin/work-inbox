@@ -1,0 +1,81 @@
+<#
+Register-LaptopDraftDiff.ps1
+============================
+Registers the scheduled task "Work Inbox Laptop Draft Diff" on Kevin's Oxford
+laptop (101L-DE013193 / begb0037.AD-OAK). It runs "Run Laptop Draft Diff.ps1":
+the ongoing draft/final diff capture, reading Drafts + Sent over IMAP+OAuth2
+(no Outlook COM). Writes/logs only, plus one tiny GitHub run-status file
+(data/laptop_status/draftdiff_status.json -- counts + exit code, no email content).
+
+RUN THIS ONCE, in a normal (NON-elevated) PowerShell, signed in as ad-oak\begb0037
+(the PRT-holding standard user -- NOT begb0037-a).
+
+  -Cadence Bridge  (default)  07:30 / 12:30 / 16:30 Mon-Fri   (3x/day, each 30 min
+                              after a "Work Inbox Bridge Briefing" slot -- same
+                              stagger logic as the desktop's original 06:30/09:30/... offset)
+  -Cadence Full               06:30 / 09:30 / 12:30 / 15:30 / 18:30 Mon-Fri   (matches the
+                              desktop "Draft Diff Capture" task exactly)
+
+  -WithAI          pass -WithAI through to the wrapper (edit_type/note
+                   classification -- requires ANTHROPIC_API_KEY on the laptop;
+                   off by default, the 27 Aug cutover removed the key).
+
+LogonType = Interactive: runs only while ad-oak\begb0037 is logged on -- required
+for the MSAL broker silent-token path. Keep the laptop docked + logged in.
+StartWhenAvailable is deliberately OFF (mirrors the desktop task): a skipped
+catch-up costs nothing -- Thread-Index correlation picks up any pending pair on
+the next real run.
+
+UNREGISTER:
+  Unregister-ScheduledTask -TaskName 'Work Inbox Laptop Draft Diff' -Confirm:$false
+Then on the admin desktop (to restore the old path):
+  Enable-ScheduledTask -TaskName 'Draft Diff Capture'
+#>
+param(
+  [ValidateSet('Bridge','Full')] [string]$Cadence = 'Bridge',
+  [switch]$WithAI
+)
+
+$ErrorActionPreference = 'Stop'
+$taskName = 'Work Inbox Laptop Draft Diff'
+$root     = Join-Path $env:USERPROFILE 'work-inbox'
+$wrapper  = Join-Path $root 'Run Laptop Draft Diff.ps1'
+
+if (-not (Test-Path $wrapper)) {
+  throw "wrapper not found: $wrapper  --  copy 'Run Laptop Draft Diff.ps1' AND 'Push-LaptopRunStatus.ps1' into $root first (see Drew's handover)."
+}
+if (-not (Test-Path (Join-Path $root 'Push-LaptopRunStatus.ps1'))) {
+  throw "Push-LaptopRunStatus.ps1 not found next to the wrapper in $root -- copy it there too (the wrapper calls it for the run-status file)."
+}
+
+$times = if ($Cadence -eq 'Full') { '06:30','09:30','12:30','15:30','18:30' } else { '07:30','12:30','16:30' }
+
+$argLine = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$wrapper`""
+if ($WithAI) { $argLine += ' -WithAI' }
+$argLine += " -Cadence $Cadence"
+
+$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $argLine
+
+$triggers = foreach ($tm in $times) {
+  New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday,Tuesday,Wednesday,Thursday,Friday -At $tm
+}
+
+$principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" `
+  -LogonType Interactive -RunLevel Limited
+
+# StartWhenAvailable intentionally NOT set (mirrors the desktop 'Draft Diff Capture').
+$settings = New-ScheduledTaskSettingsSet `
+  -MultipleInstances IgnoreNew `
+  -ExecutionTimeLimit (New-TimeSpan -Minutes 20) `
+  -DontStopOnIdleEnd `
+  -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $triggers `
+  -Principal $principal -Settings $settings -Force `
+  -Description "work-inbox draft/final diff capture on the laptop over IMAP (no Outlook COM). Writes local-only staging + one tiny GitHub run-status file. Replaces the desktop 'Draft Diff Capture' task -- disable that once this is proven."
+
+Write-Host "Registered '$taskName'  (cadence: $Cadence -> $($times -join ', ') Mon-Fri, WithAI=$WithAI, as $env:USERDOMAIN\$env:USERNAME, run-only-when-logged-on)."
+(Get-ScheduledTask -TaskName $taskName).Triggers | Format-Table -AutoSize
+Write-Host ""
+Write-Host "Smoke test now:  Start-ScheduledTask -TaskName '$taskName'"
+Write-Host "Then watch:      Get-Content `"$root\logs\draft_diff_last_run.log`" -Wait"

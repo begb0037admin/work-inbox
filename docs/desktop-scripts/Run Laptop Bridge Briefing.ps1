@@ -57,6 +57,20 @@ function Log($m) {
   Add-Content -LiteralPath $log -Value $line
 }
 
+# Publish a tiny GitHub run-status file (counts / exit code only, no email
+# content) so the desktop toast watcher can surface a FAILED laptop run.
+# Best-effort: never changes the exit code, never throws.
+function Publish-Status([int]$code) {
+  try {
+    $pusher = Join-Path $PSScriptRoot 'Push-LaptopRunStatus.ps1'
+    if (Test-Path $pusher) {
+      & $pusher -Kind briefing -ExitCode $code 2>&1 | ForEach-Object { Log "status: $_" }
+    } else {
+      Log "status: Push-LaptopRunStatus.ps1 not found next to this wrapper -- skipped"
+    }
+  } catch { Log "status: publish failed (non-fatal): $($_.Exception.Message)" }
+}
+
 Log "=== Laptop Bridge Briefing START  (user $env:USERDOMAIN\$env:USERNAME  host $env:COMPUTERNAME) ==="
 Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  log=$log"
 Set-Location $root
@@ -67,6 +81,7 @@ if (-not (Test-Path (Join-Path $kevinCfg '.credentials.json'))) {
   Log "FATAL: $kevinCfg\.credentials.json not found -- the kevin@ isolated Claude Code config is not logged in."
   Log "FIX:   `$env:CLAUDE_CONFIG_DIR='$kevinCfg'; claude /login   (sign in as kevin@lelitte.co.uk), then re-run."
   Copy-Item $log $latest -Force
+  Publish-Status 3
   exit 3
 }
 
@@ -104,6 +119,7 @@ if ($rc -ne 0) {
     Log "exit 1 = a phase raised. Common causes: (a) expired IMAP token -> the log shows 'IMAP mail sign-in expired'; fix with:  cd `"$root`"; python reauth_imap.py   (one browser click) then re-run.  (b) a Phase 4 safe-write veto -> the log shows 'Safe write blocked briefing update: ...'."
   }
   Copy-Item $log $latest -Force
+  Publish-Status $rc
   Log "=== Laptop Bridge Briefing END (core failed) ==="
   exit $rc
 }
@@ -111,6 +127,7 @@ if ($rc -ne 0) {
 if ($CoreOnly) {
   Log "CoreOnly set -- skipping the needs_reply / drafted_replies publishers."
   Copy-Item $log $latest -Force
+  Publish-Status 0
   Log "=== Laptop Bridge Briefing END (core OK, CoreOnly) ==="
   exit 0
 }
@@ -159,5 +176,6 @@ if ($okDeps -and (Get-PipelineScript "$tb/publish_drafted_replies.py" (Join-Path
 }
 
 Copy-Item $log $latest -Force
+Publish-Status 0
 Log "=== Laptop Bridge Briefing END (core OK) ==="
 exit 0
