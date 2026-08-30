@@ -3487,12 +3487,17 @@ briefing = {
 }
 
 # Laptop bridge: make the missing calendar explicit rather than silently absent.
-if BRIDGE_ALLOW_EMPTY_CALENDAR and calendar_summary_count(briefing) == 0 and not briefing["absences"]:
+# (Absences can still be present here -- Phase "Absence preservation" above carries
+# the last full briefing's same-day absences forward -- so the note is about the
+# meeting list only.)
+if BRIDGE_ALLOW_EMPTY_CALENDAR and calendar_summary_count(briefing) == 0:
     briefing["calendarUnavailable"] = True
+    _carried = (" Colleague absences below are carried forward from the last full briefing."
+                if briefing["absences"] else "")
     _bridge_note = ("Calendar unavailable this run (bridge mode - the laptop has no calendar "
-                    "source); no meetings or colleague absences are shown below.")
+                    "source): no meeting list or prep for today or this week." + _carried)
     briefing["context"] = ((context + " " + _bridge_note).strip() if context else _bridge_note)
-    log("Phase 4 - bridge mode: calendar/absences empty; flagged calendarUnavailable + noted it in context.")
+    log("Phase 4 - bridge mode: no calendar summaries; set calendarUnavailable + noted it in context.")
 
 # -- Phase 4 -- push to GitHub --
 log("Phase 4 - pushing briefing to GitHub...")
