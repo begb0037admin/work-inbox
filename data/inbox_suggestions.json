@@ -1,6 +1,15 @@
 {
-  "generated_at": "2026-08-31 07:05",
+  "generated_at": "2026-08-31 12:04",
   "new_tasks": [
+    {
+      "title": "Resolve Cority Employee Import error 2026-08-28 17:00",
+      "tier": "today",
+      "description": "Cority Integration Platform reported an SFTP error on 28 August at 17:00 during scheduled employee data import. Kevin needs to review the attached error log and coordinate recovery with James Salas Guillen to determine if HR data import recovered or requires resending.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": ""
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -62,15 +71,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t030",
-      "task_title": "Cority SFTP production feed error -- 22 June",
-      "note": "Cority SFTP connection error logged 28 August 17:00 during employee import; similar to 22 June incident - requires urgent investigation.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-28 18:00",
-      "entry_id": ""
-    }
-  ]
+  "applied_updates": []
 }
