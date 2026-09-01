@@ -1,3 +1,28 @@
+# Handover -- 1 September 2026, ~midday UTC (Drew) -- TRACK 1 COMPLETE: Draft Diff Capture cutover to the laptop is done. `Work Inbox Laptop Draft Diff` is a registered, healthy scheduled task on the laptop (not manual runs); the desktop `Draft Diff Capture` is formally Disabled. Correction to the entry below: 31 Aug 2026 is a MONDAY -- the "Sunday runs" flag there was a weekday miscount; every run fits the Mon-Fri trigger. Only residual: the `claude -p` IMAP enrichment path has still never processed a real draft->sent pair (0 pairs every run since re-baseline) -- it exercises when Kevin next sends/abandons a Drafts item; watch the next `draftdiff_status.json` push after that.
+
+## Reconcile -- verified via SSH from the desktop (Kevin: "use SSH"), 1 Sep ~midday
+
+**LAPTOP** (`ssh oxford-lan`, as `begb0037-a`):
+- **`Work Inbox Laptop Draft Diff` -- State `Ready`.** Triggers 07:30 / 12:30 / 16:30, `DaysOfWeek=62` (Mon-Fri). `LastRunTime 01/09/2026 07:30`, `LastTaskResult 0`, `NextRunTime 01/09/2026 12:30`, `NumberOfMissedRuns 0`. => registered + firing on schedule; the 31 Aug (Mon) + 1 Sep run-status commits are the task, not manual runs.
+- Also `Ready`: `Work Inbox Bridge Briefing`, `Work Inbox Laptop Parity Shadow`.
+
+**DESKTOP** (local, DESKTOP-MJDJM64):
+- **`Draft Diff Capture` -- State `Disabled`.** `LastRunTime 28/08/2026 18:30`, `LastTaskResult 1` (the COM `GetNamespace` failure from the 28 Aug reboot), `NumberOfMissedRuns 6`. Dead since the reboot; now formally disabled -- step 4 of the 30 Aug "NEXT (gated)" list is done.
+- `Work Inbox Briefing` -- `Disabled`. `Classic Outlook Keepalive` -- `Disabled`.
+
+## Track 1 status: CLOSED
+Steps 1-4 of the 30 Aug "NEXT (gated)" list are all complete (refresh / supervised run #2 / register / disable the desktop task). The laptop now owns Draft Diff Capture end to end over IMAP + `claude -p`, on the `Work Inbox Laptop Draft Diff` task (Bridge cadence 07:30/12:30/16:30 Mon-Fri). Desktop retired from this pipeline.
+
+**Residual watch item (not a blocker):** every laptop run since the IMAP ledger re-baseline shows `draft_final_pairs_found: 0` / `pairs_classified_this_run: 0` -- nothing has left Drafts, so the ported `claude -p` (`AI_BACKEND=claude_code`) enrichment path has never run against a real pair. First time Kevin sends or abandons a tracked Drafts item, the next `data/laptop_status/draftdiff_status.json` push should show `pairs_classified_this_run > 0` and a `classify_edit via claude -p wall=...` line. Confirm then; only after that is the full IMAP correlation->classify chain proven end to end (a confirmed-fact memory entry is warranted at that point).
+
+## Next: Track 2 (Lane B kickoff) -- needs Kevin's hands
+Unchanged from the 1 Sep verification report. Today is the plan's Lane B kickoff date; Edu quota reset confirmed (Kevin). Kevin's sequence: (a) move interactive AI work off the Oxford ChatGPT Edu account; (b) ChatGPT Edu -> Connectors: remove GitHub + Outlook Email, leave only Outlook Calendar + Microsoft Teams, confirm what remains; (c) on the laptop `codex login` to the Edu account, then the read-only `codex exec -s read-only --skip-git-repo-check` tool-enumeration proof (plan sec.7 "Deferred -- 1-Sept Lane B kickoff block") -- MAKE-OR-BREAK #2: headless `codex exec` must load exactly the {Calendar, Teams} read tools and nothing else (28 Aug desktop test loaded ZERO connector tools). Capture the laptop's own `~/.codex/config.toml` sha1 immediately after `codex login` and again after the `codex exec` -- the two must be identical (that file is distinct from the desktop `35f8910382373d525598194b2649159cfeed3f6a` baseline).
+
+## Next action (one line)
+Kevin runs the Track 2 sequence (a)->(b)->(c); STOP and report the `codex exec` tool list + config.toml hashes before any Lane B build.
+
+---
+
 # Handover -- 1 September 2026, ~morning UTC (Drew -- verification-only dispatch, no code/script/plan change) -- LAPTOP DRAFT DIFF has progressed past the 30 Aug "NEXT (gated)" list WITHOUT a checkpoint or a run-#2 report. `data/laptop_status/draftdiff_status.json` on `main` is now a REAL successful laptop run (not the `1e2a67c` `pending` placeholder), and 4 `chore: laptop draftdiff run-status (ok, exit 0)` commits at Bridge-cadence slots (31 Aug 07:30/12:30/16:30, 1 Sep 07:30) indicate the laptop path is running. NOT verifiable from GitHub: whether `Work Inbox Laptop Draft Diff` is actually registered, and whether the desktop `Draft Diff Capture` was disabled -- Kevin to confirm on both machines. Lane B (calendar+Teams) still not started; Edu quota reset confirmed for 1 Sep (Kevin) -- prerequisites (a)/(b)/(c) still Kevin's.
 
 ## Verified live state (GitHub API, 1 Sep ~AM -- Drew on the admin desktop)
