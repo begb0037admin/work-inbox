@@ -1,3 +1,51 @@
+# Handover -- 1 September 2026, ~10:31 UTC (Drew) -- MAKE-OR-BREAK #3 FAILED. Kevin ran the enumeration proof on the desktop: codex **0.152.0** (the OpenAI desktop-app-BUNDLED binary at `C:\Users\admin\AppData\Local\Programs\OpenAI\Codex\bin\codex.exe`, not an npm global), ChatGPT account `cc80356f-959e-449f-9721-add87a9ba0a5` (a THIRD account id -- not the `eb7a812e` personal Plus that worked on 27 Aug, not confirmed as Edu), `config.toml` sha1 `64003AB8718E2A6DAB58534DF5AF84B7C9EE7003` unchanged before+after. `codex exec -s read-only` returned ONLY the 9 base tools (`functions.*` / `collaboration.*`) -- ZERO `microsoft_*` / `list_events` / `list_chats`. Third headless failure, third different situation.
+
+## Evidence table (4 data points)
+| When | Machine | codex binary | ChatGPT account | Result |
+|---|---|---|---|---|
+| 26-27 Aug | desktop | codex-cli **0.149.1** (npm-era; the AppData\Local\Programs\OpenAI\Codex bundle was not in PATH then) | personal Plus `eb7a812e-...` | connector tools **LOADED** (write tools callable, 4 live-mailbox writes landed) |
+| 28 Aug | desktop | not captured (auto-update likely) | same personal Plus `eb7a812e-...` | ZERO |
+| 1 Sept | laptop | codex-cli 0.151.0 | Oxford ChatGPT Edu (enterprise-managed) | ZERO |
+| 1 Sept | desktop | codex **0.152.0**, desktop-app bundle | `cc80356f-...` (3rd id) | ZERO |
+
+The single success was on **0.149.1**. Every failure is on **>=0.151.0**, across 3 accounts and 2 machines, `config.toml` clean and unchanged each time. Newer builds also coincide with the desktop app shipping its own `codex.exe` that now wins PATH -- "codex" today is a **different binary** than the one that worked. **Common factor in every failure = the codex build, not the account.** Honest lean: OpenAI gated or rewired the connectors-in-Codex "Apps" surface out of plain `codex exec` somewhere after 0.149.1. Not yet proven -- one clean isolation test remains.
+
+## CORRECTION to the entry below
+The downgrade package name in the 10:00-12:00 entry was WRONG. It is **`@openai/codex`**, NOT `@openai/codex-cli` (npm E404). `codex --version` prints the string "codex-cli 0.152.0" but the npm package is `@openai/codex`. Also: after an npm global install the desktop-app-bundled `codex.exe` still wins PATH -- the npm binary must be invoked by explicit full path.
+
+## PLAN -- two steps, definitive, then the attended route
+
+### Step 1 -- rule out the trivial cause (Kevin, ~2 min, do first)
+The logged-in account `cc80356f` is NOT `eb7a812e` (27 Aug's working account). If `cc80356f` has no Microsoft connectors attached, headless shows zero regardless of build.
+1. ChatGPT/Codex desktop app -> Settings -> Account: what email is `cc80356f`? Is it the same personal ChatGPT Plus that held the connectors on 27 Aug?
+2. That account's ChatGPT Settings -> Connectors / Apps: are **Outlook Calendar** and **Microsoft Teams** connected right now? (yes/no)
+3. If wrong account / connectors not attached: `codex logout` then `codex login`, pick the personal Plus account that owns Calendar+Teams, confirm both are connected, re-run the enumeration. Tools appear -> pin + build.
+
+### Step 2 -- definitive version isolation (Kevin, ~10 min, if Step 1 didn't fix it)
+PowerShell 5.1, desktop, correct account logged in, ChatGPT/Codex desktop app OPEN and signed into the same account:
+```powershell
+npm install -g @openai/codex@0.149.1
+$npmCodex = Join-Path (npm prefix -g) "codex.cmd"
+& $npmCodex --version                     # must print codex-cli 0.149.1
+Get-FileHash "$env:USERPROFILE\.codex\config.toml" -Algorithm SHA1
+& $npmCodex exec -s read-only --skip-git-repo-check "List every tool available to you as a JSON array of tool names. Call nothing, change nothing."
+Get-FileHash "$env:USERPROFILE\.codex\config.toml" -Algorithm SHA1   # must equal the previous hash
+```
+- 0.149.1 lists `list_events` + `list_chats` -> **PIN to it** (wrapper invokes it by explicit full path so the bundle can't shadow it); Drew builds the headless pipeline.
+- 0.149.1 ALSO loads zero -> **conclusive: OpenAI removed headless connector access; no client-side action recovers it.** Go to the attended route.
+
+### Step 3 -- the attended connector route (Drew builds this regardless -- ~90% shared code)
+Only calendar + Teams need the connector (mail = IMAP, triage = `claude -p`). If `codex exec` can't load it, the connector is reachable only through an interactive surface (Codex desktop app / ChatGPT web with the M365 connector).
+- **NOT schedulable.** Kevin triggers a "Lane B manual refresh" ~1-3x/day: opens the app on the account with Calendar+Teams connectors, pastes the two rigid Call-1 prompts verbatim from `LANE_B_TEAMS_CAL_DESIGN.md` sec.3, pastes each returned JSON array into `data/lane_b_manual/calendar.json` + `teams.json`.
+- Then automatic: `normalise_pull.py` (shipped, `3d59dc3`) sanitises -> `lane_b_normalised.json`; `fetch_inbox.py` under `CAL_BACKEND=connector` reads that file for Phases 3.7/3.8 + a new Teams section. **This wiring reads a file regardless of whether a machine or Kevin produced it -- Drew builds it now either way.**
+- Staleness guard replaces the automated calendar HALT: the manual JSON is timestamped; the briefing shows "calendar/Teams via manual Lane B refresh, last updated HH:MM" so a skipped cycle is visible, never silent.
+- Fragility: HIGH -- depends on Kevin doing it each cycle, the app's connector UI not changing, the app not breaking on auto-update. Worse than zero-touch COM for calendar, but it is the only route that keeps calendar+Teams ON THE CONNECTOR per the locked decision and the ONLY route that delivers **Teams** at all (no COM path for Teams). Headless stays a "re-enable when OpenAI ships stable connectors-in-Codex" future.
+
+## Next action (one line)
+Kevin runs Step 1 then Step 2 (<=15 min, definitive) and reports. On PASS: Drew builds headless + pins codex 0.149.1 (explicit-path invocation). On FAIL: Drew ships the attended-refresh wiring + Teams section same day so calendar+Teams land in the briefing via the manual refresh.
+
+---
+
 # Handover -- 1 September 2026, 10:00-12:00 UTC (Drew) -- DECISION REVERSAL (Kevin, via coordinator, relayed 4x, "locked, will not revisit"). The 1 Sept ~late-afternoon (c)+(e) recommendation below is REJECTED. Chosen architecture is now: **email = IMAP (Lane A, unchanged), calendar = ChatGPT M365 connector (Lane B), Teams = ChatGPT M365 connector (Lane B).** Build order: calendar first, then Teams. **The connector write-risk (`CONNECTOR_SAFEGUARDS.md` §D "NOT SOUND" for unattended use; ungateable `codex exec` write-tool surface, evidenced by the 26/27 Aug live-mailbox category writes that landed) is EXPLICITLY ACCEPTED by Kevin and is closed -- same class as the 25 Aug PAT precondition and the `SMTP.Send` scope in the IMAP token bundle. Not to be re-raised as a veto.** Lane B build is authorised. This entry is the durable record of that decision. Timestamp of this checkpoint: 2026-09-01 ~11:00 UTC.
 
 ## What is NOT changing
