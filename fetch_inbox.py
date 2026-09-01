@@ -1,4 +1,4 @@
-import json, os, base64, html, re, urllib.request, urllib.error, subprocess, time
+import json, os, base64, html, re, urllib.request, urllib.error, urllib.parse, subprocess, time
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
@@ -1337,6 +1337,26 @@ def _com_message_id(msg):
         return (msg.PropertyAccessor.GetProperty(PR_INTERNET_MESSAGE_ID) or "").strip()
     except Exception:
         return ""
+
+# --------------------------------------------------------------------------- #
+#  Command Centre triage (Phase 3.5/3.6): backend-agnostic email identity.
+#  docs/MAIL_BACKEND_MIGRATION_PLAN.md "Follow-up #1". COM -> real Outlook
+#  EntryID. IMAP -> entry_id is always "" (no IMAP equivalent), so fall back
+#  to the internet Message-ID with angle brackets stripped. Returns "" only
+#  when BOTH are missing -- callers MUST skip such a candidate (it cannot be
+#  safely deduped, ledgered or promoted). entry_id keeps its strict meaning
+#  everywhere else: a real COM EntryID or "".
+def _cc_mail_key(entry_id="", message_id=""):
+    eid = (entry_id or "").strip()
+    if eid:
+        return eid
+    return (message_id or "").strip().strip("<>")
+
+def _owa_link(message_id=""):
+    mid = (message_id or "").strip().strip("<>")
+    if not mid:
+        return ""
+    return "https://outlook.office.com/mail/search?query=" + urllib.parse.quote(mid)
 
 def _kevin_is_primary_recipient(msg):
     """True if Kevin's address appears in To (addressed directly), False if
@@ -2835,7 +2855,9 @@ try:
                 "from":         m.get("from", ""),
                 "received":     (m.get("received", "") or "")[:16],
                 "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
-                "entry_id":     m.get("entry_id", "")
+                "entry_id":     m.get("entry_id", ""),
+                "message_id":   m.get("message_id", ""),
+                "web_link":     m.get("web_link", "") or _owa_link(m.get("message_id", "")),
             })
 
     for s in sent[:30]:
@@ -2845,6 +2867,8 @@ try:
             "received":     (s.get("sent", "") or "")[:16],
             "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
             "entry_id":     s.get("entry_id", ""),
+            "message_id":   s.get("message_id", ""),
+            "web_link":     s.get("web_link", "") or _owa_link(s.get("message_id", "")),
             "direction":    "sent"
         })
 
@@ -2904,16 +2928,19 @@ try:
             "email_subject": src["subject"],
             "email_from":    src["from"],
             "received":      src["received"],
-            "entry_id":      src["entry_id"]
+            "entry_id":      src["entry_id"],
+            "message_id":    src.get("message_id", ""),
+            "web_link":      src.get("web_link", ""),
+            "mail_key":      _cc_mail_key(src["entry_id"], src.get("message_id", "")),
         })
     for tu in t_out.get("task_updates", [])[:20]:
         i   = tu.get("email_n")
         tid = tu.get("task_id", "")
         if not isinstance(i, int) or not (0 <= i < len(email_candidates)) or tid not in task_by_id:
             continue
-        if email_candidates[i]["entry_id"] + "_" + tid in ledger.get("applied", {}):
-            continue
         src = email_candidates[i]
+        if (_cc_mail_key(src["entry_id"], src.get("message_id", "")) + "_" + tid) in ledger.get("applied", {}):
+            continue
         suggestions["task_updates"].append({
             "task_id":       tid,
             "task_title":    task_by_id[tid]["title"],
@@ -2921,7 +2948,10 @@ try:
             "email_subject": src["subject"],
             "email_from":    src["from"],
             "received":      src["received"],
-            "entry_id":      src["entry_id"]
+            "entry_id":      src["entry_id"],
+            "message_id":    src.get("message_id", ""),
+            "web_link":      src.get("web_link", ""),
+            "mail_key":      _cc_mail_key(src["entry_id"], src.get("message_id", "")),
         })
     print(f"Phase 3.5 done - new:{len(suggestions['new_tasks'])} (suppressed_no_action:{suppressed_no_action}) updates:{len(suggestions['task_updates'])}")
 except Exception as e:
@@ -3028,7 +3058,12 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                     if action_text in actions:
                         break
                     actions.append(action_text)
-                    task["entryId"] = upd["entry_id"]
+                    if upd.get("entry_id"):
+                        task["entryId"] = upd["entry_id"]
+                    if upd.get("message_id"):
+                        task["messageId"] = (upd.get("message_id") or "").strip().strip("<>")
+                        if upd.get("web_link"):
+                            task["webLink"] = upd["web_link"]
                     applied += 1
                     break
 
@@ -3054,13 +3089,22 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
             return None
 
         existing_entry_ids  = {t.get("entryId") for t in task_list if t.get("entryId")}
+        existing_msg_ids    = {(t.get("messageId") or "").strip().strip("<>") for t in task_list if t.get("messageId")}
         existing_titles     = {(t.get("title") or "").strip().lower() for t in task_list}
         existing_title_list = [(t.get("title") or "").strip() for t in task_list if t.get("title")]
         promoted = 0
         fuzzy_skipped = 0
         for nt in (suggestions["new_tasks"] if AUTO_PROMOTE_NEW_TASKS else []):
-            eid = nt.get("entry_id", "")
-            if not eid or eid in ledger.get("promoted", {}) or eid in existing_entry_ids:
+            eid  = nt.get("entry_id", "")                 # real Outlook EntryID or "" -- kept strictly pure
+            mid  = (nt.get("message_id") or "").strip().strip("<>")
+            mkey = nt.get("mail_key") or _cc_mail_key(eid, mid)
+            if not mkey:
+                continue                                  # no stable identity -> cannot dedup/promote safely
+            if mkey in ledger.get("promoted", {}):
+                continue
+            if eid and eid in existing_entry_ids:
+                continue
+            if mid and mid in existing_msg_ids:
                 continue
             title = (nt.get("title") or "").strip()
             if title.lower() in existing_titles:
@@ -3078,12 +3122,17 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                 "source":      f"Inbox - {nt['email_from']}, {nt['received']}",
                 "emailRef":    nt.get("email_subject", ""),
                 "entryId":     eid,
+                "messageId":   mid,
+                "webLink":     nt.get("web_link", "") or _owa_link(mid),
                 "summary":     "",
                 "description": nt.get("description", ""),
                 "origin":      "inbox-auto",
                 "actions":     [f"[{stamp}] Auto-created from inbox triage (email: {nt['email_from']} - {nt.get('email_subject','')})."]
             })
-            existing_entry_ids.add(eid)
+            if eid:
+                existing_entry_ids.add(eid)
+            if mid:
+                existing_msg_ids.add(mid)
             existing_titles.add(title.lower())
             existing_title_list.append(title)
             nt["auto_promoted"] = True
@@ -3101,10 +3150,14 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                     cc_meta["sha"])
             print(f"Phase 3.6 done - {applied} update(s), {promoted} new task(s) applied to Command Centre" + (f" ({fuzzy_skipped} near-duplicate suggestion(s) skipped)" if fuzzy_skipped else ""))
             for u in suggestions["task_updates"]:
-                ledger["applied"][u["entry_id"] + "_" + u["task_id"]] = datetime.now().strftime("%Y-%m-%d")
+                _uk = u.get("mail_key") or _cc_mail_key(u.get("entry_id", ""), u.get("message_id", ""))
+                if _uk:
+                    ledger["applied"][_uk + "_" + u["task_id"]] = datetime.now().strftime("%Y-%m-%d")
             for nt in suggestions["new_tasks"]:
                 if nt.get("auto_promoted"):
-                    ledger["promoted"][nt["entry_id"]] = datetime.now().strftime("%Y-%m-%d")
+                    _nk = nt.get("mail_key") or _cc_mail_key(nt.get("entry_id", ""), nt.get("message_id", ""))
+                    if _nk:
+                        ledger["promoted"][_nk] = datetime.now().strftime("%Y-%m-%d")
             ledger_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/data/triage_ledger.json"
             l_sha = None
             try:
