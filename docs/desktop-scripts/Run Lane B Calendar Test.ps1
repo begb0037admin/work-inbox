@@ -14,40 +14,56 @@ Lane B run gets executed in the right context.
 
 WHAT IT DOES
   0. prints codex version + logged-in account (for the record)
-  1. pulls the 4 Lane B scripts fresh from raw.githubusercontent main
+  1. pulls the Lane B scripts fresh from raw.githubusercontent main
   2. python lane_b_call1.py --domain calendar   -> data/lane_b/lane_b_normalised.json
      prints meta.lane_b.domains.calendar (status / count / attempts / tool_calls)
      and the calendar events (day / start / all_day / subject)
   3. python lane_b_cal_guard.py --run           -> exit 0 clean / 3 transient / 1 HALT
-  4. (only with -RealBriefing) one MAIL_BACKEND=imap CAL_BACKEND=connector
-     AI_BACKEND=claude_code fetch_inbox.py run -- this PRODUCES AND PUSHES a real
-     briefing.json. Omit the switch for a read-only calendar+guard check.
+     (SKIPPED with -Fast)
+  4. (with -RealBriefing, implied by -Fast) one MAIL_BACKEND=imap CAL_BACKEND=connector
+     AI_BACKEND=claude_code fetch_inbox.py run -- PRODUCES AND PUSHES a real briefing.json.
+
+  -Fast  = the ~6 min one-time proof: step 1 -> step 2 -> (if calendar status ok) step 4.
+           SKIPS step 3 (the snapshot HALT guard). Rationale: the "does connector
+           calendar reach a real briefing" proof does not need the HALT guard --
+           that is a scheduled-cadence safety layer, validated when it is wired into
+           the bridge wrapper. lane_b_call1.py's OWN verb-based re-contamination
+           guard still runs in step 2 and HALTs on any write tool.
+  full run (no -Fast) = steps 1-4, ~12-15 min (codex is ~3 min/call on this box and
+           the guard adds 3 more codex calls: its pre-snapshot, its own calendar
+           call, its post-snapshot).
 
 USAGE (paste into the RDP PowerShell session, as AD-OAK\begb0037):
     cd $env:USERPROFILE\work-inbox
     # get this script fresh too:
     $u='https://raw.githubusercontent.com/begb0037admin/work-inbox/main/docs/desktop-scripts/Run%20Lane%20B%20Calendar%20Test.ps1'
     Invoke-WebRequest -UseBasicParsing "$u`?t=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" -OutFile '.\Run Lane B Calendar Test.ps1'
-    powershell -NoProfile -ExecutionPolicy Bypass -File '.\Run Lane B Calendar Test.ps1'
-    # then, once steps 2+3 look right:
+    # FAST one-time proof (~6 min, no guard):
+    powershell -NoProfile -ExecutionPolicy Bypass -File '.\Run Lane B Calendar Test.ps1' -Fast
+    # full check incl. the snapshot guard (~12-15 min):
     powershell -NoProfile -ExecutionPolicy Bypass -File '.\Run Lane B Calendar Test.ps1' -RealBriefing
 
 PARAMS
   -RunDir       default $env:USERPROFILE\work-inbox
+  -Fast         one-time proof, skips step 3, implies -RealBriefing (~6 min)
   -RealBriefing also run step 4 (produces + PUSHES a real briefing.json)
   -CodexBin     full path to codex.cmd/.exe/.ps1 if a bare 'codex' is not on PATH
                 for this session (sets $env:WI_CODEX_BIN)
-  -Retries      WI_LANE_B_RETRIES for the connector-flake retry (default 3)
+  -Retries      WI_LANE_B_RETRIES for the connector-flake retry (default 3;
+                pass -Retries 1 to fail fast instead of retrying a flaky connector)
+  -Timeout      per codex-exec-call timeout in seconds (default 360)
 
 Target: Windows PowerShell 5.1. No &&, no ternary, no ??.
 #>
 param(
   [string]$RunDir = (Join-Path $env:USERPROFILE 'work-inbox'),
   [switch]$RealBriefing,
+  [switch]$Fast,        # ONE-TIME validation: refresh -> lane_b_call1 --domain calendar -> (if ok) fetch_inbox.py connector briefing. SKIPS the snapshot guard (step 3). ~6 min instead of ~12-15. Implies -RealBriefing.
   [string]$CodexBin = '',
   [int]$Retries = 3,
   [int]$Timeout = 360   # per codex-exec-call timeout (s). 0.151.0 cold-starts ~3+ min; the runner does one warm-up call first.
 )
+if ($Fast) { $RealBriefing = $true }
 
 $ErrorActionPreference = 'Continue'
 function Stamp { (Get-Date).ToString('yyyy-MM-dd HH:mm:ss') }
@@ -62,7 +78,7 @@ try { Start-Transcript -Path $log -Append | Out-Null; $transcribing = $true } ca
 
 Say "=== Run Lane B Calendar Test ==="
 Say ("host {0}   user {1}\{2}   RunDir {3}" -f $env:COMPUTERNAME, $env:USERDOMAIN, $env:USERNAME, $RunDir)
-Say ("RealBriefing={0}   Retries={1}" -f [bool]$RealBriefing, $Retries)
+Say ("Fast={0}   RealBriefing={1}   Retries={2}" -f [bool]$Fast, [bool]$RealBriefing, $Retries)
 
 if (-not (Test-Path $RunDir)) { Say "FATAL: RunDir not found: $RunDir"; if ($transcribing) { Stop-Transcript | Out-Null }; exit 2 }
 Set-Location $RunDir
@@ -134,16 +150,22 @@ if (Test-Path $normPath) {
 }
 
 # --- 3. the guard end-to-end (what the scheduled task will call) ---
-Say "--- STEP 3: python lane_b_cal_guard.py --run ---"
-& python -u (Join-Path $RunDir 'lane_b_cal_guard.py') --run
-$guardrc = $LASTEXITCODE
-$guardMeaning = switch ($guardrc) {
-  0 { 'CLEAN -- calendar verified unchanged across the read window; lane_b_normalised.json is trustworthy' }
-  1 { 'PERSISTENT HALT -- a real calendar change during the window, OR a write tool was seen. lane_b_normalised.json quarantined. The bridge wrapper would Disable-ScheduledTask + toast here.' }
-  3 { 'TRANSIENT -- connector unavailable / could not verify this cycle. No connector calendar this run; the task stays enabled. Re-run later.' }
-  default { "unexpected exit $guardrc" }
+if ($Fast) {
+  $guardrc = 'skipped (-Fast)'
+  $guardMeaning = 'snapshot HALT guard skipped for this one-time validation. lane_b_call1.py''s own verb-based re-contamination guard still ran in step 2 (HALTs on any write tool). The snapshot guard is a scheduled-cadence safety layer, wired into the bridge wrapper separately.'
+  Say "--- STEP 3 skipped (-Fast) ---"
+} else {
+  Say "--- STEP 3: python lane_b_cal_guard.py --run ---"
+  & python -u (Join-Path $RunDir 'lane_b_cal_guard.py') --run
+  $guardrc = $LASTEXITCODE
+  $guardMeaning = switch ($guardrc) {
+    0 { 'CLEAN -- calendar verified unchanged across the read window; lane_b_normalised.json is trustworthy' }
+    1 { 'PERSISTENT HALT -- a real calendar change during the window, OR a write tool was seen. lane_b_normalised.json quarantined. The bridge wrapper would Disable-ScheduledTask + toast here.' }
+    3 { 'TRANSIENT -- connector unavailable / could not verify this cycle. No connector calendar this run; the task stays enabled. Re-run later.' }
+    default { "unexpected exit $guardrc" }
+  }
+  Say "lane_b_cal_guard.py exit $guardrc -- $guardMeaning"
 }
-Say "lane_b_cal_guard.py exit $guardrc -- $guardMeaning"
 
 # --- 4. optional: a real connector briefing (produces + PUSHES briefing.json) ---
 $briefrc = 'skipped'
