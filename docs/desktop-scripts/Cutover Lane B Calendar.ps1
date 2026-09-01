@@ -60,7 +60,7 @@ Set-Location $RunDir
 
 # result holders for the PASTE-THIS-BACK block
 $R = [ordered]@{
-  precond_auth = ''; precond_email = ''; precond_plan = ''; precond_probe = ''
+  precond_auth = ''; precond_email = ''; precond_plan = ''; precond_account = ''; precond_probe = ''
   script_bak = ''; task_xml_bak = ''; live_ps1 = ''
   new_action = ''; guard_exit = ''; calendar_line = ''; briefing_before = ''; briefing_after = ''; fetch_exit = ''
   rollback_a = ''; rollback_b = ''; rollback_script = ''
@@ -95,28 +95,41 @@ if (-not $idTok) { Fail "no id_token found in $authJson (looked at .tokens.id_to
 $claimsRaw = Decode-JwtPayloadRaw $idTok
 if (-not $claimsRaw) { Fail "could not base64url-decode the id_token payload" }
 
-$foundEmail = ''
+$foundEmail = ''; $foundAccount = ''
 try {
   $claims = $claimsRaw | ConvertFrom-Json
   if ($claims.email) { $foundEmail = "$($claims.email)" }
+  $oa = $claims.'https://api.openai.com/auth'
+  if ($oa -and $oa.chatgpt_account_id) { $foundAccount = "$($oa.chatgpt_account_id)" }
 } catch { }
 if (-not $foundEmail -and ($claimsRaw -match '"email"\s*:\s*"([^"]+)"')) { $foundEmail = $Matches[1] }
+if (-not $foundAccount -and ($claimsRaw -match '"chatgpt_account_id"\s*:\s*"([^"]+)"')) { $foundAccount = $Matches[1] }
+if (-not $foundAccount -and $auth.tokens -and $auth.tokens.account_id) { $foundAccount = "$($auth.tokens.account_id)" }
+if (-not $foundAccount -and $auth.account_id) { $foundAccount = "$($auth.account_id)" }
 
 $foundPlan = '(unknown)'
 if ($claimsRaw -match '"chatgpt_plan_type"\s*:\s*"([^"]+)"') { $foundPlan = $Matches[1] }
 elseif ($claimsRaw -match '"plan_type"\s*:\s*"([^"]+)"') { $foundPlan = $Matches[1] }
 
-Say "id_token: email='$foundEmail'  plan='$foundPlan'"
-$R.precond_email = $foundEmail
-$R.precond_plan  = $foundPlan
+Say "id_token: email='$foundEmail'  plan='$foundPlan'  account_id='$foundAccount'"
+$R.precond_email   = $foundEmail
+$R.precond_plan    = $foundPlan
+$R.precond_account = $foundAccount
 
-if ($claimsRaw -match 'begb0037@ox\.ac\.uk' -or $foundPlan -eq 'education') {
-  Fail "this CODEX_HOME is signed into the OXFORD EDU account (found begb0037@ox.ac.uk / plan '$foundPlan'). Lane B must use the PERSONAL account. Run:  `$env:CODEX_HOME='$CodexHome'; codex login   as $Email, then re-run."
+# hard STOP on any Edu signal
+if ($claimsRaw -match 'begb0037@ox\.ac\.uk' -or $foundPlan -eq 'education' -or $foundPlan -eq 'enterprise' -or $foundAccount -eq 'cc80356f-959e-449f-9721-add87a9ba0a5') {
+  Fail "this CODEX_HOME is signed into the OXFORD EDU account (email='$foundEmail' plan='$foundPlan' account='$foundAccount'). Lane B must use the PERSONAL account. Run:  `$env:CODEX_HOME='$CodexHome'; codex login   as $Email, then re-run."
 }
+# positive assert: email must match, plan must be a personal plan (belt + braces)
 if ($foundEmail.ToLower() -ne $Email.ToLower()) {
   Fail "id_token email is '$foundEmail', expected '$Email'. Not cutting over."
 }
-Say "PRECONDITION: account identity OK -- $foundEmail / plan $foundPlan"
+if ($foundPlan -eq '(unknown)') {
+  Say "WARN: could not read chatgpt_plan_type from the id_token -- proceeding on the verified email ($foundEmail)"
+} elseif (@('plus','pro','team') -notcontains $foundPlan) {
+  Fail "id_token plan is '$foundPlan' -- expected a personal plan (plus / pro / team). Not cutting over."
+}
+Say "PRECONDITION: account identity OK -- $foundEmail / plan $foundPlan / account $foundAccount"
 
 # --- probe: does the personal account have the Outlook Calendar connector? ---
 Say "probing the connector via lane_b_call1.py (this makes ~1 real codex call, ~3-5 min on this box)..."
@@ -324,7 +337,7 @@ Say "  wrapper script back : $($R.rollback_script)"
 Say "================ PASTE THIS BACK ================"
 Say "host/user            : $env:COMPUTERNAME  $env:USERDOMAIN\$env:USERNAME"
 Say "precond auth.json    : $($R.precond_auth)"
-Say "precond account      : email=$($R.precond_email)  plan=$($R.precond_plan)"
+Say "precond account      : email=$($R.precond_email)  plan=$($R.precond_plan)  account_id=$($R.precond_account)"
 Say "precond connector    : $($R.precond_probe)"
 Say "wrapper backup       : $($R.script_bak)"
 Say "task XML backup      : $($R.task_xml_bak)"

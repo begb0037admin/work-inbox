@@ -169,14 +169,44 @@ def _codex_env() -> dict:
     return e
 
 
-def _codex_account_id() -> str:
+def _b64url_json(seg: str) -> dict:
+    import base64
+    seg = seg.replace("-", "+").replace("_", "/")
+    seg += "=" * (-len(seg) % 4)
+    return json.loads(base64.b64decode(seg).decode("utf-8", "replace"))
+
+
+def _codex_identity() -> tuple[str, str, str]:
+    """(account_id, email, plan) from <CODEX_HOME>/auth.json. codex writes the
+    real values under .tokens.account_id and inside the id_token's
+    `https://api.openai.com/auth` claim -- NOT a top-level .account_id."""
     try:
-        return (json.loads((_codex_home() / "auth.json").read_text(encoding="utf-8"))
-                .get("account_id") or "(auth.json has no account_id)")
+        auth = json.loads((_codex_home() / "auth.json").read_text(encoding="utf-8"))
     except FileNotFoundError:
-        return "(no auth.json -- run `codex login` into this CODEX_HOME)"
+        return ("(no auth.json -- run `codex login` into this CODEX_HOME)", "", "")
     except Exception as e:  # noqa: BLE001
-        return f"(auth.json unreadable: {e})"
+        return (f"(auth.json unreadable: {e})", "", "")
+    tok = auth.get("tokens") or {}
+    acct = tok.get("account_id") or auth.get("account_id") or ""
+    email = plan = ""
+    idt = tok.get("id_token") or auth.get("id_token") or ""
+    if idt and idt.count(".") >= 2:
+        try:
+            claims = _b64url_json(idt.split(".")[1])
+            email = claims.get("email") or ""
+            oa = claims.get("https://api.openai.com/auth") or {}
+            plan = oa.get("chatgpt_plan_type") or claims.get("chatgpt_plan_type") or ""
+            acct = acct or oa.get("chatgpt_account_id") or ""
+        except Exception:  # noqa: BLE001
+            pass
+    return (acct or "(no account_id)", email, plan)
+
+
+def _codex_account_id() -> str:
+    acct, email, plan = _codex_identity()
+    extra = " ".join(x for x in (f"email={email}" if email else "",
+                                 f"plan={plan}" if plan else "") if x)
+    return f"{acct}{('  ' + extra) if extra else ''}"
 
 
 def _config_toml_sha1() -> str | None:

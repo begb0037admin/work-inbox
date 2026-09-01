@@ -121,11 +121,20 @@ if (-not (Test-Path $authJson)) {
 Say "--- codex identity (CODEX_HOME=$CodexHome) ---"
 try { & codex --version } catch { Say "codex --version failed: $($_.Exception.Message)" }
 try { & codex login status } catch { Say "codex login status failed: $($_.Exception.Message)" }
-$acct = '(unparsed)'
+$acct = '(unparsed)'; $acctEmail = ''; $acctPlan = ''
 try {
-  $acct = (Get-Content $authJson -Raw | ConvertFrom-Json).account_id
-  Say "$CodexHome\auth.json account_id = $acct"
-} catch { Say "could not parse $authJson" }
+  $a = Get-Content $authJson -Raw | ConvertFrom-Json
+  if ($a.tokens -and $a.tokens.account_id) { $acct = "$($a.tokens.account_id)" } elseif ($a.account_id) { $acct = "$($a.account_id)" }
+  $idt = if ($a.tokens -and $a.tokens.id_token) { $a.tokens.id_token } elseif ($a.id_token) { $a.id_token } else { '' }
+  if ($idt -and $idt.Split('.').Count -ge 2) {
+    $p = $idt.Split('.')[1].Replace('-','+').Replace('_','/'); switch ($p.Length % 4) { 2 { $p += '==' } 3 { $p += '=' } }
+    $raw = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($p))
+    if ($raw -match '"email"\s*:\s*"([^"]+)"') { $acctEmail = $Matches[1] }
+    if ($raw -match '"chatgpt_plan_type"\s*:\s*"([^"]+)"') { $acctPlan = $Matches[1] }
+    if ($acct -eq '(unparsed)' -and $raw -match '"chatgpt_account_id"\s*:\s*"([^"]+)"') { $acct = $Matches[1] }
+  }
+  Say "$CodexHome\auth.json  account_id=$acct  email=$acctEmail  plan=$acctPlan"
+} catch { Say "could not parse $authJson : $($_.Exception.Message)" }
 $cfg = Join-Path $CodexHome 'config.toml'
 if (Test-Path $cfg) { Say ("$CodexHome\config.toml sha1 = {0}" -f (Get-FileHash $cfg -Algorithm SHA1).Hash) } else { Say "(no $CodexHome\config.toml yet -- codex writes it on first run)" }
 
@@ -217,7 +226,7 @@ if ($RealBriefing) {
 # --- summary to paste back ---
 Say "================ PASTE THIS BACK ================"
 Say "host/user            : $env:COMPUTERNAME  $env:USERDOMAIN\$env:USERNAME"
-Say "codex account_id     : $acct"
+Say "codex identity       : account_id=$acct  email=$acctEmail  plan=$acctPlan"
 Say "step2 call1 exit     : $call1rc   (calendar status: $calStatus)"
 Say "step3 guard exit     : $guardrc   ($guardMeaning)"
 Say "step4 briefing exit  : $briefrc"
