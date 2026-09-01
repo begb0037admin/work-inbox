@@ -46,7 +46,7 @@ param(
   [switch]$RealBriefing,
   [string]$CodexBin = '',
   [int]$Retries = 3,
-  [int]$Timeout = 300   # per codex-exec-call timeout (s). 0.151.0 cold-starts ~3+ min; the runner does one warm-up call first.
+  [int]$Timeout = 360   # per codex-exec-call timeout (s). 0.151.0 cold-starts ~3+ min; the runner does one warm-up call first.
 )
 
 $ErrorActionPreference = 'Continue'

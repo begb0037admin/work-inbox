@@ -70,22 +70,24 @@ NORMALISED_OUT = LANE_B_DIR / "lane_b_normalised.json"
 # Recorded ~/.codex/config.toml sha1 baselines, per host (short lowercase
 # hostname). WARNING-ONLY -- a mismatch is logged, never a HALT. Set
 # WI_CODEX_CONFIG_SHA1 to override for a deliberate re-baseline.
-_HOST = socket.gethostname().split(".")[0].lower()
+_HOST = (socket.gethostname() or os.environ.get("COMPUTERNAME", "")).split(".")[0].strip().lower()
 CONFIG_TOML_SHA1_BASELINES = {
     "101l-de013193":   "ba0184e864ffd081069820cc7a6f8f19acf5c845",  # AD-OAK\begb0037, Edu, codex-cli 0.151.0 (1 Sept 2026, first real run)
     "desktop-mjdjm64": "4fd8ef763bf0a8ddad9a138b6679a84fe8536f73",  # admin desktop, Edu (1 Sept 2026)
 }
-CONFIG_TOML_SHA1_BASELINE = (
-    os.environ.get("WI_CODEX_CONFIG_SHA1", "").strip().lower()
-    or CONFIG_TOML_SHA1_BASELINES.get(_HOST, "")
-)
+_ENV_CONFIG_SHA1 = os.environ.get("WI_CODEX_CONFIG_SHA1", "").strip().lower()
+# pass/fail check is "is this a recognised good hash" (ANY recorded host, or the
+# env override) -- host-key case cannot make it a false alarm. The per-host dict
+# is just for the "expected for this host" message.
+_KNOWN_CONFIG_SHA1 = {v.lower() for v in CONFIG_TOML_SHA1_BASELINES.values()}
+CONFIG_TOML_SHA1_BASELINE = _ENV_CONFIG_SHA1 or CONFIG_TOML_SHA1_BASELINES.get(_HOST, "")
 
 CODEX_BIN   = os.environ.get("WI_CODEX_BIN", "codex")
 CODEX_MODEL = os.environ.get("WI_CODEX_MODEL", "").strip()   # optional -m <model>
 # codex-cli 0.151.0 cold-starts SLOW on the Oxford laptop -- attempt 1 of a real
 # call was observed taking ~3m37s (1 Sept). Bumped from 240; a one-shot warm-up
 # call (see _ensure_warm) absorbs the cold start once per process.
-CALL1_TIMEOUT_S        = int(os.environ.get("WI_LANE_B_TIMEOUT", "300"))
+CALL1_TIMEOUT_S        = int(os.environ.get("WI_LANE_B_TIMEOUT", "360"))
 CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
 # Headless connector availability FLIPS between runs on the same account
 # (confirmed 1 Sept: same laptop/account, calendar fired one run, Teams the
@@ -212,7 +214,7 @@ def _ensure_warm() -> None:
         _WARMED = True
         return
     _WARMED = True
-    _log(f"warming codex (cold start can take ~3+ min; timeout {CALL1_WARMUP_TIMEOUT_S}s)...")
+    _log(f"warming codex (timeout {CALL1_WARMUP_TIMEOUT_S}s)...")
     t0 = time.time()
     try:
         subprocess.run(
@@ -220,6 +222,7 @@ def _ensure_warm() -> None:
                               "Reply with the single word OK. Use no tools, change nothing."],
             capture_output=True, text=True, timeout=CALL1_WARMUP_TIMEOUT_S,
             cwd=str(REPO_ROOT), env={**os.environ, "PYTHONUTF8": "1"},
+            stdin=subprocess.DEVNULL,   # codex exec BLOCKS reading stdin until EOF -- give it EOF now
         )
         _log(f"codex warm-up done in {time.time() - t0:.0f}s")
     except Exception as e:  # noqa: BLE001
@@ -242,6 +245,9 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict]
                 cmd, capture_output=True, text=True, timeout=timeout_s,
                 cwd=str(REPO_ROOT),
                 env={**os.environ, "PYTHONUTF8": "1"},
+                stdin=subprocess.DEVNULL,   # codex-cli 0.151.0 prints "Reading additional input
+                                            # from stdin..." and BLOCKS on read until EOF; an
+                                            # inherited stdin never closes -> hang. Give it EOF.
             )
         except subprocess.TimeoutExpired as te:
             last_raw = (te.stdout or "") if isinstance(te.stdout, str) else ""
@@ -679,13 +685,13 @@ def main(argv: list[str]) -> int:
 
     sha_before = _config_toml_sha1()
     if sha_before and not args.from_file:
-        if CONFIG_TOML_SHA1_BASELINE and sha_before != CONFIG_TOML_SHA1_BASELINE:
-            _log(f"WARNING (never a HALT): ~/.codex/config.toml sha1 {sha_before} != recorded "
-                 f"baseline {CONFIG_TOML_SHA1_BASELINE} for host {_HOST} "
-                 f"(set WI_CODEX_CONFIG_SHA1 to re-baseline)")
-        elif not CONFIG_TOML_SHA1_BASELINE:
-            _log(f"note: no recorded ~/.codex/config.toml baseline for host {_HOST}; "
-                 f"observed sha1 {sha_before} -- add it to CONFIG_TOML_SHA1_BASELINES")
+        _log(f"host={_HOST}  ~/.codex/config.toml sha1={sha_before}")
+        if sha_before == _ENV_CONFIG_SHA1 or sha_before in _KNOWN_CONFIG_SHA1:
+            pass  # a recognised good config.toml state
+        else:
+            _log(f"note (never a HALT): config.toml sha1 {sha_before} is not among the recorded "
+                 f"baselines {sorted(_KNOWN_CONFIG_SHA1)} -- add it to CONFIG_TOML_SHA1_BASELINES "
+                 f"for host {_HOST} if this state is expected (or set WI_CODEX_CONFIG_SHA1)")
 
     per_domain: dict[str, dict] = {}
     overall_rc = 0

@@ -56,7 +56,7 @@ LANE_B_DIR     = REPO_ROOT / "data" / "lane_b"
 CODEX_RUNS_DIR = REPO_ROOT / "data" / "codex_runs"
 NORMALISED     = LANE_B_DIR / "lane_b_normalised.json"
 
-SNAPSHOT_TIMEOUT_S = int(lb.os.environ.get("WI_LANE_B_SNAP_TIMEOUT", "300"))
+SNAPSHOT_TIMEOUT_S = int(lb.os.environ.get("WI_LANE_B_SNAP_TIMEOUT", "360"))
 
 
 def _log(m: str) -> None:
