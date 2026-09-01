@@ -1,4 +1,122 @@
-# Handover -- 1 September 2026, ~16:35 UTC (Drew) -- LANE B (connector calendar + Teams): SINGLE CHECKPOINT. **REAL PUSHED BRIEFING WITH REAL CONNECTOR CALENDAR DATA** -- 1 Sept ~16:08-16:14, `101L-DE013193` as `AD-OAK\begb0037`: `lane_b_call1.py --domain calendar` (via `-Fast`) returned 53 real events, then `fetch_inbox.py MAIL_BACKEND=imap CAL_BACKEND=connector AI_BACKEND=claude_code` logged "Phase 1 - Lane B connector calendar: 53 event(s)" and pushed briefing commit [`0d78be5`](https://github.com/begb0037admin/work-inbox/commit/0d78be5) + task-suggestions commit [`ba94e58`](https://github.com/begb0037admin/work-inbox/commit/ba94e58), exit 0 throughout. **This run was on the Edu account** (before Kevin's personal-account switch, §0 below) -- do not confuse it with the personal-account go-live, which is still pending Kevin's 2 prerequisites. Full transcript: `C:\Users\begb0037.AD-OAK\work-inbox\logs\lane_b_test_20260901-160854.log` (on the laptop, not in the repo). **The bridge wrapper is guard-aware** (§3a) and **`docs/desktop-scripts/Cutover Lane B Calendar.ps1` (§3c) is a one-shot cutover script** -- preconditions + backup + flip + re-register + force-run-verify + printed rollback. **PERSONAL-ACCOUNT PROBE CONFIRMED GREEN (1 Sept ~17:09):** `CODEX_HOME=C:\WorkInboxAI\codex-laneb` -> id_token email `kevin@lelitte.co.uk`, plan `plus`, account `eb7a812e-...`; the Outlook Calendar connector IS attached to personal; `-Fast -Retries 1` pulled **52 real events** (status ok, 1 attempt, ~2.5 min) and pushed briefing [`8ee7adf`](https://github.com/begb0037admin/work-inbox/commit/8ee7adf) (mail 46, cal 52, exit 0), guard did not false-trip. Kevin has the **cutover go-ahead** -- runs `Cutover Lane B Calendar.ps1` tonight to be live for 7am. Until then the live task stays on `CAL_BACKEND=com`. **IDENTITY PIVOT (Kevin, ~15:30): Lane B moves off the Oxford Edu account to Kevin's PERSONAL ChatGPT account, via a dedicated `CODEX_HOME`** (Edu's 500/month hard credit cap can't sustain Lane B + Kevin's interactive use -- 272/500 burned on day one). Remaining blockers: (a) Kevin's 2 prerequisites in §0; (b) a repeatable execution path into the `AD-OAK\begb0037` context on `101L-DE013193`; (c) Teams briefing section, not yet built. All older Lane B entries (three "MAKE-OR-BREAK failures", "abandon Edu", "Edu primary / personal failover", "attended route", pre-16:35 versions of this entry) are SUPERSEDED and kept only for audit.
+# Handover -- 1 September 2026, ~20:30 UTC (Drew) -- LANE B CALENDAR CUTOVER ATTEMPTED THIS EVENING, ROLLED BACK ON A GUARD FALSE-POSITIVE. Live task is back on `CAL_BACKEND=com` (unambiguously). **COMMAND CENTRE FEED BUG ROOT-CAUSED + LIVE-REPRO'D** -- under `MAIL_BACKEND=imap` every email has `entry_id=""`, so `fetch_inbox.py` Phase 3.6's `if not eid: continue` has silently dropped 100% of new Command Centre cards since the 30 Aug IMAP cutover. Three fixes are on pushed branches with **DRAFT PRs open, NOT merged**: feed-fix [work-inbox #32](https://github.com/begb0037admin/work-inbox/pull/32), Lane B guard fix [work-inbox #31](https://github.com/begb0037admin/work-inbox/pull/31) (split out), CC board-UX + IMAP opener [command-centre #15](https://github.com/begb0037admin/command-centre/pull/15). Nothing merged, nothing deployed, live scheduled task and `CAL_BACKEND` untouched by this checkpoint. The 1 Sept ~16:35 entry below and all older Lane-B-cutover entries are SUPERSEDED, kept for audit.
+
+## 0. DIRECTIVE + CHANGE-PACE CONTEXT
+
+Kevin's directive for the 1 Sept evening was **"everything tonight"** -- an explicit one-time override of the standing work-inbox cautious-change-pace rule (small isolated verified changes on the live pipeline; see the 17 Aug memory entry). That override applied to the evening only. **Change pace is now back to normal** -- the three PRs below stay DRAFT and gated on Kevin's review, feed-fix merges before the CC PR, and any dashboard change still needs a screenshot + Kevin's literal "approved".
+
+## 1. LANE B CALENDAR CUTOVER -- ATTEMPTED, FALSE-TRIPPED, ROLLED BACK
+
+`docs/desktop-scripts/Cutover Lane B Calendar.ps1` was run in **Kevin's RDP session** (`AD-OAK\begb0037` on `101L-DE013193`).
+
+**Preconditions PASSED:**
+- Lane B codex `CODEX_HOME=C:\WorkInboxAI\codex-laneb` signed into **`kevin@lelitte.co.uk`**, plan **`plus`**, account **`eb7a812e-1b9d-4586-b1a4-02a4ed7ca116`** (personal, not Edu).
+- Connector calendar probe returned **41 real events**.
+- Backups written on the laptop:
+  - `Run Laptop Bridge Briefing.ps1.bak-20260901-204854` (the live wrapper, path parsed from the task action).
+  - `logs/WorkInboxBridgeBriefing_task_20260901-204854.xml` (`Export-ScheduledTask`).
+
+**Then `lane_b_cal_guard.py` exited 1 -- persistent HALT:**
+> `quarantined lane_b_normalised.json ... (52 calendar change(s) during read window)`
+
+**This was a FALSE POSITIVE.** Two back-to-back `list_events` reads of an unchanged calendar diffed by ~52 because:
+1. Recurring-series **occurrences** get a fresh Graph `id` on every connector call -> each occurrence read as `removed` + `added`.
+2. `start` / `end` were compared as the raw `.isoformat()` of whatever timezone label the connector rendered that call.
+
+**The guard failed CLOSED and correctly:** it ran `Disable-ScheduledTask` on `Work Inbox Bridge Briefing`, fell back to `CAL_BACKEND=com` for that cycle, and **the briefing still shipped on COM (commit `bede48d`)**. `BurntToast` is not installed on the laptop, so the toast step was skipped (try/catch, non-fatal, as designed).
+
+## 2. RECOVERY -- same night, live task is now unambiguously COM
+
+Done in the same RDP session:
+- `Register-ScheduledTask -Xml (Get-Content '<...WorkInboxBridgeBriefing_task_20260901-204854.xml>' -Raw) -TaskName 'Work Inbox Bridge Briefing' -Force`.
+- Live wrapper restored from `Run Laptop Bridge Briefing.ps1.bak-20260901-204854`.
+- **`-CalBackend connector` stripped from the task action.** The rebuilt action was constructed **without `-WorkingDirectory`** because the task's own `$a.WorkingDirectory` is empty -- passing an empty `-WorkingDirectory` to `New-ScheduledTaskAction` would have thrown.
+- Verified read-back: task **State: Ready**, **NextRunTime 2026-09-02 07:00**, action arguments contain **no** `-CalBackend connector` (COM is the default) -> unambiguously on Outlook COM.
+
+**Lane B calendar connector = PARKED** pending the guard fix (§4, PR #31). Do **not** re-attempt the connector cutover until a fresh RDP `--dry-diff` is clean.
+
+## 3. COMMAND CENTRE FEED BUG -- ROOT CAUSE CONFIRMED + LIVE-REPRO'D
+
+**Symptom:** no new Command Centre cards since ~27 Aug; task-update bullets collapsed to ~1 per task, lifetime.
+
+**Root cause (confirmed):**
+- Under `MAIL_BACKEND=imap` **every email has `entry_id=""`** -- by design (`imap_mail.py` ~L486 / ~L773; there is no Outlook COM EntryID under IMAP).
+- `fetch_inbox.py` Phase 3.6 promotion guard **`if not eid: continue` (~L3062)** then silently skips **100%** of new-task candidates.
+- The `applied` ledger key `entry_id + "_" + task_id` degenerates to **`_<task_id>`**, so each task gets exactly **one** inbox update ever, then locks.
+
+**Live proof (1 Sept eve):**
+- `triage_ledger.json` `promoted` map frozen at **2026-08-27** (49 real-EntryID keys); only **13** `_`-prefixed `applied` keys since the IMAP cutover on 30 Aug.
+- Tonight's bridge run logged **`Phase 3.5 done - new:3 ... updates:0`**, **no Phase 3.6 line**, **no `tasks.json` commit**; the 3 new tasks dropped to unactioned suggestions (Phase 5, commit `29ea61e`).
+- This was a **known-deferred follow-up** from the 28 Aug IMAP build ("key on `message_id`") that never got done before the 30 Aug cutover.
+
+## 4. FIXES -- ALL ON PUSHED BRANCHES, DRAFT PRs OPEN, NOTHING MERGED
+
+### 4a. work-inbox feed-fix -- branch `drew/cc-feed-imap-identity-fix` @ `c5f52db7` -- [PR #32](https://github.com/begb0037admin/work-inbox/pull/32) (DRAFT)
+
+| File | Change | Evidence |
+|---|---|---|
+| `fetch_inbox.py` | **+65 / -12.** New module-scope helpers `_cc_mail_key(entry_id, message_id)` (`entry_id or message_id or ""`) and `_owa_link()`. Phase 3.5 dedup + Phase 3.6 promote-guard both use `_cc_mail_key`; `applied` **and** `promoted` ledger keys migrated read+write; promoted cards also carry `messageId` + `webLink`; `entryId` no longer clobbered with `""` in the apply loop; new `messageId` dedup set guards re-promotion. | `py_compile` OK; COM-path keys **byte-identical** to pre-fix for real EntryIDs. |
+| `test_cc_mail_key.py` | **NEW, +99.** AST-extracts the real `_cc_mail_key` / `_owa_link` from `fetch_inbox.py` (no import side effects), asserts COM key parity + IMAP `Message-ID` fallback + empty-identity skip guard + OWA link host. | **10/10 pass** locally. |
+| `clean_triage_ledger.py` | **NEW, +148. BUILT, NOT RUN.** One-time removal of the 13 poisoned `_`-prefixed `applied` keys. GitHub-API only, **dry-run by default** (dry-run: 385 -> 372); `--apply` does backup -> byte-verify -> write -> post-write verify. `promoted` / `tracked_needs_urgent` never touched. | dry-run output only so far. |
+
+### 4b. Lane B calendar guard fix -- branch `drew/lane-b-cal-guard-snapshot-fix` @ `505c30790068a0b3c060c2b7de3dca34dd30f35e` -- [PR #31](https://github.com/begb0037admin/work-inbox/pull/31) (DRAFT)
+
+**Split out of `drew/cc-feed-imap-identity-fix` on Drew's recommendation** so the guard fix has its own review track. Branched from `main` HEAD `2ce7575`; single commit; `lane_b_cal_guard.py` blob `5599f3fe384cf39b23f4084d573938ab6e16cafb` is **byte-identical** to the copy on the feed-fix branch.
+
+`lane_b_cal_guard.py` **+233 / -29:**
+- Match events on a **stable natural key**: `iCalUID` (else `id`, else `subject`) **+ the start instant canonicalised to UTC** (the instant disambiguates the occurrences of one series).
+- Compare only load-bearing fields -- `subject` / `start` / `end` / `response_status` / `all_day` -- each normalised (datetimes -> UTC ISO-8601 `Z`; all-day -> bare date; `response_status` casefold + alias; `subject` whitespace-collapsed). `type` no longer compared.
+- Pin **one** 7-day window per guard cycle, passed to PRE and POST (was recomputed each call -> a cycle straddling UTC midnight shifted the window).
+- `lane_b_call1.py` re-contamination guard (server must be `codex_apps`; write/unknown verb -> HALT) is **completely untouched**. A real `subject` / `start` / `end` change or a genuine add/remove still HALTs.
+- New: `--dry-diff` (PRE+POST back-to-back, no Call-1, assert 0 diff -- the cheap pre-cutover validator) and `--selftest` (pure-function, no codex).
+
+Evidence: `--selftest` **7/7** locally (incl. the id-churn + tz-label + case-churn case -> 0 trips, and a genuine change -> trip); `py_compile` OK. **NOT integration-tested against a live connector** -- needs an RDP `--dry-diff` run as `AD-OAK\begb0037` on `101L-DE013193` before any connector cutover retry.
+
+Residual (documented inline in the file): an intermittent Windows-tz-*label* flip with no offset in the `dateTime` string is only fully normalised where `zoneinfo` / `tzdata` resolves the zone; otherwise wall-clock is treated as UTC (symmetric across both snapshots). `--dry-diff` surfaces any residual before a cutover retry.
+
+**PR #32 still physically carries this same file** (the split was done by copying, not by reverting it from the feed-fix branch). A PR comment on #32 records that it will be reverted from that branch **on Kevin's word** -- not force-pushed pre-approval, to avoid a force-push race.
+
+### 4c. command-centre board-UX + IMAP opener -- branch `drew/cc-imap-open-email-and-board-ux` @ `656694ba` -- [PR #15](https://github.com/begb0037admin/command-centre/pull/15) (DRAFT)
+
+- `js/app.js` **+53 / -4:**
+  - `renderBoard` sorts each tier by most-recent-activity desc (`dateAdded` / genuine action stamps via `lastActivityTs`); new + updated cards land at the top. **This supersedes manual intra-tier drag order.** Between-tier drag + Move buttons are **unaffected**.
+  - `cardsWithDayDivider`: one **"Earlier"** divider between cards active today (local midnight = Work Inbox's briefing day boundary) and older cards. **Only renders when a tier has both today-active and older cards.**
+  - `cardHTML`: new branch -- a task with `webLink` / `messageId` but no real `entryId` (IMAP-sourced inbox tasks) gets the `openEmailWeb()` button. `openEmailWeb()` also reads camelCase `webLink` and synthesises an OWA search link from `messageId`; same `https` + `outlook.office.com` / `outlook.office365.com` host allowlist.
+- `css/styles.css` **+6:** `.board-day-divider` rule.
+- Two archived pre-edit backups on the branch (`Archive/app.js.20260901T200221Z.bak`, `Archive/styles.css.20260901T200221Z.bak`), byte-verified identical to the live files before editing.
+- `node --check js/app.js` OK.
+- Inert until the feed-fix (§4a) lands -- no IMAP card carries `webLink` / `messageId` until then.
+
+### Screenshots for Kevin (in `C:\Users\admin\Downloads\`)
+- `CC-dashboard_20260901_1_live-data_newest-first.png` -- CC, live data, newest-first sort.
+- `CC-dashboard_20260901_2_demo_earlier-divider.png` -- CC, demo data, the "Earlier" divider.
+- `wi-datesort-move-1sep\01-BEFORE.png` / `02-AFTER.png` / `03-AFTER-move-menu-open.png` -- Work Inbox dashboard Move-button bundle (see NEXT (f)).
+
+## 5. EXACT NEXT ACTIONS
+
+(a) **DONE this checkpoint** -- the 3 draft PRs are open: feed-fix [work-inbox #32](https://github.com/begb0037admin/work-inbox/pull/32), Lane B guard [work-inbox #31](https://github.com/begb0037admin/work-inbox/pull/31), CC board-UX [command-centre #15](https://github.com/begb0037admin/command-centre/pull/15). PR comment on #32 records the guard-file overlap with #31.
+
+(b) **Kevin reviews the CC screenshots** (`CC-dashboard_20260901_1_*` and `_2_*` in `C:\Users\admin\Downloads\`) and replies the literal word **"approved"** -- standing UI approval gate.
+
+(c) **Merge order: feed-fix PR #32 FIRST, THEN CC PR #15.** The CC board changes consume `messageId` / `webLink` fields that #32 is what starts writing.
+
+(d) **After #32 merges:** run `clean_triage_ledger.py` -- dry-run first, then `--apply` -- in the RDP session as `AD-OAK\begb0037` on `101L-DE013193`.
+
+(e) **Lane B guard (PR #31):** run `python lane_b_cal_guard.py --selftest`, then a fresh `python lane_b_cal_guard.py --dry-diff` in the RDP session. **Only if `--dry-diff` is CLEAN**, retry the connector cutover (`docs/desktop-scripts/Cutover Lane B Calendar.ps1`). The live task stays on `CAL_BACKEND=com` until then.
+
+(f) **Work Inbox dashboard Move-button bundle:** there is **NO branch and NO commit** for this -- a prior agent's code was lost. Rebuild it from the screenshots in `C:\Users\admin\Downloads\wi-datesort-move-1sep\` (`01-BEFORE` / `02-AFTER` / `03-AFTER-move-menu-open`). Needs a fresh screenshot + Kevin's literal "approved" before any push.
+
+(g) **Teams briefing section in `fetch_inbox.py`:** only after the calendar connector is actually live (i.e. after (e) succeeds). `lane_b_call1.py --domain teams` already emits the normalised Teams block; still needs the briefing-section shape + LANE_B sec.6b's softer "disable NEXT run" Teams guard.
+
+## 6. LIVE STATE AT THIS CHECKPOINT (verified)
+
+- `Work Inbox Bridge Briefing` (laptop `101L-DE013193`, `AD-OAK\begb0037`): **State Ready**, `MAIL_BACKEND=imap`, `CAL_BACKEND=com` (no `-CalBackend connector` in the action), NextRunTime **2026-09-02 07:00**. **Not touched by this checkpoint.**
+- work-inbox `main` HEAD `2ce7575de554e344e424bd0f82e7143b7d0da436`; command-centre `main` HEAD `1cfb9a77c135b4b9cf7dcb21486ae7008c96fa90`. **No merges.**
+- Branches: `drew/cc-feed-imap-identity-fix` @ `c5f52db7`, `drew/lane-b-cal-guard-snapshot-fix` @ `505c3079`, `drew/cc-imap-open-email-and-board-ux` @ `656694ba`.
+- Last good `data/briefing.json` = the COM-fallback run that shipped during the aborted cutover, commit `bede48d`.
+
+---
+
+# Handover -- 1 September 2026, ~16:35 UTC (Drew) -- LANE B (connector calendar + Teams): SINGLE CHECKPOINT. [SUPERSEDED by the 1 Sept ~20:30 UTC entry above -- the connector calendar cutover was ATTEMPTED that evening and ROLLED BACK on a guard false-positive; the live task is back on CAL_BACKEND=com.] **REAL PUSHED BRIEFING WITH REAL CONNECTOR CALENDAR DATA** -- 1 Sept ~16:08-16:14, `101L-DE013193` as `AD-OAK\begb0037`: `lane_b_call1.py --domain calendar` (via `-Fast`) returned 53 real events, then `fetch_inbox.py MAIL_BACKEND=imap CAL_BACKEND=connector AI_BACKEND=claude_code` logged "Phase 1 - Lane B connector calendar: 53 event(s)" and pushed briefing commit [`0d78be5`](https://github.com/begb0037admin/work-inbox/commit/0d78be5) + task-suggestions commit [`ba94e58`](https://github.com/begb0037admin/work-inbox/commit/ba94e58), exit 0 throughout. **This run was on the Edu account** (before Kevin's personal-account switch, §0 below) -- do not confuse it with the personal-account go-live, which is still pending Kevin's 2 prerequisites. Full transcript: `C:\Users\begb0037.AD-OAK\work-inbox\logs\lane_b_test_20260901-160854.log` (on the laptop, not in the repo). **The bridge wrapper is guard-aware** (§3a) and **`docs/desktop-scripts/Cutover Lane B Calendar.ps1` (§3c) is a one-shot cutover script** -- preconditions + backup + flip + re-register + force-run-verify + printed rollback. **PERSONAL-ACCOUNT PROBE CONFIRMED GREEN (1 Sept ~17:09):** `CODEX_HOME=C:\WorkInboxAI\codex-laneb` -> id_token email `kevin@lelitte.co.uk`, plan `plus`, account `eb7a812e-...`; the Outlook Calendar connector IS attached to personal; `-Fast -Retries 1` pulled **52 real events** (status ok, 1 attempt, ~2.5 min) and pushed briefing [`8ee7adf`](https://github.com/begb0037admin/work-inbox/commit/8ee7adf) (mail 46, cal 52, exit 0), guard did not false-trip. Kevin has the **cutover go-ahead** -- runs `Cutover Lane B Calendar.ps1` tonight to be live for 7am. Until then the live task stays on `CAL_BACKEND=com`. **IDENTITY PIVOT (Kevin, ~15:30): Lane B moves off the Oxford Edu account to Kevin's PERSONAL ChatGPT account, via a dedicated `CODEX_HOME`** (Edu's 500/month hard credit cap can't sustain Lane B + Kevin's interactive use -- 272/500 burned on day one). Remaining blockers: (a) Kevin's 2 prerequisites in §0; (b) a repeatable execution path into the `AD-OAK\begb0037` context on `101L-DE013193`; (c) Teams briefing section, not yet built. All older Lane B entries (three "MAKE-OR-BREAK failures", "abandon Edu", "Edu primary / personal failover", "attended route", pre-16:35 versions of this entry) are SUPERSEDED and kept only for audit.
 
 ---
 
