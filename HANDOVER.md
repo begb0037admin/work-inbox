@@ -1,3 +1,57 @@
+# Handover -- 1 September 2026, ~late afternoon UTC (Drew) -- TRACK 2 / LANE B: MAKE-OR-BREAK #2 FAILED on the laptop. Headless `codex exec` on the Oxford ChatGPT Edu account loads ZERO connector tools -- no `microsoft_outlook_calendar.*`, no `microsoft_teams.*`, nothing. Same wall as the desktop on 28 Aug. Lane B (connector calendar + Teams) has no route on the Edu account. Recommendation below: ship Lane A (mail-only IMAP, proven) as the whole migration, keep calendar on Outlook COM **on the laptop** (PRT-healthy, unlike the desktop), formally park Lane B. Kevin decides. NO build / config / cutover / `codex login` this dispatch.
+
+## MAKE-OR-BREAK #2 -- `codex exec` connector-load proof on the laptop -- FAILED (evidence, all verified this session by the coordinator over RDP/SSH, relayed to Drew)
+
+Kevin ran the Lane B kickoff prerequisites (plan sec.6 "Kevin's action list -- FROM 1 SEPT"):
+- **(a) done** -- interactive AI work moved off the Oxford ChatGPT Edu account (`begb0037@ox.ac.uk`, "University of Oxford EDU" workspace, single account, "Workspace data isn't used to train models").
+- **(b) N/A -- nothing to strip.** The Edu account's Plugins panel lists: Default templates, Documents, Outlook Calendar, PDF, Plugin Management, Presentations, Spreadsheets, Teams, Template Creator, Browse plugins, Developer mode. **No GitHub connector, no Outlook Email connector.** Data controls has **no connectors section** at all. PROMPT D end-state (GitHub + Outlook Email removed, only Calendar + Teams remain) was already satisfied.
+- **(c) done -- and this is the failure.**
+  - `codex login` on the laptop (RDP as `AD-OAK\begb0037`, non-elevated) -> "Successfully logged in", against the Oxford tenant. OAuth scopes included `api.connectors.read api.connectors.invoke`; `id_token_add_organizations=true`.
+  - `codex --version` -> `codex-cli 0.151.0`.
+  - `codex exec -s read-only --skip-git-repo-check "List every tool available to you as a JSON array of names. Call nothing."` returned EXACTLY:
+    `functions.exec, functions.wait, functions.request_user_input, tools.apply_patch, tools.create_goal, tools.exec_command, tools.list_mcp_resource_templates, tools.list_mcp_resources, tools.read_mcp_resource, tools.request_plugin_install, tools.update_goal, tools.update_plan, tools.view_image, tools.write_stdin, tools.image_gen__imagegen, tools.web__run, collaboration.followup_task, collaboration.interrupt_agent, collaboration.list_agents, collaboration.send_message, collaboration.spawn_agent, collaboration.wait_agent`
+    -> **ZERO connector tools.** No `microsoft_outlook_calendar.*`, no `microsoft_teams.*`, no `list_events`, no `list_chats`.
+  - Codex printed: `warning: Configured value for approval_policy is disallowed by requirements; falling back to required value UnlessTrusted ... (set by enterprise-managed requirements Group requirements (6d66d29d-222b-42ee-a85f-c8f3f0d4416a))` -- the Edu tenant enforces managed Codex config policy.
+  - Laptop `~/.codex/config.toml` -- sha1 `3F15F6F168B1402E268D6F46E65BBFCC56D66A45`, 2496 bytes, LastWriteTime 01/09/2026 10:07. Content is desktop-app plumbing only: `notify`->codex-computer-use.exe; `[marketplaces.openai-bundled]`; `[plugins."browser@openai-bundled"]` / `chrome` / `visualize` / `codex-app-tools@openai-bundled` all enabled; `[mcp_servers.node_repl]`; `[mcp_servers.cua_repl]` -> `ChatGPT.exe` (enabled=false); `[windows] sandbox="unelevated"`. **No `[mcp_servers.codex_apps]` entry** -- the server the B1 findings said holds the 292-tool connector catalog is not wired.
+  - `~/.codex/.codex-global-state.json` present (1,269,118 bytes) + a `.bak` same size; `~/.codex/auth.json` present (4201 bytes). ChatGPT/Codex desktop app = MSIX `OpenAI.Codex_26.825.6671.0`.
+  - The run's `h0/h1/h2` hash-check lines were mangled by an RDP paste artifact -- inconclusive, ignore them; the clean `config.toml` sha1 above supersedes.
+
+## Blocker analysis (verified vs inferred)
+
+**Verified (this session + durable records):**
+- Laptop `codex exec` on the Edu account loads zero connector tools (above).
+- The Oxford Edu ChatGPT workspace exposes **no "connectors" surface** -- no GitHub / Outlook Email connector, no Data-controls connectors section. Calendar/Teams appear only as **plugins**, not as the "Apps"/connectors that fed `codex exec` on the desktop.
+- The Edu tenant actively enforces managed Codex requirements (`6d66d29d-222b-42ee-a85f-c8f3f0d4416a`) -- it overrode `approval_policy` on this very run.
+- On the **desktop**, `codex exec` DID load `codex_apps/microsoft_outlook_email.*` connector tools during the 26-27 Aug write-gate tests -- but that was on Kevin's **personal ChatGPT Plus** account (`auth.json` account `eb7a812e-...`), never the Edu account. MAKE-OR-BREAK #2 has therefore **never passed on the Edu account on any machine.**
+- 28 Aug desktop: a plain `codex exec` (also personal Plus) loaded ZERO connector tools -- cause was left undetermined. The laptop result is the second occurrence of the same symptom.
+- `codex_apps` is not a `config.toml [mcp_servers.*]` entry on any machine. On the desktop where connectors loaded, `codex doctor` never listed a Microsoft MCP server; the tools re-provisioned from the ChatGPT account each session, outside every local config/plugin surface (27 Aug plugin-disable test). It is bridged by the ChatGPT desktop app runtime (`codex app-server` / `codex-code-mode-host`), not user-wired in TOML.
+- No `--allowed-tools` / tool-gating flag exists in any codex-cli through 0.151.0 (`CONNECTOR_SAFEGUARDS.md` B6).
+
+**Inferred (not directly proven):**
+- The ChatGPT "Apps/connectors in Codex" feature is account/workspace-provisioned and desktop-app-bridged; it is not a documented `config.toml` capability. There is no supported key to attach connectors to `codex exec`.
+- Most likely cause of the Edu zero-tools result, in order: (1) the Oxford Edu enterprise workspace does not provision connectors-in-Codex at all (consistent with "no connectors section"); (2) the managed-requirements group restricts the Apps surface for managed Codex CLI; (3) the desktop-app bridge daemons weren't running at test time. (1)/(2) are not user-fixable; (3) is, but there's no evidence it's the cause and the 28 Aug desktop zero-tools happened with the app installed.
+- Hand-wiring `[mcp_servers.codex_apps]` is not a real path: no documented endpoint, it's not how connectors loaded on the desktop, managed requirements would likely override it, and it breaches the standing "no config.toml change without Kevin / record sha before+after / no overrides" discipline.
+
+**Conclusion:** headless `codex exec` connector loading on the Edu account is **not achievable via a supported `config.toml` change** and is very likely structurally unavailable for this workspace. Best case it is desktop-app-only for this account; worst case the Edu tenant has it disabled by enterprise policy and no local change re-enables it.
+
+## Lane B options (for Kevin to decide)
+
+| Option | What it is | Assessment |
+|---|---|---|
+| **(a) config/MCP route to make `codex exec` see connectors on Edu** | wire `[mcp_servers.codex_apps]` or similar | **Not viable.** No documented mechanism; managed requirements `6d66d29d...` enforced; Edu has no connectors surface; would breach config discipline; never worked on Edu even on the desktop. |
+| **(b) drive the ChatGPT desktop app instead of `codex exec`** | UI-script the interactive Codex/ChatGPT app for the calendar+Teams reads | **Not viable for an unattended pipeline.** No headless surface; GUI automation on a docked laptop is fragile and breaks on every MSIX auto-update (`OpenAI.Codex_26.825.6671.0`); the write-surface objection is worse (full interactive account, no `--disable apps`); fights the managed-requirements posture. |
+| **(c) calendar + Teams stay off the connector; ship Lane A only** | whole pipeline on the laptop: mail via IMAP (Lane A, proven), calendar via **Outlook COM on the laptop**, Teams out of scope; triage `claude -p` unchanged | **Recommended.** Ships a fully de-risked, fully-proven migration now. COM calendar recovered on the desktop with the M365 fix, and the laptop has a healthy ~14-day PRT (the 28 Aug outage was the desktop's missing PRT / Workplace-Join churn -- not a COM problem per se). Classic Outlook is installed + configured on the Oxford laptop image. `fetch_inbox.py` already has `CAL_BACKEND=com` working under `MAIL_BACKEND=imap` (`d5447b9`). Cost: no Teams briefing section (a **net-new** feature Lane B would have *added*, not a migration requirement -- Teams has never been in the pipeline); calendar keeps a classic-Outlook-COM dependency on the laptop (port the desktop's `Classic Outlook Keepalive` pattern). |
+| **(d) non-connector calendar route** | Graph read / EWS read / read-only Graph proxy | Nothing new: Graph disallowed at Oxford (do not re-investigate), EWS removed from the plan (retiring), a read-only Graph proxy needs Oxford consent they won't give. Collapses to (c) = COM. |
+| **(e) formally park Lane B** | treat Lane B (connector calendar + Teams) like IMAP was parked -- documented, revisit only if the Edu workspace ever exposes Apps/connectors to the CLI, or a read-only Graph proxy becomes viable | **Recommended alongside (c).** Lane B was already the "eyes-open residual" that `CONNECTOR_SAFEGUARDS.md` D judged NOT SOUND for unattended use anyway. |
+
+### Recommendation: (c) + (e)
+Ship **Lane A (mail-only IMAP) on the laptop as the complete migration**. Keep the **calendar section on Outlook COM on the laptop** -- PRT-healthy and docked, materially more reliable than the desktop COM path that caused the 28 Aug outage; port the `Classic Outlook Keepalive` task. **Formally park Lane B** (connector calendar + Teams) with a written revisit trigger. Net result: Kevin gets a fully proven, zero-write-surface pipeline on the laptop now, instead of blocking the whole migration on a connector route that has failed on both machines and was never sound. Teams stays a future feature, not a migration blocker.
+
+## Next action (one line)
+Kevin decides between Lane B options (a)-(e) above (recommendation: (c)+(e) -- ship Lane A, calendar stays on laptop COM, park Lane B). On (c)+(e): next build step is the laptop `Classic Outlook Keepalive` port + a supervised full `MAIL_BACKEND=imap CAL_BACKEND=com` run on the laptop, then the Phase 6 cutover checklist minus the "uninstall classic Outlook" line. No build until Kevin's decision.
+
+---
+
 # Handover -- 1 September 2026, ~midday UTC (Drew) -- TRACK 1 COMPLETE: Draft Diff Capture cutover to the laptop is done. `Work Inbox Laptop Draft Diff` is a registered, healthy scheduled task on the laptop (not manual runs); the desktop `Draft Diff Capture` is formally Disabled. Correction to the entry below: 31 Aug 2026 is a MONDAY -- the "Sunday runs" flag there was a weekday miscount; every run fits the Mon-Fri trigger. Only residual: the `claude -p` IMAP enrichment path has still never processed a real draft->sent pair (0 pairs every run since re-baseline) -- it exercises when Kevin next sends/abandons a Drafts item; watch the next `draftdiff_status.json` push after that.
 
 ## Reconcile -- verified via SSH from the desktop (Kevin: "use SSH"), 1 Sep ~midday
