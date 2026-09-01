@@ -48,6 +48,7 @@ import hashlib
 import json
 import os
 import re
+import shutil as _shutil
 import subprocess
 import sys
 import time
@@ -164,9 +165,23 @@ def build_teams_prompt(since_iso: str) -> str:
 # --------------------------------------------------------------------------- #
 #  codex exec --json
 # --------------------------------------------------------------------------- #
+def _codex_argv0() -> list[str]:
+    """Resolve how to launch codex, robustly on Windows.
+    WI_CODEX_BIN may be a bare name ('codex'), a full path to codex.cmd/.exe, or
+    a .ps1 (npm global on Kevin's laptop = C:\\Users\\...\\npm\\codex.ps1).
+    Python 3.12+ will not run a .cmd/.bat via subprocess without the extension,
+    and cannot exec a .ps1 at all -- handle both."""
+    cand = CODEX_BIN
+    resolved = _shutil.which(cand) or cand
+    low = resolved.lower()
+    if low.endswith(".ps1"):
+        return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", resolved]
+    return [resolved]
+
+
 def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict], str]:
     """Return (parsed_json_objects, raw_stdout). Raises RuntimeError on hard failure."""
-    cmd = [CODEX_BIN, "exec", "-s", "read-only", "--skip-git-repo-check", "--json"]
+    cmd = _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check", "--json"]
     if CODEX_MODEL:
         cmd += ["-m", CODEX_MODEL]
     cmd.append(prompt)
