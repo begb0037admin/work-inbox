@@ -56,7 +56,7 @@ LANE_B_DIR     = REPO_ROOT / "data" / "lane_b"
 CODEX_RUNS_DIR = REPO_ROOT / "data" / "codex_runs"
 NORMALISED     = LANE_B_DIR / "lane_b_normalised.json"
 
-SNAPSHOT_TIMEOUT_S = int(lb.os.environ.get("WI_LANE_B_SNAP_TIMEOUT", "180"))
+SNAPSHOT_TIMEOUT_S = int(lb.os.environ.get("WI_LANE_B_SNAP_TIMEOUT", "300"))
 
 
 def _log(m: str) -> None:
@@ -203,6 +203,7 @@ def cmd_run() -> int:
     rc = subprocess.run(
         [sys.executable, str(REPO_ROOT / "lane_b_call1.py"), "--domain", "calendar"],
         cwd=str(REPO_ROOT),
+        env={**lb.os.environ, "WI_LANE_B_SKIP_WARMUP": "1"},   # the PRE snapshot already warmed codex
     ).returncode
     _log(f"lane_b_call1.py --domain calendar exit {rc}")
     if rc == 1:

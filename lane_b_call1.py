@@ -49,6 +49,7 @@ import json
 import os
 import re
 import shutil as _shutil
+import socket
 import subprocess
 import sys
 import time
@@ -66,15 +67,26 @@ LANE_B_DIR     = REPO_ROOT / "data" / "lane_b"
 CODEX_RUNS_DIR = REPO_ROOT / "data" / "codex_runs"
 NORMALISED_OUT = LANE_B_DIR / "lane_b_normalised.json"
 
-# The recorded Lane B config baseline (HANDOVER 1 Sept, "VERIFIED WORKING").
-# Override with WI_CODEX_CONFIG_SHA1 if Kevin re-baselines it deliberately.
-CONFIG_TOML_SHA1_BASELINE = os.environ.get(
-    "WI_CODEX_CONFIG_SHA1", "4FD8EF763BF0A8DDAD9A138B6679A84FE8536F73"
-).lower()
+# Recorded ~/.codex/config.toml sha1 baselines, per host (short lowercase
+# hostname). WARNING-ONLY -- a mismatch is logged, never a HALT. Set
+# WI_CODEX_CONFIG_SHA1 to override for a deliberate re-baseline.
+_HOST = socket.gethostname().split(".")[0].lower()
+CONFIG_TOML_SHA1_BASELINES = {
+    "101l-de013193":   "ba0184e864ffd081069820cc7a6f8f19acf5c845",  # AD-OAK\begb0037, Edu, codex-cli 0.151.0 (1 Sept 2026, first real run)
+    "desktop-mjdjm64": "4fd8ef763bf0a8ddad9a138b6679a84fe8536f73",  # admin desktop, Edu (1 Sept 2026)
+}
+CONFIG_TOML_SHA1_BASELINE = (
+    os.environ.get("WI_CODEX_CONFIG_SHA1", "").strip().lower()
+    or CONFIG_TOML_SHA1_BASELINES.get(_HOST, "")
+)
 
 CODEX_BIN   = os.environ.get("WI_CODEX_BIN", "codex")
 CODEX_MODEL = os.environ.get("WI_CODEX_MODEL", "").strip()   # optional -m <model>
-CALL1_TIMEOUT_S = int(os.environ.get("WI_LANE_B_TIMEOUT", "240"))
+# codex-cli 0.151.0 cold-starts SLOW on the Oxford laptop -- attempt 1 of a real
+# call was observed taking ~3m37s (1 Sept). Bumped from 240; a one-shot warm-up
+# call (see _ensure_warm) absorbs the cold start once per process.
+CALL1_TIMEOUT_S        = int(os.environ.get("WI_LANE_B_TIMEOUT", "300"))
+CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
 # Headless connector availability FLIPS between runs on the same account
 # (confirmed 1 Sept: same laptop/account, calendar fired one run, Teams the
 # next). If the expected tool doesn't fire, re-invoke codex a few times before
@@ -82,14 +94,33 @@ CALL1_TIMEOUT_S = int(os.environ.get("WI_LANE_B_TIMEOUT", "240"))
 # "connector unavailable this cycle" path.
 CALL1_RETRIES = max(1, int(os.environ.get("WI_LANE_B_RETRIES", "3")))
 CALL1_RETRY_BACKOFF_S = [5, 12, 20, 30]
+_WARMED = False
 
 PRIMARY_CAL_NAME = "Calendar"
 SHARED_CAL_NAME  = "People Department - HR Systems"
 
-# LANE_B sec.5 read allowlists (bare tool names, after stripping the
-# microsoft_outlook_calendar. / microsoft_teams. namespace prefix)
+# --- re-contamination guard (revised 1 Sept 2026 after a false HALT) ---------
+# The task-descriptive Call-1 prompt lets the model pick its own read tools, and
+# it legitimately picks ones we didn't hard-list (observed: `search_events`
+# alongside `list_calendars`/`list_events`). So the guard is now VERB-based, not
+# an exact allowlist:
+#   * server MUST be `codex_apps`.
+#   * tool namespace (before the first '.') MUST be one of the two Lane B
+#     connectors -- anything else on codex_apps (`microsoft_outlook_email.*`,
+#     `github.*`, `canva.*`, ...) is off-scope -> HALT.
+#   * within those namespaces: a READ verb leaf -> allow; a WRITE verb leaf or an
+#     unrecognised verb -> HALT (fail closed).
+LANE_B_NAMESPACES = {"microsoft_outlook_calendar", "microsoft_teams"}
+READ_VERB_RE = re.compile(r"^(list|get|fetch|search|resolve)(_|$)", re.IGNORECASE)
+WRITE_VERB_RE = re.compile(
+    r"^(send|create|update|delete|remove|add|reply|forward|draft|cancel|respond|"
+    r"accept|decline|tentatively|move|mark|set|patch|post|schedule|invite|share|"
+    r"rsvp|clear|archive|pin|unpin|hide)(_|$)",
+    re.IGNORECASE,
+)
+# Reference only (no longer the gate): the sec.5 read tool names known on 1 Sept.
 CAL_ALLOW = {
-    "list_calendars", "list_events", "fetch_event", "fetch_events_batch",
+    "list_calendars", "list_events", "search_events", "fetch_event", "fetch_events_batch",
     "list_event_instances", "list_recurring_series", "get_mailbox_settings",
 }
 TEAMS_ALLOW = {
@@ -99,13 +130,6 @@ TEAMS_ALLOW = {
     "list_online_meeting_transcripts", "get_online_meeting_transcript_content",
     "list_online_meeting_recordings",
 }
-# belt-and-braces: any tool whose bare name starts with one of these verbs is a
-# write regardless of which connector it belongs to -> HALT.
-WRITE_VERB_RE = re.compile(
-    r"^(send|create|update|delete|remove|add|reply|forward|draft|cancel|accept|"
-    r"decline|tentatively_accept|move|mark|set|patch|post|schedule|invite|share)_",
-    re.IGNORECASE,
-)
 
 EXPECTED_TOOL = {"calendar": "list_events", "teams": "list_chats"}
 
@@ -179,8 +203,32 @@ def _codex_argv0() -> list[str]:
     return [resolved]
 
 
+def _ensure_warm() -> None:
+    """One throwaway `codex exec` per process to absorb the cold-start hang
+    (codex-cli 0.151.0 on the Oxford laptop can take 3+ min on the first call).
+    Skipped when WI_LANE_B_SKIP_WARMUP=1 (e.g. the guard already warmed the box)."""
+    global _WARMED
+    if _WARMED or os.environ.get("WI_LANE_B_SKIP_WARMUP", "").strip().lower() in ("1", "true", "yes"):
+        _WARMED = True
+        return
+    _WARMED = True
+    _log(f"warming codex (cold start can take ~3+ min; timeout {CALL1_WARMUP_TIMEOUT_S}s)...")
+    t0 = time.time()
+    try:
+        subprocess.run(
+            _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check",
+                              "Reply with the single word OK. Use no tools, change nothing."],
+            capture_output=True, text=True, timeout=CALL1_WARMUP_TIMEOUT_S,
+            cwd=str(REPO_ROOT), env={**os.environ, "PYTHONUTF8": "1"},
+        )
+        _log(f"codex warm-up done in {time.time() - t0:.0f}s")
+    except Exception as e:  # noqa: BLE001
+        _log(f"codex warm-up did not complete in {time.time() - t0:.0f}s ({e}) -- continuing")
+
+
 def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict], str]:
     """Return (parsed_json_objects, raw_stdout). Raises RuntimeError on hard failure."""
+    _ensure_warm()
     cmd = _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check", "--json"]
     if CODEX_MODEL:
         cmd += ["-m", CODEX_MODEL]
@@ -333,23 +381,31 @@ def _json_array_from_text(text: str) -> list | None:
 #  Re-contamination guard (LANE_B sec.6c, revised: assert on observed calls)
 # --------------------------------------------------------------------------- #
 def guard_recontamination(tool_calls: list[dict], domain: str) -> tuple[str, dict]:
-    allow = CAL_ALLOW if domain == "calendar" else TEAMS_ALLOW
+    """Verb-based, not an exact allowlist. Returns ('ok'|'halt'|'unavailable', detail).
+    HALT on: server != codex_apps; a tool namespace outside the two Lane B
+    connectors; a write-verb leaf; an unrecognised-verb leaf (fail closed)."""
     seen: list[str] = []
     unexpected: list[str] = []
     for tc in tool_calls:
         srv, tool = tc["server"], tc["tool"]
-        bare = tool.split(".")[-1]
         seen.append(f"{srv}::{tool}")
         if srv != "codex_apps":
             unexpected.append(f"{srv}::{tool} (server != codex_apps)")
             continue
-        if WRITE_VERB_RE.match(bare):
+        ns, _dot, leaf = tool.partition(".")
+        if not _dot:
+            unexpected.append(f"{tool} (no namespace)")
+            continue
+        if ns not in LANE_B_NAMESPACES:
+            unexpected.append(f"{tool} (off-scope connector namespace '{ns}')")
+            continue
+        if WRITE_VERB_RE.match(leaf):
             unexpected.append(f"{tool} (write verb)")
             continue
-        if bare not in allow:
-            # allow the OTHER domain's read tools too (a combined run), but nothing else
-            if bare not in (CAL_ALLOW | TEAMS_ALLOW):
-                unexpected.append(tool)
+        if not READ_VERB_RE.match(leaf):
+            unexpected.append(f"{tool} (unrecognised verb -- add to READ_VERB_RE if it is a read)")
+            continue
+        # codex_apps + Lane B namespace + read verb -> allowed
     detail = {"seen": sorted(set(seen)), "unexpected": sorted(set(unexpected))}
     if unexpected:
         return "halt", detail
@@ -485,7 +541,7 @@ def _events_from_results(tool_calls: list[dict], domain: str, events: list[dict]
     model's final agent_message (per the 1 Sept probe: it's unreliable / summary).
     The `_json_array_from_text` fallback is retained only for a --from-file
     transcript that predates the structured_content schema."""
-    data_tools = ({"list_events", "list_event_instances", "fetch_events_batch"}
+    data_tools = ({"list_events", "search_events", "list_event_instances", "fetch_events_batch"}
                   if domain == "calendar"
                   else {"list_chats", "list_chat_messages", "list_channel_messages",
                         "list_channels", "search"})
@@ -622,9 +678,14 @@ def main(argv: list[str]) -> int:
         return 0
 
     sha_before = _config_toml_sha1()
-    if sha_before and sha_before != CONFIG_TOML_SHA1_BASELINE and not args.from_file:
-        _log(f"WARNING: ~/.codex/config.toml sha1 {sha_before} != baseline {CONFIG_TOML_SHA1_BASELINE} "
-             f"(set WI_CODEX_CONFIG_SHA1 to re-baseline deliberately)")
+    if sha_before and not args.from_file:
+        if CONFIG_TOML_SHA1_BASELINE and sha_before != CONFIG_TOML_SHA1_BASELINE:
+            _log(f"WARNING (never a HALT): ~/.codex/config.toml sha1 {sha_before} != recorded "
+                 f"baseline {CONFIG_TOML_SHA1_BASELINE} for host {_HOST} "
+                 f"(set WI_CODEX_CONFIG_SHA1 to re-baseline)")
+        elif not CONFIG_TOML_SHA1_BASELINE:
+            _log(f"note: no recorded ~/.codex/config.toml baseline for host {_HOST}; "
+                 f"observed sha1 {sha_before} -- add it to CONFIG_TOML_SHA1_BASELINES")
 
     per_domain: dict[str, dict] = {}
     overall_rc = 0

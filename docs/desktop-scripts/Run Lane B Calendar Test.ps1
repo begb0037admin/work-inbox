@@ -45,7 +45,8 @@ param(
   [string]$RunDir = (Join-Path $env:USERPROFILE 'work-inbox'),
   [switch]$RealBriefing,
   [string]$CodexBin = '',
-  [int]$Retries = 3
+  [int]$Retries = 3,
+  [int]$Timeout = 300   # per codex-exec-call timeout (s). 0.151.0 cold-starts ~3+ min; the runner does one warm-up call first.
 )
 
 $ErrorActionPreference = 'Continue'
@@ -68,8 +69,11 @@ Set-Location $RunDir
 
 # --- 0. codex identity for the record ---
 if ($CodexBin -ne '') { $env:WI_CODEX_BIN = $CodexBin; Say "WI_CODEX_BIN=$CodexBin" }
-$env:WI_LANE_B_RETRIES = "$Retries"
+$env:WI_LANE_B_RETRIES     = "$Retries"
+$env:WI_LANE_B_TIMEOUT     = "$Timeout"
+$env:WI_LANE_B_SNAP_TIMEOUT = "$Timeout"
 $env:PYTHONUTF8 = '1'
+Say "timeouts: per-call ${Timeout}s (+ a one-shot warm-up); retries $Retries"
 
 Say "--- codex identity ---"
 try { & codex --version } catch { Say "codex --version failed: $($_.Exception.Message)" }
