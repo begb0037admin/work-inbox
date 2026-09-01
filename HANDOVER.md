@@ -1,4 +1,45 @@
-# Handover -- 1 September 2026, ~10:31 UTC (Drew) -- MAKE-OR-BREAK #3 FAILED. Kevin ran the enumeration proof on the desktop: codex **0.152.0** (the OpenAI desktop-app-BUNDLED binary at `C:\Users\admin\AppData\Local\Programs\OpenAI\Codex\bin\codex.exe`, not an npm global), ChatGPT account `cc80356f-959e-449f-9721-add87a9ba0a5` (a THIRD account id -- not the `eb7a812e` personal Plus that worked on 27 Aug, not confirmed as Edu), `config.toml` sha1 `64003AB8718E2A6DAB58534DF5AF84B7C9EE7003` unchanged before+after. `codex exec -s read-only` returned ONLY the 9 base tools (`functions.*` / `collaboration.*`) -- ZERO `microsoft_*` / `list_events` / `list_chats`. Third headless failure, third different situation.
+# Handover -- 1 September 2026, ~10:52 UTC (Drew) -- CORRECTION: MAKE-OR-BREAK #2 AND #3 WERE FALSE NEGATIVES. Headless connector calendar + Teams on the Oxford ChatGPT **Edu** account is **PROVEN WORKING** (coordinator, verified directly on the admin desktop, 1 Sept ~10:4x UTC). Lane B is a live route. Build proceeds for real. Everything below this entry that says "headless connector loading is dead / abandon Edu / attended route" is **SUPERSEDED** -- kept only for the audit trail.
+
+## Why #2 and #3 were false negatives (two independent causes, both now fixed)
+
+1. **The test method was wrong.** All three "MAKE-OR-BREAK" runs (28 Aug desktop, 1 Sept laptop, 1 Sept desktop) used a bare *"list every tool available to you as a JSON array"* enumeration. **`codex_apps` connector tools are lazily surfaced -- they do NOT appear in that enumeration.** They materialise only when the model is actually asked to use one. Every enumeration-based proof was therefore structurally guaranteed to return zero connector tools regardless of whether the connector worked. This invalidates the `2026-09-01` drew confirmed-fact about "enterprise-managed workspace withholds the Apps surface" -- that conclusion was built on the bad method.
+2. **The connectors were toggled OFF in the Edu ChatGPT account settings.** Kevin has now re-enabled Outlook Calendar + Microsoft Teams there.
+3. **codex-cli version is NOT a factor.** The coordinator installed `@openai/codex@0.149.1` via npm and invoked it by explicit path (`(npm prefix -g)\codex.cmd`); it behaved **identically** to the bundled 0.152.0. The 27->28 Aug "regression" was cause (1)+(2), not a version change. **No version pin is needed.** Use whatever `codex` is on PATH (currently the desktop-app bundle at `C:\Users\admin\AppData\Local\Programs\OpenAI\Codex\bin\codex.exe`, 0.152.0).
+
+## VERIFIED WORKING -- evidence (coordinator, admin desktop, 1 Sept ~10:4x UTC)
+
+- Account: `begb0037@ox.ac.uk` (**Edu**, `plan_type` education, `account_id` `cc80356f-959e-449f-9721-add87a9ba0a5`). codex 0.152.0 bundled binary. **`~/.codex/config.toml` sha1 `4FD8EF763BF0A8DDAD9A138B6679A84FE8536F73` -- unchanged across every run** (this is the new recorded Lane B baseline for the config-hash guard; supersedes the stale `35f8910...` desktop baseline in the plan doc).
+- `codex exec -s read-only --skip-git-repo-check --json "<instruction to use Teams / Calendar>"` produced real `mcp_tool_call` items:
+  - `mcp_tool_call server="codex_apps" tool="microsoft_teams.list_chats"` -> real chats: **Functional Analysts**, **HR Systems Managers Meeting**, **Organisational Structure Review** -- with message previews + timestamps.
+  - `mcp_tool_call server="codex_apps" tool="microsoft_outlook_calendar.get_mailbox_settings"` then `microsoft_outlook_calendar.list_events` (args: `start_datetime` / `end_datetime` window, `order_by`, `top`) -> Kevin's **real** 2026-09-01 events: *FA Team Daily Catchup* 08:30-08:45 UTC, *DTP1092 College staff into PXD* 14:00 UTC, *Annual leave - Marie* all-day, plus Busy / Keep-free blocks -- each with full attendee lists, `web_link`, `series_master_id`, `i_cal_u_id`, `response_status`.
+- Plugin state (`codex plugin list`): `teams@openai-curated` installed+enabled (app `connector_246af0940da3457da0e751171dc1ce60`); `outlook-email@openai-curated` installed+enabled; **`outlook-calendar@openai-curated` shows "not installed" YET the calendar tools still fired** -> calendar tools come from the **app-connector layer**, not that plugin. Open question for Kevin: whether `codex plugin add outlook-calendar@openai-curated` helps or is unnecessary (working without it, so: leave unless a run shows a gap).
+- The managed-requirements group `6d66d29d-...` override on `approval_policy` is real but **does not withhold connectors** -- it only forces the policy value; the connector tools load fine under it.
+
+## Decision context (reconfirmed by the coordinator this correction)
+
+- **Edu (`begb0037@ox.ac.uk`) is the PRIMARY Lane B identity.** Kevin's **personal ChatGPT Plus is FAILOVER ONLY.**
+- Email stays IMAP (Lane A). Order: **calendar first, then Teams.** Connector write-risk accepted (unchanged).
+
+## The real tool surface Lane B builds against (replaces the "enumeration / manifest turn" design in LANE_B_TEAMS_CAL_DESIGN.md sec.6c)
+
+- MCP server name: **`codex_apps`**.
+- Calendar: `microsoft_outlook_calendar.list_events` (primary), `.get_mailbox_settings`, `.list_event_instances`, `.list_calendars`, `.fetch_event(s)_batch` -- per LANE_B sec.5 calendar allowlist, namespaced `microsoft_outlook_calendar.*`.
+- Teams: `microsoft_teams.list_chats` (primary), `.list_channel_messages`, `.list_chat_messages`, `.list_channels`, `.resolve_*`, `.search`, `.fetch`, transcript tools -- per LANE_B sec.5 Teams allowlist, namespaced `microsoft_teams.*`.
+- **Call-1 runner method:** rigid prompt that instructs the model to CALL the named connector tools (not "list tools"); run `codex exec -s read-only --skip-git-repo-check --json <prompt>`; parse the JSONL for `mcp_tool_call` events -- take the tool **results** directly where present (more robust + less injection-exposed than the model's reformatted final text), fall back to the model's final JSON array.
+- **Re-contamination guard (revised):** collect every `mcp_tool_call` `server`+`tool` actually seen in the JSONL. Assert `server == "codex_apps"` and every `tool` is in the LANE_B sec.5 allowlist -> any tool outside (a `microsoft_*` write, `github.*`, `microsoft_outlook_email.*`, etc.) => HALT + `Disable-ScheduledTask` + toast + `GUARD_TRIPPED_*`. Assert the EXPECTED tools were called (`microsoft_outlook_calendar.list_events` etc.) -> if absent, "connector unavailable this cycle" -> skip calendar (empty + warning), toast, **no HALT**. There is no "manifest turn"; the assertion is on observed behaviour.
+- Calendar HALT kill-switch (LANE_B sec.6a) unchanged in intent: pre/post `list_events` snapshot over today+7d on primary + "People Department - HR Systems"; any id add/drop / `last_modified` change / `response_status` change / `is_cancelled` flip => HALT the run, disable the task, toast.
+
+## Build status (this session, Drew)
+- `normalise_pull.py` -- shipped `3d59dc3` (unchanged, still correct: it sanitises the normalised pull whatever produced it).
+- Correcting the durable record -- **this commit.**
+- Next: `lane_b_call1.py` (Call-1 runner + JSONL `mcp_tool_call` parser + revised guard), `lane_b_cal_guard.py` (HALT kill-switch), `fetch_inbox.py` Phases 3.7/3.8 `CAL_BACKEND=connector` wiring, then the Teams section. Needs one probe from the coordinator: the exact `--json` event schema for an `mcp_tool_call` and its result item (command in the report).
+
+## Next action (one line)
+Drew builds `lane_b_call1.py` against the `codex_apps` surface + wires calendar into `fetch_inbox.py` behind `CAL_BACKEND=connector`; coordinator runs one `codex exec --json` probe to capture the exact `mcp_tool_call` result-item schema; then calendar goes into a real briefing (staged on the desktop first for speed -- see the report).
+
+---
+
+# Handover -- 1 September 2026, ~10:31 UTC (Drew) -- MAKE-OR-BREAK #3 FAILED [SUPERSEDED -- FALSE NEGATIVE, see the correction entry above]. Kevin ran the enumeration proof on the desktop: codex **0.152.0** (the OpenAI desktop-app-BUNDLED binary at `C:\Users\admin\AppData\Local\Programs\OpenAI\Codex\bin\codex.exe`, not an npm global), ChatGPT account `cc80356f-959e-449f-9721-add87a9ba0a5` (a THIRD account id -- not the `eb7a812e` personal Plus that worked on 27 Aug, not confirmed as Edu), `config.toml` sha1 `64003AB8718E2A6DAB58534DF5AF84B7C9EE7003` unchanged before+after. `codex exec -s read-only` returned ONLY the 9 base tools (`functions.*` / `collaboration.*`) -- ZERO `microsoft_*` / `list_events` / `list_chats`. Third headless failure, third different situation.
 
 ## Evidence table (4 data points)
 | When | Machine | codex binary | ChatGPT account | Result |

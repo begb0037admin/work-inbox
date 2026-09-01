@@ -9,13 +9,15 @@
 
 Kevin's locked decision (via coordinator, 1 Sept 2026): **email = IMAP (Lane A), calendar = ChatGPT M365 connector (Lane B), Teams = ChatGPT M365 connector (Lane B).** Build order: calendar, then Teams. Connector write-risk (`docs/CONNECTOR_SAFEGUARDS.md` §D) explicitly accepted by Kevin and closed. The 1 Sept (c)+(e) "ship Lane A only, park Lane B" recommendation is **rejected**.
 
+**Headless connector = PROVEN WORKING on the Edu account (1 Sept, coordinator, direct on the admin desktop).** The three "MAKE-OR-BREAK" failures were false negatives: a bare tool-enumeration does not surface the lazily-loaded `codex_apps` connector tools, and the connectors had been toggled off in the Edu account (now re-enabled). codex-cli version is not a factor. `codex exec -s read-only --json` on `begb0037@ox.ac.uk` returns real `mcp_tool_call` results from `microsoft_teams.list_chats` and `microsoft_outlook_calendar.list_events`.
+
 | Lane | Scope | Status |
 |---|---|---|
 | **A** | Mail pull via IMAP+OAuth2 (`MAIL_BACKEND=imap`) | Proven (Phase 2(i)); shipped behind default-unset flag; **live now via the laptop bridge briefing**; formal Phase 6 cutover still pending |
-| **B — calendar** | `CAL_BACKEND=connector`, Phases 3.7/3.8 via `codex exec` + ChatGPT M365 connector, `normalise_pull.py` sanitiser, **calendar kill-switch HALTs on any change** | **BUILD AUTHORISED.** `normalise_pull.py` built. `fetch_inbox.py` wiring staged, NOT pushed — gated on Kevin's `codex exec` connector-load proof (personal ChatGPT Plus account on the desktop, codex-cli pinned 0.149.1). **Edu account abandoned as the Lane B identity** — enterprise-managed workspace withholds the connector surface from headless `codex exec` (MAKE-OR-BREAK #2 failed 1 Sept). |
-| **B — Teams** | new Teams briefing section, same connector + safeguards | Queued behind calendar (build order: calendar first) |
+| **B — calendar** | `CAL_BACKEND=connector`, Phases 3.7/3.8 fed by a `codex exec --json` Call-1 against `codex_apps` (`microsoft_outlook_calendar.list_events` etc.), `normalise_pull.py` sanitiser, **calendar kill-switch HALTs on any change**, re-contamination guard asserts on the actual `mcp_tool_call` server/tool events | **BUILDING.** `normalise_pull.py` shipped (`3d59dc3`). Next: `lane_b_call1.py` (runner + JSONL parser + guard), `lane_b_cal_guard.py`, then the `fetch_inbox.py` `CAL_BACKEND=connector` wiring. **Edu (`begb0037@ox.ac.uk`) is the PRIMARY Lane B identity; personal ChatGPT Plus is failover only.** Config-hash baseline for the guard: `4FD8EF763BF0A8DDAD9A138B6679A84FE8536F73`. |
+| **B — Teams** | new Teams briefing section, same `codex_apps` surface (`microsoft_teams.*`) + safeguards | Queued behind calendar (build order: calendar first) |
 
-See `HANDOVER.md` top entry (1 Sept, "DECISION REVERSAL") for the regression diagnosis and Kevin's exact proof steps.
+See `HANDOVER.md` top entry (1 Sept, "CORRECTION: MAKE-OR-BREAK #2 AND #3 WERE FALSE NEGATIVES") for the verified evidence and the real tool surface.
 
 ---
 
