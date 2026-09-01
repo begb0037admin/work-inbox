@@ -13,11 +13,32 @@ pushes for real:
     ->  Phase 5  command-centre task-suggestion sync
     ->  (best effort) needs_reply.json + drafted_replies.json publishers
 
-Calendar: NONE. CAL_BACKEND=com by default, but there is no classic Outlook on
+Calendar: NONE by default. CAL_BACKEND=com, but there is no classic Outlook on
 the laptop, so fetch_inbox.py degrades the calendar phases to empty + a warning
 (handled path, not a crash). The bridge briefing simply has no calendar section.
-Accepted for the bridge. Pass -CalBackend connector to skip the COM calendar
-attempt entirely (identical empty-calendar result, never touches COM).
+Accepted for the bridge.
+
+LANE B (connector calendar) GLUE -- added 1 Sept 2026, NOT LIVE YET:
+  -CalBackend connector wires in lane_b_cal_guard.py --run BEFORE fetch_inbox.py:
+    exit 0 (clean)      -> proceed with CAL_BACKEND=connector for real.
+    exit 1 (persistent HALT -- a real calendar change during the read window, or
+            a write tool was seen) -> Disable-ScheduledTask on THIS task + a
+            best-effort BurntToast + fall back to CAL_BACKEND=com for this cycle
+            only (degrades to empty+warning on this laptop, same as always --
+            the briefing still ships). No auto re-enable; Kevin investigates.
+    exit 3 (transient -- connector unavailable / could not verify this cycle)
+            -> log + fall back to CAL_BACKEND=com for this cycle; task STAYS
+            enabled; try again next cadence.
+  CODEX_HOME for the guard/Call-1: see $LaneBCodexHome below -- ONE clearly
+  commented variable, currently blank (uses whatever codex is already logged
+  into on this session -- the Oxford Edu account, at the time this was wired).
+  Flip it to the dedicated Lane B login once Kevin does the personal-ChatGPT
+  switch and tells us the CODEX_HOME to point at.
+  **THE LIVE SCHEDULED TASK STAYS ON CAL_BACKEND=com.** This wiring is dormant
+  until Kevin gives the explicit go-ahead to register/re-register the task with
+  -CalBackend connector -- same cutover discipline as the mail IMAP migration.
+  Passing -CalBackend connector by hand (this script only, not the live task)
+  is how Kevin/the coordinator proves it end to end before that go-ahead.
 
 Mirrors the live desktop "Run Inbox Briefing.bat" environment, minus Outlook COM
 and minus the hope@ overflow config (single account on the laptop for now -- a
@@ -26,7 +47,8 @@ Pro-cap hit degrades that one run; acceptable for a short bridge).
 PARAMS
   -CoreOnly          run only fetch_inbox.py (skip the two downstream publishers).
                      Use this for the first supervised run.
-  -CalBackend        com (default) | connector
+  -CalBackend        com (default, LIVE) | connector (Lane B, NOT live -- manual
+                     proof/testing only until Kevin's cutover go-ahead)
 
 LIVE COPY   %USERPROFILE%\work-inbox\Run Laptop Bridge Briefing.ps1
 REFERENCE   work-inbox/docs/desktop-scripts/Run Laptop Bridge Briefing.ps1
@@ -40,6 +62,21 @@ param(
   [switch]$CoreOnly,
   [ValidateSet('com','connector')] [string]$CalBackend = 'com'
 )
+
+# ============================================================================
+# LANE B -- single override points (edit these two lines only to change identity
+# or task name; nothing else in this script should need touching for that).
+#   $LaneBCodexHome = '' (blank)         -> use whatever codex is already logged
+#                                            into on this session (Edu, as of
+#                                            1 Sept 2026 -- Kevin has not yet
+#                                            done the personal-account switch).
+#   $LaneBCodexHome = 'C:\WorkInboxAI\codex-laneb'  -> ONE-LINE FLIP to the
+#                                            dedicated Lane B login once Kevin
+#                                            has run `codex login` into it on
+#                                            the personal ChatGPT account.
+# ============================================================================
+$LaneBCodexHome = ''
+$TaskName       = 'Work Inbox Bridge Briefing'   # this task's own name, for Disable-ScheduledTask on a guard HALT
 
 $ErrorActionPreference = 'Continue'
 $root   = Join-Path $env:USERPROFILE 'work-inbox'
@@ -98,13 +135,59 @@ $env:PYTHONUTF8                  = '1'
 # --- refresh pipeline scripts from main (cache-busted raw pull, same mechanism the desktop uses) ---
 $t    = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $base = 'https://raw.githubusercontent.com/begb0037admin/work-inbox/main'
-foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py') {
+foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py') {
   try {
     Invoke-WebRequest -UseBasicParsing "$base/$f`?t=$t" -OutFile (Join-Path $root $f)
     Log "refreshed $f from main"
   } catch {
     Log "WARN: could not refresh $f ($($_.Exception.Message)) -- using the local copy"
   }
+}
+
+# --- LANE B calendar HALT guard -- only when CalBackend=connector was explicitly
+#     passed (the live task does not pass this; see the header note). ---
+if ($CalBackend -eq 'connector') {
+  if ($LaneBCodexHome -ne '') {
+    $env:CODEX_HOME           = $LaneBCodexHome
+    $env:WI_LANE_B_CODEX_HOME = $LaneBCodexHome
+    Log "Lane B: CODEX_HOME override -> $LaneBCodexHome"
+  } else {
+    Log "Lane B: `$LaneBCodexHome not set -- using whatever codex is already logged into on this session"
+  }
+  Log "running: python lane_b_cal_guard.py --run"
+  & python -u (Join-Path $root 'lane_b_cal_guard.py') --run 2>&1 | Tee-Object -FilePath $log -Append
+  $guardRc = $LASTEXITCODE
+  Log "lane_b_cal_guard.py exit $guardRc"
+  switch ($guardRc) {
+    0 {
+      Log "Lane B guard CLEAN -- proceeding with CAL_BACKEND=connector"
+    }
+    1 {
+      Log "Lane B guard PERSISTENT HALT (a real calendar change during the read window, or a write tool was seen) -- disabling '$TaskName' and falling back to CAL_BACKEND=com for THIS cycle only"
+      $CalBackend = 'com'
+      try {
+        Disable-ScheduledTask -TaskName $TaskName -ErrorAction Stop | Out-Null
+        Log "Disabled scheduled task '$TaskName' -- re-enable manually after investigating: Enable-ScheduledTask -TaskName '$TaskName'"
+      } catch {
+        Log "WARN: could not Disable-ScheduledTask '$TaskName' ($($_.Exception.Message)) -- disable it manually"
+      }
+      try {
+        Import-Module BurntToast -ErrorAction Stop
+        New-BurntToastNotification -Text 'Work Inbox - Lane B calendar guard HALTED', "Task '$TaskName' disabled. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
+      } catch {
+        Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- toast skipped, the HALT + task-disable above are still real"
+      }
+    }
+    3 {
+      Log "Lane B guard TRANSIENT (connector unavailable / could not verify this cycle) -- falling back to CAL_BACKEND=com for THIS cycle only; task stays enabled, will retry next cadence"
+      $CalBackend = 'com'
+    }
+    default {
+      Log "Lane B guard unexpected exit $guardRc -- treating conservatively: falling back to CAL_BACKEND=com for THIS cycle only; task stays enabled"
+      $CalBackend = 'com'
+    }
+  }
+  $env:CAL_BACKEND = $CalBackend   # re-assert in case the guard downgraded it above
 }
 
 # --- CORE: fetch_inbox.py  (Phase 1 IMAP -> combined claude -p triage -> Phase 4 push -> Phase 5 CC sync) ---
