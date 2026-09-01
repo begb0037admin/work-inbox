@@ -76,109 +76,8 @@ def _snapshot_prompt(win_start_iso: str, win_end_iso: str) -> str:
 
 SNAP_RETRIES = max(1, int(lb.os.environ.get("WI_LANE_B_RETRIES", "3")))
 
-# --------------------------------------------------------------------------- #
-#  Snapshot normalisation (1 Sept 2026 false-positive fix).
-#  Two back-to-back reads of an UNCHANGED calendar were diffing by ~52. Cause:
-#   (a) recurring-series OCCURRENCES get a fresh Graph `id` per connector call
-#       -> every occurrence looked removed+added;  (b) start/end were compared
-#       as raw `.isoformat()` of whatever tz the connector happened to render
-#       (UTC one call, a Windows tz label the next) for the SAME instant;
-#   (c) response_status / whitespace re-casing.
-#  Fix: match on a STABLE natural key (iCalUID, else id, else subject) + the
-#  event's start INSTANT canonicalised to UTC; compare only genuinely
-#  load-bearing fields, each normalised. Ordering was already irrelevant (the
-#  fingerprint is a dict + set diff). The re-contamination guard is untouched.
-_CMP_FIELDS = ("subject", "start", "end", "response_status", "all_day")
-_STATUS_ALIAS = {"notresponded": "none", "": "none", "not_responded": "none",
-                 "tentativelyaccepted": "tentative", "tentatively_accepted": "tentative"}
-_WIN_TZ = {
-    "gmt standard time": "Europe/London", "w. europe standard time": "Europe/Berlin",
-    "central europe standard time": "Europe/Budapest", "romance standard time": "Europe/Paris",
-    "greenwich standard time": "Atlantic/Reykjavik", "eastern standard time": "America/New_York",
-    "central standard time": "America/Chicago", "pacific standard time": "America/Los_Angeles",
-    "india standard time": "Asia/Kolkata", "singapore standard time": "Asia/Singapore",
-    "aus eastern standard time": "Australia/Sydney",
-}
 
-
-def _norm_txt(v) -> str:
-    return " ".join(str(v or "").split())
-
-
-def _norm_status(ev: dict) -> str:
-    rs = ev.get("response_status") or ev.get("responseStatus") or {}
-    v = rs.get("response") if isinstance(rs, dict) else str(rs or "")
-    v = (v or "").strip().casefold()
-    return _STATUS_ALIAS.get(v, v)
-
-
-def _tzinfo(name: str):
-    key = (name or "").strip().lower()
-    if key in ("", "utc", "gmt", "z", "tzid=utc"):
-        return _dt.timezone.utc
-    ia = _WIN_TZ.get(key) or (name if "/" in (name or "") else None)
-    if ia:
-        try:
-            from zoneinfo import ZoneInfo
-            return ZoneInfo(ia)
-        except Exception:
-            return None
-    return None
-
-
-def _instant_utc(sdt, tz_name: str, all_day: bool) -> str:
-    """Canonical UTC ISO-8601 'Z' for a timed event; bare 'YYYY-MM-DD' for an
-    all-day event. Applied identically to PRE and POST, so an unchanged event
-    matches itself regardless of how the connector rendered the timezone."""
-    if sdt is None:
-        return ""
-    if all_day:
-        return sdt.date().isoformat()
-    if sdt.tzinfo is not None:
-        return sdt.astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    tz = _tzinfo(tz_name)
-    if tz is None:
-        # unknown Windows zone and no tzdata -- treat the wall clock as UTC.
-        # Symmetric across both snapshots; only an intermittent label flip on
-        # this exact zone would slip through, and --dry-diff would surface it.
-        return sdt.strftime("%Y-%m-%dT%H:%M:%SZ")
-    return sdt.replace(tzinfo=tz).astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def _natural_key(ev: dict, sdt, tz_name: str, all_day: bool) -> str:
-    """Stable across connector calls: iCalUID (shared by a whole series) OR the
-    raw id OR the subject, PLUS the start instant -- the instant disambiguates
-    the individual occurrences of a recurring series (same iCalUID)."""
-    uid = _norm_txt(lb._first(ev, "i_cal_u_id", "iCalUId", "i_cal_uid", " i_cal_uid", "uid", default=""))
-    rid = _norm_txt(ev.get("id") or "")
-    subj = _norm_txt(ev.get("subject") or ev.get("display_title") or "")
-    base = uid or rid or ("subj:" + subj[:80] if subj else "")
-    return base + "@" + _instant_utc(sdt, tz_name, all_day)
-
-
-def _fingerprint_one(ev: dict) -> dict:
-    sdt, s_tz = lb._graph_dt_parts(ev.get("start"))
-    edt, e_tz = lb._graph_dt_parts(ev.get("end"))
-    all_day = bool(lb._is_all_day(ev, sdt, edt))
-    return {
-        "subject": _norm_txt(ev.get("subject") or ev.get("display_title") or "")[:200],
-        "start": _instant_utc(sdt, s_tz, all_day),
-        "end": _instant_utc(edt, e_tz, all_day),
-        "response_status": _norm_status(ev),
-        "all_day": all_day,
-        "type": _norm_txt(ev.get("type") or ""),  # stored for the trip payload; NOT compared
-    }
-
-
-def _run_window():
-    """The 7-day snapshot window, computed ONCE per guard cycle so PRE and POST
-    use byte-identical query params even if the cycle straddles UTC midnight."""
-    today = _dt.date.today()
-    ws = _dt.datetime(today.year, today.month, today.day, tzinfo=_dt.timezone.utc)
-    return ws, ws + _dt.timedelta(days=7)
-
-
-def take_snapshot(tag: str, window=None) -> tuple[dict | None, dict]:
+def take_snapshot(tag: str) -> tuple[dict | None, dict]:
     """Return (fingerprint_by_id | None, meta).
       dict  -> a verified snapshot (list_events fired).
       None  -> UNAVAILABLE: list_events did not fire across all retries, OR the
@@ -186,7 +85,9 @@ def take_snapshot(tag: str, window=None) -> tuple[dict | None, dict]:
                this cycle without disabling the task.
     Raises RuntimeError ONLY if the snapshot session's own re-contamination guard
     tripped (a write / non-allowlisted tool was seen) -- that IS a real HALT."""
-    ws, we = window if window is not None else _run_window()
+    today = _dt.date.today()
+    ws = _dt.datetime(today.year, today.month, today.day, tzinfo=_dt.timezone.utc)
+    we = ws + _dt.timedelta(days=7)
     prompt = _snapshot_prompt(ws.strftime("%Y-%m-%dT%H:%M:%SZ"), we.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
     attempts: list[dict] = []
@@ -215,13 +116,19 @@ def take_snapshot(tag: str, window=None) -> tuple[dict | None, dict]:
         for ev in objs:
             if not isinstance(ev, dict):
                 continue
-            sdt, s_tz = lb._graph_dt_parts(ev.get("start"))
-            edt, _e_tz = lb._graph_dt_parts(ev.get("end"))
-            all_day = bool(lb._is_all_day(ev, sdt, edt))
-            key = _natural_key(ev, sdt, s_tz, all_day)
-            if not key.strip("@"):
+            sdt, _ = lb._graph_dt_parts(ev.get("start"))
+            edt, _ = lb._graph_dt_parts(ev.get("end"))
+            rs = ev.get("response_status") or {}
+            eid = str(ev.get("id") or ev.get("i_cal_u_id") or "")
+            if not eid:
                 continue
-            fp[key] = _fingerprint_one(ev)
+            fp[eid] = {
+                "subject": (ev.get("subject") or ev.get("display_title") or "")[:200],
+                "start": sdt.isoformat() if sdt else "",
+                "end": edt.isoformat() if edt else "",
+                "response_status": (rs.get("response") if isinstance(rs, dict) else str(rs or "")),
+                "type": ev.get("type") or "",
+            }
         attempts.append({"n": n, "outcome": "ok", "count": len(fp)})
         return fp, {"tag": tag, "count": len(fp), "attempts": attempts,
                     "tool_calls": [f"{t['server']}::{t['tool']}" for t in tool_calls]}
@@ -230,21 +137,17 @@ def take_snapshot(tag: str, window=None) -> tuple[dict | None, dict]:
 
 
 def diff_snapshots(pre: dict, post: dict) -> list[dict]:
-    """A trip is a genuine calendar change: an event key present on only one
-    side (real add/remove, or a reschedule that moved the start instant), or a
-    matched key whose subject/start/end/response_status/all_day differs after
-    normalisation. `type` and other re-rendered fields are NOT compared."""
     trips: list[dict] = []
-    for key in sorted(pre.keys() - post.keys()):
-        trips.append({"change": "removed", "key": key, "was": pre[key]})
-    for key in sorted(post.keys() - pre.keys()):
-        trips.append({"change": "added", "key": key, "now": post[key]})
-    for key in sorted(pre.keys() & post.keys()):
-        changed = {k: {"was": pre[key].get(k), "now": post[key].get(k)}
-                   for k in _CMP_FIELDS
-                   if pre[key].get(k) != post[key].get(k)}
-        if changed:
-            trips.append({"change": "modified", "key": key, "fields": changed})
+    for eid in pre.keys() - post.keys():
+        trips.append({"change": "removed", "id": eid, "was": pre[eid]})
+    for eid in post.keys() - pre.keys():
+        trips.append({"change": "added", "id": eid, "now": post[eid]})
+    for eid in pre.keys() & post.keys():
+        if pre[eid] != post[eid]:
+            changed = {k: {"was": pre[eid].get(k), "now": post[eid].get(k)}
+                       for k in set(pre[eid]) | set(post[eid])
+                       if pre[eid].get(k) != post[eid].get(k)}
+            trips.append({"change": "modified", "id": eid, "fields": changed})
     return trips
 
 
@@ -278,12 +181,10 @@ def cmd_run() -> int:
     _log(f"--run start ts={ts}")
     _log(f"CODEX_HOME={lb._codex_home()}  account_id={lb._codex_account_id()}")
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
-    window = _run_window()
-    _log(f"read window (pinned for PRE+POST): {window[0].strftime('%Y-%m-%dT%H:%M:%SZ')} .. {window[1].strftime('%Y-%m-%dT%H:%M:%SZ')}")
 
     # 1. PRE snapshot
     try:
-        pre_fp, pre_meta = take_snapshot("pre", window)
+        pre_fp, pre_meta = take_snapshot("pre")
     except RuntimeError as e:      # re-contamination during the snapshot session == real HALT
         _log(f"PRE snapshot re-contamination HALT ({e})")
         _quarantine_normalised(ts, f"pre-snapshot re-contamination: {e}")
@@ -323,7 +224,7 @@ def cmd_run() -> int:
 
     # 3. POST snapshot
     try:
-        post_fp, post_meta = take_snapshot("post", window)
+        post_fp, post_meta = take_snapshot("post")
     except RuntimeError as e:
         _log(f"POST snapshot re-contamination HALT ({e})")
         _quarantine_normalised(ts, f"post-snapshot re-contamination: {e}")
@@ -375,121 +276,16 @@ def cmd_diff(pre: str, post: str) -> int:
     return 1 if trips else 0
 
 
-def cmd_dry_diff() -> int:
-    """Two back-to-back snapshots with NO Call-1 between them; assert zero
-    diff. The cheap validator for the normalisation before any full guard
-    cutover retry. exit 0 = stable, 1 = residual diff (normalisation still
-    imperfect), 3 = connector unavailable."""
-    ts = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    window = _run_window()
-    _log(f"--dry-diff: PRE + POST back-to-back, NO Call-1 (window "
-         f"{window[0].strftime('%Y-%m-%dT%H:%M:%SZ')} .. {window[1].strftime('%Y-%m-%dT%H:%M:%SZ')})")
-    try:
-        a_fp, a_meta = take_snapshot("dry-pre", window)
-        b_fp, b_meta = take_snapshot("dry-post", window)
-    except RuntimeError as e:
-        _log(f"re-contamination guard tripped during --dry-diff: {e}")
-        return 1
-    if a_fp is None or b_fp is None:
-        _log(f"connector unavailable (pre={a_meta.get('count')}, post={b_meta.get('count')}) -- cannot validate")
-        return 3
-    trips = diff_snapshots(a_fp, b_fp)
-    CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
-    out = CODEX_RUNS_DIR / f"DRY_DIFF_cal_{ts}.json"
-    out.write_text(json.dumps({"ts": ts, "pre_count": a_meta["count"], "post_count": b_meta["count"],
-                               "trips": trips}, indent=2, ensure_ascii=False), encoding="utf-8")
-    if trips:
-        _log(f"--dry-diff NOT CLEAN: {len(trips)} residual diff(s) between two unchanged reads -> {out.name}")
-        print(json.dumps(trips[:20], indent=2, ensure_ascii=False))
-        return 1
-    _log(f"--dry-diff CLEAN: {a_meta['count']} vs {b_meta['count']} events, 0 diffs. "
-         f"Normalisation is stable ({out.name}).")
-    return 0
-
-
-def cmd_selftest() -> int:
-    """Pure-function checks, no codex. Feeds synthetic connector event dicts
-    that mimic the observed re-rendering and asserts benign churn -> 0 trips
-    while genuine change -> a trip."""
-    fails = []
-
-    def _fp(objs):
-        d = {}
-        for ev in objs:
-            sdt, s_tz = lb._graph_dt_parts(ev.get("start"))
-            ad = bool(lb._is_all_day(ev, sdt, lb._graph_dt_parts(ev.get("end"))[0]))
-            d[_natural_key(ev, sdt, s_tz, ad)] = _fingerprint_one(ev)
-        return d
-
-    def check(name, cond):
-        print(("  ok   " if cond else "  FAIL ") + name)
-        if not cond:
-            fails.append(name)
-
-    # occurrence: same iCalUID, id churns between calls, tz rendered UTC then +01:00 (same instant)
-    pre = [{"id": "AAA111", "i_cal_u_id": "UID-weekly-1to1", "subject": "Weekly 1:1",
-            "start": {"dateTime": "2026-09-02T08:00:00", "timeZone": "UTC"},
-            "end": {"dateTime": "2026-09-02T08:30:00", "timeZone": "UTC"},
-            "response_status": {"response": "Accepted"}, "type": "occurrence"}]
-    post = [{"id": "BBB222-DIFFERENT", "i_cal_u_id": "UID-weekly-1to1", "subject": "Weekly  1:1 ",
-             "start": {"dateTime": "2026-09-02T09:00:00+01:00", "timeZone": "GMT Standard Time"},
-             "end": {"dateTime": "2026-09-02T09:30:00+01:00", "timeZone": "GMT Standard Time"},
-             "response_status": {"response": "accepted"}, "type": "singleInstance"}]
-    check("benign churn (id + tz-label + case + whitespace) -> 0 trips",
-          diff_snapshots(_fp(pre), _fp(post)) == [])
-
-    # two occurrences of one series (same UID, different instants) must both survive
-    two = [dict(pre[0]), dict(pre[0], start={"dateTime": "2026-09-09T08:00:00", "timeZone": "UTC"},
-                end={"dateTime": "2026-09-09T08:30:00", "timeZone": "UTC"})]
-    check("two occurrences of one series -> 2 distinct keys", len(_fp(two)) == 2)
-
-    # genuine reschedule
-    resched = [dict(pre[0], start={"dateTime": "2026-09-02T15:00:00", "timeZone": "UTC"},
-               end={"dateTime": "2026-09-02T15:30:00", "timeZone": "UTC"})]
-    check("genuine reschedule -> a trip", len(diff_snapshots(_fp(pre), _fp(resched))) >= 1)
-
-    # genuine subject change on the same instant
-    ren = [dict(pre[0], subject="Weekly 1:1 -- CANCELLED cover")]
-    tr = diff_snapshots(_fp(pre), _fp(ren))
-    check("genuine subject change -> modified trip",
-          len(tr) == 1 and tr[0]["change"] == "modified" and "subject" in tr[0]["fields"])
-
-    # genuine add / remove
-    check("genuine add -> a trip", len(diff_snapshots(_fp(pre), _fp(pre + ren))) == 1)
-    check("genuine remove -> a trip", len(diff_snapshots(_fp(pre + ren), _fp(pre))) == 1)
-
-    # all-day event, date-only both sides
-    ad_pre = [{"id": "D1", "i_cal_u_id": "UID-leave", "subject": "A/L", "is_all_day": True,
-               "start": {"dateTime": "2026-09-03T00:00:00", "timeZone": "UTC"},
-               "end": {"dateTime": "2026-09-04T00:00:00", "timeZone": "UTC"}}]
-    ad_post = [dict(ad_pre[0], id="D1-CHURN")]
-    check("all-day event, id churn -> 0 trips", diff_snapshots(_fp(ad_pre), _fp(ad_post)) == [])
-
-    print("")
-    if fails:
-        print("RESULT: %d FAILED" % len(fails))
-        return 1
-    print("RESULT: all passed")
-    return 0
-
-
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Lane B calendar HALT kill-switch")
     ap.add_argument("--run", action="store_true", help="pre-snap -> lane_b_call1 calendar -> post-snap -> diff (the wrapper entry point)")
     ap.add_argument("--snapshot", action="store_true")
     ap.add_argument("--out", default=str(CODEX_RUNS_DIR / "cal_snapshot.json"))
     ap.add_argument("--diff", action="store_true")
-    ap.add_argument("--dry-diff", dest="dry_diff", action="store_true",
-                    help="PRE + POST back-to-back, NO Call-1 -- assert the normalised snapshots are stable")
-    ap.add_argument("--selftest", action="store_true", help="pure-function checks, no codex")
     ap.add_argument("--pre")
     ap.add_argument("--post")
     args = ap.parse_args(argv)
 
-    if args.selftest:
-        return cmd_selftest()
-    if args.dry_diff:
-        return cmd_dry_diff()
     if args.run:
         return cmd_run()
     if args.snapshot:
@@ -498,7 +294,7 @@ def main(argv: list[str]) -> int:
         if not (args.pre and args.post):
             ap.error("--diff needs --pre and --post")
         return cmd_diff(args.pre, args.post)
-    ap.error("one of --run / --dry-diff / --selftest / --snapshot / --diff required")
+    ap.error("one of --run / --snapshot / --diff required")
 
 
 if __name__ == "__main__":
