@@ -50,6 +50,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 try:
@@ -73,6 +74,13 @@ CONFIG_TOML_SHA1_BASELINE = os.environ.get(
 CODEX_BIN   = os.environ.get("WI_CODEX_BIN", "codex")
 CODEX_MODEL = os.environ.get("WI_CODEX_MODEL", "").strip()   # optional -m <model>
 CALL1_TIMEOUT_S = int(os.environ.get("WI_LANE_B_TIMEOUT", "240"))
+# Headless connector availability FLIPS between runs on the same account
+# (confirmed 1 Sept: same laptop/account, calendar fired one run, Teams the
+# next). If the expected tool doesn't fire, re-invoke codex a few times before
+# giving up on that domain for the cycle. This is NOT a HALT -- it's the
+# "connector unavailable this cycle" path.
+CALL1_RETRIES = max(1, int(os.environ.get("WI_LANE_B_RETRIES", "3")))
+CALL1_RETRY_BACKOFF_S = [5, 12, 20, 30]
 
 PRIMARY_CAL_NAME = "Calendar"
 SHARED_CAL_NAME  = "People Department - HR Systems"
@@ -524,6 +532,46 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
     }
 
 
+def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries: int) -> dict:
+    """Run codex exec for one domain, retrying while the expected connector tool
+    does not fire. Returns a run_domain-shaped dict plus an `attempts` list.
+    Never raises. Terminal statuses: 'ok', 'halt' (re-contamination),
+    'unavailable' (expected tool never fired across all attempts),
+    'codex_failed' (every attempt's codex run failed)."""
+    attempts: list[dict] = []
+    result: dict | None = None
+    for n in range(1, retries + 1):
+        try:
+            events, raw = run_codex_json(prompt, timeout_s=CALL1_TIMEOUT_S, tag=f"{domain}#{n}")
+        except RuntimeError as e:
+            attempts.append({"n": n, "outcome": "codex_failed", "detail": str(e)[:200]})
+            _log(f"[{domain}] attempt {n}/{retries}: codex run failed -- {e}")
+            if n < retries:
+                time.sleep(CALL1_RETRY_BACKOFF_S[min(n - 1, len(CALL1_RETRY_BACKOFF_S) - 1)])
+            continue
+        try:
+            (LANE_B_DIR / f"{ts}_call1_{domain}_a{n}.jsonl").write_text(raw, encoding="utf-8")
+        except OSError:
+            pass
+        result = run_domain(domain, events, window_days=window_days)
+        attempts.append({"n": n, "outcome": result["status"],
+                         "tools": result["tool_calls"], "count": result["count"]})
+        if result["status"] in ("ok", "halt"):
+            break
+        _log(f"[{domain}] attempt {n}/{retries}: {EXPECTED_TOOL[domain]} did not fire "
+             f"(connector unavailable)" + (" -- retrying" if n < retries else " -- giving up this cycle"))
+        if n < retries:
+            time.sleep(CALL1_RETRY_BACKOFF_S[min(n - 1, len(CALL1_RETRY_BACKOFF_S) - 1)])
+
+    if result is None:
+        result = {"domain": domain, "status": "codex_failed",
+                  "guard": {"seen": [], "unexpected": []},
+                  "tool_calls": [], "count": 0, "raw_items": []}
+    result["attempts"] = attempts
+    _log(f"[{domain}] final status={result['status']} after {len(attempts)} attempt(s)")
+    return result
+
+
 # --------------------------------------------------------------------------- #
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Lane B Call-1 codex_apps connector fetch")
@@ -567,24 +615,20 @@ def main(argv: list[str]) -> int:
     overall_rc = 0
     for d in domains:
         if args.from_file:
-            raw = Path(args.from_file).read_text(encoding="utf-8", errors="replace")
-            events = _parse_jsonl(raw)
+            events = _parse_jsonl(Path(args.from_file).read_text(encoding="utf-8", errors="replace"))
             if not events:
                 _log(f"[{d}] --from-file produced no parseable JSONL")
                 return 3
+            per_domain[d] = run_domain(d, events, window_days=args.window_days)
+            per_domain[d]["attempts"] = [{"n": 1, "outcome": per_domain[d]["status"], "from_file": True}]
         else:
-            try:
-                events, raw = run_codex_json(prompts[d], timeout_s=CALL1_TIMEOUT_S, tag=d)
-            except RuntimeError as re_:
-                _log(str(re_))
-                return 3
-            (LANE_B_DIR / f"{ts}_call1_{d}.jsonl").write_text(raw, encoding="utf-8")
-
-        per_domain[d] = run_domain(d, events, window_days=args.window_days)
+            per_domain[d] = fetch_domain(d, prompts[d], window_days=args.window_days,
+                                         ts=ts, retries=CALL1_RETRIES)
         if per_domain[d]["status"] == "halt":
             overall_rc = 1
 
     sha_after = _config_toml_sha1()
+    any_ok = any(r["status"] == "ok" for r in per_domain.values())
 
     # --- assemble the normalise_pull raw shape, sanitise, write ---
     raw_lane_b = {
@@ -595,10 +639,10 @@ def main(argv: list[str]) -> int:
     normalised, hits = normalise_pull.normalise(raw_lane_b, ts=ts)
 
     # carry Lane B provenance + guard status into meta so fetch_inbox.py can gate
+    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts")
     normalised["meta"]["lane_b"] = {
         "ts": ts,
-        "domains": {d: {k: per_domain[d][k] for k in ("status", "count", "tool_calls", "guard")}
-                    for d in per_domain},
+        "domains": {d: {k: per_domain[d].get(k) for k in _dom_keys} for d in per_domain},
         "config_toml_sha1_before": sha_before,
         "config_toml_sha1_after": sha_after,
         "config_toml_sha1_match": (sha_before == sha_after) if (sha_before and sha_after) else None,
@@ -606,12 +650,23 @@ def main(argv: list[str]) -> int:
     }
 
     if overall_rc == 1:
-        # GUARD TRIPPED: write the tripped marker, do NOT overwrite a good normalised file
+        # RE-CONTAMINATION GUARD TRIPPED: write the marker, do NOT overwrite a good normalised file
         trip = CODEX_RUNS_DIR / f"GUARD_TRIPPED_{ts}.json"
         trip.write_text(json.dumps(normalised["meta"]["lane_b"], indent=2), encoding="utf-8")
         _log(f"GUARD TRIPPED -- wrote {trip}. NOT updating {args.out}. Caller must HALT.")
         _write_run_log(ts, args, per_domain, sha_before, sha_after, len(hits), halted=True)
         return 1
+
+    if not any_ok:
+        # every requested domain was 'unavailable' / 'codex_failed' this cycle
+        # (headless connector flakiness). Do NOT overwrite a previous good file --
+        # fetch_inbox.py will use it until it ages past WI_LANE_B_MAX_AGE_H, then
+        # degrade to empty+warning. This is the documented flaky path, not an error.
+        _log(f"no domain returned data this cycle "
+             f"({ {d: per_domain[d]['status'] for d in per_domain} }); "
+             f"leaving any existing {Path(args.out).name} in place (last-good until it ages out).")
+        _write_run_log(ts, args, per_domain, sha_before, sha_after, len(hits), halted=False)
+        return 0
 
     Path(args.out).write_text(json.dumps(normalised, indent=2, ensure_ascii=False), encoding="utf-8")
     (CODEX_RUNS_DIR / f"{ts}_sanitiser_hits.json").write_text(
@@ -630,7 +685,8 @@ def _write_run_log(ts, args, per_domain, sha_before, sha_after, n_hits, *, halte
         "ts": ts,
         "domains_requested": args.domain,
         "window_days": args.window_days,
-        "per_domain": {d: {k: per_domain[d][k] for k in ("status", "count", "tool_calls", "guard")}
+        "per_domain": {d: {k: per_domain[d].get(k)
+                           for k in ("status", "count", "tool_calls", "guard", "attempts")}
                        for d in per_domain},
         "sanitiser_hits": n_hits,
         "config_toml_sha1_before": sha_before,
