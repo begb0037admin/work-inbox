@@ -1,5 +1,5 @@
 import json, os, base64, html, re, urllib.request, urllib.error, subprocess, time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
 # win32com / pywintypes / anthropic are path-specific, not universal:
@@ -137,16 +137,26 @@ MAIL_PARALLEL = os.environ.get("WI_MAIL_PARALLEL", "").strip().lower() in ("1", 
 #  CAL_BACKEND=com        (default) -- calendar phases 3.7/3.8 pull the primary
 #                         + "People Department - HR Systems" calendars via
 #                         Outlook COM, byte-identical to before.
-#  CAL_BACKEND=connector  -- pull the calendar via the Lane B ChatGPT M365
-#                         connector (codex exec). NOT IMPLEMENTED YET -- Lane B
-#                         is not built until 1 Sept (see docs/
-#                         LANE_B_TEAMS_CAL_DESIGN.md). Until then it means "no
-#                         COM calendar source this run": calendar phases go
-#                         empty + warning, and classic Outlook is NOT opened.
+#  CAL_BACKEND=connector  -- calendar phases 3.7/3.8 read
+#                         data/lane_b/lane_b_normalised.json, produced OUT OF
+#                         BAND by lane_b_call1.py against the codex_apps ChatGPT
+#                         M365 connector (Lane B, see docs/
+#                         LANE_B_TEAMS_CAL_DESIGN.md). fetch_inbox.py does NOT
+#                         invoke codex -- the runner is its own step/task so
+#                         codex latency/flakiness never blocks the briefing.
+#                         Classic Outlook is NOT opened. Missing / stale (>
+#                         WI_LANE_B_MAX_AGE_H, default 6h) / guard-HALT file =>
+#                         calendar empty + warning, mail briefing continues.
 # --------------------------------------------------------------------------- #
 _CAL_BACKEND_REQ = os.environ.get("CAL_BACKEND", "com").strip().lower()
 CAL_BACKEND = _CAL_BACKEND_REQ if _CAL_BACKEND_REQ in ("com", "connector") else "com"
-CAL_CONNECTOR_NYI = (CAL_BACKEND == "connector")
+CAL_CONNECTOR = (CAL_BACKEND == "connector")
+LANE_B_NORMALISED = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "data", "lane_b", "lane_b_normalised.json")
+try:
+    LANE_B_MAX_AGE_H = float(os.environ.get("WI_LANE_B_MAX_AGE_H", "6"))
+except ValueError:
+    LANE_B_MAX_AGE_H = 6.0
 
 #  WI_BRIDGE_ALLOW_EMPTY_CALENDAR=1 -- "laptop bridge" mode. The laptop has no
 #  calendar source (no classic Outlook; Lane B not built), so calendar summaries
@@ -158,10 +168,77 @@ CAL_CONNECTOR_NYI = (CAL_BACKEND == "connector")
 #  "Run Laptop Bridge Briefing.ps1". See docs/LAPTOP_MIGRATION_PLAN.md.
 BRIDGE_ALLOW_EMPTY_CALENDAR = os.environ.get(
     "WI_BRIDGE_ALLOW_EMPTY_CALENDAR", "").strip().lower() in ("1", "true", "yes")
-if CAL_CONNECTOR_NYI:
-    log("Calendar backend: 'connector' requested -- NOT IMPLEMENTED yet (Lane B "
-        "lands 1 Sept, see docs/LANE_B_TEAMS_CAL_DESIGN.md). Calendar will be "
-        "empty this run; mail briefing continues; Outlook COM will not be used.")
+if CAL_CONNECTOR:
+    log(f"Calendar backend: 'connector' -- calendar phases read "
+        f"data/lane_b/lane_b_normalised.json (max age {LANE_B_MAX_AGE_H}h). "
+        f"Outlook COM will not be used for calendar; mail briefing continues if it is missing/stale.")
+
+
+def _load_lane_b_calendar(_week_end, _lookback):
+    """CAL_BACKEND=connector: map data/lane_b/lane_b_normalised.json (written by
+    lane_b_call1.py) into the flat Phase-1 `calendar` dict shape. Returns [] plus
+    a warning on any of: file missing, stale (> WI_LANE_B_MAX_AGE_H), guard HALT,
+    or calendar-domain status not ok. Never raises."""
+    try:
+        if not os.path.exists(LANE_B_NORMALISED):
+            print(f"WARNING: CAL_BACKEND=connector but {LANE_B_NORMALISED} not found "
+                  f"-- calendar empty this run, mail briefing continues")
+            return []
+        with open(LANE_B_NORMALISED, "r", encoding="utf-8") as fh:
+            doc = json.load(fh)
+        meta   = (doc.get("meta") or {})
+        lane_b = (meta.get("lane_b") or {})
+        cal_dom = ((lane_b.get("domains") or {}).get("calendar") or {})
+
+        ts = lane_b.get("ts") or meta.get("ts")
+        age_h = None
+        if ts:
+            try:
+                t0 = datetime.strptime(ts, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+                age_h = (datetime.now(timezone.utc) - t0).total_seconds() / 3600.0
+            except ValueError:
+                age_h = None
+        if age_h is None:
+            age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
+        if age_h > LANE_B_MAX_AGE_H:
+            print(f"WARNING: Lane B calendar file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
+                  f"-- treating calendar as unavailable this run")
+            return []
+        if lane_b.get("halt") or cal_dom.get("status") == "halt":
+            print("WARNING: Lane B calendar guard is HALT/tripped -- calendar empty this run")
+            return []
+        if cal_dom.get("status") not in ("ok", None):
+            print(f"WARNING: Lane B calendar status is '{cal_dom.get('status')}' "
+                  f"-- calendar empty this run")
+            return []
+
+        out = []
+        for e in (doc.get("calendar") or []):
+            start = e.get("start") or ""
+            try:
+                d = datetime.fromisoformat(start).date()
+            except ValueError:
+                continue
+            if d > _week_end or d < _lookback:
+                continue
+            out.append({
+                "subject":      e.get("subject") or "",
+                "start":        start,
+                "end":          e.get("end") or "",
+                "location":     e.get("location") or "",
+                "organizer":    e.get("organizer") or "",
+                "sender_name":  e.get("organizer") or "",
+                "is_recurring": bool(e.get("series_master_id")),
+                "body_preview": (e.get("body_preview") or "")[:100],
+                "all_day":      bool(e.get("all_day") or e.get("is_all_day")),
+            })
+        print(f"Phase 1 - Lane B connector calendar: {len(out)} event(s) in window "
+              f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {cal_dom.get('tool_calls')})")
+        return out
+    except Exception as _lb_e:
+        print(f"WARNING: Lane B calendar load failed ({_lb_e}) -- calendar empty this run, "
+              f"mail briefing continues")
+        return []
 AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
                or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
@@ -1081,13 +1158,14 @@ if MAIL_BACKEND == "imap":
     # calendar phases will genuinely use a COM source this run:
     #   - CAL_BACKEND == "com", AND
     #   - not a mail-only parallel capture (WI_MAIL_PARALLEL exits before calendar), AND
-    #   - CAL_BACKEND was not requested as 'connector' (Lane B, not built yet).
+    #   - CAL_BACKEND is not 'connector' (Lane B -- calendar comes from
+    #     data/lane_b/lane_b_normalised.json, not COM).
     # And even then: never auto-launch OUTLOOK.EXE (allow_launch=False). A
     # missing/not-connected classic Outlook degrades to empty calendar + warning.
-    _need_com_cal = (CAL_BACKEND == "com" and not MAIL_PARALLEL and not CAL_CONNECTOR_NYI)
+    _need_com_cal = (CAL_BACKEND == "com" and not MAIL_PARALLEL and not CAL_CONNECTOR)
     if not _need_com_cal:
         _why = ("WI_MAIL_PARALLEL mail-only capture" if MAIL_PARALLEL
-                else "CAL_BACKEND=connector (Lane B not built yet)" if CAL_CONNECTOR_NYI
+                else "CAL_BACKEND=connector (Lane B -- calendar from lane_b_normalised.json)" if CAL_CONNECTOR
                 else "calendar not in COM scope this run")
         log(f"Phase 1 - MAIL_BACKEND=imap: NOT connecting Outlook COM ({_why}); "
             f"classic Outlook will not be opened. Calendar phases degrade to empty.")
@@ -1582,9 +1660,13 @@ def _get_is_recurring(item):
 week_end = today + timedelta(days=6)
 lookback  = today - timedelta(days=30)  # catch multi-day absences spanning today
 calendar = []
-if mapi is None:
+_cal_items = []
+if CAL_CONNECTOR:
+    # Lane B: calendar comes from data/lane_b/lane_b_normalised.json (codex_apps
+    # M365 connector, produced out of band by lane_b_call1.py). COM not touched.
+    calendar = _load_lane_b_calendar(week_end, lookback)
+elif mapi is None:
     # MAIL_BACKEND=imap and classic Outlook COM was unavailable this run.
-    _cal_items = []
     print("WARNING: Outlook COM unavailable - primary calendar not pulled this run "
           "(MAIL_BACKEND=imap); calendar phases degrade to empty, mail briefing continues")
 else:
@@ -1626,7 +1708,10 @@ for item in _cal_items:
 hr_calendar_count = 0
 try:
     _kevin_store = None
-    for _store in mapi.Folders:
+    # CAL_CONNECTOR: the Lane B pull already covers the shared calendar (the
+    # Call-1 prompt names "People Department - HR Systems"). mapi is None: COM
+    # is unavailable. Either way, skip the COM traversal without a spurious warning.
+    for _store in ([] if (CAL_CONNECTOR or mapi is None) else mapi.Folders):
         if _store.Name == "kevin.lelitte@admin.ox.ac.uk":
             _kevin_store = _store
             break
@@ -1658,7 +1743,7 @@ try:
                 hr_calendar_count += 1
             except:
                 continue
-    else:
+    elif not (CAL_CONNECTOR or mapi is None):
         print("WARNING: 'kevin.lelitte@admin.ox.ac.uk' store not found -- People Department - HR Systems calendar not pulled this run")
 except Exception as e:
     print(f"WARNING: People Department - HR Systems calendar pull failed - {e}")

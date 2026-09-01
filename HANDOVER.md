@@ -29,13 +29,49 @@
 - **Re-contamination guard (revised):** collect every `mcp_tool_call` `server`+`tool` actually seen in the JSONL. Assert `server == "codex_apps"` and every `tool` is in the LANE_B sec.5 allowlist -> any tool outside (a `microsoft_*` write, `github.*`, `microsoft_outlook_email.*`, etc.) => HALT + `Disable-ScheduledTask` + toast + `GUARD_TRIPPED_*`. Assert the EXPECTED tools were called (`microsoft_outlook_calendar.list_events` etc.) -> if absent, "connector unavailable this cycle" -> skip calendar (empty + warning), toast, **no HALT**. There is no "manifest turn"; the assertion is on observed behaviour.
 - Calendar HALT kill-switch (LANE_B sec.6a) unchanged in intent: pre/post `list_events` snapshot over today+7d on primary + "People Department - HR Systems"; any id add/drop / `last_modified` change / `response_status` change / `is_cancelled` flip => HALT the run, disable the task, toast.
 
-## Build status (this session, Drew)
-- `normalise_pull.py` -- shipped `3d59dc3` (unchanged, still correct: it sanitises the normalised pull whatever produced it).
-- Correcting the durable record -- **this commit.**
-- Next: `lane_b_call1.py` (Call-1 runner + JSONL `mcp_tool_call` parser + revised guard), `lane_b_cal_guard.py` (HALT kill-switch), `fetch_inbox.py` Phases 3.7/3.8 `CAL_BACKEND=connector` wiring, then the Teams section. Needs one probe from the coordinator: the exact `--json` event schema for an `mcp_tool_call` and its result item (command in the report).
+## `codex exec --json` schema (coordinator probe, 1 Sept, real Edu data -- 31.5 KB transcript)
+
+One JSON object per line. Tool-call event:
+```
+{"type":"item.completed","item":{
+   "id":"item_1", "type":"mcp_tool_call", "server":"codex_apps",
+   "tool":"microsoft_outlook_calendar.list_events",
+   "arguments":{...},
+   "result":{ "content":[{"type":"text","text":"Action completed."}],   <- ignore
+              "structured_content":{ "value":[ <event objects> ], "next_link":null } },
+   "error":null, "status":"completed" }}
+```
+Parse = iterate lines, JSON-parse, keep `item.type=="mcp_tool_call" && item.status=="completed"`, read `item.result.structured_content` -> calendar `.value`; Teams `list_chats` `.chats`; message lists `.messages`/`.value`. **Do NOT use the model's final `agent_message` text.**
+Calendar event keys (real): `id, subject, body{contentType,content}, bodyPreview, web_link, display_url, start{dateTime,timeZone}, end{dateTime,timeZone}, type(singleInstance|occurrence), response_status{response}, importance, sensitivity, location{displayName}, attendees[{emailAddress{address,name},type,status{response}}], organizer{emailAddress{address,name}}, recurrence, series_master_id, original_start, i_cal_u_id, cancelled_occurrences, is_reminder_on, reminder_minutes_before_start, display_title`. **No `isAllDay` field** -> heuristic: both ends at exact midnight + whole-day span. `start.dateTime` is naive with 7-digit fractional secs, `timeZone:"UTC"` -> strip fractional, treat as UTC, convert timed events to machine-local, keep all-day at naive midnight.
+
+## CRITICAL -- prompt phrasing (coordinator finding, changes LANE_B_TEAMS_CAL_DESIGN.md sec.3)
+The `codex_apps` connector tools load **only when the prompt describes the TASK, not when it names the tool imperatively.**
+- WORKS: *"Using the Microsoft Outlook Calendar app connector, retrieve my calendar events between X and Y ..."*
+- FAILS: *"Call `microsoft_outlook_calendar.list_events` with start_datetime ..."* -> model: "I can't access that in this session", no tool fires.
+Keep the "do not use any other tool / create/update/delete nothing / send nothing" guardrail clauses -- those are fine. The model also calls `get_mailbox_settings` first (allowlisted, expected in the stream). LANE_B sec.3 prompts are rewritten to task-descriptive form in `lane_b_call1.py`.
+
+## Build status (this session, Drew) -- SHIPPED THIS COMMIT
+
+| File | State |
+|---|---|
+| `normalise_pull.py` (`3d59dc3`) | unchanged -- still correct, sanitises whatever produced the pull |
+| `lane_b_call1.py` (NEW) | Call-1 runner. `--domain calendar\|teams\|both`. Task-descriptive prompts. Runs `codex exec -s read-only --skip-git-repo-check --json`, parses `item.result.structured_content` per the schema above, maps Graph event keys (UTC->local for timed, midnight-naive for all-day, 7-digit-fractional strip), **re-contamination guard = HALT** (server must be `codex_apps`; every tool in the LANE_B sec.5 read allowlist; any write-verb tool / other connector => status `halt`, writes `data/codex_runs/GUARD_TRIPPED_<ts>.json`, does NOT update the normalised file, exit 1). Expected-tool-absent => status `unavailable` => empty calendar, no HALT. Writes `data/lane_b/lane_b_normalised.json` + per-run log. `--from-file` parses a captured transcript offline (no codex run). `--dry-run` prints the prompt. **Tested green against the coordinator's real 31.5 KB probe: 5 events, correct BST conversion (08:30 UTC -> 09:30), all-day detection, every `start` `datetime.fromisoformat()`-parseable.** |
+| `fetch_inbox.py` (EDIT) | `CAL_BACKEND=connector` now reads `data/lane_b/lane_b_normalised.json` (out of band -- fetch_inbox does NOT invoke codex). `_load_lane_b_calendar()` maps it into the flat Phase-1 `calendar` dict shape so `_cal_for_date` / `build_cal_items` / absence detection / Phases 3.7/3.8 need **no** edits. Missing / stale (> `WI_LANE_B_MAX_AGE_H`, default 6h) / guard-HALT / status!=ok => `[]` + warning, mail briefing continues. **`com` path byte-identical** (verified: `CAL_CONNECTOR` false -> every branch falls through to the original code; full `diff` is additive only). |
+| `data/lane_b/` + `data/codex_runs/` | not committed -- `data/` is gitignored wholesale; `lane_b_call1.py` `mkdir -p`s them at runtime |
+
+## NOT yet built
+- **`lane_b_cal_guard.py`** -- the LANE_B sec.6a pre/post `list_events` snapshot HALT (detects a calendar change during the read window). The **re-contamination HALT is in** (`lane_b_call1.py`); the snapshot-diff guard is the second layer -- next commit, needs a live run to validate its snapshot parse the same way Call-1 did.
+- **Teams section** -- after calendar is in a real briefing. `lane_b_call1.py --domain teams` already emits the Teams-shaped normalised block; the briefing-section rendering in `fetch_inbox.py` is the remaining piece.
+
+## Deploy -- Kevin runs everything on the LAPTOP (his instruction: no desktop staging)
+Live briefing = laptop bridge (`Work Inbox Bridge Briefing`, `Run Laptop Bridge Briefing.ps1`, 07/12/16 Mon-Fri). Laptop right now: codex 0.149.0 (npm global), logged into Kevin's **personal Plus** -> Teams works, **no Calendar connector**. Desktop Edu account has both.
+**Kevin's to-do (only he can, interactive browser at the laptop):**
+1. On the laptop: `codex login` to the **Edu** account (`begb0037@ox.ac.uk`).
+2. Confirm Outlook Calendar + Microsoft Teams connectors are **enabled** on that Edu account.
+Then the coordinator (has SSH desktop->laptop) runs the verification + first real run -- exact commands in the report.
 
 ## Next action (one line)
-Drew builds `lane_b_call1.py` against the `codex_apps` surface + wires calendar into `fetch_inbox.py` behind `CAL_BACKEND=connector`; coordinator runs one `codex exec --json` probe to capture the exact `mcp_tool_call` result-item schema; then calendar goes into a real briefing (staged on the desktop first for speed -- see the report).
+Kevin does the laptop Edu `codex login` + connector-enable; coordinator runs `python lane_b_call1.py --domain calendar` on the laptop then a `MAIL_BACKEND=imap CAL_BACKEND=connector` bridge run; Drew builds `lane_b_cal_guard.py` + the Teams section.
 
 ---
 

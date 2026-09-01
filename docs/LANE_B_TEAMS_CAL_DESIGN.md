@@ -1,5 +1,10 @@
 # LANE_B_TEAMS_CAL_DESIGN.md — dumb-fetch codex exec for Calendar + Teams
 
+> **UPDATE 2026-09-01 — BUILDING. Two design points corrected by live findings (see `HANDOVER.md` top entry):**
+> 1. **§6c "manifest turn" is dropped.** `codex_apps` connector tools are lazily surfaced and never appear in a "list your tools" enumeration — that method gave three false negatives. The re-contamination guard instead asserts on the `mcp_tool_call` `server`/`tool` events **actually observed** in the `codex exec --json` JSONL (`lane_b_call1.py: guard_recontamination`).
+> 2. **§3 prompts must be TASK-DESCRIPTIVE, not imperative.** "Using the Outlook Calendar app connector, retrieve my events between X and Y…" loads the tools; "Call `microsoft_outlook_calendar.list_events` with…" makes the model reply "I can't access that in this session". Guardrail clauses ("use no other tool / change nothing / send nothing") stay. Real MCP server = `codex_apps`; result payload = `item.result.structured_content` (`.value` calendar / `.chats` teams).
+> Build: `lane_b_call1.py` (runner + guard, shipped), `fetch_inbox.py` `CAL_BACKEND=connector` wiring (shipped), `lane_b_cal_guard.py` (§6a snapshot HALT, next), Teams section (after calendar is live). Identity = Edu `begb0037@ox.ac.uk` PRIMARY, personal Plus failover.
+
 **Date:** 2026-08-29 (Drew). **DESIGN ONLY — no build until Kevin approves this doc.**
 **Parent:** `LAPTOP_MIGRATION_PLAN.md` (rev 2). **Reuses patterns from:** `CONNECTOR_SAFEGUARDS.md` (§A enumeration, §B safeguard layers, §D the "NOT SOUND" verdict), `CODEX_CONNECTOR_PIPELINE_PLAN.md` (the two-call split, `normalise_pull.py`, the 26-Aug branch scripts on `drew/codex-phase2-ai-triage`).
 **Scope:** Lane B is **calendar + Teams only**. Mail is Lane A (own read-only Python — different doc). Triage is `claude -p`, unchanged.
