@@ -1,31 +1,22 @@
 {
-  "generated_at": "2026-09-01 12:06",
+  "generated_at": "2026-09-01 16:05",
   "new_tasks": [
     {
-      "title": "Investigate P5 Task# 50981420 for Incident# 11706988",
+      "title": "Explore ESS menu item reduction for Company 90",
+      "tier": "week",
+      "description": "Nathan Kirwan is following up from a meeting today to confirm whether Kevin can explore removing extraneous menu items from ESS to simplify navigation. Assessment and decision needed on feasibility and priority against current workload.",
+      "email_subject": "ESS Menu Item Reduction for Company 90 records",
+      "email_from": "Nathan Kirwan",
+      "received": "2026-09-01 15:38",
+      "entry_id": ""
+    },
+    {
+      "title": "Investigate P5 Incident# 11706988 -- Task# 50981420",
       "tier": "today",
-      "description": "Michael O'Sullivan has assigned P5 Task# 50981420 to Kevin's team for investigation of Incident# 11706988; from what Michael can see, all reported users have the same issue and need urgent resolution.",
+      "description": "Michael O'Sullivan has assigned investigation of P5 Incident# 11706988 (Task# 50981420) to Kevin's team, requiring immediate assessment of all users who reported the incident.",
       "email_subject": "FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988",
       "email_from": "Michael O'Sullivan",
       "received": "2026-09-01 09:57",
-      "entry_id": ""
-    },
-    {
-      "title": "Resolve Cority Service Slowness - Support Call# 11707051 URGENT",
-      "tier": "today",
-      "description": "Support Call# 11707051 marked URGENT reports Cority service is very slow and sometimes fails to deliver notifications; Rob Green and Christopher Sanders have escalated this for Kevin's team to investigate root cause and coordinate resolution.",
-      "email_subject": "RE: Assigned to your team - Support Call# 11707051 - URGENT - problems with Cority",
-      "email_from": "Rob Green",
-      "received": "2026-09-01 09:32",
-      "entry_id": ""
-    },
-    {
-      "title": "Resolve Cority Employee Import Error - 28 August 17:00",
-      "tier": "week",
-      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import; Kevin needs to review the attached error log and coordinate resolution with Cority support.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-28 18:00",
       "entry_id": ""
     },
     {
@@ -89,5 +80,15 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t2608111331410",
+      "task_title": "URGENT -- Cority Applicant Data Import file (James Salas Guillen / Simon Burford thread)",
+      "note": "Sarah Johnson introduces Victoria Myatt from Cority as consultant for the Cority Consultancy project preparation.",
+      "email_subject": "University of Oxford: Cority Consultancy",
+      "email_from": "Sarah Johnson",
+      "received": "2026-08-25 16:25",
+      "entry_id": ""
+    }
+  ]
 }
