@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-09-01 16:05",
+  "generated_at": "2026-09-01 16:17",
   "new_tasks": [
     {
-      "title": "Explore ESS menu item reduction for Company 90",
-      "tier": "week",
-      "description": "Nathan Kirwan is following up from a meeting today to confirm whether Kevin can explore removing extraneous menu items from ESS to simplify navigation. Assessment and decision needed on feasibility and priority against current workload.",
-      "email_subject": "ESS Menu Item Reduction for Company 90 records",
-      "email_from": "Nathan Kirwan",
-      "received": "2026-09-01 15:38",
-      "entry_id": ""
-    },
-    {
-      "title": "Investigate P5 Incident# 11706988 -- Task# 50981420",
+      "title": "Investigate P5 Incident# 11706988 / Task# 50981420",
       "tier": "today",
-      "description": "Michael O'Sullivan has assigned investigation of P5 Incident# 11706988 (Task# 50981420) to Kevin's team, requiring immediate assessment of all users who reported the incident.",
+      "description": "Michael O'Sullivan assigned Task# 50981420 for Kevin to investigate P5 Incident# 11706988 with all reported users affected. Urgent diagnosis required; Kevin must begin investigation immediately and report findings back to Michael.",
       "email_subject": "FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988",
       "email_from": "Michael O'Sullivan",
       "received": "2026-09-01 09:57",
+      "entry_id": ""
+    },
+    {
+      "title": "Review and resolve Cority Employee Import error -- 2026-08-28 17:00",
+      "tier": "today",
+      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import; error log is attached and has been unread for 4 days. Kevin must review error details and coordinate with Cority to confirm root cause and resolution.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
       "entry_id": ""
     },
     {
@@ -80,15 +80,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608111331410",
-      "task_title": "URGENT -- Cority Applicant Data Import file (James Salas Guillen / Simon Burford thread)",
-      "note": "Sarah Johnson introduces Victoria Myatt from Cority as consultant for the Cority Consultancy project preparation.",
-      "email_subject": "University of Oxford: Cority Consultancy",
-      "email_from": "Sarah Johnson",
-      "received": "2026-08-25 16:25",
-      "entry_id": ""
-    }
-  ]
+  "applied_updates": []
 }
