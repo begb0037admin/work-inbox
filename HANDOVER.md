@@ -1,3 +1,91 @@
+# Handover -- 1 September 2026, 10:00-12:00 UTC (Drew) -- DECISION REVERSAL (Kevin, via coordinator, relayed 4x, "locked, will not revisit"). The 1 Sept ~late-afternoon (c)+(e) recommendation below is REJECTED. Chosen architecture is now: **email = IMAP (Lane A, unchanged), calendar = ChatGPT M365 connector (Lane B), Teams = ChatGPT M365 connector (Lane B).** Build order: calendar first, then Teams. **The connector write-risk (`CONNECTOR_SAFEGUARDS.md` §D "NOT SOUND" for unattended use; ungateable `codex exec` write-tool surface, evidenced by the 26/27 Aug live-mailbox category writes that landed) is EXPLICITLY ACCEPTED by Kevin and is closed -- same class as the 25 Aug PAT precondition and the `SMTP.Send` scope in the IMAP token bundle. Not to be re-raised as a veto.** Lane B build is authorised. This entry is the durable record of that decision. Timestamp of this checkpoint: 2026-09-01 ~11:00 UTC.
+
+## What is NOT changing
+- **Email / Lane A / IMAP+OAuth2** -- untouched, out of scope for this work. Still where the 1 Sept ~midday record left it: `MAIL_BACKEND=imap` proven (Phase 2(i) `broker_imap_proof.py`, 2 passes), Lane A code shipped behind the default-unset flag (`0900b3f`), NOT cut over; the live briefing currently runs from the **laptop bridge** (`Run Laptop Bridge Briefing.ps1`, task `Work Inbox Bridge Briefing`, cadence 07:00/12:00/16:00 Mon-Fri) which already uses `MAIL_BACKEND=imap` + `CAL_BACKEND=com` + `AI_BACKEND=claude_code`. Last good briefing = `bced96b`, `data/briefing.json` "Tuesday 1 September 2026", 07:04, urgent 0 / needs 41 / fyi 17 / calToday 7 / calTomorrow 10 / absences 7 -- healthy, calendar present. No `codex login`, no `.bat` edit, no scheduled-task change to the mail path this session. Classic Outlook is NOT uninstalled and will not be.
+- **Triage** -- `claude -p` (`AI_BACKEND=claude_code`), unchanged, no connector.
+
+## `connect_to_outlook()` COM dependency -- verified (context only, Kevin flagged the plan prose may overstate it)
+Read `fetch_inbox.py` @ `origin/main` directly. Under `MAIL_BACKEND=imap` the COM calendar path is **already fully conditional and non-fatal**: `_need_com_cal = (CAL_BACKEND == "com" and not MAIL_PARALLEL and not CAL_CONNECTOR_NYI)`. When `CAL_BACKEND=connector` (`CAL_CONNECTOR_NYI` true) the script logs `NOT connecting Outlook COM (CAL_BACKEND=connector ...)`, sets `outlook = mapi = _inbox_folder = None`, and the calendar phases "degrade to empty". `connect_to_outlook(allow_launch=False)` never auto-starts OUTLOOK.EXE on the imap path. So: **wiring `CAL_BACKEND=connector` removes the last classic-Outlook dependency; it does not add one.** The migration-plan prose that implies calendar keeps a hard COM dependency is stale for the `imap`+`connector` combination. There is currently a stub: `CAL_BACKEND=connector` is parsed, logged as "NOT IMPLEMENTED yet", and falls through to empty calendar (no crash).
+
+## Regression diagnosis -- why `codex exec` loaded connector tools on 27 Aug and not since (concrete, cited)
+
+**Three data points, TWO different situations -- do not conflate them:**
+
+| Date | Machine | ChatGPT account | codex-cli | `codex exec` connector tools | Evidence |
+|---|---|---|---|---|---|
+| 26-27 Aug | admin **desktop** | **personal ChatGPT Plus** (`auth.json` account `eb7a812e-1b9d-4586-b1a4-02a4ed7ca116`) | **0.149.1** (stated verbatim, `CODEX_CONNECTOR_MIGRATION_RESEARCH.md` §9 "Codex commissioned to attempt a local fix ... codex-cli **0.149.1**") | **LOADED** -- `mcp: codex_apps/microsoft_outlook_email.set_message_categories (completed)` on every write-gate test (v1/v2 Layer C, Layer A, top-level "Always ask", plugin-disable) -- all FOUR landed a real category write on Kevin's live Exchange mailbox, COM-confirmed, then remediated | §9 entries 27 Aug ~13:46-14:50 |
+| 28 Aug | admin **desktop** | **same personal Plus** (`eb7a812e-...`) | not recorded (auto-update likely -- see below) | **ZERO** -- a plain `codex exec` loaded no connector tools; cause "left undetermined" | HANDOVER 1 Sept ~late-afternoon "Blocker analysis", bullet "28 Aug desktop" |
+| 1 Sept | Oxford **laptop** (RDP `AD-OAK\begb0037`) | **Oxford ChatGPT Edu** (`begb0037@ox.ac.uk`, "University of Oxford EDU" workspace) | **0.151.0** | **ZERO** -- `codex exec -s read-only` returned only `functions.*` / `tools.*` / `collaboration.*`; Codex also printed `approval_policy ... disallowed by requirements ... enterprise-managed requirements Group requirements (6d66d29d-222b-42ee-a85f-c8f3f0d4416a)` | HANDOVER 1 Sept ~late-afternoon "MAKE-OR-BREAK #2 ... FAILED"; drew confirmed-fact `2026-09-01-headless-codex-exec-on-an-enterprise-managed-chatgpt-workspace...` |
+
+**Situation A -- the 1 Sept laptop / Edu result is NOT the 27->28 Aug regression. It is a separate, structural dead end.** The Edu workspace is enterprise-managed: managed-requirements group `6d66d29d-222b-42ee-a85f-c8f3f0d4416a` is enforced (it overrode `approval_policy` on the run), the Edu ChatGPT UI has **no connectors surface at all** (no GitHub/Outlook-Email connector, no Data-controls connectors section; Calendar/Teams appear only as *plugins*), and `codex login` succeeds + OAuth even carries `api.connectors.read api.connectors.invoke` scopes yet **zero connector tools load**. Per the drew confirmed-fact from this exact test: an enterprise-managed ChatGPT workspace can withhold the Apps/connector surface from managed Codex CLI entirely and **no local config change re-enables it**. **Conclusion: the Edu account cannot be the Lane B identity. Abandon it for this purpose.** (This reverses the plan-rev-2 assumption that Edu would be the dedicated automation identity from 1 Sept.)
+
+**Situation B -- the real 27->28 Aug regression, same desktop, same personal Plus account.** The record says the cause was "left undetermined". The candidates, ranked by probability given the evidence:
+1. **codex-cli auto-updated off 0.149.1 overnight (most likely).** codex-cli self-updates by default; 27 Aug was pinned-in-the-record at 0.149.1, the laptop was on 0.151.0 by 1 Sept. The connectors-in-Codex "Apps" bridge is a beta and OpenAI has been changing it release-to-release. A version bump between 27 and 28 Aug is the single most probable single-variable change. **Not proven -- the 28 Aug version was not captured.**
+2. **OpenAI shipped a server-side change to the connectors-in-Codex beta.** Consistent with a same-account, same-machine, next-day behaviour flip. Nothing in Kevin's control; nothing local re-enables it if so.
+3. **The ChatGPT desktop-app bridge daemons (`codex app-server` / `codex-code-mode-host`) were not running at 28 Aug test time.** The `codex_apps` tools re-provision from the account each session *via the desktop-app runtime*, outside `config.toml` (confirmed-fact `2026-08-29-codex-chatgpt-connector-apps-tool-manifests...` + §9 plugin-disable test). If the ChatGPT/Codex desktop app wasn't open, the bridge is down and `codex exec` sees zero connector tools. This IS in Kevin's control (open the app) but there's no evidence it was the cause.
+4. Connector detached/re-permissioned in the personal ChatGPT account between the two days -- no evidence, but only Kevin can see the account's current connector state.
+
+**The record cannot pick between 1-4 from what was logged.** The one check that resolves it is Kevin re-running the enumeration on the desktop against the personal Plus account with codex-cli pinned to 0.149.1 (steps below). If tools load -> it was the version (or the app not being open); if they still don't -> it's server-side (#2) and Lane B headless is blocked until OpenAI ships a stable/GA connectors-in-Codex.
+
+## EXACT STEPS FOR KEVIN -- restore the 27 Aug working headless-connector state and prove it (PowerShell 5.1, on the admin DESKTOP, ~10 min)
+
+Run these in order, on **DESKTOP-MJDJM64** (where it worked on 27 Aug), signed in to your **personal ChatGPT Plus** account (NOT the Oxford Edu one). Paste the output of steps 3 and 6 back.
+
+```powershell
+# --- 1. Record the current codex-cli version and where it is ---
+& codex --version
+(Get-Command codex).Source
+
+# --- 2. Open the ChatGPT / Codex desktop app now and leave it running ---
+#     (the connector bridge -- codex app-server / codex-code-mode-host -- runs inside it;
+#      a headless `codex exec` re-provisions the Microsoft connector tools from your
+#      account THROUGH that app. App closed = zero connector tools.)
+Start-Process "shell:AppsFolder\OpenAI.Codex_gcQ2b0qhq8m0g!OpenAI.Codex"   # if this errors, just launch ChatGPT/Codex from the Start menu
+
+# --- 3. Confirm which ChatGPT account codex is logged in as ---
+& codex login status
+Get-Content "$env:USERPROFILE\.codex\auth.json" | ConvertFrom-Json |
+  Select-Object -ExpandProperty account_id
+#   EXPECT: eb7a812e-1b9d-4586-b1a4-02a4ed7ca116  (your personal Plus account).
+#   If it shows a different id / "not logged in":  & codex login    (sign in as personal Plus, NOT Edu)
+
+# --- 4. Pin codex-cli to 0.149.1 (the version that provably loaded the connector tools on 27 Aug) ---
+#     Only if step 1 showed something newer than 0.149.1. npm global install:
+& npm install -g @openai/codex-cli@0.149.1
+& codex --version        # EXPECT: 0.149.1
+
+# --- 5. Record the config.toml hash BEFORE the proof (must be unchanged AFTER) ---
+Get-FileHash "$env:USERPROFILE\.codex\config.toml" -Algorithm SHA1 | Select-Object Hash
+
+# --- 6. THE PROOF: headless tool enumeration, read-only, calls nothing ---
+cd $env:USERPROFILE
+& codex exec -s read-only --skip-git-repo-check "List every tool available to you as a JSON array of tool names. Call nothing, change nothing."
+
+# --- 7. Record the config.toml hash AFTER -- it must EQUAL step 5 ---
+Get-FileHash "$env:USERPROFILE\.codex\config.toml" -Algorithm SHA1 | Select-Object Hash
+```
+
+**PASS =** step 6 output contains `microsoft_outlook_calendar.list_events` (or `list_events`) **and** `microsoft_teams.list_chats` (or `list_chats`), and step 7's hash equals step 5's.
+**PARTIAL =** some `codex_apps/*` / `microsoft_*` tools present but not the calendar/Teams read set -> paste the full list, we adjust.
+**FAIL =** only `functions.*` / `tools.*` / `collaboration.*` (same as the laptop) -> the connectors-in-Codex bridge is not available headless on any account right now; it is a server-side beta regression (candidate #2). Lane B headless cannot be built today; the only remaining route is the attended ChatGPT/Codex desktop app (fragile, breaks on every MSIX auto-update) -- do not schedule that without a separate decision.
+
+> Note: per the 27 Aug record a cold `codex exec` after a gap reliably hangs once on infra startup -- if step 6 hangs ~90s with "Reading additional input from stdin...", Ctrl-C and re-run it once; the second call works.
+
+## What was built this session (Drew) vs what is gated on the PASS
+
+| Item | State |
+|---|---|
+| This decision-reversal HANDOVER entry + ROADMAP Lane B line | **DONE, pushed** (this commit) |
+| Regression diagnosis + Kevin's restore/proof steps | **DONE** (above) |
+| `normalise_pull.py` -- deterministic calendar+Teams sanitiser, `LANE_B_TEAMS_CAL_DESIGN.md` §4, new standalone file, zero live-path risk (design-doc gate: "none -- new file") | **built this session, see commit** |
+| `fetch_inbox.py` Phases 3.7/3.8 `CAL_BACKEND=connector` wiring + Call-1 runner + calendar HALT kill-switch + re-contamination guard | **staged, NOT pushed** -- gated on the enumeration PASS. Cannot test a connector calendar path end-to-end while the connector does not load; pushing an untested activation of a 3-hourly live pipeline path violates the standing work-inbox cautious-change-pace rule. Ready to land within the same session the PASS comes back. |
+| Teams briefing section | after calendar is proven live (build order: calendar then Teams, per the decision) |
+
+## Next action (one line)
+Kevin runs the 7-step PowerShell proof above on the desktop (personal Plus account, codex-cli pinned 0.149.1, ChatGPT app open) and pastes steps 1/3/6/7 output; on PASS, Drew lands the staged `CAL_BACKEND=connector` wiring + kill-switches and activates calendar, then builds the Teams section.
+
+---
+
 # Handover -- 1 September 2026, ~late afternoon UTC (Drew) -- TRACK 2 / LANE B: MAKE-OR-BREAK #2 FAILED on the laptop. Headless `codex exec` on the Oxford ChatGPT Edu account loads ZERO connector tools -- no `microsoft_outlook_calendar.*`, no `microsoft_teams.*`, nothing. Same wall as the desktop on 28 Aug. Lane B (connector calendar + Teams) has no route on the Edu account. Recommendation below: ship Lane A (mail-only IMAP, proven) as the whole migration, keep calendar on Outlook COM **on the laptop** (PRT-healthy, unlike the desktop), formally park Lane B. Kevin decides. NO build / config / cutover / `codex login` this dispatch.
 
 ## MAKE-OR-BREAK #2 -- `codex exec` connector-load proof on the laptop -- FAILED (evidence, all verified this session by the coordinator over RDP/SSH, relayed to Drew)

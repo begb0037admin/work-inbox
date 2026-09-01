@@ -1,7 +1,21 @@
 # work-inbox — Roadmap
 
-**Last updated:** 2026-06-25
+**Last updated:** 2026-09-01
 **Status:** Active — pipeline fully working, roadmap clear
+
+---
+
+## Backend migration (two-lane) — status as of 2026-09-01
+
+Kevin's locked decision (via coordinator, 1 Sept 2026): **email = IMAP (Lane A), calendar = ChatGPT M365 connector (Lane B), Teams = ChatGPT M365 connector (Lane B).** Build order: calendar, then Teams. Connector write-risk (`docs/CONNECTOR_SAFEGUARDS.md` §D) explicitly accepted by Kevin and closed. The 1 Sept (c)+(e) "ship Lane A only, park Lane B" recommendation is **rejected**.
+
+| Lane | Scope | Status |
+|---|---|---|
+| **A** | Mail pull via IMAP+OAuth2 (`MAIL_BACKEND=imap`) | Proven (Phase 2(i)); shipped behind default-unset flag; **live now via the laptop bridge briefing**; formal Phase 6 cutover still pending |
+| **B — calendar** | `CAL_BACKEND=connector`, Phases 3.7/3.8 via `codex exec` + ChatGPT M365 connector, `normalise_pull.py` sanitiser, **calendar kill-switch HALTs on any change** | **BUILD AUTHORISED.** `normalise_pull.py` built. `fetch_inbox.py` wiring staged, NOT pushed — gated on Kevin's `codex exec` connector-load proof (personal ChatGPT Plus account on the desktop, codex-cli pinned 0.149.1). **Edu account abandoned as the Lane B identity** — enterprise-managed workspace withholds the connector surface from headless `codex exec` (MAKE-OR-BREAK #2 failed 1 Sept). |
+| **B — Teams** | new Teams briefing section, same connector + safeguards | Queued behind calendar (build order: calendar first) |
+
+See `HANDOVER.md` top entry (1 Sept, "DECISION REVERSAL") for the regression diagnosis and Kevin's exact proof steps.
 
 ---
 
