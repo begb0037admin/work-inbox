@@ -1,22 +1,13 @@
 {
-  "generated_at": "2026-08-31 16:04",
+  "generated_at": "2026-09-01 07:04",
   "new_tasks": [
     {
       "title": "Resolve Cority Employee Import error 2026-08-28 17:00",
       "tier": "today",
-      "description": "Cority Integration Platform reported SFTP connection error during employee data import on 28 August at 17:00. This is blocking daily HR data operations and needs immediate investigation and resolution. Kevin should review the attached error log and coordinate with James Salas Guillen or Cority support to restore the import process.",
+      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import. Kevin needs to review the attached error log and confirm resolution with James Salas Guillen and Cority support.",
       "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
       "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
       "received": "2026-08-28 18:00",
-      "entry_id": ""
-    },
-    {
-      "title": "Confirm IRIS / IEX incidents changes implementation timings",
-      "tier": "week",
-      "description": "Marie Cooksey has copied Kevin and James requesting confirmed timings for IRIS and IEX incidents changes implementation. Amanda needs clarity on when HR Systems can handle the work. Kevin must respond with realistic timelines and coordinate with James on technical feasibility.",
-      "email_subject": "RE: IRIS / IEX - Incidents Changes",
-      "email_from": "Marie Cooksey",
-      "received": "2026-08-27 15:53",
       "entry_id": ""
     },
     {
