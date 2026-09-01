@@ -1,19 +1,28 @@
 {
-  "generated_at": "2026-09-01 17:49",
+  "generated_at": "2026-09-01 21:01",
   "new_tasks": [
     {
-      "title": "Investigate P5 Incident# 11706988 -- Task# 50981420",
+      "title": "Support Call# 11707439 - Manager unable to approve leave",
       "tier": "today",
-      "description": "Michael O'Sullivan assigned P5 Task# 50981420 to Kevin for investigation of Incident# 11706988. Kevin must assess all affected users and root-cause the issue.",
+      "description": "Michael O'Sullivan has forwarded Support Call# 11707439 concerning a manager unable to approve leave for staff. This is a workflow or system issue requiring Kevin's investigation to identify the root cause and provide resolution.",
+      "email_subject": "Support Call# 11707439: Manager unable to approve leave",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-09-01 16:29",
+      "entry_id": ""
+    },
+    {
+      "title": "P5 Incident# 11706988 - Investigate (Task# 50981420)",
+      "tier": "today",
+      "description": "Michael O'Sullivan has assigned P5 Task# 50981420 to Kevin for investigation of Incident# 11706988. Multiple users have reported the incident and Kevin needs to assess scope, impact, and resolution approach.",
       "email_subject": "FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988",
       "email_from": "Michael O'Sullivan",
       "received": "2026-09-01 09:57",
       "entry_id": ""
     },
     {
-      "title": "Resolve Cority Employee Import error -- 28 August 2026",
-      "tier": "week",
-      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 18:00 during scheduled employee data import. Kevin must review the error log and confirm resolution status with Cority support.",
+      "title": "Resolve Cority Employee Import error - 2026-08-28 17:00",
+      "tier": "today",
+      "description": "Cority Integration Platform reported an SFTP connection error on 28 August at 17:00 during scheduled HR employee data import. Kevin has not yet reviewed the error log; resolution confirmation is needed with Cority support. This mirrors the June 22 incident (t030) and is now 4+ days overdue.",
       "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
       "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
       "received": "2026-08-28 18:00",
