@@ -1,8 +1,32 @@
-# Handover -- 1 September 2026, ~14:30 UTC (Drew) -- LANE B (connector calendar + Teams): SINGLE CHECKPOINT. **Connector calendar END-TO-END PROVEN ON THE REAL MACHINE** -- 1 Sept ~14:57, `101L-DE013193` as `AD-OAK\begb0037`, Edu account, codex-cli 0.151.0: `list_calendars` + `list_events` + `search_events` all fired and returned Kevin's real data. The first real run also surfaced 3 code bugs -- **all 3 fixed + pushed this update** (verb-based guard so a legit `search_events` no longer false-HALTs; per-host `~/.codex/config.toml` sha1 baseline, `101L-DE013193` = `ba0184e864ffd081069820cc7a6f8f19acf5c845`, warning-only; codex cold-start warm-up + 300s timeouts). Calendar code is BUILT + PUSHED. Only remaining blocker: a repeatable execution path into the `AD-OAK\begb0037` context on `101L-DE013193`. All older Lane B entries (three "MAKE-OR-BREAK failures", "abandon Edu", "attended route", the pre-14:30 versions of this entry) are SUPERSEDED and kept only for audit.
+# Handover -- 1 September 2026, ~15:40 UTC (Drew) -- LANE B (connector calendar + Teams): SINGLE CHECKPOINT. **Connector calendar END-TO-END PROVEN ON THE REAL MACHINE** (1 Sept ~14:57, `101L-DE013193` as `AD-OAK\begb0037`, codex-cli 0.151.0: `list_calendars` + `list_events` + `search_events` fired, real data). **IDENTITY PIVOT (Kevin, ~15:30): Lane B moves off the Oxford Edu account to Kevin's PERSONAL ChatGPT account, via a dedicated `CODEX_HOME`** (Edu's 500/month hard credit cap can't sustain Lane B + Kevin's interactive use -- 272/500 burned on day one). Code + scripts updated this commit to be `CODEX_HOME`-driven. Remaining blockers: (a) Kevin's 2 prerequisites in §0; (b) a repeatable execution path into the `AD-OAK\begb0037` context on `101L-DE013193`. All older Lane B entries (three "MAKE-OR-BREAK failures", "abandon Edu", "Edu primary / personal failover", "attended route", pre-15:40 versions of this entry) are SUPERSEDED and kept only for audit.
 
 ---
 
-## 1. PROVEN (verified 1 Sept afternoon by the coordinator, on the real machine)
+## 0. IDENTITY (decision 1 Sept ~15:30) + KEVIN'S PREREQUISITES
+
+**Lane B identity = Kevin's PERSONAL ChatGPT account (`kevin@lelitte.co.uk`, `eb7a812e`), via a DEDICATED `CODEX_HOME`** (default `C:\WorkInboxAI\codex-laneb`). The Oxford Edu account is **not used by Lane B at all**. This REVERSES the earlier "Edu primary, personal failover" call.
+
+**Why:** the Oxford ChatGPT Edu monthly cap is **500 credits** (renewed 1 Sept, already **272 used on day one** -- partly our broken test runs). A clean Lane B run is ~5 codex calls (warm-up + calendar + guard's pre/call/post); at 3x/weekday that's 300+/month before Kevin's own Edu use. 500 will not sustain both. **Personal ChatGPT Plus draws from rate limits, not a hard monthly credit cap.**
+
+**COST NOTE:** heavy interactive testing on Edu burned ~half the monthly cap in a day. Future validation runs: `-Fast -Retries 1` and minimised. Don't loop full `--run` guard cycles on Edu (or on personal wastefully) for iteration.
+
+**KEVIN'S PREREQUISITES (only he can do these; both in his RDP session on `101L-DE013193` as `AD-OAK\begb0037`):**
+1. **Add the Microsoft Outlook Calendar connector to his PERSONAL ChatGPT account.** Personal currently has **Teams** connected (works headless) but returned "NO CALENDAR CONNECTOR" when tested. ChatGPT -> Settings -> Connectors/Apps -> add Outlook Calendar to the personal account.
+2. **`codex login` into the dedicated Lane B `CODEX_HOME`, signed into the personal account:**
+   ```powershell
+   $env:CODEX_HOME = 'C:\WorkInboxAI\codex-laneb'
+   codex login          # browser flow -> sign in as kevin@lelitte.co.uk (personal), NOT the Edu account
+   codex login status   # confirm; expect the personal account
+   ```
+   (Device-code auth is disabled on Edu; personal may allow it, but the browser flow in his session works regardless.) This writes `C:\WorkInboxAI\codex-laneb\auth.json`. Kevin's interactive `codex` (whatever `CODEX_HOME` he normally uses, typically `~/.codex` = Edu) is **completely untouched**.
+
+Once both are done: `Run Lane B Calendar Test.ps1 -Fast` (it sets `CODEX_HOME`/`WI_LANE_B_CODEX_HOME` to `C:\WorkInboxAI\codex-laneb` and FATALs early with these steps if the login is missing).
+
+**Re-prove on personal:** Teams connector already works headless on personal; the Calendar connector has never been exercised on personal (it wasn't attached). The `-Fast` run is that proof.
+
+---
+
+## 1. MECHANISM PROVEN (verified 1 Sept afternoon by the coordinator, on the real machine -- on Edu; the mechanism is account-agnostic)
 
 **Connector calendar AND Teams work headless via `codex exec`.** The three earlier "MAKE-OR-BREAK failures" were false negatives, two independent causes, both fixed:
 - **Bad test method.** A bare "list every tool as a JSON array" enumeration NEVER surfaces the lazily-loaded `codex_apps` connector tools -- structurally guaranteed to return zero every time. Probe by asking the model to USE a tool and parsing the result, never by enumerating.
@@ -30,7 +54,10 @@
 | -- `begb0037-a` (local-admin, SSH lands here) | -- | -- | -- | **CANNOT** read into `begb0037.AD-OAK`'s profile (Access denied). |
 | -- **`begb0037.AD-OAK`** (DOMAIN user, `C:\Users\begb0037.AD-OAK`) | **Where the pipeline lives** | npm **0.151.0** | Edu (`~/.codex/auth.json`) | Has `work-inbox\`, runs the existing **`Work Inbox Bridge Briefing`** scheduled task. Kevin's SSH key was added to `C:\Users\begb0037.AD-OAK\.ssh\authorized_keys` but direct SSH as the domain user still FAILS (permission denied / connection reset from `.208` -- unresolved; possible Tailscale ACL / missing "log on through Network" right / sshd `AllowUsers`). |
 
-## 3. BUILT + PUSHED (Drew, work-inbox `main` -- HEAD `48496a8` at time of writing)
+## 3. BUILT + PUSHED (Drew, work-inbox `main`)
+
+**CODEX_HOME-driven (1 Sept ~15:40):** `lane_b_call1.py` + `lane_b_cal_guard.py` resolve `WI_LANE_B_CODEX_HOME` (wins) or an inherited `CODEX_HOME`, FORCE it into `CODEX_HOME` for every codex subprocess, read `config.toml`/`auth.json` from there, and log `CODEX_HOME=<x> account_id=<y>` each run. `Run Lane B Calendar Test.ps1` has `-CodexHome` (default `C:\WorkInboxAI\codex-laneb`), sets both env vars, and FATALs early if `<home>\auth.json` is missing (prints the `codex login` steps). So the Lane B scheduled task rides the dedicated personal login, never Kevin's interactive one.
+
 
 | File | What |
 |---|---|
@@ -61,8 +88,11 @@ SSH lands as `begb0037-a`, which can't touch the domain user's profile; direct d
 ## 6. Unchanged / out of scope
 Email = IMAP (Lane A), untouched. Triage = `claude -p`, untouched. Classic Outlook is NOT uninstalled. The live briefing currently runs from the laptop bridge (`Work Inbox Bridge Briefing`, 07/12/16 Mon-Fri) on `MAIL_BACKEND=imap CAL_BACKEND=com` -- last good `data/briefing.json` = the 1 Sept 12:07 run. Lane B calendar replaces the `CAL_BACKEND=com` half once sec.5 steps 1-3 are green on `101L-DE013193`.
 
-## Next action (one line)
-Kevin runs `docs/desktop-scripts/Run Lane B Calendar Test.ps1 -Fast` in his RDP session on `101L-DE013193` (as `AD-OAK\begb0037`) -- ~6 min, proves connector calendar reaches a real pushed briefing -- and pastes back the summary block; on green, Drew wires `lane_b_cal_guard.py --run` into the bridge wrapper (which validates the snapshot guard) + builds the Teams section.
+## Next action
+1. **Mechanism is PROVEN** (connector calendar end-to-end on the real machine, 1 Sept ~14:57). No more mechanism doubt.
+2. **Kevin's 2 prerequisites (§0):** (a) add the **Microsoft Outlook Calendar** connector to his **personal** ChatGPT account (Teams already works there); (b) dedicated **`codex login` into `C:\WorkInboxAI\codex-laneb`** (`$env:CODEX_HOME=` that dir first) signed into **personal** (`kevin@lelitte.co.uk`), not Edu.
+3. **Then one validation run:** `docs/desktop-scripts/Run Lane B Calendar Test.ps1 -Fast -Retries 1` in the RDP session on `101L-DE013193` as `AD-OAK\begb0037` (it sets `CODEX_HOME`/`WI_LANE_B_CODEX_HOME` to the Lane B dir and FATALs early with the login steps if missing). ~6 min; proves connector calendar reaches a real pushed briefing on the personal account. Paste back the summary block. Record the Lane B `CODEX_HOME/config.toml` sha1 into `lane_b_call1.py CONFIG_TOML_SHA1_BASELINES`.
+4. **Then (Drew):** wire `lane_b_cal_guard.py --run` into the bridge wrapper (`Run Laptop Bridge Briefing.ps1` -- call before `fetch_inbox.py`; `Disable-ScheduledTask` + BurntToast on exit 1; sets `CODEX_HOME` to the Lane B dir) and build the **Teams briefing section** in `fetch_inbox.py`.
 
 ---
 

@@ -179,6 +179,7 @@ def cmd_run() -> int:
                no connector calendar this run, wrapper does NOT disable the task."""
     ts = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     _log(f"--run start ts={ts}")
+    _log(f"CODEX_HOME={lb._codex_home()}  account_id={lb._codex_account_id()}")
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
     # 1. PRE snapshot

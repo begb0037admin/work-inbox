@@ -4,16 +4,25 @@ Run Lane B Calendar Test.ps1
 FALLBACK EXECUTION PATH for Lane B (connector calendar), to be pasted into
 Kevin's RDP session on the Oxford work laptop 101L-DE013193, running as the
 DOMAIN user AD-OAK\begb0037 (the account the "Work Inbox Bridge Briefing"
-scheduled task runs as, and the one that holds ~/.codex/auth.json for the Edu
-ChatGPT account begb0037@ox.ac.uk).
+scheduled task runs as).
 
-Why this exists: SSH into 101L-DE013193 only lands as the local-admin account
-begb0037-a, which cannot read into AD-OAK\begb0037's profile, and direct SSH as
-the domain user is currently broken. Until that is fixed, this script is how a
-Lane B run gets executed in the right context.
+IDENTITY (decision 1 Sept ~15:30): Lane B uses a DEDICATED CODEX_HOME
+(-CodexHome, default C:\WorkInboxAI\codex-laneb) signed into Kevin's PERSONAL
+ChatGPT account (kevin@lelitte.co.uk) -- NOT the Oxford Edu account, whose
+500/month credit cap won't sustain Lane B + Kevin's interactive use. Kevin's
+interactive codex on this box (whatever CODEX_HOME he uses, typically ~/.codex
+= Edu) is completely untouched. One-time setup: `$env:CODEX_HOME='<dir>'; codex
+login` as personal, + add the Microsoft Outlook Calendar connector to personal
+in ChatGPT settings (Teams already works there).
+
+Why this script exists: SSH into 101L-DE013193 only lands as the local-admin
+account begb0037-a, which cannot read into AD-OAK\begb0037's profile, and direct
+SSH as the domain user is currently broken. Until that is fixed, this script is
+how a Lane B run gets executed in the right context.
 
 WHAT IT DOES
-  0. prints codex version + logged-in account (for the record)
+  0. sets CODEX_HOME + WI_LANE_B_CODEX_HOME to -CodexHome; prints codex version +
+     the account_id from <CodexHome>\auth.json (FATAL if that login is missing)
   1. pulls the Lane B scripts fresh from raw.githubusercontent main
   2. python lane_b_call1.py --domain calendar   -> data/lane_b/lane_b_normalised.json
      prints meta.lane_b.domains.calendar (status / count / attempts / tool_calls)
@@ -47,6 +56,9 @@ PARAMS
   -RunDir       default $env:USERPROFILE\work-inbox
   -Fast         one-time proof, skips step 3, implies -RealBriefing (~6 min)
   -RealBriefing also run step 4 (produces + PUSHES a real briefing.json)
+  -CodexHome    dedicated Lane B CODEX_HOME (default C:\WorkInboxAI\codex-laneb),
+                signed into the PERSONAL ChatGPT account. FATAL if its auth.json
+                is missing (prints the one-time `codex login` steps).
   -CodexBin     full path to codex.cmd/.exe/.ps1 if a bare 'codex' is not on PATH
                 for this session (sets $env:WI_CODEX_BIN)
   -Retries      WI_LANE_B_RETRIES for the connector-flake retry (default 3;
@@ -59,6 +71,7 @@ param(
   [string]$RunDir = (Join-Path $env:USERPROFILE 'work-inbox'),
   [switch]$RealBriefing,
   [switch]$Fast,        # ONE-TIME validation: refresh -> lane_b_call1 --domain calendar -> (if ok) fetch_inbox.py connector briefing. SKIPS the snapshot guard (step 3). ~6 min instead of ~12-15. Implies -RealBriefing.
+  [string]$CodexHome = 'C:\WorkInboxAI\codex-laneb',  # DEDICATED codex login for Lane B (personal ChatGPT account). Kevin's interactive codex (Edu) is untouched.
   [string]$CodexBin = '',
   [int]$Retries = 3,
   [int]$Timeout = 360   # per codex-exec-call timeout (s). 0.151.0 cold-starts ~3+ min; the runner does one warm-up call first.
@@ -83,28 +96,38 @@ Say ("Fast={0}   RealBriefing={1}   Retries={2}" -f [bool]$Fast, [bool]$RealBrie
 if (-not (Test-Path $RunDir)) { Say "FATAL: RunDir not found: $RunDir"; if ($transcribing) { Stop-Transcript | Out-Null }; exit 2 }
 Set-Location $RunDir
 
-# --- 0. codex identity for the record ---
+# --- 0. codex identity: DEDICATED Lane B CODEX_HOME (personal ChatGPT account) ---
 if ($CodexBin -ne '') { $env:WI_CODEX_BIN = $CodexBin; Say "WI_CODEX_BIN=$CodexBin" }
-$env:WI_LANE_B_RETRIES     = "$Retries"
-$env:WI_LANE_B_TIMEOUT     = "$Timeout"
+$env:WI_LANE_B_RETRIES      = "$Retries"
+$env:WI_LANE_B_TIMEOUT      = "$Timeout"
 $env:WI_LANE_B_SNAP_TIMEOUT = "$Timeout"
 $env:PYTHONUTF8 = '1'
+$env:CODEX_HOME            = $CodexHome
+$env:WI_LANE_B_CODEX_HOME  = $CodexHome
 Say "timeouts: per-call ${Timeout}s (+ a one-shot warm-up); retries $Retries"
+Say "CODEX_HOME (Lane B, dedicated) = $CodexHome"
 
-Say "--- codex identity ---"
+$authJson = Join-Path $CodexHome 'auth.json'
+if (-not (Test-Path $authJson)) {
+  Say "FATAL: $authJson not found -- the Lane B codex login does not exist yet."
+  Say "FIX (in this RDP session, one time):"
+  Say "    `$env:CODEX_HOME = '$CodexHome'"
+  Say "    codex login          # browser flow -> sign in as your PERSONAL ChatGPT account (kevin@lelitte.co.uk)"
+  Say "  then confirm the personal account has the Microsoft Outlook Calendar connector added (Teams already works there),"
+  Say "  and re-run this script."
+  if ($transcribing) { Stop-Transcript | Out-Null }
+  exit 2
+}
+Say "--- codex identity (CODEX_HOME=$CodexHome) ---"
 try { & codex --version } catch { Say "codex --version failed: $($_.Exception.Message)" }
 try { & codex login status } catch { Say "codex login status failed: $($_.Exception.Message)" }
-$authJson = Join-Path $env:USERPROFILE '.codex\auth.json'
-if (Test-Path $authJson) {
-  try {
-    $acct = (Get-Content $authJson -Raw | ConvertFrom-Json).account_id
-    Say "~/.codex/auth.json account_id = $acct"
-  } catch { Say "could not parse $authJson" }
-} else {
-  Say "WARNING: $authJson not found -- this profile is not logged in to codex. Run 'codex login' in this RDP session first."
-}
-$cfg = Join-Path $env:USERPROFILE '.codex\config.toml'
-if (Test-Path $cfg) { Say ("~/.codex/config.toml sha1 = {0}" -f (Get-FileHash $cfg -Algorithm SHA1).Hash) }
+$acct = '(unparsed)'
+try {
+  $acct = (Get-Content $authJson -Raw | ConvertFrom-Json).account_id
+  Say "$CodexHome\auth.json account_id = $acct"
+} catch { Say "could not parse $authJson" }
+$cfg = Join-Path $CodexHome 'config.toml'
+if (Test-Path $cfg) { Say ("$CodexHome\config.toml sha1 = {0}" -f (Get-FileHash $cfg -Algorithm SHA1).Hash) } else { Say "(no $CodexHome\config.toml yet -- codex writes it on first run)" }
 
 # --- 1. refresh the 4 Lane B scripts from main ---
 Say "--- refreshing scripts from main ---"

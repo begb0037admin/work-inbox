@@ -67,13 +67,15 @@ LANE_B_DIR     = REPO_ROOT / "data" / "lane_b"
 CODEX_RUNS_DIR = REPO_ROOT / "data" / "codex_runs"
 NORMALISED_OUT = LANE_B_DIR / "lane_b_normalised.json"
 
-# Recorded ~/.codex/config.toml sha1 baselines, per host (short lowercase
-# hostname). WARNING-ONLY -- a mismatch is logged, never a HALT. Set
-# WI_CODEX_CONFIG_SHA1 to override for a deliberate re-baseline.
+# Recorded <CODEX_HOME>/config.toml sha1 baselines. WARNING-ONLY -- a mismatch is
+# logged, never a HALT. Set WI_CODEX_CONFIG_SHA1 to pin. The Lane B dedicated
+# CODEX_HOME (personal ChatGPT account) has its OWN config.toml -- record its
+# sha1 here once `codex login` into it is done and a run logs it.
 _HOST = (socket.gethostname() or os.environ.get("COMPUTERNAME", "")).split(".")[0].strip().lower()
 CONFIG_TOML_SHA1_BASELINES = {
-    "101l-de013193":   "ba0184e864ffd081069820cc7a6f8f19acf5c845",  # AD-OAK\begb0037, Edu, codex-cli 0.151.0 (1 Sept 2026, first real run)
-    "desktop-mjdjm64": "4fd8ef763bf0a8ddad9a138b6679a84fe8536f73",  # admin desktop, Edu (1 Sept 2026)
+    # "<lane-b-codex-home config.toml sha1>": "personal ChatGPT, Lane B CODEX_HOME -- TBC",
+    "101l-de013193":   "ba0184e864ffd081069820cc7a6f8f19acf5c845",  # AD-OAK\begb0037, ~/.codex, Edu, codex-cli 0.151.0 (1 Sept 2026)
+    "desktop-mjdjm64": "4fd8ef763bf0a8ddad9a138b6679a84fe8536f73",  # admin desktop, ~/.codex, Edu (1 Sept 2026)
 }
 _ENV_CONFIG_SHA1 = os.environ.get("WI_CODEX_CONFIG_SHA1", "").strip().lower()
 # pass/fail check is "is this a recognised good hash" (ANY recorded host, or the
@@ -145,8 +147,40 @@ def _log(msg: str) -> None:
     print(f"[{_dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}] lane_b_call1: {msg}")
 
 
+# --- Lane B codex identity: a DEDICATED CODEX_HOME on Kevin's PERSONAL ChatGPT
+# account (decision 1 Sept ~15:30 -- Edu's 500/month HARD credit cap won't
+# sustain Lane B [~5 codex calls/clean run x 3x/weekday] plus Kevin's own
+# interactive use; personal draws from rate limits, not a monthly cap).
+# WI_LANE_B_CODEX_HOME wins; else an inherited CODEX_HOME; else codex's default
+# (~/.codex). Whatever is resolved is FORCED into CODEX_HOME for every codex
+# subprocess so the Lane B task never rides Kevin's interactive login.
+LANE_B_CODEX_HOME = (os.environ.get("WI_LANE_B_CODEX_HOME", "").strip()
+                     or os.environ.get("CODEX_HOME", "").strip())
+
+
+def _codex_home() -> Path:
+    return Path(LANE_B_CODEX_HOME) if LANE_B_CODEX_HOME else (Path(os.path.expanduser("~")) / ".codex")
+
+
+def _codex_env() -> dict:
+    e = {**os.environ, "PYTHONUTF8": "1"}
+    if LANE_B_CODEX_HOME:
+        e["CODEX_HOME"] = LANE_B_CODEX_HOME
+    return e
+
+
+def _codex_account_id() -> str:
+    try:
+        return (json.loads((_codex_home() / "auth.json").read_text(encoding="utf-8"))
+                .get("account_id") or "(auth.json has no account_id)")
+    except FileNotFoundError:
+        return "(no auth.json -- run `codex login` into this CODEX_HOME)"
+    except Exception as e:  # noqa: BLE001
+        return f"(auth.json unreadable: {e})"
+
+
 def _config_toml_sha1() -> str | None:
-    p = Path(os.path.expanduser("~")) / ".codex" / "config.toml"
+    p = _codex_home() / "config.toml"
     if not p.exists():
         return None
     return hashlib.sha1(p.read_bytes()).hexdigest().lower()
@@ -221,7 +255,7 @@ def _ensure_warm() -> None:
             _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check",
                               "Reply with the single word OK. Use no tools, change nothing."],
             capture_output=True, text=True, timeout=CALL1_WARMUP_TIMEOUT_S,
-            cwd=str(REPO_ROOT), env={**os.environ, "PYTHONUTF8": "1"},
+            cwd=str(REPO_ROOT), env=_codex_env(),
             stdin=subprocess.DEVNULL,   # codex exec BLOCKS reading stdin until EOF -- give it EOF now
         )
         _log(f"codex warm-up done in {time.time() - t0:.0f}s")
@@ -244,7 +278,7 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict]
             proc = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=timeout_s,
                 cwd=str(REPO_ROOT),
-                env={**os.environ, "PYTHONUTF8": "1"},
+                env=_codex_env(),
                 stdin=subprocess.DEVNULL,   # codex-cli 0.151.0 prints "Reading additional input
                                             # from stdin..." and BLOCKS on read until EOF; an
                                             # inherited stdin never closes -> hang. Give it EOF.
@@ -662,6 +696,9 @@ def main(argv: list[str]) -> int:
 
     ts = _utcstamp()
     _log(f"start domain={args.domain} window_days={args.window_days} ts={ts}")
+    if not args.from_file:
+        _log(f"CODEX_HOME={_codex_home()}  account_id={_codex_account_id()}"
+             + ("  [WI_LANE_B_CODEX_HOME override]" if os.environ.get('WI_LANE_B_CODEX_HOME', '').strip() else ""))
     LANE_B_DIR.mkdir(parents=True, exist_ok=True)
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -685,7 +722,7 @@ def main(argv: list[str]) -> int:
 
     sha_before = _config_toml_sha1()
     if sha_before and not args.from_file:
-        _log(f"host={_HOST}  ~/.codex/config.toml sha1={sha_before}")
+        _log(f"host={_HOST}  {_codex_home().name}/config.toml sha1={sha_before}")
         if sha_before == _ENV_CONFIG_SHA1 or sha_before in _KNOWN_CONFIG_SHA1:
             pass  # a recognised good config.toml state
         else:
