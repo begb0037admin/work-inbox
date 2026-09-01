@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-09-01 16:17",
+  "generated_at": "2026-09-01 17:15",
   "new_tasks": [
     {
-      "title": "Investigate P5 Incident# 11706988 / Task# 50981420",
+      "title": "Investigate P5 Incident# 11706988 -- Task# 50981420",
       "tier": "today",
-      "description": "Michael O'Sullivan assigned Task# 50981420 for Kevin to investigate P5 Incident# 11706988 with all reported users affected. Urgent diagnosis required; Kevin must begin investigation immediately and report findings back to Michael.",
+      "description": "Michael O'Sullivan has assigned this support incident investigation to Kevin for action today. All users who reported the issue need investigation and resolution.",
       "email_subject": "FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988",
       "email_from": "Michael O'Sullivan",
       "received": "2026-09-01 09:57",
       "entry_id": ""
     },
     {
-      "title": "Review and resolve Cority Employee Import error -- 2026-08-28 17:00",
+      "title": "Resolve Cority Employee Import error 2026-08-28 17:00",
       "tier": "today",
-      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import; error log is attached and has been unread for 4 days. Kevin must review error details and coordinate with Cority to confirm root cause and resolution.",
+      "description": "Cority Integration Platform reported an SFTP connection error during scheduled employee data import on 28 August. Kevin needs to review the attached error log file and coordinate resolution with James Salas Guillen / Cority support.",
       "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
       "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
       "received": "2026-08-28 18:00",
