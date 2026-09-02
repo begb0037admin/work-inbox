@@ -16,8 +16,17 @@ Read-only except this one file. Uses GITHUB_PAT (User env var, then Machine,
 then process). Best-effort: any failure just logs to stderr and exits 0 -- a
 status push must never fail a real run.
 
+-LaneBGuard / -LaneBGuardDetail (added 2 Sept 2026, -Kind briefing only): the
+Lane B calendar-guard outcome for this run ('not-run'|'clean'|'halted'|
+'transient'|'unexpected-<n>') + a short detail string, so the desktop toast
+watcher can surface a guard HALT even when the overall run exit code is 0 (the
+guard falls back to CAL_BACKEND=com and the briefing still ships that cycle --
+exit code alone would hide the trip). Still just a short fixed-vocabulary
+string -- no email/calendar content.
+
 USAGE
   Push-LaptopRunStatus.ps1 -Kind briefing  -ExitCode 0
+  Push-LaptopRunStatus.ps1 -Kind briefing  -ExitCode 0 -LaneBGuard halted -LaneBGuardDetail "task disabled"
   Push-LaptopRunStatus.ps1 -Kind draftdiff -ExitCode 1 -StatsFile C:\...\stats.json
   Push-LaptopRunStatus.ps1 -Kind draftdiff -ExitCode 3 -Note 'WithAI requested, no key'
 #>
@@ -25,7 +34,9 @@ param(
   [Parameter(Mandatory)] [ValidateSet('briefing','draftdiff')] [string]$Kind,
   [Parameter(Mandatory)] [int]$ExitCode,
   [string]$StatsFile,
-  [string]$Note
+  [string]$Note,
+  [string]$LaneBGuard,
+  [string]$LaneBGuardDetail
 )
 
 $ErrorActionPreference = 'Stop'
@@ -52,6 +63,8 @@ try {
     user      = "$env:USERDOMAIN\$env:USERNAME"
   }
   if ($Note) { $body.note = $Note }
+  if ($LaneBGuard) { $body.lane_b_guard = $LaneBGuard }
+  if ($LaneBGuardDetail) { $body.lane_b_guard_detail = $LaneBGuardDetail }
 
   if ($Kind -eq 'draftdiff' -and $StatsFile -and (Test-Path $StatsFile)) {
     try {

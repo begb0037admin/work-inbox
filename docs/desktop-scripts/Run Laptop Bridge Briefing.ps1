@@ -95,18 +95,32 @@ function Log($m) {
 }
 
 # Publish a tiny GitHub run-status file (counts / exit code only, no email
-# content) so the desktop toast watcher can surface a FAILED laptop run.
+# content) so the desktop toast watcher can surface a FAILED laptop run --
+# and, since 2 Sept 2026, a Lane B calendar-guard HALT even on a run that
+# otherwise succeeds (the guard falls back to CAL_BACKEND=com and the
+# briefing still ships, so $code alone would report "ok" and hide a real
+# safety trip -- see $LaneBGuardResult below).
 # Best-effort: never changes the exit code, never throws.
 function Publish-Status([int]$code) {
   try {
     $pusher = Join-Path $PSScriptRoot 'Push-LaptopRunStatus.ps1'
     if (Test-Path $pusher) {
-      & $pusher -Kind briefing -ExitCode $code 2>&1 | ForEach-Object { Log "status: $_" }
+      & $pusher -Kind briefing -ExitCode $code -LaneBGuard $LaneBGuardResult -LaneBGuardDetail $LaneBGuardDetail 2>&1 | ForEach-Object { Log "status: $_" }
     } else {
       Log "status: Push-LaptopRunStatus.ps1 not found next to this wrapper -- skipped"
     }
   } catch { Log "status: publish failed (non-fatal): $($_.Exception.Message)" }
 }
+
+# Lane B calendar-guard outcome for THIS run, surfaced to Publish-Status above so
+# the cross-machine (desktop) toast watcher sees a HALT even when the briefing
+# itself still succeeds via the CAL_BACKEND=com fallback. Values: 'not-run'
+# (CalBackend never passed -CalBackend connector -- the live task today),
+# 'clean', 'halted' (persistent HALT -- task disabled, THIS is the one that must
+# be hard to miss), 'transient' (connector unavailable this cycle, not actionable),
+# 'unexpected-<n>'.
+$LaneBGuardResult = 'not-run'
+$LaneBGuardDetail = ''
 
 Log "=== Laptop Bridge Briefing START  (user $env:USERDOMAIN\$env:USERNAME  host $env:COMPUTERNAME) ==="
 Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  log=$log"
@@ -161,30 +175,43 @@ if ($CalBackend -eq 'connector') {
   switch ($guardRc) {
     0 {
       Log "Lane B guard CLEAN -- proceeding with CAL_BACKEND=connector"
+      $LaneBGuardResult = 'clean'
     }
     1 {
       Log "Lane B guard PERSISTENT HALT (a real calendar change during the read window, or a write tool was seen) -- disabling '$TaskName' and falling back to CAL_BACKEND=com for THIS cycle only"
       $CalBackend = 'com'
+      $LaneBGuardResult = 'halted'
+      $LaneBGuardDetail = "task '$TaskName' disabled; calendar fell back to COM this cycle. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
       try {
         Disable-ScheduledTask -TaskName $TaskName -ErrorAction Stop | Out-Null
         Log "Disabled scheduled task '$TaskName' -- re-enable manually after investigating: Enable-ScheduledTask -TaskName '$TaskName'"
       } catch {
         Log "WARN: could not Disable-ScheduledTask '$TaskName' ($($_.Exception.Message)) -- disable it manually"
       }
+      # LOCAL toast (laptop, only seen if someone is logged into this session).
+      # Cross-machine (desktop) notification of the SAME event happens via
+      # Publish-Status below -> data/laptop_status/briefing_status.json ->
+      # Watch-BridgeBriefing.ps1 on the desktop -- see that script for the
+      # matching toast. Both are required; neither replaces the other.
       try {
         Import-Module BurntToast -ErrorAction Stop
-        New-BurntToastNotification -Text 'Work Inbox - Lane B calendar guard HALTED', "Task '$TaskName' disabled. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
+        New-BurntToastNotification -Text 'Work Inbox - Lane B calendar guard HALTED', "Task '$TaskName' disabled. $LaneBGuardDetail"
+        Log "local BurntToast fired"
       } catch {
-        Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- toast skipped, the HALT + task-disable above are still real"
+        Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the HALT + task-disable above are still real, and the desktop toast (via Publish-Status) is independent of this and still fires"
       }
     }
     3 {
       Log "Lane B guard TRANSIENT (connector unavailable / could not verify this cycle) -- falling back to CAL_BACKEND=com for THIS cycle only; task stays enabled, will retry next cadence"
       $CalBackend = 'com'
+      $LaneBGuardResult = 'transient'
+      $LaneBGuardDetail = 'connector unavailable this cycle; not actionable, no toast.'
     }
     default {
       Log "Lane B guard unexpected exit $guardRc -- treating conservatively: falling back to CAL_BACKEND=com for THIS cycle only; task stays enabled"
       $CalBackend = 'com'
+      $LaneBGuardResult = "unexpected-$guardRc"
+      $LaneBGuardDetail = "lane_b_cal_guard.py exited $guardRc (not 0/1/3) -- treated conservatively, not disabled."
     }
   }
   $env:CAL_BACKEND = $CalBackend   # re-assert in case the guard downgraded it above

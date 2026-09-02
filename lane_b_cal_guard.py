@@ -70,7 +70,8 @@ def _snapshot_prompt(win_start_iso: str, win_end_iso: str) -> str:
         f"exists, the calendar named \"{lb.SHARED_CAL_NAME}\". "
         "Return ONLY the raw connector result as a JSON array of the event objects, with no "
         "summary and no prose. Do not use any other app or tool. Do not create, update, "
-        "cancel, delete, move, respond to, or add an attachment to any event. Send nothing."
+        "cancel, delete, move, respond to, or add an attachment to any event. Send nothing. "
+        f"{lb.SAFETY_RULE}"
     )
 
 
