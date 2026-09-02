@@ -1,6 +1,18 @@
 {
-  "generated_at": "2026-09-02 20:41",
+  "generated_at": "2026-09-02 21:15",
   "new_tasks": [
+    {
+      "title": "Investigate Cority Employee Import error 2026-08-28 17:00",
+      "tier": "today",
+      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import. Kevin needs to review the error log and confirm resolution with James Salas Guillen/Cority support, similar to the 21 August incident (t2608211926550).",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": "",
+      "message_id": "<010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com>",
+      "web_link": "https://outlook.office.com/mail/search?query=010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000%40us-west-2.amazonses.com",
+      "mail_key": "010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com"
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -62,5 +74,78 @@
       "carried_forward": true
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t2608270801360",
+      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
+      "note": "Simon Burford confirms he will ask Kevin to estimate how many GLAM workgroups the team can take on from GLAM beyond Chemistry's 131.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Simon Burford",
+      "received": "2026-09-02 18:23",
+      "entry_id": "",
+      "message_id": "<CWLP265MB4176CD928473D0EDD95E89CB92B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB4176CD928473D0EDD95E89CB92B72%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB4176CD928473D0EDD95E89CB92B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2608121801280",
+      "task_title": "Review 38-day balance implementation timeline and decisions",
+      "note": "Julie Hickman confirms Chemistry requires 131 workgroups to be updated and asks Kevin for effort estimate on GLAM capacity.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Julie Hickman",
+      "received": "2026-09-02 15:37",
+      "entry_id": "",
+      "message_id": "<LO0SPRMB0017EDD062776109663266368AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB0017EDD062776109663266368AB72%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO0SPRMB0017EDD062776109663266368AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2608270801360",
+      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
+      "note": "Julie Hickman confirms Chemistry workgroup update list expected and notes meeting with Jenna scheduled for Tuesday 3 September.",
+      "email_subject": "RE: changing to 38 day balance - workgroups for updating",
+      "email_from": "Julie Hickman",
+      "received": "2026-09-02 13:44",
+      "entry_id": "",
+      "message_id": "<LO0SPRMB00173AD0E4CD60EE104244EC8AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB00173AD0E4CD60EE104244EC8AB72%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO0SPRMB00173AD0E4CD60EE104244EC8AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2609020705200",
+      "task_title": "Investigate manager leave approval failure - Support Call# 11707439",
+      "note": "Michael O'Sullivan forwards manager leave approval issue for investigation.",
+      "email_subject": "Support Call# 11707439: Manager unable to approve leave",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-09-01 16:29",
+      "entry_id": "",
+      "message_id": "<CWLP265MB1842B7E69E25FD79D17400D280A82@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB1842B7E69E25FD79D17400D280A82%40CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB1842B7E69E25FD79D17400D280A82@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2609020705201",
+      "task_title": "Investigate P5 Incident# 11706988 - Task# 50981420 assigned for investigation",
+      "note": "Michael O'Sullivan assigns P5 Incident 11706988 directly to Kevin for investigation, affecting multiple users reporting the issue.",
+      "email_subject": "FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-09-01 09:57",
+      "entry_id": "",
+      "message_id": "<CWLP265MB1842B0CB675A6D3AF9F715B980A82@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB1842B0CB675A6D3AF9F715B980A82%40CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB1842B0CB675A6D3AF9F715B980A82@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2608270801360",
+      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
+      "note": "Marie Cooksey updates that she met with Michelle who will discuss Chemistry's workgroup responses with Julie on her return.",
+      "email_subject": "RE: changing to 38 day balance - workgroups for updating",
+      "email_from": "Marie Cooksey",
+      "received": "2026-08-28 11:52",
+      "entry_id": "",
+      "message_id": "<LO6P265MB62672A4572572EC4DD3B3ABF8BAC2@LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO6P265MB62672A4572572EC4DD3B3ABF8BAC2%40LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO6P265MB62672A4572572EC4DD3B3ABF8BAC2@LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM"
+    }
+  ]
 }
