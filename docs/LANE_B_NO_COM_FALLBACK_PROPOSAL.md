@@ -1,8 +1,9 @@
 # Lane B calendar — removing COM as the halt/uncertainty fallback (PROPOSAL, not implemented)
 
-**Status:** 2 Sept 2026 (Drew). Design proposal only, per Kevin's explicit instruction to propose
-before implementing. Nothing in this doc has been built. No code in `lane_b_cal_guard.py`,
-`lane_b_call1.py`, `fetch_inbox.py`, or the wrapper has changed as a result of this doc.
+**Status:** 2 Sept 2026 (Drew). Design proposal only. Nothing in this doc has been built —
+distinct from `lane_b_cal_guard.py`/`lane_b_call1.py` themselves, which DID change today (commits
+`d6a74de`, `a4582a0`, `6a681bd`) for a separate, related decision — see the update note below.
+`fetch_inbox.py` and the wrapper are untouched by either.
 
 **Standing decision this responds to (Kevin, verbatim):** *"If we find we can't trust the
 connector read, then we find a way to trust it. I'm not going to rule Connector out of this. We
@@ -12,82 +13,76 @@ not up for re-litigation here.
 
 ---
 
+## UPDATE (2 Sept 2026, later same day) — the snapshot-diff layer this doc's §2-3 was about is GONE
+
+Kevin made a separate, further decision today: drop the PRE/POST snapshot-diff layer from the live
+`--run` gate entirely, rather than keep chasing its reliability (it was the direct cause of the 1
+Sept 52-false-positive bug, the all-day-event gap, and a "second connector call hangs" 360s-timeout
+pattern that blocked every `--dry-diff` attempt this week — three separate incidents, none of them
+ever a real write). `lane_b_call1.py`'s re-contamination guard — which inspects the ACTUAL tool
+calls made during the fetch, not an inferred before/after diff — is now the SOLE live safety
+mechanism. Assessed first whether that guard alone is sufficient (it is, with one real gap found
+and closed the same day: partial/timed-out output is now scanned for tool calls too, via
+`ReContaminationDetected`/`_scan_partial_output_for_writes`, so a write completing just before a
+hang is no longer invisible). Full writeup: HANDOVER.md's 2 Sept "drop the snapshot-diff layer"
+entry.
+
+**Consequence for this doc:** §2-3 below (splitting exit-1 into "1a re-contamination" vs "1b diff
+mismatch", and the POST2 confirmation-snapshot escalation ladder for 1b) is now **MOOT** — there is
+no more 1b. Every HALT from `--run` is now unambiguously a re-contamination event: unlike a diff
+mismatch, it has no ambiguity to resolve by reading again, so there is nothing left to escalate.
+Left §2-3 in place below, struck through in spirit, for the record of what was considered and why
+it's no longer needed — skip to §3-revised for the current design. §4 (no-COM destination) and §5-6
+are updated to match.
+
+---
+
 ## 1. The current behaviour (what's changing)
 
 `lane_b_cal_guard.py --run` returns one of three codes; the wrapper (`Run Laptop Bridge
-Briefing.ps1`) currently reacts to all three by falling back to `CAL_BACKEND=com` for that cycle:
+Briefing.ps1`) currently reacts to all three by falling back to `CAL_BACKEND=com` for that cycle —
+**this part is UNCHANGED by today's snapshot-diff removal, still the thing this doc proposes to fix:**
 
-| Exit | Meaning today | Wrapper reaction today |
+| Exit | Meaning (as of the `6a681bd` redesign) | Wrapper reaction today |
 |---|---|---|
-| 0 | Clean — PRE and POST snapshots agree | proceed with `CAL_BACKEND=connector` |
-| 1 | Persistent HALT — either a write/off-allowlist tool was actually observed (re-contamination), or the PRE/POST diff found a real change | disable the scheduled task, toast, **fall back to `CAL_BACKEND=com`** |
+| 0 | Clean — Call-1's re-contamination guard saw nothing unexpected | proceed with `CAL_BACKEND=connector` |
+| 1 | Persistent HALT — the re-contamination guard actually observed a write/off-allowlist tool call | disable the scheduled task, toast, **fall back to `CAL_BACKEND=com`** |
 | 3 | Transient — connector didn't return `list_events` across all retries, can't verify | task stays enabled, **fall back to `CAL_BACKEND=com`** |
 
-The problem Kevin is pointing at: exit 1 and exit 3 both silently swap in COM — a completely
-different pull mechanism the guard has no visibility into and no ability to safety-check — as the
-*permanent* answer to "the connector wasn't verified this cycle." That's the "silent safety net."
+The problem Kevin is pointing at, unchanged: exit 1 and exit 3 both silently swap in COM — a
+completely different pull mechanism the guard has no visibility into and no ability to
+safety-check — as the *permanent* answer to "the connector wasn't verified this cycle." That's the
+"silent safety net." This doc is still about fixing exactly that.
 
-## 2. First split the two things "exit 1" currently conflates
+## 2. ~~First split the two things "exit 1" currently conflates~~ — MOOT, see UPDATE above
 
-They need different treatment, and treating them the same is itself part of the problem:
+*(Original §2 content preserved for the record; skip to §3-revised.)*
 
-- **1a — re-contamination observed** (a write-verb or off-allowlist tool actually fired, caught by
-  `lane_b_call1.py`'s `guard_recontamination()` on any attempt, PRE/Call-1/POST). This is a
-  **safety** trip. More connector calls after this is the wrong direction — it increases exposure,
-  it doesn't resolve uncertainty. This should stay a hard stop, unchanged in spirit, **only the
-  destination for "what do we show this cycle" changes** (see §4) — never escalate/retry this one.
-- **1b — snapshot diff found a change, no write tool ever observed**. This is an **uncertainty**
-  trip: either (i) the connector gave a flaky/incomplete read on one side (the actual 1 Sept
-  52-false-positive bug and, plausibly, yesterday's 8-diff all-day-event gap), or (ii) the calendar
-  genuinely changed during the pull window (a real edit by Kevin or a colleague, nothing wrong).
-  **This is exactly the case "retry/escalate until trustworthy" is suited to** — more connector
-  reads can actually discriminate between (i) and (ii); more connector reads cannot help 1a.
+There is no longer a "1a vs 1b" distinction to make. Exit 1 from `--run` now means exactly one
+thing: the re-contamination guard actually observed a write/off-allowlist tool call. That is
+always a safety trip, always a hard stop, never something more connector reads would help resolve.
 
-Proposal: `cmd_run()` reports a distinct outcome for 1a vs 1b (e.g. keep exit 1 for 1a, use a new
-exit 4 for 1b before escalation resolves it — see §3) so the wrapper (and any future caller) can
-tell them apart instead of treating every HALT identically.
+## 3-revised. HALT (exit 1) is unambiguous now — no escalation ladder needed
 
-## 3. Escalation ladder for 1b (diff-with-no-write-tool-observed)
+Today (post-`6a681bd`): Call-1 runs, its own re-contamination guard inspects every tool call made
+across every retry attempt (including partial output from a killed/timed-out attempt). If it sees
+anything outside the read-only allowlist for the two Lane B connector namespaces, Call-1 exits 1,
+`cmd_run()` propagates that as exit 1, quarantines the normalised file, and returns.
 
-Today: PRE → Call-1 → POST → diff trips → immediate HALT.
+**There is nothing to escalate or retry here** — unlike a diff mismatch (which could have been a
+flaky read, and a second read could tell you), an observed write-tool call is a direct, first-hand
+observation. Retrying after one increases exposure, it doesn't resolve ambiguity, because there
+isn't any. This case goes straight to §4 below.
 
-Proposed: on a trip, **before** halting, take a third confirmation snapshot and use the
-re-contamination guard's already-independent verdict as a second, orthogonal signal:
-
-1. PRE → Call-1 → POST → diff trips, AND `guard_recontamination()` never flagged a write tool on
-   any of PRE/Call-1/POST (already checked per-attempt today, confirmed by code read this
-   session — see HANDOVER.md 2 Sept entry §6/audit).
-2. Take **POST2** (one more `take_snapshot()` call, reusing existing retry-aware plumbing —
-   cheap, ~1 extra codex call in the rare case this triggers at all).
-3. Compare POST2 against PRE and POST:
-   - **POST2 == PRE (not POST)** → the original POST was the flake. Treat PRE/POST2 as
-     authoritative, proceed with `CAL_BACKEND=connector` this cycle, log the blip
-     (`data/codex_runs/` — a visible, audited "transient diff self-resolved" record, not a silent
-     pass), task stays enabled, no toast (nothing wrong happened).
-   - **POST2 == POST (not PRE), reproducible across two independent reads** → the change is very
-     likely genuine (a real exogenous edit), *not* a flaky read. Combined with re-contamination
-     never having flagged a write tool across PRE/Call-1/POST/POST2, this is strong evidence
-     (two independent signals, not one) that nothing self-inflicted happened. **Accept it**: proceed
-     with `CAL_BACKEND=connector` using POST2's data, log clearly as "confirmed reproducible
-     calendar change during pull window, no write tool observed at any point, accepted" — visible
-     in the run log, not silent — task stays enabled, no toast (this is normal operation, a
-     calendar changing during a 7-day read window is expected).
-   - **Neither matches** (three reads disagree with each other) → genuine instability in what the
-     connector is returning. This is the "can't get a clean read" case → §4.
-
-**Known implementation gap, flagged not solved:** `take_snapshot()` today only returns a
-*fingerprint* (subject/start/end/response_status/all_day), not the full raw event objects
-`normalise_pull` needs to actually populate the briefing. The escalation path needs POST2's full
-data usable downstream, not just its fingerprint for comparison — either extend `take_snapshot()`
-to optionally persist the raw objects too, or have the escalation step re-run
-`lane_b_call1.py --domain calendar` as the "confirmation fetch" (it already produces full,
-correctly-shaped normalised data) instead of a bare snapshot. Worth resolving at implementation
-time, not a blocker to reviewing the design.
+*(The original §3 "POST2 confirmation snapshot" escalation ladder, and its "known implementation
+gap" about `take_snapshot()` only returning fingerprints not full event data, no longer apply —
+there is no second read to confirm, and `take_snapshot()`/`diff_snapshots()` are diagnostic-only
+now, not part of any live decision.)*
 
 ## 4. When it's genuinely unverified — no COM, what instead
 
-Applies to: 1a (re-contamination, always), 1b after escalation still disagrees, and exit-3
-(transient/connector-unavailable, unchanged from today except for the destination).
+Applies to: exit 1 (re-contamination — always, unconditionally now) and exit 3
+(transient/connector-unavailable, unchanged from before today's redesign).
 
 - **Serve no calendar that cycle, honestly.** Reuse the pattern already proven and live for the
   laptop bridge (`WI_BRIDGE_ALLOW_EMPTY_CALENDAR`, used when there is genuinely no calendar
@@ -95,44 +90,45 @@ Applies to: 1a (re-contamination, always), 1b after escalation still disagrees, 
   cycle" warning in the briefing. This is materially different from a COM fallback — it's honest
   about the failure instead of silently substituting a different-trust-model data source the guard
   never checked.
-- **Backoff / escalate the retry, not the fallback.** Two mechanisms worth considering (pick one,
-  or start with the cheaper one and add the other if it's not enough):
-  1. Increase `SNAP_RETRIES`/`CALL1_RETRIES`/timeout for the *next* attempt after a consecutive
-     failure (cheap, no new scheduled infrastructure), or
+- **Backoff / escalate the retry, not the fallback** — this is about exit-3 (genuine connector
+  unavailability), NOT exit-1 (never retry a re-contamination). Two mechanisms worth considering
+  (pick one, or start with the cheaper one and add the other if it's not enough):
+  1. Increase `CALL1_RETRIES`/timeout for the *next* attempt after a consecutive failure (cheap, no
+     new scheduled infrastructure), or
   2. A short-interval out-of-band retry (e.g. 15–30 min later, calendar-pull only, not a full
      briefing re-run) rather than waiting for the next full 07/12/16 cadence slot.
-- **Track and surface a consecutive-failure counter.** A single unverified cycle is unremarkable
-  (already true today, exit 3 doesn't disable the task). A *streak* is a real signal something's
-  wrong with the connector/account and deserves the same visibility the HALT toast now gets
-  (built this session, see the ~09:2x/2 Sept entries) — e.g. after 2+ consecutive
-  unverified/unresolved cycles, fire the same cross-machine toast channel with a distinct message
-  ("Lane B calendar unverified for N consecutive cycles") even though this isn't a safety trip.
-- **Never disable the scheduled task for pure unavailability** (exit 3 today, and 1b-still-unresolved
-  after escalation) — only 1a (re-contamination) disables the task, unchanged from today.
+- **Track and surface a consecutive-failure counter for exit-3 specifically.** A single unverified
+  cycle is unremarkable (already true today, exit 3 doesn't disable the task). A *streak* is a real
+  signal something's wrong with the connector/account and deserves the same visibility the HALT
+  toast now gets (built earlier 2 Sept) — e.g. after 2+ consecutive exit-3 cycles, fire the same
+  cross-machine toast channel with a distinct message ("Lane B calendar unverified for N
+  consecutive cycles") even though this isn't a safety trip.
+- **Never disable the scheduled task for pure unavailability** (exit 3) — only exit 1
+  (re-contamination) disables the task, unchanged from before today.
 
 ## 5. What does NOT change
 
-- The re-contamination guard's strictness (1a) — if anything this proposal argues for *keeping* it
-  exactly as strict, since it's now the thing the whole 1b-escalation logic leans on as an
-  independent signal.
+- The re-contamination guard's strictness — if anything today's redesign argues for keeping it
+  exactly as strict (and it's now been hardened further — partial-output scanning), since it's the
+  ONLY live safety mechanism now, not one of two.
 - `SAFETY_RULE` prompt hardening, the toast build, the `approval_policy` structural finding — all
-  already shipped on `#31` this session, unrelated to this proposal, still ready alongside it.
+  already shipped on `#31`, unrelated to this proposal, still ready alongside it.
 - Nothing here touches the live scheduled task or `CAL_BACKEND` on anything running. Calendar
   stays on COM as the *actual live pull mechanism* until Kevin gives an explicit cutover go-ahead
   — this doc only changes what happens *within the connector path itself* once that cutover has
   happened and Lane B is live.
 
-## 6. Suggested build order (if/when Kevin says go)
+## 6. Suggested build order (if/when Kevin says go) — simplified, no escalation-ladder work needed
 
-1. Split exit 1 into 1a/1b in `lane_b_cal_guard.py` (small, low-risk — just better labeling of an
-   outcome already computed).
-2. Build the POST2 escalation ladder for 1b, resolving the raw-data gap in §3.
-3. Replace the wrapper's `$CalBackend = 'com'` fallback lines (both the exit-1 and exit-3 cases)
+1. Replace the wrapper's `$CalBackend = 'com'` fallback lines (both the exit-1 and exit-3 cases)
    with the "serve empty + warn" path, reusing `WI_BRIDGE_ALLOW_EMPTY_CALENDAR`.
-4. Add the consecutive-failure counter + its toast case (extends the `lane_b_guard` status field
-   already wired this session with a new value, e.g. `unverified-streak-N`).
-5. `--selftest`/`--dry-diff` coverage for the new escalation logic before any live exercise, same
-   discipline as the existing guard fixes.
+2. Add the exit-3 consecutive-failure counter + its toast case (extends the `lane_b_guard` status
+   field already wired earlier 2 Sept with a new value, e.g. `unverified-streak-N`).
+3. Test coverage for the new wrapper behaviour before any live exercise, same discipline as the
+   existing guard fixes — no `--selftest`/`--dry-diff` work needed here since the guard side of
+   this is already done and tested (`lane_b_call1.py --selftest`, `lane_b_cal_guard.py --selftest`,
+   both green as of `6a681bd`).
 
-Each of these is independently reviewable and small — none of it needs to land in one PR, and none
-of it should land without its own `--selftest` proof, same standard as the rest of `#31`.
+Smaller build than the original §6 — dropping the snapshot-diff layer also dropped the escalation
+ladder this doc originally needed to design around it. What's left is just: stop falling back to
+COM, serve empty+warn instead, and make a genuine unavailability streak visible.
