@@ -1,3 +1,50 @@
+# Handover -- 2 September 2026, ~00:1x UTC (Drew, documentation checkpoint) -- PR #31 --dry-diff NOT CLEAN: second, DISTINCT gap (all-day-event completeness), separate from the 1 Sept false-positive fix. Calendar stays on COM, no cutover.
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched this session.
+
+## 1. (a) fetch_inbox.py refresh -- clean
+Kevin ran the prep script from the prior checkpoint in RDP. `iwr` pull of `fetch_inbox.py` from `main` (PR #32's feed fix) + `py_compile` -- clean, no errors.
+
+## 2. (b) No-write shadow run -- completed clean, but does not yet positively prove promotion
+`WI_AI_PARALLEL=1 MAIL_BACKEND=imap AI_BACKEND=claude_code` shadow run completed end-to-end with no errors: IMAP inbox 44 / sent 5, Phase 3.5 `new:0 updates:4`, Phase 3.9 dry-run `carried:20`. **Caveat:** no new IMAP task candidates existed at run time, so this proves "the refreshed script runs clean end-to-end" but does **not** positively prove "a real new IMAP task now promotes via PR #32's `_cc_mail_key` fix" -- that positive proof is still outstanding, pending an actual new-task cycle.
+
+## 3. (c) PR #31 guard: pulled from the BRANCH correctly, `--selftest` 7/7, `--dry-diff` NOT CLEAN
+Kevin correctly pulled `lane_b_cal_guard.py` from `drew/lane-b-cal-guard-snapshot-fix` (blob `5599f3fe`, 24695B) rather than `main` (`main` still carries the pre-fix guard, blob `09e7d1c5`, 14415B -- confirmed directly via the Contents API this session, see `begb0037admin/drew` memory `wi-cc-2sept-verification-checkpoint.md`). `--selftest` **7/7 passed** -- the original 1 Sept 52-false-positive bug (recurring-series occurrence-id churn + raw-isoformat comparison) is still confirmed fixed.
+
+`--dry-diff` then came back **NOT CLEAN**: **8 residual "added" diffs**, all all-day events -- Kevin/Chris/Michael/Julie annual leave + Marie K non-working-day, spanning 2-9 Sept. Run log:
+- PRE snapshot: succeeded fast/clean on attempt 1 (~40s).
+- POST snapshot: `list_events did not fire` on attempts 1-2, succeeded on attempt 3 (~4 min elapsed).
+- All 8 diffs are "added" (present in POST, absent from PRE) and all all-day.
+
+**This points at the PRE snapshot under-returning all-day events on a slow/retried connector call -- but is NOT confirmed.** It is equally consistent with a bug in the guard's own natural-key matching (`_natural_key` / `_fingerprint_one`) specific to all-day events. Neither has been isolated yet.
+
+## 4. Conclusion + Kevin's pushback
+Delivered to Kevin as: PR #31's fix is **not validated for cutover**. It correctly fixes the original 52-diff false-positive (`--selftest` proves this), but has a **second, distinct residual gap** around all-day-event completeness that the original fix does not address and was not designed to address. **Calendar stays on COM. No cutover.** `#31` stays open/draft, unmerged.
+
+Kevin pushed back, reasonably: before parking this, isolate whether it's (i) a connector-completeness issue (real gap -- the guard is correctly distrusting an incomplete read) or (ii) a bug in the guard's own key-matching for all-day events (fixable in code, no connector implication). Session ended (90% usage) before this diagnostic could be run.
+
+## 5. NEXT ACTION -- run this diagnostic first, in RDP as `AD-OAK\begb0037` on `101L-DE013193`, before touching #31's code or re-attempting cutover
+
+```powershell
+cd $env:USERPROFILE\work-inbox
+python .\lane_b_cal_guard.py --snapshot --out data\codex_runs\test1.json
+python .\lane_b_cal_guard.py --snapshot --out data\codex_runs\test2.json
+(Get-Content data\codex_runs\test1.json | ConvertFrom-Json).fp.PSObject.Properties.Name.Count
+(Get-Content data\codex_runs\test2.json | ConvertFrom-Json).fp.PSObject.Properties.Name.Count
+Select-String -Path data\codex_runs\test1.json -Pattern "Annual Leave","Non-working day"
+Select-String -Path data\codex_runs\test2.json -Pattern "Annual Leave","Non-working day"
+python .\lane_b_cal_guard.py --diff --pre data\codex_runs\test1.json --post data\codex_runs\test2.json
+```
+
+**Interpretation:** if `test1.json` (first pull) is missing the leave-event subjects and `test2.json` has them -> connector-side completeness gap between calls, the guard is right to distrust it, this becomes a Lane B connector-reliability finding, not a guard bug. If **both** files already contain the leave subjects and the `--diff` still flags them as "added" -> a bug in `_natural_key`/`_fingerprint_one` specific to all-day events, fixable in `lane_b_cal_guard.py` on the `#31` branch before that PR can be considered done.
+
+`lane_b_cal_guard.py` for this diagnostic must still come from the `#31` branch (`drew/lane-b-cal-guard-snapshot-fix`), not `main` -- same reasoning as §3 above.
+
+## Housekeeping
+Drew wrote this checkpoint from the coordinator's relayed session summary (Kevin stopped the session at 90% usage) -- documentation only, no commands run, no code touched, `#31` not merged, command-centre untouched (nothing changed there today beyond the 1 Sept night state already on record).
+
+---
+
 # Handover -- 1 September 2026, ~21:30 UTC (coordinator; Drew rate-limited mid-task) -- CC FEED FIX + BOARD-UX MERGED; TRIAGE LEDGER CLEANED; Lane B calendar guard split to #31 (parked)
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched tonight. Next run 2026-09-02 07:00.
