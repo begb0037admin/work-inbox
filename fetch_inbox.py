@@ -173,6 +173,40 @@ if CAL_CONNECTOR:
         f"data/lane_b/lane_b_normalised.json (max age {LANE_B_MAX_AGE_H}h). "
         f"Outlook COM will not be used for calendar; mail briefing continues if it is missing/stale.")
 
+# --------------------------------------------------------------------------- #
+#  Teams-source backend  (added 2026-09-02, Drew -- Lane B Teams v1, raw digest
+#  only, no AI triage/judgment on Teams content)
+#  TEAMS_BACKEND=off        (default) -- no Teams section at all. briefing.json
+#                           output is BYTE-IDENTICAL to before this flag existed
+#                           (no "teams" key added, same as CAL_BACKEND=com never
+#                           touching the calendar shape).
+#  TEAMS_BACKEND=connector  -- reads the SAME data/lane_b/lane_b_normalised.json
+#                           file as CAL_BACKEND=connector (produced OUT OF BAND
+#                           by lane_b_call1.py --domain teams|both against the
+#                           codex_apps ChatGPT M365 connector, see docs/
+#                           LANE_B_TEAMS_CAL_DESIGN.md). Independent flag from
+#                           CAL_BACKEND -- Teams has no COM/classic-Outlook
+#                           equivalent to fall back to, it has only ever been
+#                           connector-or-nothing. fetch_inbox.py does NOT invoke
+#                           codex here either, same out-of-band posture as
+#                           calendar. Missing / stale (> WI_LANE_B_MAX_AGE_H,
+#                           shared with calendar) / guard-HALT file => Teams
+#                           section empty + warning, mail briefing continues.
+#                           Re-contamination guard is the SOLE safety mechanism
+#                           for Teams (same as calendar post-2-Sept-redesign) --
+#                           no separate Teams-specific kill-switch exists or is
+#                           planned; the guard already covers the
+#                           microsoft_teams.* namespace (see
+#                           lane_b_call1.py's guard_recontamination()).
+# --------------------------------------------------------------------------- #
+_TEAMS_BACKEND_REQ = os.environ.get("TEAMS_BACKEND", "off").strip().lower()
+TEAMS_BACKEND = _TEAMS_BACKEND_REQ if _TEAMS_BACKEND_REQ in ("off", "connector") else "off"
+TEAMS_CONNECTOR = (TEAMS_BACKEND == "connector")
+if TEAMS_CONNECTOR:
+    log(f"Teams backend: 'connector' -- Teams phase reads "
+        f"data/lane_b/lane_b_normalised.json (max age {LANE_B_MAX_AGE_H}h, shared with calendar). "
+        f"Raw digest only (v1) -- no AI triage/judgment on Teams content.")
+
 
 def _load_lane_b_calendar(_week_end, _lookback):
     """CAL_BACKEND=connector: map data/lane_b/lane_b_normalised.json (written by
@@ -239,6 +273,76 @@ def _load_lane_b_calendar(_week_end, _lookback):
         print(f"WARNING: Lane B calendar load failed ({_lb_e}) -- calendar empty this run, "
               f"mail briefing continues")
         return []
+
+
+def _load_lane_b_teams():
+    """TEAMS_BACKEND=connector: map data/lane_b/lane_b_normalised.json's "teams"
+    array (written by lane_b_call1.py --domain teams|both) into a flat raw-digest
+    list -- chat/channel, sender, time, body preview only. NO AI triage/judgment
+    (v1, deliberately). Mirrors _load_lane_b_calendar()'s file/staleness/HALT
+    checks exactly (same file, same meta.lane_b.domains shape, just the "teams"
+    sub-key instead of "calendar"). Never raises; returns [] plus a warning on
+    any of: file missing, stale (> WI_LANE_B_MAX_AGE_H), guard HALT, or
+    teams-domain status not ok."""
+    try:
+        if not os.path.exists(LANE_B_NORMALISED):
+            print(f"WARNING: TEAMS_BACKEND=connector but {LANE_B_NORMALISED} not found "
+                  f"-- Teams section empty this run, mail briefing continues")
+            return []
+        with open(LANE_B_NORMALISED, "r", encoding="utf-8") as fh:
+            doc = json.load(fh)
+        meta   = (doc.get("meta") or {})
+        lane_b = (meta.get("lane_b") or {})
+        teams_dom = ((lane_b.get("domains") or {}).get("teams") or {})
+
+        ts = lane_b.get("ts") or meta.get("ts")
+        age_h = None
+        if ts:
+            try:
+                t0 = datetime.strptime(ts, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+                age_h = (datetime.now(timezone.utc) - t0).total_seconds() / 3600.0
+            except ValueError:
+                age_h = None
+        if age_h is None:
+            age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
+        if age_h > LANE_B_MAX_AGE_H:
+            print(f"WARNING: Lane B Teams file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
+                  f"-- treating Teams as unavailable this run")
+            return []
+        # lane_b.halt is domain-wide (the re-contamination guard tripping HALTs
+        # the whole Lane B run, calendar and Teams together -- there is no
+        # per-domain HALT split). A per-domain "unavailable"/"codex_failed"
+        # status (teams_dom.get("status")) is the normal, non-alarming case
+        # when only calendar fired this cycle (headless connector availability
+        # is known to flip run-to-run, confirmed 1 Sept).
+        if lane_b.get("halt") or teams_dom.get("status") == "halt":
+            print("WARNING: Lane B guard is HALT/tripped -- Teams section empty this run")
+            return []
+        if teams_dom.get("status") not in ("ok", None):
+            print(f"WARNING: Lane B Teams status is '{teams_dom.get('status')}' "
+                  f"-- Teams section empty this run")
+            return []
+
+        out = []
+        for m in (doc.get("teams") or []):
+            out.append({
+                "channel":      m.get("container_name") or "",
+                "kind":         m.get("kind") or "chat",
+                "sender":       m.get("from_name") or m.get("from_email") or "",
+                "time":         m.get("created") or "",
+                "preview":      (m.get("body_preview") or "")[:200],
+                "is_from_me":   bool(m.get("is_from_me")),
+                "has_attachments": bool(m.get("has_attachments")),
+            })
+        print(f"Phase - Lane B connector Teams: {len(out)} message(s) "
+              f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {teams_dom.get('tool_calls')})")
+        return out
+    except Exception as _lb_e:
+        print(f"WARNING: Lane B Teams load failed ({_lb_e}) -- Teams section empty this run, "
+              f"mail briefing continues")
+        return []
+
+
 AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
                or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
@@ -3603,6 +3707,18 @@ try:
 except Exception as e:
     print(f"WARNING: Phase 3.9 scroll-out persistence failed entirely, Urgent/Needs left as fresh-pull-only this run - {e}")
 
+# -- Phase 3.95 -- Lane B Teams digest (v1: raw digest only, no AI triage) --
+# Independent of everything above -- TEAMS_BACKEND is its own flag (see the
+# doc block near CAL_BACKEND), off by default. When off, no "teams" key is
+# added to `briefing` at all, so briefing.json is byte-identical to before
+# this phase existed -- same discipline as CAL_BACKEND=com never touching the
+# calendar shape.
+if TEAMS_CONNECTOR:
+    log("Phase 3.95 - Lane B Teams digest...")
+    teams_digest = _load_lane_b_teams()
+else:
+    teams_digest = None
+
 briefing = {
     "date":         today_str,
     "subtitle":     subtitle,
@@ -3623,6 +3739,8 @@ briefing = {
     "prioritiesWeek":     priorities_week,
     "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
 }
+if teams_digest is not None:
+    briefing["teams"] = teams_digest
 
 # Laptop bridge: make the missing calendar explicit rather than silently absent.
 # (Absences can still be present here -- Phase "Absence preservation" above carries
