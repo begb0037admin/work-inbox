@@ -318,6 +318,47 @@ def _ensure_warm() -> None:
         _log(f"codex warm-up did not complete in {time.time() - t0:.0f}s ({e}) -- continuing")
 
 
+# --- inter-call QUIET GAP (added 2 Sept 2026, "second call hangs" investigation) -----------
+# Evidence: (1) a clean manual test -- two SEPARATE `--snapshot` invocations Kevin typed one
+# after another, natural human-typing gap ~30s-few min between them -- came back clean, 51/51
+# events, 0 diffs. (2) the automated `--dry-diff` PRE+POST-in-one-process sequence has ZERO gap
+# (POST's first attempt starts at the exact same timestamp PRE's last call returned) and hung
+# 360s on EVERY attempt after the first, including retries -- and `run_codex_json`'s own 2-attempt
+# loop *also* has zero gap between attempt 1 and attempt 2. There is no point in the observed
+# failure sequence where the connector ever actually sat idle, even though ~12 minutes of
+# wall-clock elapsed across the failed attempts -- every attempt is either touching the connector
+# immediately after a prior touch, or retrying seconds after a timeout. This is consistent with
+# "needs a genuine quiet gap since the last connector touch", not "needs elapsed clock time" or
+# "needs a fresh OS process" (each attempt already IS a fresh subprocess -- confirmed no session/
+# process reuse anywhere in this file; the gap, not the process boundary, is the suspect variable).
+# Mechanism (hypothesis, not proven): a shared connector-bridge/session resource (per CODEX_HOME
+# or per ChatGPT account) that a rapid repeat touch contends with or that a killed/timed-out call
+# leaves in a bad state until real quiet time passes. Fix: enforce a minimum quiet gap since the
+# last connector touch before every `codex exec` invocation this process makes -- covers BOTH the
+# PRE-to-POST gap (take_snapshot calls in `cmd_dry_diff`/`cmd_run`, via this shared module-level
+# tracker) AND the previously-zero-gap retry within this function, with one mechanism.
+SNAPSHOT_GAP_S = int(os.environ.get("WI_LANE_B_SNAPSHOT_GAP_S", "75"))
+_LAST_CONNECTOR_TOUCH_MONO: float | None = None
+
+
+def _wait_for_quiet_gap(tag: str) -> None:
+    global _LAST_CONNECTOR_TOUCH_MONO
+    if _LAST_CONNECTOR_TOUCH_MONO is None:
+        return
+    elapsed = time.monotonic() - _LAST_CONNECTOR_TOUCH_MONO
+    remaining = SNAPSHOT_GAP_S - elapsed
+    if remaining > 0:
+        _log(f"[{tag}] waiting {remaining:.0f}s quiet gap since the last connector touch "
+             f"(WI_LANE_B_SNAPSHOT_GAP_S={SNAPSHOT_GAP_S}) before the next codex exec call")
+        time.sleep(remaining)
+
+
+def _mark_connector_touch() -> None:
+    global _LAST_CONNECTOR_TOUCH_MONO
+    _LAST_CONNECTOR_TOUCH_MONO = time.monotonic()
+# ------------------------------------------------------------------------------------------- #
+
+
 def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict], str]:
     """Return (parsed_json_objects, raw_stdout). Raises RuntimeError on hard failure."""
     _ensure_warm()
@@ -328,6 +369,7 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict]
 
     last_raw = ""
     for attempt in (1, 2):
+        _wait_for_quiet_gap(tag)
         _log(f"[{tag}] codex exec attempt {attempt}/2 (timeout {timeout_s}s)")
         try:
             proc = subprocess.run(
@@ -339,11 +381,13 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict]
                                             # inherited stdin never closes -> hang. Give it EOF.
             )
         except subprocess.TimeoutExpired as te:
+            _mark_connector_touch()
             last_raw = (te.stdout or "") if isinstance(te.stdout, str) else ""
             _log(f"[{tag}] timed out after {timeout_s}s (cold-start hang?) -- retrying once" if attempt == 1
                  else f"[{tag}] timed out again")
             continue
 
+        _mark_connector_touch()
         raw = proc.stdout or ""
         last_raw = raw
         objs = _parse_jsonl(raw)

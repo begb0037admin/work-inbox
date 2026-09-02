@@ -377,10 +377,17 @@ def cmd_diff(pre: str, post: str) -> int:
 
 
 def cmd_dry_diff() -> int:
-    """Two back-to-back snapshots with NO Call-1 between them; assert zero
-    diff. The cheap validator for the normalisation before any full guard
-    cutover retry. exit 0 = stable, 1 = residual diff (normalisation still
-    imperfect), 3 = connector unavailable."""
+    """Two snapshots with NO Call-1 between them; assert zero diff. The cheap
+    validator for the normalisation before any full guard cutover retry.
+    exit 0 = stable, 1 = residual diff (normalisation still imperfect),
+    3 = connector unavailable.
+    NOTE (2 Sept 2026): PRE and POST are no longer truly "back-to-back" --
+    lane_b_call1.py's run_codex_json() now enforces a minimum quiet gap
+    (WI_LANE_B_SNAPSHOT_GAP_S, default 75s) since the last connector touch
+    before every codex exec call, including this pair. Evidence: a clean
+    manual two-separate-invocations test (natural human-typing gap) vs a
+    hard hang on every attempt of the previous zero-gap automated version --
+    see HANDOVER.md for the full writeup."""
     ts = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     window = _run_window()
     _log(f"--dry-diff: PRE + POST back-to-back, NO Call-1 (window "
