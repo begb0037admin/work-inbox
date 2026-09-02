@@ -1,3 +1,43 @@
+# Handover -- 2 September 2026, later still (coordinator + Drew) -- #31 MERGED to main (b09d047, Kevin's go-ahead after a clean live --run: 51 events, exit 0, on top of 11/11 selftest); Teams v1 (raw digest, no AI triage) BUILT on new branch #33, compiles + isolated tests pass, awaiting live RDP validation before merge. Live task stays CAL_BACKEND=com -- Kevin's plan is to cut BOTH calendar and Teams over together once Teams is validated too, not calendar sooner.
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. **Not touched. Calendar stays on COM.** Merging `#31`'s guard fix to `main` does NOT cut over the live task -- that's a separate decision, deliberately deferred until Teams is ready too (see below).
+
+## #31 merged
+Commit `b09d047`, after Kevin ran a live `--dry-diff` → clean, then a live `--run` → clean (51 events, exit 0) on the redesigned guard (re-contamination-only, no snapshot-diff). Calendar guard fix is done. Cutover (flipping the live task to `CAL_BACKEND=connector`) is a separate, still-undecided step -- see next.
+
+## Teams v1 scoped, then built (Kevin: go ahead)
+Scoped first (prior turn): checked the repo directly rather than trusting old HANDOVER entries. Found `lane_b_call1.py`'s Teams fetch/guard side was already fully built since ~1 Sept (prompt, allowlist, parsing, re-contamination coverage -- proven again today via the `--selftest` "send_chat_message present -> HALT" case) but completely unused -- `fetch_inbox.py` had zero Teams handling of any kind. Recommended not building the original design doc's Teams-specific "disable next run" diff-based kill-switch (`LANE_B_TEAMS_CAL_DESIGN.md` §6b) -- same fragile "two reads agree" pattern just dropped for calendar -- and reusing the existing re-contamination guard uniformly instead.
+
+Kevin confirmed: build it, uniform guard treatment (same immediate-halt as calendar, not the lenient variant), raw digest only for v1 (no AI triage), gated behind its own flag, same off-by-default/byte-identical-when-off discipline as `CAL_BACKEND`. Also confirmed the cutover sequencing: **both calendar and Teams go live together once Teams is validated, not calendar now/Teams later.**
+
+**Built, on new branch `drew/lane-b-teams-v1` -- draft PR https://github.com/begb0037admin/work-inbox/pull/33, commit `b676b8f`:**
+- New `TEAMS_BACKEND` env flag (`off` default, `connector` opt-in) in `fetch_inbox.py`, independent of `CAL_BACKEND` -- Teams has no COM/classic-Outlook equivalent, always connector-or-nothing. Off = byte-identical output, no `"teams"` key added to `briefing.json` at all.
+- `_load_lane_b_teams()` mirrors `_load_lane_b_calendar()` almost line for line -- same `data/lane_b/lane_b_normalised.json` file (already written by `lane_b_call1.py --domain teams|both`, no change needed there), same staleness (`WI_LANE_B_MAX_AGE_H`)/HALT checks, `teams` sub-key instead of `calendar`. Digest fields: channel/kind, sender, time, preview, `is_from_me`, `has_attachments` -- raw pass-through only, no summarisation/judgment, per Kevin's v1 scope.
+- New Phase 3.95 assembles the digest just before the `briefing` dict is built.
+- Safety: reuses the re-contamination guard as-is, no new mechanism -- it already covers `microsoft_teams.*`. No per-domain HALT split (`lane_b.halt` is Lane-B-wide, same as calendar).
+
+**Verified locally:** `py_compile` clean. `_load_lane_b_teams()`'s logic verified in isolation (extracted + run against 7 synthetic `lane_b_normalised.json` shapes: missing file, clean ok, stale, lane_b-wide halt, teams-domain halt, teams-domain unavailable/normal-flakiness, malformed JSON) -- **7/7 pass**, mirroring exactly what `_load_lane_b_calendar()` already relies on. **Not yet live-tested against the real connector or a real `fetch_inbox.py` run** -- no RDP access this session, same gate as calendar had.
+
+## Next action -- resume here
+Same rhythm as calendar's `#31`: a live validation run in RDP before Kevin approves merge. Re-pull `fetch_inbox.py` from the new branch (not main) and do a supervised test run with `TEAMS_BACKEND=connector` set:
+```powershell
+cd $env:USERPROFILE\work-inbox
+$cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/fetch_inbox.py?t=$cb" -OutFile fetch_inbox.py
+Get-ChildItem fetch_inbox.py   # sanity check: today's date
+python -c "import py_compile; py_compile.compile('fetch_inbox.py', doraise=True); print('compiles clean')"
+# fetch a real Teams pull first (same pattern as the calendar dry-diff work):
+python .\lane_b_call1.py --domain teams
+# then a real fetch_inbox.py run with the new flag on -- CoreOnly-equivalent, review the output
+# before anything touches GitHub. Exact invocation depends on which wrapper/env Kevin uses --
+# mirror whatever he used for the calendar --run validation, with TEAMS_BACKEND=connector added.
+```
+If clean (a `"teams"` array appears in the local output with sane digest entries, no guard HALT): `#33` is ready for Kevin's own merge decision -- still not automatic. **Cutover for both calendar and Teams together is a separate, later, still-undecided step -- do not assume it's happening today.**
+
+**Standing architectural decision (unchanged, do not re-litigate):** no permanent COM fallback for Lane B calendar. Connector is the mandatory path. Teams was always connector-only, no COM equivalent ever existed.
+
+---
+
 # Handover -- 2 September 2026, later still (coordinator + Drew) -- MAJOR REDESIGN: the fragile PRE/POST snapshot-diff layer is DROPPED from the live guard entirely (Kevin's decision); the re-contamination guard (inspects actual tool calls, not an inferred diff) is now the SOLE live safety mechanism for Lane B calendar. Built, tested, pushed to #31. Calendar stays on COM, nothing merged.
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM, no cutover.**
