@@ -11,6 +11,10 @@ minutes and toasts for:
   3. DRAFT DIFF     -- data/laptop_status/draftdiff_status.json changes:
                        result=ok    -> "ran (pairs N / backlog M)"
                        result=failed-> "FAILED (exit N)"
+  4. LANE B GUARD HALT -- data/laptop_status/briefing_status.json's lane_b_guard
+                       field ='halted' (added 2 Sept 2026). Fires independently of
+                       #2 -- a guard trip falls back to CAL_BACKEND=com and the
+                       briefing still ships (result=ok), so #2 alone would miss it.
 
 Read-only GitHub API only (commits API for #1, contents API for #2/#3). No
 Outlook, no M365, no local pipeline dependency.
@@ -129,6 +133,16 @@ try {
         Toast 'Work Inbox Briefing - FAILED (laptop)' "exit $($bs.obj.exit_code)  -  $ts" 'The laptop briefing run did not complete. Check logs\bridge_briefing_last_run.log on the laptop.'
       } else {
         Log "briefing_status new ($($bs.sha.Substring(0,7))) result=$($bs.obj.result) -- no toast (success covered by the commit poll)."
+      }
+      # Lane B calendar-guard HALT -- fires independently of $bs.obj.result, because
+      # a guard trip falls back to CAL_BACKEND=com and the briefing still ships
+      # (result=ok) that cycle. This is the one that must be hard to miss even away
+      # from the laptop: it means a scheduled task got disabled and Lane B needs
+      # investigating. Added 2 Sept 2026 (Kevin: laptop toast alone is not enough
+      # since the whole point is being away from the laptop).
+      if ([string]$bs.obj.lane_b_guard -eq 'halted') {
+        $ts = [string]$bs.obj.ts
+        Toast 'Work Inbox - Lane B calendar guard HALTED (laptop)' "$ts" "$([string]$bs.obj.lane_b_guard_detail)"
       }
       $state.lastBriefingStatusSha = $bs.sha; Save-State
     } else {
