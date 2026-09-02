@@ -1,3 +1,45 @@
+# Handover -- 2 September 2026, end of day (coordinator + Drew, stop-and-checkpoint -- Kevin switching to mains power, stopping for the day) -- #31's fix is very likely good; ONLY the formal --dry-diff confirmation is still outstanding, blocked by operator directory-confusion all session, not a code problem
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM, no cutover.**
+
+## 1. Standing decision reconfirmed: NO permanent COM fallback -- settled, don't re-litigate
+Kevin, again today: connector is the mandatory path, COM is not an acceptable permanent fallback destination for a Lane B halt/uncertainty. `docs/LANE_B_NO_COM_FALLBACK_PROPOSAL.md` (commit `1eb1c4b`, on `#31`) stands as the design direction for what replaces the COM fallback -- still a proposal only, nothing implemented. Future sessions: this is architecture, not feasibility-up-for-debate.
+
+## 2. SAFETY_RULE "bug" -- CONFIRMED operator error, not a code problem; also resolves the "why did the guard file revert" open question
+Root cause, fully diagnosed: Kevin was running commands from his **home directory**, not `work-inbox` (a stray half-downloaded file pair had landed there earlier from a misdirected `iwr`). Even after `cd`-ing back into `work-inbox`, the local `lane_b_call1.py` actually sitting there was a **stale pre-session checkout** that had never been overwritten by today's downloads. Branch `#31`'s `lane_b_call1.py` was and is correct (verified directly against the blob earlier this session -- `SAFETY_RULE` is defined and used correctly). **This also fully explains the previous entry's "guard file keeps reverting, cause not diagnosed" open question -- it was never reverting. It was directory confusion the whole session.** The earlier hypothesis (the wrapper's self-refresh loop being hardcoded to `main` and silently clobbering branch-only files) is still real and still worth fixing eventually, but it is NOT what caused today's specific failures.
+
+## 3. Domain-user SSH gap -- diagnosed by Max, not urgent
+Max (`begb0037admin/max`) found the root cause: very likely Windows OpenSSH's strict per-user `authorized_keys` ACL check failing silently (confirmed via a live SSH attempt + the laptop's own OpenSSH/Operational event log showing a pre-auth connection close, same signature). The file exists but neither Max nor the admin account can read it to confirm -- only Kevin, logged in normally, can check:
+```powershell
+icacls "$env:USERPROFILE\.ssh\authorized_keys"
+Get-Content "$env:USERPROFILE\.ssh\authorized_keys"
+```
+Not urgent, not blocking anything. Whenever Kevin gets to it. Full evidence in `begb0037admin/max`'s own memory.
+
+## 4. Toast mechanism -- confirmed NOT blocked by the admin-rights gap
+Also from Max: the cross-machine toast built earlier today is unaffected by the `AD-OAK\begb0037` admin-rights limitation -- it runs `RunLevel Limited` (already proven live), `BurntToast` needs no elevated install and fails soft if missing, and the toast that actually reaches Kevin fires from the **desktop** side (`Watch-BridgeBriefing.ps1`) regardless of the laptop's own rights. No change needed.
+
+## 5. Formal `--dry-diff` confirmation -- STILL NOT OBTAINED, the one open item
+By end of session: files are now correctly in place in `work-inbox` (`lane_b_call1.py` freshly re-pulled, `SAFETY_RULE` confirmed present, `__pycache__` cleared). The corrected run was **in flight** when Kevin called time to stop for the day. Not a code problem at this point -- purely a "ran out of session time" close-out gap.
+
+## Where everything stands
+- **#31's actual fix is very likely good.** Yesterday's manual snapshot/diff test (`test1.json`/`test2.json`, both 51 events, both containing every previously-missing all-day subject, formal `--diff` = `{"trips": [], "tripped": false}` clean) is strong evidence. **The ONLY thing blocking merge is getting one clean formal `--dry-diff` run** through the actual entry point -- today's session never obtained it, entirely because of directory-confusion errors on the operator side (see #2), not because of anything wrong in the code.
+- Write-safety hardening (cross-machine toast, `SAFETY_RULE` prompt hardening, the `approval_policy` source-level proof) and the no-COM-fallback design proposal are all sitting on `#31`, ready alongside the guard fix, nothing merged.
+- Calendar remains on COM. No cutover today, none pending. Nothing touched on `main`'s pipeline code this session -- documentation only.
+
+## Next action -- resume here
+Confirm you're actually in the right directory and looking at today's files before running anything, then run the formal confirmation:
+```powershell
+cd $env:USERPROFILE\work-inbox
+Get-ChildItem lane_b_call1.py, lane_b_cal_guard.py   # sanity check: both should show TODAY's date
+python .\lane_b_cal_guard.py --dry-diff
+```
+If `CLEAN`: `#31` is ready for Kevin's own merge/cutover decision (still not automatic -- his explicit go-ahead, same as every prior gate). If it fails: re-check you're actually in `work-inbox` with today's files (per #2) before re-diagnosing anything about the connector or the guard's key-matching -- rule out directory/stale-checkout confusion FIRST, it has now caused two separate false alarms this week.
+
+**Standing architectural decision (settled, do not re-litigate in a future session):** no permanent COM fallback for Lane B calendar. Connector is the mandatory path. See #1 above and `docs/LANE_B_NO_COM_FALLBACK_PROPOSAL.md` for the design direction once `#31` merges.
+
+---
+
 # Handover -- 2 September 2026, ~later UTC (coordinator + Drew, stop-and-checkpoint -- Kevin switching accounts) -- #31 very likely FIXED, one formal confirmation run outstanding; write-safety hardening (toast, prompt rules, approval_policy proof) built and ready alongside it; guard file reverted on the laptop mid-session, root cause found
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM, no cutover.**
