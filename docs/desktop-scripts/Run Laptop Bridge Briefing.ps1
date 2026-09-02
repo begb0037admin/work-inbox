@@ -29,11 +29,12 @@ LANE B (connector calendar) GLUE -- added 1 Sept 2026, NOT LIVE YET:
     exit 3 (transient -- connector unavailable / could not verify this cycle)
             -> log + fall back to CAL_BACKEND=com for this cycle; task STAYS
             enabled; try again next cadence.
-  CODEX_HOME for the guard/Call-1: see $LaneBCodexHome below -- ONE clearly
-  commented variable, currently blank (uses whatever codex is already logged
-  into on this session -- the Oxford Edu account, at the time this was wired).
-  Flip it to the dedicated Lane B login once Kevin does the personal-ChatGPT
-  switch and tells us the CODEX_HOME to point at.
+  CODEX_HOME for the guard/Call-1: UPDATED 2 Sept 2026 evening -- lane_b_call1.py
+  now resolves its own primary (Edu, tried first) / failover (personal,
+  automatic once Edu's own retry budget is exhausted for ANY reason) identity
+  and logs which one served each call. $LaneBCodexHome below is an escape
+  hatch only (normally blank) -- see its own comment block for the full story
+  and the two wrong ideas rejected en route to this design.
   **THE LIVE SCHEDULED TASK STAYS ON CAL_BACKEND=com.** This wiring is dormant
   until Kevin gives the explicit go-ahead to register/re-register the task with
   -CalBackend connector -- same cutover discipline as the mail IMAP migration.
@@ -64,16 +65,46 @@ param(
 )
 
 # ============================================================================
-# LANE B -- single override points (edit these two lines only to change identity
-# or task name; nothing else in this script should need touching for that).
-#   $LaneBCodexHome = '' (blank)         -> use whatever codex is already logged
-#                                            into on this session (Edu, as of
-#                                            1 Sept 2026 -- Kevin has not yet
-#                                            done the personal-account switch).
-#   $LaneBCodexHome = 'C:\WorkInboxAI\codex-laneb'  -> ONE-LINE FLIP to the
-#                                            dedicated Lane B login once Kevin
-#                                            has run `codex login` into it on
-#                                            the personal ChatGPT account.
+# LANE B identity -- CORRECTED 2 Sept 2026 evening (Kevin, after tonight's Teams
+# investigation). Two DIFFERENT wrong ideas were tried and rejected in quick
+# succession tonight before landing here, both worth recording so a future
+# session doesn't re-propose them:
+#   (a) leaving this blank (the state since 1 Sept) -- silently falls through to
+#       whatever codex is already logged into on the calling session, which on
+#       the laptop's RDP default profile is Edu. That's not "wrong" by itself
+#       (Edu IS meant to be tried first -- see below) but it was ACCIDENTAL, not
+#       deliberate, and gave no fallback at all when Edu failed (which is
+#       exactly what happened to Teams tonight: 4 straight timed-out attempts,
+#       no data, ever, on Edu).
+#   (b) hardcoding this to the personal account (`C:\WorkInboxAI\codex-laneb`)
+#       -- tried first as "the fix" tonight, then Kevin corrected it: the 1 Sept
+#       move to personal-only was a TESTING-PHASE workaround for burning
+#       through Edu's monthly cap fast during heavy testing, not the permanent
+#       architecture. Edu should still be tried first, every time; personal is
+#       the safety net, not the new default.
+# ACTUAL design: `lane_b_call1.py` itself now has explicit primary(Edu)/
+# failover(personal) resolution + automatic failover built in (PRIMARY_CODEX_HOME
+# / FAILOVER_CODEX_HOME, WI_LANE_B_CODEX_HOME_FAILOVER env override) -- Edu is
+# tried first, its EXISTING retry budget is exhausted, and only then does it
+# automatically retry the same call against personal, logging clearly which
+# identity actually served each call. This wrapper does NOT need to pick an
+# identity or implement any fallback itself any more -- that decision now lives
+# in the Python code, not here. This var is kept ONLY as an explicit escape
+# hatch to override BOTH calendar's and Teams' primary identity in one place if
+# ever needed (e.g. Edu login expires and needs bypassing entirely) -- leave it
+# blank for normal operation, which lets lane_b_call1.py's own primary/failover
+# logic run as designed.
+#   $LaneBCodexHome = '' (blank, NORMAL)      -> lane_b_call1.py resolves its
+#                                                 own primary (Edu, explicit
+#                                                 deliberate default) and
+#                                                 failover (personal) itself.
+#   $LaneBCodexHome = '<any path>'            -> escape hatch: forces BOTH
+#                                                 CODEX_HOME and
+#                                                 WI_LANE_B_CODEX_HOME to this
+#                                                 path, which becomes
+#                                                 lane_b_call1.py's PRIMARY
+#                                                 (its own failover logic still
+#                                                 applies on top of that).
 # ============================================================================
 $LaneBCodexHome = ''
 $TaskName       = 'Work Inbox Bridge Briefing'   # this task's own name, for Disable-ScheduledTask on a guard HALT
@@ -164,9 +195,9 @@ if ($CalBackend -eq 'connector') {
   if ($LaneBCodexHome -ne '') {
     $env:CODEX_HOME           = $LaneBCodexHome
     $env:WI_LANE_B_CODEX_HOME = $LaneBCodexHome
-    Log "Lane B: CODEX_HOME override -> $LaneBCodexHome"
+    Log "Lane B: CODEX_HOME escape-hatch override -> $LaneBCodexHome (becomes lane_b_call1.py's PRIMARY; its own failover logic still applies on top)"
   } else {
-    Log "Lane B: `$LaneBCodexHome not set -- using whatever codex is already logged into on this session"
+    Log "Lane B: `$LaneBCodexHome not set (normal) -- lane_b_call1.py resolves its own primary(Edu)/failover(personal) identity and logs which one actually served each call"
   }
   Log "running: python lane_b_cal_guard.py --run"
   & python -u (Join-Path $root 'lane_b_cal_guard.py') --run 2>&1 | Tee-Object -FilePath $log -Append
