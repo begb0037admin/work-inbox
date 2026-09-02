@@ -66,6 +66,15 @@ REPO_ROOT      = Path(__file__).resolve().parent
 LANE_B_DIR     = REPO_ROOT / "data" / "lane_b"
 CODEX_RUNS_DIR = REPO_ROOT / "data" / "codex_runs"
 NORMALISED_OUT = LANE_B_DIR / "lane_b_normalised.json"
+# Teams incremental-pull high-water-mark (added 2 Sept 2026 evening, last piece
+# before cutover). Local file, same convention as lane_b_normalised.json itself
+# and every other data/lane_b/*.json artefact -- never pushed to GitHub (data/
+# lane_b/ and data/codex_runs/ don't exist on `main` at all, confirmed earlier
+# tonight). NOT the triage ledger / calendar-snapshot pattern (those are
+# GitHub-backed with backup-and-verify discipline) -- this is ephemeral local
+# state, same tier as lane_b_normalised.json, plain read/write, no backup
+# machinery needed.
+TEAMS_WATERMARK = LANE_B_DIR / "teams_watermark.json"
 
 # Recorded <CODEX_HOME>/config.toml sha1 baselines. WARNING-ONLY -- a mismatch is
 # logged, never a HALT. Set WI_CODEX_CONFIG_SHA1 to pin. The Lane B dedicated
@@ -318,6 +327,90 @@ def build_teams_prompt(since_iso: str) -> str:
         "a chat or channel, and do not touch Planner or tasks. "
         f"{SAFETY_RULE}"
     )
+
+
+# --------------------------------------------------------------------------- #
+#  Teams incremental-pull high-water-mark (added 2 Sept 2026 evening).
+#  Every run used to re-ask the connector for the full --teams-lookback-h
+#  (default 72h) rolling window from scratch -- correction on the framing this
+#  was requested under: Teams was already narrower than a literal 7-day pull
+#  (that's calendar's --window-days, unrelated/unused for Teams), but every run
+#  still re-scanned the full 72h regardless of how recently the last run
+#  succeeded. On a 3x/weekday cadence that's a lot of redundant re-enumeration
+#  of Edu's real Teams volume -- plausibly a real contributor to tonight's
+#  slowness. Fix: persist the newest message timestamp actually observed in
+#  the last SUCCESSFUL pull; every run after the first asks only for the gap
+#  since then instead of the full lookback.
+# --------------------------------------------------------------------------- #
+def _parse_iso_utc(s) -> "_dt.datetime | None":
+    """Permissive ISO-8601 -> aware UTC datetime. Returns None on anything
+    unparseable rather than raising -- this function must never be the reason
+    a run fails."""
+    if not s:
+        return None
+    try:
+        s2 = _FRAC_RE.sub("", str(s).strip())
+        s2 = s2[:-1] + "+00:00" if s2.endswith("Z") else s2
+        d = _dt.datetime.fromisoformat(s2)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=_dt.timezone.utc)
+        return d.astimezone(_dt.timezone.utc)
+    except (ValueError, TypeError):
+        return None
+
+
+def _load_teams_watermark() -> str | None:
+    """Returns the persisted high-water-mark (an ISO-8601 UTC string to resume
+    'since' from), or None if there isn't one yet (first-ever run) or the file
+    is missing/corrupt (treated identically to first-ever run -- self-healing,
+    never a HALT, never raises). A None return means the caller falls back to
+    the existing full --teams-lookback-h baseline."""
+    try:
+        if not TEAMS_WATERMARK.exists():
+            return None
+        doc = json.loads(TEAMS_WATERMARK.read_text(encoding="utf-8"))
+        hwm = doc.get("high_water_mark")
+        if _parse_iso_utc(hwm) is None:
+            _log(f"teams watermark file present but unparseable ({hwm!r}) -- "
+                 f"treating as first-ever run (full lookback baseline)")
+            return None
+        return hwm
+    except Exception as e:  # noqa: BLE001
+        _log(f"teams watermark unreadable ({e}) -- treating as first-ever run (full lookback baseline)")
+        return None
+
+
+def _new_teams_watermark(raw_items: list[dict], pull_started_iso: str) -> str:
+    """The new high-water-mark after a SUCCESSFUL pull -- the later of (a) the
+    newest `created` timestamp actually observed among the returned messages,
+    or (b) the wall-clock time this pull started (a safe floor: never advances
+    past 'when we started asking', so a slow pull can't skip messages that
+    arrived mid-pull -- they'll simply be re-covered, harmlessly, next run).
+    Called ONLY when the caller has confirmed status=='ok' -- see main()."""
+    best = pull_started_iso
+    best_dt = _parse_iso_utc(pull_started_iso)
+    for m in raw_items:
+        cand_dt = _parse_iso_utc(m.get("created"))
+        if cand_dt is not None and (best_dt is None or cand_dt > best_dt):
+            best, best_dt = m.get("created"), cand_dt
+    return best if best_dt is not None else pull_started_iso
+
+
+def _save_teams_watermark(new_hwm: str, *, count: int) -> None:
+    """Called ONLY after a genuinely successful, verified pull (status=='ok').
+    NEVER called on halt/unavailable/codex_failed -- advancing the mark on a
+    failed run would create a silent, permanent gap in coverage the next run
+    would never know to fill. Best-effort write; a failure here just means the
+    next run re-widens to the full lookback baseline (safe, just less
+    efficient) -- never raises, never fails the overall run."""
+    try:
+        LANE_B_DIR.mkdir(parents=True, exist_ok=True)
+        TEAMS_WATERMARK.write_text(json.dumps(
+            {"high_water_mark": new_hwm, "updated_ts": _utcstamp(), "last_pull_count": count},
+            indent=2), encoding="utf-8")
+        _log(f"teams watermark advanced to {new_hwm} (last pull: {count} item(s))")
+    except OSError as e:  # noqa: BLE001
+        _log(f"WARNING: could not write teams watermark ({e}) -- next run will re-widen to the full lookback")
 
 
 # --------------------------------------------------------------------------- #
@@ -1108,7 +1201,18 @@ def main(argv: list[str]) -> int:
     win_end = win_start + _dt.timedelta(days=args.window_days)
     win_start_iso = win_start.strftime("%Y-%m-%dT%H:%M:%SZ")
     win_end_iso = win_end.strftime("%Y-%m-%dT%H:%M:%SZ")
-    since_iso = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(hours=args.teams_lookback_h)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    teams_pull_started_iso = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _teams_lookback_since = (_dt.datetime.now(_dt.timezone.utc)
+                             - _dt.timedelta(hours=args.teams_lookback_h)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    teams_watermark = _load_teams_watermark()
+    if teams_watermark:
+        since_iso = teams_watermark
+        _log(f"teams: resuming from watermark {since_iso} (skips re-scanning the full "
+             f"{args.teams_lookback_h}h lookback)")
+    else:
+        since_iso = _teams_lookback_since
+        _log(f"teams: no watermark yet -- full {args.teams_lookback_h}h baseline lookback (from {since_iso})")
 
     domains = ["calendar", "teams"] if args.domain == "both" else [args.domain]
     prompts = {
@@ -1149,6 +1253,21 @@ def main(argv: list[str]) -> int:
 
     sha_after = _config_toml_sha1()
     any_ok = any(r["status"] == "ok" for r in per_domain.values())
+
+    # Teams watermark: advance ONLY on a genuinely successful, verified pull.
+    # halt/unavailable/codex_failed must NOT advance it -- see _save_teams_watermark's
+    # own docstring for why. Deliberately checked here (post-orchestration, whichever
+    # identity -- primary or failover -- actually produced the result) rather than
+    # inside fetch_domain(), so this stays a single, simple, easily-testable decision
+    # point independent of the primary/failover machinery.
+    if "teams" in per_domain:
+        _teams_result = per_domain["teams"]
+        if _teams_result.get("status") == "ok":
+            _new_hwm = _new_teams_watermark(_teams_result.get("raw_items", []), teams_pull_started_iso)
+            _save_teams_watermark(_new_hwm, count=_teams_result.get("count", 0))
+        else:
+            _log(f"teams: status={_teams_result.get('status')} -- watermark NOT advanced "
+                 f"(only a genuinely successful pull advances it; next run re-tries the same gap)")
 
     # --- assemble the normalise_pull raw shape, sanitise, write ---
     raw_lane_b = {
