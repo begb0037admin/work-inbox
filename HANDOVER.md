@@ -1,3 +1,68 @@
+# Handover -- 2 September 2026, evening, further speed cut (coordinator + Drew) -- primary's worst-case-before-failover cut from ~13min to ~5min (Kevin's explicit call, tradeoff stated plainly). Commit `c009e18`, verified locally (16/16 failover checks incl. 6 new, 11/11 guard, 15/15 watermark). Kevin's live test on the OLD 13-min-budget code deliberately left running untouched (real data, Edu confirmed rate-limited). This change is for the NEXT run -- command below.
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. Calendar stays on COM.
+
+## What changed and why
+Kevin wanted primary's (Edu's) worst-case time before automatic failover cut further -- from the ~13 min shipped earlier tonight down to ~5 min. This is exactly the lever already flagged as the next possible cut in that earlier entry: primary's internal cold-start-hang absorber (previously 2 sub-attempts x 360s timeout, same as failover).
+
+**New, PRIMARY ONLY:** `PRIMARY_TIMEOUT_S` (default 290s, env `WI_LANE_B_PRIMARY_TIMEOUT`) and `PRIMARY_MAX_ATTEMPTS` (default 1, env `WI_LANE_B_PRIMARY_MAX_ATTEMPTS`). `run_codex_json()` gained a `max_attempts` parameter (default 2, so every OTHER call site -- failover, and the diagnostic-only calendar snapshot code in `lane_b_cal_guard.py` -- is completely unaffected by default). `fetch_domain()` now passes `PRIMARY_TIMEOUT_S`/`PRIMARY_MAX_ATTEMPTS` for the primary call and explicit `CALL1_TIMEOUT_S`/`2` for the failover call (made explicit rather than relying on the default, for clarity that this was a deliberate choice, not an oversight).
+
+**Failover/personal is completely unchanged** -- still 360s x 2 sub-attempts, the full original benefit of the doubt. Personal has been reliable all night; this cut is specifically about not making Kevin wait on Edu.
+
+## Tradeoff -- stated plainly, per Kevin's own instruction not to implement silently
+**This loses the cold-start-hang retry protection for primary specifically.** A legitimate slow-but-would-have-succeeded Edu call can now fail over prematurely instead of getting the one retry that used to absorb a genuine cold-start hang (a real, previously-observed phenomenon -- ~3m37s once). Accepted: Kevin's explicit priority right now is speed over giving Edu the benefit of the doubt, and this is a reasonable moment to accept that -- **Edu is confirmed rate-limited at the moment this was decided** (5hr usage limit at 0%, resets 18:28; monthly at 6% remaining, 468 of 500 used, per a screenshot Kevin showed). A slow/failing primary is *expected* tonight specifically, not anomalous -- failing over faster is the right call under these exact conditions. Worth re-examining once Edu's limits reset, if the "1 attempt, 290s" setting still feels too aggressive once Edu isn't rate-limited.
+
+## Honest timing note -- also not glossed over
+Warm-up (~10s, once per process) + `PRIMARY_TIMEOUT_S` (~290s) + the existing `WI_LANE_B_SNAPSHOT_GAP_S` quiet-gap wait (75s, **unchanged, out of scope for this specific change** -- it's a shared process-wide "last connector touch" tracker, not per-identity, and still fires before failover's own first call) totals closer to **~375s (~6.25 min)** before failover's call actually *starts*, not a clean 5:00. The 280-300s timeout figure was implemented exactly as instructed (290s, the midpoint); the quiet-gap mechanism itself wasn't touched and adds real time on top of the stated ~5 min target. Flagging this precisely rather than letting the "~5 min" framing stand uncorrected.
+
+## Verified locally (real python interpreter, zero live codex calls)
+- `py_compile` clean.
+- Guard `--selftest`: still 11/11 (unaffected).
+- Teams watermark test (`test_teams_watermark.py`): still 15/15 (unaffected -- this change is orthogonal to the watermark feature).
+- Failover orchestration test (`test_failover.py`): extended with 6 new explicit assertions (2 constant-value checks confirming `PRIMARY_TIMEOUT_S==290`/`PRIMARY_MAX_ATTEMPTS==1`, 4 direct call-argument assertions proving primary's actual `run_codex_json` call receives `timeout_s=290, max_attempts=1` while failover's call receives `timeout_s=360, max_attempts=2` -- i.e. this doesn't just check the constants exist, it proves they're actually threaded through to the real call). **16/16 pass** (was 10 before this change).
+
+## Kevin's currently-running live test -- deliberately left untouched
+A live test against the OLD code (13-min primary budget) was already running in RDP when this instruction came in. Left to finish naturally -- real, useful data given Edu's confirmed rate-limited state right now. Not interrupted, not restarted.
+
+## Next action -- for the NEXT run (not the one currently in flight)
+Re-pull fresh (branch moved) before the next test:
+```powershell
+cd $env:USERPROFILE\work-inbox
+$cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/lane_b_call1.py?t=$cb" -OutFile lane_b_call1.py
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/fetch_inbox.py?t=$cb" -OutFile fetch_inbox.py
+Get-ChildItem lane_b_call1.py, fetch_inbox.py   # sanity check: both today's date
+python -c "import py_compile; py_compile.compile('lane_b_call1.py', doraise=True); py_compile.compile('fetch_inbox.py', doraise=True); print('compiles clean')"
+python .\lane_b_call1.py --selftest
+
+Remove-Item Env:\CODEX_HOME -ErrorAction SilentlyContinue
+Remove-Item Env:\WI_LANE_B_CODEX_HOME -ErrorAction SilentlyContinue
+
+# if an old watermark exists from earlier tonight's runs, this is fine to keep --
+# it'll just mean an even smaller/faster incremental pull. Delete it only if you
+# specifically want to re-test the first-run/full-baseline path:
+#   Remove-Item data\lane_b\teams_watermark.json -ErrorAction SilentlyContinue
+
+Write-Host "=== expect: if primary struggles, failover kicks in around ~5-6 min, not ~13 ==="
+python .\lane_b_call1.py --domain teams
+
+$env:MAIL_BACKEND   = 'imap'
+$env:CAL_BACKEND    = 'com'
+$env:TEAMS_BACKEND  = 'connector'
+$env:AI_BACKEND     = 'claude_code'
+$env:WI_AI_PARALLEL = '1'
+python -u .\fetch_inbox.py
+Get-Content data\claude_briefing.json | ConvertFrom-Json | Select-Object -ExpandProperty teams | Format-Table
+```
+
+**Standing architectural decisions (unchanged, do not re-litigate):**
+- No permanent COM fallback for Lane B calendar. Connector is the mandatory path.
+- Edu is primary, personal is automatic failover.
+- Primary's retry budget is deliberately short (1 attempt, ~290s) by design -- tonight's tradeoff, accepted, not a bug. Don't "fix" this back to 360s x 2 without Kevin's say-so.
+- Teams pulls incrementally via a watermark; calendar does not (no demonstrated need yet).
+
+---
+
 # Handover -- 2 September 2026, evening, final piece before cutover (coordinator + Drew) -- Teams incremental pull via a persisted high-water-mark BUILT, commit `8afe28f`, verified locally (15/15 new checks + 11/11 guard selftest + 10/10 failover test, all still green). This is the last piece of Lane B engineering queued for tonight. NOT yet live-tested -- RDP command prepared below, not run. Live task/CAL_BACKEND untouched, calendar stays on COM.
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched.
