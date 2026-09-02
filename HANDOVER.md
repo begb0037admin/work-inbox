@@ -1,3 +1,60 @@
+# Handover -- 2 September 2026, evening, continued (coordinator + Drew) -- live Teams test with automatic failover: SUCCEEDED but took ~43 min (primary won on its last sub-attempt, failover never actually exercised live) + a real UnicodeDecodeError crash. Both fixed: UTF-8 subprocess decoding, and a much shorter primary retry budget (13 min worst case, down from ~40). Pushed `#33` commit `078788a`, verified locally, NOT yet live-tested with both fixes together.
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM.**
+
+## What the live automatic-failover test showed
+Kevin ran the resume-point test from the previous entry, with `CODEX_HOME`/`WI_LANE_B_CODEX_HOME` genuinely cleared first (a real test of the automatic default, not a pinned identity). Two findings:
+
+1. **A real bug: `UnicodeDecodeError` crashed a background reader thread mid-run** (`subprocess.py`'s `_readerthread`, `cp1252` codec, byte `0x8f` undecodable). Happened during a timed-out attempt so didn't block the eventual success, but is a real defect that will recur -- Teams message bodies regularly contain emoji/accented characters, and `subprocess.run(..., text=True)` with no explicit `encoding=` silently defaults to `locale.getpreferredencoding()` (cp1252 on Windows), not UTF-8.
+2. **Primary (Edu) eventually succeeded (87 items) but took ~43 minutes and 3 full fetch-level retries** (`teams#primary1` attempt 1 timeout, attempt 2 timeout [Unicode crash happened somewhere in this window], `teams#primary2` attempt 1 timeout, attempt 2 SUCCEEDED) -- on literally its last sub-attempt before it would have failed over to personal. Failover itself was never actually exercised live tonight (primary technically stayed within its old, generous budget). Not acceptable on a schedule, and cutting it that close doesn't inspire confidence it'll be that lucky every time.
+
+## Both fixed, pushed to `#33` (commit `078788a`)
+
+**1. UnicodeDecodeError -- real fix, not a workaround.** Both `subprocess.run` calls in `lane_b_call1.py` (`_ensure_warm`'s warm-up call, `run_codex_json`'s real call) now pass `encoding='utf-8', errors='replace'` explicitly. `errors='replace'` means even a genuinely malformed byte sequence never raises -- worst case one character comes through as U+FFFD instead of crashing the read. Verified locally: a direct subprocess test with an emoji byte sequence decodes cleanly with the fix applied (a flaky attempt to reproduce the exact background-thread race without the fix didn't reliably crash every run -- expected, it's a timing-dependent race in Python's own `communicate()` implementation -- but the traceback signature (cp1252 `charmap_decode`, byte `0x8f`) is a textbook, well-documented instance of this exact Windows Python gotcha, and the fix is the standard, correct remedy regardless of repro flakiness).
+
+**2. Primary's retry budget shortened -- Kevin's tradeoff, implemented per his instruction to propose a number and build it, not just raise the question.** New `PRIMARY_RETRIES` (default 1, env `WI_LANE_B_PRIMARY_RETRIES`) -- primary now gets exactly ONE fetch-level attempt (still with `run_codex_json`'s own internal 2-sub-attempt cold-start-hang absorber intact -- that mechanism itself isn't the problem, the OUTER 3x stacking was) before automatically failing over. **New worst case before failover: ~795s (~13 min)**, down from ~2400s+ (~40 min). The `retries` parameter passed into `fetch_domain()` is now FAILOVER's budget only (unchanged default 3 -- personal has proven reliable, worth a real chance once paying to switch to it).
+
+**Tradeoff flagged plainly, not decided unilaterally:** this trades "give Edu every chance" for "don't make Kevin wait 40+ minutes" -- given tonight's evidence Edu is genuinely unreliable right now, erring toward faster failover, at the cost of failing over to personal somewhat more readily on what might occasionally have been a recoverable Edu blip. **If 13 minutes is still too slow for Kevin's taste, the next lever is trimming `run_codex_json`'s internal 2-sub-attempt loop to 1 for primary specifically (worst case ~6 min), at the cost of losing the single cold-start-hang absorber for primary** (a real, previously-documented phenomenon -- ~3m37s observed once) -- not done, that's a further judgment call for Kevin, not assumed.
+
+**Verified locally (real python interpreter):**
+- `py_compile` clean on the updated file.
+- Guard `--selftest`: still 11/11 (unaffected).
+- Orchestration test (`test_failover.py`) updated with a new explicit assertion and re-run: **10/10 pass** (was 9) -- specifically proves primary is now capped at `PRIMARY_RETRIES` (1) regardless of a larger `retries=` argument passed in for failover, confirming the actual fix behaves as designed, not just that the orchestration logic exists.
+- **Not yet live-tested with both fixes together against the real connector** -- that's the next step.
+
+## Next action -- resume here
+Same test as the previous entry's resume point (still valid, files just need a fresh pull since the branch moved):
+```powershell
+cd $env:USERPROFILE\work-inbox
+$cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/lane_b_call1.py?t=$cb" -OutFile lane_b_call1.py
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/fetch_inbox.py?t=$cb" -OutFile fetch_inbox.py
+Get-ChildItem lane_b_call1.py, fetch_inbox.py   # sanity check: both today's date
+python -c "import py_compile; py_compile.compile('lane_b_call1.py', doraise=True); py_compile.compile('fetch_inbox.py', doraise=True); print('compiles clean')"
+python .\lane_b_call1.py --selftest
+
+Remove-Item Env:\CODEX_HOME -ErrorAction SilentlyContinue
+Remove-Item Env:\WI_LANE_B_CODEX_HOME -ErrorAction SilentlyContinue
+
+python .\lane_b_call1.py --domain both
+
+$env:MAIL_BACKEND   = 'imap'
+$env:CAL_BACKEND    = 'com'
+$env:TEAMS_BACKEND  = 'connector'
+$env:AI_BACKEND     = 'claude_code'
+$env:WI_AI_PARALLEL = '1'            # SAFE: no push, local file only
+python -u .\fetch_inbox.py
+Get-Content data\claude_briefing.json | ConvertFrom-Json | Select-Object -ExpandProperty teams | Format-Table
+```
+Expect this run to be noticeably faster if primary struggles again (failing over within ~13 min instead of ~40), and no `UnicodeDecodeError` regardless of message content. If primary succeeds fast and cleanly this time, that's fine too -- both outcomes are valid confirmation, the point is no more 40-minute runs and no more crashes.
+
+**Standing architectural decisions (unchanged, do not re-litigate):**
+- No permanent COM fallback for Lane B calendar. Connector is the mandatory path.
+- Edu is primary, personal is automatic failover -- not a manual choice, not "personal always."
+- Primary's retry budget is deliberately short (1 fetch-level attempt) by design, not a bug -- don't "fix" this back to 3 without Kevin's say-so.
+
+---
+
 # Handover -- 2 September 2026, evening (coordinator + Drew) -- Teams-on-Edu root cause found: account identity, not a prompt/code bug. Automatic Edu-primary/personal-failover BUILT (applies to both calendar and Teams), pushed to #33, verified locally (9/9 new orchestration checks + 11/11 guard selftest), NOT yet live-tested. Live task/CAL_BACKEND untouched.
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM.**
