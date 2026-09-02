@@ -98,7 +98,8 @@ CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
 # "connector unavailable this cycle" path.
 CALL1_RETRIES = max(1, int(os.environ.get("WI_LANE_B_RETRIES", "3")))
 CALL1_RETRY_BACKOFF_S = [5, 12, 20, 30]
-_WARMED = False
+# (per-CODEX_HOME warm-up tracking is _WARMED_HOMES, defined near _ensure_warm() below --
+# replaces a single process-wide flag now that primary/failover means two identities)
 
 PRIMARY_CAL_NAME = "Calendar"
 SHARED_CAL_NAME  = "People Department - HR Systems"
@@ -147,25 +148,45 @@ def _log(msg: str) -> None:
     print(f"[{_dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}] lane_b_call1: {msg}")
 
 
-# --- Lane B codex identity: a DEDICATED CODEX_HOME on Kevin's PERSONAL ChatGPT
-# account (decision 1 Sept ~15:30 -- Edu's 500/month HARD credit cap won't
-# sustain Lane B [~5 codex calls/clean run x 3x/weekday] plus Kevin's own
-# interactive use; personal draws from rate limits, not a monthly cap).
-# WI_LANE_B_CODEX_HOME wins; else an inherited CODEX_HOME; else codex's default
-# (~/.codex). Whatever is resolved is FORCED into CODEX_HOME for every codex
-# subprocess so the Lane B task never rides Kevin's interactive login.
-LANE_B_CODEX_HOME = (os.environ.get("WI_LANE_B_CODEX_HOME", "").strip()
-                     or os.environ.get("CODEX_HOME", "").strip())
+# --- Lane B codex identity: EDU is PRIMARY, PERSONAL is AUTOMATIC FAILOVER ---
+# CORRECTED 2 Sept 2026 evening (Kevin, after tonight's Teams investigation):
+# the 1 Sept move to personal-only was a testing-phase workaround for burning
+# through Edu's 500/month hard credit cap fast during heavy testing -- it was
+# never meant to be the permanent architecture. Edu is tried FIRST, always;
+# personal is the safety net for when Edu's own retry budget is exhausted, not
+# the new default. Tonight's evidence: Teams failed 4x on Edu (generic
+# timeouts, no clean "quota exhausted" signal to key off) then worked
+# cleanly, first attempt, on personal (44 items, ~4.5 min). Deliberately NOT
+# trying to distinguish "Edu's cap is exhausted" from any other transient
+# Edu failure -- that signal isn't clean/reliable enough to key off from
+# codex's own error output (see HANDOVER.md). Failover triggers on ANY
+# exhausted-retries failure on primary, full stop.
+#
+# PRIMARY_CODEX_HOME: WI_LANE_B_CODEX_HOME wins; else an inherited CODEX_HOME;
+#   else codex's OS default (~/.codex). On the laptop today that OS default IS
+#   Edu, by virtue of whatever `codex login` state already exists there -- not
+#   because this code hardcodes "Edu" (there's no portable way to hardcode an
+#   account, only a CODEX_HOME path). This is now an EXPLICIT, deliberate
+#   default (computed once, logged, reused) rather than ambient/accidental
+#   inheritance the way a bare `codex exec` on a fresh env would fall through.
+# FAILOVER_CODEX_HOME: WI_LANE_B_CODEX_HOME_FAILOVER wins; else the known
+#   dedicated Lane B personal-account login (confirmed working for both
+#   calendar (1 Sept) and Teams (2 Sept) -- see HANDOVER.md).
+PRIMARY_CODEX_HOME = (os.environ.get("WI_LANE_B_CODEX_HOME", "").strip()
+                      or os.environ.get("CODEX_HOME", "").strip()
+                      or str(Path(os.path.expanduser("~")) / ".codex"))
+FAILOVER_CODEX_HOME = (os.environ.get("WI_LANE_B_CODEX_HOME_FAILOVER", "").strip()
+                       or r"C:\WorkInboxAI\codex-laneb")
+LANE_B_CODEX_HOME = PRIMARY_CODEX_HOME   # backward-compat alias -- some callers/logs still read this name
 
 
-def _codex_home() -> Path:
-    return Path(LANE_B_CODEX_HOME) if LANE_B_CODEX_HOME else (Path(os.path.expanduser("~")) / ".codex")
+def _codex_home(codex_home: str | None = None) -> Path:
+    return Path(codex_home or PRIMARY_CODEX_HOME)
 
 
-def _codex_env() -> dict:
+def _codex_env(codex_home: str | None = None) -> dict:
     e = {**os.environ, "PYTHONUTF8": "1"}
-    if LANE_B_CODEX_HOME:
-        e["CODEX_HOME"] = LANE_B_CODEX_HOME
+    e["CODEX_HOME"] = codex_home or PRIMARY_CODEX_HOME
     return e
 
 
@@ -176,12 +197,12 @@ def _b64url_json(seg: str) -> dict:
     return json.loads(base64.b64decode(seg).decode("utf-8", "replace"))
 
 
-def _codex_identity() -> tuple[str, str, str]:
+def _codex_identity(codex_home: str | None = None) -> tuple[str, str, str]:
     """(account_id, email, plan) from <CODEX_HOME>/auth.json. codex writes the
     real values under .tokens.account_id and inside the id_token's
     `https://api.openai.com/auth` claim -- NOT a top-level .account_id."""
     try:
-        auth = json.loads((_codex_home() / "auth.json").read_text(encoding="utf-8"))
+        auth = json.loads((_codex_home(codex_home) / "auth.json").read_text(encoding="utf-8"))
     except FileNotFoundError:
         return ("(no auth.json -- run `codex login` into this CODEX_HOME)", "", "")
     except Exception as e:  # noqa: BLE001
@@ -202,15 +223,15 @@ def _codex_identity() -> tuple[str, str, str]:
     return (acct or "(no account_id)", email, plan)
 
 
-def _codex_account_id() -> str:
-    acct, email, plan = _codex_identity()
+def _codex_account_id(codex_home: str | None = None) -> str:
+    acct, email, plan = _codex_identity(codex_home)
     extra = " ".join(x for x in (f"email={email}" if email else "",
                                  f"plan={plan}" if plan else "") if x)
     return f"{acct}{('  ' + extra) if extra else ''}"
 
 
-def _config_toml_sha1() -> str | None:
-    p = _codex_home() / "config.toml"
+def _config_toml_sha1(codex_home: str | None = None) -> str | None:
+    p = _codex_home(codex_home) / "config.toml"
     if not p.exists():
         return None
     return hashlib.sha1(p.read_bytes()).hexdigest().lower()
@@ -294,23 +315,29 @@ def _codex_argv0() -> list[str]:
     return [resolved]
 
 
-def _ensure_warm() -> None:
-    """One throwaway `codex exec` per process to absorb the cold-start hang
-    (codex-cli 0.151.0 on the Oxford laptop can take 3+ min on the first call).
+_WARMED_HOMES: set[str] = set()
+
+
+def _ensure_warm(codex_home: str | None = None) -> None:
+    """One throwaway `codex exec` per process, PER CODEX_HOME, to absorb the
+    cold-start hang (codex-cli 0.151.0 on the Oxford laptop can take 3+ min on
+    the first call). Tracked per-identity (not a single process-wide flag) since
+    2 Sept's primary/failover design means a process may need to warm BOTH the
+    primary (Edu) and failover (personal) CODEX_HOME if failover ever triggers.
     Skipped when WI_LANE_B_SKIP_WARMUP=1 (e.g. the guard already warmed the box)."""
-    global _WARMED
-    if _WARMED or os.environ.get("WI_LANE_B_SKIP_WARMUP", "").strip().lower() in ("1", "true", "yes"):
-        _WARMED = True
+    home = codex_home or PRIMARY_CODEX_HOME
+    if home in _WARMED_HOMES or os.environ.get("WI_LANE_B_SKIP_WARMUP", "").strip().lower() in ("1", "true", "yes"):
+        _WARMED_HOMES.add(home)
         return
-    _WARMED = True
-    _log(f"warming codex (timeout {CALL1_WARMUP_TIMEOUT_S}s)...")
+    _WARMED_HOMES.add(home)
+    _log(f"warming codex (CODEX_HOME={home}, timeout {CALL1_WARMUP_TIMEOUT_S}s)...")
     t0 = time.time()
     try:
         subprocess.run(
             _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check",
                               "Reply with the single word OK. Use no tools, change nothing."],
             capture_output=True, text=True, timeout=CALL1_WARMUP_TIMEOUT_S,
-            cwd=str(REPO_ROOT), env=_codex_env(),
+            cwd=str(REPO_ROOT), env=_codex_env(home),
             stdin=subprocess.DEVNULL,   # codex exec BLOCKS reading stdin until EOF -- give it EOF now
         )
         _log(f"codex warm-up done in {time.time() - t0:.0f}s")
@@ -359,9 +386,15 @@ def _mark_connector_touch() -> None:
 # ------------------------------------------------------------------------------------------- #
 
 
-def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict], str]:
-    """Return (parsed_json_objects, raw_stdout). Raises RuntimeError on hard failure."""
-    _ensure_warm()
+def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | None = None) -> tuple[list[dict], str]:
+    """Return (parsed_json_objects, raw_stdout). Raises RuntimeError on hard failure.
+    codex_home: which CODEX_HOME to run this call against -- defaults to
+    PRIMARY_CODEX_HOME (Edu) when not given. The primary/failover ORCHESTRATION
+    (try primary's full retry budget, then fail over to personal) lives in
+    fetch_domain()/take_snapshot(), not here -- this function just executes a
+    single identity's worth of the existing 2-attempt retry for whichever
+    codex_home it's told to use."""
+    _ensure_warm(codex_home)
     cmd = _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check", "--json"]
     if CODEX_MODEL:
         cmd += ["-m", CODEX_MODEL]
@@ -370,12 +403,13 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict]
     last_raw = ""
     for attempt in (1, 2):
         _wait_for_quiet_gap(tag)
-        _log(f"[{tag}] codex exec attempt {attempt}/2 (timeout {timeout_s}s)")
+        _log(f"[{tag}] codex exec attempt {attempt}/2 (timeout {timeout_s}s) "
+             f"CODEX_HOME={codex_home or PRIMARY_CODEX_HOME}")
         try:
             proc = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=timeout_s,
                 cwd=str(REPO_ROOT),
-                env=_codex_env(),
+                env=_codex_env(codex_home),
                 stdin=subprocess.DEVNULL,   # codex-cli 0.151.0 prints "Reading additional input
                                             # from stdin..." and BLOCKS on read until EOF; an
                                             # inherited stdin never closes -> hang. Give it EOF.
@@ -401,7 +435,8 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict]
         if attempt == 1:
             continue
 
-    raise RuntimeError(f"[{tag}] codex exec produced no usable JSON output after 2 attempts")
+    raise RuntimeError(f"[{tag}] codex exec produced no usable JSON output after 2 attempts "
+                       f"(CODEX_HOME={codex_home or PRIMARY_CODEX_HOME})")
 
 
 def _parse_jsonl(raw: str) -> list[dict]:
@@ -792,55 +827,100 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
     }
 
 
-def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries: int) -> dict:
-    """Run codex exec for one domain, retrying while the expected connector tool
-    does not fire. Returns a run_domain-shaped dict plus an `attempts` list.
-    Never raises. Terminal statuses: 'ok', 'halt' (re-contamination),
-    'unavailable' (expected tool never fired across all attempts),
-    'codex_failed' (every attempt's codex run failed)."""
+def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts: str,
+                               retries: int, codex_home: str, identity_label: str) -> tuple[dict | None, list[dict]]:
+    """The pre-2-Sept-evening fetch_domain() retry loop, unchanged in behaviour,
+    now parameterized by WHICH identity (codex_home/identity_label) it runs
+    against and tagged accordingly in logs/attempt records/per-attempt JSONL
+    filenames. Re-contamination still breaks immediately, never retried --
+    that rule doesn't change per-identity. Returns (result_or_None, attempts)."""
     attempts: list[dict] = []
     result: dict | None = None
     for n in range(1, retries + 1):
         try:
-            events, raw = run_codex_json(prompt, timeout_s=CALL1_TIMEOUT_S, tag=f"{domain}#{n}")
+            events, raw = run_codex_json(prompt, timeout_s=CALL1_TIMEOUT_S,
+                                         tag=f"{domain}#{identity_label}{n}", codex_home=codex_home)
         except ReContaminationDetected as e:
             # A write/unexpected tool call was actually observed -- even if only in
             # partial output salvaged from a killed/timed-out attempt. Non-retryable:
             # retrying after a suspected write increases exposure, it does not resolve
-            # anything. Immediate terminal HALT, matching the "halt" status a full
-            # successful-attempt guard_recontamination() call would produce.
-            attempts.append({"n": n, "outcome": "halt", "detail": str(e)[:300]})
-            _log(f"[{domain}] attempt {n}/{retries}: RE-CONTAMINATION -- {e}")
-            result = {"domain": domain, "status": "halt",
+            # anything. Immediate terminal HALT -- and this identity's HALT is final;
+            # the caller (fetch_domain) does NOT fail over after a detected write.
+            attempts.append({"n": n, "identity": identity_label, "outcome": "halt", "detail": str(e)[:300]})
+            _log(f"[{domain}/{identity_label}] attempt {n}/{retries}: RE-CONTAMINATION -- {e}")
+            result = {"domain": domain, "status": "halt", "served_by": identity_label,
                       "guard": {"seen": [], "unexpected": [str(e)]},
                       "tool_calls": [], "count": 0, "raw_items": []}
             break
         except RuntimeError as e:
-            attempts.append({"n": n, "outcome": "codex_failed", "detail": str(e)[:200]})
-            _log(f"[{domain}] attempt {n}/{retries}: codex run failed -- {e}")
+            attempts.append({"n": n, "identity": identity_label, "outcome": "codex_failed", "detail": str(e)[:200]})
+            _log(f"[{domain}/{identity_label}] attempt {n}/{retries}: codex run failed -- {e}")
             if n < retries:
                 time.sleep(CALL1_RETRY_BACKOFF_S[min(n - 1, len(CALL1_RETRY_BACKOFF_S) - 1)])
             continue
         try:
-            (LANE_B_DIR / f"{ts}_call1_{domain}_a{n}.jsonl").write_text(raw, encoding="utf-8")
+            (LANE_B_DIR / f"{ts}_call1_{domain}_{identity_label}_a{n}.jsonl").write_text(raw, encoding="utf-8")
         except OSError:
             pass
         result = run_domain(domain, events, window_days=window_days)
-        attempts.append({"n": n, "outcome": result["status"],
+        result["served_by"] = identity_label
+        attempts.append({"n": n, "identity": identity_label, "outcome": result["status"],
                          "tools": result["tool_calls"], "count": result["count"]})
         if result["status"] in ("ok", "halt"):
             break
-        _log(f"[{domain}] attempt {n}/{retries}: {EXPECTED_TOOL[domain]} did not fire "
-             f"(connector unavailable)" + (" -- retrying" if n < retries else " -- giving up this cycle"))
+        _log(f"[{domain}/{identity_label}] attempt {n}/{retries}: {EXPECTED_TOOL[domain]} did not fire "
+             f"(connector unavailable)" + (" -- retrying" if n < retries else " -- giving up on this identity"))
         if n < retries:
             time.sleep(CALL1_RETRY_BACKOFF_S[min(n - 1, len(CALL1_RETRY_BACKOFF_S) - 1)])
+    return result, attempts
+
+
+def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries: int) -> dict:
+    """PRIMARY/FAILOVER orchestration (added 2 Sept 2026 evening, Kevin's
+    correction): try PRIMARY (Edu) first, its existing full retry budget
+    unchanged (`retries`, same as before today). If that budget is exhausted
+    with no 'ok'/'halt' result -- for ANY reason, deliberately not trying to
+    distinguish "Edu's cap is exhausted" from any other transient failure,
+    since tonight's real failures showed only generic timeouts with no clean
+    quota-exhaustion signal to key off -- automatically retry the SAME domain
+    fetch against FAILOVER (personal), reusing the SAME retry budget, not a
+    new/larger tier. A re-contamination HALT on primary is terminal and does
+    NOT trigger failover -- more calls after a detected write is the wrong
+    direction regardless of which identity would make them.
+    Returns a run_domain-shaped dict + 'served_by' (which identity actually
+    produced the result, or None if neither did) + 'attempts' (both identities'
+    attempts, concatenated, each tagged). Never raises. Terminal statuses:
+    'ok', 'halt' (re-contamination), 'unavailable' (expected tool never fired
+    on either identity), 'codex_failed' (every attempt on both failed)."""
+    result, attempts = _fetch_domain_one_identity(
+        domain, prompt, window_days=window_days, ts=ts, retries=retries,
+        codex_home=PRIMARY_CODEX_HOME, identity_label="primary")
+
+    if result is not None and result["status"] in ("ok", "halt"):
+        pass   # success, or a terminal re-contamination HALT -- no failover either way
+    elif FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME:
+        _log(f"[{domain}] PRIMARY exhausted with no success, but FAILOVER_CODEX_HOME is identical "
+             f"to primary ({PRIMARY_CODEX_HOME}) -- nothing distinct to fail over to")
+    else:
+        _log(f"[{domain}] PRIMARY ({PRIMARY_CODEX_HOME}) exhausted its retry budget with no success "
+             f"-- failing over to PERSONAL ({FAILOVER_CODEX_HOME}) for this domain fetch")
+        fo_result, fo_attempts = _fetch_domain_one_identity(
+            domain, prompt, window_days=window_days, ts=ts, retries=retries,
+            codex_home=FAILOVER_CODEX_HOME, identity_label="failover")
+        attempts = attempts + fo_attempts
+        if fo_result is not None:
+            result = fo_result
+            if fo_result["status"] == "ok":
+                _log(f"[{domain}] FAILOVER succeeded -- this cycle's {domain} data was served by the "
+                     f"personal account, not Edu. Informational, not a HALT.")
 
     if result is None:
-        result = {"domain": domain, "status": "codex_failed",
+        result = {"domain": domain, "status": "codex_failed", "served_by": None,
                   "guard": {"seen": [], "unexpected": []},
                   "tool_calls": [], "count": 0, "raw_items": []}
     result["attempts"] = attempts
-    _log(f"[{domain}] final status={result['status']} after {len(attempts)} attempt(s)")
+    _log(f"[{domain}] final status={result['status']} served_by={result.get('served_by')} "
+         f"after {len(attempts)} total attempt(s) across both identities")
     return result
 
 
@@ -973,8 +1053,11 @@ def main(argv: list[str]) -> int:
     ts = _utcstamp()
     _log(f"start domain={args.domain} window_days={args.window_days} ts={ts}")
     if not args.from_file:
-        _log(f"CODEX_HOME={_codex_home()}  account_id={_codex_account_id()}"
+        _log(f"PRIMARY   CODEX_HOME={PRIMARY_CODEX_HOME}  account_id={_codex_account_id(PRIMARY_CODEX_HOME)}"
              + ("  [WI_LANE_B_CODEX_HOME override]" if os.environ.get('WI_LANE_B_CODEX_HOME', '').strip() else ""))
+        _log(f"FAILOVER  CODEX_HOME={FAILOVER_CODEX_HOME}  account_id={_codex_account_id(FAILOVER_CODEX_HOME)}"
+             + ("  [WI_LANE_B_CODEX_HOME_FAILOVER override]" if os.environ.get('WI_LANE_B_CODEX_HOME_FAILOVER', '').strip() else "")
+             + ("  (same as primary -- no distinct failover configured)" if FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME else ""))
     LANE_B_DIR.mkdir(parents=True, exist_ok=True)
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -1033,8 +1116,12 @@ def main(argv: list[str]) -> int:
     }
     normalised, hits = normalise_pull.normalise(raw_lane_b, ts=ts)
 
-    # carry Lane B provenance + guard status into meta so fetch_inbox.py can gate
-    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts")
+    # carry Lane B provenance + guard status into meta so fetch_inbox.py can gate.
+    # "served_by" (added 2 Sept evening, primary/failover) = which identity actually
+    # produced this domain's result this cycle -- "primary" (Edu, normal), "failover"
+    # (personal -- informational, not alarming by itself, but worth being visible;
+    # see the toast/HANDOVER work), or None if neither identity produced a result.
+    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by")
     normalised["meta"]["lane_b"] = {
         "ts": ts,
         "domains": {d: {k: per_domain[d].get(k) for k in _dom_keys} for d in per_domain},
@@ -1081,7 +1168,7 @@ def _write_run_log(ts, args, per_domain, sha_before, sha_after, n_hits, *, halte
         "domains_requested": args.domain,
         "window_days": args.window_days,
         "per_domain": {d: {k: per_domain[d].get(k)
-                           for k in ("status", "count", "tool_calls", "guard", "attempts")}
+                           for k in ("status", "count", "tool_calls", "guard", "attempts", "served_by")}
                        for d in per_domain},
         "sanitiser_hits": n_hits,
         "config_toml_sha1_before": sha_before,
