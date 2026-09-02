@@ -1,3 +1,56 @@
+# Handover -- 2 September 2026, ~later UTC (coordinator + Drew, stop-and-checkpoint -- Kevin switching accounts) -- #31 very likely FIXED, one formal confirmation run outstanding; write-safety hardening (toast, prompt rules, approval_policy proof) built and ready alongside it; guard file reverted on the laptop mid-session, root cause found
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM, no cutover.**
+
+## 1. Connector Action Control check -- CLOSED, do not re-raise
+Kevin: he already tested this extensively weeks ago. Treat as closed/non-blocking, not an open item. (Supersedes the "check ChatGPT Settings -> Connectors -> Action control" next-action item in the ~09:2x entry above -- don't ask him to do this.)
+
+## 2. Write-risk framing -- SETTLED, don't re-litigate
+Extended discussion this session concluded: prompt-injection via calendar content is low-probability for Kevin's actual environment (internal Oxford colleagues, not public-facing). The realistic trigger is **model over-reach during a degraded/retried connector call** -- exactly the shape of the original `--dry-diff` failure (a retry storm, not a hostile payload). Kevin's hard rule, already baked into the `SAFETY_RULE` prompt-hardening shipped this session (`36b4e8f` on #31): any future write must never be decline/cancel/respond/send; zero recipients if a write is ever genuinely unavoidable. Closed.
+
+## 3. Scheduled-task-into-live-session proposal -- decline CONFIRMED correct, stays parked
+Drew declined to build a mechanism (via the `begb0037-a` local-admin SSH account) that would register a scheduled task executing commands inside Kevin's live authenticated RDP session unattended, on the grounds that it's a standing privilege-boundary-crossing capability on an Oxford-managed domain machine, not a one-time convenience, and needs Kevin's own direct explicit sign-off first -- not a relayed "he's fatigued of pasting." **Noted as the right call.** Stays parked unless/until Kevin himself explicitly asks for it, with the actual mechanics in front of him.
+
+## 4. One-click diagnostic script -- pushed to #31, GitHub raw-URL CDN gotcha hit and worked around
+Coordinator pushed `docs/desktop-scripts/Lane-B-Dry-Diff-Isolate.ps1` to branch #31. Two broken pushes en route: a double-base64-encoding mistake, then a `raw.githubusercontent.com` CDN stale-cache issue that persisted even after the underlying git blob was already fixed (confirmed via the Contents API returning correct content while `curl` on the raw URL still served the old garbage -- a cache-invalidation lag, not a repo-state bug). Worked around by giving Kevin an inline PowerShell here-string directly rather than a GitHub fetch. **Reusable lesson, added to Drew's own memory:** after overwriting a raw-URL-served file shortly after a previous bad push, don't trust `raw.githubusercontent.com` immediately -- verify via the Contents/Blobs API first, and if a live paste is time-sensitive, hand over an inline here-string instead of a fetch-and-run one-liner.
+
+## 5. Kevin's manual diagnostic (live, RDP) -- STRONGLY SUGGESTS #31 IS FIXED
+Two ad-hoc `--snapshot` pulls (`test1.json`, `test2.json`): **both 51 events, both containing every annual-leave/non-working-day subject** from yesterday's failure list -- just different JSON key ordering between the two pulls. Formal `--diff` on those two files: `{"trips": [], "tripped": false}` -- **CLEAN.** This strongly suggests yesterday's original 8-diff `--dry-diff` failure was a **one-off connector flake during that run's retry storm** (the POST snapshot's attempts 1-2 not returning `list_events`, attempt 3 succeeding -- see the 2 Sept ~00:1x entry below), not a systematic bug in the connector's completeness or in the guard's `_natural_key`/`_fingerprint_one` matching.
+
+**Not yet a FORMAL re-confirmation** -- that needs the actual `python .\lane_b_cal_guard.py --dry-diff` entry point (stronger evidence: exercises the guard's own PRE+POST-in-one-run path end to end, not two separately-triggered ad-hoc snapshots diffed by hand).
+
+## 6. Formal `--dry-diff` re-run FAILED -- guard file had REVERTED to the old main-branch version; ROOT CAUSE FOUND
+`python .\lane_b_cal_guard.py --dry-diff` failed because the laptop's local `lane_b_cal_guard.py` had reverted to the **old `main`-branch version** (missing `--dry-diff`/`--selftest` from its argparse usage) -- despite having been correctly pulled from the `#31` branch earlier in this same session (see the ~00:1x / ~09:2x entries below and their "GATE" pull-from-branch-raw-URL instructions).
+
+**Root cause, found by reading the wrapper's own source (`docs/desktop-scripts/Run Laptop Bridge Briefing.ps1`, current on `#31`):**
+```
+$base = 'https://raw.githubusercontent.com/begb0037admin/work-inbox/main'
+foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py') {
+  Invoke-WebRequest -UseBasicParsing "$base/$f`?t=$t" -OutFile (Join-Path $root $f)
+```
+This self-refresh loop is **hardcoded to `main`**, with no branch override of any kind. **Any execution of the wrapper after the branch-pull -- the live scheduled task ticking over, a manual test run, or "the shadow run" mentioned this session -- silently overwrites `lane_b_cal_guard.py` (and the other 5 listed files) back to whatever is on `main`.** Since PR #31 is still unmerged, `main`'s copy is the pre-fix guard (blob `09e7d1c5`, missing `--dry-diff`/`--selftest`). This is a near-certain explanation, not just a hypothesis needing further live testing -- the mechanism is directly visible in the wrapper's own code and matches the observed symptom exactly (branch version present, then later absent, with a wrapper run somewhere in between). **Same exposure applies to every file in that refresh list while #31 is unmerged** -- not just the guard.
+
+**Not yet confirmed which specific run did it** (the live 07:00 task, a shadow run, or something else) -- not needed to explain the symptom, so not chased further this session per the time-box.
+
+## Where everything stands
+- **#31 (branch `drew/lane-b-cal-guard-snapshot-fix`) is very likely fixed** -- Kevin's manual diff came back clean, matching the original false-positive fix's `--selftest` 7/7 plus now a clean real-world spot-check. **One formal confirmation run is the only thing outstanding before #31 can be seriously considered for merge/cutover.**
+- **Write-safety hardening is built and sitting on the same branch, ready alongside the guard fix:** cross-machine (laptop + desktop) toast on any guard HALT, `SAFETY_RULE` prompt hardening on every Lane B prompt, and a source-level proof that headless `codex exec` write-capable connector calls are structurally auto-aborted when `approval_policy != Never` (see the ~09:2x entry below for full detail and its caveats).
+- **Calendar remains on COM. No cutover today, none pending.** Nothing merged. Nothing touched on `main`'s pipeline code this session -- only this documentation checkpoint.
+
+## Next action -- resume here
+1. **Re-pull `lane_b_cal_guard.py` from the `#31` branch (NOT main) and re-run `--dry-diff` for the formal confirmation**, in RDP as `AD-OAK\begb0037` on `101L-DE013193`:
+   ```powershell
+   cd $env:USERPROFILE\work-inbox
+   Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-cal-guard-snapshot-fix/lane_b_cal_guard.py?t=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" -OutFile lane_b_cal_guard.py
+   python .\lane_b_cal_guard.py --dry-diff
+   ```
+   (Verify the raw-URL content is actually current before trusting it -- #4 above; if in doubt, cross-check against the Contents API rather than assuming the CDN is fresh.) **Do not run the wrapper (`Run Laptop Bridge Briefing.ps1`) or anything that touches it between the re-pull and this test, or it will revert again per #6.**
+2. If `--dry-diff` comes back clean: #31 is ready for Kevin's merge/cutover decision -- not automatic, still needs his explicit go-ahead per this repo's standing rules.
+3. **Structural fix worth considering (not built, not urgent while #31 stays unmerged):** either merge #31 promptly once confirmed, or give the wrapper's refresh loop a branch override so testing on `#31` doesn't get silently clobbered by routine wrapper runs. Flagged, not actioned.
+4. Everything else from the ~09:2x entry above (Action Control check -- now closed, don't re-raise; the tool-schema silent-param question; the optional per-attempt-logging follow-up) unchanged.
+
+---
+
 # Handover -- 2 September 2026, ~09:2x UTC (Drew) -- Lane B safety follow-ups on branch #31: cross-machine guard-halt toast BUILT + PUSHED (not merged), prompt safety-rule hardening BUILT + PUSHED (not merged), approval_policy connector-tool-scope investigated (source-level answer, see below), transcript-audit for today's --dry-diff attempts (no persisted transcripts to grep -- code-level proof instead)
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched this session. Calendar stays on COM -- #31's `--dry-diff` gap (8 residual all-day "added" diffs, 2 Sept ~00:1x entry below) is STILL UNRESOLVED, this session did not touch that.
