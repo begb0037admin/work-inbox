@@ -195,7 +195,7 @@ if ($CalBackend -eq 'connector') {
       # matching toast. Both are required; neither replaces the other.
       try {
         Import-Module BurntToast -ErrorAction Stop
-        New-BurntToastNotification -Text 'Work Inbox - Lane B calendar guard HALTED', "Task '$TaskName' disabled. $LaneBGuardDetail"
+        New-BurntToastNotification -Text 'Work Inbox - Lane B calendar guard HALTED', $LaneBGuardDetail
         Log "local BurntToast fired"
       } catch {
         Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the HALT + task-disable above are still real, and the desktop toast (via Publish-Status) is independent of this and still fires"
