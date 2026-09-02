@@ -1,22 +1,24 @@
-IyBMYW5lIEIgY2FsZW5kYXIgZ3VhcmQg4oCUIGRyeS1kaWZmIGlzb2xhdGlvbiBkaWFnbm9zdGlj
-CiMgUnVuIGluIFJEUCBhcyBBRC1PQUtcYmVnYjAwMzcgb24gMTAxTC1ERTAxMzE5MywgaW5zaWRl
-IHdvcmstaW5ib3ggcmVwby4KJEVycm9yQWN0aW9uUHJlZmVyZW5jZSA9ICdTdG9wJwpTZXQtTG9j
-YXRpb24gIiRlbnY6VVNFUlBST0ZJTEVcd29yay1pbmJveCIKV3JpdGUtSG9zdCAiWyQoR2V0LURh
-dGUgLUZvcm1hdCBvKV0gU3RhcnRpbmcgTGFuZSBCIGRyeS1kaWZmIGlzb2xhdGlvbi4uLiIKCnB5
-dGhvbiAuXGxhbmVfYl9jYWxfZ3VhcmQucHkgLS1zbmFwc2hvdCAtLW91dCBkYXRhXGNvZGV4X3J1
-bnNcdGVzdDEuanNvbgpweXRob24gLlxsYW5lX2JfY2FsX2d1YXJkLnB5IC0tc25hcHNob3QgLS1v
-dXQgZGF0YVxjb2RleF9ydW5zXHRlc3QyLmpzb24KCiRjMSA9IChHZXQtQ29udGVudCBkYXRhXGNv
-ZGV4X3J1bnNcdGVzdDEuanNvbiB8IENvbnZlcnRGcm9tLUpzb24pLmZwLlBTT2JqZWN0LlByb3Bl
-cnRpZXMuTmFtZS5Db3VudAokYzIgPSAoR2V0LUNvbnRlbnQgZGF0YVxjb2RleF9ydW5zXHRlc3Qy
-Lmpzb24gfCBDb252ZXJ0RnJvbS1Kc29uKS5mcC5QU09iamVjdC5Qcm9wZXJ0aWVzLk5hbWUuQ291
-bnQKV3JpdGUtSG9zdCAidGVzdDEgZXZlbnQgY291bnQ6ICRjMSIKV3JpdGUtSG9zdCAidGVzdDIg
-ZXZlbnQgY291bnQ6ICRjMiIKCldyaXRlLUhvc3QgIi0tLSB0ZXN0MSBsZWF2ZS1ldmVudCBtYXRj
-aGVzIChmaXJzdCBwdWxsKSAtLS0iClNlbGVjdC1TdHJpbmcgLVBhdGggZGF0YVxjb2RleF9ydW5z
-XHRlc3QxLmpzb24gLVBhdHRlcm4gIkFubnVhbCBMZWF2ZSIsIk5vbi13b3JraW5nIGRheSIKCldy
-aXRlLUhvc3QgIi0tLSB0ZXN0MiBsZWF2ZS1ldmVudCBtYXRjaGVzIChzZWNvbmQgcHVsbCkgLS0t
-IgpTZWxlY3QtU3RyaW5nIC1QYXRoIGRhdGFcY29kZXhfcnVuc1x0ZXN0Mi5qc29uIC1QYXR0ZXJu
-ICJBbm51YWwgTGVhdmUiLCJOb24td29ya2luZyBkYXkiCgpXcml0ZS1Ib3N0ICItLS0gZm9ybWFs
-IGRpZmYgLS0tIgpweXRob24gLlxsYW5lX2JfY2FsX2d1YXJkLnB5IC0tZGlmZiAtLXByZSBkYXRh
-XGNvZGV4X3J1bnNcdGVzdDEuanNvbiAtLXBvc3QgZGF0YVxjb2RleF9ydW5zXHRlc3QyLmpzb24K
-CldyaXRlLUhvc3QgIlskKEdldC1EYXRlIC1Gb3JtYXQgbyldIERvbmUuIENvcHkgZXZlcnl0aGlu
-ZyBhYm92ZSBhbmQgc2VuZCBpdCBiYWNrLiIK
+# Lane B calendar guard — dry-diff isolation diagnostic
+# Run in RDP as AD-OAK\begb0037 on 101L-DE013193, inside work-inbox repo.
+$ErrorActionPreference = 'Stop'
+Set-Location "$env:USERPROFILE\work-inbox"
+Write-Host "[$(Get-Date -Format o)] Starting Lane B dry-diff isolation..."
+
+python .\lane_b_cal_guard.py --snapshot --out data\codex_runs\test1.json
+python .\lane_b_cal_guard.py --snapshot --out data\codex_runs\test2.json
+
+$c1 = (Get-Content data\codex_runs\test1.json | ConvertFrom-Json).fp.PSObject.Properties.Name.Count
+$c2 = (Get-Content data\codex_runs\test2.json | ConvertFrom-Json).fp.PSObject.Properties.Name.Count
+Write-Host "test1 event count: $c1"
+Write-Host "test2 event count: $c2"
+
+Write-Host "--- test1 leave-event matches (first pull) ---"
+Select-String -Path data\codex_runs\test1.json -Pattern "Annual Leave","Non-working day"
+
+Write-Host "--- test2 leave-event matches (second pull) ---"
+Select-String -Path data\codex_runs\test2.json -Pattern "Annual Leave","Non-working day"
+
+Write-Host "--- formal diff ---"
+python .\lane_b_cal_guard.py --diff --pre data\codex_runs\test1.json --post data\codex_runs\test2.json
+
+Write-Host "[$(Get-Date -Format o)] Done. Copy everything above and send it back."
