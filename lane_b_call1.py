@@ -516,13 +516,23 @@ def _json_array_from_text(text: str) -> list | None:
     return None
 
 
-# --------------------------------------------------------------------------- #
-#  Re-contamination guard (LANE_B sec.6c, revised: assert on observed calls)
-# --------------------------------------------------------------------------- #
-def guard_recontamination(tool_calls: list[dict], domain: str) -> tuple[str, dict]:
-    """Verb-based, not an exact allowlist. Returns ('ok'|'halt'|'unavailable', detail).
-    HALT on: server != codex_apps; a tool namespace outside the two Lane B
-    connectors; a write-verb leaf; an unrecognised-verb leaf (fail closed)."""
+class ReContaminationDetected(RuntimeError):
+    """Raised the INSTANT an unexpected/write tool call is observed in ANY codex exec
+    output this process has seen -- including partial output salvaged from a killed/
+    timed-out attempt (see _scan_partial_output_for_writes below). Deliberately a
+    RuntimeError subclass so any pre-existing `except RuntimeError` still catches it,
+    but callers MUST check for this type specifically and treat it as a non-retryable
+    HALT -- never swallow-and-retry it the way a generic codex-failed RuntimeError is
+    swallowed. Retrying after a suspected write is the wrong direction: it increases
+    exposure, it does not resolve anything."""
+
+
+def _scan_tool_calls_for_unexpected(tool_calls: list[dict]) -> tuple[list[str], list[str]]:
+    """Domain-agnostic danger-scan, shared by guard_recontamination() (full attempts)
+    and _scan_partial_output_for_writes() (partial/timed-out output). Returns
+    (seen, unexpected). HALT-worthy ('unexpected'): server != codex_apps; a tool
+    namespace outside the two Lane B connectors; a write-verb leaf; an
+    unrecognised-verb leaf (fail closed)."""
     seen: list[str] = []
     unexpected: list[str] = []
     for tc in tool_calls:
@@ -545,6 +555,45 @@ def guard_recontamination(tool_calls: list[dict], domain: str) -> tuple[str, dic
             unexpected.append(f"{tool} (unrecognised verb -- add to READ_VERB_RE if it is a read)")
             continue
         # codex_apps + Lane B namespace + read verb -> allowed
+    return seen, unexpected
+
+
+def _scan_partial_output_for_writes(raw_text: str, tag: str) -> None:
+    """Closes a real gap (found 2 Sept 2026, while removing the snapshot-diff layer
+    and making this guard the SOLE live safety mechanism): on a `codex exec` timeout,
+    whatever stdout was captured before the process was killed used to be discarded
+    without ever being checked for tool calls -- so a write tool that completed and
+    was logged to stdout moments before the process hung on a LATER step would have
+    been silently invisible to the guard. Called on every failure/timeout path in
+    run_codex_json() with whatever raw text was captured (may be empty, may be
+    truncated mid-line -- _parse_jsonl only keeps whole, valid JSON lines, which is
+    fine: a truncated final line was never a *completed* tool call anyway). Raises
+    ReContaminationDetected immediately if anything unexpected is found; otherwise a
+    no-op (finding nothing here does NOT mean the attempt succeeded -- it only means
+    no write was caught in whatever partial evidence exists)."""
+    if not raw_text:
+        return
+    events = _parse_jsonl(raw_text)
+    if not events:
+        return
+    tool_calls = extract_tool_calls(events)
+    if not tool_calls:
+        return
+    _seen, unexpected = _scan_tool_calls_for_unexpected(tool_calls)
+    if unexpected:
+        raise ReContaminationDetected(
+            f"[{tag}] unexpected tool call(s) found in PARTIAL/timed-out output: {sorted(set(unexpected))}"
+        )
+
+
+# --------------------------------------------------------------------------- #
+#  Re-contamination guard (LANE_B sec.6c, revised: assert on observed calls)
+# --------------------------------------------------------------------------- #
+def guard_recontamination(tool_calls: list[dict], domain: str) -> tuple[str, dict]:
+    """Verb-based, not an exact allowlist. Returns ('ok'|'halt'|'unavailable', detail).
+    HALT on: server != codex_apps; a tool namespace outside the two Lane B
+    connectors; a write-verb leaf; an unrecognised-verb leaf (fail closed)."""
+    seen, unexpected = _scan_tool_calls_for_unexpected(tool_calls)
     detail = {"seen": sorted(set(seen)), "unexpected": sorted(set(unexpected))}
     if unexpected:
         return "halt", detail
@@ -783,6 +832,116 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
 
 
 # --------------------------------------------------------------------------- #
+#  Pure-function selftest for the re-contamination guard (added 2 Sept 2026,
+#  same day the snapshot-diff layer was removed and this guard became the SOLE
+#  live safety mechanism for Lane B calendar/Teams). No codex, no connector,
+#  no live risk -- synthetic tool_calls lists only, same style as
+#  lane_b_cal_guard.py's cmd_selftest() for the (now diagnostic-only) diff logic.
+# --------------------------------------------------------------------------- #
+def cmd_selftest() -> int:
+    fails = []
+
+    def check(name, cond):
+        print(("  ok   " if cond else "  FAIL ") + name)
+        if not cond:
+            fails.append(name)
+
+    def tc(server, tool):
+        return {"server": server, "tool": tool, "arguments": {}, "result": None, "error": None, "raw": {}}
+
+    # --- guard_recontamination(): the ONLY tools a Call-1 calendar fetch should ever call ---
+    clean_calendar = [
+        tc("codex_apps", "microsoft_outlook_calendar.list_events"),
+        tc("codex_apps", "microsoft_outlook_calendar.list_calendars"),
+        tc("codex_apps", "microsoft_outlook_calendar.get_mailbox_settings"),
+    ]
+    status, detail = guard_recontamination(clean_calendar, "calendar")
+    check("clean calendar fetch (list/get only) -> status ok, no false positive",
+          status == "ok" and not detail["unexpected"])
+
+    # a real Call-1 fetch that legitimately picked search_events too (observed 1 Sept) -> still ok
+    clean_with_search = clean_calendar + [tc("codex_apps", "microsoft_outlook_calendar.search_events")]
+    status2, _ = guard_recontamination(clean_with_search, "calendar")
+    check("clean fetch incl. search_events (a real read verb we don't hard-list) -> ok",
+          status2 == "ok")
+
+    # --- the actual thing this guard exists to catch: a write-verb tool call ---
+    dirty_decline = clean_calendar + [tc("codex_apps", "microsoft_outlook_calendar.respond_to_event")]
+    status3, detail3 = guard_recontamination(dirty_decline, "calendar")
+    check("decline/respond_to_event present -> HALT",
+          status3 == "halt" and any("respond_to_event" in u for u in detail3["unexpected"]))
+
+    dirty_cancel = clean_calendar + [tc("codex_apps", "microsoft_outlook_calendar.cancel_or_delete_event")]
+    status4, detail4 = guard_recontamination(dirty_cancel, "calendar")
+    check("cancel_or_delete_event present -> HALT",
+          status4 == "halt" and any("cancel_or_delete_event" in u for u in detail4["unexpected"]))
+
+    dirty_create = clean_calendar + [tc("codex_apps", "microsoft_outlook_calendar.create_event")]
+    status5, _ = guard_recontamination(dirty_create, "calendar")
+    check("create_event present -> HALT", status5 == "halt")
+
+    dirty_send = [tc("codex_apps", "microsoft_teams.list_chats"), tc("codex_apps", "microsoft_teams.send_chat_message")]
+    status6, _ = guard_recontamination(dirty_send, "teams")
+    check("send_chat_message present (Teams) -> HALT", status6 == "halt")
+
+    # off-scope connector namespace (not one of the two Lane B connectors) -> HALT even though
+    # the leaf verb itself looks like a read (fail-closed on scope, not just on verb)
+    off_scope = clean_calendar + [tc("codex_apps", "microsoft_outlook_email.list_messages")]
+    status7, detail7 = guard_recontamination(off_scope, "calendar")
+    check("off-scope connector namespace (email, not calendar/teams) -> HALT",
+          status7 == "halt" and any("off-scope" in u for u in detail7["unexpected"]))
+
+    # server != codex_apps entirely -> HALT
+    off_server = clean_calendar + [tc("github", "create_file")]
+    status8, detail8 = guard_recontamination(off_server, "calendar")
+    check("non-codex_apps server (e.g. a stray github tool) -> HALT",
+          status8 == "halt" and any("server != codex_apps" in u for u in detail8["unexpected"]))
+
+    # --- _scan_partial_output_for_writes(): the partial/timed-out-output gap closed today ---
+    import json as _json
+    clean_partial_jsonl = "\n".join(_json.dumps(e) for e in [
+        {"type": "item.completed", "item": {"type": "mcp_tool_call", "server": "codex_apps",
+         "tool": "microsoft_outlook_calendar.list_events", "arguments": {}, "result": {}, "status": "completed"}},
+    ])
+    try:
+        _scan_partial_output_for_writes(clean_partial_jsonl, "selftest-clean")
+        check("partial output, read-only tool call -> no raise", True)
+    except ReContaminationDetected:
+        check("partial output, read-only tool call -> no raise", False)
+
+    dirty_partial_jsonl = "\n".join(_json.dumps(e) for e in [
+        {"type": "item.completed", "item": {"type": "mcp_tool_call", "server": "codex_apps",
+         "tool": "microsoft_outlook_calendar.list_events", "arguments": {}, "result": {}, "status": "completed"}},
+        {"type": "item.completed", "item": {"type": "mcp_tool_call", "server": "codex_apps",
+         "tool": "microsoft_outlook_calendar.cancel_or_delete_event", "arguments": {}, "result": {}, "status": "completed"}},
+    ])
+    try:
+        _scan_partial_output_for_writes(dirty_partial_jsonl, "selftest-dirty")
+        check("partial output, write tool call present (simulates a write completing just before a "
+              "kill/timeout) -> ReContaminationDetected raised", False)
+    except ReContaminationDetected:
+        check("partial output, write tool call present (simulates a write completing just before a "
+              "kill/timeout) -> ReContaminationDetected raised", True)
+
+    empty_or_garbage_cases = ["", "not json at all", "{broken", "   \n  \n"]
+    all_quiet = True
+    for garbage in empty_or_garbage_cases:
+        try:
+            _scan_partial_output_for_writes(garbage, "selftest-garbage")
+        except ReContaminationDetected:
+            all_quiet = False
+    check("empty/unparseable partial output -> no raise (nothing to find is not evidence of "
+          "anything, never a false HALT)", all_quiet)
+
+    print("")
+    if fails:
+        print("RESULT: %d FAILED" % len(fails))
+        return 1
+    print("RESULT: all passed")
+    return 0
+
+
+# --------------------------------------------------------------------------- #
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Lane B Call-1 codex_apps connector fetch")
     ap.add_argument("--domain", choices=["calendar", "teams", "both"], default="calendar")
@@ -791,7 +950,12 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--dry-run", action="store_true", help="print the prompt(s), run nothing")
     ap.add_argument("--from-file", help="parse this pre-captured codex --json transcript instead of running codex")
     ap.add_argument("--out", default=str(NORMALISED_OUT))
+    ap.add_argument("--selftest", action="store_true",
+                    help="pure-function checks of the re-contamination guard, no codex, no connector")
     args = ap.parse_args(argv)
+
+    if args.selftest:
+        return cmd_selftest()
 
     ts = _utcstamp()
     _log(f"start domain={args.domain} window_days={args.window_days} ts={ts}")
