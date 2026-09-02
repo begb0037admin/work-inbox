@@ -1,3 +1,74 @@
+# Handover -- 2 September 2026, evening (coordinator + Drew) -- Teams-on-Edu root cause found: account identity, not a prompt/code bug. Automatic Edu-primary/personal-failover BUILT (applies to both calendar and Teams), pushed to #33, verified locally (9/9 new orchestration checks + 11/11 guard selftest), NOT yet live-tested. Live task/CAL_BACKEND untouched.
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM.**
+
+## What happened tonight (Teams, after the earlier calendar work)
+`python .\lane_b_call1.py --domain teams` (bare manual invocation, no wrapper) failed 4 straight times on the laptop -- two full timeout cycles inside one `run_codex_json` call, then a second `fetch_domain` retry attempt also failing, Ctrl+C'd at ~25 min with zero successful output ever. Investigated the mechanics per the coordinator's brief (prompt phrasing, data volume/compound-call shape, tool-name drift) -- before that investigation concluded, **Kevin ran the identical command with `CODEX_HOME`/`WI_LANE_B_CODEX_HOME` explicitly set to the personal account** (`C:\WorkInboxAI\codex-laneb`, `eb7a812e-...`) and it succeeded cleanly: 44 items, first attempt, ~4.5 min. **Confirmed: the failing account was Edu** (`cc80356f`, `begb0037@ox.ac.uk`) -- the laptop RDP session's default profile, reached only because nothing in that shell had set `CODEX_HOME`/`WI_LANE_B_CODEX_HOME`, an accidental fall-through, not a deliberate choice. Not a prompt bug, not a code bug -- account identity.
+
+**Teams enabled on both accounts (Kevin checked directly), Edu usage/credits fine (34% monthly, 56% weekly, 5hr limit unused) -- ruling out both "connector not attached" and "quota exhausted" as the cause.** Something else about Edu's session/connector state was failing for Teams specifically tonight; root cause of THAT residual mystery not chased further (see "what's still open" below) -- superseded by the actual fix Kevin wants.
+
+## Kevin's decision: Edu PRIMARY, personal AUTOMATIC FAILOVER -- not "just use personal"
+Explicit correction after an initial wrong turn (a first pass hardcoded the wrapper to personal-only, which is what "just use personal" would look like): the 1 Sept move to personal-only was a **testing-phase workaround** for burning through Edu's 500/month cap fast during heavy testing, not the permanent architecture. Edu is tried first, every time; personal is the safety net for when Edu's own existing retry budget is exhausted, not the new default. Deliberately NOT trying to distinguish "Edu's cap is exhausted" from any other transient failure -- tonight's real failures showed only generic timeouts, no clean quota-exhaustion signal to key off, and building detection for a signal that isn't reliably there would be brittle. Applies uniformly to calendar and Teams.
+
+## Built, pushed to `#33` (commit `68e5ee6`), NOT yet live-tested
+
+**`lane_b_call1.py`:**
+- `PRIMARY_CODEX_HOME` (Edu -- `WI_LANE_B_CODEX_HOME` / inherited `CODEX_HOME` / OS `~/.codex` default, now an explicit deliberate default computed once and logged, not accidental inheritance) and `FAILOVER_CODEX_HOME` (`WI_LANE_B_CODEX_HOME_FAILOVER` / the known personal Lane B login) resolved once at module load.
+- `run_codex_json()` / `_ensure_warm()` / `_codex_identity()` / `_codex_account_id()` / `_config_toml_sha1()` all take an optional `codex_home` param, default primary -- every existing zero-arg call site still works unchanged. `_WARMED_HOMES` (a set) replaces the old single-process `_WARMED` bool, since a process may now warm both identities if failover triggers.
+- `fetch_domain()` split into `_fetch_domain_one_identity()` (the pre-existing retry loop, now parameterized by identity) + orchestration: try PRIMARY's full existing retry budget unchanged (no new/larger tier) → if exhausted with no ok/halt result, automatically retry the SAME domain fetch against FAILOVER once, same budget → **a re-contamination HALT on primary is terminal and never triggers failover** (more calls after a detected write is the wrong direction regardless of identity). Every result carries `served_by` (`primary`/`failover`/`None`), threaded into the normalised `meta.lane_b.domains` output and the per-run log, per Kevin's explicit ask for auditability.
+
+**`Run Laptop Bridge Briefing.ps1`:** corrected after the in-session wrong turn (hardcoding `$LaneBCodexHome` to personal-only was tried first, then reverted once Kevin corrected the direction). The wrapper no longer picks an identity or implements any fallback itself -- `lane_b_call1.py`'s own primary/failover logic governs completely. `$LaneBCodexHome` is now an escape-hatch override only, normally blank. Comment block records both wrong turns tried tonight so a future session doesn't re-propose either.
+
+**Verified locally (real python interpreter, not the sandboxed `python3` stub):**
+- `py_compile` clean on both files.
+- Guard `--selftest`: still 11/11 (unaffected by this change).
+- **New isolated orchestration test** (`test_failover.py`, monkeypatched `run_codex_json`, zero live codex calls): primary is tried its full retry budget (confirmed exact call count) before failover ever engages; failover is skipped entirely if `FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME`; a re-contamination `HALT` on primary is confirmed to NEVER reach the failover code path (the fake failover function raises `AssertionError` if called, proving it wasn't); `served_by` is correctly `failover` on a primary-exhausted/failover-succeeds run, `primary` on a primary-HALT run, and `None` when both identities fail. **9/9 checks pass.**
+- **Not yet live-tested against the real connector** -- no RDP access this session. This is the one thing left before `#33` can be considered for merge.
+
+## What's still open (not chased tonight, not blocking)
+- **Why Edu specifically failed Teams tonight** (given Teams is enabled and usage/credits are fine on that account) is not diagnosed -- could be connector-session staleness, a transient service-side issue, or something else entirely. Not chased further because the failover design makes the exact cause less urgent: whatever it is, Lane B now routes around it automatically. If Edu keeps failing Teams specifically and never recovers, that would be worth a fresh look, but there's no evidence of that yet -- tonight is one data point.
+- `take_snapshot()` (the now-diagnostic-only calendar snapshot/diff code in `lane_b_cal_guard.py`, used by `--dry-diff`/`--snapshot`) was NOT given the same primary/failover treatment -- it still resolves to primary only via the unchanged default. Lower priority since it's diagnostic-only, not the live gate, and calendar has never shown Edu failures. Worth a follow-up if it ever does.
+
+## Next action -- resume here, one live test, ready to run
+This test doubles as the failover-mechanism proof: run it WITHOUT manually setting `CODEX_HOME`/`WI_LANE_B_CODEX_HOME` (clear any leftover from earlier in the session first) so Lane B's own primary-then-failover logic runs for real. Watch for "PRIMARY ... exhausted ... failing over to PERSONAL" in the log if Edu fails Teams again tonight -- that would be the new behaviour actually catching it live, not a re-run of the same failure.
+
+```powershell
+cd $env:USERPROFILE\work-inbox
+$cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+
+# pull the branch versions -- TEAMS_BACKEND + failover logic aren't on main yet
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/lane_b_call1.py?t=$cb" -OutFile lane_b_call1.py
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/fetch_inbox.py?t=$cb" -OutFile fetch_inbox.py
+Get-ChildItem lane_b_call1.py, fetch_inbox.py   # sanity check: both today's date
+python -c "import py_compile; py_compile.compile('lane_b_call1.py', doraise=True); py_compile.compile('fetch_inbox.py', doraise=True); print('compiles clean')"
+python .\lane_b_call1.py --selftest
+
+# IMPORTANT: clear any manual override left over from earlier tonight, so the
+# real primary/failover logic runs instead of a pinned identity
+Remove-Item Env:\CODEX_HOME -ErrorAction SilentlyContinue
+Remove-Item Env:\WI_LANE_B_CODEX_HOME -ErrorAction SilentlyContinue
+
+python .\lane_b_call1.py --domain both
+
+# full fetch_inbox.py pass, Teams section on, SAFE mode (no push to GitHub --
+# writes data\claude_briefing.json locally instead of touching the live briefing.json)
+$env:MAIL_BACKEND   = 'imap'
+$env:CAL_BACKEND    = 'com'          # calendar cutover is separate, not part of this test
+$env:TEAMS_BACKEND  = 'connector'
+$env:AI_BACKEND     = 'claude_code'
+$env:WI_AI_PARALLEL = '1'            # SAFE: no push, local file only
+python -u .\fetch_inbox.py
+Get-Content data\claude_briefing.json | ConvertFrom-Json | Select-Object -ExpandProperty teams | Format-Table
+```
+
+If `lane_b_call1.py --domain both` exits ok and `claude_briefing.json`'s `teams` array has sane digest entries (channel, sender, time, preview): `#33` is ready for Kevin's own merge decision -- still not automatic. **Cutover for both calendar and Teams together is a separate, later, still-undecided step -- do not assume it's happening tonight just because this test passes.**
+
+**Standing architectural decisions (unchanged, do not re-litigate):**
+- No permanent COM fallback for Lane B calendar. Connector is the mandatory path.
+- Edu is primary, personal is automatic failover -- not a manual choice, not "personal always." Don't re-propose hardcoding personal-only; that was tried and corrected tonight.
+
+---
+
 # Handover -- 2 September 2026, later still (coordinator + Drew) -- #31 MERGED to main (b09d047, Kevin's go-ahead after a clean live --run: 51 events, exit 0, on top of 11/11 selftest); Teams v1 (raw digest, no AI triage) BUILT on new branch #33, compiles + isolated tests pass, awaiting live RDP validation before merge. Live task stays CAL_BACKEND=com -- Kevin's plan is to cut BOTH calendar and Teams over together once Teams is validated too, not calendar sooner.
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. **Not touched. Calendar stays on COM.** Merging `#31`'s guard fix to `main` does NOT cut over the live task -- that's a separate decision, deliberately deferred until Teams is ready too (see below).
