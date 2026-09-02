@@ -100,6 +100,28 @@ CODEX_MODEL = os.environ.get("WI_CODEX_MODEL", "").strip()   # optional -m <mode
 # call (see _ensure_warm) absorbs the cold start once per process.
 CALL1_TIMEOUT_S        = int(os.environ.get("WI_LANE_B_TIMEOUT", "360"))
 CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
+# PRIMARY_TIMEOUT_S / PRIMARY_MAX_ATTEMPTS (added 2 Sept 2026, further cut after
+# Kevin's live 13-min-worst-case test -- he wants ~5 min before failover, not 13.
+# PRIMARY ONLY -- failover/personal keeps CALL1_TIMEOUT_S (360s) x 2 sub-attempts
+# unchanged, exactly as before tonight; personal has been reliable all night and
+# gets the full benefit of the doubt. TRADEOFF, stated plainly (not a silent
+# change): cutting primary to 1 sub-attempt at ~290s loses the cold-start-hang
+# retry protection for primary specifically -- a legitimate slow-but-would-have-
+# succeeded Edu call can now fail over prematurely instead of getting its one
+# retry. Accepted per Kevin's explicit priority right now: speed over giving Edu
+# the benefit of the doubt (also: Edu is confirmed rate-limited at the moment
+# this was decided -- 5hr usage limit at 0% until 18:28, monthly at 6%
+# remaining/468 of 500 used -- so a slow/failing primary is expected, not
+# anomalous, tonight specifically).
+# Honest timing note (not silently glossed over): warm-up (~10s, once per
+# process) + PRIMARY_TIMEOUT_S (~290s) + the existing WI_LANE_B_SNAPSHOT_GAP_S
+# quiet-gap wait (75s, unchanged, still fires before failover's own first call
+# since it's a shared process-wide "last connector touch" tracker) totals closer
+# to ~375s (~6.25 min) before failover's call actually STARTS, not a clean 5:00
+# -- the 280-300s timeout figure was implemented as given; the gap mechanism
+# wasn't touched (out of scope for this change) and adds real time on top.
+PRIMARY_TIMEOUT_S     = int(os.environ.get("WI_LANE_B_PRIMARY_TIMEOUT", "290"))
+PRIMARY_MAX_ATTEMPTS  = int(os.environ.get("WI_LANE_B_PRIMARY_MAX_ATTEMPTS", "1"))
 # Headless connector availability FLIPS between runs on the same account
 # (confirmed 1 Sept: same laptop/account, calendar fired one run, Teams the
 # next). If the expected tool doesn't fire, re-invoke codex a few times before
@@ -509,14 +531,19 @@ def _mark_connector_touch() -> None:
 # ------------------------------------------------------------------------------------------- #
 
 
-def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | None = None) -> tuple[list[dict], str]:
+def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | None = None,
+                   max_attempts: int = 2) -> tuple[list[dict], str]:
     """Return (parsed_json_objects, raw_stdout). Raises RuntimeError on hard failure.
     codex_home: which CODEX_HOME to run this call against -- defaults to
     PRIMARY_CODEX_HOME (Edu) when not given. The primary/failover ORCHESTRATION
     (try primary's full retry budget, then fail over to personal) lives in
     fetch_domain()/take_snapshot(), not here -- this function just executes a
-    single identity's worth of the existing 2-attempt retry for whichever
-    codex_home it's told to use."""
+    single identity's worth of the retry for whichever codex_home it's told to
+    use. max_attempts (added 2 Sept 2026, further speed cut): default 2
+    (FAILOVER's unchanged behaviour); PRIMARY is called with max_attempts=1 by
+    fetch_domain() specifically -- see PRIMARY_MAX_ATTEMPTS's own comment for
+    the full tradeoff (losing the cold-start-hang retry for primary only,
+    accepted for speed tonight)."""
     _ensure_warm(codex_home)
     cmd = _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check", "--json"]
     if CODEX_MODEL:
@@ -524,9 +551,9 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
     cmd.append(prompt)
 
     last_raw = ""
-    for attempt in (1, 2):
+    for attempt in range(1, max_attempts + 1):
         _wait_for_quiet_gap(tag)
-        _log(f"[{tag}] codex exec attempt {attempt}/2 (timeout {timeout_s}s) "
+        _log(f"[{tag}] codex exec attempt {attempt}/{max_attempts} (timeout {timeout_s}s) "
              f"CODEX_HOME={codex_home or PRIMARY_CODEX_HOME}")
         try:
             proc = subprocess.run(
@@ -549,8 +576,8 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
             _mark_connector_touch()
             last_raw = (te.stdout or "") if isinstance(te.stdout, str) else ""
             _scan_partial_output_for_writes(last_raw, tag)   # raises ReContaminationDetected, uncaught here on purpose
-            _log(f"[{tag}] timed out after {timeout_s}s (cold-start hang?) -- retrying once" if attempt == 1
-                 else f"[{tag}] timed out again")
+            _log(f"[{tag}] timed out after {timeout_s}s (cold-start hang?) -- retrying once" if attempt < max_attempts
+                 else f"[{tag}] timed out again -- no more attempts for this identity")
             continue
 
         _mark_connector_touch()
@@ -563,10 +590,10 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
             return objs, raw
         _log(f"[{tag}] no parseable JSONL (exit {proc.returncode}); stderr tail: "
              f"{(proc.stderr or '').strip()[-300:]!r}")
-        if attempt == 1:
+        if attempt < max_attempts:
             continue
 
-    raise RuntimeError(f"[{tag}] codex exec produced no usable JSON output after 2 attempts "
+    raise RuntimeError(f"[{tag}] codex exec produced no usable JSON output after {max_attempts} attempt(s) "
                        f"(CODEX_HOME={codex_home or PRIMARY_CODEX_HOME})")
 
 
@@ -959,17 +986,21 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
 
 
 def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts: str,
-                               retries: int, codex_home: str, identity_label: str) -> tuple[dict | None, list[dict]]:
+                               retries: int, codex_home: str, identity_label: str,
+                               timeout_s: int = CALL1_TIMEOUT_S, max_attempts: int = 2) -> tuple[dict | None, list[dict]]:
     """The pre-2-Sept-evening fetch_domain() retry loop, unchanged in behaviour,
     now parameterized by WHICH identity (codex_home/identity_label) it runs
     against and tagged accordingly in logs/attempt records/per-attempt JSONL
-    filenames. Re-contamination still breaks immediately, never retried --
+    filenames, AND (added later 2 Sept, further speed cut) by timeout_s/
+    max_attempts per-identity -- FAILOVER keeps the original CALL1_TIMEOUT_S/2
+    defaults, PRIMARY is called with PRIMARY_TIMEOUT_S/PRIMARY_MAX_ATTEMPTS by
+    fetch_domain(). Re-contamination still breaks immediately, never retried --
     that rule doesn't change per-identity. Returns (result_or_None, attempts)."""
     attempts: list[dict] = []
     result: dict | None = None
     for n in range(1, retries + 1):
         try:
-            events, raw = run_codex_json(prompt, timeout_s=CALL1_TIMEOUT_S,
+            events, raw = run_codex_json(prompt, timeout_s=timeout_s, max_attempts=max_attempts,
                                          tag=f"{domain}#{identity_label}{n}", codex_home=codex_home)
         except ReContaminationDetected as e:
             # A write/unexpected tool call was actually observed -- even if only in
@@ -1029,7 +1060,8 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
     on either identity), 'codex_failed' (every attempt on both failed)."""
     result, attempts = _fetch_domain_one_identity(
         domain, prompt, window_days=window_days, ts=ts, retries=PRIMARY_RETRIES,
-        codex_home=PRIMARY_CODEX_HOME, identity_label="primary")
+        codex_home=PRIMARY_CODEX_HOME, identity_label="primary",
+        timeout_s=PRIMARY_TIMEOUT_S, max_attempts=PRIMARY_MAX_ATTEMPTS)
 
     if result is not None and result["status"] in ("ok", "halt"):
         pass   # success, or a terminal re-contamination HALT -- no failover either way
@@ -1041,7 +1073,8 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
              f"-- failing over to PERSONAL ({FAILOVER_CODEX_HOME}) for this domain fetch")
         fo_result, fo_attempts = _fetch_domain_one_identity(
             domain, prompt, window_days=window_days, ts=ts, retries=retries,
-            codex_home=FAILOVER_CODEX_HOME, identity_label="failover")
+            codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
+            timeout_s=CALL1_TIMEOUT_S, max_attempts=2)   # explicit, unchanged -- personal keeps full benefit of the doubt
         attempts = attempts + fo_attempts
         if fo_result is not None:
             result = fo_result
