@@ -1,3 +1,77 @@
+# Handover -- 2 September 2026, evening, final piece before cutover (coordinator + Drew) -- Teams incremental pull via a persisted high-water-mark BUILT, commit `8afe28f`, verified locally (15/15 new checks + 11/11 guard selftest + 10/10 failover test, all still green). This is the last piece of Lane B engineering queued for tonight. NOT yet live-tested -- RDP command prepared below, not run. Live task/CAL_BACKEND untouched, calendar stays on COM.
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched.
+
+## The ask and a framing correction
+Every Teams pull re-asked the connector for the full rolling lookback window from scratch, every single run, with no memory of what was already fetched -- flagged as a plausible real contributor to tonight's slowness (Edu's real Teams volume being fully re-enumerated 3x/weekday). **Correction on the request's framing:** Teams was never actually pulling a literal 7-day window -- that's calendar's `--window-days` parameter, which is accepted but unused by the Teams fetch path. Teams has always used a narrower `--teams-lookback-h` rolling window (default 72h/3 days), set independently. The redundant full-window re-scan every run was real and worth fixing regardless of the exact number -- noted for the record, doesn't change the fix.
+
+## Built (commit `8afe28f`), following existing repo conventions
+Checked existing state patterns first, per the coordinator's instruction not to invent a new one: `data/lane_b/`/`data/codex_runs/` artefacts (`lane_b_normalised.json`, `cal_baseline_*.json`, `GUARD_TRIPPED_*.json`) are all **local files, never pushed to GitHub** (confirmed earlier tonight -- `data/lane_b/` and `data/codex_runs/` don't exist on `main` at all). This is a different tier from the triage ledger / calendar-snapshot state, which ARE GitHub-backed with backup-and-verify discipline. Followed the local-file tier: new `data/lane_b/teams_watermark.json`, plain read/write, no backup machinery -- same convention as `lane_b_normalised.json` itself.
+
+- `_load_teams_watermark()` / `_save_teams_watermark()` / `_new_teams_watermark()` / `_parse_iso_utc()`: new helpers in `lane_b_call1.py`.
+- **New watermark = the LATER of** (a) the newest `created` timestamp actually observed among the pull's returned messages, or (b) the pull's own start time (a safe floor -- protects against a slow pull skipping messages that arrived mid-pull, since anything not yet returned just gets harmlessly re-covered next run; also means an anomalously old message timestamp can never regress the mark backwards).
+- `main()`'s `since_iso` now resolves from the watermark when one exists, falling back to the existing full `--teams-lookback-h` baseline when it doesn't (first-ever run, or a corrupt/unreadable watermark file -- self-healing, logged, never a HALT).
+- **Advances ONLY when `per_domain["teams"]["status"] == "ok"`** -- `halt` (re-contamination), `unavailable`, and `codex_failed` all leave it untouched, so a failed run can never create a silent, permanent gap in coverage; the next run simply re-tries the exact same span it already knew about.
+- **Teams only, per explicit scope.** Calendar's 51-event pulls have been consistently fast all week -- no demonstrated problem there to fix. Noted as a future candidate for the same treatment if calendar's connector volume or run time ever becomes an issue; not built now.
+
+## Verified locally (real python interpreter, zero live codex calls anywhere in this verification)
+- `py_compile` clean.
+- Guard `--selftest`: still 11/11 (unaffected).
+- Failover orchestration test (`test_failover.py`): still 10/10 (unaffected).
+- **New `test_teams_watermark.py`, 15 checks, all pass** -- proves exactly the four behaviours asked for, plus a bonus fifth:
+  1. First-ever run (no watermark file) uses the full lookback baseline, and the watermark file exists afterward (advanced by the successful pull).
+  2. A second run resumes from **exactly** the watermark value persisted by the first run's success -- not the full window again (directly asserted: the second run's `since_iso` matches the pull's observed message timestamp, and differs from the first run's `since_iso`).
+  3. A failed pull (`status='codex_failed'`) leaves the watermark **unchanged**, and the following run still resumes from the pre-failure watermark (not a wider or narrower window) -- proves no silent gap is ever created.
+  4. A re-contamination **HALT** also leaves the watermark unchanged (same principle, tested as its own case since it's a distinct status from `codex_failed`).
+  5. (bonus, helper-level) newest-observed-timestamp selection is correct when multiple messages are returned; a genuinely empty-but-successful pull falls back to the safe pull-start floor; an anomalously old message timestamp can never regress the watermark backwards; corrupt/unparseable watermark files self-heal to "first-ever run" behaviour without raising.
+
+**Not yet live-tested against the real connector.**
+
+## Next action -- prepared live RDP validation command, NOT run
+Same pattern as tonight's other work -- re-pull fresh, then run TWICE in the same session to directly observe the watermark taking effect (the second run should visibly log "resuming from watermark ..." and be markedly faster/narrower than the first):
+```powershell
+cd $env:USERPROFILE\work-inbox
+$cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/lane_b_call1.py?t=$cb" -OutFile lane_b_call1.py
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/fetch_inbox.py?t=$cb" -OutFile fetch_inbox.py
+Get-ChildItem lane_b_call1.py, fetch_inbox.py   # sanity check: both today's date
+python -c "import py_compile; py_compile.compile('lane_b_call1.py', doraise=True); py_compile.compile('fetch_inbox.py', doraise=True); print('compiles clean')"
+python .\lane_b_call1.py --selftest
+
+Remove-Item Env:\CODEX_HOME -ErrorAction SilentlyContinue
+Remove-Item Env:\WI_LANE_B_CODEX_HOME -ErrorAction SilentlyContinue
+
+# if this laptop already has an OLD data\lane_b\teams_watermark.json from an
+# earlier session, delete it first so this is a genuine first-run baseline test:
+Remove-Item data\lane_b\teams_watermark.json -ErrorAction SilentlyContinue
+
+Write-Host "=== RUN 1 (expect: full lookback baseline, watermark created) ==="
+python .\lane_b_call1.py --domain teams
+Get-Content data\lane_b\teams_watermark.json
+
+Write-Host "=== RUN 2 (expect: 'resuming from watermark ...' in the log, noticeably faster) ==="
+python .\lane_b_call1.py --domain teams
+Get-Content data\lane_b\teams_watermark.json
+
+# then the full pipeline, same SAFE (no-push) pattern as before:
+$env:MAIL_BACKEND   = 'imap'
+$env:CAL_BACKEND    = 'com'
+$env:TEAMS_BACKEND  = 'connector'
+$env:AI_BACKEND     = 'claude_code'
+$env:WI_AI_PARALLEL = '1'
+python -u .\fetch_inbox.py
+Get-Content data\claude_briefing.json | ConvertFrom-Json | Select-Object -ExpandProperty teams | Format-Table
+```
+If RUN 2 visibly resumes from the watermark and completes faster than RUN 1: the fix is confirmed live, and (combined with the earlier UnicodeDecodeError fix + shortened primary retry budget) `#33` should be ready for Kevin's own review/merge/cutover decision tonight -- still his call, not automatic.
+
+**Standing architectural decisions (unchanged, do not re-litigate):**
+- No permanent COM fallback for Lane B calendar. Connector is the mandatory path.
+- Edu is primary, personal is automatic failover.
+- Primary's retry budget is deliberately short (1 fetch-level attempt) by design.
+- Teams now pulls incrementally via a watermark; calendar does not (no demonstrated need yet).
+
+---
+
 # Handover -- 2 September 2026, evening, continued (coordinator + Drew) -- live Teams test with automatic failover: SUCCEEDED but took ~43 min (primary won on its last sub-attempt, failover never actually exercised live) + a real UnicodeDecodeError crash. Both fixed: UTF-8 subprocess decoding, and a much shorter primary retry budget (13 min worst case, down from ~40). Pushed `#33` commit `078788a`, verified locally, NOT yet live-tested with both fixes together.
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. **Calendar stays on COM.**
