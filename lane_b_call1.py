@@ -98,6 +98,28 @@ CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
 # "connector unavailable this cycle" path.
 CALL1_RETRIES = max(1, int(os.environ.get("WI_LANE_B_RETRIES", "3")))
 CALL1_RETRY_BACKOFF_S = [5, 12, 20, 30]
+# PRIMARY_RETRIES (added 2 Sept 2026, same evening as primary/failover itself):
+# CALL1_RETRIES above is now interpreted as FAILOVER's retry budget (unchanged
+# meaning/default -- personal has proven reliable, worth giving it a real
+# chance once we're paying the cost of switching to it). PRIMARY gets its own,
+# deliberately SMALLER budget. Evidence: the live Teams test that validated
+# primary/failover took ~43 minutes and 3 full fetch-level retries (each up to
+# 2 internal codex-exec sub-attempts x 360s) before primary finally succeeded
+# on its very last sub-attempt -- one retry short of needing failover at all.
+# Not acceptable on a schedule. Kevin: err toward faster failover given Edu is
+# genuinely unreliable right now -- flagged as a tradeoff, not decided
+# unilaterally (see HANDOVER.md): this trades "give Edu every chance" for
+# "don't make Kevin wait 40+ minutes", at the cost of failing over to personal
+# somewhat more readily on what might have been a recoverable Edu blip.
+# PRIMARY_RETRIES=1 keeps run_codex_json()'s own internal 2-sub-attempt loop
+# intact (a single cold-start-hang absorber, real and previously observed --
+# ~3m37s once -- worth keeping) but removes the OUTER 3x stacking that was the
+# actual driver of the 43-minute worst case. New primary worst case before
+# failover: ~795s (~13 min: 2 sub-attempts x 360s + one ~75s quiet-gap wait)
+# instead of ~2400s+ (~40 min). If still too slow, the next lever is trimming
+# run_codex_json's internal loop to 1 attempt for primary specifically
+# (worst case ~6 min) -- not done here, deliberately not decided unilaterally.
+PRIMARY_RETRIES = max(1, int(os.environ.get("WI_LANE_B_PRIMARY_RETRIES", "1")))
 # (per-CODEX_HOME warm-up tracking is _WARMED_HOMES, defined near _ensure_warm() below --
 # replaces a single process-wide flag now that primary/failover means two identities)
 
@@ -338,6 +360,14 @@ def _ensure_warm(codex_home: str | None = None) -> None:
                               "Reply with the single word OK. Use no tools, change nothing."],
             capture_output=True, text=True, timeout=CALL1_WARMUP_TIMEOUT_S,
             cwd=str(REPO_ROOT), env=_codex_env(home),
+            encoding="utf-8", errors="replace",   # 2 Sept fix: text=True with no encoding= defaults to
+                                                   # locale.getpreferredencoding() -- cp1252 on Windows,
+                                                   # not UTF-8 -- and a real Teams message body with an
+                                                   # emoji/accent crashed the subprocess module's own
+                                                   # background _readerthread with UnicodeDecodeError.
+                                                   # Force UTF-8 (codex's own stdout is UTF-8) with
+                                                   # errors=replace so an undecodable byte never crashes
+                                                   # the read, worst case one character comes through as U+FFFD.
             stdin=subprocess.DEVNULL,   # codex exec BLOCKS reading stdin until EOF -- give it EOF now
         )
         _log(f"codex warm-up done in {time.time() - t0:.0f}s")
@@ -410,6 +440,14 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
                 cmd, capture_output=True, text=True, timeout=timeout_s,
                 cwd=str(REPO_ROOT),
                 env=_codex_env(codex_home),
+                encoding="utf-8", errors="replace",   # 2 Sept fix -- see _ensure_warm()'s comment.
+                                                       # Real bug tonight: a Teams message body with a
+                                                       # non-cp1252 byte (near-certainly an emoji/accent)
+                                                       # crashed subprocess's background _readerthread
+                                                       # with UnicodeDecodeError. Teams content WILL
+                                                       # regularly contain non-ASCII characters -- this
+                                                       # is not a one-off, force UTF-8 explicitly rather
+                                                       # than relying on Windows' ANSI-codepage default.
                 stdin=subprocess.DEVNULL,   # codex-cli 0.151.0 prints "Reading additional input
                                             # from stdin..." and BLOCKS on read until EOF; an
                                             # inherited stdin never closes -> hang. Give it EOF.
@@ -877,23 +915,27 @@ def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts
 
 def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries: int) -> dict:
     """PRIMARY/FAILOVER orchestration (added 2 Sept 2026 evening, Kevin's
-    correction): try PRIMARY (Edu) first, its existing full retry budget
-    unchanged (`retries`, same as before today). If that budget is exhausted
-    with no 'ok'/'halt' result -- for ANY reason, deliberately not trying to
-    distinguish "Edu's cap is exhausted" from any other transient failure,
-    since tonight's real failures showed only generic timeouts with no clean
-    quota-exhaustion signal to key off -- automatically retry the SAME domain
-    fetch against FAILOVER (personal), reusing the SAME retry budget, not a
-    new/larger tier. A re-contamination HALT on primary is terminal and does
-    NOT trigger failover -- more calls after a detected write is the wrong
-    direction regardless of which identity would make them.
+    correction; retry budgets split same evening after a live 43-minute test --
+    see PRIMARY_RETRIES's own comment for the full evidence/tradeoff). Try
+    PRIMARY (Edu) first, with its own deliberately SMALL retry budget
+    (PRIMARY_RETRIES, default 1 -- NOT `retries`/CALL1_RETRIES, which is now
+    FAILOVER's budget). If primary's budget is exhausted with no 'ok'/'halt'
+    result -- for ANY reason, deliberately not trying to distinguish "Edu's
+    cap is exhausted" from any other transient failure, since real failures
+    tonight showed only generic timeouts with no clean quota-exhaustion signal
+    to key off -- automatically retry the SAME domain fetch against FAILOVER
+    (personal), using `retries` (its own, more generous budget -- personal has
+    proven reliable, worth a real chance once we're paying to switch to it).
+    A re-contamination HALT on primary is terminal and does NOT trigger
+    failover -- more calls after a detected write is the wrong direction
+    regardless of which identity would make them.
     Returns a run_domain-shaped dict + 'served_by' (which identity actually
     produced the result, or None if neither did) + 'attempts' (both identities'
     attempts, concatenated, each tagged). Never raises. Terminal statuses:
     'ok', 'halt' (re-contamination), 'unavailable' (expected tool never fired
     on either identity), 'codex_failed' (every attempt on both failed)."""
     result, attempts = _fetch_domain_one_identity(
-        domain, prompt, window_days=window_days, ts=ts, retries=retries,
+        domain, prompt, window_days=window_days, ts=ts, retries=PRIMARY_RETRIES,
         codex_home=PRIMARY_CODEX_HOME, identity_label="primary")
 
     if result is not None and result["status"] in ("ok", "halt"):
