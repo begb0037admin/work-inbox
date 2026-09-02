@@ -1,3 +1,71 @@
+# Handover -- 2 September 2026, late evening, session handoff (coordinator + Drew, Kevin moving to a fresh session on the laptop) -- BOTH Lane B halves essentially done: calendar (#31) MERGED to main, Teams (#33) built + live-validated end-to-end tonight, NOT yet merged. Only remaining step before merge: an in-flight fetch_inbox.py shadow-run confirming CAL_BACKEND=connector + TEAMS_BACKEND=connector together, then Kevin's explicit go for the actual live cutover. Live scheduled task untouched throughout -- still CAL_BACKEND=com, TEAMS_BACKEND off.
+
+**Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action, `TEAMS_BACKEND` not set. Not touched tonight.
+
+## 1. Calendar -- #31 MERGED
+Commit `b09d047`, Kevin's go-ahead, after a live `--run` came back clean (51 events, exit 0) on the redesigned guard (re-contamination-only, snapshot-diff dropped). Merging the fix to `main` did **not** cut over the live task -- that's still a separate, deliberately deferred decision (see #4/#5 below).
+
+## 2. Teams -- #33 (branch `drew/lane-b-teams-v1`) built end-to-end tonight, still NOT merged
+Full build, in the order it happened:
+- `TEAMS_BACKEND` env flag + `_load_lane_b_teams()` raw-digest loader in `fetch_inbox.py` (off by default, byte-identical when off, mirrors `_load_lane_b_calendar()`).
+- **Automatic Edu-primary/personal-failover architecture**, built after Kevin's explicit correction (an in-session wrong turn -- hardcoding personal-only -- was tried first and corrected): Edu is tried first, always; personal is the automatic safety net once Edu's own retry budget is exhausted, for any reason, never a manual/static switch. A re-contamination HALT on primary is terminal and never triggers failover.
+- **UnicodeDecodeError fix**: `subprocess.run(..., text=True)` was defaulting to `locale.getpreferredencoding()` (cp1252 on Windows) instead of UTF-8, crashing on real Teams message content (emoji/accents). Fixed with explicit `encoding='utf-8', errors='replace'`.
+- **Primary's retry budget shortened twice**, both times Kevin's explicit call with the tradeoff stated plainly each time: first cut (`PRIMARY_RETRIES=1`, keeping the internal 2-sub-attempt/360s cold-start absorber) brought worst-case-before-failover from ~43min down to ~13min. Second cut (`PRIMARY_TIMEOUT_S=290s`, `PRIMARY_MAX_ATTEMPTS=1`) brought it down further to ~6.25min honestly accounted (not the cleaner "~5min" framing it was requested under). Failover/personal's own timeout and retry behaviour (360s x 2) was never touched -- proven reliable all night, kept the full benefit of the doubt throughout.
+- **Persistent Teams watermark** (`data/lane_b/teams_watermark.json`, local file, same convention as `lane_b_normalised.json` -- never pushed to GitHub): repeat runs resume from the last successful pull's newest-observed-message timestamp instead of re-scanning the full 72h lookback every time. Advances only on a genuinely successful (`status=='ok'`) pull -- halt/unavailable/codex_failed all leave it untouched, so a failed run can never create a silent coverage gap.
+
+**Verified locally throughout, every increment:** `py_compile` clean at every step; guard `--selftest` stayed 11/11 across all of it; a dedicated failover-orchestration test (`test_failover.py`) grew from 9 to 16 checks as the primary/failover and timing logic was built out, all green; a dedicated watermark test (`test_teams_watermark.py`, 15 checks) proved first-run/resume/failure-doesn't-advance/HALT-doesn't-advance behaviour, all green. Final code state: commit `c009e18` on `drew/lane-b-teams-v1`.
+
+## 3. Full live proof, ALL fixes together -- commit `c009e18` -- real end-to-end confirmation
+Kevin ran `python .\lane_b_call1.py --domain teams` with `CODEX_HOME`/`WI_LANE_B_CODEX_HOME` genuinely cleared first (a true test of the automatic defaults, not a pinned identity). Result: **~2.3 minutes total** -- watermark resume working (visibly logged "resuming from watermark..."), primary failing fast and cleanly (~5s, no hang -- a completely different, much better shape than the ~43min and ~13min runs earlier tonight), correct automatic failover to personal, **40 items extracted**, watermark advanced afterward. This is the real proof that the whole night's work -- failover architecture, the Unicode fix, both retry-budget cuts, and the watermark -- all function together correctly on live data.
+
+## 4. Last step in progress when the session ended -- NOT YET SEEN
+A full `fetch_inbox.py` shadow-pipeline run (safe/no-push, `WI_AI_PARALLEL=1`) with **both** `CAL_BACKEND=connector` and `TEAMS_BACKEND=connector` set together -- proving the actual combined live configuration end-to-end, not just the two domains individually. Kevin started this run as the session was ending. **Result not yet seen -- this is the one open item.**
+
+## 5. Standing decisions tonight -- firm, do not re-litigate in a future session
+- **(a)** No permanent COM fallback for Lane B calendar. Connector is the mandatory path (from earlier today).
+- **(b)** The calendar guard's PRE/POST snapshot-diff layer is dropped entirely from the live gate -- the re-contamination guard (inspects actual tool calls, not an inferred diff) is the SOLE live safety mechanism for both calendar and Teams. This was the direct cause of three separate incidents chased earlier tonight (the 1 Sept 52-false-positive bug, the all-day-event gap, the "second call hangs" timeout pattern) -- none of them were ever a real write.
+- **(c)** Edu-primary/personal-automatic-failover is the identity architecture -- not a static personal-only default (tried once, corrected), not a manual switch. Applies uniformly to calendar and Teams.
+- **(d)** **Both calendar AND Teams cut over to the live scheduled task together**, not calendar first/Teams later. Do not treat calendar's merge as clearance to cut calendar over on its own.
+
+## Where everything stands
+- **#31 (calendar):** merged, done.
+- **#33 (Teams):** built, live-validated end-to-end (commit `c009e18`), **not yet merged**. The only thing between here and merge-readiness is confirming the in-flight combined shadow-run (#4) came back clean.
+- **Live scheduled task:** completely untouched all night. `CAL_BACKEND=com`, `TEAMS_BACKEND` unset. No cutover has happened or is imminent without a fresh, explicit go from Kevin -- and per decision (d), that go covers both domains together, not one at a time.
+
+## Next action -- resume here
+1. **Check the result of the in-flight shadow-run first** (started right as the last session ended) -- may already be sitting in the RDP session's console history/scrollback if that session is still open on the laptop. If it's gone, re-run it fresh:
+```powershell
+cd $env:USERPROFILE\work-inbox
+$cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/lane_b_call1.py?t=$cb" -OutFile lane_b_call1.py
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/lane_b_cal_guard.py?t=$cb" -OutFile lane_b_cal_guard.py
+iwr -UseBasicParsing "https://raw.githubusercontent.com/begb0037admin/work-inbox/drew/lane-b-teams-v1/fetch_inbox.py?t=$cb" -OutFile fetch_inbox.py
+Get-ChildItem lane_b_call1.py, lane_b_cal_guard.py, fetch_inbox.py   # sanity check: all today's date
+python -c "import py_compile; py_compile.compile('lane_b_call1.py', doraise=True); py_compile.compile('lane_b_cal_guard.py', doraise=True); py_compile.compile('fetch_inbox.py', doraise=True); print('compiles clean')"
+python .\lane_b_call1.py --selftest
+
+Remove-Item Env:\CODEX_HOME -ErrorAction SilentlyContinue
+Remove-Item Env:\WI_LANE_B_CODEX_HOME -ErrorAction SilentlyContinue
+
+# refresh both domains into lane_b_normalised.json together
+python .\lane_b_call1.py --domain both
+
+# full pipeline, BOTH connector backends on, SAFE mode (no push -- writes
+# data\claude_briefing.json locally instead of touching the live briefing.json)
+$env:MAIL_BACKEND   = 'imap'
+$env:CAL_BACKEND    = 'connector'
+$env:TEAMS_BACKEND  = 'connector'
+$env:AI_BACKEND     = 'claude_code'
+$env:WI_AI_PARALLEL = '1'
+python -u .\fetch_inbox.py
+Get-Content data\claude_briefing.json | ConvertFrom-Json | Select-Object calToday, calTomorrow, calFull, teams | ConvertTo-Json -Depth 4
+```
+2. **If that comes back clean** (calendar + Teams sections both populated with sane data, no guard HALT, exit 0): `#33` is ready for Kevin's own review/merge decision. Merge alone still does **not** cut over the live task.
+3. **The actual live cutover** (flipping the registered scheduled task to `CAL_BACKEND=connector` + `TEAMS_BACKEND=connector` together) is a separate, later step needing Kevin's fresh explicit go-ahead, same discipline as every prior gate this week -- per decision (d), both domains cut over in the same step, not staggered.
+4. Do not merge `#33`, do not touch command-centre, do not run anything live, do not touch the live scheduled task without that explicit go-ahead.
+
+---
+
 # Handover -- 2 September 2026, evening, further speed cut (coordinator + Drew) -- primary's worst-case-before-failover cut from ~13min to ~5min (Kevin's explicit call, tradeoff stated plainly). Commit `c009e18`, verified locally (16/16 failover checks incl. 6 new, 11/11 guard, 15/15 watermark). Kevin's live test on the OLD 13-min-budget code deliberately left running untouched (real data, Edu confirmed rate-limited). This change is for the NEXT run -- command below.
 
 **Live briefing path unchanged and safe.** `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `MAIL_BACKEND=imap`, `CAL_BACKEND=com`, `-CalBackend connector` still stripped from the task action. Not touched. Calendar stays on COM.
