@@ -383,6 +383,7 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str) -> tuple[list[dict]
         except subprocess.TimeoutExpired as te:
             _mark_connector_touch()
             last_raw = (te.stdout or "") if isinstance(te.stdout, str) else ""
+            _scan_partial_output_for_writes(last_raw, tag)   # raises ReContaminationDetected, uncaught here on purpose
             _log(f"[{tag}] timed out after {timeout_s}s (cold-start hang?) -- retrying once" if attempt == 1
                  else f"[{tag}] timed out again")
             continue
@@ -802,6 +803,18 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
     for n in range(1, retries + 1):
         try:
             events, raw = run_codex_json(prompt, timeout_s=CALL1_TIMEOUT_S, tag=f"{domain}#{n}")
+        except ReContaminationDetected as e:
+            # A write/unexpected tool call was actually observed -- even if only in
+            # partial output salvaged from a killed/timed-out attempt. Non-retryable:
+            # retrying after a suspected write increases exposure, it does not resolve
+            # anything. Immediate terminal HALT, matching the "halt" status a full
+            # successful-attempt guard_recontamination() call would produce.
+            attempts.append({"n": n, "outcome": "halt", "detail": str(e)[:300]})
+            _log(f"[{domain}] attempt {n}/{retries}: RE-CONTAMINATION -- {e}")
+            result = {"domain": domain, "status": "halt",
+                      "guard": {"seen": [], "unexpected": [str(e)]},
+                      "tool_calls": [], "count": 0, "raw_items": []}
+            break
         except RuntimeError as e:
             attempts.append({"n": n, "outcome": "codex_failed", "detail": str(e)[:200]})
             _log(f"[{domain}] attempt {n}/{retries}: codex run failed -- {e}")

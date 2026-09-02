@@ -4,39 +4,60 @@
 lane_b_cal_guard.py -- Lane B calendar HALT kill-switch (LANE_B_TEAMS_CAL_DESIGN.md sec.6a)
 =========================================================================================
 
-The SECOND HALT layer for Lane B calendar. The first is lane_b_call1.py's
-re-contamination guard (HALT if a write / non-allowlisted / non-codex_apps tool
-is seen). This one is deliberately asymmetric and stricter: it takes a
-`list_events` snapshot immediately BEFORE the Call-1 pull and again immediately
-AFTER, and HALTS the whole run on ANY detected calendar change during that
-window -- because the calendar blast radius (decline / cancel / RSVP notices
-to real attendees) justifies favouring safety over uptime.
+REDESIGNED 2 Sept 2026 (Kevin's decision, see HANDOVER.md): this file used to
+run TWO HALT layers -- a PRE/POST `list_events` snapshot diff around Call-1
+(this file), plus lane_b_call1.py's own re-contamination guard (HALT if a
+write / non-allowlisted / non-codex_apps tool is seen). The snapshot-diff
+layer required two independent connector reads of the same window to agree
+with each other -- which is what actually produced the 1 Sept
+52-false-positive bug, the still-undiagnosed all-day-event gap, and a
+"second connector call hangs" 360s-timeout pattern that blocked every
+`--dry-diff` attempt the week of 1-2 Sept. None of those three incidents was
+ever a real write; every one was a symptom of the diff mechanism itself.
+
+**`--run` (the live gate the wrapper calls) now relies SOLELY on
+lane_b_call1.py's re-contamination guard** -- it inspects the ACTUAL tool
+calls made during the real fetch (including partial output from a
+killed/timed-out attempt, since 2 Sept -- see _scan_partial_output_for_writes
+in lane_b_call1.py), rather than inferring a write from a before/after
+mismatch. It already checks every retry attempt, isn't timing-sensitive, and
+needs only one connector read, not two agreeing ones.
+
+The snapshot/diff machinery below (`take_snapshot`, `diff_snapshots`,
+`--snapshot`, `--diff`, `--dry-diff`, `--selftest`) is UNCHANGED and STAYS --
+it is a useful standalone diagnostic for spot-checking connector-read
+normalisation -- but as of 2 Sept it is no longer part of what a live
+scheduled run goes through.
 
 Single entry point for the wrapper:
 
-  python lane_b_cal_guard.py --run            # pre-snap -> lane_b_call1 --domain calendar -> post-snap -> diff
+  python lane_b_cal_guard.py --run            # lane_b_call1 --domain calendar; its own re-contamination guard is the gate
 
   exit 0  = clean. data/lane_b/lane_b_normalised.json is fresh and trustworthy.
-  exit 1  = GUARD TRIPPED (a calendar change happened during the read window,
-            OR lane_b_call1's own re-contamination guard tripped). The freshly
-            written lane_b_normalised.json is QUARANTINED (renamed
-            .halted_<ts>) so fetch_inbox.py falls back to "calendar empty".
-            data/codex_runs/GUARD_TRIPPED_cal_<ts>.json holds the diff.
+  exit 1  = GUARD TRIPPED -- lane_b_call1's re-contamination guard actually
+            observed a write/off-allowlist tool call. The freshly written
+            lane_b_normalised.json is QUARANTINED (renamed .halted_<ts>) so
+            fetch_inbox.py falls back to "calendar empty".
+            data/codex_runs/GUARD_TRIPPED_cal_<ts>.json holds the detail.
             The WRAPPER is responsible for `Disable-ScheduledTask` + a toast.
   exit 2  = usage / environment error.
-  exit 3  = a snapshot codex run failed (can't verify -> treated as unsafe: the
-            normalised file is quarantined too, no calendar this run).
+  exit 3  = the Call-1 codex run failed / connector unavailable this cycle
+            (can't verify -> treated as unsafe: no calendar this run, task
+            stays enabled, retried next cadence).
 
-Also usable in pieces (for tests / manual):
+Diagnostic-only, NOT part of the live gate (see note above):
   python lane_b_cal_guard.py --snapshot --out data/codex_runs/cal_baseline_<ts>.json
   python lane_b_cal_guard.py --diff  --pre <baseline.json> --post <after.json>
+  python lane_b_cal_guard.py --dry-diff
+  python lane_b_cal_guard.py --selftest
 
 NOTE (1 Sept 2026): the codex_apps calendar event object has NO
 lastModifiedDateTime / last_modified field (confirmed from the real probe), so
 the per-event fingerprint diffs on {subject, start, end, response_status, type}
 keyed by id. That still catches an add, a drop, a reschedule, an RSVP change,
 and a single->cancelled-occurrence flip. Any timestamp-only edit that changed
-none of those is not detectable via this surface -- documented residual.
+none of those is not detectable via this surface -- documented residual, and
+academic now that this mechanism is diagnostic-only rather than the live gate.
 """
 
 from __future__ import annotations
@@ -194,6 +215,10 @@ def take_snapshot(tag: str, window=None) -> tuple[dict | None, dict]:
     for n in range(1, SNAP_RETRIES + 1):
         try:
             events, _raw = lb.run_codex_json(prompt, timeout_s=SNAPSHOT_TIMEOUT_S, tag=f"snap-{tag}#{n}")
+        except lb.ReContaminationDetected as e:
+            # A write was actually observed, even in partial/timed-out output -- never
+            # retry this, propagate as the real HALT it is (same as a full-attempt catch below).
+            raise RuntimeError(str(e)) from e
         except RuntimeError as e:
             attempts.append({"n": n, "outcome": "codex_failed", "detail": str(e)[:160]})
             if n < SNAP_RETRIES:
@@ -270,41 +295,46 @@ def _write_trip(ts: str, payload: dict) -> Path:
 
 
 def cmd_run() -> int:
-    """Exit: 0 clean (calendar verified unchanged; normalised file trustworthy).
-             1 PERSISTENT HALT (a real calendar change during the read window,
-               or a write-tool seen) -- wrapper Disable-ScheduledTask + toast.
+    """Exit: 0 clean (Call-1's re-contamination guard saw nothing unexpected;
+               normalised file trustworthy).
+             1 PERSISTENT HALT (Call-1's re-contamination guard actually
+               observed a write/off-allowlist tool call) -- wrapper
+               Disable-ScheduledTask + toast.
              3 TRANSIENT: connector unavailable / codex failed / can't verify --
-               no connector calendar this run, wrapper does NOT disable the task."""
+               no connector calendar this run, wrapper does NOT disable the task.
+
+    REDESIGNED 2 Sept 2026 (Kevin's decision): the PRE-snapshot -> POST-snapshot
+    diff that used to bookend Call-1 here has been REMOVED from this live gate.
+    It required two independent connector reads of the same window to agree
+    with each other -- which is what actually produced the 1 Sept
+    52-false-positive bug, the still-undiagnosed all-day-event gap, and the
+    "second call hangs" 360s-timeout pattern that blocked every --dry-diff
+    attempt this week. None of those three incidents were ever a real write --
+    every one was a symptom of the diff mechanism itself, not evidence it ever
+    caught anything the guard below wouldn't have.
+
+    Call-1's re-contamination guard (lane_b_call1.py: guard_recontamination(),
+    now backed by _scan_partial_output_for_writes() so a write logged just
+    before a timeout/kill is no longer invisible either) inspects the ACTUAL
+    tool calls made during the real fetch -- it doesn't infer a write from a
+    before/after mismatch, it sees the write tool get called, directly. It
+    already checks every retry attempt, not just the last one, isn't
+    timing-sensitive, and needs only ONE connector read, not two agreeing
+    ones. It is now the SOLE live safety mechanism for Lane B calendar/Teams.
+
+    take_snapshot() / diff_snapshots() / --dry-diff / --snapshot / --diff /
+    --selftest below are UNCHANGED and remain available as standalone
+    diagnostic commands (useful for spot-checking normalisation) -- they are
+    simply no longer part of what a live scheduled run goes through."""
     ts = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     _log(f"--run start ts={ts}")
     _log(f"CODEX_HOME={lb._codex_home()}  account_id={lb._codex_account_id()}")
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
-    window = _run_window()
-    _log(f"read window (pinned for PRE+POST): {window[0].strftime('%Y-%m-%dT%H:%M:%SZ')} .. {window[1].strftime('%Y-%m-%dT%H:%M:%SZ')}")
 
-    # 1. PRE snapshot
-    try:
-        pre_fp, pre_meta = take_snapshot("pre", window)
-    except RuntimeError as e:      # re-contamination during the snapshot session == real HALT
-        _log(f"PRE snapshot re-contamination HALT ({e})")
-        _quarantine_normalised(ts, f"pre-snapshot re-contamination: {e}")
-        _write_trip(ts, {"ts": ts, "phase": "pre", "halt": True, "error": str(e)})
-        return 1
-    if pre_fp is None:
-        _log("PRE snapshot UNAVAILABLE (list_events never fired) -- skipping Lane B calendar "
-             "this cycle; NOT disabling the task")
-        _quarantine_normalised(ts, "pre-snapshot connector unavailable")
-        _write_trip(ts, {"ts": ts, "phase": "pre", "transient": True, "meta": pre_meta})
-        return 3
-    (CODEX_RUNS_DIR / f"cal_baseline_{ts}.json").write_text(
-        json.dumps({"ts": ts, "meta": pre_meta, "fp": pre_fp}, indent=2, ensure_ascii=False), encoding="utf-8")
-    _log(f"PRE snapshot: {pre_meta['count']} event(s)")
-
-    # 2. Call-1 (its own re-contamination HALT is inside)
     rc = subprocess.run(
         [sys.executable, str(REPO_ROOT / "lane_b_call1.py"), "--domain", "calendar"],
         cwd=str(REPO_ROOT),
-        env={**lb.os.environ, "WI_LANE_B_SKIP_WARMUP": "1"},   # the PRE snapshot already warmed codex
+        env={**lb.os.environ},
     ).returncode
     _log(f"lane_b_call1.py --domain calendar exit {rc}")
     if rc == 1:
@@ -322,33 +352,8 @@ def cmd_run() -> int:
              "no connector calendar this run; NOT disabling the task")
         return 3
 
-    # 3. POST snapshot
-    try:
-        post_fp, post_meta = take_snapshot("post", window)
-    except RuntimeError as e:
-        _log(f"POST snapshot re-contamination HALT ({e})")
-        _quarantine_normalised(ts, f"post-snapshot re-contamination: {e}")
-        _write_trip(ts, {"ts": ts, "phase": "post", "halt": True, "error": str(e), "pre_meta": pre_meta})
-        return 1
-    if post_fp is None:
-        _log("POST snapshot UNAVAILABLE -- cannot confirm the calendar is unchanged; "
-             "quarantining this run's calendar (transient, task stays enabled)")
-        _quarantine_normalised(ts, "post-snapshot connector unavailable -- unverified")
-        _write_trip(ts, {"ts": ts, "phase": "post", "transient": True, "pre_meta": pre_meta})
-        return 3
-    _log(f"POST snapshot: {post_meta['count']} event(s)")
-
-    # 4. diff -- ONLY a real change between two verified snapshots is a HALT
-    trips = diff_snapshots(pre_fp, post_fp)
-    if trips:
-        _log(f"GUARD TRIPPED -- {len(trips)} calendar change(s) during the read window -- persistent HALT")
-        p = _write_trip(ts, {"ts": ts, "phase": "diff", "halt": True, "trips": trips,
-                             "pre_meta": pre_meta, "post_meta": post_meta})
-        _quarantine_normalised(ts, f"{len(trips)} calendar change(s) during read window")
-        _log(f"wrote {p}. WRAPPER must Disable-ScheduledTask + toast. No auto-resume.")
-        return 1
-
-    _log("clean -- calendar unchanged across the read window; lane_b_normalised.json is trustworthy")
+    _log("clean -- lane_b_call1's re-contamination guard saw nothing unexpected; "
+         "lane_b_normalised.json is trustworthy")
     return 0
 
 
