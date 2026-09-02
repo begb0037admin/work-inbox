@@ -18,17 +18,30 @@ the laptop, so fetch_inbox.py degrades the calendar phases to empty + a warning
 (handled path, not a crash). The bridge briefing simply has no calendar section.
 Accepted for the bridge.
 
-LANE B (connector calendar) GLUE -- added 1 Sept 2026, NOT LIVE YET:
-  -CalBackend connector wires in lane_b_cal_guard.py --run BEFORE fetch_inbox.py:
-    exit 0 (clean)      -> proceed with CAL_BACKEND=connector for real.
+LANE B (connector calendar + Teams) GLUE -- calendar added 1 Sept 2026, Teams
+wiring added 2 Sept 2026 evening (Drew) -- NEITHER LIVE YET:
+  -CalBackend connector and/or -TeamsBackend connector wire in
+  lane_b_cal_guard.py --run --domain <calendar|teams|both> BEFORE fetch_inbox.py
+  (ONE guard call covering whichever domain(s) were requested -- see below for
+  why Teams reuses this same gate rather than getting its own):
+    exit 0 (clean)      -> proceed with CAL_BACKEND=connector / TEAMS_BACKEND=connector
+            for whichever domain(s) were requested, for real.
     exit 1 (persistent HALT -- a real calendar change during the read window, or
             a write tool was seen) -> Disable-ScheduledTask on THIS task + a
-            best-effort BurntToast + fall back to CAL_BACKEND=com for this cycle
-            only (degrades to empty+warning on this laptop, same as always --
-            the briefing still ships). No auto re-enable; Kevin investigates.
+            best-effort BurntToast + fall back to CAL_BACKEND=com AND
+            TEAMS_BACKEND=off for this cycle only (degrades to empty+warning on
+            this laptop, same as always -- the briefing still ships). No auto
+            re-enable; Kevin investigates.
     exit 3 (transient -- connector unavailable / could not verify this cycle)
-            -> log + fall back to CAL_BACKEND=com for this cycle; task STAYS
-            enabled; try again next cadence.
+            -> log + fall back to CAL_BACKEND=com AND TEAMS_BACKEND=off for this
+            cycle; task STAYS enabled; try again next cadence.
+  TEAMS HAS NO SEPARATE GUARD: fetch_inbox.py's own TEAMS_BACKEND comment block
+  documents that lane_b_call1.py's re-contamination guard already covers the
+  microsoft_teams.* tool namespace exactly like it covers calendar's -- Teams
+  is raw-digest-only (v1, no AI triage/judgment on its content, see
+  docs/LANE_B_TEAMS_CAL_DESIGN.md), so the same single kill-switch that halts
+  on any unexpected/write tool call is the deliberate, sufficient safety
+  mechanism for both domains. No separate Teams-specific HALT logic is planned.
   CODEX_HOME for the guard/Call-1: UPDATED 2 Sept 2026 evening -- lane_b_call1.py
   now resolves its own primary (Edu, tried first) / failover (personal,
   automatic once Edu's own retry budget is exhausted for ANY reason) identity
@@ -50,6 +63,10 @@ PARAMS
                      Use this for the first supervised run.
   -CalBackend        com (default, LIVE) | connector (Lane B, NOT live -- manual
                      proof/testing only until Kevin's cutover go-ahead)
+  -TeamsBackend      off (default, LIVE) | connector (Lane B, NOT live -- manual
+                     proof/testing only until Kevin's cutover go-ahead). Independent
+                     of -CalBackend (Teams has no COM/classic-Outlook equivalent to
+                     fall back to -- it has only ever been connector-or-nothing).
 
 LIVE COPY   %USERPROFILE%\work-inbox\Run Laptop Bridge Briefing.ps1
 REFERENCE   work-inbox/docs/desktop-scripts/Run Laptop Bridge Briefing.ps1
@@ -61,7 +78,8 @@ REVERT / END OF BRIDGE
 #>
 param(
   [switch]$CoreOnly,
-  [ValidateSet('com','connector')] [string]$CalBackend = 'com'
+  [ValidateSet('com','connector')] [string]$CalBackend = 'com',
+  [ValidateSet('off','connector')] [string]$TeamsBackend = 'off'
 )
 
 # ============================================================================
@@ -143,18 +161,19 @@ function Publish-Status([int]$code) {
   } catch { Log "status: publish failed (non-fatal): $($_.Exception.Message)" }
 }
 
-# Lane B calendar-guard outcome for THIS run, surfaced to Publish-Status above so
-# the cross-machine (desktop) toast watcher sees a HALT even when the briefing
-# itself still succeeds via the CAL_BACKEND=com fallback. Values: 'not-run'
-# (CalBackend never passed -CalBackend connector -- the live task today),
-# 'clean', 'halted' (persistent HALT -- task disabled, THIS is the one that must
-# be hard to miss), 'transient' (connector unavailable this cycle, not actionable),
-# 'unexpected-<n>'.
+# Lane B guard outcome (calendar and/or Teams -- ONE guard, see the header note)
+# for THIS run, surfaced to Publish-Status above so the cross-machine (desktop)
+# toast watcher sees a HALT even when the briefing itself still succeeds via the
+# CAL_BACKEND=com / TEAMS_BACKEND=off fallback. Values: 'not-run' (neither
+# -CalBackend connector nor -TeamsBackend connector was passed -- the live task
+# today), 'clean', 'halted' (persistent HALT -- task disabled, THIS is the one
+# that must be hard to miss), 'transient' (connector unavailable this cycle, not
+# actionable), 'unexpected-<n>'.
 $LaneBGuardResult = 'not-run'
 $LaneBGuardDetail = ''
 
 Log "=== Laptop Bridge Briefing START  (user $env:USERDOMAIN\$env:USERNAME  host $env:COMPUTERNAME) ==="
-Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  log=$log"
+Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  TeamsBackend=$TeamsBackend  log=$log"
 Set-Location $root
 
 # --- isolated Claude Code config: kevin@ ONLY (no hope@ failover on the laptop yet) ---
@@ -173,6 +192,7 @@ $env:WI_CLAUDE_CONFIG_DIR         = $kevinCfg     # -> claude -p gets CLAUDE_CON
 $env:WI_CLAUDE_CONFIG_DIR_FALLBACK = ''           # explicit: single account, no hope@ overflow
 $env:MAIL_BACKEND                 = 'imap'
 $env:CAL_BACKEND                  = $CalBackend
+$env:TEAMS_BACKEND                = $TeamsBackend
 $env:WI_BRIDGE_ALLOW_EMPTY_CALENDAR = '1'         # no calendar source on the laptop -> empty calendar/absences must not veto the Phase 4 push
 $env:WI_MAIL_PARALLEL            = ''             # explicit: this is a REAL run, not a parallel capture
 $env:PYTHONUTF8                  = '1'
@@ -189,9 +209,16 @@ foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','normalise_pull.
   }
 }
 
-# --- LANE B calendar HALT guard -- only when CalBackend=connector was explicitly
-#     passed (the live task does not pass this; see the header note). ---
-if ($CalBackend -eq 'connector') {
+# --- LANE B calendar/Teams HALT guard -- only when CalBackend=connector and/or
+#     TeamsBackend=connector was explicitly passed (the live task does not pass
+#     either yet; see the header note). ONE guard call covers whichever domain(s)
+#     were requested -- Teams has no separate guard, see header note for why. ---
+$laneBDomain = $null
+if ($CalBackend -eq 'connector' -and $TeamsBackend -eq 'connector') { $laneBDomain = 'both' }
+elseif ($CalBackend -eq 'connector') { $laneBDomain = 'calendar' }
+elseif ($TeamsBackend -eq 'connector') { $laneBDomain = 'teams' }
+
+if ($laneBDomain) {
   if ($LaneBCodexHome -ne '') {
     $env:CODEX_HOME           = $LaneBCodexHome
     $env:WI_LANE_B_CODEX_HOME = $LaneBCodexHome
@@ -199,20 +226,21 @@ if ($CalBackend -eq 'connector') {
   } else {
     Log "Lane B: `$LaneBCodexHome not set (normal) -- lane_b_call1.py resolves its own primary(Edu)/failover(personal) identity and logs which one actually served each call"
   }
-  Log "running: python lane_b_cal_guard.py --run"
-  & python -u (Join-Path $root 'lane_b_cal_guard.py') --run 2>&1 | Tee-Object -FilePath $log -Append
+  Log "running: python lane_b_cal_guard.py --run --domain $laneBDomain"
+  & python -u (Join-Path $root 'lane_b_cal_guard.py') --run --domain $laneBDomain 2>&1 | Tee-Object -FilePath $log -Append
   $guardRc = $LASTEXITCODE
   Log "lane_b_cal_guard.py exit $guardRc"
   switch ($guardRc) {
     0 {
-      Log "Lane B guard CLEAN -- proceeding with CAL_BACKEND=connector"
+      Log "Lane B guard CLEAN -- proceeding with CAL_BACKEND=$CalBackend TEAMS_BACKEND=$TeamsBackend"
       $LaneBGuardResult = 'clean'
     }
     1 {
-      Log "Lane B guard PERSISTENT HALT (a real calendar change during the read window, or a write tool was seen) -- disabling '$TaskName' and falling back to CAL_BACKEND=com for THIS cycle only"
+      Log "Lane B guard PERSISTENT HALT (a real calendar change during the read window, or a write tool was seen) -- disabling '$TaskName' and falling back to CAL_BACKEND=com / TEAMS_BACKEND=off for THIS cycle only"
       $CalBackend = 'com'
+      $TeamsBackend = 'off'
       $LaneBGuardResult = 'halted'
-      $LaneBGuardDetail = "task '$TaskName' disabled; calendar fell back to COM this cycle. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
+      $LaneBGuardDetail = "task '$TaskName' disabled; calendar/Teams fell back to COM/off this cycle. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
       try {
         Disable-ScheduledTask -TaskName $TaskName -ErrorAction Stop | Out-Null
         Log "Disabled scheduled task '$TaskName' -- re-enable manually after investigating: Enable-ScheduledTask -TaskName '$TaskName'"
@@ -226,30 +254,33 @@ if ($CalBackend -eq 'connector') {
       # matching toast. Both are required; neither replaces the other.
       try {
         Import-Module BurntToast -ErrorAction Stop
-        New-BurntToastNotification -Text 'Work Inbox - Lane B calendar guard HALTED', $LaneBGuardDetail
+        New-BurntToastNotification -Text 'Work Inbox - Lane B guard HALTED', $LaneBGuardDetail
         Log "local BurntToast fired"
       } catch {
         Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the HALT + task-disable above are still real, and the desktop toast (via Publish-Status) is independent of this and still fires"
       }
     }
     3 {
-      Log "Lane B guard TRANSIENT (connector unavailable / could not verify this cycle) -- falling back to CAL_BACKEND=com for THIS cycle only; task stays enabled, will retry next cadence"
+      Log "Lane B guard TRANSIENT (connector unavailable / could not verify this cycle) -- falling back to CAL_BACKEND=com / TEAMS_BACKEND=off for THIS cycle only; task stays enabled, will retry next cadence"
       $CalBackend = 'com'
+      $TeamsBackend = 'off'
       $LaneBGuardResult = 'transient'
       $LaneBGuardDetail = 'connector unavailable this cycle; not actionable, no toast.'
     }
     default {
-      Log "Lane B guard unexpected exit $guardRc -- treating conservatively: falling back to CAL_BACKEND=com for THIS cycle only; task stays enabled"
+      Log "Lane B guard unexpected exit $guardRc -- treating conservatively: falling back to CAL_BACKEND=com / TEAMS_BACKEND=off for THIS cycle only; task stays enabled"
       $CalBackend = 'com'
+      $TeamsBackend = 'off'
       $LaneBGuardResult = "unexpected-$guardRc"
       $LaneBGuardDetail = "lane_b_cal_guard.py exited $guardRc (not 0/1/3) -- treated conservatively, not disabled."
     }
   }
-  $env:CAL_BACKEND = $CalBackend   # re-assert in case the guard downgraded it above
+  $env:CAL_BACKEND   = $CalBackend    # re-assert in case the guard downgraded it above
+  $env:TEAMS_BACKEND = $TeamsBackend  # re-assert in case the guard downgraded it above
 }
 
 # --- CORE: fetch_inbox.py  (Phase 1 IMAP -> combined claude -p triage -> Phase 4 push -> Phase 5 CC sync) ---
-Log "running: python -u fetch_inbox.py   [MAIL_BACKEND=imap  CAL_BACKEND=$CalBackend  AI_BACKEND=claude_code  cfg=$kevinCfg]"
+Log "running: python -u fetch_inbox.py   [MAIL_BACKEND=imap  CAL_BACKEND=$CalBackend  TEAMS_BACKEND=$TeamsBackend  AI_BACKEND=claude_code  cfg=$kevinCfg]"
 & python -u (Join-Path $root 'fetch_inbox.py') 2>&1 | Tee-Object -FilePath $log -Append
 $rc = $LASTEXITCODE
 Log "fetch_inbox.py exit $rc"

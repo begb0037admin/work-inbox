@@ -31,7 +31,9 @@ scheduled run goes through.
 
 Single entry point for the wrapper:
 
-  python lane_b_cal_guard.py --run            # lane_b_call1 --domain calendar; its own re-contamination guard is the gate
+  python lane_b_cal_guard.py --run                            # lane_b_call1 --domain calendar (default); its own re-contamination guard is the gate
+  python lane_b_cal_guard.py --run --domain teams              # same gate, Teams-only fetch
+  python lane_b_cal_guard.py --run --domain both                # same gate, one call covering both domains
 
   exit 0  = clean. data/lane_b/lane_b_normalised.json is fresh and trustworthy.
   exit 1  = GUARD TRIPPED -- lane_b_call1's re-contamination guard actually
@@ -294,7 +296,7 @@ def _write_trip(ts: str, payload: dict) -> Path:
     return p
 
 
-def cmd_run() -> int:
+def cmd_run(domain: str = "calendar") -> int:
     """Exit: 0 clean (Call-1's re-contamination guard saw nothing unexpected;
                normalised file trustworthy).
              1 PERSISTENT HALT (Call-1's re-contamination guard actually
@@ -302,6 +304,15 @@ def cmd_run() -> int:
                Disable-ScheduledTask + toast.
              3 TRANSIENT: connector unavailable / codex failed / can't verify --
                no connector calendar this run, wrapper does NOT disable the task.
+
+    `domain` -- 'calendar' (default), 'teams', or 'both'. Added 2 Sept 2026 for
+    the Lane B Teams wrapper wiring: fetch_inbox.py's own comment on
+    TEAMS_BACKEND already documents that this guard (via lane_b_call1's
+    re-contamination check, which covers the microsoft_teams.* tool namespace
+    same as calendar's) is the SOLE safety mechanism for Teams too -- no
+    separate Teams guard exists or is planned. This param is what actually lets
+    a live run ask lane_b_call1.py to fetch (and guard) Teams data instead of
+    just defaulting to calendar-only every time.
 
     REDESIGNED 2 Sept 2026 (Kevin's decision): the PRE-snapshot -> POST-snapshot
     diff that used to bookend Call-1 here has been REMOVED from this live gate.
@@ -327,29 +338,29 @@ def cmd_run() -> int:
     diagnostic commands (useful for spot-checking normalisation) -- they are
     simply no longer part of what a live scheduled run goes through."""
     ts = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    _log(f"--run start ts={ts}")
+    _log(f"--run start ts={ts} domain={domain}")
     _log(f"CODEX_HOME={lb._codex_home()}  account_id={lb._codex_account_id()}")
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
     rc = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "lane_b_call1.py"), "--domain", "calendar"],
+        [sys.executable, str(REPO_ROOT / "lane_b_call1.py"), "--domain", domain],
         cwd=str(REPO_ROOT),
         env={**lb.os.environ},
     ).returncode
-    _log(f"lane_b_call1.py --domain calendar exit {rc}")
+    _log(f"lane_b_call1.py --domain {domain} exit {rc}")
     if rc == 1:
         _log("lane_b_call1 RE-CONTAMINATION guard TRIPPED -- persistent HALT")
         _quarantine_normalised(ts, "lane_b_call1 re-contamination guard tripped")
-        _write_trip(ts, {"ts": ts, "phase": "call1", "halt": True, "call1_exit": rc})
+        _write_trip(ts, {"ts": ts, "phase": "call1", "halt": True, "call1_exit": rc, "domain": domain})
         return 1
     if rc != 0:
         _log(f"lane_b_call1 exit {rc} (codex failed / all domains unavailable) -- "
-             f"no connector calendar this run; NOT disabling the task")
+             f"no connector data this run; NOT disabling the task")
         _quarantine_normalised(ts, f"lane_b_call1 exit {rc}")
         return 3
     if not NORMALISED.exists():
         _log("lane_b_call1 exit 0 but no lane_b_normalised.json (connector unavailable this cycle) -- "
-             "no connector calendar this run; NOT disabling the task")
+             "no connector data this run; NOT disabling the task")
         return 3
 
     _log("clean -- lane_b_call1's re-contamination guard saw nothing unexpected; "
@@ -488,7 +499,9 @@ def cmd_selftest() -> int:
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Lane B calendar HALT kill-switch")
-    ap.add_argument("--run", action="store_true", help="pre-snap -> lane_b_call1 calendar -> post-snap -> diff (the wrapper entry point)")
+    ap.add_argument("--run", action="store_true", help="lane_b_call1 --domain <--domain> ; its own re-contamination guard is the gate (the wrapper entry point)")
+    ap.add_argument("--domain", choices=["calendar", "teams", "both"], default="calendar",
+                    help="which Lane B domain(s) to fetch+guard on --run (default calendar, back-compat)")
     ap.add_argument("--snapshot", action="store_true")
     ap.add_argument("--out", default=str(CODEX_RUNS_DIR / "cal_snapshot.json"))
     ap.add_argument("--diff", action="store_true")
@@ -504,7 +517,7 @@ def main(argv: list[str]) -> int:
     if args.dry_diff:
         return cmd_dry_diff()
     if args.run:
-        return cmd_run()
+        return cmd_run(args.domain)
     if args.snapshot:
         return cmd_snapshot(args.out)
     if args.diff:
