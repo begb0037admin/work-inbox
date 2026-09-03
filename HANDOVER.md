@@ -69,7 +69,34 @@ This also finishes off the earlier two findings: (1) `SetCursorPos`/`Cursor.Posi
 
 ---
 
-## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Option (c) DEAD -- Kevin tested all 5 query forms, none land on the message. `3a66600` REVERTED (`79e6471`) -- main back to the pre-change baseline. Reassessed, NOT deployed, Kevin deciding.
+## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Option 1 (connector Graph webLink) BUILT + LIVE-PROVEN work-inbox side (`fcb47a9`). Pending Kevin's click-confirm before marking fully shipped / merging the command-centre holding branch.
+
+### Option 1 SHIPPED, work-inbox side -- full story
+
+**Identity/tenant verification (Kevin's hard gate, done first, with evidence -- not restated assumption):** both the Edu-primary and personal-failover connector identities were confirmed, from live Microsoft Graph data returned by the connector itself, to reach the SAME mailbox and tenant:
+- `list_calendars` returns identical calendar `id` + `owner:{"address":"kevin.lelitte@admin.ox.ac.uk"}` on BOTH identities (checked across 5 separate transcripts, 1-3 Sept).
+- Teams `tenantId=cc95de1b-97f5-4f93-b4ba-fe68b852cf91` identical on both identities -- Oxford's own AAD tenant (matches this session's own earlier device-join verification).
+- `imap_mail.py`'s own pre-existing code comment: `_KEVIN_ADDRS = {"kevin.lelitte@admin.ox.ac.uk", "begb0037@ox.ac.uk"}` -- documented alias pair for the one mailbox; IMAP auth logged every run as `begb0037@ox.ac.uk`.
+- Conclusion given to Kevin: **yes**, all data (mail/calendar/Teams, both primary and failover) is `kevin.lelitte@admin.ox.ac.uk`'s Oxford work data -- the personal ChatGPT account (`kevin@lelitte.co.uk`) is only the LOGIN LAYER; its Microsoft 365 connector grant is separately OAuth-scoped to Oxford. Kevin gave fresh, explicit go-ahead on this basis.
+
+**Probe (read-only, before any build), proven live:** `microsoft_outlook_email.list_messages` with `filter="internetMessageId eq '<id>'"` returns Graph's native `web_link` field directly -- a real, working `https://outlook.office365.com/owa/?ItemID=...&exvsurl=1&viewmodel=ReadMessageItem` deep-link, not something the agent constructs itself. Transcript: `data/lane_b/20260903T205502Z_mailprobe_raw.jsonl`. No write-verb tool calls observed.
+
+**Guard extended, same pattern as calendar/Teams, unit-verified:** `LANE_B_NAMESPACES` now includes `microsoft_outlook_email`; `EXPECTED_TOOL["mail"]="list_messages"`. Verb-based `guard_recontamination()` (unchanged logic) -- confirmed live: `list_messages` (read) -> `ok`; `send_mail`/`reply_to_message` (write) -> `halt`; off-namespace -> `halt`.
+
+**Built:** `lane_b_call1.resolve_mail_weblink(message_id)` -- personal-account-only (Edu has no Outlook Email connector, Kevin's Q2 decision, deliberate -- no primary/failover choice exists for mail), fails soft always (exception/HALT/timeout/not-found all return `""`, never raises), persists a raw transcript per call. Wired into `fetch_inbox.py` Phase 3.6: for each newly-promoted IMAP-sourced task, resolves once before building the task dict, falls back to the old `_owa_link()` search-link if resolution fails. **One codex-exec call per newly-promoted card this run** (typically 0-1, occasionally more) -- never re-run for an existing card, never per-dashboard-render, never batched across multiple messages in one call (that would need more live-testing than done here). Existing/old cards are NOT retrofitted, per Kevin's explicit scope.
+
+**A real bug found and fixed during end-to-end testing, root-caused not guessed:** the first version of `resolve_mail_weblink()` always returned `""` even though the connector call was succeeding -- `extract_tool_calls()` already unwraps `item.result.structured_content` into `tc["result"]`, but the parsing code called `.get("structured_content")` on it a *second* time, always landing on `{}`. Confirmed via a raw-transcript dump (`data/lane_b/debug_resolve_raw.jsonl`) showing the real data present at `structured_content.value[0].web_link` the whole time. Fixed; re-tested end-to-end, now returns the real link (~24s total: 5s warm-up + 19s call).
+
+**Known, flagged gap:** a guard HALT during mail-webLink resolution is logged loudly but does NOT (yet) trip the same `Disable-ScheduledTask` path a calendar/Teams HALT does -- that wrapper-level wiring lives in `lane_b_cal_guard.py`'s `cmd_run()`, and this call runs inside `fetch_inbox.py`'s own process instead. Not silently equivalent safety to calendar/Teams; flagged for a future session if Kevin wants parity.
+
+### Test URL for Kevin -- real, proven, from the actual shipped function (not the standalone probe)
+Card: `t2609020705201`, "Investigate P5 Incident# 11706988 ...", Michael O'Sullivan, 2026-09-01.
+```
+https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqm9AAA%3D&exvsurl=1&viewmodel=ReadMessageItem
+```
+This is the classic `?ItemID=` OWA deep-link -- unlike every option-(c) search URL, it should open the exact message directly, not a search results view.
+
+**NOT DONE until Kevin clicks this and confirms it opens the exact message.** Once confirmed: merge the command-centre holding branch (`holding/owa-link-messageid-fallback-drop`, `0096cac` -- drops the client's own broken raw-messageId fallback, unaffected by which server-side format won) and mark this section fully shipped.
 
 ### Option (c) closed out -- confirmed dead by live test, not just theory
 Kevin clicked all 5 iterations (operators + `received:`, operators without `received:`, operator + distinctive token, plain distinctive-token keywords, plain full subject) against the real Michael O'Sullivan card. **None opened or surfaced the message.** Conclusion: `https://outlook.office.com/mail/search?query=...` is not a usable deep-link mechanism at all, in any query form -- OWA's `/mail/search` URL parameter doesn't reliably resolve to a single message regardless of syntax. Not worth further query-tuning.
