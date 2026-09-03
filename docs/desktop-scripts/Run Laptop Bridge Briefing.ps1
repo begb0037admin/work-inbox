@@ -154,7 +154,12 @@ function Publish-Status([int]$code) {
   try {
     $pusher = Join-Path $PSScriptRoot 'Push-LaptopRunStatus.ps1'
     if (Test-Path $pusher) {
-      & $pusher -Kind briefing -ExitCode $code -LaneBGuard $LaneBGuardResult -LaneBGuardDetail $LaneBGuardDetail 2>&1 | ForEach-Object { Log "status: $_" }
+      $pusherArgs = @{
+        Kind = 'briefing'; ExitCode = $code
+        LaneBGuard = $LaneBGuardResult; LaneBGuardDetail = $LaneBGuardDetail
+      }
+      if ($LaneBDomainsSummary -and $LaneBDomainsSummary.Count -gt 0) { $pusherArgs.LaneBDomains = $LaneBDomainsSummary }
+      & $pusher @pusherArgs 2>&1 | ForEach-Object { Log "status: $_" }
     } else {
       Log "status: Push-LaptopRunStatus.ps1 not found next to this wrapper -- skipped"
     }
@@ -171,6 +176,11 @@ function Publish-Status([int]$code) {
 # actionable), 'unexpected-<n>'.
 $LaneBGuardResult = 'not-run'
 $LaneBGuardDetail = ''
+# Per-domain status/count/served_by/primary_failover_identical (added 3 Sept
+# 2026, regression-fix verification -- see Push-LaptopRunStatus.ps1's own
+# header note). Populated below, after the guard call, from the freshest
+# data\lane_b\*_lane_b.json run log -- pure counts/status, never content.
+$LaneBDomainsSummary = $null
 
 Log "=== Laptop Bridge Briefing START  (user $env:USERDOMAIN\$env:USERNAME  host $env:COMPUTERNAME) ==="
 Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  TeamsBackend=$TeamsBackend  log=$log"
@@ -219,6 +229,32 @@ elseif ($CalBackend -eq 'connector') { $laneBDomain = 'calendar' }
 elseif ($TeamsBackend -eq 'connector') { $laneBDomain = 'teams' }
 
 if ($laneBDomain) {
+  # Regression fix, 3 Sept 2026 (root cause of the 2 Sept 20:58 live incident --
+  # see HANDOVER-LATEST-2026-09-02-teams-regression.md): ALWAYS start from a
+  # clean CODEX_HOME / WI_LANE_B_CODEX_HOME / WI_LANE_B_CODEX_HOME_FAILOVER
+  # environment before every Lane B invocation, exactly like every documented
+  # manual interactive test this week has done by hand (`Remove-Item
+  # Env:\CODEX_HOME`, `Remove-Item Env:\WI_LANE_B_CODEX_HOME`). Scheduled-task
+  # processes inherit the FULL ambient user/system environment, which on this
+  # host still carries CODEX_HOME=C:\WorkInboxAI\codex-laneb left over from
+  # 1 Sept's now-superseded personal-only testing phase. Without this clear,
+  # lane_b_call1.py's PRIMARY_CODEX_HOME resolution (WI_LANE_B_CODEX_HOME wins,
+  # else inherited CODEX_HOME, else the true OS default) silently picks up that
+  # leftover value -- which happens to be the EXACT SAME literal path as
+  # FAILOVER_CODEX_HOME's own hardcoded default, collapsing primary and
+  # failover into one identity. Automatic failover then can't fire (nothing
+  # distinct to fail over to), "primary" silently runs as the old personal
+  # test account instead of Edu, and a struggling connector call on that
+  # account produces exactly the "only one attempt, identity=primary,
+  # codex_failed" shape seen in the incident -- for BOTH domains, since both
+  # go through the same misidentified identity. This clear runs unconditionally
+  # BEFORE the escape-hatch check below, so the escape hatch (when actually
+  # used) still applies cleanly on top of a known-clean starting environment.
+  Remove-Item Env:\CODEX_HOME -ErrorAction SilentlyContinue
+  Remove-Item Env:\WI_LANE_B_CODEX_HOME -ErrorAction SilentlyContinue
+  Remove-Item Env:\WI_LANE_B_CODEX_HOME_FAILOVER -ErrorAction SilentlyContinue
+  Log "Lane B: cleared any ambient CODEX_HOME/WI_LANE_B_CODEX_HOME(_FAILOVER) from this process's environment before resolving identity (regression fix, 3 Sept 2026)"
+
   if ($LaneBCodexHome -ne '') {
     $env:CODEX_HOME           = $LaneBCodexHome
     $env:WI_LANE_B_CODEX_HOME = $LaneBCodexHome
@@ -230,6 +266,38 @@ if ($laneBDomain) {
   & python -u (Join-Path $root 'lane_b_cal_guard.py') --run --domain $laneBDomain 2>&1 | Tee-Object -FilePath $log -Append
   $guardRc = $LASTEXITCODE
   Log "lane_b_cal_guard.py exit $guardRc"
+
+  # Per-domain status/count/served_by/primary_failover_identical, for the
+  # cross-machine run-status push (regression-fix verification, 3 Sept 2026 --
+  # see Push-LaptopRunStatus.ps1's header note). lane_b_call1.py writes
+  # data\lane_b\<ts>_lane_b.json UNCONDITIONALLY on every invocation
+  # (success, halt, or codex_failed) via its own _write_run_log() -- pick the
+  # most recently written one rather than relying on lane_b_normalised.json
+  # (which is left at its last-good state, not overwritten, on a bad cycle).
+  # Best-effort only: never blocks or fails the run.
+  try {
+    $laneBLogDir = Join-Path $root 'data\lane_b'
+    $latestLog = Get-ChildItem -LiteralPath $laneBLogDir -Filter '*_lane_b.json' -ErrorAction Stop |
+                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($latestLog) {
+      $logJson = Get-Content -Raw -LiteralPath $latestLog.FullName | ConvertFrom-Json
+      $summary = @{}
+      foreach ($d in $logJson.per_domain.PSObject.Properties.Name) {
+        $pd = $logJson.per_domain.$d
+        $summary[$d] = @{
+          status = $pd.status; count = $pd.count; served_by = $pd.served_by
+          primary_failover_identical = $pd.primary_failover_identical
+        }
+      }
+      $LaneBDomainsSummary = $summary
+      Log "Lane B per-domain summary ($($latestLog.Name)): $($summary | ConvertTo-Json -Depth 4 -Compress)"
+    } else {
+      Log "WARN: no data\lane_b\*_lane_b.json found to summarise (unexpected -- lane_b_call1.py should always write one)"
+    }
+  } catch {
+    Log "WARN: could not build Lane B per-domain summary (non-fatal): $($_.Exception.Message)"
+  }
+
   switch ($guardRc) {
     0 {
       Log "Lane B guard CLEAN -- proceeding with CAL_BACKEND=$CalBackend TEAMS_BACKEND=$TeamsBackend"
