@@ -1,6 +1,18 @@
 {
-  "generated_at": "2026-09-03 14:46",
+  "generated_at": "2026-09-03 15:19",
   "new_tasks": [
+    {
+      "title": "Investigate Cority employee import error 28 August 2026 17:00",
+      "tier": "week",
+      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import. Review attached error log file and coordinate with Cority support to confirm resolution status and identify any required remediation.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": "",
+      "message_id": "<010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com>",
+      "web_link": "https://outlook.office.com/mail/search?query=010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000%40us-west-2.amazonses.com",
+      "mail_key": "010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com"
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -64,21 +76,33 @@
   ],
   "applied_updates": [
     {
-      "task_id": "t1781204987882",
-      "task_title": "Holiday Records - 3 Reports Created -- approved, awaiting scheduling (case 69001638)",
-      "note": "Kevin confirmed with Access Group that 2pm Friday 18 September works for Holiday Records project kickoff call; awaiting calendar invite from Conor O'Shea.",
-      "email_subject": "Re: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "email_from": "Kevin (sent to: Conor O'Shea <C.OShea@theaccessgroup.com>, Alan Quirke <Alan.Quirke@theaccessgroup.com>, Marie Cooksey <marie.cooksey@admin.ox.ac.uk>)",
-      "received": "2026-09-03 14:11",
+      "task_id": "t2608121801280",
+      "task_title": "Review 38-day balance implementation timeline and decisions",
+      "note": "Simon reiterates that Kevin committed to stating workgroup update capacity for GLAM after Chemistry rollout.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Simon Burford",
+      "received": "2026-09-03 15:02",
       "entry_id": "",
-      "message_id": "<CW1P265MB8765667963C4863AFFF403FA88B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CW1P265MB8765667963C4863AFFF403FA88B62%40CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CW1P265MB8765667963C4863AFFF403FA88B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM"
+      "message_id": "<CWLP265MB417628F0327FAE569B9FB3B292B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB417628F0327FAE569B9FB3B292B62%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB417628F0327FAE569B9FB3B292B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
     },
     {
-      "task_id": "t2608191643001",
-      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
-      "note": "Kevin confirmed to Julie and Simon that Chemistry remains the 38-day balance pilot with 131 workgroups to update.",
+      "task_id": "t2608270801360",
+      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
+      "note": "Julie disputes prior meeting recollection and asserts Kevin agreed to support Chemistry and provide GLAM with count of workgroups Kevin can update.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Julie Hickman",
+      "received": "2026-09-03 14:57",
+      "entry_id": "",
+      "message_id": "<LO0SPRMB0017A6F1881F7DF0C10E3E878AB62@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB0017A6F1881F7DF0C10E3E878AB62%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO0SPRMB0017A6F1881F7DF0C10E3E878AB62@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2608121801280",
+      "task_title": "Review 38-day balance implementation timeline and decisions",
+      "note": "Kevin confirms Chemistry remains 38-day balance pilot with 131 workgroups to be updated, clarifying scope in dispute with Julie.",
       "email_subject": "Re: 38 day balance for departments update and decisions needed",
       "email_from": "Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>, Simon Burford <simon.burford@admin.ox.ac.uk>)",
       "received": "2026-09-03 14:02",
