@@ -1,6 +1,18 @@
 {
-  "generated_at": "2026-09-03 09:48",
+  "generated_at": "2026-09-03 13:04",
   "new_tasks": [
+    {
+      "title": "Investigate Cority Employee Import error -- 28 August 2026",
+      "tier": "week",
+      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import. Kevin needs to review the attached log file and confirm whether import succeeded or if resolution action is required with Cority support, similar to 21 August incident.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": "",
+      "message_id": "<010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com>",
+      "web_link": "https://outlook.office.com/mail/search?query=010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000%40us-west-2.amazonses.com",
+      "mail_key": "010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com"
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -66,38 +78,50 @@
     {
       "task_id": "t021",
       "task_title": "FP 68261303 -- Multi Company Setup",
-      "note": "Conor O'Brien requesting requirements details from project team for FP 68261303 Multi Company Setup.",
+      "note": "Simon confirms research team reviewed ESS profile and identified changes needed for separate Company 90 configuration; asks Conor O'Brien to share detailed requirements for review.",
       "email_subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "email_from": "Conor O'Brien",
-      "received": "2026-09-03 09:43",
+      "email_from": "Simon Burford",
+      "received": "2026-09-03 12:36",
       "entry_id": "",
-      "message_id": "<LO0P123MB4265A243BE88E1DF34823796FBB62@LO0P123MB4265.GBRP123.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=LO0P123MB4265A243BE88E1DF34823796FBB62%40LO0P123MB4265.GBRP123.PROD.OUTLOOK.COM",
-      "mail_key": "LO0P123MB4265A243BE88E1DF34823796FBB62@LO0P123MB4265.GBRP123.PROD.OUTLOOK.COM"
+      "message_id": "<CWLP265MB4176C49B90511A902CEB523792B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB4176C49B90511A902CEB523792B62%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB4176C49B90511A902CEB523792B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
     },
     {
       "task_id": "t2608121801280",
       "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Simon indicating Kevin needs to estimate how many GLAM workgroups the team can take on beyond Chemistry's 131.",
+      "note": "Julie confirms after GLAM meeting that team lacks capacity to update all workgroups; provides department contacts (Emma Harte-Maths, Jenna Boyce-Alexia Leakey-Chemistry, Becky Fitzek-GLAM).",
       "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Simon Burford",
-      "received": "2026-09-02 18:23",
+      "email_from": "Julie Hickman",
+      "received": "2026-09-03 11:10",
       "entry_id": "",
-      "message_id": "<CWLP265MB4176CD928473D0EDD95E89CB92B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB4176CD928473D0EDD95E89CB92B72%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CWLP265MB4176CD928473D0EDD95E89CB92B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
+      "message_id": "<LO0SPRMB0017C192D9662B8D77FACEB08AB62@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB0017C192D9662B8D77FACEB08AB62%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO0SPRMB0017C192D9662B8D77FACEB08AB62@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
     },
     {
-      "task_id": "t030",
-      "task_title": "Cority SFTP production feed error -- 22 June",
-      "note": "Cority Integration Platform reporting SFTP error on 28 August 17:00 UTC during employee data import; log file requires review.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-28 18:00",
+      "task_id": "t021",
+      "task_title": "FP 68261303 -- Multi Company Setup",
+      "note": "Simon confirms API_USER account in UOXU has Company 90 restriction applied; system is ready for Multi Company Setup integration re-test.",
+      "email_subject": "API_USER account",
+      "email_from": "Simon Burford",
+      "received": "2026-09-02 15:10",
       "entry_id": "",
-      "message_id": "<010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com>",
-      "web_link": "https://outlook.office.com/mail/search?query=010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000%40us-west-2.amazonses.com",
-      "mail_key": "010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com"
+      "message_id": "<CWLP265MB4176CB1C902A5FAAFEF57CE392B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB4176CB1C902A5FAAFEF57CE392B72%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB4176CB1C902A5FAAFEF57CE392B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2608191643001",
+      "task_title": "38-day balance rollout â€” Work Group Holiday Scheme updates by department",
+      "note": "Julie updates on workgroup responses; Michelle will coordinate further discussion with Julie upon her return from leave.",
+      "email_subject": "RE: changing to 38 day balance - workgroups for updating",
+      "email_from": "Julie Hickman",
+      "received": "2026-09-02 13:44",
+      "entry_id": "",
+      "message_id": "<LO0SPRMB00173AD0E4CD60EE104244EC8AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB00173AD0E4CD60EE104244EC8AB72%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO0SPRMB00173AD0E4CD60EE104244EC8AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
     }
   ]
 }
