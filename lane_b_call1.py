@@ -620,41 +620,73 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
         _wait_for_quiet_gap(tag)
         _log(f"[{tag}] codex exec attempt {attempt}/{max_attempts} (timeout {timeout_s}s) "
              f"CODEX_HOME={codex_home or PRIMARY_CODEX_HOME}")
+        # 3 Sept 2026 tree-kill fix (root cause of a live anomaly the same day:
+        # a configured 45s primary timeout actually took 5-6+ minutes wall-clock).
+        # subprocess.run(timeout=...) kills only the DIRECT child on timeout, then
+        # does an UNTIMED second communicate() to drain output before re-raising --
+        # that is CPython's own internal implementation, not a bug in our code, but
+        # it silently defeats any timeout when the direct child isn't the real
+        # worker. On this laptop codex resolves to an npm-global .ps1/.cmd shim (see
+        # _codex_argv0()'s own comment), so the direct child is powershell.exe/
+        # cmd.exe and the actual worker (node.exe running codex's real CLI) is a
+        # GRANDCHILD that inherits the stdout/stderr pipes -- killing only the
+        # direct child leaves the grandchild running and holding those pipes open,
+        # so the untimed drain blocks until the orphan finishes on its own. Fix:
+        # use Popen + a manual timed communicate() so we control what happens on
+        # timeout -- kill the WHOLE process tree by PID (`taskkill /T /F`, Windows
+        # built-in, no new dependency) instead of just the one process, then a
+        # short BOUNDED follow-up communicate() to drain whatever was buffered
+        # (the tree should already be dead by then, so this should return near-
+        # instantly -- bounded anyway as a defensive measure, never unbounded again).
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            cwd=str(REPO_ROOT),
+            env=_codex_env(codex_home),
+            text=True, encoding="utf-8", errors="replace",   # 2 Sept fix -- see _ensure_warm()'s comment.
+                                                             # Real bug: a Teams message body with a non-cp1252
+                                                             # byte (near-certainly an emoji/accent) crashed
+                                                             # subprocess's background _readerthread with
+                                                             # UnicodeDecodeError. Force UTF-8 explicitly.
+            stdin=subprocess.DEVNULL,   # codex-cli prints "Reading additional input from stdin..." and
+                                        # BLOCKS on read until EOF; an inherited stdin never closes -> hang.
+        )
         try:
-            proc = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=timeout_s,
-                cwd=str(REPO_ROOT),
-                env=_codex_env(codex_home),
-                encoding="utf-8", errors="replace",   # 2 Sept fix -- see _ensure_warm()'s comment.
-                                                       # Real bug tonight: a Teams message body with a
-                                                       # non-cp1252 byte (near-certainly an emoji/accent)
-                                                       # crashed subprocess's background _readerthread
-                                                       # with UnicodeDecodeError. Teams content WILL
-                                                       # regularly contain non-ASCII characters -- this
-                                                       # is not a one-off, force UTF-8 explicitly rather
-                                                       # than relying on Windows' ANSI-codepage default.
-                stdin=subprocess.DEVNULL,   # codex-cli 0.151.0 prints "Reading additional input
-                                            # from stdin..." and BLOCKS on read until EOF; an
-                                            # inherited stdin never closes -> hang. Give it EOF.
-            )
-        except subprocess.TimeoutExpired as te:
+            out, err = proc.communicate(timeout=timeout_s)
+            returncode = proc.returncode
+        except subprocess.TimeoutExpired:
             _mark_connector_touch()
-            last_raw = (te.stdout or "") if isinstance(te.stdout, str) else ""
+            _log(f"[{tag}] timeout {timeout_s}s hit -- killing process tree (PID {proc.pid}) so an orphaned "
+                 f"grandchild can't keep the real call running underneath a defeated timeout")
+            try:
+                subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)],
+                               capture_output=True, timeout=15)
+            except Exception as kill_exc:  # noqa: BLE001 -- non-Windows / taskkill missing / already exited
+                _log(f"[{tag}] taskkill failed ({kill_exc}) -- falling back to proc.kill() (direct child only)")
+                try:
+                    proc.kill()
+                except Exception:  # noqa: BLE001
+                    pass
+            try:
+                out, err = proc.communicate(timeout=10)   # tree should be dead now -- bounded anyway, never unbounded
+            except subprocess.TimeoutExpired:
+                _log(f"[{tag}] output still not drained 10s after tree-kill -- proceeding with empty output")
+                out, err = "", ""
+            last_raw = out or ""
             _scan_partial_output_for_writes(last_raw, tag)   # raises ReContaminationDetected, uncaught here on purpose
             _log(f"[{tag}] timed out after {timeout_s}s (cold-start hang?) -- retrying once" if attempt < max_attempts
                  else f"[{tag}] timed out again -- no more attempts for this identity")
             continue
 
         _mark_connector_touch()
-        raw = proc.stdout or ""
+        raw = out or ""
         last_raw = raw
         objs = _parse_jsonl(raw)
         if objs:
-            if proc.returncode != 0:
-                _log(f"[{tag}] codex exited {proc.returncode} but produced parseable JSONL -- continuing")
+            if returncode != 0:
+                _log(f"[{tag}] codex exited {returncode} but produced parseable JSONL -- continuing")
             return objs, raw
-        _log(f"[{tag}] no parseable JSONL (exit {proc.returncode}); stderr tail: "
-             f"{(proc.stderr or '').strip()[-300:]!r}")
+        _log(f"[{tag}] no parseable JSONL (exit {returncode}); stderr tail: "
+             f"{(err or '').strip()[-300:]!r}")
         if attempt < max_attempts:
             continue
 
