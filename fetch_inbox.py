@@ -1456,26 +1456,11 @@ def _cc_mail_key(entry_id="", message_id=""):
         return eid
     return (message_id or "").strip().strip("<>")
 
-def _owa_link(message_id="", subject="", from_name="", received=""):
-    """OWA search deep-link fallback -- only used when a message has no stored
-    web_link (IMAP always sets one via imap_mail._owa_search_link). Scoped with
-    fields OWA indexes: sender + exact subject phrase + received date.
-    message_id is accepted for backward-compat but NOT used in the URL -- OWA
-    search does not match the internet Message-ID header (pre-3-Sept-2026 bug
-    that landed users on the inbox root)."""
-    terms = []
-    f = (from_name or "").strip()
-    if f:
-        terms.append(("from:" + f) if " " not in f else ('from:"' + f.replace(chr(34), "") + '"'))
-    s = " ".join((subject or "").split()).replace(chr(34), "")
-    if s:
-        terms.append(chr(34) + s + chr(34))
-    d = (received or "").strip()[:10]
-    if len(d) == 10 and d[4] == "-" and d[7] == "-":
-        terms.append("received:" + d)
-    if not terms:
+def _owa_link(message_id=""):
+    mid = (message_id or "").strip().strip("<>")
+    if not mid:
         return ""
-    return "https://outlook.office.com/mail/search?query=" + urllib.parse.quote(" ".join(terms))
+    return "https://outlook.office.com/mail/search?query=" + urllib.parse.quote(mid)
 
 def _kevin_is_primary_recipient(msg):
     """True if Kevin's address appears in To (addressed directly), False if
@@ -2976,7 +2961,7 @@ try:
                 "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
                 "entry_id":     m.get("entry_id", ""),
                 "message_id":   m.get("message_id", ""),
-                "web_link":     m.get("web_link", "") or _owa_link(m.get("message_id", ""), m.get("subject", ""), m.get("from", ""), m.get("received", "")),
+                "web_link":     m.get("web_link", "") or _owa_link(m.get("message_id", "")),
             })
 
     for s in sent[:30]:
@@ -2987,7 +2972,7 @@ try:
             "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
             "entry_id":     s.get("entry_id", ""),
             "message_id":   s.get("message_id", ""),
-            "web_link":     s.get("web_link", "") or _owa_link(s.get("message_id", ""), s.get("subject", ""), "", s.get("sent", "")),
+            "web_link":     s.get("web_link", "") or _owa_link(s.get("message_id", "")),
             "direction":    "sent"
         })
 
@@ -3242,7 +3227,7 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                 "emailRef":    nt.get("email_subject", ""),
                 "entryId":     eid,
                 "messageId":   mid,
-                "webLink":     nt.get("web_link", "") or _owa_link(mid, nt.get("email_subject", ""), nt.get("email_from", ""), nt.get("received", "")),
+                "webLink":     nt.get("web_link", "") or _owa_link(mid),
                 "summary":     "",
                 "description": nt.get("description", ""),
                 "origin":      "inbox-auto",
