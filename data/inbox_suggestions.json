@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-03 15:19",
+  "generated_at": "2026-09-03 16:11",
   "new_tasks": [
     {
-      "title": "Investigate Cority employee import error 28 August 2026 17:00",
-      "tier": "week",
-      "description": "Cority Integration Platform reported SFTP connection error on 28 August at 17:00 during scheduled employee data import. Review attached error log file and coordinate with Cority support to confirm resolution status and identify any required remediation.",
+      "title": "Investigate Cority employee import error - 28 August 17:00",
+      "tier": "today",
+      "description": "Cority Integration Platform reported an SFTP connection error on 28 August at 17:00 during scheduled employee data import. Kevin needs to review the attached error log and confirm resolution with James Salas Guillen and Cority support, similar to the 22 June incident (t030).",
       "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
       "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
       "received": "2026-08-28 18:00",
@@ -78,19 +78,7 @@
     {
       "task_id": "t2608121801280",
       "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Simon reiterates that Kevin committed to stating workgroup update capacity for GLAM after Chemistry rollout.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Simon Burford",
-      "received": "2026-09-03 15:02",
-      "entry_id": "",
-      "message_id": "<CWLP265MB417628F0327FAE569B9FB3B292B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB417628F0327FAE569B9FB3B292B62%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CWLP265MB417628F0327FAE569B9FB3B292B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2608270801360",
-      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
-      "note": "Julie disputes prior meeting recollection and asserts Kevin agreed to support Chemistry and provide GLAM with count of workgroups Kevin can update.",
+      "note": "Julie disputes prior meeting recollection and asserts Kevin agreed to support Chemistry and provide GLAM with specific workgroup update capacity numbers.",
       "email_subject": "RE: 38 day balance for departments update and decisions needed",
       "email_from": "Julie Hickman",
       "received": "2026-09-03 14:57",
@@ -102,14 +90,14 @@
     {
       "task_id": "t2608121801280",
       "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Kevin confirms Chemistry remains 38-day balance pilot with 131 workgroups to be updated, clarifying scope in dispute with Julie.",
-      "email_subject": "Re: 38 day balance for departments update and decisions needed",
-      "email_from": "Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>, Simon Burford <simon.burford@admin.ox.ac.uk>)",
-      "received": "2026-09-03 14:02",
+      "note": "Marie is out of office until Monday 7 September; auto-reply confirms deputy contacts for technical issues during her absence.",
+      "email_subject": "Automatic reply: 38 day balance for departments update and decisions needed",
+      "email_from": "Marie Cooksey",
+      "received": "2026-09-03 14:03",
       "entry_id": "",
-      "message_id": "<CW1P265MB8765F429101C1984822C7A4788B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CW1P265MB8765F429101C1984822C7A4788B62%40CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CW1P265MB8765F429101C1984822C7A4788B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM"
+      "message_id": "<0cb8cb3d0bdc408ca6a923867c5c3e12@LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=0cb8cb3d0bdc408ca6a923867c5c3e12%40LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "0cb8cb3d0bdc408ca6a923867c5c3e12@LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM"
     }
   ]
 }
