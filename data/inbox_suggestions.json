@@ -1,18 +1,6 @@
 {
-  "generated_at": "2026-09-03 07:15",
+  "generated_at": "2026-09-03 09:48",
   "new_tasks": [
-    {
-      "title": "Investigate Cority Employee Import error 2026-08-28",
-      "tier": "week",
-      "description": "Cority Integration Platform reported an employee data import error on 28 August at 17:00 during scheduled import cycle. Review error log and confirm resolution status with James Salas Guillen or Cority support, similar to the ongoing 21 August incident tracking.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-08-28 18:00",
-      "entry_id": "",
-      "message_id": "<010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com>",
-      "web_link": "https://outlook.office.com/mail/search?query=010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000%40us-west-2.amazonses.com",
-      "mail_key": "010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com"
-    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -78,14 +66,38 @@
     {
       "task_id": "t021",
       "task_title": "FP 68261303 -- Multi Company Setup",
-      "note": "Simon updates on Multi Company Setup (FP 68261303) noting research team's requested ESS profile changes for separate profile configuration.",
+      "note": "Conor O'Brien requesting requirements details from project team for FP 68261303 Multi Company Setup.",
       "email_subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "email_from": "Simon Burford",
-      "received": "2026-09-02 14:12",
+      "email_from": "Conor O'Brien",
+      "received": "2026-09-03 09:43",
       "entry_id": "",
-      "message_id": "<CWLP265MB4176BB5EC9B6CB5C6AF7C8A392B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB4176BB5EC9B6CB5C6AF7C8A392B72%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CWLP265MB4176BB5EC9B6CB5C6AF7C8A392B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
+      "message_id": "<LO0P123MB4265A243BE88E1DF34823796FBB62@LO0P123MB4265.GBRP123.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0P123MB4265A243BE88E1DF34823796FBB62%40LO0P123MB4265.GBRP123.PROD.OUTLOOK.COM",
+      "mail_key": "LO0P123MB4265A243BE88E1DF34823796FBB62@LO0P123MB4265.GBRP123.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2608121801280",
+      "task_title": "Review 38-day balance implementation timeline and decisions",
+      "note": "Simon indicating Kevin needs to estimate how many GLAM workgroups the team can take on beyond Chemistry's 131.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Simon Burford",
+      "received": "2026-09-02 18:23",
+      "entry_id": "",
+      "message_id": "<CWLP265MB4176CD928473D0EDD95E89CB92B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB4176CD928473D0EDD95E89CB92B72%40CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB4176CD928473D0EDD95E89CB92B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t030",
+      "task_title": "Cority SFTP production feed error -- 22 June",
+      "note": "Cority Integration Platform reporting SFTP error on 28 August 17:00 UTC during employee data import; log file requires review.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": "",
+      "message_id": "<010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com>",
+      "web_link": "https://outlook.office.com/mail/search?query=010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000%40us-west-2.amazonses.com",
+      "mail_key": "010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com"
     }
   ]
 }
