@@ -219,6 +219,33 @@ foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','normalise_pull.
   }
 }
 
+# --- self-refresh the wrapper + status pusher from docs/desktop-scripts/ on
+#     main, GUARDED (min-size + marker) so a truncated/failed pull can never
+#     replace a working copy. These two are NOT in the loop above because they
+#     live under docs/desktop-scripts/, not repo root. The wrapper refresh takes
+#     effect on the NEXT run (this process is already parsed); the
+#     Push-LaptopRunStatus.ps1 refresh takes effect THIS run (it is invoked at
+#     the exit points below). Added 3 Sept 2026 -- previously both files could
+#     only be updated on the laptop by a manual SSH/RDP file copy, so repo edits
+#     silently never reached the live task (root cause of the stale
+#     Push-LaptopRunStatus.ps1 '-LaneBGuard' param error). ---
+foreach ($sf in @(
+    @{ Name = 'Run Laptop Bridge Briefing.ps1'; Marker = 'Laptop Bridge Briefing START' }
+    @{ Name = 'Push-LaptopRunStatus.ps1';       Marker = 'LaneBDomains' }
+)) {
+  $dl = (Join-Path $root $sf.Name) + '.download'
+  try {
+    Invoke-WebRequest -UseBasicParsing "$base/docs/desktop-scripts/$($sf.Name)`?t=$t" -OutFile $dl
+    if ((Get-Item $dl).Length -lt 1000) { throw 'downloaded file too small' }
+    if (-not (Select-String -Quiet -LiteralPath $dl -Pattern $sf.Marker)) { throw "missing marker /$($sf.Marker)/" }
+    Move-Item -Force $dl (Join-Path $root $sf.Name)
+    Log "refreshed $($sf.Name) from main (docs/desktop-scripts, guarded)"
+  } catch {
+    Log "WARN: could not refresh $($sf.Name) ($($_.Exception.Message)) -- keeping local copy"
+    if (Test-Path $dl) { Remove-Item $dl -Force }
+  }
+}
+
 # --- LANE B calendar/Teams HALT guard -- only when CalBackend=connector and/or
 #     TeamsBackend=connector was explicitly passed (the live task does not pass
 #     either yet; see the header note). ONE guard call covers whichever domain(s)
