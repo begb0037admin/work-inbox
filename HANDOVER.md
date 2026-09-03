@@ -1,59 +1,61 @@
-# Handover -- 3 September 2026, ~18:40 (Drew) -- RDP KEEP-ALIVE: does NOT hold as-is. Verified live with GetLastInputInfo (not `quser`, which lags): the session locks despite the task running. TWO causes found: (1) the original `Cursor.Position`/`SetCursorPos` nudge does NOT reset the idle timer on modern Windows -- FIXED, now uses `SendInput()`; (2) fundamental -- once locked, `SendInput` from an ordinary process is blocked by the secure desktop (`SendInput` returns 0), so a keep-alive can only PREVENT a lock, never clear one, and it needs an unbroken run from a fresh unlocked state. The corrected task is deployed but UNVERIFIED (session is currently locked; can't test without Kevin unlocking). See section D -- this needs a decision, not just another iteration.
+# Handover -- 3 September 2026, ~19:20 (Drew) -- RDP KEEP-ALIVE: DEAD END at user privilege. Tested from a clean unlocked start (Kevin unlocked ~19:02): the automatic scheduled-task fires every 3 min (`LastTaskResult 0`) but `SendInput` returns `0` -- ZERO events injected -- on every single automatic run, even with the session fully unlocked (idle 23s/203s/383s). Idle climbed unchecked 1->15 min and the session re-locked at ~19:15. A scheduled-task process is not attached to the interactive input desktop, so its `SendInput` is silently rejected -- not fixable by task config. **Task DISABLED + `KEEPALIVE_DISABLE` kill-switch file set.** Kevin's fallback (pre-authorised): the Oxford IT GPO-exception route. Full detail + the one faint remaining technical option in section D.
 
-## D. RDP Keep-Alive (idle-lock bypass) -- NOT HOLDING. Mechanism fixed; fundamental limitation remains; needs a call from Kevin.
+## D. RDP Keep-Alive (idle-lock bypass) -- DEAD END at user privilege. Task DISABLED. Fall back to Oxford IT exception.
 
-**Blunt status: as of 18:40 the session is locked and has been for ~15 min despite the keep-alive task firing every 3 min.** Do not read this as "done."
+**Final verdict (19:20, tested properly this time): it does NOT hold, and this specific avenue cannot be made to work.**
 
-**How it was verified (properly this time):** added `GetLastInputInfo`-based logging to `RDP-Keepalive-Nudge.ps1` -> `logs\keepalive.log`. That's the exact idle value the screensaver/lock timer keys off, precise to the second -- unlike `quser`'s IDLE TIME column which lags 1-2 min and gave misleadingly rosy readings earlier this session. The log shows plainly:
-```
-18:36:49  NUDGE idleBefore=907s idleAfter=908s  SendInput sent=0/0  -> FAILED -- session already locked
-```
-`SendInput` returning `0` = the input injection was blocked (secure desktop).
+**The clean-start test (Kevin unlocked ~19:02):**
+| time | trigger | `SendInput sent` | idle |
+|---|---|---|---|
+| 19:02:13 | **manual** `Start-ScheduledTask` | `1/1` (worked) | reset to 0s |
+| 19:03:49 | automatic repetition | **`0/0`** | 23s |
+| 19:06:49 | automatic | **`0/0`** | 203s |
+| 19:09:50 | automatic | **`0/0`** | 383s |
+| 19:12:49 | automatic | **`0/0`** | 563s |
+| 19:15:49 | automatic | **`0/0`** | 743s -- **re-locked** |
+| 19:18:50 | automatic | **`0/0`** | 924s, `LogonUI` count 2 |
 
-**Cause 1 -- mechanism (FIXED):** the first version used `[System.Windows.Forms.Cursor]::Position` (= `SetCursorPos`). On Windows 10/11 that moves the pointer but does **not** reset `GetLastInputInfo`'s idle timer (Microsoft hardened this specifically against keep-alive tools). So even when the session was unlocked and the task was firing, the lock timer kept counting. Rewritten to use `SendInput()` with a relative (+1,0)/(-1,0) mouse move -- that *does* feed the raw input thread and update the idle timer. Not yet provable it works, because every test window so far has been against an already-locked session.
+`quser` idle climbed 1->3->4->6->7->9->10->12->13->15 min with zero resets from the automatic task. Task ran every 3 min (`LastTaskResult 0` throughout) -- it's firing fine, it just can't inject.
 
-**Cause 2 -- fundamental, NOT fixable at this privilege level:** once the session has locked, `SendInput` from an ordinary user-mode process is rejected by Windows' secure-desktop isolation (returns 0). A keep-alive of this kind can therefore ONLY prevent the *first* lock -- it must be running and successfully resetting the idle timer continuously, from before idle first hits 600s, with no gap that long. Today's repeated re-registrations (AtLogOn trigger that never armed -> `-Once`+repetition; then PT4M -> PT3M) plus the initial dead period created gaps; the session locked; every nudge since is a no-op.
+**Root cause, definitive:** a process launched by Task Scheduler -- even `LogonType=Interactive`, running in session 1 -- is **not attached to the active interactive input desktop (`WinSta0\Default`)**. `SendInput` requires the calling thread to be on that desktop; from a scheduled task's window station it returns 0 (nothing sent) and silently does nothing. This is a Windows security boundary, not a config problem. The single manual success at 19:02:13 was either a fluke or coincided with Kevin's own keyboard activity right after unlocking.
 
-**Also fixed along the way:** the trigger. `-AtLogOn` never armed its repetition on this box (verified: task only ever ran on a manual `Start-ScheduledTask`, `LastRunTime` frozen). Screen *unlock* is not a Logon event and `-AtLogOn` doesn't fire retroactively for an already-logged-in session. Now a `-Once` trigger dated 2 min in the past + infinite `PT3M` repetition -- arms immediately, keeps ticking regardless of logon/lock state. Verified firing every ~3 min (`LastRunTime` advances). Interval tightened 4->3 min after `quser` showed idle touch 10 once.
+This also finishes off the earlier two findings: (1) `SetCursorPos`/`Cursor.Position` doesn't reset the modern-Windows idle timer -- real, fixed to `SendInput`, but moot now; (2) `-AtLogOn` trigger never armed -- real, fixed to `-Once`+`PT3M`, also moot now. The blocker is (3): scheduled-task `SendInput` is desktop-isolated.
 
-**Where it stands:**
-- Corrected task IS registered and firing every 3 min. `logs\keepalive.log` on the laptop is the live truth -- once Kevin next unlocks, watch for `-> OK reset` lines with `idleAfter` near 0. If those appear and keep appearing, it's holding. If they still say `FAILED` / `SendInput sent=0`, the SendInput-from-scheduled-task approach doesn't work here either and this whole avenue is a dead end at user privilege.
-- Kill switch unchanged: create `C:\Users\begb0037.AD-OAK\work-inbox\KEEPALIVE_DISABLE`. Full stop: `Disable-ScheduledTask` / `Unregister-ScheduledTask -TaskName 'RDP Keep-Alive (idle-lock bypass)'`.
+**Current state:** task `RDP Keep-Alive (idle-lock bypass)` is **`Disabled`**, and `C:\Users\begb0037.AD-OAK\work-inbox\KEEPALIVE_DISABLE` exists as a second stop. `logs\keepalive.log` has the full evidence trail. Scripts remain in `docs/desktop-scripts/` for reference. To fully remove: `Unregister-ScheduledTask -TaskName 'RDP Keep-Alive (idle-lock bypass)' -Confirm:$false` and delete both `RDP-Keepalive-Nudge.ps1` / `Register-RDPKeepAlive.ps1` from the laptop.
 
-**Decision needed (flagging, not deciding unilaterally):** this is proving to be a fragile hack against a control Windows actively defends. Options: (a) Kevin unlocks once, we confirm the SendInput version holds from a clean start, accept that any reboot/disruption re-locks it until he re-auths; (b) drop it, accept the 10-min re-auth; (c) proper fix = Oxford IT GPO exception for this account/machine; (d) a SYSTEM-privileged input injector that *can* reach the secure desktop -- bigger build, even more clearly a deliberate bypass. My recommendation: (a) as a trial with a hard time-box, fall back to (c) if it keeps misbehaving -- but it's Kevin's call given it's his security posture.
+**Recommended path forward: Oxford IT GPO exception** (Kevin pre-authorised this fallback). Request an exemption for `AD-OAK\begb0037` / `101L-DE013193` from the screensaver-lock GPO (`Software\Policies\Microsoft\Windows\Control Panel\Desktop` -- `ScreenSaveTimeOut=600`, `ScreenSaverIsSecure=1`), or a longer timeout for that account. This is the only clean fix -- everything below IT's GPO layer either can't override it (local reg edit reverts) or can't inject input (this task).
 
-**Earlier text from this section (now superseded by the above):** the task was built + registered + config-verified, but the "holds through 10+ min idle" test could not be completed because the session was already locked, and secure-desktop isolation blocks synthetic input into a locked screen. That much was right; what's new is the confirmed `SetCursorPos`-doesn't-reset-idle bug and the `-AtLogOn`-never-armed bug, both now fixed, and the honest verdict that it is currently NOT holding.
+**One faint remaining technical option, NOT recommended, noted for completeness:** a keep-alive launched from Kevin's **Startup folder** (run by `explorer`/`userinit`, so it inherits the correct interactive desktop) *might* get `SendInput` to work where the scheduled task can't -- the 19:02 manual success is a weak hint. But it's another build+test cycle against a control Windows defends, it only ever prevents (never clears) a lock, and any gap re-locks it. If Kevin wants it explored, it's a fresh small task; otherwise the Oxford IT route is cleaner and more durable.
 
-**Security trade-off, stated plainly (Kevin's explicit informed go-ahead, 3 Sept 2026):** this is a deliberate circumvention of Oxford's domain-enforced screensaver lock (section C above), not a settings change. While active, the RDP session will never lock from inactivity alone -- anyone who could otherwise reach the open RDP client (if it were left connected and unattended somewhere) has the same access a logged-in, unlocked session always has. Kevin has accepted this, same category as the auto-logon password-storage trade-off (section B).
+---
 
-**What it does:** `RDP-Keepalive-Nudge.ps1` moves the mouse cursor 1px and immediately back -- registers as real input to Windows' own idle-timer (`GetLastInputInfo`, same call path a physical mouse move uses) without touching keyboard focus or any application state. Chosen over a SendKeys keystroke specifically because a keystroke could type into whatever control has focus; a mouse nudge cannot.
+## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Root cause found, fix proposed, NOT deployed.
 
-**Scoped, not blanket-24/7:** each firing first checks `query session` for begb0037's connection state and exits immediately (does nothing) if it shows `Disc` (disconnected) rather than `Active` (connected) -- so the nudge only happens while an RDP client is genuinely attached. **Honest limitation, not hidden:** this cannot distinguish "connected but Kevin stepped away" from "connected and present" -- that distinction is the entire purpose of the control being bypassed. A connected-but-unattended session stays unlocked by this script; only a fully disconnected one stops it.
+### Symptom
+Kevin's screenshot: the board's "Open email" (envelope) button now opens Outlook Web at the generic inbox, not the specific message. Example card: "Investigate P5 Incident# 11706988 - Task# 50981420", INBOX - Michael O'Sullivan, 2026-09-01 09:57. Under the old COM feed it deep-linked straight to the message.
 
-**Registered:** scheduled task `RDP Keep-Alive (idle-lock bypass)`, trigger `AtLogOn` for `AD-OAK\begb0037` with a repetition pattern (`Interval=PT4M`, `Duration` unset/indefinite) -- verified live via `(Get-ScheduledTask ...).Triggers.Repetition`, exact values confirmed: `Interval=PT4M, Duration=<blank>, StopAtDurationEnd=False`. `MultipleInstances=IgnoreNew`, `ExecutionTimeLimit=30s`, `LogonType=Interactive` (same principal pattern as every other laptop task).
+### Root cause -- confirmed
+- **COM feed**: each mail item carried a real Outlook `EntryID`. Promoted task gets `entryId`. The board's `openEmail()` (`command-centre/js/app.js:535`) does `window.location.href='openmail://'+entryId` -> the registered protocol handler opens the exact message in classic Outlook via `GetItemFromID`. Worked.
+- **IMAP feed**: there is no IMAP equivalent of an Outlook EntryID -- `imap_mail.py:_build_entry()` sets `entry_id = ""` by design. The only stable per-message identifier IMAP carries is the RFC822 `Message-ID` header. `imap_mail.py:_owa_search_link()` (and the mirror `fetch_inbox.py:_owa_link()`) build `web_link = https://outlook.office.com/mail/search?query=<Message-ID>`.
+- The board falls through to `openEmailWeb()` (`js/app.js:552`) which opens that URL. **OWA's search box does NOT index or match the `Message-ID` header** -- searching for a raw message-id returns zero results, and OWA then shows the default mail view (the inbox). That's exactly Kevin's screenshot.
+- The client also has its own fallback (`js/app.js:564-566`) that builds `?query=<messageId>` when no `webLink` is present -- broken the same way.
 
-**Kill switch (no elevated PowerShell needed):** create an empty file `KEEPALIVE_DISABLE` next to the script (`C:\Users\begb0037.AD-OAK\work-inbox\KEEPALIVE_DISABLE`) -- every firing checks for it first and exits immediately if present. Delete the file to resume.
+### Options evaluated
+- **(a) OWA search-deeplink by Message-ID** -- NOT viable. No OWA `?query=` operator searches or opens by RFC Message-ID. This is literally what's deployed and broken.
+- **(b) Look up the immutable/EWS ItemID keyed on Message-ID, then build a real OWA `?ItemID=...` deep-link.**
+  - Via **Graph** (`/me/messages?$filter=internetMessageId eq '...'&$select=webLink` -> ready-made OWA deep link): blocked. Graph is a hard dead-end at Oxford (CLAUDE.md hard rule).
+  - Via **EWS** (`FindItem` restricted on `PR_INTERNET_MESSAGE_ID` -> `ItemId` -> construct `.../owa/?ItemID=...&exvsurl=1&viewmodel=ReadMessageItem`): technically works, but adds a real dependency the IMAP migration deliberately shed -- a new OAuth scope (`EWS.AccessAsUser.All`), an EWS call per promoted message (latency + new failure mode), and EWS is being deprecated for Exchange Online in Oct 2026. Heavy for a convenience feature.
+- **(c) Rebuild the OWA link from fields OWA CAN match** -- `from:` + exact-phrase `subject` + `received:` date. The IMAP fetch already stores `from`/`from_email`/`subject`/`received` on every message and threads `email_from`/`email_subject`/`received` into the promoted-task dict. Query form:
+  `https://outlook.office.com/mail/search?query=from%3A"michael.osullivan%40admin.ox.ac.uk" "Investigate P5 Incident%23 11706988 - Task%23 50981420" received%3A2026-09-01`
+  `from:` / `subject-as-quoted-phrase` / `received:` are documented OWA search operators. sender + exact subject is near-unique -> OWA lands on the right message (one click to open it in the reading pane), in the right mailbox. Zero new dependency, ~5 lines changed in each of `_owa_search_link` (imap_mail.py) and `_owa_link` (fetch_inbox.py), plus removing/aligning the client's raw-messageId fallback (that touches command-centre -> its own backup-and-verify + UI-approval gate).
 
-**Full stop:**
-```powershell
-Disable-ScheduledTask -TaskName 'RDP Keep-Alive (idle-lock bypass)'          # pause, keeps config
-Unregister-ScheduledTask -TaskName 'RDP Keep-Alive (idle-lock bypass)' -Confirm:$false   # remove entirely
-```
+### Recommendation
+**(c).** Graph is blocked, EWS is a deprecating heavyweight for a nicety, and (c) turns "lands on the inbox" into "lands on the exact message, one click to open" with no new dependency and a tiny diff. Not a true one-click deep-link -- if Kevin wants that, it's a separate EWS project to scope against EWS's Oct-2026 sunset. NOT deployed -- Kevin will want to see the search actually resolve to the right message in his own mailbox first (his call on whether the one-extra-click is acceptable vs. pursuing EWS).
 
-**Test status -- honest, not overclaimed:**
-- Config verified correct (interval/duration/principal, above) -- this part is solid fact, not inference.
-- Manually fired once (`Start-ScheduledTask`) to sanity-check the script runs without error -- it did (exit clean, no error).
-- **Could NOT verify the actual "holds through 10+ min idle without locking" behaviour this session.** Checked `quser` before and after the manual fire: `IDLE TIME` did not reset (stayed at ~55-56 min). Checked why: `Get-Process -Name LogonUI` shows it running -- **the session is already locked**, and has been for a long time (idle 55+ min predates this whole session's work, unrelated to anything built today). Windows deliberately isolates the lock screen on its own secure desktop -- an ordinary background process (even one running as begb0037 in that same session) cannot inject synthetic input into it. This is correct, expected OS behaviour, not a bug: **the keep-alive can only PREVENT a lock proactively; it cannot and structurally never will reverse one already in effect.**
-- The `AtLogOn` trigger's repetition cycle very likely hasn't started firing on its own yet for the CURRENTLY-live session (no fresh logon/unlock event has occurred since the task was registered, a few minutes ago) -- Microsoft's own documentation states "At log on" triggers fire on unlock as well as fresh console/RDP logons, but I could not confirm this with live event-log evidence on this specific box (`Get-WinEvent -Id 4624` returned nothing for begb0037 in the last 30h -- logon-success auditing does not appear to be enabled here, a pre-existing gap unrelated to this task).
-
-**What actually closes this out:** next time Kevin unlocks the session (which he'll do anyway to use it), the scheduled task's `AtLogOn` trigger should engage and start the 4-minute repeating nudge automatically. **Verification, either by Kevin or a future session:**
-```powershell
-quser                                    # watch IDLE TIME -- should never climb past ~4-5 min once engaged
-Get-Process -Name LogonUI -ErrorAction SilentlyContinue   # should NOT reappear during a 10-15 min idle stretch
-```
-If `IDLE TIME` does climb past ~5 min or `LogonUI` reappears, the task isn't actually firing -- check `Get-ScheduledTaskInfo -TaskName 'RDP Keep-Alive (idle-lock bypass)'` for `LastRunTime`/`LastTaskResult`, and confirm `KEEPALIVE_DISABLE` doesn't exist.
-
-Files: `docs/desktop-scripts/RDP-Keepalive-Nudge.ps1`, `docs/desktop-scripts/Register-RDPKeepAlive.ps1` (both committed to main, also deployed live to `C:\Users\begb0037.AD-OAK\work-inbox\`).
+### Files the fix touches
+- `imap_mail.py` -- `_owa_search_link()` (currently line ~358): take sender address + subject + date, build the scoped-search query. Caller `_build_entry()` (line 488) already has all of it.
+- `fetch_inbox.py` -- `_owa_link()` (line ~1459): same; it's the fallback used at lines 2964/2975/3230 when a stored `web_link` is absent. Promotion-path callers (`nt`/`src` dicts) already carry `email_subject`/`email_from`/`received`.
+- `command-centre/js/app.js` -- `openEmailWeb()` line 564-566: the client-side `?query=<messageId>` fallback should be dropped or aligned once the server always stores a good `web_link`. Separate gated change (command-centre backup-and-verify + screenshot approval).
 
 ---
 
