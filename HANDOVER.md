@@ -1,3 +1,40 @@
+# Handover -- 3 September 2026, ~17:40 (Drew, RDP keep-alive built) -- Kevin approved a deliberate workaround for the RDP idle-lock GPO (section C below): a scheduled task that nudges the mouse 1px every 4 min so the idle timer never reaches the domain's 10-min threshold. BUILT, REGISTERED, verified CORRECTLY CONFIGURED -- but NOT fully end-to-end tested, honestly: the live session was already locked when I went to test it (55+ min pre-existing idle, confirmed via `LogonUI.exe` running), and Windows' secure-desktop isolation means synthetic input from an ordinary background process cannot reach an already-locked screen -- so my manual test-fire did not (and structurally could not) unlock it. Full honest status + what's needed to close out the test, below.
+
+## D. RDP Keep-Alive (idle-lock bypass) -- BUILT, REGISTERED, config verified. Full hold-test needs Kevin back at the keyboard once.
+
+**Security trade-off, stated plainly (Kevin's explicit informed go-ahead, 3 Sept 2026):** this is a deliberate circumvention of Oxford's domain-enforced screensaver lock (section C above), not a settings change. While active, the RDP session will never lock from inactivity alone -- anyone who could otherwise reach the open RDP client (if it were left connected and unattended somewhere) has the same access a logged-in, unlocked session always has. Kevin has accepted this, same category as the auto-logon password-storage trade-off (section B).
+
+**What it does:** `RDP-Keepalive-Nudge.ps1` moves the mouse cursor 1px and immediately back -- registers as real input to Windows' own idle-timer (`GetLastInputInfo`, same call path a physical mouse move uses) without touching keyboard focus or any application state. Chosen over a SendKeys keystroke specifically because a keystroke could type into whatever control has focus; a mouse nudge cannot.
+
+**Scoped, not blanket-24/7:** each firing first checks `query session` for begb0037's connection state and exits immediately (does nothing) if it shows `Disc` (disconnected) rather than `Active` (connected) -- so the nudge only happens while an RDP client is genuinely attached. **Honest limitation, not hidden:** this cannot distinguish "connected but Kevin stepped away" from "connected and present" -- that distinction is the entire purpose of the control being bypassed. A connected-but-unattended session stays unlocked by this script; only a fully disconnected one stops it.
+
+**Registered:** scheduled task `RDP Keep-Alive (idle-lock bypass)`, trigger `AtLogOn` for `AD-OAK\begb0037` with a repetition pattern (`Interval=PT4M`, `Duration` unset/indefinite) -- verified live via `(Get-ScheduledTask ...).Triggers.Repetition`, exact values confirmed: `Interval=PT4M, Duration=<blank>, StopAtDurationEnd=False`. `MultipleInstances=IgnoreNew`, `ExecutionTimeLimit=30s`, `LogonType=Interactive` (same principal pattern as every other laptop task).
+
+**Kill switch (no elevated PowerShell needed):** create an empty file `KEEPALIVE_DISABLE` next to the script (`C:\Users\begb0037.AD-OAK\work-inbox\KEEPALIVE_DISABLE`) -- every firing checks for it first and exits immediately if present. Delete the file to resume.
+
+**Full stop:**
+```powershell
+Disable-ScheduledTask -TaskName 'RDP Keep-Alive (idle-lock bypass)'          # pause, keeps config
+Unregister-ScheduledTask -TaskName 'RDP Keep-Alive (idle-lock bypass)' -Confirm:$false   # remove entirely
+```
+
+**Test status -- honest, not overclaimed:**
+- Config verified correct (interval/duration/principal, above) -- this part is solid fact, not inference.
+- Manually fired once (`Start-ScheduledTask`) to sanity-check the script runs without error -- it did (exit clean, no error).
+- **Could NOT verify the actual "holds through 10+ min idle without locking" behaviour this session.** Checked `quser` before and after the manual fire: `IDLE TIME` did not reset (stayed at ~55-56 min). Checked why: `Get-Process -Name LogonUI` shows it running -- **the session is already locked**, and has been for a long time (idle 55+ min predates this whole session's work, unrelated to anything built today). Windows deliberately isolates the lock screen on its own secure desktop -- an ordinary background process (even one running as begb0037 in that same session) cannot inject synthetic input into it. This is correct, expected OS behaviour, not a bug: **the keep-alive can only PREVENT a lock proactively; it cannot and structurally never will reverse one already in effect.**
+- The `AtLogOn` trigger's repetition cycle very likely hasn't started firing on its own yet for the CURRENTLY-live session (no fresh logon/unlock event has occurred since the task was registered, a few minutes ago) -- Microsoft's own documentation states "At log on" triggers fire on unlock as well as fresh console/RDP logons, but I could not confirm this with live event-log evidence on this specific box (`Get-WinEvent -Id 4624` returned nothing for begb0037 in the last 30h -- logon-success auditing does not appear to be enabled here, a pre-existing gap unrelated to this task).
+
+**What actually closes this out:** next time Kevin unlocks the session (which he'll do anyway to use it), the scheduled task's `AtLogOn` trigger should engage and start the 4-minute repeating nudge automatically. **Verification, either by Kevin or a future session:**
+```powershell
+quser                                    # watch IDLE TIME -- should never climb past ~4-5 min once engaged
+Get-Process -Name LogonUI -ErrorAction SilentlyContinue   # should NOT reappear during a 10-15 min idle stretch
+```
+If `IDLE TIME` does climb past ~5 min or `LogonUI` reappears, the task isn't actually firing -- check `Get-ScheduledTaskInfo -TaskName 'RDP Keep-Alive (idle-lock bypass)'` for `LastRunTime`/`LastTaskResult`, and confirm `KEEPALIVE_DISABLE` doesn't exist.
+
+Files: `docs/desktop-scripts/RDP-Keepalive-Nudge.ps1`, `docs/desktop-scripts/Register-RDPKeepAlive.ps1` (both committed to main, also deployed live to `C:\Users\begb0037.AD-OAK\work-inbox\`).
+
+---
+
 # Handover -- 3 September 2026, ~17:15 (Drew, laptop operational hardening) -- Architecture verified (mail=IMAP, calendar+Teams=connector, ZERO Outlook COM dependency, confirmed by direct code + live-task inspection, not restated assumption). Auto-logon PREPARED but NOT enabled (needs Kevin's own hands -- password never should transit through me). RDP idle-lock found to be a DOMAIN GPO (10 min, secure) -- confirmed, NOT locally overridable, flagged rather than fought per instruction.
 
 ## A. Architecture verification -- mail/calendar/Teams, no Outlook dependency confirmed
