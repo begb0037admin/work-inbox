@@ -69,20 +69,31 @@ This also finishes off the earlier two findings: (1) `SetCursorPos`/`Cursor.Posi
 
 ---
 
-## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Option (c) IMPLEMENTED. work-inbox side SHIPPED; command-centre side on a holding branch; awaiting Kevin's live click-test.
+## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Option (c) DEAD -- Kevin tested all 5 query forms, none land on the message. `3a66600` REVERTED (`79e6471`) -- main back to the pre-change baseline. Reassessed, NOT deployed, Kevin deciding.
 
-### Status (3 Sept ~20:00)
-- **work-inbox: SHIPPED, `3a66600` on main.** `imap_mail.py:_owa_search_link()` (primary -- has the sender address) and `fetch_inbox.py:_owa_link()` (fallback) now build `?query=from:<addr> "<exact subject>" received:<YYYY-MM-DD>` -- fields OWA actually indexes -- instead of the unmatchable raw Message-ID. `from:` value is quoted if it contains a space (display-name fallback path). `py_compile` clean; URL format unit-tested against the real Michael O'Sullivan card data.
-- **command-centre: on holding branch `holding/owa-link-messageid-fallback-drop` (commit `0096cac`), NOT merged.** Drops `openEmailWeb()`'s broken raw-messageId `?query=` fallback + the matching `||t.messageId` button-visibility / `_cgHasLink` refs + trims the alert text. Pre-edit backup `Archive/app_backup_20260903_2000.js` committed to main (`451574c`, verified byte-identical). **Behaviour-only change -- no visual delta to the board**, so the screenshot gate here is really "Kevin reviews the diff": https://github.com/begb0037admin/command-centre/compare/main...holding/owa-link-messageid-fallback-drop
-- **NOT DONE until Kevin confirms** the test URL below lands on the exact message in his own mailbox. If OWA's quoted-phrase match on the punctuation-heavy subject is too strict, first lever to pull is dropping the `received:` term, then loosening the subject to its most distinctive token (e.g. the Task#/Incident# number).
-- **Pre-existing tasks** created before `3a66600` still carry the old broken `?query=<Message-ID>` `webLink` in `tasks.json` -- they'll keep opening the inbox until re-triaged or a one-time `tasks.json` rewrite. Not in this change's scope; flag if Kevin wants the back-fill.
+### Option (c) closed out -- confirmed dead by live test, not just theory
+Kevin clicked all 5 iterations (operators + `received:`, operators without `received:`, operator + distinctive token, plain distinctive-token keywords, plain full subject) against the real Michael O'Sullivan card. **None opened or surfaced the message.** Conclusion: `https://outlook.office.com/mail/search?query=...` is not a usable deep-link mechanism at all, in any query form -- OWA's `/mail/search` URL parameter doesn't reliably resolve to a single message regardless of syntax. Not worth further query-tuning.
 
-### Test URL for Kevin (card `t2609020705201`, "Investigate P5 Incident# 11706988 ...", email from Michael O'Sullivan, received 2026-09-01)
-```
-https://outlook.office.com/mail/search?query=from%3A%22Michael%20O%27Sullivan%22%20%22FW%3A%20P5%20Task%20assigned%20to%20your%20team%20-%20Task%23%2050981420%20for%20Incident%23%2011706988%22%20received%3A2026-09-01
-```
-Decoded query: `from:"Michael O'Sullivan" "FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988" received:2026-09-01`
-(Live cards will use the sender's email address, not the display name -- the address isn't stored on this already-promoted card, so the test uses the quoted display name, which OWA's `from:` also matches.)
+### Cleanup -- `3a66600` REVERTED
+`3a66600` (the option-(c) query rewrite) is provably no better than the pre-change baseline -- both are broken, and leaving the new-but-useless format live was pure noise while a real decision gets made. **Reverted clean: commit `79e6471`, diff against pre-`3a66600` is empty (`imap_mail.py`/`fetch_inbox.py` byte-identical to before), `py_compile` clean.** Main is back to `?query=<raw Message-ID>` -- the same broken-but-long-running state that's been live since the IMAP cutover. The command-centre holding branch `holding/owa-link-messageid-fallback-drop` (`0096cac`) stays unmerged and untouched -- it only drops a client-side fallback, independent of which server-side link format wins.
+
+### Reassessment -- three real options, no deploy yet
+
+**1. Connector-resolved Graph `webLink` (coordinator's lead candidate).**
+- Mechanism: the SAME `codex exec` -> `codex_apps::microsoft_*` connector already trusted for Lane B calendar+Teams almost certainly also exposes read tools under `microsoft_outlook_email.*` -- the connector manifest is Graph-backed, and Graph's `message` resource has exactly the property needed: `GET /me/messages?$filter=internetMessageId eq '<id>'&$select=webLink` returns a ready-made OWA deep-link. The 1 Sept connector-manifest probe already confirmed a dozen `microsoft_outlook_email.*` tools exist (mostly write -- send/reply/forward/draft/move) on accounts where that connector is attached; a read/list/search counterpart is very likely present (send/reply tooling implies a read/list capability exists), **but this is inference from the manifest shape, not a live-confirmed read tool -- would need one real `codex exec` probe to confirm before building.**
+- **Fits the existing safety model better than it first looks, but widens the accepted risk:** the re-contamination guard is already VERB-based (`READ_VERB_RE` allow / `WRITE_VERB_RE` halt), not a tool allowlist -- adding `microsoft_outlook_email` to `LANE_B_NAMESPACES` would let `list_messages`/`get_message`/`search` through and still HALT on `send`/`reply`/`forward`/`move`/`delete`, same mechanism already governing calendar+Teams. **But** it widens the CONNECTOR_SAFEGUARDS.md-accepted worst-case residual from "a stray Teams message" (Kevin's prior explicit acceptance) to **"a stray email sent to a real recipient"** -- a bigger blast radius that needs Kevin's own fresh, explicit re-acceptance, not an inherited one.
+- **Identity constraint:** the Lane B Edu identity had Outlook Email deliberately stripped (Kevin's Q2 decision, keeping it Calendar+Teams only). Only the **personal failover account** has Outlook Email connected. So this would be personal-account-only -- no primary/failover for the mail-resolution step itself, it just runs on whichever identity is already serving Lane B mail-adjacent calls (today, that's `kevin@lelitte.co.uk`, since Edu is quota-dead anyway).
+- **Cost:** roughly one extra `codex exec` call per briefing (batch-resolve that run's newly-promoted message-ids in one session, not one call per message) -- based on today's measured connector latency, likely adds a few minutes to an already ~12-20 min Lane B + fetch_inbox run. Only fixes NEW promotions; existing tasks keep the dead link unless separately back-filled.
+- **Not yet build-ready:** needs (a) a live probe confirming a real read tool + its exact args/return shape, (b) Kevin's explicit re-acceptance of the widened worst-case, (c) a design for where in the pipeline this call runs and how it interacts with fast-fail/failover.
+
+**2. EWS ItemID fallback -- DEAD, don't build.**
+`FindItem` restricted on `PR_INTERNET_MESSAGE_ID` -> real `ItemId` -> a genuine `?ItemID=` OWA deep-link. Technically the most "correct" fix. **But Microsoft is retiring EWS for Exchange Online -- new EWS application access is being blocked from October 2026.** Building a brand-new EWS dependency in September 2026 that stops working within about four weeks is not worth doing regardless of the read/write-scope and Oxford-access questions that would also apply. Not recommended under any circumstance.
+
+**3. Do nothing -- accept the downgrade.**
+Leave the button opening OWA search on the raw Message-ID (current, reverted-to state) or just remove/grey it out for IMAP-sourced tasks. What's lost vs COM: a one-click jump straight to the source email. What's NOT lost: every card already shows the email's subject (`emailRef`) and sender+date (`source`) in plain text -- Kevin can paste the subject into OWA's own search box himself in a few seconds, on the rare occasion he actually wants the source email rather than just the task summary already on the card. This is a real but small convenience regression, not a functional gap.
+
+### Recommendation
+**Primary: option 1 (connector Graph `webLink`), conditional on Kevin explicitly re-accepting the widened worst-case (stray email vs stray Teams message) and a live probe confirming the read tool exists before any build.** It is the only option that produces an actual one-click deep-link, and it reuses infrastructure Kevin already trusts for Lane B rather than adding something new. If Kevin does not want to re-open that risk acceptance for a convenience feature, **fall back to option 3 (accept the downgrade)** -- cheap, honest, no new dependency, no new risk. Option 2 is off the table regardless (EWS sunset). **Not deploying anything -- Kevin decides before any build,** per instruction.
 
 ### Symptom
 Kevin's screenshot: the board's "Open email" (envelope) button now opens Outlook Web at the generic inbox, not the specific message. Example card: "Investigate P5 Incident# 11706988 - Task# 50981420", INBOX - Michael O'Sullivan, 2026-09-01 09:57. Under the old COM feed it deep-linked straight to the message.
@@ -92,23 +103,6 @@ Kevin's screenshot: the board's "Open email" (envelope) button now opens Outlook
 - **IMAP feed**: there is no IMAP equivalent of an Outlook EntryID -- `imap_mail.py:_build_entry()` sets `entry_id = ""` by design. The only stable per-message identifier IMAP carries is the RFC822 `Message-ID` header. `imap_mail.py:_owa_search_link()` (and the mirror `fetch_inbox.py:_owa_link()`) build `web_link = https://outlook.office.com/mail/search?query=<Message-ID>`.
 - The board falls through to `openEmailWeb()` (`js/app.js:552`) which opens that URL. **OWA's search box does NOT index or match the `Message-ID` header** -- searching for a raw message-id returns zero results, and OWA then shows the default mail view (the inbox). That's exactly Kevin's screenshot.
 - The client also has its own fallback (`js/app.js:564-566`) that builds `?query=<messageId>` when no `webLink` is present -- broken the same way.
-
-### Options evaluated
-- **(a) OWA search-deeplink by Message-ID** -- NOT viable. No OWA `?query=` operator searches or opens by RFC Message-ID. This is literally what's deployed and broken.
-- **(b) Look up the immutable/EWS ItemID keyed on Message-ID, then build a real OWA `?ItemID=...` deep-link.**
-  - Via **Graph** (`/me/messages?$filter=internetMessageId eq '...'&$select=webLink` -> ready-made OWA deep link): blocked. Graph is a hard dead-end at Oxford (CLAUDE.md hard rule).
-  - Via **EWS** (`FindItem` restricted on `PR_INTERNET_MESSAGE_ID` -> `ItemId` -> construct `.../owa/?ItemID=...&exvsurl=1&viewmodel=ReadMessageItem`): technically works, but adds a real dependency the IMAP migration deliberately shed -- a new OAuth scope (`EWS.AccessAsUser.All`), an EWS call per promoted message (latency + new failure mode), and EWS is being deprecated for Exchange Online in Oct 2026. Heavy for a convenience feature.
-- **(c) Rebuild the OWA link from fields OWA CAN match** -- `from:` + exact-phrase `subject` + `received:` date. The IMAP fetch already stores `from`/`from_email`/`subject`/`received` on every message and threads `email_from`/`email_subject`/`received` into the promoted-task dict. Query form:
-  `https://outlook.office.com/mail/search?query=from%3A"michael.osullivan%40admin.ox.ac.uk" "Investigate P5 Incident%23 11706988 - Task%23 50981420" received%3A2026-09-01`
-  `from:` / `subject-as-quoted-phrase` / `received:` are documented OWA search operators. sender + exact subject is near-unique -> OWA lands on the right message (one click to open it in the reading pane), in the right mailbox. Zero new dependency, ~5 lines changed in each of `_owa_search_link` (imap_mail.py) and `_owa_link` (fetch_inbox.py), plus removing/aligning the client's raw-messageId fallback (that touches command-centre -> its own backup-and-verify + UI-approval gate).
-
-### Recommendation
-**(c).** Graph is blocked, EWS is a deprecating heavyweight for a nicety, and (c) turns "lands on the inbox" into "lands on the exact message, one click to open" with no new dependency and a tiny diff. Not a true one-click deep-link -- if Kevin wants that, it's a separate EWS project to scope against EWS's Oct-2026 sunset. NOT deployed -- Kevin will want to see the search actually resolve to the right message in his own mailbox first (his call on whether the one-extra-click is acceptable vs. pursuing EWS).
-
-### Files the fix touches
-- `imap_mail.py` -- `_owa_search_link()` (currently line ~358): take sender address + subject + date, build the scoped-search query. Caller `_build_entry()` (line 488) already has all of it.
-- `fetch_inbox.py` -- `_owa_link()` (line ~1459): same; it's the fallback used at lines 2964/2975/3230 when a stored `web_link` is absent. Promotion-path callers (`nt`/`src` dicts) already carry `email_subject`/`email_from`/`received`.
-- `command-centre/js/app.js` -- `openEmailWeb()` line 564-566: the client-side `?query=<messageId>` fallback should be dropped or aligned once the server always stores a good `web_link`. Separate gated change (command-centre backup-and-verify + screenshot approval).
 
 ---
 
