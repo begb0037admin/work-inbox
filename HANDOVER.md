@@ -69,7 +69,7 @@ This also finishes off the earlier two findings: (1) `SetCursorPos`/`Cursor.Posi
 
 ---
 
-## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Option 1 (connector Graph webLink) BUILT + LIVE-PROVEN work-inbox side (`fcb47a9`). Pending Kevin's click-confirm before marking fully shipped / merging the command-centre holding branch.
+## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). SHIPPED AND CLOSED. Option 1 (connector Graph webLink), work-inbox `fcb47a9` + command-centre `0096cac`. Kevin confirmed the test URL opened the exact message.
 
 ### Option 1 SHIPPED, work-inbox side -- full story
 
@@ -96,7 +96,11 @@ https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLT
 ```
 This is the classic `?ItemID=` OWA deep-link -- unlike every option-(c) search URL, it should open the exact message directly, not a search results view.
 
-**NOT DONE until Kevin clicks this and confirms it opens the exact message.** Once confirmed: merge the command-centre holding branch (`holding/owa-link-messageid-fallback-drop`, `0096cac` -- drops the client's own broken raw-messageId fallback, unaffected by which server-side format won) and mark this section fully shipped.
+**CONFIRMED by Kevin: opened the exact message.** One transient hiccup on the very first click ("This message might have been moved or deleted") -- investigated (mailbox-match re-verified via the shared ~115-char Graph mailbox-GUID prefix between this message's `id` and the already-proven-`kevin.lelitte@admin.ox.ac.uk` calendar item `id`, ruling out a mailbox mismatch), then Kevin's own re-click worked -- stale cache/timing on Microsoft's side, not a mailbox mismatch or a code bug. Also independently confirmed the resolved message's subject matches character-for-character: `"FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988"`, sender `michael.osullivan@admin.ox.ac.uk`, received `2026-09-01T08:57:02Z` -- pulled directly from the connector's own tool result, not inferred.
+
+**Command-centre side merged:** `holding/owa-link-messageid-fallback-drop` fast-forward merged to main, commit `0096cac`, verified live (`js/app.js` sha `1e7b6b...` matches the merged blob exactly). Holding branch deleted. Drops the client's own broken raw-messageId `?query=` fallback in `openEmailWeb()` -- the server now always supplies a working `web_link` for IMAP-sourced cards going forward, so that fallback was dead weight.
+
+**This regression is now fully closed.** New cards promoted from here get a real one-click OWA deep-link; existing pre-`fcb47a9` cards keep their old (broken) link unless separately back-filled (out of scope, flagged only).
 
 ### Option (c) closed out -- confirmed dead by live test, not just theory
 Kevin clicked all 5 iterations (operators + `received:`, operators without `received:`, operator + distinctive token, plain distinctive-token keywords, plain full subject) against the real Michael O'Sullivan card. **None opened or surfaced the message.** Conclusion: `https://outlook.office.com/mail/search?query=...` is not a usable deep-link mechanism at all, in any query form -- OWA's `/mail/search` URL parameter doesn't reliably resolve to a single message regardless of syntax. Not worth further query-tuning.
