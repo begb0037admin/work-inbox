@@ -290,6 +290,32 @@ if ($laneBDomain) {
     Log "Lane B: `$LaneBCodexHome not set (normal) -- lane_b_call1.py resolves its own primary(Edu)/failover(personal) identity and logs which one actually served each call"
   }
   Log "running: python lane_b_cal_guard.py --run --domain $laneBDomain"
+
+  # FAST-FAIL Lane B primary (added 3 Sept 2026, Kevin's explicit requirement).
+  # Edu's connector quota is exhausted until 1 Oct -- every primary attempt on
+  # Edu is currently either a guaranteed failure or, on the evidence of the
+  # 3 Sept 12:51 test run, an intermittent success; either way the default
+  # budget (Teams primary: 2 sub-attempts x 360s + 75s quiet-gaps around every
+  # call) could burn ~15 min/run before ever reaching failover. Force ONE short
+  # primary attempt per domain, no outer retry, a short inter-call quiet gap;
+  # switch to personal (failover) immediately if primary doesn't succeed.
+  # Failover's own budget (WI_LANE_B_TIMEOUT/WI_LANE_B_RETRIES, unset here) is
+  # left at full strength -- personal is proven reliable and keeps the benefit
+  # of the doubt. Live-proven 3 Sept: ~29 min (double-failover, pre-change) ->
+  # ~Xm (fast-fail, see HANDOVER.md for the exact proving-run number).
+  # REVERT THIS WHOLE BLOCK after 1 Oct 2026 when Edu's monthly quota resets --
+  # it deliberately overrides the 3 Sept Teams-primary-budget fix (which exists
+  # for exactly the case this block short-circuits: a primary genuinely worth
+  # waiting on) and is only correct while Edu cannot be trusted to finish in a
+  # reasonable time.
+  $env:WI_LANE_B_PRIMARY_TIMEOUT            = '45'
+  $env:WI_LANE_B_PRIMARY_MAX_ATTEMPTS       = '1'
+  $env:WI_LANE_B_PRIMARY_TIMEOUT_TEAMS      = '45'
+  $env:WI_LANE_B_PRIMARY_MAX_ATTEMPTS_TEAMS = '1'
+  $env:WI_LANE_B_PRIMARY_RETRIES            = '1'
+  $env:WI_LANE_B_SNAPSHOT_GAP_S             = '15'
+  $env:WI_LANE_B_WARMUP_TIMEOUT             = '45'
+  Log "Lane B: FAST-FAIL primary active -- 1 attempt/45s per domain, 15s inter-call gap, immediate personal failover on any primary failure (Edu quota dead until 1 Oct -- REVERT after)"
   & python -u (Join-Path $root 'lane_b_cal_guard.py') --run --domain $laneBDomain 2>&1 | Tee-Object -FilePath $log -Append
   $guardRc = $LASTEXITCODE
   Log "lane_b_cal_guard.py exit $guardRc"
