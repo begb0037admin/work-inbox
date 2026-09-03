@@ -1,3 +1,53 @@
+# Handover -- 3 September 2026, ~13:00 (Drew, Lane B session) -- CALENDAR + TEAMS FAILOVER NOW PROVEN LIVE end-to-end on a real natural scheduled fire (12:00 BST). BUT a new blocker surfaced: the run takes ~29 min and the scheduled task's `ExecutionTimeLimit` is `PT20M`, so Task Scheduler kills the wrapper mid-run -- Lane B data lands on disk but `fetch_inbox.py` never runs, so **no briefing is produced/pushed on scheduled fires** while Edu is quota-dead. No fix deployed (needs go-ahead -- it's a live-task change). Verification-only session, no code pushed except this checkpoint.
+
+## A. Lane B failover -- PROVEN (closes out the 3 Sept midday entry's section 4)
+Pulled `data/lane_b/20260903T110005Z_lane_b.json` via `ssh oxford-lan` (written 12:29:24, from the 12:00 BST natural fire, first run after fix (b) the wrapper redeploy went live):
+
+| field | calendar | teams |
+|---|---|---|
+| `served_by` | **`failover`** | **`failover`** |
+| `count` | **47** | **16** |
+| `primary_failover_identical` | **`false`** | **`false`** |
+| `status` | `ok` | `ok` |
+| guard `unexpected` | `[]` | `[]` |
+
+`halted: false`, `sanitiser_hits: 0`, `config_toml_sha1_match: true`. `attempts` array for each domain: primary (Edu, `CODEX_HOME=C:\Users\begb0037.AD-OAK\.codex`) `codex_failed`, then failover (personal) `ok`. The calendar failover transcript (`20260903T110005Z_call1_calendar_failover_a1.jsonl`, 581 KB) contains real `microsoft_outlook_calendar.list_events` structured content -- genuine events, not empty. **This is exactly the "actual proof both fixes together are working" that section 4 of the midday entry asked for.** PR #35 (`d454c7a`) + the laptop wrapper SSH redeploy (fix (b)) are validated. Edu-primary → personal-failover works automatically and silently for both domains on the live task.
+
+## B. NEW BLOCKER -- 20-minute task limit kills the briefing pipeline
+- `Work Inbox Bridge Briefing` on `101L-DE013193` / `AD-OAK\begb0037`: `Settings.ExecutionTimeLimit = PT20M`, `MultipleInstances = IgnoreNew`.
+- 12:00 run: `LastRunTime 12:00:00`, **`LastTaskResult 267014`** (`0x00041306` = `SCHED_S_TASK_TERMINATED` -- task force-stopped for exceeding its time limit at 12:20:01).
+- `logs/bridge_briefing_20260903-120001.log` (1589 B): starts 12:00:01, refreshes scripts, launches `python lane_b_cal_guard.py --run --domain both` at 12:00:04, then the log **freezes** -- no END line.
+- The orphaned `codex` child processes outlived the killed parent and finished Lane B at **12:29:24** (29 min after start), writing `lane_b.json` / `lane_b_normalised.json` / `teams_watermark.json`. But the parent wrapper was already dead, so **`fetch_inbox.py` (the IMAP mail briefing + triage + dashboard push) never ran**. Last briefing commit on `main` is `b17c9ed` 09:48 (from Kevin's 09:32 manual run). No 12:00 briefing exists.
+- **Why now:** pre-quota-exhaustion, calendar + Teams were both served by Edu-primary fast (no failover) and the whole run fit inside 20 min. Now Edu is dead (0/500 until 1 Oct) so **every** run does two full failover cycles: calendar primary burns its budget (~290s) then failover (~9 min), Teams primary burns 360s x 2 (~12 min) then failover (~7 min). ~29 min total, before `fetch_inbox.py` even starts. The `PT20M` limit was always there; the double-failover path is what now exceeds it.
+
+## C. Recommended fix (NOT deployed -- needs coordinator/Kevin go-ahead; changing the live scheduled task is a production change)
+1. **Minimal / immediate:** raise `ExecutionTimeLimit` on `Work Inbox Bridge Briefing` from `PT20M` to `PT45M` (headroom: calendar failover ~10m + Teams failover ~20m + `fetch_inbox.py` ~5m + margin). One `Set-ScheduledTask` / task-XML edit, must be run in the `AD-OAK\begb0037` context (RDP -- not available this session; `Set-ScheduledTask` failed silently over `begb0037-a` SSH last session). Follow the same backup-and-verify discipline as the 1 Sept cutover (task XML backup + verified rollback).
+2. **Companion (cheaper runtime, optional, code change = its own go-ahead):** while Edu is known-dead until 1 Oct, trim Teams primary from 360s x 2 to a single short attempt (matches what calendar primary already does) so failover triggers ~10 min sooner per run. Revert after 1 Oct. Does NOT touch the Edu-primary/personal-failover architecture (still primary-first) -- just the dead-primary detection budget. Do not propose personal-primary; that's settled against.
+3. Consider whether the wrapper should also kill its own orphaned `codex` children on exit, so a terminated run fails cleanly instead of leaving processes writing to disk after the parent is gone.
+
+## D. Minor, separate -- `-LaneBGuard` param error in the live wrapper
+`logs/bridge_briefing_20260903-070003.log` and the 09:32 log both end with: `status: publish failed (non-fatal): A parameter cannot be found that matches parameter name 'LaneBGuard'.` The live wrapper passes `-LaneBGuard` to a downstream script (likely `Push-LaptopRunStatus.ps1` / the drafted-replies publish step) whose deployed copy doesn't declare that param -- so the 2 Sept Lane B guard-halt toast field isn't wired live. Non-fatal (core briefing still completes). Same wrapper-family fix as (E) below.
+
+## E. Tracking recommendation for the laptop-only wrapper fix (fix (b), asked by coordinator)
+`Run Laptop Bridge Briefing.ps1` currently exists in the repo but is NOT in the wrapper's own auto-refresh-from-main list, and the last redeploy (3 Sept, `$LaneBCodexHome = ''`) was a direct SSH file swap with no commit. Recommendation:
+1. Commit the corrected `Run Laptop Bridge Briefing.ps1` (the live laptop copy) to `main` now, so GitHub has the authoritative version.
+2. Add the wrapper's own filename to its self-refresh list (it already `iwr`s `fetch_inbox.py`/`lane_b_call1.py`/`lane_b_cal_guard.py`/`normalise_pull.py`/`imap_mail.py`/`reauth_imap.py` from `main` at the top of every run) -- OR, cleaner, a tiny fixed bootstrap `.ps1` registered in the task that does nothing but pull the real wrapper from `main` and dot-source it. Then the wrapper is self-updating like every other script and a laptop rebuild can't silently lose the fix.
+3. Until (2) ships, the live copy is verifiable via `ssh oxford-lan` -> `Select-String -Path 'C:\Users\begb0037.AD-OAK\work-inbox\Run Laptop Bridge Briefing.ps1' -Pattern 'LaneBCodexHome ='` (expect `''`).
+Folding (D) into the same commit makes sense -- both are drift in the same never-tracked file.
+
+## F. Exact next action for whoever resumes
+1. Get coordinator/Kevin go-ahead on C.1 (raise `ExecutionTimeLimit` to `PT45M`). Needs RDP (`AD-OAK\begb0037` on `101L-DE013193`) -- `Set-ScheduledTask` doesn't take effect over `begb0037-a` SSH.
+2. After the change, watch the next natural fire (07:00/12:00/16:00 BST Mon-Fri) for a real briefing commit on `main` AND a fresh `*_lane_b.json` with `served_by=failover` both domains -- that's full end-to-end proof (Lane B + briefing pipeline together).
+3. Separately decide on C.2 (Teams primary budget trim) and E (wrapper tracking) -- each its own small PR.
+
+## G. What NOT to re-litigate (unchanged from midday entry)
+- No permanent COM fallback for Lane B calendar; snapshot-diff stays dropped; re-contamination guard is the sole live safety layer.
+- Edu-primary/personal-automatic-failover is the architecture, both domains, not a static personal-only switch.
+- Both calendar + Teams go live together.
+- Edu's 0/500 quota until 1 Oct is a known constraint, not a bug.
+
+---
+
 # Handover -- 3 September 2026, midday (Drew), session ending -- 2 Sept 20:58 live regression: BOTH root causes found and fixed, Teams proven live end-to-end, calendar's fix unverified only because Edu hit its monthly cap the same morning. Consolidates 3 same-day checkpoint commits into one entry. STANDING DOWN -- no more codex exec / live triggers this session. Next resume point is step 4 below.
 
 ## 1. What was broken
