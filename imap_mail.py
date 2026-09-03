@@ -355,17 +355,28 @@ def _text_preview(raw_message_bytes, limit=150):
         return ""
 
 
-def _owa_search_link(message_id):
-    """OWA deep-link keyed on the internet Message-ID. There is no IMAP path to
-    mint an OWA ItemID, so we open OWA's search UI scoped to the exact
-    Message-ID. Estate precedent: command-centre sourceType=codex-graph opens a
-    stored web_link on outlook.office.com. The dashboard validates this exactly
-    like command-centre openEmailWeb(): https + exact-hostname allowlist."""
-    if not message_id:
-        return ""
-    mid = message_id.strip().strip("<>")
+def _owa_search_link(from_addr="", subject="", received=""):
+    """OWA search deep-link. IMAP carries no Outlook EntryID / OWA ItemID, so we
+    open OWA search scoped as tightly as the fields OWA actually indexes allow:
+    sender address + exact subject phrase + received date. Searching the raw
+    internet Message-ID (the pre-3-Sept-2026 behaviour) does NOT work -- OWA
+    search does not match that header, so it landed users on the inbox root.
+    The dashboard still validates the result exactly like command-centre
+    openEmailWeb(): https + exact-hostname allowlist."""
     from urllib.parse import quote
-    return f"https://outlook.office.com/mail/search?query={quote(mid)}"
+    terms = []
+    a = (from_addr or "").strip()
+    if a:
+        terms.append(("from:" + a) if " " not in a else ('from:"' + a.replace(chr(34), "") + '"'))
+    s = " ".join((subject or "").split()).replace(chr(34), "")
+    if s:
+        terms.append(chr(34) + s + chr(34))
+    d = (received or "").strip()[:10]   # 'YYYY-MM-DD HH:MM:SS' -> 'YYYY-MM-DD'
+    if len(d) == 10 and d[4] == "-" and d[7] == "-":
+        terms.append("received:" + d)
+    if not terms:
+        return ""
+    return "https://outlook.office.com/mail/search?query=" + quote(" ".join(terms))
 
 
 # --------------------------------------------------------------------------- #
@@ -475,17 +486,19 @@ def _build_entry(msg, flags, idt, raw_full, kevin_email, source_folder=None):
             full = email.message_from_bytes(raw_full)
         except Exception:
             full = None
+    subj = _decode_hdr(msg.get("Subject"))
+    rcvd = _received_str(idt)
     entry = {
-        "subject": _decode_hdr(msg.get("Subject")),
+        "subject": subj,
         "from": name or addr,
         "from_email": addr,
-        "received": _received_str(idt),
+        "received": rcvd,
         "is_read": is_read,
         "has_attachments": _has_attachments(full),
         "importance": _importance_from_headers(msg),
         "entry_id": "",  # no IMAP equivalent -- see migration plan
         "message_id": (msg.get("Message-ID") or "").strip(),
-        "web_link": _owa_search_link(msg.get("Message-ID") or ""),
+        "web_link": _owa_search_link(addr, subj, rcvd),
         "mail_backend": "imap",  # dashboard opener discriminator
         "kevin_is_primary_recipient": _kevin_is_primary_recipient(msg, kevin_email),
     }
