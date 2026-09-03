@@ -16,13 +16,16 @@ Backed up the live file (`Run Laptop Bridge Briefing.ps1.bak_20260903_pre_drew_r
 
 **Not yet proven live** -- no run has happened against this corrected wrapper yet. The next natural fire (task's own schedule, not manually forced -- see below) is the first real test of this specific fix.
 
-## Kevin: Edu monthly quota reported at 500/500 (0 remaining until 1 Oct) -- UNCONFIRMED, do not treat as settled
+## Edu monthly quota -- CONFIRMED exhausted, 500/500 used, resets 1 Oct
 
-Relayed via the coordinator, not yet independently confirmed. Flagged back with three specific inconsistencies before acting on it as fact:
-1. My own manual `--domain both` test on the SAME Edu identity succeeded fully (94 real calendar events, 5 real Teams messages) at ~07:55-08:10 UTC that same morning -- ~2h before the claim.
-2. In the SAME 09:32 live run: calendar (1-2 tool calls) failed, but Teams (list_chats + list_chat_messages -- MORE calls, same identity, same run) succeeded. Quota exhaustion would be expected to hit the heavier workload first/more reliably, not the lighter one.
-3. The actual failure detail ("codex exec produced no usable JSON output after 1 attempt(s)") is the same generic message this whole incident has used for ordinary pre-existing connector flakiness -- not a quota-specific error string. HANDOVER already notes elsewhere there is no clean quota-exhaustion signal in codex's own output.
-No response received yet on this before this checkpoint was written. **Whatever the truth of the quota claim, it does not change fix #2 above** (a file redeploy, zero quota cost) or the diagnosis (the collision was a real, independently-confirmed, config-level bug regardless of Edu's account balance). Per Kevin's instruction, standing down from any further codex exec calls / live task triggers for the rest of this session either way -- the next verification signal is whatever the task's own unforced schedule produces.
+Kevin sent a screenshot of ChatGPT's own Usage Limits panel: **Monthly usage limit -- 0% remaining, 500 of 500 credits used, resets 1st of next month.** This is hard evidence (a real usage-panel screenshot), not the earlier vague relay -- treating it as confirmed fact.
+
+This was flagged back initially with three inconsistencies before the screenshot arrived (kept here for the record, since they're still real and still matter for interpreting today's calendar/Teams asymmetry, just not as grounds to doubt the quota fact itself):
+1. My own manual `--domain both` test on the SAME Edu identity succeeded fully (94 real calendar events, 5 real Teams messages) at ~07:55-08:10 UTC that same morning -- ~2h before the live 09:32 run.
+2. In the SAME 09:32 live run: calendar (1-2 tool calls) failed, but Teams (list_chats + list_chat_messages -- MORE calls, same identity, same run) succeeded. Quota exhaustion alone would be expected to hit the heavier workload first/more reliably, not the lighter one.
+3. The actual failure detail ("codex exec produced no usable JSON output after 1 attempt(s)") is the same generic message this whole incident has used for ordinary pre-existing connector flakiness -- not a quota-specific error string.
+
+Most likely reading (both true at once, not contradictory): Edu's cap was crossed SOMEWHERE BETWEEN my ~08:10 UTC test and the 09:32 live run, not before either -- and the wrapper's stale `$LaneBCodexHome` collision (fix #2 above, independently confirmed via direct file inspection, unrelated to account balance) was ALSO live and real that whole time. Today's specific calendar-fails/Teams-succeeds split may reflect some mix of "quota ran out mid-morning" and "config collision," and there's no way to cleanly separate the two from today's evidence alone. **The wrapper fix stands as a separate, independently-verified root cause regardless of the quota question** -- it was confirmed by directly reading the stale file content over SSH, not inferred from run behaviour. Standing down from any further Edu-consuming codex exec calls / live task triggers until Edu resets 1 Oct, per Kevin's instruction.
 
 ## What's proven, what's still open
 
@@ -32,10 +35,11 @@ No response received yet on this before this checkpoint was written. **Whatever 
 - Root cause of calendar's continued live failure after `#35`: the stale wrapper escape-hatch value, not a flaw in `#35`'s own collision-avoidance logic for the ambient-env case it was designed for.
 
 **Fixed but NOT yet live-verified:**
-- The wrapper redeploy (fix #2 above) -- needs an actual run to confirm calendar now succeeds (or at minimum, correctly fails over to personal) with the collision gone.
+- The wrapper redeploy (fix #2 above) -- needs an actual run to confirm calendar now succeeds via failover (or Edu itself, once quota resets) with the collision gone. **Important caveat given the confirmed Edu exhaustion:** even with the collision fixed, PRIMARY (Edu) will keep returning `codex_failed` until 1 Oct regardless -- the collision fix only restores the ABILITY to fail over, it doesn't make Edu itself succeed. So the real test of fix #2, until 1 Oct, is whether calendar now correctly reaches `served_by=failover` with real personal-account data, not whether Edu succeeds. If a post-1-Oct run still shows `codex_failed`/no failover, that would point back at something else; a `served_by=failover` result with real events, or a clean Edu success after 1 Oct, are both valid confirmations.
 
-**Open / blocked:**
-- Edu quota claim -- needs independent confirmation (a real usage screenshot, or a specific quota-exceeded error string) before it's treated as a real constraint on calendar's success rate going forward.
+**Open / blocked, until Edu resets 1 Oct:**
+- No further Edu-consuming codex exec calls or live task triggers this session (Kevin's instruction, given confirmed 0% remaining).
+- Wrapper fix #2's live verification (see caveat above) -- next unforced fire will show whether failover now engages correctly; full "Edu itself succeeds" confirmation waits for 1 Oct.
 - No further live triggering this session (Kevin's instruction) -- next real signal is the task's own unforced next fire. Whoever picks this up next: check `data/briefing.json`'s `calendarUnavailable` flag and `calFull` contents, or (better) pull `data\lane_b\*_lane_b.json` directly via SSH/RDP for the full per-domain detail, same as this session did.
 
 ## What broke (2 Sept 20:58 incident) and why -- three root causes found
