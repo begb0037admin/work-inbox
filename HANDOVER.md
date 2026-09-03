@@ -1,4 +1,42 @@
-# Handover -- 3 September 2026, morning (Drew) -- 2 Sept 20:58 live regression FIXED and MERGED (`#35`, commit `d454c7a`). Live scheduled task untouched (still CAL_BACKEND=connector/TEAMS_BACKEND=connector, unchanged from the cutover) -- the fix lives in the auto-refreshed pipeline files, so it applies automatically on the task's OWN next natural fire. LIVE-VERIFICATION STATUS: NOT YET CONFIRMED -- proven via real manual test runs on the admin desktop (see below), per Kevin's explicit instruction the go/no-go evidence must be the scheduled task's own genuine unattended fire, not a manual trigger. Next natural fire (empirically confirmed from `data/laptop_status/briefing_status.json`'s real timestamps, cadence 07:00/12:00/16:00 BST Mon-Fri): 12:00 BST (11:00 UTC) today.
+# Handover -- 3 September 2026, late morning (Drew) -- SECOND fix deployed after the first live run (09:32-09:49 BST, Kevin-triggered) showed calendar STILL failing live even after `#35` merged. Root cause of THAT: the live deployed wrapper on the laptop was stale (a file `#35` doesn't auto-refresh) and still forced the exact env-var collision `#35` was built to catch. Fixed by redeploying the wrapper directly via SSH (`oxford-lan`), a zero-Edu-quota file operation. STANDING DOWN from further live triggering/testing per Kevin's instruction (see the quota note below) -- next signal comes from the task's own natural fire, un-forced, whenever that next happens.
+
+## Live run #1 (09:32-09:49 BST, Kevin-triggered) -- real result, and what it revealed
+
+Kevin ran `Start-ScheduledTask -TaskName 'Work Inbox Bridge Briefing'` this morning. `LastTaskResult 0`, log completed cleanly through the last publisher -- no crash, no HALT. Real result (coordinator pulled `data\lane_b\20260903T083225Z_lane_b.json` directly via SSH):
+- **Teams: status=ok, count=1, served_by=primary, tool_calls=[list_chats, list_chat_messages].** Real message delivered end to end into the live `data/briefing.json` (pushed to `main` -- "chore: update briefing 2026-09-03 09:48") -- real sender, real timestamp, real body content. This is `#35`'s Teams fix (budget + schema) proven live, not just on my desktop.
+- **Calendar: status=codex_failed, count=0, served_by=null, `primary_failover_identical=true`.** Same collision signature as the 2 Sept incident -- failover never attempted.
+
+The `primary_failover_identical=true` flag (which `#35` added) is itself proof `#35`'s code IS running live (the auto-refreshed `lane_b_call1.py` picked it up correctly) -- but the collision persisted anyway. Investigated via direct SSH to the laptop: the LIVE DEPLOYED wrapper at `C:\Users\begb0037.AD-OAK\work-inbox\Run Laptop Bridge Briefing.ps1` still had `$LaneBCodexHome = 'C:\WorkInboxAI\codex-laneb'` hardcoded on line 127 (confirmed via `Select-String`) -- the STALE 1 Sept personal-only-pivot escape-hatch value. File's own `LastWriteTime` was 02/09/2026 20:58:11 -- i.e. it was last touched at almost the exact moment of the 2 Sept incident (the both-domains cutover that evening), and never corrected afterward even though `main`'s reference copy WAS corrected to `''` later that same evening. Two separate deploy events that night; only one of them reached the live file.
+
+This matters because `#35`'s fix in `lane_b_call1.py` deliberately does NOT second-guess an EXPLICIT `WI_LANE_B_CODEX_HOME` (only an ambient/inherited bare `CODEX_HOME` collision is caught and bypassed) -- and the wrapper's escape-hatch branch explicitly sets `$env:WI_LANE_B_CODEX_HOME = $LaneBCodexHome` when non-blank, which is exactly what was happening every single live run. `#35`'s own design comment says as much ("an explicit ask is always honoured... since that could be a deliberate single-identity test") -- reasonable in general, but wrong for THIS specific case since the "explicit ask" was itself stale, unintentional configuration, not a deliberate choice.
+
+## Fix #2 -- wrapper redeploy via SSH, 3 Sept ~11:18 BST
+
+Backed up the live file (`Run Laptop Bridge Briefing.ps1.bak_20260903_pre_drew_redeploy`, matching the host's own existing `.bak-YYYYMMDD-HHMMSS` backup convention), downloaded the current `main` reference copy (cache-busted), verified it parses clean (`[System.Management.Automation.Language.Parser]::ParseFile`) and contains all of `#35`'s changes (`$LaneBCodexHome = ''`, the env-clear block, `LaneBDomainsSummary`), then swapped it into place. Confirmed post-deploy: `Select-String` on the live file now shows `$LaneBCodexHome = ''`. This is a plain file copy -- zero codex/Edu quota cost.
+
+**Not yet proven live** -- no run has happened against this corrected wrapper yet. The next natural fire (task's own schedule, not manually forced -- see below) is the first real test of this specific fix.
+
+## Kevin: Edu monthly quota reported at 500/500 (0 remaining until 1 Oct) -- UNCONFIRMED, do not treat as settled
+
+Relayed via the coordinator, not yet independently confirmed. Flagged back with three specific inconsistencies before acting on it as fact:
+1. My own manual `--domain both` test on the SAME Edu identity succeeded fully (94 real calendar events, 5 real Teams messages) at ~07:55-08:10 UTC that same morning -- ~2h before the claim.
+2. In the SAME 09:32 live run: calendar (1-2 tool calls) failed, but Teams (list_chats + list_chat_messages -- MORE calls, same identity, same run) succeeded. Quota exhaustion would be expected to hit the heavier workload first/more reliably, not the lighter one.
+3. The actual failure detail ("codex exec produced no usable JSON output after 1 attempt(s)") is the same generic message this whole incident has used for ordinary pre-existing connector flakiness -- not a quota-specific error string. HANDOVER already notes elsewhere there is no clean quota-exhaustion signal in codex's own output.
+No response received yet on this before this checkpoint was written. **Whatever the truth of the quota claim, it does not change fix #2 above** (a file redeploy, zero quota cost) or the diagnosis (the collision was a real, independently-confirmed, config-level bug regardless of Edu's account balance). Per Kevin's instruction, standing down from any further codex exec calls / live task triggers for the rest of this session either way -- the next verification signal is whatever the task's own unforced schedule produces.
+
+## What's proven, what's still open
+
+**Proven (live, real data):**
+- Teams budget + schema fix (`#35`): real message content delivered end-to-end on the actual live scheduled task, not just my desktop test.
+- The `primary_failover_identical` collision-detection flag: correctly firing and visible in the live run log, confirming `#35`'s auto-refreshed code is genuinely running on the laptop.
+- Root cause of calendar's continued live failure after `#35`: the stale wrapper escape-hatch value, not a flaw in `#35`'s own collision-avoidance logic for the ambient-env case it was designed for.
+
+**Fixed but NOT yet live-verified:**
+- The wrapper redeploy (fix #2 above) -- needs an actual run to confirm calendar now succeeds (or at minimum, correctly fails over to personal) with the collision gone.
+
+**Open / blocked:**
+- Edu quota claim -- needs independent confirmation (a real usage screenshot, or a specific quota-exceeded error string) before it's treated as a real constraint on calendar's success rate going forward.
+- No further live triggering this session (Kevin's instruction) -- next real signal is the task's own unforced next fire. Whoever picks this up next: check `data/briefing.json`'s `calendarUnavailable` flag and `calFull` contents, or (better) pull `data\lane_b\*_lane_b.json` directly via SSH/RDP for the full per-domain detail, same as this session did.
 
 ## What broke (2 Sept 20:58 incident) and why -- three root causes found
 
