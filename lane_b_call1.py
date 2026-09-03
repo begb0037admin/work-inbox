@@ -190,7 +190,17 @@ SHARED_CAL_NAME  = "People Department - HR Systems"
 #     `github.*`, `canva.*`, ...) is off-scope -> HALT.
 #   * within those namespaces: a READ verb leaf -> allow; a WRITE verb leaf or an
 #     unrecognised verb -> HALT (fail closed).
-LANE_B_NAMESPACES = {"microsoft_outlook_calendar", "microsoft_teams"}
+LANE_B_NAMESPACES = {"microsoft_outlook_calendar", "microsoft_teams", "microsoft_outlook_email"}
+# microsoft_outlook_email added 3 Sept 2026 for resolve_mail_weblinks() (option 1,
+# the "Open email" OWA-deeplink fix -- see that function's own docstring). Kevin's
+# explicit, informed, FRESH re-acceptance of the widened worst-case (a stray real
+# email vs a stray Teams message) -- confirmed identity/tenant match first (this
+# session's own investigation: kevin.lelitte@admin.ox.ac.uk / tenant cc95de1b...
+# on BOTH primary and failover, verified from live connector data, not inferred).
+# Same verb-based gate as calendar/Teams below -- read verbs allowed, write verbs
+# HALT, off-namespace HALT. Personal-account-only: Edu has no Outlook Email
+# connector attached (Kevin removed it deliberately, Q2 decision) -- there is no
+# primary/failover choice to make for mail, only the one identity that has it.
 READ_VERB_RE = re.compile(r"^(list|get|fetch|search|resolve)(_|$)", re.IGNORECASE)
 WRITE_VERB_RE = re.compile(
     r"^(send|create|update|delete|remove|add|reply|forward|draft|cancel|respond|"
@@ -211,7 +221,7 @@ TEAMS_ALLOW = {
     "list_online_meeting_recordings",
 }
 
-EXPECTED_TOOL = {"calendar": "list_events", "teams": "list_chats"}
+EXPECTED_TOOL = {"calendar": "list_events", "teams": "list_chats", "mail": "list_messages"}
 
 
 # --------------------------------------------------------------------------- #
@@ -891,6 +901,113 @@ def guard_recontamination(tool_calls: list[dict], domain: str) -> tuple[str, dic
     if not any(tc["tool"].split(".")[-1] == EXPECTED_TOOL[domain] for tc in tool_calls):
         return "unavailable", detail
     return "ok", detail
+
+
+# --------------------------------------------------------------------------- #
+#  Mail webLink resolution (option 1, 3 Sept 2026 -- the "Open email" OWA
+#  deep-link fix). Kevin's explicit go-ahead, gated on identity/tenant
+#  verification done the same day (HANDOVER.md section E): both the Edu-primary
+#  and personal-failover connector identities were confirmed, from live Graph
+#  data (not inferred), to reach the SAME kevin.lelitte@admin.ox.ac.uk mailbox /
+#  tenant cc95de1b-97f5-4f93-b4ba-fe68b852cf91 -- this is Kevin's own Oxford work
+#  data, not a different or personal mailbox, regardless of which ChatGPT
+#  account (Edu login vs personal login) is hosting the connector session.
+# --------------------------------------------------------------------------- #
+def resolve_mail_weblink(message_id: str) -> str:
+    """Resolve a REAL, working, one-click OWA deep-link for a single email
+    message, via the SAME Graph-backed connector already trusted for
+    calendar+Teams. Microsoft Graph's message resource has a native `web_link`
+    property; reachable via microsoft_outlook_email.list_messages with an
+    internetMessageId filter. PROVEN LIVE 3 Sept 2026 (probe transcript:
+    data/lane_b/20260903T205502Z_mailprobe_raw.jsonl) -- list_messages(filter=
+    "internetMessageId eq '<id>'") returned value[0].web_link directly, a real
+    tool-native field (https://outlook.office365.com/owa/?ItemID=...&exvsurl=1&
+    viewmodel=ReadMessageItem), not something the agent had to construct itself.
+
+    PERSONAL-ACCOUNT-ONLY, no primary/failover choice: Edu has no Outlook Email
+    connector attached (Kevin's Q2 decision, deliberate, calendar+Teams only) --
+    there is nothing to fail over FROM, this always runs against
+    FAILOVER_CODEX_HOME directly.
+
+    SAME re-contamination guard as calendar/Teams, no new design: verb-based via
+    guard_recontamination()/LANE_B_NAMESPACES (now includes
+    microsoft_outlook_email) -- read verbs allowed, write verbs / off-namespace
+    HALT. KNOWN, FLAGGED GAP (not silently equivalent to calendar/Teams): a HALT
+    here is logged loudly and this function just returns "" -- it does NOT (yet)
+    trip the same Disable-ScheduledTask path a calendar/Teams HALT does, because
+    this runs inside fetch_inbox.py's own process (Phase 3.6), not inside
+    lane_b_cal_guard.py's cmd_run() where that wrapper-level wiring lives.
+
+    FAILS SOFT, always: any exception, timeout, guard HALT, "unavailable", or a
+    lookup that finds nothing returns "" -- never raises. A missing webLink must
+    degrade the dashboard link, never break the briefing. Cost: ONE codex-exec
+    call per invocation (one per newly-promoted mail-sourced card, not batched,
+    not re-run for existing cards, not per-dashboard-render)."""
+    mid = (message_id or "").strip()
+    if not mid:
+        return ""
+    filt_id = mid if mid.startswith("<") else f"<{mid}>"
+    prompt = (
+        "Using the Microsoft Outlook Email connector, in READ-ONLY mode: look up "
+        f"the single email message whose internet Message-ID header is exactly "
+        f"'{mid}'. Call list_messages with filter internetMessageId eq "
+        f"'{filt_id}' and report back only its web_link field. If it is not "
+        "found, say so plainly -- do not guess, fabricate, or construct a link "
+        "yourself. Do not send, reply, forward, move, delete, draft, or modify "
+        "anything -- this is a read-only lookup, change nothing."
+    )
+    try:
+        objs, raw = run_codex_json(prompt, timeout_s=120, tag="mail",
+                                    codex_home=FAILOVER_CODEX_HOME, max_attempts=1)
+    except ReContaminationDetected as e:
+        _log(f"[mail] RE-CONTAMINATION resolving webLink for {mid!r} -- {e} -- "
+             f"skipped, investigate before relying on this identity again")
+        return ""
+    except Exception as e:  # noqa: BLE001 -- best-effort, must never fail the briefing
+        _log(f"[mail] webLink resolution failed for {mid!r} (non-fatal): {e}")
+        return ""
+
+    # persist a raw transcript for auditability, same convention as the
+    # calendar/teams <ts>_call1_<domain>_<identity>_a<n>.jsonl files -- best
+    # effort, a write failure here must never affect the actual result.
+    try:
+        _ts = _utcstamp()
+        (LANE_B_DIR / f"{_ts}_call1_mail_failover_a1.jsonl").write_text(raw, encoding="utf-8")
+    except OSError:
+        pass
+
+    tool_calls = extract_tool_calls(objs)
+    status, detail = guard_recontamination(tool_calls, "mail")
+    if status == "halt":
+        _log(f"[mail] RE-CONTAMINATION guard HALT resolving webLink for {mid!r} -- "
+             f"{detail} -- skipped, investigate before relying on this identity again")
+        return ""
+    if status == "unavailable":
+        _log(f"[mail] webLink resolution for {mid!r}: list_messages never fired "
+             f"(connector unavailable this cycle) -- skipped")
+        return ""
+
+    for tc in tool_calls:
+        if tc["tool"].split(".")[-1] != "list_messages":
+            continue
+        # extract_tool_calls() ALREADY unwraps item.result.structured_content
+        # into tc["result"] -- tc["result"] IS the structured_content dict
+        # itself (has "value"/"next_link"/... directly), not a wrapper around
+        # it. An earlier version of this function called
+        # .get("structured_content") on it a second time here, which always
+        # returned {} even though the connector call itself was succeeding and
+        # returning real data -- confirmed live 3 Sept 2026 via a raw-transcript
+        # dump (data/lane_b/debug_resolve_raw.jsonl showed structured_content.
+        # value[0].web_link populated correctly; the bug was purely in this
+        # parsing step, not the connector/guard/prompt).
+        sc = tc.get("result") or {}
+        for m in (sc.get("value") or []):
+            wl = (m.get("web_link") or m.get("webLink") or "").strip()
+            if wl:
+                _log(f"[mail] resolved webLink for {mid!r}")
+                return wl
+    _log(f"[mail] webLink resolution for {mid!r}: message not found via the connector")
+    return ""
 
 
 # --------------------------------------------------------------------------- #

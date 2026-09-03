@@ -1462,6 +1462,31 @@ def _owa_link(message_id=""):
         return ""
     return "https://outlook.office.com/mail/search?query=" + urllib.parse.quote(mid)
 
+# Option 1 (3 Sept 2026): resolve a REAL OWA deep-link via the connector, for
+# newly-promoted IMAP-sourced cards -- see lane_b_call1.resolve_mail_weblink()'s
+# own docstring for the full design/guard/cost story. Soft import: this module
+# is co-located and always deployed together in practice, but a webLink nicety
+# must never be a hard dependency for the core mail briefing -- if the import
+# ever fails for any reason, _resolve_mail_weblink() below degrades to the
+# pre-existing _owa_link() search-link fallback, exactly as before this feature.
+try:
+    import lane_b_call1 as _lb_mail
+except Exception as _lb_mail_import_err:  # noqa: BLE001
+    _lb_mail = None
+    print(f"WARNING: lane_b_call1 import failed ({_lb_mail_import_err}) -- "
+          f"mail webLink resolution (option 1) unavailable this run, falls back to _owa_link()")
+
+
+def _resolve_mail_weblink(message_id: str) -> str:
+    if not _lb_mail:
+        return ""
+    try:
+        return _lb_mail.resolve_mail_weblink(message_id) or ""
+    except Exception as e:  # noqa: BLE001 -- must never fail the briefing over this
+        print(f"WARNING: _resolve_mail_weblink({message_id!r}) raised unexpectedly ({e}) -- "
+              f"falls back to _owa_link()")
+        return ""
+
 def _kevin_is_primary_recipient(msg):
     """True if Kevin's address appears in To (addressed directly), False if
     only in CC (or not found at all -- distribution lists/aliases mean this
@@ -3219,6 +3244,18 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                 print(f"Phase 3.6 - skipped near-duplicate task suggestion: '{title}' looks like existing '{dup_of}'")
                 continue
             new_id = "t" + datetime.now().strftime("%y%m%d%H%M%S") + str(promoted)
+            # Option 1 (3 Sept 2026, Kevin explicit go-ahead after identity/tenant
+            # verification -- see HANDOVER.md section E): resolve a REAL one-click
+            # OWA deep-link via the connector, for IMAP-sourced cards only (eid
+            # empty, mid present). One codex-exec call per newly-promoted card
+            # this run (typically 0-1, occasionally more) -- never re-run for a
+            # card that already exists, never per-dashboard-render. Best-effort:
+            # _resolve_mail_weblink() itself never raises -- any failure/HALT/
+            # timeout just returns "" and this falls back to the pre-existing
+            # (weaker) _owa_link() search-link behaviour, exactly as before.
+            resolved_link = ""
+            if not eid and mid:
+                resolved_link = _resolve_mail_weblink(mid)
             task_list.append({
                 "id":          new_id,
                 "title":       nt["title"],
@@ -3227,7 +3264,7 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                 "emailRef":    nt.get("email_subject", ""),
                 "entryId":     eid,
                 "messageId":   mid,
-                "webLink":     nt.get("web_link", "") or _owa_link(mid),
+                "webLink":     resolved_link or nt.get("web_link", "") or _owa_link(mid),
                 "summary":     "",
                 "description": nt.get("description", ""),
                 "origin":      "inbox-auto",
