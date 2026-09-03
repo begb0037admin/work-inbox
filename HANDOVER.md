@@ -1,4 +1,39 @@
-# Handover -- 3 September 2026, ~14:50 (Drew, Lane B session close-out) -- FAST-FAIL PRIMARY DEPLOYED + LIVE-PROVEN. Lane B calendar+Teams now completes end-to-end on every scheduled fire while Edu is quota-dead: single 45s primary attempt per domain (was up to 3 stacked attempts / ~15 min on Teams alone), immediate failover to personal, full pipeline + briefing push confirmed. **ExecutionTimeLimit stays at PT45M, NOT reverted to PT20M** -- the proving run came in at ~23.5 min total, over the original PT20M limit; reverting would reintroduce the exact bug this session fixed. Flagging this as a deviation from the originally-planned step 4, evidence below.
+# Handover -- 3 September 2026, ~15:25 (Drew, Lane B session FINAL close-out) -- TREE-KILL TIMEOUT FIX DEPLOYED + LIVE-PROVEN. The fast-fail primary's "45s" timeout was being silently defeated (actual 5-6+ min) by a Windows subprocess/orphaned-grandchild issue -- root-caused and fixed same day. Primary attempts now genuinely bounded to 45s. Lane B total dropped 29min (original) -> 20min (fast-fail only) -> **6m46s** (fast-fail + tree-kill fix). Full pipeline (incl. fetch_inbox.py + publishers) now **11m55s**, briefing pushed. `ExecutionTimeLimit` left at `PT45M` (judgment call, not reverted to `PT20M` -- see reasoning below).
+
+## Session-final summary -- read this first; see the two entries below for the fast-fail-only and original-regression detail
+
+**Three-stage timing, same live task, same Edu-quota-dead conditions, all times BST:**
+
+| Stage | Lane B alone | Full run (Lane B + fetch_inbox.py + publishers) | Calendar primary attempt | Teams primary attempt |
+|---|---|---|---|---|
+| **1. Original** (12:00 run) | ~29 min (killed by old `PT20M` before finishing) | never completed | 1 attempt, up to 290s | 2 attempts, up to 360s each |
+| **2. Fast-fail only** (14:23 run) | 20m04s | 23m28s, exit 0 | "45s" configured, **actual 386s (6m26s)** -- timeout silently defeated | "45s" configured, **actual 317s (5m17s)** -- same defeat |
+| **3. Fast-fail + tree-kill fix** (15:07 run) | **6m46s** | **11m55s**, exit 0 | **45s exactly, honoured** | **45s exactly, honoured** |
+
+Stage 3 evidence, `lane_b_call1.py`'s own log (`logs/bridge_briefing_20260903-150755.log`): calendar primary `attempt 1/1 (timeout 45s)` at 14:08:08Z -> `timeout 45s hit -- killing process tree (PID 33828)` at 14:08:53Z (**exactly 45s**); teams primary `attempt 1/1 (timeout 45s)` at 14:11:31Z -> `timeout 45s hit -- killing process tree (PID 22680)` at 14:12:16Z (**exactly 45s**). Both then failed over immediately (14s-15s quiet gap) and succeeded: calendar 49 events in 2m08s, Teams 2 messages in 2m14s. `data/lane_b/20260903T140759Z_lane_b.json`: both domains `served_by=failover`, `primary_failover_identical=false`, `status=ok`, guard clean, `halted=false`. Briefing pushed (`fetch_inbox.py` commits `7a6b63a`/`a8f9b36`, live-verified).
+
+## Root cause of stage 2's defeated timeout (investigated on Kevin's explicit "not parked" instruction)
+
+`run_codex_json()` used `subprocess.run(cmd, timeout=timeout_s, ...)`. CPython's own internal implementation of that wrapper: on `TimeoutExpired`, it kills only the **direct child**, then does a **second, UNTIMED** `communicate()` call to drain output before re-raising. On the laptop, codex resolves to an npm-global `.ps1`/`.cmd` shim (`_codex_argv0()`'s own long-standing comment already documented this) -- so the direct child Python actually launches is `powershell.exe`/`cmd.exe`, and the real worker (`node.exe` running codex's actual CLI, doing the live Microsoft connector call) is a **grandchild** that inherits the stdout/stderr pipes. Killing only the shell leaves that grandchild running and holding the pipes open, so the untimed second drain silently blocks until the orphan finishes on its own -- which took ~5-6.5 minutes both times, suspiciously matching genuine successful-call durations elsewhere in the same session. Not a one-off (cold-start/API blip); structural, and would have recurred on every run until 1 Oct.
+
+**Fix, `lane_b_call1.py`, PR #36 merged `25f96d5`:** switched to `Popen` + a manual timed `communicate()`. On timeout: `taskkill /T /F /PID <pid>` (Windows built-in, no new dependency) kills the **whole process tree**, then a short **bounded** (10s) follow-up drain -- never unbounded again. Falls back to `proc.kill()` (direct child only) if taskkill itself fails/unavailable. Same external contract (`(parsed_json_objects, raw_stdout)`, `RuntimeError` on hard failure) -- no caller changes needed. Verified: `py_compile` clean, `lane_b_cal_guard.py --selftest` 7/7 (imports this module); no in-repo unit test exercises the live-timeout path specifically -- validated via the stage-3 proving run instead (numbers above).
+
+## ExecutionTimeLimit -- left at PT45M, judgment call
+
+11m55s vs a `PT20M` limit is a comfortable ~8 min / ~40% margin on its face. **Not reverting anyway**, because this is only ONE clean sample of the fully-fixed pipeline, and the failover (personal) connector calls -- the part now dominating total time -- have shown real variance across this session's runs (roughly 2-9 min per domain depending on the run, not a fixed cost). A worst-case combination (both domains' failover calls landing at the slow end observed elsewhere this session) could plausibly approach 15-18 min for Lane B alone before `fetch_inbox.py` even starts, leaving little to no margin under `PT20M`. Recommend revisiting after 2-3 more natural scheduled fires (07:00/12:00/16:00 BST) land real variance data, rather than tightening a production safety margin off a single sample -- especially given this exact class of bug (task killed mid-run, no briefing) has now been hit and fixed twice in one day. Restore point unchanged from earlier this session: `PT20M`; task XML backup `logs\WorkInboxBridgeBriefing_task_20260903-preTimeLimit.xml`.
+
+## Deployed/committed this final stage
+
+- work-inbox PR #36, merged `25f96d5` -- `lane_b_call1.py` tree-kill timeout fix.
+- Self-refresh (from the earlier stage) confirmed working end-to-end: the laptop's live `lane_b_call1.py` picked up the fix automatically on the very next scheduled-style run, no manual SSH deploy needed for this file (it was already in the original repo-root refresh list) -- verified via `Select-String -Pattern 'taskkill'` on the live file returning `True` before the proving run, and the proving run's own log showing the new "killing process tree (PID ...)" line.
+
+**REVERT AFTER 1 OCT 2026 (unchanged note from the previous entry):** delete the FAST-FAIL env-var block in `docs/desktop-scripts/Run Laptop Bridge Briefing.ps1`. The tree-kill fix itself is a general robustness fix, not Edu-quota-specific -- **keep it permanently**, it's correct regardless of which identity is slow/hanging.
+
+**Correction to the previous entry's "not investigated" note:** that entry flagged "Teams failover took ~10-11min for 1 message" as an unexplained anomaly worth a future look. Now explained and NOT an anomaly: that figure was inferred from file write-timestamps alone and actually covered primary(5m17s, timeout-defeated)+gap+failover(5m20s) combined, not failover alone. The stage-3 log (this entry) shows the real failover-only durations directly: calendar 2m08s, Teams 2m14s -- both normal. Nothing further to chase.
+
+---
+
+# Handover -- 3 September 2026, ~13:00 (Drew, Lane B session) -- CALENDAR + TEAMS FAILOVER NOW PROVEN LIVE end-to-end on a real natural scheduled fire (12:00 BST). BUT a new blocker surfaced: the run takes ~29 min and the scheduled task's `ExecutionTimeLimit` is `PT20M`, so Task Scheduler kills the wrapper mid-run -- Lane B data lands on disk but `fetch_inbox.py` never runs, so **no briefing is produced/pushed on scheduled fires** while Edu is quota-dead. No fix deployed (needs go-ahead -- it's a live-task change). Verification-only session, no code pushed except this checkpoint.
 
 ## Session close-out summary (this entry) -- read this first, then the 13:00 entry below for the full failover-proof detail
 
