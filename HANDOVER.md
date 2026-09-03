@@ -137,7 +137,7 @@ Kevin's screenshot: the board's "Open email" (envelope) button now opens Outlook
 
 ---
 
-# Handover -- 3 September 2026, ~17:15 (Drew, laptop operational hardening) -- Architecture verified (mail=IMAP, calendar+Teams=connector, ZERO Outlook COM dependency, confirmed by direct code + live-task inspection, not restated assumption). Auto-logon PREPARED but NOT enabled (needs Kevin's own hands -- password never should transit through me). RDP idle-lock found to be a DOMAIN GPO (10 min, secure) -- confirmed, NOT locally overridable, flagged rather than fought per instruction.
+# Handover -- 3 September 2026, ~17:15 (Drew, laptop operational hardening) -- Architecture verified (mail=IMAP, calendar+Teams=connector, ZERO Outlook COM dependency, confirmed by direct code + live-task inspection, not restated assumption). Auto-logon PREPARED, later run by Kevin himself and CONFIRMED LIVE (see section B for the closing update). RDP idle-lock found to be a DOMAIN GPO (10 min, secure) -- confirmed, NOT locally overridable, flagged rather than fought per instruction.
 
 ## A. Architecture verification -- mail/calendar/Teams, no Outlook dependency confirmed
 
@@ -148,6 +148,20 @@ Kevin asked to confirm the whole pipeline runs unattended with zero Outlook/Team
 - **Corrects a stale memory note**: an earlier 2 Sept entry in this same file/local memory said "live scheduled task still on `CAL_BACKEND=com`" -- true at that point in the narrative, superseded by the 2 Sept "everything tonight" cutover (the same incident whose regression the rest of today's entries fix). Local Claude memory annotated with a correction (not rewritten) at the original line.
 - **Bonus/related**: Draft Diff Capture (separate feature, same laptop) was also fully cut to IMAP as of 1 Sept, desktop COM version formally disabled -- no lingering COM dependency there either.
 - **One real gap found, flagged, not an Outlook dependency**: the scheduled task's Principal is `LogonType: Interactive` (verified live) -- the `AD-OAK\begb0037` Windows session must already be logged in for the task to fire at all (locked screen is fine; full logoff/reboot without someone logging back in is not). `AutoAdminLogon` was confirmed `0` (not configured) -- a reboot does not auto-restore the session. This is the one place "true headless, no interactive logon" wasn't fully accurate. See section B.
+
+## B. Auto-logon -- DONE. Kevin ran it himself, verified live.
+
+**Closed out.** Kevin downloaded and ran the staged `Autologon64.exe` himself (`C:\Users\begb0037.AD-OAK\Tools\Autologon\Autologon64.exe`), with his real password, via an **elevated CONNECT-domain admin prompt** -- worth remembering for future changes on this box: `begb0037` is NOT local admin here (only `begb0037-a` is), so anything needing elevation (writing `HKLM`, as `AutoAdminLogon` requires) needs either `begb0037-a` or a CONNECT-domain admin account, not a plain "Run as administrator" on `begb0037`'s own login.
+
+**Verified live (not restated):** `HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon` -- `AutoAdminLogon=1`, `DefaultUserName=begb0037`, `DefaultDomainName=AD-OAK`. Password went in via the LSA-secret path (Autologon's own mechanism), not plaintext `DefaultPassword`.
+
+**Not yet proven by an actual reboot** -- that's the only way to see it truly log in unattended, and per this file's own earlier caveat a reboot test on this live production box needs its own explicit go-ahead, not assumed. No further action needed unless something breaks on the next natural reboot.
+
+Rollback unchanged: `Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name AutoAdminLogon -Value 0` (same elevation requirement applies).
+
+---
+
+<details><summary>Original prep entry (historical, kept for the full story)</summary>
 
 ## B. Auto-logon -- PREPARED, NOT enabled. Needs Kevin's own hands, deliberately.
 
@@ -165,6 +179,8 @@ Kevin approved enabling Windows auto-logon for `AD-OAK\begb0037` on the laptop, 
 **To verify once Kevin runs it:** `Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' | Select AutoAdminLogon,DefaultUserName,DefaultDomainName` should show `1`/`begb0037`/`AD-OAK`, and `DefaultPassword` should stay blank (proves the LSA-secret path was used, not plaintext). A real reboot is the only way to prove it actually logs in unattended -- **do not reboot the laptop to test this without Kevin's explicit go-ahead first**, per the coordinator's own caveat; it's a live production machine running the Lane B briefing pipeline.
 
 **Rollback (either method):** set `AutoAdminLogon` back to `0` in the same key (`Set-ItemProperty ... -Name AutoAdminLogon -Value 0`). If Autologon.exe was used, it also has a `/reg:disable`-style off switch in its own UI/CLI (`Autologon.exe /d` or via its GUI "Disable"). No need to also scrub the LSA secret itself for this to take effect -- `AutoAdminLogon=0` alone stops the behavior.
+
+</details>
 
 ## C. RDP idle-lock -- found DOMAIN-ENFORCED GPO, NOT locally overridable, flagged not fought
 
