@@ -1,3 +1,33 @@
+# Handover -- 3 September 2026, ~14:50 (Drew, Lane B session close-out) -- FAST-FAIL PRIMARY DEPLOYED + LIVE-PROVEN. Lane B calendar+Teams now completes end-to-end on every scheduled fire while Edu is quota-dead: single 45s primary attempt per domain (was up to 3 stacked attempts / ~15 min on Teams alone), immediate failover to personal, full pipeline + briefing push confirmed. **ExecutionTimeLimit stays at PT45M, NOT reverted to PT20M** -- the proving run came in at ~23.5 min total, over the original PT20M limit; reverting would reintroduce the exact bug this session fixed. Flagging this as a deviation from the originally-planned step 4, evidence below.
+
+## Session close-out summary (this entry) -- read this first, then the 13:00 entry below for the full failover-proof detail
+
+**Timing, before -> after (all times BST, same live task, same Edu-quota-dead conditions):**
+
+| | Lane B alone | Full run (Lane B + fetch_inbox.py + publishers) | Primary attempts/domain |
+|---|---|---|---|
+| **Before** (12:00 run, pre fast-fail) | ~29 min (killed at 20 min by old `PT20M` limit before finishing) | never completed that cycle | calendar 1, teams 2 (each up to 360s) |
+| **After** (14:23 run, fast-fail live) | **20m 4s** (14:23:07 -> 14:43:11) | **23m 28s** (14:23:03 -> 14:46:31), exit 0, briefing pushed | calendar 1 (45s), teams 1 (45s) -- confirmed in the run's own `attempts` array |
+
+Fast-fail worked exactly as designed -- both domains now show exactly ONE primary attempt (not 2-3 stacked ones) before immediate failover, confirmed live: `data/lane_b/20260903T132307Z_lane_b.json` -- calendar `served_by=failover, count=98, status=ok`; teams `served_by=failover, count=1, status=ok`; both `primary_failover_identical=false`, guard clean, `halted=false`. Commits `d21b2f2`/`4388f0e` on `main` are the two real briefing pushes either side of the deploy (12:51 pre-fast-fail full run, 14:46 post-fast-fail full run) -- both exit 0.
+
+**Why the total didn't land at the originally-estimated ~10-11 min:** the fast-fail change only removes WASTED time spent retrying a quota-dead Edu primary (confirmed working -- 1 attempt, ~45s-bounded, not 2-3 attempts up to 360s each). It never touched the FAILOVER (personal) call budget, which is where the real time now goes: calendar's failover pulled 98 events across 4 `list_events` calls (~8-9 min of genuine connector work), Teams' failover took ~10-11 min for just 1 message (connector-side latency, not proportional to output size -- not investigated further this session). These are real, successful connector round-trips, not waste -- see the 3 Sept 13:00 entry's own "honest caveat" that predicted this exact shape (sub-2-min was never realistic without cutting the failover budget itself, which was correctly not attempted).
+
+**ExecutionTimeLimit decision -- deviates from the coordinator's step 4 ("once proven, revert to PT20M"):** the proving run's actual total (~23.5 min) is ITSELF proof that PT20M is not a safe value under current conditions -- a PT20M limit would have killed this exact successful run at the 20-minute mark, just as it killed the 12:00 run. Left at `PT45M` (already applied + verified this session, restore point `PT20M` / task XML backup `logs\WorkInboxBridgeBriefing_task_20260903-preTimeLimit.xml` if ever needed) -- gives ~21 min of headroom over today's actual worst case. Not reverting without a stated reason not to revert; flagging for Kevin/coordinator to confirm or override.
+
+**Deployed, both files (repo `docs/desktop-scripts/`, now self-refreshing -- see this session's earlier wrapper-tracking fix):**
+- `1df233a` -- wrapper + `Push-LaptopRunStatus.ps1` self-refresh from `main` (guarded: min-size + marker check before overwrite). Also fixes the recurring non-fatal `-LaneBGuard param not found` error (the deployed `Push-LaptopRunStatus.ps1` was stale; confirmed absent from this session's run logs after deploy).
+- `3a92d97` -- FAST-FAIL Lane B primary block (env vars only, no `lane_b_call1.py` code change): `WI_LANE_B_PRIMARY_TIMEOUT=45`, `WI_LANE_B_PRIMARY_MAX_ATTEMPTS=1`, `WI_LANE_B_PRIMARY_TIMEOUT_TEAMS=45`, `WI_LANE_B_PRIMARY_MAX_ATTEMPTS_TEAMS=1`, `WI_LANE_B_PRIMARY_RETRIES=1`, `WI_LANE_B_SNAPSHOT_GAP_S=15`, `WI_LANE_B_WARMUP_TIMEOUT=45`.
+- Both live-deployed to the laptop directly (SSH) ahead of the proving run, backups at `Run Laptop Bridge Briefing.ps1.bak_20260903_pre_selfrefresh` / `.bak_20260903_pre_fastfail` and `Push-LaptopRunStatus.ps1.bak_20260903_pre_selfrefresh`.
+
+**REVERT AFTER 1 OCT 2026** (when Edu's monthly connector quota resets): delete the whole "FAST-FAIL Lane B primary" env-var block from `docs/desktop-scripts/Run Laptop Bridge Briefing.ps1` (clearly commented/bounded in the file). It deliberately overrides the 3 Sept Teams-primary-budget fix (360s x 2, tuned for a primary genuinely worth waiting on) -- correct only while Edu cannot succeed in reasonable time. Once reverted, re-check whether `ExecutionTimeLimit` can safely drop back toward `PT20M`/`PT30M` given Edu should stop needing failover at all for most runs.
+
+**Not investigated this session, worth a look if it recurs:** why Teams' failover call took ~10-11 min to return just 1 message -- disproportionate to output size, distinct from the "Teams does genuinely more work per call" explanation used for the 3 Sept primary-budget fix (that reasoning was about listing 40 chats x 30 messages each; a 1-item watermark-filtered result shouldn't need that). Possibly connector-side, possibly the watermark isn't reducing the underlying connector call cost, only the digest. Not a blocker -- the run completed and pushed successfully -- but a candidate explanation for future slow runs.
+
+**Do not re-open (adds to the 13:00 entry's list):** the ~10-11 min total estimate (superseded by the ~23.5 min actual, see above); reverting `ExecutionTimeLimit` to `PT20M` without first re-proving total runtime under it.
+
+---
+
 # Handover -- 3 September 2026, ~13:00 (Drew, Lane B session) -- CALENDAR + TEAMS FAILOVER NOW PROVEN LIVE end-to-end on a real natural scheduled fire (12:00 BST). BUT a new blocker surfaced: the run takes ~29 min and the scheduled task's `ExecutionTimeLimit` is `PT20M`, so Task Scheduler kills the wrapper mid-run -- Lane B data lands on disk but `fetch_inbox.py` never runs, so **no briefing is produced/pushed on scheduled fires** while Edu is quota-dead. No fix deployed (needs go-ahead -- it's a live-task change). Verification-only session, no code pushed except this checkpoint.
 
 ## A. Lane B failover -- PROVEN (closes out the 3 Sept midday entry's section 4)
