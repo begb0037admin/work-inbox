@@ -29,7 +29,20 @@ This also finishes off the earlier two findings: (1) `SetCursorPos`/`Cursor.Posi
 
 ---
 
-## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Root cause found, fix proposed, NOT deployed.
+## E. REGRESSION -- board "Open email" button opens OWA inbox, not the message (IMAP feed). Option (c) IMPLEMENTED. work-inbox side SHIPPED; command-centre side on a holding branch; awaiting Kevin's live click-test.
+
+### Status (3 Sept ~20:00)
+- **work-inbox: SHIPPED, `3a66600` on main.** `imap_mail.py:_owa_search_link()` (primary -- has the sender address) and `fetch_inbox.py:_owa_link()` (fallback) now build `?query=from:<addr> "<exact subject>" received:<YYYY-MM-DD>` -- fields OWA actually indexes -- instead of the unmatchable raw Message-ID. `from:` value is quoted if it contains a space (display-name fallback path). `py_compile` clean; URL format unit-tested against the real Michael O'Sullivan card data.
+- **command-centre: on holding branch `holding/owa-link-messageid-fallback-drop` (commit `0096cac`), NOT merged.** Drops `openEmailWeb()`'s broken raw-messageId `?query=` fallback + the matching `||t.messageId` button-visibility / `_cgHasLink` refs + trims the alert text. Pre-edit backup `Archive/app_backup_20260903_2000.js` committed to main (`451574c`, verified byte-identical). **Behaviour-only change -- no visual delta to the board**, so the screenshot gate here is really "Kevin reviews the diff": https://github.com/begb0037admin/command-centre/compare/main...holding/owa-link-messageid-fallback-drop
+- **NOT DONE until Kevin confirms** the test URL below lands on the exact message in his own mailbox. If OWA's quoted-phrase match on the punctuation-heavy subject is too strict, first lever to pull is dropping the `received:` term, then loosening the subject to its most distinctive token (e.g. the Task#/Incident# number).
+- **Pre-existing tasks** created before `3a66600` still carry the old broken `?query=<Message-ID>` `webLink` in `tasks.json` -- they'll keep opening the inbox until re-triaged or a one-time `tasks.json` rewrite. Not in this change's scope; flag if Kevin wants the back-fill.
+
+### Test URL for Kevin (card `t2609020705201`, "Investigate P5 Incident# 11706988 ...", email from Michael O'Sullivan, received 2026-09-01)
+```
+https://outlook.office.com/mail/search?query=from%3A%22Michael%20O%27Sullivan%22%20%22FW%3A%20P5%20Task%20assigned%20to%20your%20team%20-%20Task%23%2050981420%20for%20Incident%23%2011706988%22%20received%3A2026-09-01
+```
+Decoded query: `from:"Michael O'Sullivan" "FW: P5 Task assigned to your team - Task# 50981420 for Incident# 11706988" received:2026-09-01`
+(Live cards will use the sender's email address, not the display name -- the address isn't stored on this already-promoted card, so the test uses the quoted display name, which OWA's `from:` also matches.)
 
 ### Symptom
 Kevin's screenshot: the board's "Open email" (envelope) button now opens Outlook Web at the generic inbox, not the specific message. Example card: "Investigate P5 Incident# 11706988 - Task# 50981420", INBOX - Michael O'Sullivan, 2026-09-01 09:57. Under the old COM feed it deep-linked straight to the message.
