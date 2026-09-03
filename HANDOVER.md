@@ -1,3 +1,43 @@
+# Handover -- 3 September 2026, ~20:30 (Drew) -- RDP LOCK: REAL FIX FOUND + APPLIED. Kevin identified the actual trigger: the lock only happens when the mstsc window is MINIMISED >10 min (standard behaviour -- minimising drops the graphical session, so the remote screensaver-lock timer runs). Fix is client-side on Kevin's DESKTOP, not the laptop, not the GPO: DWORD `RemoteDesktop_SuppressWhenMinimized`=2 under `HKCU\Software\Microsoft\Terminal Server Client`. **APPLIED on the desktop (verified), backup taken.** Needs mstsc fully closed+reopened to take effect, then a 12-min minimised test. This SUPERSEDES the keep-alive avenue (section D -- dead end) and the Oxford-IT-exception fallback (section C). Detail in section F.
+
+## F. RDP lock when mstsc minimised -- REAL FIX, applied on the desktop, pending Kevin's restart + test
+
+**Actual root cause (Kevin's diagnosis, 3 Sept):** the Oxford GPO screensaver-lock (section C) only bites when Kevin's `mstsc.exe` client window is **minimised** for >10 min. Minimising the RDP client drops the graphical session ("minimise video optimisation"), so the remote session is no longer being actively rendered and its screensaver-lock timer engages. Leaving the window open (even unfocused) is fine. This is standard mstsc behaviour, not an Oxford thing.
+
+**Fix -- on the LOCAL machine that runs mstsc (Kevin's DESKTOP, `C:\Users\admin`), NOT the laptop:**
+- Key: `HKCU\Software\Microsoft\Terminal Server Client`
+- Value: `RemoteDesktop_SuppressWhenMinimized`  (was absent)
+- Type / data: `REG_DWORD` = `2`
+- Effect: mstsc keeps rendering the session in the background when minimised, so it never enters the suppressed state that lets the remote screensaver engage. Per-user (HKCU), no elevation needed.
+
+**Verification caveat, stated plainly:** I could not fetch a live Microsoft/Sysinternals doc page to re-confirm the value on 3 Sept (WebFetch failed on every relevant URL -- 404s / CAPTCHA). This is the long-established community-canonical value for this exact symptom, and it's fully reversible (one line), with a `.reg` backup -- so applying it is low-risk even without a fresh citation.
+
+**Applied + verified on the desktop** (this session runs ON the admin desktop): `New-ItemProperty ... -PropertyType DWord -Value 2` -> read back `= 2`. It did not exist before.
+
+**Backups:**
+- Full subtree export (contains RDP MRU hostnames/IPs + a cert hash, so kept LOCAL, not in git): `D:\OneDrive - lelitte.com\Desktop\RegBackups\TerminalServerClient_HKCU_FULL_backup_20260903.reg`
+- Sanitised top-key scalar values (safe, in repo): `docs/desktop-scripts/backups/TerminalServerClient_HKCU_topkey_backup_20260903.reg`
+
+**Takes effect only after mstsc is FULLY closed and reopened.** Kevin currently has a live session -- it won't pick this up until he closes all mstsc windows and reconnects.
+
+**One-line rollback:**
+```powershell
+Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Terminal Server Client' -Name 'RemoteDesktop_SuppressWhenMinimized'
+```
+(or `docs/desktop-scripts/Set-RdpKeepRenderingWhenMinimized.ps1 -Rollback`)
+
+**Test procedure for Kevin:**
+1. Close ALL mstsc windows (fully exit, not just disconnect).
+2. Reconnect to the laptop.
+3. Minimise the RDP window. Leave it 12+ minutes. Do something else.
+4. Restore it -- it should NOT be on the lock screen. If it is, the value didn't help on this Windows build; roll back and fall back to section C's Oxford-IT route.
+
+**Scripts (committed):** `docs/desktop-scripts/Set-RdpKeepRenderingWhenMinimized.ps1` (apply / `-Rollback`, PS 5.1). If Kevin's ever on a different desktop machine, run that once there.
+
+**Consequence for sections C + D:** the keep-alive scheduled task (D) stays DISABLED -- this client-side fix is the right approach and doesn't need it. The Oxford-IT GPO-exception (C) is now a fallback-of-last-resort only, if this DWORD doesn't hold on Kevin's Windows build.
+
+---
+
 # Handover -- 3 September 2026, ~19:20 (Drew) -- RDP KEEP-ALIVE: DEAD END at user privilege. Tested from a clean unlocked start (Kevin unlocked ~19:02): the automatic scheduled-task fires every 3 min (`LastTaskResult 0`) but `SendInput` returns `0` -- ZERO events injected -- on every single automatic run, even with the session fully unlocked (idle 23s/203s/383s). Idle climbed unchecked 1->15 min and the session re-locked at ~19:15. A scheduled-task process is not attached to the interactive input desktop, so its `SendInput` is silently rejected -- not fixable by task config. **Task DISABLED + `KEEPALIVE_DISABLE` kill-switch file set.** Kevin's fallback (pre-authorised): the Oxford IT GPO-exception route. Full detail + the one faint remaining technical option in section D.
 
 ## D. RDP Keep-Alive (idle-lock bypass) -- DEAD END at user privilege. Task DISABLED. Fall back to Oxford IT exception.
