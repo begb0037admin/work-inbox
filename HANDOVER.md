@@ -1,3 +1,46 @@
+# Handover -- 3 September 2026, ~17:15 (Drew, laptop operational hardening) -- Architecture verified (mail=IMAP, calendar+Teams=connector, ZERO Outlook COM dependency, confirmed by direct code + live-task inspection, not restated assumption). Auto-logon PREPARED but NOT enabled (needs Kevin's own hands -- password never should transit through me). RDP idle-lock found to be a DOMAIN GPO (10 min, secure) -- confirmed, NOT locally overridable, flagged rather than fought per instruction.
+
+## A. Architecture verification -- mail/calendar/Teams, no Outlook dependency confirmed
+
+Kevin asked to confirm the whole pipeline runs unattended with zero Outlook/Teams desktop app dependency. Verified directly, not restated:
+
+- **Mail**: pure IMAP. `imap_mail.py` imports only stdlib (`imaplib`/`email`/`ssl`) -- zero win32com anywhere. `fetch_inbox.py`: when `MAIL_BACKEND=imap` (live: `Mail backend: imap`), all four COM mail-read loops are hard-skipped and `connect_to_outlook()` is never invoked once calendar is also on connector.
+- **Calendar + Teams**: connector/API-based, not COM. **Directly inspected the live registered scheduled task's actual Action** (`Get-ScheduledTask 'Work Inbox Bridge Briefing' | Select Actions`): `Arguments: ... -CalBackend connector -TeamsBackend connector` -- baked into the task definition itself, so every natural 07:00/12:00/16:00 Mon-Fri fire uses connector, not a manual override. Zero win32com/`Outlook.Application` references in `lane_b_call1.py`/`lane_b_cal_guard.py`; data comes from `codex_apps::microsoft_outlook_calendar.*`/`microsoft_teams.*` via a separate `codex exec` process (ChatGPT-connector-brokered Microsoft Graph API, cloud-to-cloud, no local Office app involved). `fetch_inbox.py`'s own `_need_com_cal` flag evaluates `False` whenever `CAL_BACKEND=connector` -- COM is structurally bypassed, not just unused.
+- **Corrects a stale memory note**: an earlier 2 Sept entry in this same file/local memory said "live scheduled task still on `CAL_BACKEND=com`" -- true at that point in the narrative, superseded by the 2 Sept "everything tonight" cutover (the same incident whose regression the rest of today's entries fix). Local Claude memory annotated with a correction (not rewritten) at the original line.
+- **Bonus/related**: Draft Diff Capture (separate feature, same laptop) was also fully cut to IMAP as of 1 Sept, desktop COM version formally disabled -- no lingering COM dependency there either.
+- **One real gap found, flagged, not an Outlook dependency**: the scheduled task's Principal is `LogonType: Interactive` (verified live) -- the `AD-OAK\begb0037` Windows session must already be logged in for the task to fire at all (locked screen is fine; full logoff/reboot without someone logging back in is not). `AutoAdminLogon` was confirmed `0` (not configured) -- a reboot does not auto-restore the session. This is the one place "true headless, no interactive logon" wasn't fully accurate. See section B.
+
+## B. Auto-logon -- PREPARED, NOT enabled. Needs Kevin's own hands, deliberately.
+
+Kevin approved enabling Windows auto-logon for `AD-OAK\begb0037` on the laptop, preferring the LSA-secret method over plaintext registry (avoids the visible `DefaultPassword` registry value).
+
+**Not set by me, on purpose.** Setting this requires the account's actual Windows password. Per this repo's own hard rule ("credentials are never written anywhere -- never in a file, never in memory") and the same principle extended to Kevin's own account password: I should never see, type, relay, or hold that value -- not in chat, not in a script I run, not in my own context. Also: partially enabling (`AutoAdminLogon=1` with no valid credential yet) risks a domain-account lockout if an unplanned reboot triggers a blank/failed auto-logon attempt against AD -- so this must be done atomically, in one step, by whoever holds the password.
+
+**Recommended method -- Sysinternals `Autologon.exe`** (official Microsoft tool, does exactly the LSA-secret method, more trustworthy than a hand-rolled P/Invoke script nobody has tested against this exact box):
+1. Kevin downloads it on the laptop (in his own RDP session): https://learn.microsoft.com/en-us/sysinternals/downloads/autologon
+2. Runs it elevated (as `begb0037-a` local admin, or "Run as different user"), either via its GUI (enter username `begb0037`, domain `AD-OAK`, password -> Enable) or CLI: `Autologon.exe begb0037 AD-OAK <password>` (typed at his own prompt -- never sent to me or the coordinator).
+3. This sets `AutoAdminLogon=1`, `DefaultUserName`, `DefaultDomainName` in `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`, and stores the password as the `DefaultPassword` LSA secret (not plaintext-visible in the registry) -- confirmed this is Autologon.exe's actual mechanism, matching the "prefer LSA-secret" ask.
+
+**Verified today, safe to state as fact:** current state is `AutoAdminLogon=0`, `DefaultUserName=''`, `DefaultDomainName=''`, `DefaultPassword=''` -- clean baseline, nothing half-configured, no lockout risk sitting live right now.
+
+**To verify once Kevin runs it:** `Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' | Select AutoAdminLogon,DefaultUserName,DefaultDomainName` should show `1`/`begb0037`/`AD-OAK`, and `DefaultPassword` should stay blank (proves the LSA-secret path was used, not plaintext). A real reboot is the only way to prove it actually logs in unattended -- **do not reboot the laptop to test this without Kevin's explicit go-ahead first**, per the coordinator's own caveat; it's a live production machine running the Lane B briefing pipeline.
+
+**Rollback (either method):** set `AutoAdminLogon` back to `0` in the same key (`Set-ItemProperty ... -Name AutoAdminLogon -Value 0`). If Autologon.exe was used, it also has a `/reg:disable`-style off switch in its own UI/CLI (`Autologon.exe /d` or via its GUI "Disable"). No need to also scrub the LSA secret itself for this to take effect -- `AutoAdminLogon=0` alone stops the behavior.
+
+## C. RDP idle-lock -- found DOMAIN-ENFORCED GPO, NOT locally overridable, flagged not fought
+
+Kevin wants the RDP session to stop locking after idle time so he doesn't have to re-enter the password on reconnect.
+
+**Root cause found, directly verified (not guessed):** the current live session's screensaver-lock policy is set at `HKU:\<begb0037's SID>\Software\Policies\Microsoft\Windows\Control Panel\Desktop` -- `ScreenSaveTimeOut=600` (10 min), `ScreenSaverIsSecure=1` (locks, requires password), `ScreenSaveActive=1`. **This is the `Software\Policies\...` path -- the canonical Group Policy location, not a plain user preference.** No machine-wide "Interactive logon: Machine inactivity limit" GPO was found separately (`InactivityTimeoutSecs` blank both in `HKLM\...\Policies\System` and `HKLM\...\Winlogon`) -- the classic screensaver-lock policy is the actual mechanism here, applied via Oxford's domain GPO (machine is domain-joined to `connect.ox.ac.uk`, `PartOfDomain=True`).
+
+**Not changed.** A local edit to that exact key would appear to work immediately (it's a live per-session value) but is very likely to be silently reverted on the next Group Policy background refresh (typically 90-120 min, or at next logon) -- creating a false "fixed" state that quietly breaks again, worse than not touching it. Per the explicit instruction to flag rather than fight a domain-enforced policy: this is what a real fix requires, and none of it is something I can do myself:
+1. **The correct fix** is an Oxford IT exception/GPO scope change for this account or machine -- outside what a local script (or a local admin account like `begb0037-a`) can achieve against a domain-issued, likely-enforced policy.
+2. **A workaround exists but wasn't built without Kevin's explicit say-so**: a scheduled "keep-alive" input-simulation task (e.g. a script that nudges the mouse/sends a harmless keypress periodically) would prevent the idle timer from ever firing, without touching the GPO value itself -- this is circumventing a security control rather than adjusting a personal preference, a different category of judgment call than the auto-logon password-storage trade-off. Not built; flagging it as an option only.
+
+**How Kevin can verify this finding himself:** leave the RDP session idle past 10 minutes and confirm it locks requiring the password -- that reproduces the GPO's actual effect directly, no local change needed to observe it.
+
+---
+
 # Handover -- 3 September 2026, ~15:25 (Drew, Lane B session FINAL close-out) -- TREE-KILL TIMEOUT FIX DEPLOYED + LIVE-PROVEN. The fast-fail primary's "45s" timeout was being silently defeated (actual 5-6+ min) by a Windows subprocess/orphaned-grandchild issue -- root-caused and fixed same day. Primary attempts now genuinely bounded to 45s. Lane B total dropped 29min (original) -> 20min (fast-fail only) -> **6m46s** (fast-fail + tree-kill fix). Full pipeline (incl. fetch_inbox.py + publishers) now **11m55s**, briefing pushed. `ExecutionTimeLimit` left at `PT45M` (judgment call, not reverted to `PT20M` -- see reasoning below).
 
 ## Session-final summary -- read this first; see the two entries below for the fast-fail-only and original-regression detail
