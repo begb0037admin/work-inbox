@@ -122,6 +122,28 @@ CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
 # wasn't touched (out of scope for this change) and adds real time on top.
 PRIMARY_TIMEOUT_S     = int(os.environ.get("WI_LANE_B_PRIMARY_TIMEOUT", "290"))
 PRIMARY_MAX_ATTEMPTS  = int(os.environ.get("WI_LANE_B_PRIMARY_MAX_ATTEMPTS", "1"))
+# TEAMS gets its OWN, larger primary budget (added 3 Sept 2026, regression fix).
+# The 290s/1-attempt cut above was tuned and evidenced entirely on CALENDAR (a
+# single list_events call) -- Kevin's own framing at the time was general
+# "speed", but calendar and Teams do fundamentally different amounts of work
+# per call: Teams' prompt (build_teams_prompt) asks for up to 40 chats AND,
+# for each chat/channel with recent activity, its 30 newest messages -- that
+# can be dozens of sequential tool calls in a single codex session, nothing
+# like calendar's one list_events round-trip. Applying calendar's aggressive
+# budget to Teams risked (and on the evidence from the night of 2 Sept,
+# plausibly did) cut the run off after chats were listed but before messages
+# were pulled -- exactly the "chats but no messages" shape investigated in
+# HANDOVER's 2 Sept 21:20 regression entry. Fix: Teams PRIMARY reuses the same
+# generous budget FAILOVER has always had (CALL1_TIMEOUT_S=360s x 2 sub-
+# attempts) -- a config already proven live to pull real Teams messages
+# (44 items, ~4.5 min, 2 Sept). Calendar's own primary budget is UNCHANGED
+# (still 290s/1 attempt) -- Kevin's explicit note that calendar has been fast
+# and reliable all week stands; this is a Teams-only correction, not a
+# reversion of the calendar speed cut.
+PRIMARY_TIMEOUT_S_TEAMS    = int(os.environ.get("WI_LANE_B_PRIMARY_TIMEOUT_TEAMS", str(CALL1_TIMEOUT_S)))
+PRIMARY_MAX_ATTEMPTS_TEAMS = int(os.environ.get("WI_LANE_B_PRIMARY_MAX_ATTEMPTS_TEAMS", "2"))
+PRIMARY_TIMEOUT_S_BY_DOMAIN = {"calendar": PRIMARY_TIMEOUT_S, "teams": PRIMARY_TIMEOUT_S_TEAMS}
+PRIMARY_MAX_ATTEMPTS_BY_DOMAIN = {"calendar": PRIMARY_MAX_ATTEMPTS, "teams": PRIMARY_MAX_ATTEMPTS_TEAMS}
 # Headless connector availability FLIPS between runs on the same account
 # (confirmed 1 Sept: same laptop/account, calendar fired one run, Teams the
 # next). If the expected tool doesn't fire, re-invoke codex a few times before
@@ -225,11 +247,54 @@ def _log(msg: str) -> None:
 # FAILOVER_CODEX_HOME: WI_LANE_B_CODEX_HOME_FAILOVER wins; else the known
 #   dedicated Lane B personal-account login (confirmed working for both
 #   calendar (1 Sept) and Teams (2 Sept) -- see HANDOVER.md).
-PRIMARY_CODEX_HOME = (os.environ.get("WI_LANE_B_CODEX_HOME", "").strip()
-                      or os.environ.get("CODEX_HOME", "").strip()
-                      or str(Path(os.path.expanduser("~")) / ".codex"))
+#
+# ANTI-COLLISION GUARD (added 3 Sept 2026, root cause of the 2 Sept 20:58 live
+# regression -- see docs/HANDOVER-LATEST-2026-09-02-teams-regression.md and
+# HANDOVER.md). The "inherited CODEX_HOME" step above is meant to catch a
+# deliberately-set session env var, but a scheduled-task process inherits the
+# FULL ambient user/system environment, including anything left set from
+# earlier interactive testing. 1 Sept's now-superseded personal-only phase
+# used CODEX_HOME=C:\WorkInboxAI\codex-laneb -- the EXACT SAME literal path as
+# FAILOVER_CODEX_HOME's own hardcoded default below -- and that env var was
+# still present (never cleared) on the live host's scheduled-task environment
+# on 2 Sept. Result: PRIMARY_CODEX_HOME silently resolved to the same path as
+# FAILOVER_CODEX_HOME, collapsing primary/failover into one identity --
+# automatic failover became structurally impossible (fetch_domain()'s own
+# "nothing distinct to fail over to" branch), "primary" silently ran as the
+# old personal test account instead of Edu, and only ONE attempt was ever
+# logged per domain, exactly matching the incident evidence. An ambient
+# CODEX_HOME that happens to equal FAILOVER_CODEX_HOME's resolved value could
+# never be a deliberate, useful choice (nobody wants PRIMARY == FAILOVER by
+# passive inheritance) -- it is disregarded here, falling through to the true
+# OS default instead, and logged loudly so this can never again pass silently.
+# WI_LANE_B_CODEX_HOME (the EXPLICIT override, e.g. the wrapper's own escape
+# hatch) is NEVER second-guessed -- an explicit ask is always honoured even if
+# it happens to equal FAILOVER_CODEX_HOME, since that could be a deliberate
+# single-identity test.
 FAILOVER_CODEX_HOME = (os.environ.get("WI_LANE_B_CODEX_HOME_FAILOVER", "").strip()
                        or r"C:\WorkInboxAI\codex-laneb")
+_OS_DEFAULT_CODEX_HOME = str(Path(os.path.expanduser("~")) / ".codex")
+_WI_LANE_B_CODEX_HOME_ENV = os.environ.get("WI_LANE_B_CODEX_HOME", "").strip()
+_AMBIENT_CODEX_HOME_ENV = os.environ.get("CODEX_HOME", "").strip()
+
+
+def _norm_home_path(p: str) -> str:
+    return str(Path(p)).lower() if p else p
+
+
+if _WI_LANE_B_CODEX_HOME_ENV:
+    PRIMARY_CODEX_HOME = _WI_LANE_B_CODEX_HOME_ENV
+elif _AMBIENT_CODEX_HOME_ENV and _norm_home_path(_AMBIENT_CODEX_HOME_ENV) == _norm_home_path(FAILOVER_CODEX_HOME):
+    PRIMARY_CODEX_HOME = _OS_DEFAULT_CODEX_HOME
+    print(f"[{__name__}] WARNING: ambient CODEX_HOME env var ({_AMBIENT_CODEX_HOME_ENV}) is IDENTICAL "
+          f"to FAILOVER_CODEX_HOME's resolved value -- almost certainly leftover pollution from "
+          f"earlier testing (the 2 Sept regression's root cause), not a deliberate override. "
+          f"Disregarded for PRIMARY; falling through to the true OS default ({_OS_DEFAULT_CODEX_HOME}). "
+          f"Set WI_LANE_B_CODEX_HOME explicitly instead if a non-default PRIMARY is genuinely intended.")
+elif _AMBIENT_CODEX_HOME_ENV:
+    PRIMARY_CODEX_HOME = _AMBIENT_CODEX_HOME_ENV
+else:
+    PRIMARY_CODEX_HOME = _OS_DEFAULT_CODEX_HOME
 LANE_B_CODEX_HOME = PRIMARY_CODEX_HOME   # backward-compat alias -- some callers/logs still read this name
 
 
@@ -896,6 +961,24 @@ def calendar_events_to_raw(events: list) -> list[dict]:
 
 
 def teams_messages_to_raw(messages: list) -> list[dict]:
+    """Map codex_apps `microsoft_teams.list_chat_messages`/`list_channel_messages`
+    result objects to the pipeline's raw shape.
+
+    FIELD NAMES CORRECTED 3 Sept 2026 (regression fix) against the REAL schema,
+    confirmed from a genuine live message returned end-to-end for the first time
+    that day (previously every Lane B Teams success on record only ever got as
+    far as list_chats -- this is the first live proof of list_chat_messages'
+    actual result shape). The real connector fields are `content` (not
+    `body_preview`/`bodyPreview`/`body.content` -- those were a guessed
+    Graph-API-style shape that never matched), `created_at` (not `created`/
+    `created_date_time`/`createdDateTime`), `author_name`/`author_user_id` (not
+    a nested `from`/`sender.user` object -- there is no separate email field in
+    this schema), and `title` for the chat/channel's own display name (not
+    `container_name`/`chat_name`/`channel_name`/`conversation_name`). Old
+    aliases are KEPT as fallbacks (not removed) in case the connector's schema
+    varies by message type or shifts again -- same defensive-first pattern the
+    calendar mapping already uses -- with the confirmed-real field name checked
+    first in each `_first(...)` call."""
     out: list[dict] = []
     for m in messages:
         if not isinstance(m, dict):
@@ -903,17 +986,20 @@ def teams_messages_to_raw(messages: list) -> list[dict]:
         frm = m.get("from") or m.get("sender") or {}
         frm_user = (frm.get("user") if isinstance(frm, dict) else {}) or frm
         out.append({
-            "kind": _first(m, "kind", default="chat"),
-            "container_name": _first(m, "container_name", "chat_name", "channel_name", "conversation_name", default=""),
+            "kind": _first(m, "container_type", "kind", default="chat"),
+            "container_name": _first(m, "title", "container_name", "chat_name", "channel_name",
+                                     "conversation_name", default=""),
             "message_id": str(_first(m, "message_id", "id", default="")),
-            "from_name": _first(frm_user, "display_name", "displayName", "name", default="") or _first(m, "from_name", default=""),
-            "from_email": _first(frm_user, "email", "mail", "userPrincipalName", default="") or _first(m, "from_email", default=""),
-            "created": _first(m, "created", "created_date_time", "createdDateTime", default=""),
+            "from_name": _first(m, "author_name", default="") or _first(frm_user, "display_name", "displayName",
+                                "name", default="") or _first(m, "from_name", default=""),
+            "from_email": _first(frm_user, "email", "mail", "userPrincipalName", default="") or _first(
+                          m, "from_email", "author_user_id", default=""),
+            "created": _first(m, "created_at", "created", "created_date_time", "createdDateTime", default=""),
             "is_from_me": bool(_first(m, "is_from_me", "from_me", default=False)),
             "has_attachments": bool(m.get("attachments") or _first(m, "has_attachments", default=False)),
-            "body_preview": _first(m, "body_preview", "bodyPreview", default="") or (
-                _first(m.get("body") or {}, "content", default="")[:400] if isinstance(m.get("body"), dict) else ""
-            ),
+            "body_preview": (_first(m, "content", "body_preview", "bodyPreview", default="") or (
+                _first(m.get("body") or {}, "content", default="") if isinstance(m.get("body"), dict) else ""
+            ))[:400],
         })
     return out
 
@@ -923,12 +1009,25 @@ def _events_from_results(tool_calls: list[dict], domain: str, events: list[dict]
     model's final agent_message (per the 1 Sept probe: it's unreliable / summary).
     The `_json_array_from_text` fallback is retained only for a --from-file
     transcript that predates the structured_content schema."""
+    # TEAMS FIX (3 Sept 2026, regression fix): `list_chats`/`list_channels` were
+    # previously included here too, on the theory that a "chats but no messages"
+    # response should still surface the chat list as a fallback. In practice
+    # this meant every successful Teams pull mixed CHAT metadata objects (id,
+    # topic, chat_type, web_url, last_message_preview -- confirmed from a real
+    # live pull 3 Sept) into the SAME collected list as genuine per-message
+    # objects from list_chat_messages/list_channel_messages, both then run
+    # through teams_messages_to_raw() (which expects a message shape) --
+    # producing a majority-empty digest (confirmed live: of 45 raw items one
+    # run, 40 were list_chats' chat objects with no body/created/message_id
+    # that survived the mapping, only 5 were real messages). list_chats/
+    # list_channels are enumeration tools, not content tools -- the guard's
+    # EXPECTED_TOOL["teams"]=="list_chats" already independently confirms the
+    # connector is alive without needing its result folded into the digest.
     data_tools = ({"list_events", "search_events", "list_event_instances", "fetch_events_batch"}
                   if domain == "calendar"
-                  else {"list_chats", "list_chat_messages", "list_channel_messages",
-                        "list_channels", "search"})
+                  else {"list_chat_messages", "list_channel_messages", "search"})
     keys = (("value", "events", "items") if domain == "calendar"
-            else ("chats", "messages", "value", "items"))
+            else ("messages", "value", "items"))
     collected: list = []
     for tc in tool_calls:
         if tc["tool"].split(".")[-1] not in data_tools:
@@ -1058,10 +1157,38 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
     attempts, concatenated, each tagged). Never raises. Terminal statuses:
     'ok', 'halt' (re-contamination), 'unavailable' (expected tool never fired
     on either identity), 'codex_failed' (every attempt on both failed)."""
+    # Collision guard (added 3 Sept 2026, regression fix): if PRIMARY_CODEX_HOME
+    # and FAILOVER_CODEX_HOME resolve to the SAME path, automatic failover is a
+    # no-op by construction -- there is nothing distinct to fail over to, and a
+    # primary failure silently becomes a hard domain failure with only one
+    # attempt logged. This is exactly the shape of the 2 Sept 20:58 live
+    # regression: an ambient/leftover CODEX_HOME (or WI_LANE_B_CODEX_HOME) env
+    # var on the host -- set during 1 Sept's now-superseded personal-only
+    # testing phase and never cleared -- made PRIMARY_CODEX_HOME resolve to the
+    # exact same literal path as FAILOVER_CODEX_HOME's hardcoded default
+    # (C:\WorkInboxAI\codex-laneb), collapsing "primary" and "failover" into one
+    # identity and defeating the Edu-primary/personal-failover architecture
+    # entirely -- without ever raising a HALT or any other loud signal. Made
+    # loud here (not just a routine _log line) so it can never again silently
+    # ride along as "working as designed". This does NOT fix a genuinely
+    # misconfigured environment by itself -- the actual fix is the wrapper
+    # explicitly clearing CODEX_HOME/WI_LANE_B_CODEX_HOME before every Lane B
+    # invocation (see Run Laptop Bridge Briefing.ps1) -- but this guard makes
+    # the failure mode visible in the run log/summary instead of indistinguishable
+    # from "no failover was needed".
+    _identity_collision = (FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME)
+    if _identity_collision:
+        _log(f"[{domain}] WARNING: PRIMARY_CODEX_HOME and FAILOVER_CODEX_HOME are IDENTICAL "
+             f"({PRIMARY_CODEX_HOME}) -- automatic failover CANNOT fire for this run. This is "
+             f"almost certainly unintentional (an ambient CODEX_HOME/WI_LANE_B_CODEX_HOME env var "
+             f"left over from earlier testing) -- check the host's environment. See lane_b_call1.py "
+             f"fetch_domain()'s collision-guard comment for the 2 Sept incident this matches.")
+
     result, attempts = _fetch_domain_one_identity(
         domain, prompt, window_days=window_days, ts=ts, retries=PRIMARY_RETRIES,
         codex_home=PRIMARY_CODEX_HOME, identity_label="primary",
-        timeout_s=PRIMARY_TIMEOUT_S, max_attempts=PRIMARY_MAX_ATTEMPTS)
+        timeout_s=PRIMARY_TIMEOUT_S_BY_DOMAIN.get(domain, PRIMARY_TIMEOUT_S),
+        max_attempts=PRIMARY_MAX_ATTEMPTS_BY_DOMAIN.get(domain, PRIMARY_MAX_ATTEMPTS))
 
     if result is not None and result["status"] in ("ok", "halt"):
         pass   # success, or a terminal re-contamination HALT -- no failover either way
@@ -1087,8 +1214,10 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
                   "guard": {"seen": [], "unexpected": []},
                   "tool_calls": [], "count": 0, "raw_items": []}
     result["attempts"] = attempts
+    result["primary_failover_identical"] = _identity_collision
     _log(f"[{domain}] final status={result['status']} served_by={result.get('served_by')} "
-         f"after {len(attempts)} total attempt(s) across both identities")
+         f"after {len(attempts)} total attempt(s) across both identities"
+         + (" -- ** PRIMARY==FAILOVER, failover was structurally unavailable this run **" if _identity_collision else ""))
     return result
 
 
@@ -1315,7 +1444,7 @@ def main(argv: list[str]) -> int:
     # produced this domain's result this cycle -- "primary" (Edu, normal), "failover"
     # (personal -- informational, not alarming by itself, but worth being visible;
     # see the toast/HANDOVER work), or None if neither identity produced a result.
-    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by")
+    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by", "primary_failover_identical")
     normalised["meta"]["lane_b"] = {
         "ts": ts,
         "domains": {d: {k: per_domain[d].get(k) for k in _dom_keys} for d in per_domain},
@@ -1362,7 +1491,7 @@ def _write_run_log(ts, args, per_domain, sha_before, sha_after, n_hits, *, halte
         "domains_requested": args.domain,
         "window_days": args.window_days,
         "per_domain": {d: {k: per_domain[d].get(k)
-                           for k in ("status", "count", "tool_calls", "guard", "attempts", "served_by")}
+                           for k in ("status", "count", "tool_calls", "guard", "attempts", "served_by", "primary_failover_identical")}
                        for d in per_domain},
         "sanitiser_hits": n_hits,
         "config_toml_sha1_before": sha_before,

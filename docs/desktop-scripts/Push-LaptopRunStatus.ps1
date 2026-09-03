@@ -24,9 +24,20 @@ guard falls back to CAL_BACKEND=com and the briefing still ships that cycle --
 exit code alone would hide the trip). Still just a short fixed-vocabulary
 string -- no email/calendar content.
 
+-LaneBDomains (added 3 Sept 2026, regression-fix verification): a small
+hashtable {domain -> {status,count,served_by,primary_failover_identical}},
+pulled by the wrapper from the freshest data\lane_b\*_lane_b.json run log.
+PURE COUNTS/STATUS/IDENTITY-LABEL ONLY -- never raw_items, never tool call
+arguments/results, never any calendar/Teams content. This exists so the Lane B
+both-domain regression fix (2 Sept incident -> 3 Sept fix) can be verified
+against the LIVE scheduled task's own real unattended runs without needing
+host/RDP access -- this file already round-trips through GitHub for exactly
+that kind of cross-machine visibility.
+
 USAGE
   Push-LaptopRunStatus.ps1 -Kind briefing  -ExitCode 0
   Push-LaptopRunStatus.ps1 -Kind briefing  -ExitCode 0 -LaneBGuard halted -LaneBGuardDetail "task disabled"
+  Push-LaptopRunStatus.ps1 -Kind briefing  -ExitCode 0 -LaneBGuard clean -LaneBDomains @{calendar=@{status='ok';count=51;served_by='primary';primary_failover_identical=$false}}
   Push-LaptopRunStatus.ps1 -Kind draftdiff -ExitCode 1 -StatsFile C:\...\stats.json
   Push-LaptopRunStatus.ps1 -Kind draftdiff -ExitCode 3 -Note 'WithAI requested, no key'
 #>
@@ -36,7 +47,8 @@ param(
   [string]$StatsFile,
   [string]$Note,
   [string]$LaneBGuard,
-  [string]$LaneBGuardDetail
+  [string]$LaneBGuardDetail,
+  [hashtable]$LaneBDomains
 )
 
 $ErrorActionPreference = 'Stop'
@@ -65,6 +77,22 @@ try {
   if ($Note) { $body.note = $Note }
   if ($LaneBGuard) { $body.lane_b_guard = $LaneBGuard }
   if ($LaneBGuardDetail) { $body.lane_b_guard_detail = $LaneBGuardDetail }
+  if ($LaneBDomains -and $LaneBDomains.Count -gt 0) {
+    # Strict whitelist -- status/count/served_by/primary_failover_identical only,
+    # per-key, even if the caller's hashtable happened to carry more. No content
+    # ever passes through this path.
+    $domainsOut = [ordered]@{}
+    foreach ($d in $LaneBDomains.Keys) {
+      $src = $LaneBDomains[$d]
+      $domainsOut[$d] = [ordered]@{
+        status                       = $src.status
+        count                        = $src.count
+        served_by                   = $src.served_by
+        primary_failover_identical  = $src.primary_failover_identical
+      }
+    }
+    $body.lane_b_domains = $domainsOut
+  }
 
   if ($Kind -eq 'draftdiff' -and $StatsFile -and (Test-Path $StatsFile)) {
     try {
