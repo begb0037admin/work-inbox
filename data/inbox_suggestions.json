@@ -1,6 +1,44 @@
 {
-  "generated_at": "2026-09-04 12:19",
+  "generated_at": "2026-09-04 16:14",
   "new_tasks": [
+    {
+      "title": "Review and action Athena Artuso's annual leave requests",
+      "tier": "today",
+      "description": "Athena Artuso has submitted two annual leave requests (subjects: 'Athena A/L (summer 2027)' and 'Athena A/L'), both received unread today. Kevin needs to review, approve, or take any required action on these leave submissions.",
+      "email_subject": "Athena A/L (summer 2027)",
+      "email_from": "Athena Artuso",
+      "received": "2026-09-04 14:00",
+      "entry_id": "",
+      "message_id": "<CW1P265MB8736A7C6DFFEA5F86559423D87B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CW1P265MB8736A7C6DFFEA5F86559423D87B52%40CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CW1P265MB8736A7C6DFFEA5F86559423D87B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM",
+      "auto_promoted": true
+    },
+    {
+      "title": "Review and approve new pension schemes setup (Change 20020762) for September payroll",
+      "tier": "week",
+      "description": "Michael O'Sullivan is notifying that for the September payroll he will be setting up new NHS ERRBO and USS DB AVC pension schemes with associated deductions. Kevin needs to review and approve these changes before implementation.",
+      "email_subject": "Change # 20020762_New NHS ERRBO and USS DB AVC Pension Schemes and Pay Codes",
+      "email_from": "Michael O'Sullivan",
+      "received": "2026-09-03 15:33",
+      "entry_id": "",
+      "message_id": "<CWLP265MB184245C116FC4C5B02D4E3A580B62@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB184245C116FC4C5B02D4E3A580B62%40CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWLP265MB184245C116FC4C5B02D4E3A580B62@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM",
+      "auto_promoted": true
+    },
+    {
+      "title": "Investigate Cority Employee Import error from 28 August 2026",
+      "tier": "week",
+      "description": "An error occurred during the scheduled Cority employee data import on 28 August at 17:00 UTC. An error log file has been provided and Kevin is primary recipient. Kevin needs to investigate the root cause and confirm resolution.",
+      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-08-28 17:00",
+      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
+      "received": "2026-08-28 18:00",
+      "entry_id": "",
+      "message_id": "<010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com>",
+      "web_link": "https://outlook.office.com/mail/search?query=010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000%40us-west-2.amazonses.com",
+      "mail_key": "010101a049508036-40ee6a5b-4d67-44c5-aff4-359f86669eb9-000000@us-west-2.amazonses.com"
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -62,5 +100,18 @@
       "carried_forward": true
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "task-1787072363309",
+      "task_title": "URGENT -- Organisational Structure Update - August 2026 - FINAL",
+      "note": "Kevin forwarded Trinity Term 2026 non-college changes to Katherine Corr for review while on annual leave.",
+      "email_subject": "Trinity Term 2026 non-college changes",
+      "email_from": "Kevin (sent to: Katherine Corr <katherine.corr@admin.ox.ac.uk>)",
+      "received": "2026-09-04 15:00",
+      "entry_id": "",
+      "message_id": "<CW1P265MB876580D3A0C2A55AFE8EBADF88B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CW1P265MB876580D3A0C2A55AFE8EBADF88B62%40CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CW1P265MB876580D3A0C2A55AFE8EBADF88B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM"
+    }
+  ]
 }
