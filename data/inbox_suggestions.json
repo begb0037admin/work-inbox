@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07 12:14",
+  "generated_at": "2026-09-07 16:16",
   "new_tasks": [
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
@@ -62,5 +62,18 @@
       "carried_forward": true
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t1781204987882",
+      "task_title": "Holiday Records - 3 Reports Created -- approved, awaiting scheduling (case 69001638)",
+      "note": "Kevin's email confirmation to Conor O'Shea for Friday 18 September 14:00 Holiday Records kickoff failed to deliver; Kevin must resend confirmation or contact Conor via alternative method.",
+      "email_subject": "Undeliverable: RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "email_from": "postmaster@admin.co.uk",
+      "received": "2026-09-03 14:11",
+      "entry_id": "",
+      "message_id": "<a9885990-a76a-43df-9445-829124b205e0@CWLP123MB2818.GBRP123.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=a9885990-a76a-43df-9445-829124b205e0%40CWLP123MB2818.GBRP123.PROD.OUTLOOK.COM",
+      "mail_key": "a9885990-a76a-43df-9445-829124b205e0@CWLP123MB2818.GBRP123.PROD.OUTLOOK.COM"
+    }
+  ]
 }
