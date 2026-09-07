@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07 07:13",
+  "generated_at": "2026-09-07 12:14",
   "new_tasks": [
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
@@ -62,102 +62,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2609051524490",
-      "task_title": "Investigate Cority Employee Import error 2026-09-04 17:00",
-      "note": "Error log file received for Cority Employee Import failure on 2026-09-04 17:00; investigation required to determine if import completed successfully or requires re-run.",
-      "email_subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-09-04 17:00",
-      "email_from": "Cority_Integration_Platform_Notifications@Cority.com",
-      "received": "2026-09-04 18:00",
-      "entry_id": "",
-      "message_id": "<010101a06d5d0222-edb83e18-afb6-4d87-8752-811a759c595e-000000@us-west-2.amazonses.com>",
-      "web_link": "https://outlook.office.com/mail/search?query=010101a06d5d0222-edb83e18-afb6-4d87-8752-811a759c595e-000000%40us-west-2.amazonses.com",
-      "mail_key": "010101a06d5d0222-edb83e18-afb6-4d87-8752-811a759c595e-000000@us-west-2.amazonses.com"
-    },
-    {
-      "task_id": "t2609041614070",
-      "task_title": "Review and action Athena Artuso's annual leave requests",
-      "note": "Athena Artuso submitted first annual leave request (summer 2027) on 4 September; unread and awaiting Kevin's approval or response.",
-      "email_subject": "Athena A/L (summer 2027)",
-      "email_from": "Athena Artuso",
-      "received": "2026-09-04 14:00",
-      "entry_id": "",
-      "message_id": "<CW1P265MB8736A7C6DFFEA5F86559423D87B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CW1P265MB8736A7C6DFFEA5F86559423D87B52%40CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CW1P265MB8736A7C6DFFEA5F86559423D87B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2609041614070",
-      "task_title": "Review and action Athena Artuso's annual leave requests",
-      "note": "Athena Artuso submitted second annual leave request on 4 September; unread and awaiting Kevin's approval or response.",
-      "email_subject": "Athena A/L",
-      "email_from": "Athena Artuso",
-      "received": "2026-09-04 13:53",
-      "entry_id": "",
-      "message_id": "<CW1P265MB8736DFB065C63557D8A63A1887B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CW1P265MB8736DFB065C63557D8A63A1887B52%40CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CW1P265MB8736DFB065C63557D8A63A1887B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2609041614321",
-      "task_title": "Review and approve new pension schemes setup (Change 20020762) for September payroll",
-      "note": "Michael O'Sullivan notifies of Change # 20020762 for new NHS ERRBO and USS DB AVC pension schemes requiring setup for September payroll; awaiting Kevin's review and approval.",
-      "email_subject": "Change # 20020762_New NHS ERRBO and USS DB AVC Pension Schemes and Pay Codes",
-      "email_from": "Michael O'Sullivan",
-      "received": "2026-09-03 15:33",
-      "entry_id": "",
-      "message_id": "<CWLP265MB184245C116FC4C5B02D4E3A580B62@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CWLP265MB184245C116FC4C5B02D4E3A580B62%40CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CWLP265MB184245C116FC4C5B02D4E3A580B62@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2609020705201",
-      "task_title": "Investigate P5 Incident# 11706988 - Task# 50981420 assigned for investigation",
-      "note": "Gillian Wilson responds to urgent Cority support call # 11707051 (Incident# 11706988); investigation underway.",
-      "email_subject": "RE: Assigned to your team - Support Call# 11707051 - URGENT - problems with Cority",
-      "email_from": "Gillian Wilson",
-      "received": "2026-09-01 16:15",
-      "entry_id": "",
-      "message_id": "<CWXP265MB31284B4E3D7E2659EA06A5AD98A82@CWXP265MB3128.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CWXP265MB31284B4E3D7E2659EA06A5AD98A82%40CWXP265MB3128.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CWXP265MB31284B4E3D7E2659EA06A5AD98A82@CWXP265MB3128.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2609020705201",
-      "task_title": "Investigate P5 Incident# 11706988 - Task# 50981420 assigned for investigation",
-      "note": "Christopher Sanders provides update on urgent Cority support call # 11707051 (Incident# 11706988) investigation.",
-      "email_subject": "RE: Assigned to your team - Support Call# 11707051 - URGENT - problems with Cority",
-      "email_from": "Christopher Sanders",
-      "received": "2026-09-01 16:06",
-      "entry_id": "",
-      "message_id": "<CWXP265MB1813E30395D0F8BC964204B495A82@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CWXP265MB1813E30395D0F8BC964204B495A82%40CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CWXP265MB1813E30395D0F8BC964204B495A82@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2609020705201",
-      "task_title": "Investigate P5 Incident# 11706988 - Task# 50981420 assigned for investigation",
-      "note": "Christopher Sanders provides further update on Cority support call # 11707051 investigation.",
-      "email_subject": "RE: Assigned to your team - Support Call# 11707051 - URGENT - problems with Cority",
-      "email_from": "Christopher Sanders",
-      "received": "2026-09-01 14:18",
-      "entry_id": "",
-      "message_id": "<CWXP265MB1813735E47DE904711DB319695A82@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CWXP265MB1813735E47DE904711DB319695A82%40CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CWXP265MB1813735E47DE904711DB319695A82@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2608270801360",
-      "task_title": "Assess 38-day balance workgroup update work for Chemistry",
-      "note": "Kevin provided effort analysis to Simon confirming Chemistry as 38-day balance pilot with 131 workgroups; capacity assessment complete.",
-      "email_subject": "Fw: 38 day balance for departments update and decisions needed",
-      "email_from": "Kevin (sent to: Simon Burford <simon.burford@admin.ox.ac.uk>)",
-      "received": "2026-09-03 19:08",
-      "entry_id": "",
-      "message_id": "<CW1P265MB87655F01241E6B755C887CD688B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=CW1P265MB87655F01241E6B755C887CD688B62%40CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "CW1P265MB87655F01241E6B755C887CD688B62@CW1P265MB8765.GBRP265.PROD.OUTLOOK.COM"
-    }
-  ]
+  "task_updates": []
 }
