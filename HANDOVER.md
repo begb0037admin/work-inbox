@@ -1,4 +1,22 @@
-# Handover -- 8 September 2026, later (Drew) -- TRIAGE TIGHTENING: fixed the false-positive Command Centre task creation from meeting invites and Cc-only mail. SHIPPED, merged to main, verified live. See section H below.
+# Handover -- 8 September 2026, afternoon (Drew) -- "Needs Response" 32-item bloat diagnosed + partial fix shipped. Session wound down by Kevin ("stop for now"). See section I; triage-tightening context in section H below.
+
+## I. "Needs Response" bucket (32 items, ~75% noise) -- diagnosis + entry_id/message_id demotion fix. SHIPPED (partial). Deeper fix PARKED pending Kevin.
+
+**Trigger:** Kevin asked why the work-inbox dashboard's "Needs Response -- within 24-48 hrs" section had 32 items and whether they were necessary ("It's a lot of noise").
+
+**Diagnosis (against the 12:18 briefing.json, all 32 checked individually):**
+- **8 genuinely need Kevin's response (25%)** -- real direct asks: application-form effort estimate (Simon Burford), PDR status (Marie Cooksey), IRIS/IEX timings (Kevin named directly despite Cc), 38-day-balance Chemistry question (Marie Cooksey), sickness-data catch-up (Sarah Rowles), SHSMS moderation requirements, Java testing request, 38-day timeline file. (Last two lower confidence.)
+- **24 noise (75%):** 5 automated (incl. 2 literal-duplicate Cority import-error emails -- a dedup gap), 4 meeting-invite/logistics, 3 already-resolved (the REF29 UDF thread Kevin closed 27 Aug), 12 colleague-to-colleague / Cc-only bystander threads (a 6-message external supplier thread, a 2-message WFM thread, the org-structure circular, etc.).
+
+**Root cause:** `categorise()` in `fetch_inbox.py` -- a pre-AI keyword classifier whose `NEEDS_SUBJECTS` list includes `"re:"`, `"fw:"`, `"fwd:"`, so almost any reply/forward lands in Needs regardless of relevance or whether Kevin is meaningfully on the thread. Entirely separate mechanism from Phase 3.5 task-triage (section H).
+
+**Fix SHIPPED -- commit `7cb5223` on `main`:** the Phase 3.3/3.3b `no_action_needed` -> FYI demotion pass (which physically moves a card out of `needs` into `fyi` in the same run) was gated on `entry_id`, always `""` under `MAIL_BACKEND=imap`, so it only ever evaluated carried-forward COM-era cards -- never fresh IMAP mail. Widened 5 sites (`summary_candidates` filter, both demotion loops, Phase 3.5 suppressor, suggestion carry-forward suppressor) to `entry_id or message_id`. `py_compile` clean; AI-response correlation is index-based not identity-based so widening the candidate set is structurally safe; `max_tokens=14000` on the summary call already sized for ~165 entries so current ~42 is fine. **Not yet observed live** -- the in-flight manual run (below) started before this commit, so the first run to exercise it is the next scheduled fire.
+
+**What this fix does and does NOT do (told to Kevin verbatim):** it re-opens daily self-correction for the whole Needs bucket (fresh mail now gets an AI verdict and `no_action_needed` cards get demoted to FYI within the same run). It should meaningfully cut the Cc-only/bystander half of the noise (the `_SYS_EMAIL_SUMMARY` cc-only-default tightening from section H targets exactly that). It will NOT zero it out: it's probabilistic AI judgment not a deterministic filter; it does not touch `categorise()` itself (same broad volume goes in every day, fix only cleans back out after); and it can't reach "already-resolved" threads (AI has no command-centre task-status visibility) or literal duplicate messages.
+
+**PARKED -- explicit next action, pending Kevin's decision (he said "stop for now", do NOT build it unasked):** tighten `categorise()` / `NEEDS_SUBJECTS` itself -- remove or gate the blanket `"re:"`/`"fw:"`/`"fwd:"` keywords so the over-catching stops at the source rather than relying on the AI to re-judge every reply-thread email from scratch each run. Higher risk (pre-AI classifier, drives tiering across the whole dashboard) -- needs its own scoped change + Kevin's go-ahead.
+
+**In-flight manual run:** `Work Inbox Bridge Briefing` triggered via SSH ~15:11 UK (to run section H's triage fix against live mail sooner than the 16:00 slot). Still `Running` at 15:43 (~32 min, within the PT45M limit, live python process, deep in Lane B connector waits -- not hung). Left to finish on its own per Kevin. **Schedule health checked and confirmed GOOD** -- git history of `data/briefing.json` shows all three daily slots (07:00/12:00/16:00 Mon-Fri) pushing a briefing every weekday since the 30 Aug laptop cutover; today's staleness was just the normal pre-16:00 gap, not a missed run.
 
 ## H. Triage tightening -- stop over-creating Command Centre tasks from meeting invites / Cc-only mail. SHIPPED, merged, verified.
 
