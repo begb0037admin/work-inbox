@@ -347,16 +347,21 @@ AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "tr
                or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
 
-# WI_TRIAGE_V2 (default OFF -- unset behaviour is byte-identical to the
-# pre-8-Sep-2026 pipeline). When ON: categorise() stops dumping every unread
-# reply/forward into "needs" -- an email only lands in Needs Response from the
-# keyword pass on a STRONG explicit action signal (NEEDS_SUBJECTS_STRICT) with
-# Kevin on the To line. Everything else starts in FYI, and Phase 3.3c below
-# promotes an FYI card into Needs when Phase 3.2's AI verdict says
-# needs_reply=true. Rationale: the 8 Sep "Needs Response = 32, ~75% noise"
-# diagnosis (HANDOVER I) -- the `re:`/`fw:`/`fwd:` net + the `if not is_read:
-# return "needs"` catch-all were the source.
-TRIAGE_V2 = os.environ.get("WI_TRIAGE_V2", "").strip().lower() in ("1", "true", "yes")
+# WI_TRIAGE_V2 -- DEFAULT ON as of 8 Sep 2026 late evening (Kevin, "flip now",
+# after reviewing the HANDOVER K1 before/after evidence). Unset/"1"/"true"/
+# "yes" -> ON; only an explicit "0"/"false"/"no" turns it OFF. When ON:
+# categorise() stops dumping every unread reply/forward into "needs" -- an
+# email only lands in Needs Response from the keyword pass on a STRONG
+# explicit action signal (NEEDS_SUBJECTS_STRICT) with Kevin on the To line,
+# plus the hard Cc-only gate (Kevin not on To -> suppressed, no exceptions)
+# and the FYI_ALWAYS/suppressed-noise floor added the same evening (HANDOVER
+# K1). Everything else starts in FYI, and Phase 3.3-promote below lifts an
+# FYI card into Needs when Phase 3.2's AI verdict says no_action_needed=false.
+# Rationale: the 8 Sep "Needs Response = 32, ~75% noise" diagnosis (HANDOVER
+# I) -- the `re:`/`fw:`/`fwd:` net + the `if not is_read: return "needs"`
+# catch-all were the source. Restore point / one-line revert to OFF:
+# `os.environ.get("WI_TRIAGE_V2", "1")` -> `os.environ.get("WI_TRIAGE_V2", "")`.
+TRIAGE_V2 = os.environ.get("WI_TRIAGE_V2", "1").strip().lower() in ("1", "true", "yes")
 _AI_OUT_PREFIX = "claude_" if AI_PARALLEL else ""
 CLAUDE_BIN          = os.environ.get("WI_CLAUDE_BIN", "claude")
 CLAUDE_CFG_PRIMARY  = os.environ.get("WI_CLAUDE_CONFIG_DIR", "").strip()
