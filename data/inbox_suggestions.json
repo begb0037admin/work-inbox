@@ -1,6 +1,19 @@
 {
-  "generated_at": "2026-09-08 22:17",
+  "generated_at": "2026-09-08 23:21",
   "new_tasks": [
+    {
+      "title": "Review IRIS Changes project plan - September 2026",
+      "tier": "today",
+      "description": "Christopher Sanders has provided a detailed project plan for IRIS Changes implementation in September 2026 with planned activities and timeline. Kevin needs to review the plan and provide feedback on HR Systems readiness, dependencies, and any constraints affecting implementation.",
+      "email_subject": "IRIS Changes - September 2026",
+      "email_from": "Christopher Sanders",
+      "received": "2026-09-08 16:28",
+      "entry_id": "",
+      "message_id": "<CWXP265MB181394DC1EA73E6088E9799095B12@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=CWXP265MB181394DC1EA73E6088E9799095B12%40CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "CWXP265MB181394DC1EA73E6088E9799095B12@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM",
+      "auto_promoted": true
+    },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
       "tier": "tomorrow",
@@ -66,31 +79,19 @@
     {
       "task_id": "t2608121801280",
       "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Julie reports Chemistry prefers batching all system updates in one phase; Kevin's capacity assessment for GLAM still needed.",
+      "note": "Julie reports Chemistry prefers batching all system updates in one phase after call with Jenna; Kevin's capacity confirmation for this approach is critical to proceeding with 131-workgroup rollout.",
       "email_subject": "RE: 38 day balance for departments update and decisions needed",
       "email_from": "Julie Hickman",
-      "received": "2026-09-08 10:26",
+      "received": "2026-09-08 15:30",
       "entry_id": "",
-      "message_id": "<LO0SPRMB0017119C3A1DFEE1495921BC8AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB0017119C3A1DFEE1495921BC8AB12%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "LO0SPRMB0017119C3A1DFEE1495921BC8AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
+      "message_id": "<LO0SPRMB001751076714F85C307D65988AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB001751076714F85C307D65988AB12%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO0SPRMB001751076714F85C307D65988AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
     },
     {
-      "task_id": "t017",
-      "task_title": "Iris / ECO Online -- enhancements, funding, new contact",
-      "note": "Christopher Sanders submitted IRIS Changes project plan for September requiring Kevin's review and HR Systems readiness confirmation.",
-      "email_subject": "Finance code B8 Review",
-      "email_from": "Kevin (sent to: Anthony Kong <anthony.kong@admin.ox.ac.uk>)",
-      "received": "2026-09-08 15:46",
-      "entry_id": "",
-      "message_id": "<CWLP265MB596983B629BEE8A6E735CEB788B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "",
-      "mail_key": "CWLP265MB596983B629BEE8A6E735CEB788B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2609051524490",
-      "task_title": "Investigate Cority Employee Import error 2026-09-04 17:00",
-      "note": "Cority employee import error from 4 September 2026 at 17:00 requires investigation; log file review and root cause analysis needed.",
+      "task_id": "t2608181201061",
+      "task_title": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
+      "note": "Kevin forwarded GLAM Ashmolean Visitor Experience incident 11688462 (leave and absence module issues) to Julie for escalation and follow-up.",
       "email_subject": "GLAM – Ashmolean Visitor Experience / Incident 11688462",
       "email_from": "Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>)",
       "received": "2026-09-08 12:05",
@@ -100,16 +101,16 @@
       "mail_key": "CWLP265MB59697F153CE33D8483C4B82288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
     },
     {
-      "task_id": "task-1787072363309",
-      "task_title": "URGENT -- Organisational Structure Update - August 2026 - FINAL",
-      "note": "Anna Gilbert completed review of Trinity Term 2026 non-college changes while Katherine Corr on leave; Kevin must follow up on findings.",
-      "email_subject": "James - off sick",
-      "email_from": "Kevin (sent to: \"hrsystems@maillist.ox.ac.uk\" <hrsystems@maillist.ox.ac.uk>)",
-      "received": "2026-09-08 08:50",
+      "task_id": "t2608121801280",
+      "task_title": "Review 38-day balance implementation timeline and decisions",
+      "note": "Kevin provided Chemistry 38-day balance capacity estimate (131 workgroups) to Julie and Simon; final decision now awaits confirmation of batching approach feasibility.",
+      "email_subject": "Re: 38 day balance for departments update and decisions needed",
+      "email_from": "Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>)",
+      "received": "2026-09-08 09:07",
       "entry_id": "",
-      "message_id": "<CWLP265MB59699E7DD8F933C2ECBBEACD88B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
+      "message_id": "<CWLP265MB59699CBDEE669E4AA760D54288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
       "web_link": "",
-      "mail_key": "CWLP265MB59699E7DD8F933C2ECBBEACD88B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
+      "mail_key": "CWLP265MB59699CBDEE669E4AA760D54288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
     }
   ]
 }
