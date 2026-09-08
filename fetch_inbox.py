@@ -2149,7 +2149,8 @@ FYI_ALWAYS       = ["starting soon", "is starting", "meeting forward notificatio
                     "annual leave", " a/l", "a/l ", "leave approval", "leave request",
                     "approve leave", "tentative:", "canceled:", "no action required",
                     "for information", "for your information", "for your records",
-                    "read receipt", "delivery receipt", "auto-reply", "autoreply"]
+                    "read receipt", "delivery receipt", "auto-reply", "autoreply",
+                    "invited you to edit"]
 LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
                     "github", "pages", "build", "deploy", "run failed", "wisp"]
 
@@ -2600,12 +2601,16 @@ if summary_candidates and anthropic_available:
         except Exception as demote_err:
             print(f"WARNING: Phase 3.3 demotion failed, Needs left unchanged - {demote_err}")
 
-        # -- Phase 3.3-promote -- WI_TRIAGE_V2 ON: lift an FYI card whose
-        # Phase 3.2 verdict says needs_reply=true up into Needs Response. This is
-        # the counterpart to Phase 3.3's demotion: with the new categorise()
-        # default (fyi unless a strong explicit ask + Kevin on To), this pass is
-        # what populates Needs Response for the bulk of genuine asks. Runs after
-        # 3.3's demotion (a just-demoted card has needs_reply=False so it is
+        # -- Phase 3.3-promote -- WI_TRIAGE_V2 ON: lift an FYI card whose Phase
+        # 3.2 verdict says Kevin needs to DO something (no_action_needed=false)
+        # up into Needs Response. Criterion is no_action_needed=false, NOT
+        # needs_reply=true -- Kevin's brief is "decision, reply, approval, OR
+        # action", and validation showed needs_reply=true alone dropped genuine
+        # items (PDR status, Sickness data catch-up) that need an offline action
+        # rather than a literal reply. With the new categorise() default (fyi
+        # unless a strong explicit ask + Kevin on To), this pass is what
+        # populates Needs Response for the bulk of genuine work. Runs after
+        # 3.3's demotion (a just-demoted card has no_action_needed=true so it is
         # never re-promoted) and before 3.3b. Same atomic-temp-list + own
         # try/except safety pattern as the demotion passes.
         if TRIAGE_V2:
@@ -2616,13 +2621,14 @@ if summary_candidates and anthropic_available:
                 for card in fyi:
                     _cs = (card.get("subject") or card.get("title") or "").lower()
                     # FYI_ALWAYS is a HARD FLOOR: an informational / automated /
-                    # bulletin / leave-notice card never gets promoted into Needs
-                    # Response even if the AI over-eagerly flags needs_reply
-                    # (caught in validation -- "Last reminder: Updates to Clockify
-                    # Free plan" was being lifted). Kevin's brief is explicit that
+                    # bulletin / leave-notice / share-confirmation card never
+                    # gets promoted into Needs Response even if the AI verdict
+                    # says otherwise (caught in validation -- "Last reminder:
+                    # Updates to Clockify Free plan" and share-confirmation
+                    # emails were being lifted). Kevin's brief is explicit that
                     # these categories must not appear as priority response tasks.
                     _fyi_locked = any(kw in _cs for kw in FYI_ALWAYS)
-                    if (not _fyi_locked) and card.get("_ai_verdict_valid") and card.get("needs_reply") is True:
+                    if (not _fyi_locked) and card.get("_ai_verdict_valid") and card.get("no_action_needed") is False:
                         card["badge"], card["badgeType"] = badge_for(card, "needs")
                         newly_needs.append(card)
                         promoted_count += 1
