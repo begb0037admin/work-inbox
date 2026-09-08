@@ -1,6 +1,28 @@
-# Handover -- 8 September 2026, ~08:50 (Drew) -- WORK-INBOX DASHBOARD "open email" now uses the connector OWA deep-link (new tab), not openmail:// / classic Outlook. Ported from command-centre. SHIPPED to main (merge `fe4439d2`), Pages built + live-verified. First pipeline run after this resolves the webLinks -- watch the `Phase 3.1 done` log line.
+# Handover -- 8 September 2026, ~09:55 (Drew) -- WORK-INBOX DASHBOARD "open email" now uses the connector OWA deep-link (new tab), not openmail:// / classic Outlook. Ported from command-centre. CLOSED -- SHIPPED + live-verified against a real production pipeline run (Kevin's proof-of-concept request), not just the merge/deploy. Phase 3.1 confirmed working end-to-end: `webLinks reused:0 newly_resolved:8 connector_calls:8`, briefing commit `da9da447`, live dashboard click-tested opening real OWA links. work-inbox is now at connector parity with command-centre for this feature.
 
-## G. Work-inbox dashboard "open email" -> Outlook Web (connector webLink), matching command-centre. SHIPPED.
+## G. Work-inbox dashboard "open email" -> Outlook Web (connector webLink), matching command-centre. CLOSED -- SHIPPED + PROOF-OF-CONCEPT VERIFIED LIVE.
+
+**CLOSE-OUT 8 Sept 2026, ~09:55.** Kevin asked for proof-of-concept immediately rather than waiting for the 12:00 natural fire. Fired the live production pipeline off-schedule via SSH and confirmed the whole feature end-to-end against real data, not a harness fixture. Nothing left open on this item.
+
+**Trigger:** SSH `oxford-lan` (101L-DE013193) -> `Start-ScheduledTask "Work Inbox Bridge Briefing"` at 09:12:23. No RDP/manual step needed -- `begb0037`'s existing RDP session (active since 3 Sept) satisfied the task's Interactive-logon requirement, so this ran unattended from the coordinator side. Completed 09:52:22 (40 min, within the `PT45M` `ExecutionTimeLimit`), `LastTaskResult 0x0`.
+
+**Phase 3.1 confirmed live** (previously only compile-checked): wrapper log --
+```
+Phase 3.1 done - webLinks reused:0 newly_resolved:8 connector_calls:8 (cap 8)
+```
+8 individual `lane_b_call1: [mail] codex exec attempt 1/1` -> `resolved webLink for '<real Message-ID>'` cycles logged against the personal connector (`CODEX_HOME=C:\WorkInboxAI\codex-laneb`), each ~15-45s, 15s inter-call gap as designed. Cap (8) hit exactly -- more cards were eligible than the per-run cap allows; the remainder are not lost, they resolve on subsequent runs (reuse-from-previous-briefing logic re-attempts anything still lacking a `web_link`, bounded at 8 calls/run each time -- self-healing by design, not a gap needing a fix).
+
+**Briefing pushed:** commit `da9da4478f799bf6f2f9fc31eb31471e44356f26` ("chore: update briefing 2026-09-08 09:51"). Verified directly in the pushed `data/briefing.json`: **8 mail cards now carry a real `web_link`** (`https://outlook.office365.com/owa/?ItemID=...&viewmodel=ReadMessageItem`, genuine Graph deep-links, not placeholders); confirmed the same 8 are served live at the proxy the dashboard actually reads (`https://github-proxy.lelitte.co.uk/work-inbox/data/briefing.json`). **37 other cards still on `entry_id`/COM fallback** this run (pre-existing carried-forward cards or cards beyond the 8-call cap) -- these self-heal over subsequent scheduled runs, no action needed.
+
+**Live dashboard verified, real production site, no fixture:** loaded `https://begb0037admin.github.io/work-inbox/` directly, found 7 rendered cards with a real `data-weburl` + `onclick="openEmailWeb(event,this)"` (one fewer than the 8 resolved -- the 8th is not currently in a rendered urgent/needs/fyi zone, e.g. thread-collapsed into an FYI group; not a bug in the opener). Dispatched a real click on the "Canceled: Outstanding WFM Work - Kick Off" card's envelope -- `window.open()` fired with `https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk...&viewmodel=ReadMessageItem` -- a genuine OWA deep-link, exactly the target behaviour, identical mechanism to command-centre.
+
+**Also observed during the run (informational, not a defect):** Lane B calendar+Teams both failed over to personal again (Edu still at 0% quota until 1 Oct) -- `served_by=failover` both domains, guard clean, no HALT. Took ~28 min this run (slower than 3 Sept's 6m46s best case but within the documented 2-9min/domain variance and the PT45M budget -- confirmed via live process checks along the way that it was making real progress, not hung). Phase 3.6 applied 1 update to Command Centre. `publish_needs_reply.py` and `publish_drafted_replies.py` both exited 0.
+
+**Divergence from Phase 3.6 -- ACCEPTED AS BUILT, not pending.** Kevin was shown this explicitly (build report) and did not veto it: a failed webLink resolve is left as `web_link=""` and retried next run -- no broken `outlook.office.com/mail/search` (`_owa_link`) fallback baked into the card. This is final, no further decision needed.
+
+**STATUS: CLOSED.** work-inbox dashboard open-email opener is at full connector parity with command-centre -- both now open Outlook Web via a Graph `web_link` in a new tab as the standard path, with `openmail://`/classic-Outlook surviving only as the fallback for old carried-forward Outlook-EntryID cards on either dashboard. No open action items remain on this thread. Next natural fire (12:00, 16:00, and the 07:00/12:00/16:00 Mon-Fri cadence going forward) will continue resolving the remaining carried-forward cards' webLinks a few at a time under the same 8/run cap.
+
+---
 
 **SHIPPED 8 Sept 2026, ~08:50.** Kevin approved the screenshots. Branch `drew/wi-dashboard-owa-open-email` merged to `main` via the Merges API -- **merge commit `fe4439d2f5d2ed288b314258bb4b412b438dac8b`** (parents `d1bf1ca7` old main + `69127ec9` branch tip). Restore point = pre-merge main `d1bf1ca78a13886a7f03251a79e25e6314fb3c68`. GitHub Pages build for `fe4439d2` polled to `built` (2026-09-08T07:46:48Z). Live-served `js/app.js` byte-verified identical to the merged HEAD blob (sha256 `9b7a525e5230e9172e9164363a4263307a95f5aa158045a3849d4b3180a5630a`, 92165 bytes). Branch deleted post-merge.
 
