@@ -2614,7 +2614,15 @@ if summary_candidates and anthropic_available:
                 still_fyi = []
                 newly_needs = []
                 for card in fyi:
-                    if card.get("_ai_verdict_valid") and card.get("needs_reply") is True:
+                    _cs = (card.get("subject") or card.get("title") or "").lower()
+                    # FYI_ALWAYS is a HARD FLOOR: an informational / automated /
+                    # bulletin / leave-notice card never gets promoted into Needs
+                    # Response even if the AI over-eagerly flags needs_reply
+                    # (caught in validation -- "Last reminder: Updates to Clockify
+                    # Free plan" was being lifted). Kevin's brief is explicit that
+                    # these categories must not appear as priority response tasks.
+                    _fyi_locked = any(kw in _cs for kw in FYI_ALWAYS)
+                    if (not _fyi_locked) and card.get("_ai_verdict_valid") and card.get("needs_reply") is True:
                         card["badge"], card["badgeType"] = badge_for(card, "needs")
                         newly_needs.append(card)
                         promoted_count += 1
