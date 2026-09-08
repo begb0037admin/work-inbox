@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-08 23:21",
+  "generated_at": "2026-09-08 23:47",
   "new_tasks": [
     {
       "title": "Review IRIS Changes project plan - September 2026",
@@ -12,7 +12,8 @@
       "message_id": "<CWXP265MB181394DC1EA73E6088E9799095B12@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM>",
       "web_link": "https://outlook.office.com/mail/search?query=CWXP265MB181394DC1EA73E6088E9799095B12%40CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM",
       "mail_key": "CWXP265MB181394DC1EA73E6088E9799095B12@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM",
-      "auto_promoted": true
+      "auto_promoted": true,
+      "carried_forward": true
     },
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
@@ -75,42 +76,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608121801280",
-      "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Julie reports Chemistry prefers batching all system updates in one phase after call with Jenna; Kevin's capacity confirmation for this approach is critical to proceeding with 131-workgroup rollout.",
-      "email_subject": "RE: 38 day balance for departments update and decisions needed",
-      "email_from": "Julie Hickman",
-      "received": "2026-09-08 15:30",
-      "entry_id": "",
-      "message_id": "<LO0SPRMB001751076714F85C307D65988AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB001751076714F85C307D65988AB12%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "LO0SPRMB001751076714F85C307D65988AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2608181201061",
-      "task_title": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
-      "note": "Kevin forwarded GLAM Ashmolean Visitor Experience incident 11688462 (leave and absence module issues) to Julie for escalation and follow-up.",
-      "email_subject": "GLAM – Ashmolean Visitor Experience / Incident 11688462",
-      "email_from": "Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>)",
-      "received": "2026-09-08 12:05",
-      "entry_id": "",
-      "message_id": "<CWLP265MB59697F153CE33D8483C4B82288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "",
-      "mail_key": "CWLP265MB59697F153CE33D8483C4B82288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2608121801280",
-      "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Kevin provided Chemistry 38-day balance capacity estimate (131 workgroups) to Julie and Simon; final decision now awaits confirmation of batching approach feasibility.",
-      "email_subject": "Re: 38 day balance for departments update and decisions needed",
-      "email_from": "Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>)",
-      "received": "2026-09-08 09:07",
-      "entry_id": "",
-      "message_id": "<CWLP265MB59699CBDEE669E4AA760D54288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "",
-      "mail_key": "CWLP265MB59699CBDEE669E4AA760D54288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
-    }
-  ]
+  "task_updates": []
 }
