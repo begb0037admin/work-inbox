@@ -314,6 +314,41 @@ function openEmail(entryId,ev){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   window.location.href='openmail://'+entryId+'/';
 }
+// Open a mail card's stored OWA deep-link (server-resolved Graph web_link,
+// fetch_inbox.py Phase 3.1) in a new browser tab. Mirrors command-centre
+// js/app.js openEmailWeb(): https-only, exact-hostname allowlist, new tab,
+// visible notice (never a silent no-op, never a throw) when no usable link
+// is present. The connector-resolved web_link is the standard opener now;
+// openmail:// (COM / classic Outlook) survives only as the fallback for old
+// carried-forward cards that still carry a real Outlook EntryID.
+function openEmailWeb(ev,el){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const raw=(el&&el.getAttribute)?el.getAttribute('data-weburl'):'';
+  const url=_owaWebUrl({web_link:raw});
+  if(url){
+    window.open(url,'_blank','noopener');
+  }else{
+    alert('No usable Outlook Web link is stored for this email (an https link on outlook.office.com / outlook.office365.com is required), so it cannot be opened from here.');
+  }
+}
+// Validate a stored Outlook Web link. Accepts web_link (snake_case, the
+// inbox feed's fetch_inbox.py Phase 3.1 field), display_url, or webLink
+// (camelCase, the Command Centre task feed's field) -- all three occur on
+// cards that reach this dashboard. https only, exact Outlook Web host
+// allowlist, no userinfo / subdomain / path-spoof tolerance. Mirrors
+// command-centre js/app.js openEmailWeb()'s candidate list. Returns the
+// first usable candidate or ''.
+function _owaWebUrl(o){
+  if(!o) return '';
+  const hosts={'outlook.office.com':1,'outlook.office365.com':1};
+  const cands=[o.web_link,o.display_url,o.webLink];
+  for(let i=0;i<cands.length;i++){
+    const c=cands[i];
+    if(!c) continue;
+    try{const u=new URL(c);if(u.protocol==='https:'&&hosts[u.hostname]) return c;}catch(_){/* not a URL */}
+  }
+  return '';
+}
 function isTicked(id){if(!currentKey) return false; return !!getTicks()[_tickStorageKey(id)];}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
@@ -342,10 +377,28 @@ function renderItems(items,cls){
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
     const hasLink=item.entry_id&&item.entry_id.length>0;
+    // Connector-resolved OWA deep-link (fetch_inbox.py Phase 3.1), validated
+    // against the https + Outlook Web host allowlist. NOTE: renderItems() is
+    // currently not on the live render path (renderBriefing() merges the
+    // urgent/needs/fyi arrays into the priority board via applyPriOverrides()
+    // and renders them with _priRenderOneCard()); the same web_link -> OWA
+    // branch is applied there. This is kept consistent in case this path is
+    // ever revived.
+    const webUrl=_owaWebUrl(item);
     const dragAttrs=`draggable="true" ondragstart="emailCardDragStart(event,'${cls}',${i})" ondragend="emailCardDragEnd(event)"`;
     const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
+    const linkCls=`card-link${ticked?' done':''}${hiddenCls}`;
     const cardHtml=`<div class="card${ticked?' done':''}${hiddenCls}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
-    return hasLink?`<a class="card-link${ticked?' done':''}${hiddenCls}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)" ${dragAttrs}>${cardHtml}</a>`:`<div ${dragAttrs}>${cardHtml}</div>`;
+    // web_link present -> open OWA in a new tab (connector standard, identical
+    // to command-centre). Otherwise fall back to the openmail://<EntryID> COM
+    // path so the residual carried-forward Outlook-EntryID cards still work.
+    if(webUrl){
+      return `<a class="${linkCls}" href="javascript:void(0)" data-weburl="${escapeHtml(webUrl)}" onclick="openEmailWeb(event,this)" ${dragAttrs}>${cardHtml}</a>`;
+    }
+    if(hasLink){
+      return `<a class="${linkCls}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)" ${dragAttrs}>${cardHtml}</a>`;
+    }
+    return `<div ${dragAttrs}>${cardHtml}</div>`;
   }).join('');
 }
 
@@ -876,7 +929,18 @@ function _priRenderOneCard(p,sec){
     if(latest) subText=latest.replace(/^\[[^\]]+\]\s*/,'');
   }
   const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.ai_summary||p.sub||'');
-  const emailBtn=(p.entry_id||p.entryId)?`<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`:'';
+  // Open-email icon. The connector-resolved OWA web_link (fetch_inbox.py
+  // Phase 3.1 for inbox cards; webLink from the Command Centre task feed) is
+  // the standard opener now -- identical behaviour to command-centre: opens
+  // Outlook Web in a new tab. openmail://<EntryID> (COM / classic Outlook)
+  // remains only as the fallback for residual carried-forward cards that
+  // still carry a real Outlook EntryID and have no web_link.
+  const _pWeb=_owaWebUrl(p);
+  const emailBtn=_pWeb
+    ? `<span class="card-icon" title="Open email in Outlook web" data-weburl="${escapeHtml(_pWeb)}" onclick="openEmailWeb(event,this)">&#9993;</span>`
+    : (p.entry_id||p.entryId)
+      ? `<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`
+      : '';
   const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC&#8594;</span>`:'';
   const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
   return `<div class="card-ph${ticked?' done':''}${hiddenCls}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
