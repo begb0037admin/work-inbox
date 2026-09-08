@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-08 16:35",
+  "generated_at": "2026-09-08 22:17",
   "new_tasks": [
     {
       "title": "Reschedule PDR with Michael O'Sullivan (avoid 18 Sept onwards)",
@@ -64,9 +64,21 @@
   ],
   "applied_updates": [
     {
-      "task_id": "task-1787072363309",
-      "task_title": "URGENT -- Organisational Structure Update - August 2026 - FINAL",
-      "note": "Kevin sent Finance code B8 verification request to Anthony Kong regarding the Trinity Term 2026 non-college changes and potential code conflict with Human Anatomy & Genetics.",
+      "task_id": "t2608121801280",
+      "task_title": "Review 38-day balance implementation timeline and decisions",
+      "note": "Julie reports Chemistry prefers batching all system updates in one phase; Kevin's capacity assessment for GLAM still needed.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Julie Hickman",
+      "received": "2026-09-08 10:26",
+      "entry_id": "",
+      "message_id": "<LO0SPRMB0017119C3A1DFEE1495921BC8AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office.com/mail/search?query=LO0SPRMB0017119C3A1DFEE1495921BC8AB12%40LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM",
+      "mail_key": "LO0SPRMB0017119C3A1DFEE1495921BC8AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t017",
+      "task_title": "Iris / ECO Online -- enhancements, funding, new contact",
+      "note": "Christopher Sanders submitted IRIS Changes project plan for September requiring Kevin's review and HR Systems readiness confirmation.",
       "email_subject": "Finance code B8 Review",
       "email_from": "Kevin (sent to: Anthony Kong <anthony.kong@admin.ox.ac.uk>)",
       "received": "2026-09-08 15:46",
@@ -74,6 +86,30 @@
       "message_id": "<CWLP265MB596983B629BEE8A6E735CEB788B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
       "web_link": "",
       "mail_key": "CWLP265MB596983B629BEE8A6E735CEB788B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "t2609051524490",
+      "task_title": "Investigate Cority Employee Import error 2026-09-04 17:00",
+      "note": "Cority employee import error from 4 September 2026 at 17:00 requires investigation; log file review and root cause analysis needed.",
+      "email_subject": "GLAM – Ashmolean Visitor Experience / Incident 11688462",
+      "email_from": "Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>)",
+      "received": "2026-09-08 12:05",
+      "entry_id": "",
+      "message_id": "<CWLP265MB59697F153CE33D8483C4B82288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "",
+      "mail_key": "CWLP265MB59697F153CE33D8483C4B82288B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
+    },
+    {
+      "task_id": "task-1787072363309",
+      "task_title": "URGENT -- Organisational Structure Update - August 2026 - FINAL",
+      "note": "Anna Gilbert completed review of Trinity Term 2026 non-college changes while Katherine Corr on leave; Kevin must follow up on findings.",
+      "email_subject": "James - off sick",
+      "email_from": "Kevin (sent to: \"hrsystems@maillist.ox.ac.uk\" <hrsystems@maillist.ox.ac.uk>)",
+      "received": "2026-09-08 08:50",
+      "entry_id": "",
+      "message_id": "<CWLP265MB59699E7DD8F933C2ECBBEACD88B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "",
+      "mail_key": "CWLP265MB59699E7DD8F933C2ECBBEACD88B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
     }
   ]
 }
