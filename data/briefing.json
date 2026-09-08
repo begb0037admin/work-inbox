@@ -1,7 +1,7 @@
 {
-  "date": "Monday 7 September 2026",
-  "subtitle": "Critical investigations meet org structure go-live deadline",
-  "context": "Marie Cooksey remains out of office (return date unconfirmed), blocking final DPIA sign-off for college record to PeopleXD and delaying 38-day balance department decisions; Asta Palmer's auto-reply from 1 September signals absence with return date unclear. The Cority Employee Import error from Thursday 4 September at 17:00 (log file attached, unacted upon for 3 days) requires urgent investigation; P5 Incident# 11706988 (Support Call# 11707051 on Cority problems) and Support Call# 11707439 (manager unable to approve leave) remain open since 1 September. Athena Artuso's two unread annual leave requests from 4 September (summer 2027 leave and standard leave) have waited 3 days without approval; simultaneously, Chemistry's 38-day balance pilot with 131 workgroups depends on Kevin's capacity assessment before rollout can proceed. The most time-critical deadline is tomorrow 8 September: the organisational structure PACS build (case CA104_2526) must close six open items before the 9 September roadmap Portal build go-live. Open the Cority error log first to confirm import status, then address Athena's leave requests and both support call investigations.",
+  "date": "Tuesday 8 September 2026",
+  "subtitle": "Colleagues away; resend booking; Cority error + org deadline",
+  "context": "Katherine Corr is on leave and blocking review of the Trinity Term 2026 non-college organisational structure changes that Kevin sent on 4 September; Anna Gilbert stepped in on 7 September with responses. Marie Cooksey is on annual leave this week with Simon Burford as contact, while Asta Palmer's auto-reply indicates she was away as of 1 September. The Cority integration platform reported an SFTP error at 17:00 on 4 September during the scheduled employee data import, with a log file now awaiting Kevin's investigation. The PeopleXD Insight Reporting Holiday Records project (case 69001638) has a kickoff call with Conor O'Shea and Alan Quirke at Access Group scheduled for Friday 18 September at 14:00, but Kevin's confirmation email delivery failed on 3 September and requires immediate resend. The Azure platform roadmap has a 9 September deadline to close six open items on the PACS org-hierarchy build (CA104_3526) blocking the Portal go-live. Start with: resend the Holiday Records confirmation to Access Group, then review Anna Gilbert's Trinity Term changes summary.",
   "urgent": [
     {
       "title": "Canceled: Outstanding WFM Work - Kick Off",
@@ -177,6 +177,30 @@
     }
   ],
   "needs": [
+    {
+      "title": "Re: Clockify: Upcoming Free plan changes & options for your team",
+      "sub": "From <strong>Milena Miletic</strong>. Dear all, I hope you are doing well. I wanted to follow up on my previous email regarding the upcoming changes to the Cl",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Re: Clockify: Upcoming Free plan changes & options for your team",
+      "from": "Milena Miletic",
+      "entry_id": "",
+      "received": "7 Sep",
+      "received_raw": "2026-09-07 18:08:16",
+      "kevin_is_primary_recipient": false
+    },
+    {
+      "title": "RE: Trinity Term 2026 non-college changes",
+      "sub": "From <strong>Anna Gilbert</strong>. Hi Kevin Katherine is on leave now, and I don&amp;#8217;t think she got chance to come back to you on this. Please see my re",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Trinity Term 2026 non-college changes",
+      "from": "Anna Gilbert",
+      "entry_id": "",
+      "received": "7 Sep",
+      "received_raw": "2026-09-07 16:16:33",
+      "kevin_is_primary_recipient": true
+    },
     {
       "title": "University Bulletin: 7 September 2026",
       "sub": "From <strong>Internal Communications</strong>. University Bulletin: 7 September 2026 Royal Society Awards | Childcare places | Professional Services Conference View th",
@@ -1140,115 +1164,99 @@
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; flag current blockers: Cority investigations (Import error 4 Sept, Incident# 11706988), Support Call# 11707439 on manager leave approvals, and 38-day balance rollout decisions."
+      "summary": "Daily team catchup - no agenda items provided in advance."
     },
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; flag current blockers: Cority investigations (Import error 4 Sept, Incident# 11706988), Support Call# 11707439 on manager leave approvals, and 38-day balance rollout decisions."
+      "summary": "Daily team catchup - no agenda items provided in advance."
     },
     {
       "time": "10:00",
-      "title": "H&S Roadmap",
-      "sub": "Christopher Sanders",
-      "ccTaskId": "t2608141501170",
-      "summary": "H&S Roadmap with Christopher Sanders; prepare updates on P5 Incident# 11706988 (Cority problems, Support Call# 11707051) and Support Call# 11707439 (manager unable to approve leave). Discuss DTP1334 SHSMS evaluation status and any roadmap blockers."
+      "title": "Azure Integration Platform Sprint Review",
+      "sub": "Erika Braverman",
+      "summary": "Org Structure Review goal: close six open items blocking PACS org-hierarchy build CA104_3526 before 9 September Portal deadline. Resolve B8 code conflict in row 16 with Human Anatomy and Genetics; ensure Pay Administered By codes (DEP/DIV suffix) are set up for all new departments. Confirm Simon has booked conversation on College and Societies parent moves."
     },
     {
       "time": "10:00",
-      "title": "H&S Roadmap",
-      "sub": "Christopher Sanders",
-      "ccTaskId": "t2608141501170",
-      "summary": "H&S Roadmap with Christopher Sanders; prepare updates on P5 Incident# 11706988 (Cority problems, Support Call# 11707051) and Support Call# 11707439 (manager unable to approve leave). Discuss DTP1334 SHSMS evaluation status and any roadmap blockers."
+      "title": "Azure Integration Platform Sprint Review",
+      "sub": "Erika Braverman",
+      "summary": "Org Structure Review goal: close six open items blocking PACS org-hierarchy build CA104_3526 before 9 September Portal deadline. Resolve B8 code conflict in row 16 with Human Anatomy and Genetics; ensure Pay Administered By codes (DEP/DIV suffix) are set up for all new departments. Confirm Simon has booked conversation on College and Societies parent moves."
     },
     {
       "time": "11:00",
-      "title": "SHSMS Functional and UX Moderation meeting (Strategic Health & Safety system)",
-      "sub": "Helen Harbour",
-      "summary": "SHSMS Functional and UX moderation with Helen Harbour on DTP1334 project; bring supplier submission clarifications document and review for HR Systems functional requirements. Evaluation deadline was 21 August; confirm current status."
+      "title": "Sickness Absence Survey working group",
+      "sub": "Simon Burford",
+      "ccTaskId": "t2608071200560",
+      "summary": "Sickness Absence Survey working group catchup - regular meeting to review progress on the survey initiative."
     },
     {
       "time": "11:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "11:00",
-      "title": "SHSMS Functional and UX Moderation meeting (Strategic Health & Safety system)",
-      "sub": "Helen Harbour",
-      "summary": "SHSMS Functional and UX moderation with Helen Harbour on DTP1334 project; bring supplier submission clarifications document and review for HR Systems functional requirements. Evaluation deadline was 21 August; confirm current status."
+      "title": "Sickness Absence Survey working group",
+      "sub": "Simon Burford",
+      "ccTaskId": "t2608071200560",
+      "summary": "Sickness Absence Survey working group catchup - regular meeting to review progress on the survey initiative."
     },
     {
       "time": "11:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "12:00",
-      "title": "James Salas Guillen 1-1 Session",
       "sub": "Kevin Lelitte",
-      "summary": "1-1 with James Salas Guillen; follow up on Cority Applicant Data Import report (Grace built, handed over with documentation) and Simon's open questions on null-value handling and UTF-8 encoding. Check if James has status on P5 Incident# 11706988 investigation."
-    },
-    {
-      "time": "12:00",
-      "title": "James Salas Guillen 1-1 Session",
-      "sub": "Kevin Lelitte",
-      "summary": "1-1 with James Salas Guillen; follow up on Cority Applicant Data Import report (Grace built, handed over with documentation) and Simon's open questions on null-value handling and UTF-8 encoding. Check if James has status on P5 Incident# 11706988 investigation."
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "13:30",
-      "title": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "sub": "Helen Harbour",
-      "summary": "SHSMS Non-functional/Technical requirements moderation with Helen Harbour on DTP1334; bring supplier clarifications document and be ready to discuss HR Systems technical integration requirements and evaluation issues."
-    },
-    {
-      "time": "13:30",
-      "title": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "sub": "Helen Harbour",
-      "summary": "SHSMS Non-functional/Technical requirements moderation with Helen Harbour on DTP1334; bring supplier clarifications document and be ready to discuss HR Systems technical integration requirements and evaluation issues."
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "15:00",
-      "title": "GP Appointment",
-      "sub": "Kevin Lelitte",
-      "summary": "Personal GP appointment."
+      "title": "DTP1092 College staff into PXD Team meeting",
+      "sub": "Crispin Muncaster",
+      "summary": "DTP1092 College Staff into PXD Team meeting - integrations testing ongoing for project deliverable; Crispin Muncaster coordinating with Guy Williams and Simon on IT side."
     },
     {
       "time": "15:00",
-      "title": "GP Appointment",
-      "sub": "Kevin Lelitte",
-      "summary": "Personal GP appointment."
+      "title": "DTP1092 College staff into PXD Team meeting",
+      "sub": "Crispin Muncaster",
+      "summary": "DTP1092 College Staff into PXD Team meeting - integrations testing ongoing for project deliverable; Crispin Muncaster coordinating with Guy Williams and Simon on IT side."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     }
   ],
   "calTomorrow": [
@@ -1256,374 +1264,253 @@
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; flag current week blockers: org structure go-live 9 September deadline, DTP1092 College Staff into PXD integration testing readiness, sickness absence survey BA effort estimation needed."
+      "summary": "Daily team catchup - no agenda items provided."
     },
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; flag current week blockers: org structure go-live 9 September deadline, DTP1092 College Staff into PXD integration testing readiness, sickness absence survey BA effort estimation needed."
-    },
-    {
-      "time": "10:00",
-      "title": "Azure Integration Platform Sprint Review",
-      "sub": "Erika Braverman",
-      "summary": "Azure Integration Platform Sprint Review meeting (note: previous meeting notes reference Org Structure Trinity Term 2026); six open items for PACS build (CA104_2526) must close by 9 September go-live. Verify USER5 / Pay Administered By field is mandatory and confirm Simon's backend pay admin code adjustments."
-    },
-    {
-      "time": "10:00",
-      "title": "Azure Integration Platform Sprint Review",
-      "sub": "Erika Braverman",
-      "summary": "Azure Integration Platform Sprint Review meeting (note: previous meeting notes reference Org Structure Trinity Term 2026); six open items for PACS build (CA104_2526) must close by 9 September go-live. Verify USER5 / Pay Administered By field is mandatory and confirm Simon's backend pay admin code adjustments."
-    },
-    {
-      "time": "11:00",
-      "title": "Sickness Absence Survey working group",
-      "sub": "Simon Burford",
-      "ccTaskId": "t2608071200560",
-      "summary": "Sickness Absence Survey working group with Simon Burford; bring FA validation effort-per-department sizing with Michael (critical blocker for Marie/Ant's BA estimate). Also discuss status on unhanded-over WFM/SBS second-batch data files (Smith's School, Geography) flagged as miss on 25 August."
+      "summary": "Daily team catchup - no agenda items provided."
     },
     {
       "time": "11:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "11:00",
-      "title": "Sickness Absence Survey working group",
-      "sub": "Simon Burford",
-      "ccTaskId": "t2608071200560",
-      "summary": "Sickness Absence Survey working group with Simon Burford; bring FA validation effort-per-department sizing with Michael (critical blocker for Marie/Ant's BA estimate). Also discuss status on unhanded-over WFM/SBS second-batch data files (Smith's School, Geography) flagged as miss on 25 August."
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "11:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
+    },
+    {
+      "time": "13:30",
+      "title": "Physio (Hand and Knee)",
+      "sub": "Kevin Lelitte",
+      "summary": "Physiotherapy session for post-op knee rehabilitation - stage 2 strength-building and gym-based exercises. Currently using walking stick; swelling and pain persist but consultant cleared progress. Local appointment at Deer Park Witney preferred; cannot drive. Book assessment on return and discuss pain management options with pharmacist."
+    },
+    {
+      "time": "13:30",
+      "title": "Physio (Hand and Knee)",
+      "sub": "Kevin Lelitte",
+      "summary": "Physiotherapy session for post-op knee rehabilitation - stage 2 strength-building and gym-based exercises. Currently using walking stick; swelling and pain persist but consultant cleared progress. Local appointment at Deer Park Witney preferred; cannot drive. Book assessment on return and discuss pain management options with pharmacist."
+    },
+    {
+      "time": "14:00",
+      "title": "HR Systems team meeting",
+      "sub": "Michelle Williams",
+      "summary": "HR Systems team meeting - regular management and status update meeting."
+    },
+    {
+      "time": "14:00",
+      "title": "HR Systems team meeting",
+      "sub": "Michelle Williams",
+      "summary": "HR Systems team meeting - regular management and status update meeting."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "15:00",
-      "title": "DTP1092 College staff into PXD Team meeting",
-      "sub": "Crispin Muncaster",
-      "summary": "DTP1092 College Staff into PXD Team meeting with Crispin Muncaster; confirm UOXU/UOXC environment prep complete (API_USER configured with Company 90 restriction per Simon 2 Sept, integration platforms current). Status on College staff data migration and any blockers for integration testing."
-    },
-    {
-      "time": "15:00",
-      "title": "DTP1092 College staff into PXD Team meeting",
-      "sub": "Crispin Muncaster",
-      "summary": "DTP1092 College Staff into PXD Team meeting with Crispin Muncaster; confirm UOXU/UOXC environment prep complete (API_USER configured with Company 90 restriction per Simon 2 Sept, integration platforms current). Status on College staff data migration and any blockers for integration testing."
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     }
   ],
   "calDay2": [
     {
-      "time": "09:30",
-      "title": "FA Team Daily Catchup",
+      "time": "09:00",
+      "title": "Org Structure TT2026 — PeopleXD build walkthrough",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; org structure PACS build 9 September go-live deadline is TODAY - flag any last-minute blockers or changes needed before Portal build."
+      "summary": "Org Structure TT2026 PeopleXD build walkthrough - close six open items blocking PACS org-hierarchy build CA104_3526 before Portal build. Resolve proposed code B8 conflict with Human Anatomy and Genetics existing codes; ensure Pay Administered By codes (DEP/DIV suffix) are created for all new departments. Confirm Simon's conversation on College and Societies parent moves is booked."
+    },
+    {
+      "time": "09:00",
+      "title": "Org Structure TT2026 — PeopleXD build walkthrough",
+      "sub": "Kevin Lelitte",
+      "summary": "Org Structure TT2026 PeopleXD build walkthrough - close six open items blocking PACS org-hierarchy build CA104_3526 before Portal build. Resolve proposed code B8 conflict with Human Anatomy and Genetics existing codes; ensure Pay Administered By codes (DEP/DIV suffix) are created for all new departments. Confirm Simon's conversation on College and Societies parent moves is booked."
     },
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; org structure PACS build 9 September go-live deadline is TODAY - flag any last-minute blockers or changes needed before Portal build."
+      "summary": "Daily team catchup - no agenda items provided."
+    },
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte",
+      "summary": "Daily team catchup - no agenda items provided."
     },
     {
       "time": "11:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Daily FA team standup; flag any blockers."
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "11:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Daily FA team standup; flag any blockers."
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "13:30",
-      "title": "Physio (Hand and Knee)",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "13:30",
-      "title": "Physio (Hand and Knee)",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "14:00",
-      "title": "HR Systems team meeting",
-      "sub": "Michelle Williams",
-      "summary": "HR Systems team meeting with Michelle Williams; bring updates on Cority investigations (Import error 4 Sept, Incident# 11706988 under investigation), 38-day balance rollout (Chemistry pilot proceeding), Trinity Term 2026 org structure go-live (9 Sept deadline), and P5 Support Call# 11707439 manager leave approval issue."
-    },
-    {
-      "time": "14:00",
-      "title": "HR Systems team meeting",
-      "sub": "Michelle Williams",
-      "summary": "HR Systems team meeting with Michelle Williams; bring updates on Cority investigations (Import error 4 Sept, Incident# 11706988 under investigation), 38-day balance rollout (Chemistry pilot proceeding), Trinity Term 2026 org structure go-live (9 Sept deadline), and P5 Support Call# 11707439 manager leave approval issue."
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     }
   ],
   "calDay3": [
     {
-      "time": "09:00",
-      "title": "Org Structure TT2026 — PeopleXD build walkthrough",
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Org Structure Trinity Term 2026 PeopleXD build walkthrough (Kevin's meeting); critical blocker: six open items for PACS hierarchy build (CA104_2526) must be complete. Ensure USER5 / Pay Administered By field is mandatory in all build steps, confirm Simon's backend pay admin adjustments, and resolve Row 16 code B8 conflict with Human Anatomy & Genetics."
-    },
-    {
-      "time": "09:00",
-      "title": "Org Structure TT2026 — PeopleXD build walkthrough",
-      "sub": "Kevin Lelitte",
-      "summary": "Org Structure Trinity Term 2026 PeopleXD build walkthrough (Kevin's meeting); critical blocker: six open items for PACS hierarchy build (CA104_2526) must be complete. Ensure USER5 / Pay Administered By field is mandatory in all build steps, confirm Simon's backend pay admin adjustments, and resolve Row 16 code B8 conflict with Human Anatomy & Genetics."
+      "summary": "Daily team catchup - no agenda items provided."
     },
     {
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; org structure build has now completed - debrief any issues encountered during 9 September go-live and confirm readiness for Portal build next phase."
+      "summary": "Daily team catchup - no agenda items provided."
     },
     {
-      "time": "09:30",
-      "title": "FA Team Daily Catchup",
+      "time": "10:00",
+      "title": "Orthopaedic Hand Surgery Follow-up Review",
       "sub": "Kevin Lelitte",
-      "summary": "Daily team standup; org structure build has now completed - debrief any issues encountered during 9 September go-live and confirm readiness for Portal build next phase."
+      "summary": "Orthopaedic Hand Surgery follow-up review appointment."
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey",
+      "summary": "Roadmap review meeting with Marie Cooksey - review open roadmap items, progress, and blockers."
+    },
+    {
+      "time": "10:00",
+      "title": "Orthopaedic Hand Surgery Follow-up Review",
+      "sub": "Kevin Lelitte",
+      "summary": "Orthopaedic Hand Surgery follow-up review appointment."
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey",
+      "summary": "Roadmap review meeting with Marie Cooksey - review open roadmap items, progress, and blockers."
     },
     {
       "time": "11:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "11:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
     },
     {
       "time": "12:30",
       "title": "Keep free",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled keep-free time block."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "14:30",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     },
     {
       "time": "16:00",
       "title": "Busy",
-      "sub": "Kevin Lelitte"
+      "sub": "Kevin Lelitte",
+      "summary": "Scheduled busy time block."
     }
   ],
   "calFull": [
     {
       "date": "2026-09-07",
       "label": "Monday 7 Sep",
-      "items": [
-        {
-          "time": "All day",
-          "title": "Julie annual leave",
-          "sub": "Julie Hickman"
-        },
-        {
-          "time": "All day",
-          "title": "Michael - AL",
-          "sub": "Michael O'Sullivan"
-        },
-        {
-          "time": "All day",
-          "title": "Kevin - Annual Leave",
-          "sub": "People Department - HR Systems"
-        },
-        {
-          "time": "All day",
-          "title": "Julie annual leave",
-          "sub": "Julie Hickman"
-        },
-        {
-          "time": "All day",
-          "title": "Michael - AL",
-          "sub": "Michael O'Sullivan"
-        },
-        {
-          "time": "All day",
-          "title": "Kevin - Annual Leave",
-          "sub": "People Department - HR Systems"
-        },
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "10:00",
-          "title": "H&S Roadmap",
-          "sub": "Christopher Sanders"
-        },
-        {
-          "time": "10:00",
-          "title": "H&S Roadmap",
-          "sub": "Christopher Sanders"
-        },
-        {
-          "time": "11:00",
-          "title": "SHSMS Functional and UX Moderation meeting (Strategic Health & Safety system)",
-          "sub": "Helen Harbour"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "11:00",
-          "title": "SHSMS Functional and UX Moderation meeting (Strategic Health & Safety system)",
-          "sub": "Helen Harbour"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:00",
-          "title": "James Salas Guillen 1-1 Session",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:00",
-          "title": "James Salas Guillen 1-1 Session",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:30",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:30",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "13:30",
-          "title": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-          "sub": "Helen Harbour"
-        },
-        {
-          "time": "13:30",
-          "title": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-          "sub": "Helen Harbour"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "15:00",
-          "title": "GP Appointment",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "15:00",
-          "title": "GP Appointment",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        }
-      ],
-      "isToday": true
+      "items": [],
+      "isToday": false
     },
     {
       "date": "2026-09-08",
@@ -1710,7 +1597,7 @@
           "sub": "Kevin Lelitte"
         }
       ],
-      "isToday": false
+      "isToday": true
     },
     {
       "date": "2026-09-09",
@@ -1872,16 +1759,6 @@
       "items": [
         {
           "time": "All day",
-          "title": "Asta - Annual Leave",
-          "sub": "People Department - HR Systems"
-        },
-        {
-          "time": "All day",
-          "title": "Marie K: Non-working day",
-          "sub": "Marie King"
-        },
-        {
-          "time": "All day",
           "title": "Annual Leave - Marie (contact Simon Burford)",
           "sub": "Marie Cooksey"
         },
@@ -1899,6 +1776,16 @@
           "time": "All day",
           "title": "Annual Leave - Marie (contact Simon Burford)",
           "sub": "Marie Cooksey"
+        },
+        {
+          "time": "All day",
+          "title": "Asta - Annual Leave",
+          "sub": "People Department - HR Systems"
+        },
+        {
+          "time": "All day",
+          "title": "Marie K: Non-working day",
+          "sub": "Marie King"
         },
         {
           "time": "09:30",
@@ -1976,11 +1863,8 @@
   ],
   "absences": [
     "Asta - off Friday 11 September, returns Monday 14 September",
-    "Julie Hickman - off today, returns Tuesday 8 September",
-    "Kevin - off today, returns Tuesday 8 September",
     "Marie Cooksey - off Friday 11 September, returns Monday 14 September",
-    "Marie King - off Thursday 10 September, returns Monday 14 September",
-    "Michael O'Sullivan - off today, returns Tuesday 8 September"
+    "Marie King - off Thursday 10 September, returns Tuesday 15 September"
   ],
   "prioritiesToday": [
     {
@@ -2000,7 +1884,7 @@
       ],
       "source": "orgstructure@admin.ox.ac.uk / Simon Burford / Sarah Rowles -- email thread",
       "dateType": "red",
-      "ai_summary": "FINAL organisational structure update received 19 August with changes effective through that date; Simon's confirmation to Sarah Rowles on go-live timing for 9 September Portal deadline still awaited."
+      "ai_summary": "Anna Gilbert has reviewed Trinity Term 2026 non-college organisational structure changes on 7 September with responses provided while Katherine Corr is on leave; 9 September roadmap deadline requires close-out of six blocking PACS org-hierarchy build items (CA104_3526)."
     },
     {
       "id": "task-1787044968753",
@@ -2016,7 +1900,7 @@
       ],
       "source": "Laura Porter (Talent Mobility Specialist, People Dept) -- email thread",
       "dateType": "red",
-      "ai_summary": "Auto job-alert notification email text changes (approved by Laura Porter and Philip Taylor in Feb 2026) stalled on Access Group config issue; Kevin must check ticket status and send Laura screenshot for sign-off before pushing to Live."
+      "ai_summary": "Auto job-alert notification email text changes approved by Laura Porter and Philip Taylor in February 2026; implementation stalled on Access Group backend config issue - Kevin must check ticket status and resend screenshot to Laura for sign-off before pushing to Live."
     },
     {
       "id": "t2608111331410",
@@ -2036,8 +1920,7 @@
         "[01 Sep 2026] Sarah Johnson introduces Victoria Myatt from Cority as consultant for the Cority Consultancy project preparation. (email: Sarah Johnson - University of Oxford: Cority Consultancy)"
       ],
       "source": "Inbox - James Salas Guillen, 2026-08-11 13:11",
-      "dateType": "red",
-      "ai_summary": "Cority Applicant Data Import file: Kevin clarified that Grace (not Lee) originally built the RECSUP20 report and handover documentation is complete; Simon's two technical questions (null-value handling, UTF-8 encoding) still need Kevin's answers."
+      "dateType": "red"
     },
     {
       "id": "t035",
@@ -2050,7 +1933,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "red",
-      "ai_summary": "WFM/GLAM rostering stalled since June when GLAM decided last-minute not to load data; three areas outstanding (SBS, PEDS, GLAM) blocking Sarah's UC dashboards; resolution meeting needs scheduling with Kevin, Simon, Marie, Michelle."
+      "ai_summary": "WFM / GLAM rostering data loading stalled - GLAM decided at last minute they lacked capacity and only one wave was loaded; three areas outstanding (SBS, PEDS, GLAM), blocking Sarah's UC dashboards and reports - resolution meeting needs to be scheduled with Kevin, Simon, Marie, Michelle, and Julie."
     },
     {
       "id": "t2609020705200",
@@ -2061,8 +1944,7 @@
         "[02 Sep 2026] Michael O'Sullivan forwards manager leave approval issue for investigation. (email: Michael O'Sullivan - Support Call# 11707439: Manager unable to approve leave)"
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-09-01 16:29",
-      "dateType": "red",
-      "ai_summary": "Manager unable to approve leave (Support Call 11707439) reported 1 September; possible WFM module issue affecting day-to-day leave processing and requiring diagnostic work."
+      "dateType": "red"
     },
     {
       "id": "t2609020705201",
@@ -2077,7 +1959,7 @@
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-09-01 09:57",
       "dateType": "red",
-      "ai_summary": "P5 Incident 11706988 / Task 50981420 assigned 1 September to Kevin's team for urgent investigation; Cory issues affecting multiple users with Gillian Wilson and Christopher Sanders coordinating responses."
+      "ai_summary": "P5 Incident 11706988 / Support Call 11707051 (urgent Cority problems affecting multiple users) assigned to Kevin's team on 1 September; team diagnostic and resolution work underway with Christopher Sanders and Gillian Wilson coordinating."
     },
     {
       "id": "t2609041614070",
@@ -2090,7 +1972,7 @@
       ],
       "source": "Inbox - Athena Artuso, 2026-09-04 14:00",
       "dateType": "red",
-      "ai_summary": "Athena Artuso submitted two annual leave requests on 4 September (unread, 3+ days old); awaiting Kevin's approval or response."
+      "ai_summary": "Athena Artuso submitted two annual leave requests on 4 September (summer 2027 and another) - both unread and awaiting Kevin's review and approval."
     },
     {
       "id": "t2609051524490",
@@ -2102,7 +1984,7 @@
       ],
       "source": "Inbox - Simon Burford, 2026-09-03 16:03",
       "dateType": "red",
-      "ai_summary": "Cority Employee Import error on 4 September at 17:00 logged SFTP connection failure; attached log file requires immediate review to confirm sync completion status or determine re-run requirement."
+      "ai_summary": "Cority integration platform reported SFTP connection error on 4 September at 17:00 during scheduled employee data import; log file attached and requires investigation to confirm whether import completed or needs re-run."
     }
   ],
   "prioritiesTomorrow": [
@@ -2123,8 +2005,7 @@
         "[18 Aug 2026] Tier moved week -> tomorrow ahead of Kevin's 19 Aug 1-1 with Simon Burford on this topic."
       ],
       "source": "Inbox - Simon Burford, 2026-08-07 16:21",
-      "dateType": "orange",
-      "ai_summary": "Volunteering Leave pay code standalone build requested via Access Group case 69049424 (July 2026); Kevin must decide FA team prioritisation timeline and review Michael O'Sullivan's TIMDEP04 report-update point."
+      "dateType": "orange"
     }
   ],
   "prioritiesWeek": [
@@ -2145,11 +2026,12 @@
         "[19 Aug 2026] Kevin replied to Alan Quirke and Marie Cooksey approving the Holiday Records 3 Reports project and confirming it is ready to schedule with Access Group. (email: Kevin (sent to: 'Alan Quirke'; Marie Cooksey) - RE: #External# PeopleXD Insight Reporting â€“ Quote Request for Holiday Records Reports)",
         "[02 Sep 2026] Conor O'Shea proposes initial call on Friday 18 September at 14:00 for Holiday Records project; Kevin needs to confirm availability. (email: Conor O'Shea - RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports)",
         "[03 Sep 2026] Kevin confirmed with Access Group that 2pm Friday 18 September works for Holiday Records project kickoff call; awaiting calendar invite from Conor O'Shea. (email: Kevin (sent to: Conor O'Shea <C.OShea@theaccessgroup.com>, Alan Quirke <Alan.Quirke@theaccessgroup.com>, Marie Cooksey <marie.cooksey@admin.ox.ac.uk>) - Re: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports)",
-        "[05 Sep 2026] Kevin confirmed 2pm Friday 18 September works for Holiday Records project kickoff call with Access Group (Conor O'Shea); awaiting calendar invite from Access Group. (email: Kevin (sent to: Conor O'Shea; Alan Quirke; Marie Cooksey) - Re: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports)"
+        "[05 Sep 2026] Kevin confirmed 2pm Friday 18 September works for Holiday Records project kickoff call with Access Group (Conor O'Shea); awaiting calendar invite from Access Group. (email: Kevin (sent to: Conor O'Shea; Alan Quirke; Marie Cooksey) - Re: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports)",
+        "[07 Sep 2026] Kevin's email confirmation to Conor O'Shea for Friday 18 September 14:00 Holiday Records kickoff failed to deliver; Kevin must resend confirmation or contact Conor via alternative method. (email: postmaster@admin.co.uk - Undeliverable: RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports)"
       ],
       "source": "Inbox 2026-06-11 15:01 / Quote 24/06",
       "dateType": "orange",
-      "ai_summary": "Holiday Records 3-reports project (case 69001638) approved 24 June with 2,800 flex points; kickoff call scheduled Friday 18 September 14:00 with Conor O'Shea but Kevin's confirmation email bounced and needs resend."
+      "ai_summary": "Holiday Records 3 Reports project (case 69001638) approved and ready to schedule with Access Group; kickoff call confirmed for Friday 18 September 14:00 with Conor O'Shea but Kevin's confirmation email bounced on 3 September - requires immediate resend."
     },
     {
       "id": "task-1785704715215",
@@ -2165,7 +2047,7 @@
       ],
       "source": "Julie Hickman",
       "dateType": "orange",
-      "ai_summary": "Julie Hickman flagged outstanding Development Insight reports actions following conversation with Ilona; Kevin needs to review and understand what work is required."
+      "ai_summary": "Julie Hickman flagged outstanding actions on Development Insight reports following conversation with Ilona; Kevin to review what actions are required and scope work needed."
     },
     {
       "id": "t2608030857560",
@@ -2182,8 +2064,7 @@
         "[21 Aug 2026] Kevin clarified that the Cority applicant data import report was originally built by Grace, not Lee, and has been handed over with documentation. (email: Kevin (sent to: Simon Burford; James Salas Guillen) - Re: Cority - Applicant Data Import file)"
       ],
       "source": "Inbox - Christopher Sanders, 2026-07-27 11:00",
-      "dateType": "orange",
-      "ai_summary": "SH&SM Project HR Systems Tender Evaluation Response meeting with Christopher Sanders; Kevin's participation required for evaluation discussion related to Health & Safety Management System (DTP1334)."
+      "dateType": "orange"
     },
     {
       "id": "t2608061800540",
@@ -2197,8 +2078,7 @@
         "[12 Aug 2026] Meeting reminder notification that the Oxford University Evo Pre project meeting is starting soon. (email: Mike West via Clari Copilot - Your meeting \"Oxford University Evo Pre project meeting \" is starting soon...)"
       ],
       "source": "Inbox - Simon Burford, 2026-08-06 16:44",
-      "dateType": "orange",
-      "ai_summary": "Oxford University Evo Pre project meeting held 11 August; Kevin attended in Simon's absence to represent HR Systems with Julian Williams from IT Services."
+      "dateType": "orange"
     },
     {
       "id": "t2608061800541",
@@ -2211,8 +2091,7 @@
         "[19 Aug 2026] Michael O'Sullivan forwarded notification of PeopleXD platform maintenance scheduled for Friday 28 August 20:00-22:00 affecting services. (email: Michael O'Sullivan - FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance)"
       ],
       "source": "Inbox - Christopher Sanders, 2026-08-06 15:11",
-      "dateType": "orange",
-      "ai_summary": "Incident Reporting PUG meeting with Christopher Sanders; Kevin's attendance required to participate in agenda discussion."
+      "dateType": "orange"
     },
     {
       "id": "t2608071200560",
@@ -2226,8 +2105,7 @@
         "[19 Aug 2026] Kevin declined Cross-Team Process Improvement Working Group meeting due to scheduling conflict. (email: Kevin (sent to: Otter Ho) - Re: Cross-Team Process Improvement Working Group â€“ 1st Meeting)"
       ],
       "source": "Inbox - Simon Burford, 2026-08-07 11:04",
-      "dateType": "orange",
-      "ai_summary": "Sickness Absence Survey working group regular catch-up with Simon Burford; Kevin needs to attend and stay current on working group progress."
+      "dateType": "orange"
     },
     {
       "id": "t2608071801051",
@@ -2241,8 +2119,7 @@
         "[20 Aug 2026] Michael O'Sullivan has responded that the TIMDEP04 Absence Reasons report may need updating to include the new Volunteering Leave absence type. (email: Michael O'Sullivan - RE: Volunteering Leave)"
       ],
       "source": "Inbox - Simon Burford, 2026-08-07 15:09",
-      "dateType": "orange",
-      "ai_summary": "Team calendar config issue identified when Simon tried to configure Volunteering Leave pay code in UOXU (missing option); Kevin must work with Asta to diagnose and resolve."
+      "dateType": "orange"
     },
     {
       "id": "t2608071801052",
@@ -2260,8 +2137,7 @@
         "[02 Sep 2026] Simon Burford confirms API_USER account in UOXU has been configured with Company 90 restriction and system is ready for integration re-test. (email: Simon Burford - API_USER account)"
       ],
       "source": "Inbox - Simon Burford, 2026-08-06 14:49",
-      "dateType": "orange",
-      "ai_summary": "UOXU/UOXC refresh approach for Company 90 testing confirmed: clone from UOXP to UOXC completed successfully 18-19 August by Access Group; API_USER account now configured in UOXU with Company 90 restriction."
+      "dateType": "orange"
     },
     {
       "id": "t2608101804010",
@@ -2274,8 +2150,7 @@
         "[12 Aug 2026] Conor O'Brien has sent updated work on the Multi Company Setup (FP 68261303) and notes that both Simon and Kevin are on leave next week, indicating work is progressing and needs Kevin's review. (email: Conor O'Brien - RE: #External# RE: Multi Company Setup)"
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-10 17:05",
-      "dateType": "orange",
-      "ai_summary": "Clockify role consolidation for Beth requested 10 August; Marie waiting for Simon's return to understand impact before proceeding; Kevin to investigate feasibility."
+      "dateType": "orange"
     },
     {
       "id": "t2608111309070",
@@ -2287,8 +2162,7 @@
         "[17 Aug 2026] Marie Cooksey has sent the Teams meeting link for the H&S Systems Supplier Reviews meeting Kevin needs to attend. (email: Marie Cooksey - HR Systems Management)"
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-11 11:50",
-      "dateType": "orange",
-      "ai_summary": "H&S Systems Supplier Reviews meeting with Marie Cooksey; Kevin's attendance required to participate in supplier evaluation process."
+      "dateType": "orange"
     },
     {
       "id": "t2608111309071",
@@ -2303,8 +2177,7 @@
         "[25 Aug 2026] Asta Palmer has sent reminder that HR Systems team meeting is tomorrow (Wednesday 26 August) and it is Presentations week. (email: Michael O'Sullivan - RE: PDR 2026 – Friday 18 September)"
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-11 11:49",
-      "dateType": "orange",
-      "ai_summary": "HR Systems Management meeting with Marie Cooksey; Kevin's attendance required to participate in management discussions."
+      "dateType": "orange"
     },
     {
       "id": "t2608111507360",
@@ -2320,7 +2193,7 @@
       ],
       "source": "Inbox - Julie Hickman, 2026-08-11 13:39",
       "dateType": "orange",
-      "ai_summary": "GLAM joining 38-day balance scheme: Marie seeking Kevin's input on whether GLAM should join alongside Maths and Chemistry; Julie has had productive initial conversation with Becky Fitzek at GLAM."
+      "ai_summary": "Julie Hickman asked Marie (copied Kevin) for thoughts on whether GLAM should join 38-day balance scheme alongside Maths and Chemistry; initial GLAM conversation with Becky Fitzek was productive; Kevin to provide input on capacity and readiness."
     },
     {
       "id": "t2608111719550",
@@ -2333,8 +2206,7 @@
         "[26 Aug 2026] Alex Manton-Jones has sent the follow-up email from the authentication call on 11 August; Kevin should review the content and determine required actions. (email: Alex Manton-Jones - Oxford Uni - Pre-project Authentication (Follow up))"
       ],
       "source": "Inbox - Alex Manton-Jones, 2026-08-11 16:50",
-      "dateType": "orange",
-      "ai_summary": "Oxford University Pre-project Authentication call held 11 August; Alex Manton-Jones follow-up sent 26 August; Kevin must review and determine what action items are required."
+      "dateType": "orange"
     },
     {
       "id": "t2608111719551",
@@ -2345,8 +2217,7 @@
         "[11 Aug 2026] Anne Mortimer has provided updated access links to the current DPIA and DPS documents for review. (email: Anne Mortimer - FW: draft DPIA for college record to PXD)"
       ],
       "source": "Inbox - Anne Mortimer, 2026-08-11 15:32",
-      "dateType": "orange",
-      "ai_summary": "DPIA and DPS documents for college record to PXD updated with new access links 11 August; Kevin to review any changes since Marie and Information Compliance's previous review."
+      "dateType": "orange"
     },
     {
       "id": "t2608121801280",
@@ -2370,7 +2241,7 @@
       ],
       "source": "Inbox - Julie Hickman, 2026-08-12 17:09",
       "dateType": "orange",
-      "ai_summary": "38-day balance implementation timeline document shared by Julie Hickman; Kevin must review implementation schedule and understand any HR Systems decisions required."
+      "ai_summary": "38-day balance implementation timeline shared by Julie Hickman; Kevin has confirmed Chemistry pilot commitment with 131 workgroups and must provide GLAM capacity estimate pending Chemistry completion."
     },
     {
       "id": "t2608121801281",
@@ -2386,8 +2257,7 @@
         "[19 Aug 2026] Michael O'Sullivan provided an update on PeopleXD platform maintenance scheduled for Friday 28 August between 8-10pm that may impact services. (email: Michael O'Sullivan - FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance)"
       ],
       "source": "Inbox - Jessica Oldershaw, 2026-08-12 16:41",
-      "dateType": "orange",
-      "ai_summary": "PeopleXD uplift timeline from Jessica Oldershaw indicates September decision point; Kevin must review and confirm HR Systems readiness and dependencies."
+      "dateType": "orange"
     },
     {
       "id": "t2608121801282",
@@ -2400,8 +2270,7 @@
         "[18 Aug 2026] Simon Burford has forwarded notification of changes to the PACS organisational structure moving colleges and societies to level 3 from level 2; this is the update that Kevin needs to review for HR Systems implications. (email: Simon Burford - FW: Organisational Structure Update - August 2026 - DRAFT)"
       ],
       "source": "Inbox - Organisational Structure, 2026-08-12 16:24",
-      "dateType": "orange",
-      "ai_summary": "August 2026 organisational structure draft circulated with changes effective through 12 August; Kevin to review for HR Systems implications or required actions."
+      "dateType": "orange"
     },
     {
       "id": "t2608131801210",
@@ -2412,8 +2281,7 @@
         "[14 Aug 2026] Helen Harbour's email confirms the deadline for DTP1334 SHSMS supplier requirements evaluations is Friday 21 August and Kevin's input is needed. (email: Helen Harbour - Strategic Health & Safety Management System project supplier requirements evaluations; upcoming deadline of Friday 21 August)"
       ],
       "source": "Inbox - Helen Harbour, 2026-08-13 16:10",
-      "dateType": "orange",
-      "ai_summary": "DTP1334 SHSMS supplier requirements evaluations deadline Friday 21 August; Helen Harbour coordinating with Kevin's input needed for evaluation process."
+      "dateType": "orange"
     },
     {
       "id": "t2608131801211",
@@ -2424,8 +2292,7 @@
         "[14 Aug 2026] Caroline Gow has shared the Supplier Submission Clarifications V2.0 document containing supplier responses for Kevin to review ahead of the 21 August deadline. (email: Caroline Gow - Caroline Gow shared \"Supplier Submission Clarifications V2.0\" with you)"
       ],
       "source": "Inbox - Caroline Gow, 2026-08-13 16:56",
-      "dateType": "orange",
-      "ai_summary": "Supplier Submission Clarifications V2.0 for DTP1334 SHSMS shared by Caroline Gow; Kevin to review and provide input on supplier responses ahead of 21 August deadline."
+      "dateType": "orange"
     },
     {
       "id": "t2608141501170",
@@ -2436,8 +2303,7 @@
         "[14 Aug 2026] Confirmation email received from Christopher Sanders for the H&S Roadmap catch-up meeting scheduled for Friday 14 August. (email: Christopher Sanders - H&S Roadmap)"
       ],
       "source": "Inbox - Christopher Sanders, 2026-08-14 13:13",
-      "dateType": "orange",
-      "ai_summary": "H&S Roadmap catch-up with Christopher Sanders; regular meeting to review open support tickets, roadmap, backlog items, blockers and concerns."
+      "dateType": "orange"
     },
     {
       "id": "t2608181201060",
@@ -2449,8 +2315,7 @@
         "[19 Aug 2026] Kevin bumped Simon Burford's email on 18 Aug regarding confirmation of employer pension rates for annual Financial Statements. (email: Kevin (sent to: Kevin Lelitte) - Fw: Confirming ERs pension rates for annual Financial Statements -- FINAL)"
       ],
       "source": "Inbox - Kevin Lelitte, 2026-08-18 10:24",
-      "dateType": "orange",
-      "ai_summary": "Employer pension rates confirmation for annual Financial Statements bumped by Kevin on 18 August (originally from Simon 28 May); still outstanding and requires sign-off."
+      "dateType": "orange"
     },
     {
       "id": "t2608181201061",
@@ -2463,8 +2328,7 @@
         "[19 Aug 2026] Kevin bumped the GLAM rostering requirements email for Botanic Gardens and Ashmolean Security, signalling need for follow-up. (email: Kevin (sent to: Kevin Lelitte) - Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement )"
       ],
       "source": "Inbox - Kevin Lelitte, 2026-08-18 10:23",
-      "dateType": "orange",
-      "ai_summary": "GLAM rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security (from Anna Carter-Windle 28 May); Kevin bumped on 18 August, still requires follow-up action."
+      "dateType": "orange"
     },
     {
       "id": "t2608181201062",
@@ -2476,8 +2340,7 @@
         "[19 Aug 2026] Kevin bumped the EcoOnline supplier engagement email on 18 Aug, flagging it for follow-up action. (email: Kevin (sent to: Kevin Lelitte) - Fw: EcoOnline /University of Oxford)"
       ],
       "source": "Inbox - Kevin Lelitte, 2026-08-18 10:23",
-      "dateType": "orange",
-      "ai_summary": "EcoOnline supplier engagement follow-up (from Joanne Grant 28 May); Kevin bumped on 18 August, requires response or action to progress relationship."
+      "dateType": "orange"
     },
     {
       "id": "t2608181501150",
@@ -2488,8 +2351,7 @@
         "[18 Aug 2026] Julie Hickman has scheduled a Teams meeting for planning departments' move to 38-day balance scheme. (email: Julie Hickman - Planning for depts move to 38 day balance )"
       ],
       "source": "Inbox - Julie Hickman, 2026-08-17 13:09",
-      "dateType": "orange",
-      "ai_summary": "User guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements requested by Julie Hickman 18 August as part of 38-day balance implementation."
+      "dateType": "orange"
     },
     {
       "id": "t2608191801190",
@@ -2504,7 +2366,7 @@
       ],
       "source": "Inbox - Simon Burford, 2026-08-19 15:51",
       "dateType": "orange",
-      "ai_summary": "Application form internal candidate identification feature: Simon forwarded scoping request on 19 August; Kevin to estimate Functional Analysis effort required."
+      "ai_summary": "Simon Burford forwarded request asking Kevin to estimate Functional Analysis effort required to implement internal candidate identification in the application form - scoping/estimation task."
     },
     {
       "id": "t2608201500590",
@@ -2515,8 +2377,7 @@
         "[20 Aug 2026] Simon Burford requests functional analysis effort estimate for internal candidate identification feature in application form. (email: Simon Burford - FW: Application form - identification of internal candidates)"
       ],
       "source": "Inbox - Simon Burford, 2026-08-19 15:51",
-      "dateType": "orange",
-      "ai_summary": "Application form internal candidate identification: Simon Burford requests functional analysis effort estimate for internal candidate identification feature in application form."
+      "dateType": "orange"
     },
     {
       "id": "t2608211201050",
@@ -2526,8 +2387,7 @@
         "[21 Aug 2026] Auto-created from inbox triage (email: Sarah Rowles - Sickness Absence Data Catch-up)."
       ],
       "source": "Inbox - Sarah Rowles, 2026-08-21 11:09",
-      "dateType": "orange",
-      "ai_summary": "Sickness absence data completeness analysis (OUTPUT_SicknessDataChecks_20260811.xlsx) from Sarah Rowles 21 August; Kevin to review findings and discuss data quality issues."
+      "dateType": "orange"
     },
     {
       "id": "task-1787645383808",
@@ -2545,7 +2405,7 @@
       ],
       "source": "Weekly Granola Review, 22 Aug 2026 (corrected)",
       "dateType": "orange",
-      "ai_summary": "PDR sessions for Simon Burford and FA team required by end of September 2026; Asta Palmer scheduled for Friday 25 September 12:00-1:00pm; Michael O'Sullivan requesting reschedule from 18 September due to leave."
+      "ai_summary": "PDR sessions with Simon Burford and FA team need booking by end of September 2026; Asta Palmer's PDR scheduled for Friday 25 September 12:00-1:00pm, Michael O'Sullivan requested reschedule from 18 September due to leave."
     },
     {
       "id": "task-1787652746063",
@@ -2562,7 +2422,7 @@
       ],
       "source": "Sickness Absence Data Catch-up, 21 Aug 2026 Granola meeting",
       "dateType": "orange",
-      "ai_summary": "FA validation effort per department needs confirmation between Kevin and Michael (from 21 Aug Sickness Absence Catch-up); feeds into Marie/Ant's BA-effort estimate and David White's funding ask."
+      "ai_summary": "Sickness Absence Data Catch-up (21 August): Kevin and Michael need to confirm approximate FA validation effort per department to determine Michael's capacity and whether additional BA/FA support is required - feeds into Marie/Ant's BA effort estimate."
     },
     {
       "id": "task-1787652746064",
@@ -2576,7 +2436,7 @@
       ],
       "source": "Sickness Absence Data Catch-up, 21 Aug 2026 Granola meeting",
       "dateType": "orange",
-      "ai_summary": "WFM/SBS second-batch sickness data files for Smith's School and Geography never handed over since 11 August working group; Kevin to check project folders for missing files."
+      "ai_summary": "Second batch of WFM/SBS sickness data files (Smith's School and Geography) never handed over or actioned since 11 August working group; Kevin to check project folders for these files."
     },
     {
       "id": "t2608251201190",
@@ -2590,8 +2450,7 @@
         "[30 Aug 2026] Sophie Levy confirms Cority Quality project (PO E22033553) is fully staffed with transition from sales to professional services proceeding. (email: Sophie Levy - Re: PO ref E22033553 / Quality funded work)"
       ],
       "source": "Inbox - Sophie Levy, 2026-08-24 08:33",
-      "dateType": "orange",
-      "ai_summary": "PeopleXD Quality project (PO E22033553) fully staffed with Sophie Levy confirming internal transition from sales to professional services on 24 August; Kevin's follow-up needed for handover clarity."
+      "dateType": "orange"
     },
     {
       "id": "t2608261500530",
@@ -2608,8 +2467,7 @@
         "[02 Sep 2026] Nathan Kirwan acknowledged Kevin's confirmation; REF2029 UDF promotion can proceed as planned. (email: Nathan Kirwan - Re: REF29 UDF - Promotion to UOXP)"
       ],
       "source": "Inbox - Nathan Kirwan, 2026-08-26 14:51",
-      "dateType": "orange",
-      "ai_summary": "REF2029 UDF promotion to UOXP production environment flagged by Nathan Kirwan; Kevin confirmed live 30 August and core portal display turned off per Nathan's request."
+      "dateType": "orange"
     },
     {
       "id": "t2608261500531",
@@ -2625,8 +2483,7 @@
         "[02 Sep 2026] Michael O'Sullivan provided additional context: SQL code evidence in Nik's folder suggests development work was initiated for Grade 2 increment bar changes. (email: Michael O'Sullivan - RE: 2024 non clinical uplift_Incremental bar changes for Grade 2)"
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-08-26 12:06",
-      "dateType": "orange",
-      "ai_summary": "Grade 2 increment bar changes (2024 non-clinical uplift) documentation requested by Michael O'Sullivan; Simon confirmed employees moved from scale point 2.5 to 2.6; SQL code evidence in Nik's folder suggests development started."
+      "dateType": "orange"
     },
     {
       "id": "t2608270801360",
@@ -2648,7 +2505,7 @@
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-26 16:29",
       "dateType": "orange",
-      "ai_summary": "Chemistry 38-day balance pilot assessment: Kevin confirmed Chemistry with 131 workgroups as pilot on 3-4 September; GLAM capacity still awaits Kevin's answer to Julie/Simon."
+      "ai_summary": "Kevin confirmed Chemistry as 38-day balance rollout pilot with 131 workgroups requiring updates; effort analysis provided to Simon Burford on 3 September."
     },
     {
       "id": "t2608271501000",
@@ -2662,8 +2519,7 @@
         "[02 Sep 2026] Michael O'Sullivan confirms Kevin's prior acceptance of 28 September Cross-Team Process Improvement Working Group meeting and Otter's request for HR Systems attendance. (email: Michael O'Sullivan - FW: Cross-Team Process Improvement Working Group – 1st Meeting)"
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-08-27 09:18",
-      "dateType": "orange",
-      "ai_summary": "Cross-Team Process Improvement Working Group 28 September: Michael confirms Kevin already accepted; Otter seeks at least one HR Systems representative to attend."
+      "dateType": "orange"
     },
     {
       "id": "t2608271801020",
@@ -2676,8 +2532,7 @@
         "[02 Sep 2026] Marie Cooksey explicitly copied Kevin and James to respond with timings on IRIS/IEX incidents changes to Amanda—urgent coordination needed. (email: Marie Cooksey - RE: IRIS / IEX - Incidents Changes)"
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-27 15:53",
-      "dateType": "orange",
-      "ai_summary": "IRIS/IEX incidents change timings: Marie Cooksey explicitly copied Kevin and James to provide timings to Amanda; coordination needed for HR Systems implementation capacity."
+      "dateType": "orange"
     },
     {
       "id": "t2609041614321",
@@ -2690,82 +2545,9 @@
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-09-03 15:33",
       "dateType": "orange",
-      "ai_summary": "Change 20020762 for new NHS ERRBO and USS DB AVC pension schemes scheduled for September payroll setup; awaiting Kevin's review and approval before implementation."
+      "ai_summary": "Change 20020762 for new NHS ERRBO and USS DB AVC pension schemes awaiting Kevin's review and approval before Michael O'Sullivan implements for September payroll."
     }
   ],
-  "refreshed_at": "Monday 07 September · 16:16",
-  "teams": [
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T13:31:43.35Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T13:26:44.251Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T13:26:44.158Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T13:26:44.074Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T12:32:52.53Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T12:32:52.346Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T12:32:52.243Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T12:29:19.699Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    }
-  ]
+  "refreshed_at": "Tuesday 08 September · 07:11",
+  "teams": []
 }
