@@ -1,3 +1,36 @@
+# Handover -- 8 September 2026, ~08:45 (Drew) -- WORK-INBOX DASHBOARD "open email" now uses the connector OWA deep-link (new tab), not openmail:// / classic Outlook. Ported from command-centre. BRANCH ONLY, not merged, pending Kevin's visual approval.
+
+## G. Work-inbox dashboard "open email" -> Outlook Web (connector webLink), matching command-centre
+
+**Report:** clicking an email on https://begb0037admin.github.io/work-inbox/ still opened Outlook **Classic** (desktop). The 3 Sept "open-email regression" fix (section E, `fcb47a9` / `0096cac`) only covered the **command-centre** task board -- the work-inbox dashboard's own cards were never migrated and still emitted `openmail://<EntryID>` -> `open_email.py` -> `win32com` `.Display()` -> desktop Outlook. GitHub Pages was current (built 2026-09-08 06:43, live `js/app.js` byte-identical to HEAD) -- not stale, not a reverted regression: a scope gap.
+
+**Diagnosis correction made during the build:** the first investigation named `renderItems()` as the opener. `renderItems()` is in fact **dead code** -- `renderBriefing()` merges `data.urgent` / `needs` / `fyi` into the priority board via `applyPriOverrides()` and renders them with `_priRenderOneCard()`. The live opener is `_priRenderOneCard()`'s envelope icon (`emailBtn`, was ~L879), which unconditionally called `openEmail()`. The fix is applied there; `renderItems()` was updated to the same pattern too, for consistency, but it is not on the live path.
+
+**Change (BRANCH `drew/wi-dashboard-owa-open-email`, NOT merged):**
+
+*Server -- `fetch_inbox.py`:*
+- `make_card()` now carries `message_id` and `web_link` ("") on every Urgent/Needs/FYI card.
+- New **Phase 3.1** (runs after the demotion phases, before Phase 3.5), same mechanism/connector as Phase 3.6's CC promotion: for a card that is **new this run**, resolve one real Graph webLink via `lane_b_call1.resolve_mail_weblink()` (`_resolve_mail_weblink()` wrapper -- codex_apps connector, verb-guarded, personal-account-only, fails soft to ""). Reuse rules keep it to ~0-1 connector calls/run like Phase 3.6: a card already carrying `web_link` (Phase 3.9 carry-forward cache) is skipped; a card whose `message_id`/`entry_id` had a `web_link` in the previous `briefing.json` reuses it with no call; only genuinely new cards resolve, capped at `WI_WEBLINK_MAX_RESOLVES` (default 8) per run.
+- **Deliberate, narrow divergence from Phase 3.6 line ~3267:** a resolve that returns "" is NOT cached as a value (no `_owa_link()` `outlook.office.com/mail/search` fallback baked in -- that form is known-broken, section E). The card keeps `web_link=""` and retries next run; the client then falls back to `openmail://` for the residual EntryID cards, or renders non-clickable for IMAP cards.
+
+*Client -- `js/app.js`:*
+- New `openEmailWeb(ev,el)` -- reads `data-weburl`, validates (https + exact `outlook.office.com`/`outlook.office365.com` allowlist), `window.open(url,'_blank','noopener')`, visible `alert()` if unusable. Mirrors command-centre `openEmailWeb()`.
+- New `_owaWebUrl(o)` -- shared validator, candidate list `[web_link, display_url, webLink]` (snake + camel, matches CC).
+- `_priRenderOneCard()` envelope: `web_link`/`webLink` present -> `openEmailWeb` (OWA new tab, `title="Open email in Outlook web"`); else `entry_id`/`entryId` -> `openEmail()` (`openmail://` COM fallback, unchanged); else no icon.
+- `renderItems()` updated to the same branch (dead-path, kept consistent only).
+
+**Guard/kill-switch gap (same as section E, Phase 3.6):** a guard HALT during Phase 3.1 resolution is logged loudly but does NOT trip `lane_b_cal_guard.py`'s `Disable-ScheduledTask` path -- that wiring lives in `cmd_run()`, and Phase 3.1 runs inside `fetch_inbox.py`'s own process. Unchanged risk posture from Phase 3.6, flagged again here.
+
+**Verified (local harness, real edited `js/app.js` unmodified + fetch shim serving a fixture `briefing.json`):**
+- `py_compile` clean; `node --check` clean.
+- `[web_link]` cards render the envelope with `onclick="openEmailWeb(event,this)"` + `data-weburl="https://outlook.office365.com/owa/?ItemID=...&viewmodel=ReadMessageItem"`; clicking -> `window.open()` called with that exact OWA `?ItemID=` deep-link. No `openmail://`.
+- `[EntryID only]` card (no web_link) -> envelope still `onclick="openEmail('...',event)"` (COM fallback intact).
+- `[no link]` card -> no envelope. Dashboard layout unchanged. Screenshots: `scratchpad/shot_1_dashboard.png`, `shot_A_urgent_section.png`, `shot_B_viewport_after_click.png`.
+
+**NOT done / next action:** await Kevin's visual approval. On "approved": merge branch to `main` (backup-and-verify per repo rule), poll Pages build to `built`, byte-verify live `js/app.js` == merged blob, update this section to SHIPPED. First real pipeline run after merge will resolve webLinks only for that run's new cards (watch the `Phase 3.1 done - ...` log line). **Known remaining divergence, not in scope of this branch:** `_priRenderOneCard`'s CC-task cards that carry a camelCase `webLink` from Phase 3.6 will now also use `openEmailWeb` (intended, consistent) -- no separate action, just noting the behaviour change reaches CC-sourced priority cards too, not only inbox cards.
+
+---
+
 # Handover -- 3 September 2026, ~20:30 (Drew) -- RDP LOCK: REAL FIX FOUND + APPLIED. Kevin identified the actual trigger: the lock only happens when the mstsc window is MINIMISED >10 min (standard behaviour -- minimising drops the graphical session, so the remote screensaver-lock timer runs). Fix is client-side on Kevin's DESKTOP, not the laptop, not the GPO: DWORD `RemoteDesktop_SuppressWhenMinimized`=2 under `HKCU\Software\Microsoft\Terminal Server Client`. **APPLIED on the desktop (verified), backup taken.** Needs mstsc fully closed+reopened to take effect, then a 12-min minimised test. This SUPERSEDES the keep-alive avenue (section D -- dead end) and the Oxford-IT-exception fallback (section C). Detail in section F.
 
 ## F. RDP lock when mstsc minimised -- REAL FIX, applied on the desktop, pending Kevin's restart + test

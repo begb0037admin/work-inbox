@@ -2137,6 +2137,8 @@ def make_card(msg, category):
         "subject":   subj,
         "from":      sender,
         "entry_id":  msg.get("entry_id", ""),
+        "message_id": msg.get("message_id", ""),
+        "web_link":  "",
         "received":  received_str,
         "received_raw": msg.get("received", ""),
         "kevin_is_primary_recipient": msg.get("kevin_is_primary_recipient", True)
@@ -2939,6 +2941,70 @@ absences = sorted(absence_map.values())
 # combined claude_code call can use them; _cc_load_priorities() is idempotent,
 # so for the api path this is the first + only call.
 _cc_load_priorities()
+
+# -- Phase 3.1 - OWA webLink resolution for Urgent/Needs/FYI mail cards --
+# Same mechanism and connector as Phase 3.6's Command Centre promotion: for a
+# mail card that is NEW this run, resolve one real Graph webLink via
+# lane_b_call1.resolve_mail_weblink() (codex_apps connector, verb-guarded,
+# personal-account-only, fails soft to ""). This is the standard opener now --
+# the dashboard uses the connector webLink, not openmail:// / classic Outlook.
+#
+# Cost control, matching Phase 3.6 ("typically 0-1 calls per run"):
+#  - a card already carrying a non-empty web_link (Phase 3.9 carry-forward
+#    cache) is left untouched;
+#  - a card whose message_id / entry_id already had a web_link in the previous
+#    briefing.json reuses that value with NO new connector call;
+#  - only a genuinely new card triggers a resolve, capped at
+#    WI_WEBLINK_MAX_RESOLVES (default 8) calls per run;
+#  - a resolve that returns "" is NOT cached as a value -- the card is left
+#    with web_link="" (client falls back to openmail:// for the residual
+#    Outlook-EntryID cards, or renders non-clickable for IMAP cards) and the
+#    resolve is retried next run. No broken outlook.office.com/mail/search
+#    fallback is baked in here (that _owa_link form is known-broken, HANDOVER
+#    E) -- deliberate, narrow divergence from Phase 3.6's line-3267 fallback.
+#
+# Guard / kill-switch note (identical to Phase 3.6, HANDOVER E): a guard HALT
+# during resolution here is logged loudly but does NOT trip the
+# lane_b_cal_guard.py Disable-ScheduledTask path -- that wrapper-level wiring
+# lives in cmd_run(), and this call runs inside fetch_inbox.py's own process.
+_WEBLINK_MAX_RESOLVES = int(os.environ.get("WI_WEBLINK_MAX_RESOLVES", "8"))
+try:
+    _prev_weblinks = {}
+    for _tier in ("urgent", "needs", "fyi"):
+        for _pc in existing_briefing.get(_tier, []) or []:
+            _wl = (_pc.get("web_link") or "").strip()
+            if not _wl:
+                continue
+            for _idk in ((_pc.get("message_id") or "").strip().strip("<>"),
+                         (_pc.get("entry_id") or "").strip()):
+                if _idk:
+                    _prev_weblinks[_idk] = _wl
+    _wl_reused = _wl_resolved = _wl_calls = 0
+    for _card in (urgent + needs + fyi):
+        if (_card.get("web_link") or "").strip():
+            continue
+        _mid = (_card.get("message_id") or "").strip().strip("<>")
+        _eid = (_card.get("entry_id") or "").strip()
+        _hit = _prev_weblinks.get(_mid) or _prev_weblinks.get(_eid)
+        if _hit:
+            _card["web_link"] = _hit
+            _wl_reused += 1
+            continue
+        if not _mid:
+            continue
+        if _wl_calls >= _WEBLINK_MAX_RESOLVES:
+            continue
+        _wl_calls += 1
+        _link = _resolve_mail_weblink(_mid)
+        if _link:
+            _card["web_link"] = _link
+            _wl_resolved += 1
+    if _wl_reused or _wl_resolved or _wl_calls:
+        print(f"Phase 3.1 done - webLinks reused:{_wl_reused} newly_resolved:{_wl_resolved} "
+              f"connector_calls:{_wl_calls} (cap {_WEBLINK_MAX_RESOLVES})")
+except Exception as _e:
+    print(f"WARNING: Phase 3.1 webLink resolution failed entirely, "
+          f"mail cards left without web_link this run - {_e}")
 
 # Phase 3.5 - AI triage: which emails should become Command Centre tasks
 log("Phase 3.5 - triaging inbox for task suggestions...")
