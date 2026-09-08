@@ -510,15 +510,15 @@ function _priGetKey(p){
 function _priGetOverrides(){try{return JSON.parse(localStorage.getItem('workInbox_priOverrides_v1')||'{}');}catch(e){return{};}}
 function _priSetOverride(key,sec){const o=_priGetOverrides();o[key]=sec;localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(o));}
 function _priGetOrder(){try{return JSON.parse(localStorage.getItem('workInbox_priOrder_v1')||'{}');}catch(e){return{};}}
-function _priSetOrder(pt,ptom,pw,pfyi,ur,nr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[]}));}
+function _priSetOrder(pt,ptom,pw,pfyi,ur,nr,appr){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify({pt,ptom:ptom||[],pw,pfyi:pfyi||[],ur:ur||[],nr:nr||[],appr:appr||[]}));}
 function _getCustomPri(){try{return JSON.parse(localStorage.getItem('workInbox_customPri_v1')||'[]');}catch(e){return[];}}
 function _saveCustomPri(arr){localStorage.setItem('workInbox_customPri_v1',JSON.stringify(arr));}
 function _addEmailCardToPriority(item,cls,sec){const arr=_getCustomPri();const priKey=_priGetKey(item);if(arr.findIndex(x=>x._priKey===priKey)<0){arr.push({...item,_priKey:priKey,_dfSec:sec,_cls:cls});_saveCustomPri(arr);}_priSetOverride(priKey,sec);}
 
 function applyPriOverrides(data){
-  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesTomorrow||[]).map(p=>({...p,_dfSec:'ptom'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.fyi||[]).map(p=>({...p,text:p.title,_dfSec:'pfyi'})),...(data.urgent||[]).map(p=>({...p,text:p.title,_dfSec:'ur'})),...(data.needs||[]).map(p=>({...p,text:p.title,_dfSec:'nr'})),..._getCustomPri()];
-  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],ptom:[],pw:[],pfyi:[],ur:[],nr:[]};
-  const validSecs=['pt','ptom','pw','pfyi','ur','nr'];
+  const all=[...(data.prioritiesToday||[]).map(p=>({...p,_dfSec:'pt'})),...(data.prioritiesTomorrow||[]).map(p=>({...p,_dfSec:'ptom'})),...(data.prioritiesWeek||[]).map(p=>({...p,_dfSec:'pw'})),...(data.fyi||[]).map(p=>({...p,text:p.title,_dfSec:'pfyi'})),...(data.urgent||[]).map(p=>({...p,text:p.title,_dfSec:'ur'})),...(data.needs||[]).map(p=>({...p,text:p.title,_dfSec:'nr'})),...(data.approvals||[]).map(p=>({...p,text:p.title,_dfSec:'appr'})),..._getCustomPri()];
+  const ovr=_priGetOverrides(),ord=_priGetOrder(),secs={pt:[],ptom:[],pw:[],pfyi:[],ur:[],nr:[],appr:[]};
+  const validSecs=['pt','ptom','pw','pfyi','ur','nr','appr'];
   const _seen=new Set();
   for(const item of all){
     const k=_priGetKey(item);
@@ -653,10 +653,10 @@ function priDragEnd(e){
       const destZone=document.querySelector(`.pri-drop-zone[data-sec="${toSec}"]`);
       if(destZone) destZone.insertBefore(_priDragEl,destZone.firstElementChild);
     }
-    const allSecs=['pt','ptom','pw','pfyi','ur','nr'];
+    const allSecs=['pt','ptom','pw','pfyi','ur','nr','appr'];
     const sk={};
     allSecs.forEach(s=>{sk[s]=Array.from(document.querySelectorAll(`.pri-drop-zone[data-sec="${s}"] .card-ph`)).map(c=>c.dataset.prikey);});
-    _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr);
+    _priSetOrder(sk.pt,sk.ptom,sk.pw,sk.pfyi,sk.ur,sk.nr,sk.appr);
 
     if(crossZoneMove){
       // Real cross-zone move: the card's own markup depends on its section
@@ -1123,13 +1123,17 @@ function renderBriefing(data,key){
         ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priSecs.nr.length)}
         <div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
+      ${(priSecs.appr.length||(Array.isArray(data.approvals)&&data.approvals.length))?`<div id="sec-approvals-wrap" style="margin-top:18px">
+        ${_secHeadHtml('appr','dot-o','Manager approvals – leave &amp; sign-off requests',priSecs.appr.length)}
+        <div class="pri-drop-zone" data-sec="appr" ondragover="priZoneDragOver(event,'appr')" ondragleave="priZoneDragLeave(event,'appr')" ondrop="priZoneDrop(event,'appr')">${priSecs.appr.length?renderPriorityCards(priSecs.appr,key,'appr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+      </div>`:''}
       <div id="sec-parked-wrap" style="margin-top:18px">
         ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length,typeof data.fyiRawCount==='number'?data.fyiRawCount:undefined)}
         <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
       </div>
     </div>
   </div>`;
-  ['pt','ptom','ur','pw','nr','pfyi'].forEach(sec=>applySecCollapse(sec,!!getCollapsedSecs()[sec]));
+  ['pt','ptom','ur','pw','nr','appr','pfyi'].forEach(sec=>applySecCollapse(sec,!!getCollapsedSecs()[sec]));
   _runCardSearch();
 }
 
