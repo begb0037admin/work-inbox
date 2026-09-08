@@ -1,3 +1,29 @@
+# Handover -- 8 September 2026, ~22:25 (Drew) -- WI_TRIAGE_V2 flipped ON live per Kevin's "flip now", real pipeline run triggered and completed, REGRESSION FOUND (Needs 29 -> 39, worse not better), ROOT CAUSE IDENTIFIED (Phase 3.9 carry-forward bypasses the new suppression rules), FLAG REVERTED BACK TO OFF same session. Live dashboard data currently still reflects the bad flag-ON run's output (commit `a54e0b4`) until the next pipeline run picks up the reverted code -- see below for what that means and the options. K1's classifier code itself (categorise()) is NOT known-bad -- Phase 3 fresh classification worked exactly as designed; the bug is downstream in Phase 3.9.
+
+## L. WI_TRIAGE_V2 flip-ON attempt -- REGRESSION, ROOT CAUSE FOUND, REVERTED
+
+**Sequence:**
+1. Flag flipped ON (`3799338`, one-line, `os.environ.get("WI_TRIAGE_V2", "1")`), restore-point comment included.
+2. Live task `Work Inbox Bridge Briefing` triggered off-schedule via SSH `oxford-lan` (21:43:18 start, actively monitored to completion via foreground polling per standing rule -- no gap, `LastTaskResult 0`, finished ~22:17).
+3. Pulled the real pushed `data/briefing.json` (commit `a54e0b4`): **needs=39** (was 29 before this whole rework started), fyi=2, suppressedCount=17, `approvals` key correctly absent.
+4. **This is worse, not better.** Named noise items Kevin explicitly wanted gone are still in Needs: Athena A/L, "RE: IRIS / IEX - Incidents Changes", "RE: #External# ... FP 68261303" **x4 copies** (not deduped), "RE: OSM: No incoming emails...", "Your meeting '...' is starting soon...", both Pre-project-Authentication Cc threads.
+
+**Root cause, confirmed from the actual run log (`logs/bridge_briefing_last_run.log`, not inferred):**
+- `Phase 3 done - urgent:2 suppressed:28 needs:8 fyi:10 low:1` -- **fresh categorise() classification worked exactly as designed.** The new logic is not the bug.
+- `Phase 3.3-promote done - 10 FYI card(s) promoted to Needs Response` -- also working as designed (AI-confirmed genuine asks).
+- `Phase 3.9 done - carried:28 dropped_resolved:0 inconclusive_lookups_carried:28 stale_over_90d:0 tracked_total:28` -- **this is the bug.** Phase 3.9 is a pre-existing `tracked_needs_urgent` carry-forward mechanism (not built or touched by the K1 rework, not previously traced against it) that re-injects previously-tracked Needs/Urgent cards from prior runs' state back into the current run's `needs` list, unconditionally, with NO re-evaluation against the current run's `categorise()`/suppression rules. All the still-present noise items (Athena A/L, IRIS/IEX, FP68261303 x4, etc.) were tracked from the PRE-flip 29-item Needs bucket and got reinstated by Phase 3.9 regardless of the new Cc-gate/FYI_ALWAYS floor.
+- Also note (informational, not the root cause): `WARNING: Phase 3.9 could not persist triage_ledger.json - HTTP Error 409: Conflict` -- a separate, pre-existing, non-fatal write-conflict warning, unrelated to the classification bug, not investigated further this session.
+
+**Action taken -- REVERTED same session, `f52ddec`:** `WI_TRIAGE_V2` default back to `""` (OFF), full root-cause explanation left in the code comment at that line. `categorise()`/suppression code itself (K1) is UNCHANGED and NOT reverted -- only the default-ON flip is undone. Verified live on `main` via cache-busted fetch immediately after push.
+
+**What this means for the live dashboard right now:** the flag is OFF again in the CODE, but the DATA Kevin sees was pushed by the bad flag-ON run (`a54e0b4`) and will stay that way (Needs=39, with the noise) until the next `fetch_inbox.py` run executes with the reverted code and pushes a fresh (safe, pre-rework-equivalent) briefing.json. Next natural fire: 07:00 tomorrow. **Not triggered an immediate corrective run this session** -- flagged here for Kevin/the coordinator to decide: trigger one now (same low-risk SSH mechanism used throughout this session), or accept the wait until 07:00.
+
+**command-centre OWA opener -- verified NOT regressed**, but only at the data/code level, not a live click-test (budget-constrained, disclosed honestly): the bad run's own pushed briefing.json still carries real `web_link` OWA deep-links on 13/41 cards (Phase 3.1 ran fine, unaffected -- `Phase 3.1 done - webLinks reused:11 newly_resolved:2 connector_calls:2 (cap 8)`), and a diff check confirms `js/app.js`'s `openEmailWeb()`/`_owaWebUrl()` functions were never touched by any commit this session (only `_priSetOrder`/`applyPriOverrides`/the Manager Approvals section were edited). Reasonably confident, not click-verified live.
+
+**Real fix needed before WI_TRIAGE_V2 can safely go ON again:** Phase 3.9's carry-forward must re-validate (or at minimum re-run `categorise()` on) each tracked item against the CURRENT run's rules before re-adding it to `needs` -- a carried item that would now classify as `suppressed` (Cc-gate or FYI_ALWAYS floor) must not be silently reinstated. This is genuinely new, untested work -- not done this session, scope not yet estimated. **Next action:** Kevin/coordinator decides (a) trigger an immediate corrective run to clear the bad data now, (b) wait for 07:00, (c) scope+build the Phase 3.9 fix as its own piece of work before attempting the flip again.
+
+---
+
 # Handover -- 8 September 2026, late evening (Drew) -- TRIAGE V2 classifier rework SHIPPED to main (flag still default OFF): dropped Manager Approvals tier, added hard Cc-only gate + suppressed-noise bucket. Codex-reviewed (1 real bug found+fixed). Real live-data before/after evidence below. Mail-pull Codex-connector migration: investigated, one blocker resolved (date-range list_messages proven live), Edu-connector attachment confirmed present but capped (expected) -- full build NOT done, paused for a proper scoped session. See section K.
 
 ## K. Classifier rework K1 (SHIPPED) + mail-pull connector migration K2 (PAUSED, scoped not built)
