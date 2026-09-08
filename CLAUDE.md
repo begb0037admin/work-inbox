@@ -81,3 +81,10 @@ Before any task where higher effort is warranted, signal to Kevin: what the task
 
 ## Branch and Merge Protocol
 Always push directly to main. If a branch must be used, merge it to main immediately upon completion — never leave files on a branch.
+
+## Change and Approval Protocol (amended 8 Sep 2026, Kevin, standing/permanent)
+For routine changes to this repo (code, data, docs): no UI-screenshot approval gate and no per-step yes/no check-in — implement, verify, apply, then report with a before/after (diff summary, dry-run output, or equivalent evidence that the change works and didn't break the pipeline). Still required, no exceptions:
+- Backup-before-write and pipeline/JSON validation for any data write (`data/*.json`) — verify the file is still valid and the pipeline still runs after the change.
+- A one-line "deploying X now" heads-up before any production deploy or live-pipeline change (not silence).
+- Stop and flag rather than proceed for anything genuinely destructive, irreversible, or outside the agreed task scope — this is not a blanket "just do it," it's a waiver of the visual-approval/per-step-checkin ceremony specifically.
+Kevin can reinstate the full screenshot-and-wait-for-"approved" ceremony for any specific change by saying so explicitly (e.g. a high-risk visual dashboard change) — this amendment is a default, not a removal of his authority to ask for it back.
