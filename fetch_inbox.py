@@ -1518,7 +1518,7 @@ try:
 except Exception as _lb_mail_import_err:  # noqa: BLE001
     _lb_mail = None
     print(f"WARNING: lane_b_call1 import failed ({_lb_mail_import_err}) -- "
-          f"mail webLink resolution (option 1) unavailable this run, falls back to _owa_link()")
+          f"mail webLink resolution (option 1) unavailable this run -- web_link left blank, no _owa_link() fallback")
 
 
 def _resolve_mail_weblink(message_id: str) -> str:
@@ -1528,7 +1528,7 @@ def _resolve_mail_weblink(message_id: str) -> str:
         return _lb_mail.resolve_mail_weblink(message_id) or ""
     except Exception as e:  # noqa: BLE001 -- must never fail the briefing over this
         print(f"WARNING: _resolve_mail_weblink({message_id!r}) raised unexpectedly ({e}) -- "
-              f"falls back to _owa_link()")
+              f"web_link left blank, no _owa_link() fallback")
         return ""
 
 def _kevin_is_primary_recipient(msg):
@@ -3096,7 +3096,7 @@ try:
                 "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
                 "entry_id":     m.get("entry_id", ""),
                 "message_id":   m.get("message_id", ""),
-                "web_link":     m.get("web_link", "") or _owa_link(m.get("message_id", "")),
+                "web_link":     m.get("web_link", ""),  # _owa_link() fallback removed 8 Sep 2026 -- see standing rule
                 "kevin_is_primary_recipient": m.get("kevin_is_primary_recipient", True),
                 "is_meeting_invite": _is_meeting_invite(m),
             })
@@ -3109,7 +3109,7 @@ try:
             "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
             "entry_id":     s.get("entry_id", ""),
             "message_id":   s.get("message_id", ""),
-            "web_link":     s.get("web_link", "") or _owa_link(s.get("message_id", "")),
+            "web_link":     s.get("web_link", ""),  # _owa_link() fallback removed 8 Sep 2026 -- see standing rule
             "direction":    "sent",
             "kevin_is_primary_recipient": True,
             "is_meeting_invite": False,
@@ -3368,7 +3368,15 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
             # card that already exists, never per-dashboard-render. Best-effort:
             # _resolve_mail_weblink() itself never raises -- any failure/HALT/
             # timeout just returns "" and this falls back to the pre-existing
-            # (weaker) _owa_link() search-link behaviour, exactly as before.
+            # (weaker) _owa_link() search-link behaviour previously used here.
+            # STANDING RULE (Kevin, 8 Sep 2026): Outlook Classic is retired, OWA-
+            # in-browser only -- _owa_link()'s ?query=<Message-ID> search form never
+            # resolves in OWA (proven dead 3 Sep 2026) and is never written to CC
+            # tasks any more. A failed/unresolved link now leaves webLink blank,
+            # matching this file's own Phase 3.1 behaviour for work-inbox's own
+            # mail cards -- command-centre's js/app.js shows no email icon at all
+            # for a task with no resolvable webLink (ported from work-inbox's
+            # _owaWebUrl()/openEmailWeb(), 8 Sep 2026).
             resolved_link = ""
             if not eid and mid:
                 resolved_link = _resolve_mail_weblink(mid)
@@ -3380,7 +3388,7 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                 "emailRef":    nt.get("email_subject", ""),
                 "entryId":     eid,
                 "messageId":   mid,
-                "webLink":     resolved_link or nt.get("web_link", "") or _owa_link(mid),
+                "webLink":     resolved_link or nt.get("web_link", ""),  # _owa_link() fallback removed 8 Sep 2026
                 "summary":     "",
                 "description": nt.get("description", ""),
                 "origin":      "inbox-auto",
