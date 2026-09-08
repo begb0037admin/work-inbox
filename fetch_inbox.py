@@ -2179,18 +2179,27 @@ def categorise(msg):
 
     if TRIAGE_V2:
         # New model (WI_TRIAGE_V2 ON). Order matters (Codex Pass 1 review, 8 Sep;
-        # hardened 8 Sep evening per Kevin's two follow-up instructions):
-        #  0. LOW_SUBJECTS -> low. Lower bar than even the Cc-only gate below
-        #     (github/deploy noise never gets a card at all either way).
-        #  1. Cc-only HARD GATE -> suppressed. Kevin, verbatim, 8 Sep evening:
+        # hardened 8 Sep evening per Kevin's two follow-up instructions; a
+        # Codex read-only review pass on THIS rework, same evening, flagged
+        # that LOW_SUBJECTS was checked ahead of the Cc-gate below -- moved
+        # the Cc-gate to genuinely be step 0, so "no exceptions" is literal,
+        # not just true for urgent/importance):
+        #  0. Cc-only HARD GATE -> suppressed. Kevin, verbatim, 8 Sep evening:
         #     "any email i am cc'd into should not be in here, work inbox is
         #     not for my attention, it is for my action ... i can pickup cc
-        #     emails myself in the outlook inbox." Checked BEFORE urgent/
-        #     importance -- explicitly no exception for an urgent-sounding Cc
+        #     emails myself in the outlook inbox." Checked before EVERYTHING
+        #     else, including LOW_SUBJECTS/urgent/importance -- explicitly no
+        #     exception for an urgent-sounding (or automated-looking) Cc
         #     thread. Only mail where Kevin is on the To line is eligible for
-        #     ANY of urgent/needs/fyi below this point.
+        #     ANY of urgent/needs/fyi/low below this point.
+        #  1. LOW_SUBJECTS -> low (github/deploy noise etc., unaffected by
+        #     Cc/To -- kept as its own bucket, not folded into suppressed, to
+        #     leave its pre-existing semantics/consumers untouched).
         #  2. imp==2 / URGENT_SUBJECTS -> urgent (kevin_primary guaranteed True
-        #     from here on down).
+        #     from here on down). Deliberately still ahead of FYI_ALWAYS below,
+        #     same as the pre-existing (pre-8-Sep) categorise() invariant that
+        #     an explicit high-importance flag always wins -- not a new
+        #     decision made by this rework.
         #  3. APPROVAL_SUBJECTS -> needs. Checked before FYI_ALWAYS so an
         #     explicit "annual leave request" / "for sign-off" ask isn't
         #     caught by FYI_ALWAYS's leave-NOTICE keywords first.
@@ -2199,18 +2208,21 @@ def categorise(msg):
         #     "logged"/"created"/"completed" confirmations, leave NOTICES,
         #     meeting-start reminders, "no action required"). Kevin: this
         #     whole class "should not appear ANYWHERE. not needs, not fyi,
-        #     not parked."
+        #     not parked." (Subject to #2 above -- a genuinely high-importance-
+        #     flagged or urgent-keyword email still wins urgent even if it also
+        #     matches an FYI_ALWAYS phrase; in practice these keyword sets
+        #     don't realistically overlap.)
         #  5. FYI_SUBJECTS -> fyi (still a real, visible, informational tier
         #     for genuine To-Kevin mail that isn't in the noise floor above).
         #  6. STRONG explicit ask (NEEDS_SUBJECTS_STRICT) -> needs.
         #  7. everything else -> fyi; Phase 3.3-promote lifts it to needs only
         #     if Phase 3.2's AI verdict says no_action_needed=false.
         # is_read is no longer a "needs" trigger on its own.
+        if not kevin_primary:
+            return "suppressed"
         for kw in LOW_SUBJECTS:
             if kw in subj or kw in sender:
                 return "low"
-        if not kevin_primary:
-            return "suppressed"
         if imp == 2:
             return "urgent"
         for kw in URGENT_SUBJECTS:
