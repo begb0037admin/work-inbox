@@ -5,10 +5,79 @@
   "urgent": [],
   "needs": [
     {
+      "title": "IRIS Changes - September 2026",
+      "sub": "From <strong>Christopher Sanders</strong>. Hi both, Following on from yesterday, I have put together a loose project plan for the upcoming IRIS changes and have in",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "IRIS Changes - September 2026",
+      "from": "Christopher Sanders",
+      "entry_id": "",
+      "message_id": "<CWXP265MB181394DC1EA73E6088E9799095B12@CWXP265MB1813.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHUAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "8 Sep",
+      "received_raw": "2026-09-08 16:28:00",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Christopher Sanders has created a project plan for the IRIS Changes due in September 2026; Kevin must review the plan and confirm HR Systems readiness and any dependencies.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
+      "title": "RE: 38 day balance for departments update and decisions needed",
+      "sub": "From <strong>Julie Hickman</strong>. Hello Kevin, I have just finished a call with Jenna in Chemistry, who made the point that they would prefer to do all of",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: 38 day balance for departments update and decisions needed",
+      "from": "Julie Hickman",
+      "entry_id": "",
+      "message_id": "<LO0SPRMB001751076714F85C307D65988AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHSAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "8 Sep",
+      "received_raw": "2026-09-08 15:30:05",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Julie Hickman reports Chemistry prefers batching all system updates in one phase and wants confirmation of workgroup update capacity for GLAM before proceeding; Kevin's decision on effort and timeline is needed.",
+      "needs_reply": true,
+      "no_action_needed": false,
+      "messageCount": 8
+    },
+    {
+      "title": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
+      "sub": "From <strong>Helen Harbour</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
+      "from": "Helen Harbour",
+      "entry_id": "",
+      "message_id": "<CW1P265MB7641E76FB32457B1D1AA6516F7B12@CW1P265MB7641.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHOAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "8 Sep",
+      "received_raw": "2026-09-08 12:02:35",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Helen Harbour is coordinating a moderation meeting on DTP1334 Strategic Health & Safety Modular System non-functional and technical requirements; Kevin's attendance and input are needed.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
+      "title": "RE: Trinity Term 2026 non-college changes",
+      "sub": "From <strong>Anna Gilbert</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Trinity Term 2026 non-college changes",
+      "from": "Anna Gilbert",
+      "entry_id": "",
+      "message_id": "<CWLP265MB20985B30B571BB435D64271AFDB22@CWLP265MB2098.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotMAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "7 Sep",
+      "received_raw": "2026-09-07 16:16:33",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Anna Gilbert has reviewed Trinity Term 2026 non-college organisational structure changes on behalf of Katherine Corr (on leave) and provided feedback; Kevin must review and determine next steps.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
       "title": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-09-04 17:00",
       "sub": "From <strong>Cority_Integration_Platform_Notifications@Cority.com</strong>. An error occured while processing your HR import. Please review the attached log file for additional details.",
-      "badge": "Overdue",
-      "badgeType": "red",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
       "subject": "[ERROR] Cority Employee Import Log File for OxfordUniversity - 2026-09-04 17:00",
       "from": "Cority_Integration_Platform_Notifications@Cority.com",
       "entry_id": "",
@@ -17,7 +86,109 @@
       "received": "4 Sep",
       "received_raw": "2026-09-04 18:00:58",
       "kevin_is_primary_recipient": true,
-      "ai_summary": "Cority integration platform reported an SFTP connection error during the employee data import on 4 September at 17:00 with log file attached; Kevin must review the log to investigate whether the import completed successfully or requires re-run.",
+      "ai_summary": "Cority Integration Platform reported an SFTP connection error on 4 September 2026 at 17:00 during employee data import; Kevin must review the attached log file and investigate whether the import completed successfully or requires re-run.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
+      "title": "RE: Org Structure update",
+      "sub": "From <strong>Katherine Corr</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Org Structure update",
+      "from": "Katherine Corr",
+      "entry_id": "",
+      "message_id": "<LO6P265MB641032F036AACF2A13543E17F1B52@LO6P265MB6410.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqn3AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "4 Sep",
+      "received_raw": "2026-09-04 14:35:50",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Katherine Corr provides update on organisational structure changes; Kevin must review feedback and confirm actions needed.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
+      "title": "Logged - Problem# 40003483",
+      "sub": "From <strong>problemnotifications@it.ox.ac.uk</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "Logged - Problem# 40003483",
+      "from": "problemnotifications@it.ox.ac.uk",
+      "entry_id": "",
+      "message_id": "<E1x2PYW-00000009AYR-O0YC@smtp11.mail.ox.ac.uk>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnxAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "4 Sep",
+      "received_raw": "2026-09-04 09:46:28",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "IT has logged Problem 40003483; Kevin must review the details and determine whether investigation or action is required.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
+      "title": "University of Oxford - 69014928 - Holiday Reports",
+      "sub": "From <strong>Conor O'Shea</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "University of Oxford - 69014928 - Holiday Reports",
+      "from": "Conor O'Shea",
+      "entry_id": "",
+      "message_id": "<LOYP123MB3022B0D5FE0322BDBCFACC558AB62@LOYP123MB3022.GBRP123.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnpAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "3 Sep",
+      "received_raw": "2026-09-03 16:39:29",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Conor O'Shea (Access Group) provides update on Holiday Reports project (case 69014928); project planning is proceeding.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
+      "title": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "sub": "From <strong>Conor O'Shea</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
+      "from": "Conor O'Shea",
+      "entry_id": "",
+      "message_id": "<LOYP123MB3022CE27BD1C749089370D348AB62@LOYP123MB3022.GBRP123.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnoAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "3 Sep",
+      "received_raw": "2026-09-03 16:39:00",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Conor O'Shea has scheduled the Holiday Records reporting project (case 69001638) kickoff call for Friday 18 September 2026 at 14:00; Kevin confirmed this time works on 3 September and is awaiting calendar invite.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
+    {
+      "title": "API_USER account",
+      "sub": "From <strong>Simon Burford</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "API_USER account",
+      "from": "Simon Burford",
+      "entry_id": "",
+      "message_id": "<CWLP265MB4176CB1C902A5FAAFEF57CE392B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqmyAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "2 Sep",
+      "received_raw": "2026-09-02 15:10:46",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Simon Burford is requesting information or action regarding API_USER account configuration; Kevin must review and respond.",
+      "needs_reply": true,
+      "no_action_needed": false
+    },
+    {
+      "title": "RE: changing to 38 day balance - workgroups for updating",
+      "sub": "From <strong>Julie Hickman</strong>.",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: changing to 38 day balance - workgroups for updating",
+      "from": "Julie Hickman",
+      "entry_id": "",
+      "message_id": "<LO0SPRMB00173AD0E4CD60EE104244EC8AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqmvAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "2 Sep",
+      "received_raw": "2026-09-02 13:44:42",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Julie Hickman provides update on workgroup changes needed for 38-day balance implementation; Kevin's confirmation on timelines and effort needed.",
       "needs_reply": false,
       "no_action_needed": false
     },
@@ -454,54 +625,6 @@
   ],
   "fyi": [
     {
-      "title": "OSM Change Enablement and Approval: Change details not displayed in IT Self Service",
-      "sub": "From <strong>Louise Piper</strong>. From: Louise Piper, ITSM Self-Service and Reporting Specialist To: OSM users Please disregard this email if you do not m",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "OSM Change Enablement and Approval: Change details not displayed in IT Self Service",
-      "from": "Louise Piper",
-      "entry_id": "",
-      "message_id": "<CWXP265MB2965CD37357FB88F596F0A4B9BB12@CWXP265MB2965.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHTAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08 15:39:44",
-      "kevin_is_primary_recipient": false,
-      "ai_summary": "Louise Piper notified OSM users of a Change Management system issue where change details are not displaying in IT Self Service; message says to disregard if Kevin does not manage OSM changes.",
-      "needs_reply": false,
-      "no_action_needed": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: 38 day balance for departments update and decisions needed",
-      "sub": "From <strong>Julie Hickman</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: 38 day balance for departments update and decisions needed",
-      "from": "Julie Hickman",
-      "entry_id": "",
-      "message_id": "<LO0SPRMB001751076714F85C307D65988AB12@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHSAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08 15:30:05",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 8
-    },
-    {
-      "title": "HR Systems Team Meeting",
-      "sub": "From <strong>Henry Acheampong</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "HR Systems Team Meeting",
-      "from": "Henry Acheampong",
-      "entry_id": "",
-      "message_id": "<LOVP265MB883772B9CD7CE5FA7C23B812E3B12@LOVP265MB8837.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHRAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08 15:28:36",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
       "title": "DTP1092 College staff into PXD Team meeting",
       "sub": "From <strong>Crispin Muncaster</strong>.",
       "badge": "FYI",
@@ -514,354 +637,9 @@
       "received": "8 Sep",
       "received_raw": "2026-09-08 15:24:12",
       "kevin_is_primary_recipient": true,
-      "ai_summary": "Crispin Muncaster sent a meeting update for the DTP1092 College Staff into PXD Team project scheduled for 15:00 today.",
+      "ai_summary": "Crispin Muncaster confirms the DTP1092 College Staff into PXD team meeting is extended to early September; meeting agenda and preparation items remain as scheduled.",
       "needs_reply": false,
       "no_action_needed": true,
-      "messageCount": 1
-    },
-    {
-      "title": "Reminder: Register for your flu vaccination by Monday 14 September 2026",
-      "sub": "From <strong>UAS Communications</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Reminder: Register for your flu vaccination by Monday 14 September 2026",
-      "from": "UAS Communications",
-      "entry_id": "",
-      "message_id": "<LO7P265MB8553C2652E68D0E6D395BFC0E9B12@LO7P265MB8553.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHPAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08 14:01:54",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "sub": "From <strong>Helen Harbour</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
-      "from": "Helen Harbour",
-      "entry_id": "",
-      "message_id": "<CW1P265MB7641E76FB32457B1D1AA6516F7B12@CW1P265MB7641.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHOAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08 12:02:35",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "Last reminder: Updates to Clockify Free plan",
-      "sub": "From <strong>Clockify Support</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Last reminder: Updates to Clockify Free plan",
-      "from": "Clockify Support",
-      "entry_id": "",
-      "message_id": "<409f3b9e-d207-65d3-2aab-716fc99e039b@clockify.me>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHNAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08 11:48:18",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "James - off sick",
-      "sub": "From <strong>Kevin Lelitte</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "James - off sick",
-      "from": "Kevin Lelitte",
-      "entry_id": "",
-      "message_id": "<CWLP265MB59699E7DD8F933C2ECBBEACD88B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PrQ%2BAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08 08:51:29",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "Re: Clockify: Upcoming Free plan changes & options for your team",
-      "sub": "From <strong>Milena Miletic</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Re: Clockify: Upcoming Free plan changes & options for your team",
-      "from": "Milena Miletic",
-      "entry_id": "",
-      "message_id": "<CA+deJ8K_zPNaq5eX+r23HLtw=9x6nBi8T9OzASXH=fVRbKTxLg@mail.gmail.com>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotNAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "7 Sep",
-      "received_raw": "2026-09-07 18:08:16",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Trinity Term 2026 non-college changes",
-      "sub": "From <strong>Anna Gilbert</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Trinity Term 2026 non-college changes",
-      "from": "Anna Gilbert",
-      "entry_id": "",
-      "message_id": "<CWLP265MB20985B30B571BB435D64271AFDB22@CWLP265MB2098.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotMAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "7 Sep",
-      "received_raw": "2026-09-07 16:16:33",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "Annual Leave - Marie (contact Simon Burford)",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Annual Leave - Marie (contact Simon Burford)",
-      "from": "Marie Cooksey",
-      "entry_id": "",
-      "message_id": "<LO6P265MB6267BAD29366C545C9932D0C8BB22@LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotLAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "7 Sep",
-      "received_raw": "2026-09-07 15:36:37",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 2
-    },
-    {
-      "title": "University Bulletin: 7 September 2026",
-      "sub": "From <strong>Internal Communications</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "University Bulletin: 7 September 2026",
-      "from": "Internal Communications",
-      "entry_id": "",
-      "message_id": "<Mno5-8BwU0Duk6-Yvds-11qqL47lhLyx7tQgY@newsletter.admin.ox.ac.uk>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EjrnAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "7 Sep",
-      "received_raw": "2026-09-07 13:32:55",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Org Structure update",
-      "sub": "From <strong>Katherine Corr</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Org Structure update",
-      "from": "Katherine Corr",
-      "entry_id": "",
-      "message_id": "<LO6P265MB641032F036AACF2A13543E17F1B52@LO6P265MB6410.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqn3AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "4 Sep",
-      "received_raw": "2026-09-04 14:35:50",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "Athena A/L (summer 2027)",
-      "sub": "From <strong>Athena Artuso</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Athena A/L (summer 2027)",
-      "from": "Athena Artuso",
-      "entry_id": "",
-      "message_id": "<CW1P265MB8736A7C6DFFEA5F86559423D87B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqn2AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "4 Sep",
-      "received_raw": "2026-09-04 14:00:18",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "Athena A/L",
-      "sub": "From <strong>Athena Artuso</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Athena A/L",
-      "from": "Athena Artuso",
-      "entry_id": "",
-      "message_id": "<CW1P265MB8736DFB065C63557D8A63A1887B52@CW1P265MB8736.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqn1AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "4 Sep",
-      "received_raw": "2026-09-04 13:53:59",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "sub": "From <strong>Conor O'Brien</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: #External# Re: University of Oxford: FP 68261303 - Multi Company Setup",
-      "from": "Conor O'Brien",
-      "entry_id": "",
-      "message_id": "<LO0P123MB426585E07880AE6F21AEC13EFBB52@LO0P123MB4265.GBRP123.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqn0AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "4 Sep",
-      "received_raw": "2026-09-04 12:08:42",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 8
-    },
-    {
-      "title": "Logged - Problem# 40003483",
-      "sub": "From <strong>problemnotifications@it.ox.ac.uk</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Logged - Problem# 40003483",
-      "from": "problemnotifications@it.ox.ac.uk",
-      "entry_id": "",
-      "message_id": "<E1x2PYW-00000009AYR-O0YC@smtp11.mail.ox.ac.uk>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnxAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "4 Sep",
-      "received_raw": "2026-09-04 09:46:28",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "PeopleXD Banner - Update to UK SMP this evening",
-      "sub": "From <strong>Michael O'Sullivan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "PeopleXD Banner - Update to UK SMP this evening",
-      "from": "Michael O'Sullivan",
-      "entry_id": "",
-      "message_id": "<CWLP265MB18425E87726247FE5001A22C80B52@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnwAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "4 Sep",
-      "received_raw": "2026-09-04 06:26:02",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Organisational Structure Update - August 2026 - UPDATED",
-      "sub": "From <strong>Organisational Structure</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Organisational Structure Update - August 2026 - UPDATED",
-      "from": "Organisational Structure",
-      "entry_id": "",
-      "message_id": "<LO6P265MB64107D3947F18758ECDD4795F1B62@LO6P265MB6410.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "3 Sep",
-      "received_raw": "2026-09-03 16:53:23",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "University of Oxford - 69014928 - Holiday Reports",
-      "sub": "From <strong>Conor O'Shea</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "University of Oxford - 69014928 - Holiday Reports",
-      "from": "Conor O'Shea",
-      "entry_id": "",
-      "message_id": "<LOYP123MB3022B0D5FE0322BDBCFACC558AB62@LOYP123MB3022.GBRP123.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnpAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "3 Sep",
-      "received_raw": "2026-09-03 16:39:29",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "sub": "From <strong>Conor O'Shea</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: #External# PeopleXD Insight Reporting – Quote Request for Holiday Records Reports",
-      "from": "Conor O'Shea",
-      "entry_id": "",
-      "message_id": "<LOYP123MB3022CE27BD1C749089370D348AB62@LOYP123MB3022.GBRP123.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnoAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "3 Sep",
-      "received_raw": "2026-09-03 16:39:00",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Org Hierarchy Options",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Org Hierarchy Options",
-      "from": "Simon Burford",
-      "entry_id": "",
-      "message_id": "<CWLP265MB41764A3970C32EC6B0F0C4E492B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnlAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "3 Sep",
-      "received_raw": "2026-09-03 16:07:44",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Proposal: WFM Pay Code Parameter Change – Restrict Entry to Valid Balance Period",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Proposal: WFM Pay Code Parameter Change – Restrict Entry to Valid Balance Period",
-      "from": "Simon Burford",
-      "entry_id": "",
-      "message_id": "<CWLP265MB41766D9AAE8E74EBA66C8D2D92B62@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnkAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "3 Sep",
-      "received_raw": "2026-09-03 16:03:41",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 4
-    },
-    {
-      "title": "Change # 20020762_New NHS ERRBO and USS DB AVC Pension Schemes and Pay Codes",
-      "sub": "From <strong>Michael O'Sullivan</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Change # 20020762_New NHS ERRBO and USS DB AVC Pension Schemes and Pay Codes",
-      "from": "Michael O'Sullivan",
-      "entry_id": "",
-      "message_id": "<CWLP265MB184245C116FC4C5B02D4E3A580B62@CWLP265MB1842.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnjAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "3 Sep",
-      "received_raw": "2026-09-03 15:33:47",
-      "kevin_is_primary_recipient": false,
-      "messageCount": 1
-    },
-    {
-      "title": "Automatic reply: 38 day balance for departments update and decisions needed",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Automatic reply: 38 day balance for departments update and decisions needed",
-      "from": "Marie Cooksey",
-      "entry_id": "",
-      "message_id": "<0cb8cb3d0bdc408ca6a923867c5c3e12@LO6P265MB6267.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqndAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "3 Sep",
-      "received_raw": "2026-09-03 14:03:20",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "API_USER account",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "API_USER account",
-      "from": "Simon Burford",
-      "entry_id": "",
-      "message_id": "<CWLP265MB4176CB1C902A5FAAFEF57CE392B72@CWLP265MB4176.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqmyAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "2 Sep",
-      "received_raw": "2026-09-02 15:10:46",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: changing to 38 day balance - workgroups for updating",
-      "sub": "From <strong>Julie Hickman</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: changing to 38 day balance - workgroups for updating",
-      "from": "Julie Hickman",
-      "entry_id": "",
-      "message_id": "<LO0SPRMB00173AD0E4CD60EE104244EC8AB72@LO0SPRMB0017.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "",
-      "received": "2 Sep",
-      "received_raw": "2026-09-02 13:44:42",
-      "kevin_is_primary_recipient": true,
       "messageCount": 1
     },
     {
@@ -877,14 +655,30 @@
       "received": "2 Sep",
       "received_raw": "2026-09-02 09:42:12",
       "kevin_is_primary_recipient": true,
-      "ai_summary": "Simon Burford's cancellation of the Outstanding WFM Work Kick Off meeting.",
+      "ai_summary": "Simon Burford has canceled the Outstanding WFM Work kick-off meeting; no action required from Kevin.",
       "needs_reply": false,
       "no_action_needed": true,
       "messageCount": 1
     }
   ],
-  "fyiRawCount": 47,
-  "low": [],
+  "fyiRawCount": 2,
+  "suppressedCount": 17,
+  "low": [
+    {
+      "title": "Welcoming Conor O’Loughlin as EcoOnline’s new CEO",
+      "sub": "From <strong>EcoOnline</strong>. Building on a strong foundation to accelerate innovation and customer value. Hi Kevin, We’re pleased to share that Conor",
+      "badge": "",
+      "badgeType": "gray",
+      "subject": "Welcoming Conor O’Loughlin as EcoOnline’s new CEO",
+      "from": "EcoOnline",
+      "entry_id": "",
+      "message_id": "<1788887564117.2760bc89-a666-4dcc-8ed2-cf1a767a0629@bf10.eu1.hubspotemail.net>",
+      "web_link": "",
+      "received": "8 Sep",
+      "received_raw": "2026-09-08 18:13:59",
+      "kevin_is_primary_recipient": true
+    }
+  ],
   "calToday": [
     {
       "time": "09:30",
@@ -1406,8 +1200,18 @@
       "items": [
         {
           "time": "All day",
+          "title": "SarahR - A/L - PM only",
+          "sub": "People Department - HR Systems"
+        },
+        {
+          "time": "All day",
           "title": "Marie K: Non-working day",
           "sub": "Marie King"
+        },
+        {
+          "time": "All day",
+          "title": "SarahR - A/L - PM only",
+          "sub": "People Department - HR Systems"
         },
         {
           "time": "All day",
@@ -1588,7 +1392,8 @@
   "absences": [
     "Asta - off Friday 11 September, returns Monday 14 September",
     "Marie Cooksey - off Friday 11 September, returns Monday 14 September",
-    "Marie King - off Thursday 10 September, returns Tuesday 15 September"
+    "Marie King - off Thursday 10 September, returns Tuesday 15 September",
+    "Sarahr - - Pm Only - off Thursday 10 September, returns Friday 11 September"
   ],
   "prioritiesToday": [
     {
@@ -1605,11 +1410,12 @@
         "[19 Aug 2026] Organisational Structure Update - August 2026 FINAL received 19 Aug 2026 16:37 with updated org structure effective through 19 August. (email: Organisational Structure - RE: Organisational Structure Update - August 2026 - FINAL)",
         "[04 Sep 2026] Kevin forwarded Trinity Term 2026 non-college changes to Katherine Corr for review while on annual leave. (email: Kevin (sent to: Katherine Corr <katherine.corr@admin.ox.ac.uk>) - Trinity Term 2026 non-college changes)",
         "[05 Sep 2026] Kevin forwarded Trinity Term 2026 non-college organisational structure changes to Katherine Corr for review while on annual leave 4 September. (email: Kevin (sent to: Katherine Corr) - Trinity Term 2026 non-college changes)",
-        "[08 Sep 2026] Anna Gilbert has stepped in to review Trinity Term 2026 non-college changes on 7 September with responses provided, since Katherine Corr is on leave. (email: Anna Gilbert - RE: Trinity Term 2026 non-college changes)"
+        "[08 Sep 2026] Anna Gilbert has stepped in to review Trinity Term 2026 non-college changes on 7 September with responses provided, since Katherine Corr is on leave. (email: Anna Gilbert - RE: Trinity Term 2026 non-college changes)",
+        "[08 Sep 2026] Kevin sent Finance code B8 verification request to Anthony Kong regarding the Trinity Term 2026 non-college changes and potential code conflict with Human Anatomy & Genetics. (email: Kevin (sent to: Anthony Kong <anthony.kong@admin.ox.ac.uk>) - Finance code B8 Review)"
       ],
       "source": "orgstructure@admin.ox.ac.uk / Simon Burford / Sarah Rowles -- email thread",
       "dateType": "red",
-      "ai_summary": "Portal build and org hierarchy implementation (CA104_2526) has 9 September deadline tomorrow; six blocking items remain including Pay Administered By code format rules and College/Societies parent entity moves requiring Simon conversation. Next: finalize code definitions and confirm Simon meeting is booked this week."
+      "ai_summary": "Trinity Term 2026 org structure changes in progress; Anna Gilbert stepped in to review on 7 September while Katherine Corr on leave; Kevin sent Finance code B8 verification to Anthony Kong on 8 September to resolve conflict with Human Anatomy and Genetics code. Next: resolve B8 conflict and confirm completion of all 60 updates, 62 creations, and 7 deletions before Portal build deadline of 9 September."
     },
     {
       "id": "task-1787044968753",
@@ -1625,7 +1431,7 @@
       ],
       "source": "Laura Porter (Talent Mobility Specialist, People Dept) -- email thread",
       "dateType": "red",
-      "ai_summary": "Job alert notification text changes (approved February 2026) blocked on backend config that saves correctly but fails to apply to outgoing emails. Next: check Access Group support ticket status and retest configuration before sending Laura Porter the screenshot for sign-off."
+      "ai_summary": "Auto job-alert vacancy notification email text changes stalled since July on Access Group back-end issue; Kevin committed to picking up end of July but went on leave. Next: check Access Group support ticket status, confirm config now applies to outgoing emails, send screenshot to Laura Porter for sign-off."
     },
     {
       "id": "t2608111331410",
@@ -1646,7 +1452,7 @@
       ],
       "source": "Inbox - James Salas Guillen, 2026-08-11 13:11",
       "dateType": "red",
-      "ai_summary": "Kevin must answer Simon Burford's two open questions on Cority Applicant Data Import CSV export (null-value handling and UTF-8 encoding confirmation); James confirmed quotation marks accepted; Kevin clarified Grace built the report. Next: respond to Simon with configuration details."
+      "ai_summary": "Cority Applicant Data Import file - Kevin must answer Simon Burford's two open questions (null-value handling for CSV export, UTF-8 encoding confirmation) and confirm whether Lee's handover included documentation on report creation process. Next: respond to Simon and cross-reference findings against Adam's CORITY-FEASIBILITY.md."
     },
     {
       "id": "t035",
@@ -1659,7 +1465,7 @@
       ],
       "source": "HR Systems Managers Meeting 24/06",
       "dateType": "red",
-      "ai_summary": "GLAM did not load rostering data at last minute; SBS, PEDS, GLAM areas outstanding and blocking Sarah's UC dashboards and reports. Next: set up resolution meeting with Kevin, Simon, Marie, Michelle, Julie to understand what wasn't loaded, agree approach, and produce action plan."
+      "ai_summary": "WFM/GLAM rostering issue - GLAM did not load rostering data, blocking Sarah from running UC dashboards; three areas outstanding (SBS, PEDS, GLAM). Next: set up resolution meeting with Kevin, Simon Burford, Marie Cooksey, Michelle Williams, and Julie Hickman to agree approach and action list."
     },
     {
       "id": "t2609020705200",
@@ -1671,7 +1477,7 @@
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-09-01 16:29",
       "dateType": "red",
-      "ai_summary": "Manager unable to approve leave requests (Support Call #11707439) suggests WFM module issue affecting day-to-day leave processing; Michael O'Sullivan flagged 1 September. Next: diagnose root cause and coordinate with WFM team for resolution."
+      "ai_summary": "Manager leave approval failure (Support Call 11707439) - WFM module issue received 1 September preventing manager leave approvals; needs diagnostic work and WFM team coordination. Next: investigate root cause and restore normal leave processing."
     },
     {
       "id": "t2609020705201",
@@ -1686,7 +1492,7 @@
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-09-01 09:57",
       "dateType": "red",
-      "ai_summary": "P5 Incident #11706988 assigned 1 September for investigation affecting multiple users; Gillian Wilson has team investigation ongoing as of 7 September. Next: continue diagnostic work to identify root cause and resolution path."
+      "ai_summary": "P5 Incident 11706988 (Task 50981420) - Michael O'Sullivan assigned directly to Kevin on 1 September affecting multiple users; Gillian Wilson investigating with last status 7 September. Next: continue investigation and work toward resolution."
     }
   ],
   "prioritiesTomorrow": [
@@ -1708,7 +1514,7 @@
       ],
       "source": "Inbox - Simon Burford, 2026-08-07 16:21",
       "dateType": "orange",
-      "ai_summary": "Volunteering Leave standalone pay code move from 'Other Leave' reason code (Access Group Case 69049424); Simon working on configuration; Marie clarified HR Systems/Reward ownership split 18 August. Next: Kevin decide FA team prioritisation and timeline for standalone build, review Michael O'Sullivan's TIMDEP04 report update."
+      "ai_summary": "Volunteering Leave pay code configuration - Simon Burford working to move Volunteering Leave to standalone leave type (from Access Group case 69049424); HR Systems owns technical changes, Reward team owns engagement. Next: Kevin decides FA team prioritization/timeline for build and reviews Michael O'Sullivan's TIMDEP04 report update requirements."
     }
   ],
   "prioritiesWeek": [
@@ -1735,7 +1541,7 @@
       ],
       "source": "Inbox 2026-06-11 15:01 / Quote 24/06",
       "dateType": "orange",
-      "ai_summary": "Holiday Records 3-report project (case 69001638) approved 24 June; Access Group proposed Friday 18 September 14:00 kickoff; Kevin confirmed availability. Next: await calendar invite from Access Group; project ready to start."
+      "ai_summary": "Holiday Records reporting project (Access Group case 69001638) - scope approved 24 June with 3 reports and 2,800 flex points; Kevin confirmed Friday 18 September 2026 at 14:00 for kickoff call. Next: accept calendar invite from Conor O'Shea and prepare for project kickoff."
     },
     {
       "id": "task-1785704715215",
@@ -1751,7 +1557,7 @@
       ],
       "source": "Julie Hickman",
       "dateType": "orange",
-      "ai_summary": "Julie Hickman flagged outstanding Development Insight reports actions following conversation with Ilona; includes CDR/PD working group items and KPI presentation July 2026. Next: review specifics with Julie on what actions remain outstanding."
+      "ai_summary": "Development Insight reports outstanding actions - Julie Hickman flagged items needing review following conversation with Ilona. Next: discuss with Julie to understand specific actions and work required."
     },
     {
       "id": "t2608071801051",
@@ -1766,7 +1572,7 @@
       ],
       "source": "Inbox - Simon Burford, 2026-08-07 15:09",
       "dateType": "orange",
-      "ai_summary": "Simon encountered missing configuration option when setting up Volunteering Leave pay code in UOXU; Kevin to investigate team calendar configuration issue with Asta. Next: coordinate with Asta to diagnose and resolve the missing option."
+      "ai_summary": "Team calendar configuration issue - Simon encountered missing option when configuring Volunteering Leave pay code in UOXU. Next: investigate with Asta Palmer to diagnose and resolve team calendar configuration problem."
     },
     {
       "id": "t2608101804010",
@@ -1780,7 +1586,7 @@
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-10 17:05",
       "dateType": "orange",
-      "ai_summary": "Marie Cooksey asking if Clockify can consolidate Beth's two roles (HR Systems and Biology) into one; Marie exploring Jibble alternative. Next: investigate Clockify platform capabilities and advise Marie on feasibility."
+      "ai_summary": "Clockify role consolidation for Beth - Marie Cooksey asking whether Beth's two roles (HR Systems and Biology) can be combined into one. Next: investigate Clockify platform capabilities and advise Marie on feasibility."
     },
     {
       "id": "t2608111507360",
@@ -1796,7 +1602,7 @@
       ],
       "source": "Inbox - Julie Hickman, 2026-08-11 13:39",
       "dateType": "orange",
-      "ai_summary": "GLAM joining 38-day balance scheme decision pending; Julie had productive conversation with Becky Fitzek at GLAM 18 August providing new capacity information. Next: provide advice to Marie on whether GLAM should join alongside Maths and Chemistry."
+      "ai_summary": "GLAM joining 38-day balance scheme - Marie seeking Kevin's input on whether GLAM should join alongside Maths and Chemistry after initial conversation with Becky Fitzek at GLAM. Next: provide thoughts/advice to inform Marie's decision."
     },
     {
       "id": "t2608121801280",
@@ -1820,7 +1626,7 @@
       ],
       "source": "Inbox - Julie Hickman, 2026-08-12 17:09",
       "dateType": "orange",
-      "ai_summary": "Julie shared OneDrive file with 38-day balance implementation timeline and tasks; Kevin confirmed Chemistry capacity (131 workgroups); GLAM participation still TBD. Next: finalize decisions on Chemistry pilot workgroup updates and GLAM inclusion before rollout."
+      "ai_summary": "38-day balance implementation timeline and decisions - Julie shared OneDrive file with workgroup update tasks; Kevin must review implementation schedule and decisions required. Next: assess Chemistry's 131 workgroups effort, confirm GLAM capacity, and decide on rollout priorities."
     },
     {
       "id": "t2608121801281",
@@ -1837,7 +1643,7 @@
       ],
       "source": "Inbox - Jessica Oldershaw, 2026-08-12 16:41",
       "dateType": "orange",
-      "ai_summary": "Jessica Oldershaw sent uplift timeline update indicating September decision point; Michael O'Sullivan recommends October implementation; multiple team members contributed input. Next: Kevin review full email and confirm HR Systems readiness and dependencies."
+      "ai_summary": "PeopleXD uplift timeline - Jessica Oldershaw indicated September decision point; Michael O'Sullivan and Athena Artuso have provided analysis suggesting October implementation may be clearer. Next: review full timeline and confirm HR Systems readiness."
     },
     {
       "id": "t2608131801210",
@@ -1849,7 +1655,7 @@
       ],
       "source": "Inbox - Helen Harbour, 2026-08-13 16:10",
       "dateType": "orange",
-      "ai_summary": "Helen Harbour coordinating DTP1334 SHSMS supplier requirements evaluations with Friday 21 August deadline (passed); Kevin needs to review submissions and clarifications. Next: confirm evaluation status and whether review phase is complete."
+      "ai_summary": "DTP1334 SHSMS supplier requirements evaluations - Helen Harbour coordinating with Friday 21 August deadline (passed); Kevin needed to review supplier submissions and clarifications. Next: complete any outstanding evaluation inputs."
     },
     {
       "id": "t2608131801211",
@@ -1861,7 +1667,7 @@
       ],
       "source": "Inbox - Caroline Gow, 2026-08-13 16:56",
       "dateType": "orange",
-      "ai_summary": "Caroline Gow shared Supplier Submission Clarifications V2.0 document containing supplier responses for DTP1334 SHSMS evaluation; original 21 August deadline passed. Next: confirm if evaluation phase is concluded or if review input still needed."
+      "ai_summary": "DTP1334 SHSMS Supplier Submission Clarifications V2.0 - Caroline Gow shared document with supplier responses for Kevin's review ahead of 21 August deadline (passed). Next: review and provide evaluation input."
     },
     {
       "id": "t2608181201060",
@@ -1874,7 +1680,7 @@
       ],
       "source": "Inbox - Kevin Lelitte, 2026-08-18 10:24",
       "dateType": "orange",
-      "ai_summary": "Simon Burford requested confirmation of employer pension rates needed for university annual Financial Statements (originally 28 May); Kevin bumped 18 August. Next: locate confirmation documentation and respond to Simon."
+      "ai_summary": "ER pension rates confirmation - Simon Burford's email (original 28 May) on employer pension rates needed for annual Financial Statements; Kevin bumped 18 August but still outstanding. Next: locate confirmation and respond to Simon."
     },
     {
       "id": "t2608181201061",
@@ -1888,7 +1694,7 @@
       ],
       "source": "Inbox - Kevin Lelitte, 2026-08-18 10:23",
       "dateType": "orange",
-      "ai_summary": "Anna Carter-Windle email on GLAM rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security (originally 28 May); Kevin bumped 18 August. Next: follow up to clarify requirements and coordinate next steps."
+      "ai_summary": "GLAM rostering requirements (Botanic Gardens Ticket Office and Ashmolean Security) - Kevin flagged follow-up on Anna Carter-Windle's rostering requirements email. Next: clarify requirements and next steps with GLAM team."
     },
     {
       "id": "t2608181201062",
@@ -1901,7 +1707,7 @@
       ],
       "source": "Inbox - Kevin Lelitte, 2026-08-18 10:23",
       "dateType": "orange",
-      "ai_summary": "Joanne Grant EcoOnline engagement email regarding University engagement (originally 28 May); Kevin bumped 18 August. Next: respond to or engage with EcoOnline on proposal or relationship discussion."
+      "ai_summary": "EcoOnline supplier engagement - Kevin flagged Joanne Grant's EcoOnline/University engagement email for follow-up (original 28 May). Next: determine status and decide on response/engagement approach."
     },
     {
       "id": "t2608181501150",
@@ -1913,7 +1719,7 @@
       ],
       "source": "Inbox - Julie Hickman, 2026-08-17 13:09",
       "dateType": "orange",
-      "ai_summary": "Julie Hickman requested user guidance for staff on leave entitlement calculations for new grades (39Q, 30S, 38S, 36S) following Maths and Chemistry meetings; part of 38-day balance implementation. Next: develop guidance document."
+      "ai_summary": "User guidance creation - Julie Hickman requested help creating guidance for staff on leave entitlement calculations for new grades (39Q, 30S, 38S, 36S) following Maths and Chemistry meetings. Next: create draft guidance for new grades."
     },
     {
       "id": "t2608191801190",
@@ -1929,7 +1735,7 @@
       ],
       "source": "Inbox - Simon Burford, 2026-08-19 15:51",
       "dateType": "orange",
-      "ai_summary": "Simon Burford forwarded request asking Kevin to estimate FA effort from Functional Analysis perspective to implement internal candidate identification in application form. Next: provide scoping and effort estimation."
+      "ai_summary": "Application form internal candidate identification - Simon Burford requesting effort estimation from Functional Analysis perspective on implementing internal candidate identification in application form. Next: provide scoping/estimation."
     },
     {
       "id": "t2608211201050",
@@ -1940,7 +1746,7 @@
       ],
       "source": "Inbox - Sarah Rowles, 2026-08-21 11:09",
       "dateType": "orange",
-      "ai_summary": "Sarah Rowles sent sickness absence data completeness analysis (OUTPUT_SicknessDataChecks_20260811.xlsx); Kevin needs to review findings and data quality issues. Next: review and discuss findings with Sarah."
+      "ai_summary": "Sickness absence data completeness - Sarah Rowles sent analysis (OUTPUT_SicknessDataChecks_20260811.xlsx) requiring review and discussion on data quality issues. Next: review findings and identify follow-up actions."
     },
     {
       "id": "task-1787645383808",
@@ -1958,7 +1764,7 @@
       ],
       "source": "Weekly Granola Review, 22 Aug 2026 (corrected)",
       "dateType": "orange",
-      "ai_summary": "PDR (Personal Development Review) sessions need booking by end September 2026; Kevin scheduled Asta Palmer for 25 September 12:00-13:00. Next: book remaining PDR slots for Simon Burford and FA team members."
+      "ai_summary": "Book PDR sessions - Kevin has booked Asta Palmer for Friday 25 September 12:00-1:00pm; Simon Burford and FA team PDRs still need booking by end of September. Next: schedule PDR sessions with Simon and remaining FA team members."
     },
     {
       "id": "task-1787652746063",
@@ -1975,7 +1781,7 @@
       ],
       "source": "Sickness Absence Data Catch-up, 21 Aug 2026 Granola meeting",
       "dateType": "orange",
-      "ai_summary": "Confirm approximate FA validation effort per department with Michael for sickness absence survey (raised 21 August); Kevin spoke with Michael 25-30 August. Next: finalize effort figures to determine Michael's capacity and whether additional BA/FA support needed."
+      "ai_summary": "FA validation effort per department - Kevin and Michael need to confirm approximate effort per department to determine capacity and whether additional BA/FA support needed; feeds into Marie/Ant's BA-effort estimate. Next: complete sizing discussion with Michael."
     },
     {
       "id": "task-1787652746064",
@@ -1989,7 +1795,7 @@
       ],
       "source": "Sickness Absence Data Catch-up, 21 Aug 2026 Granola meeting",
       "dateType": "orange",
-      "ai_summary": "Check project folders for unhanded-over WFM/SBS sickness data files (second batch - Smith's School, Geography); never actioned since 11 August working group. Next: search project folders and retrieve missing files."
+      "ai_summary": "WFM/SBS second-batch sickness data files - Second batch of sickness data files (Smith's School, Geography) never handed over; flagged as miss on 25 August. Next: check project folders and locate unhanded-over data files."
     },
     {
       "id": "t2608251201190",
@@ -2004,7 +1810,7 @@
       ],
       "source": "Inbox - Sophie Levy, 2026-08-24 08:33",
       "dateType": "orange",
-      "ai_summary": "Sophie Levy confirms PeopleXD Quality project (PO E22033553) fully staffed with internal transition from sales to professional services 24 August; project ready to proceed. Next: follow up with Sophie to ensure clear handover and identify HR Systems dependencies."
+      "ai_summary": "PeopleXD Quality project handover (Sophie Levy PO E22033553) - Sophie confirmed project fully staffed with internal sales-to-professional-services transition 24 August; project ready to proceed. Next: ensure clear handover and identify any HR Systems dependencies."
     },
     {
       "id": "t2608261500531",
@@ -2021,7 +1827,7 @@
       ],
       "source": "Inbox - Michael O'Sullivan, 2026-08-26 12:06",
       "dateType": "orange",
-      "ai_summary": "Michael O'Sullivan asks Kevin to recall decisions or locate documentation on Grade 2 increment bar changes (2024 uplift); Simon confirmed employees 2.5 moved to 2.6. Next: continue investigation and locate additional documentation."
+      "ai_summary": "Grade 2 increment bar changes documentation (2024 uplift) - Michael O'Sullivan asking Kevin to recall decisions or locate documentation on Grade 2 scale point changes; Simon confirmed employees on 2.5 moved to 2.6 with SQL code evidence in Nik's folder. Next: locate documentation and provide full details to Michael."
     },
     {
       "id": "t2608270801360",
@@ -2045,7 +1851,7 @@
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-26 16:29",
       "dateType": "orange",
-      "ai_summary": "Marie asking if Chemistry workgroup update represents significant work; Kevin confirmed Chemistry as 38-day balance pilot with 131 workgroups needing updates (8 September). Next: await Julie's scheduling and begin workgroup updates."
+      "ai_summary": "38-day balance workgroup effort assessment for Chemistry - Marie asked whether Chemistry workgroup update request represents significant planned work; Kevin confirmed Chemistry as pilot with 131 workgroups on 8 September. Next: provide GLAM capacity assessment to inform priority decisions."
     },
     {
       "id": "t2608271801020",
@@ -2059,583 +1865,25 @@
       ],
       "source": "Inbox - Marie Cooksey, 2026-08-27 15:53",
       "dateType": "orange",
-      "ai_summary": "Marie Cooksey copied Kevin and James to provide IRIS/IEX incidents change timings to Amanda; needs HR Systems confirmation on when changes can be implemented. Next: Kevin and James respond with realistic implementation timelines."
+      "ai_summary": "IRIS/IEX incidents changes timings - Marie explicitly copied Kevin and James to respond with incident change timings to Amanda; coordination needed on implementation timeline. Next: respond to Marie with realistic timelines for HR Systems to handle implementation."
     }
   ],
-  "refreshed_at": "Tuesday 08 September · 16:36",
+  "refreshed_at": "Tuesday 08 September · 22:17",
   "teams": [
     {
       "channel": "",
       "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-09-08T14:59:55.793Z",
-      "preview": "Hi Michael  \\- are you ok to present the kpi's tomorrow? I have a physio\nappointment",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-09-08T09:51:37.216Z",
+      "sender": "",
+      "time": "",
       "preview": "",
       "is_from_me": false,
       "has_attachments": false
     },
     {
       "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-25T14:00:37.96Z",
-      "preview": "It is relatively straightforward.  To date all uploads have always been done\nby the FA's as a segregation of duties.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T13:57:59.394Z",
-      "preview": "Yes agreed - just to clarify is the upload process straightforward for someone\nwith basic People XD knowledge to complete and would the upload need to be\nchecked or could a BA complete it independentl",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-25T12:47:17.48Z",
-      "preview": "My suggestion would be to work through the data by department, rather than\namalgamating everything into a single file. However, this is more a\nrecommendation based on what I think would be the most ma",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T12:44:02.131Z",
-      "preview": "Thanks",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-25T12:41:09.085Z",
-      "preview": "**1\\. Once the data is fully reviewed, mapped and formatted, roughly how long\nwould you expect the upload itself to take?**  \nThis is a standard system data load, so the actual upload should be relati",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T12:39:34.669Z",
-      "preview": "Happy to have a chat if its easier - I need this information by close of play\ntoday!",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T12:37:22.187Z",
-      "preview": "Sorry for all the questions, but Marie needs this information to go back to\nMarkos as we are trying to secure a resource for this work.\n\nThe ideal scenario would be a BA and FA resource, to validate, ",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T12:32:53.989Z",
-      "preview": "and do you think someone less technical can complete the upload, provided the\ndata has already been reviewed, formatted and validated?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T12:29:53.442Z",
-      "preview": "Thanks Michael — that’s helpful. To let us scope this properly, could you\nplease confirm:\n\n  1\\. Once the data is fully reviewed, mapped and formatted, roughly how long\nwould you expect the upload its",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-25T12:22:01.041Z",
-      "preview": "I feel like these conversations have already been had with Marie. The last\nupdate I had was that the data gathered for the second load still needed to be\nreviewed, mapped to the UCEA sickness reasons,",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T11:11:59.477Z",
-      "preview": "between now and 2pm and then 3.30 - 4pm would be good for me",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-25T11:07:58.274Z",
-      "preview": "Hi Michael, what’s the best time to catch up today to have a quick chat about\nthe sickness absence data uploads, i need to understand the effort involved\nand feed back to Marie later today.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-20T11:45:49.678Z",
-      "preview": "HOW TO - Maintain Online Application Forms in the portal 2.0.  \nDoc available here:  O:\\PS\\HR Systems\\Support\\Reference Data\\How to\nguides\\RECRUITMENT AND APPLICANT\nAlthough the title says portal some",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-19T08:50:35.627Z",
-      "preview": "Following our catch up, these are the letter templates being revised:  \nRecruitment templates:  \n  \nAcademic contract  \nSupport contract  \nApprenticeship agreement  \nOffer letter  \n  \nPeople Managemen",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-19T06:19:21.01Z",
-      "preview": "Just to let you know I've declined todays meeting 'Planning for depts move to\n38 day balance' at 14.30.  I met with Julie last week to review the tasks\nneeded.  I think this meeting is just to talk ab",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-18T14:22:04.199Z",
-      "preview": "that would explain it, can you reach out to Marie?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-18T14:20:53.536Z",
-      "preview": "I didn’t have the meeting in my calendar, so unfortunately it wasn’t on my\nradar. I’ve also had my head down working on configuration changes and haven’t\nbeen keeping as closely on top of messages as ",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-18T13:17:05.897Z",
-      "preview": "Hi Michael, you were expected to join the meeting with Glam regarding\nrostering/AL, as your technical insight would be helpful. Marie sent you a\nmessage earlier but hasn’t heard back. We’re still in t",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-18T13:16:43.413Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-08-11T08:30:57.866Z",
-      "preview": "Yes",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-08-11T08:30:27.071Z",
-      "preview": "Hi Michael, are you able to join the FA Catch-Up this morning?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-30T13:18:38.91Z",
-      "preview": "Are you able to join the meeting?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-06-26T09:38:57.807Z",
-      "preview": "My understanding is that it may be more related to how the report has been\ndesigned rather than a system bug, although I'd need someone with reporting\nexpertise to confirm that.  \n\nThe absence reports",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-26T09:32:51.488Z",
-      "preview": "Hi Michael — quick one. Are you aware of a sickness absence report bug - Simon\nflagged this (open-ended absences not being picked up, pay impact) — just\nwanted to check if its on your radar at all and",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-06-18T10:34:59.223Z",
-      "preview": "Marie should receive the approval request as normal.  With the temporary\nworkgroup implemented yesterday she then replies directly with her approval\ncomments, which you can see within the Activity His",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-18T10:27:46.454Z",
-      "preview": "Hi Michael, Just a quick one — I've raised two changes and they're currently\nsitting in \"Pending Approval\". Will Marie be able to see and approve them, or\ndo they need to be in a different status?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-15T12:03:24.854Z",
-      "preview": "Thanks",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Michael O'Sullivan",
-      "time": "2026-06-15T11:58:53.229Z",
-      "preview": "You'll find all the reporting How To's here:  O:\\PS\\HR\nSystems\\Support\\Reference Data\\How to guides\\REPORTING",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-09-08T14:58:59.48Z",
-      "preview": "OK cool  Just good to know",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-09-08T14:58:25.907Z",
-      "preview": "Hi Simon - just putting the slides together now, I was going to ask Michael",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-09-08T14:57:17.397Z",
-      "preview": "Hi Kevin, who is presenting the FA team kpis tomorrow?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-08-25T08:29:15.964Z",
-      "preview": "Hi Kevin, I've just seen Marie's email, could you book in your PDR with me at\nsome point after 14th September?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-29T08:19:43.187Z",
-      "preview": "Hi Simon, thanks for the heads-up - I’ll pick this up and work through the\npotential impact. Once I have a clearer understanding, I’ll let you know!",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-29T08:03:42.796Z",
-      "preview": "If you can let me know when you've got a good understanding then we can meet\nas a management team and pull together a response.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-29T08:03:01.627Z",
-      "preview": "Hi Kevin, not sure if you're already doing this or not but can you please work\nwith James and Chris to establish what the impact would be of the proposed org\nstructure changes that Katherine Corr is p",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-29T07:06:50.754Z",
-      "preview": "Hi Simon - Just to let you know I have a hospital pre-op assessment this\nmorning.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-24T10:59:57.251Z",
-      "preview": "No problem, I had a clash too so was looking to reschedule 😊 I'll try to find\na morning slot",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-24T07:46:32.289Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-24T07:37:00.677Z",
-      "preview": "Morning Simon, Could we please reschedule our 1-1? I have a physio appointment\ntoday, so I will not be able to attend the HR Team meeting or our 1-1.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-19T14:43:41.572Z",
-      "preview": "Yes you absolutely should have access to the remote drive",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-19T14:14:03.898Z",
-      "preview": "Hi Simon, I'm trying to regain access to the HRIS remote drive following the\nmigration. Svetlana has located the access group but can't see any record of\nmy membership under the Connect account, so sh",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-18T14:54:19.828Z",
-      "preview": "That could be a major issue for anyone who uses PowerBI or any of the other\ntools behind Connect. They need to make sure it's more seamless when they roll\nout further, or force the roll out.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-18T14:52:01.066Z",
-      "preview": "Thanks, Simon. Yes, I’ve been speaking with Svetlana, and it appears to be\nrelated to the move to SSO. We’re currently investigating the issue and,\nhopefully, we’ll have it resolved soon.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-18T14:21:52.265Z",
-      "preview": "Svetlana is good to reach out to, she's always super helpful",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-18T14:21:33.678Z",
-      "preview": "I think you'll need to get in touch with MPST though, I don't think I can help\nwith connecting to remote services apps.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-18T14:20:35.047Z",
-      "preview": "Just wondering if this might be an issue.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-18T14:20:15.267Z",
-      "preview": "Have you logged into SQL developer since you changed your authentication type\non your laptop to SSO?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-18T12:28:03.49Z",
-      "preview": "Hi Simon, Can you help me with logging into SQL? My CONNECT credentials don't\nappear to be working in Oracle SQL Developer.",
-      "is_from_me": false,
-      "has_attachments": true
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-15T17:14:59.436Z",
-      "preview": "OK that's fine, as long as your team know.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-15T16:43:29.709Z",
-      "preview": "Hi Simon, I think I may have overdone it a bit today. I’ve got meetings\ntomorrow afternoon, so I’m going to start a little later tomorrow, probably\naround lunchtime.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-15T15:56:56.767Z",
-      "preview": "Thanks - I'll let Asta know and update Marie. I'm not sure if its local or she\nwill travel but will ask.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-15T14:53:41.533Z",
-      "preview": "100% compassionate leave. Maybe give Marie C a heads up once you know the\ndate. Is the funeral going to be local or will she be travelling as well?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-15T13:09:42.334Z",
-      "preview": "Hi Simon,  I’ve had a query from Asta. Her father-in-law’s funeral is expected\nto take place on either 30 June or 1 July, with the final date still to be\nconfirmed. Could you please confirm whether sh",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-15T11:53:17.572Z",
-      "preview": "Thanks, that would be helpful. I think I can get a lot from the meeting\nrecording and transcript first, but I'll let you know if I need any pointers\non updating HR Reporting reports.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-15T10:15:59.702Z",
-      "preview": "Let me know if you need some training / pointers on updating HR Reporting\nreports, I'd like you to be able to pick these kinds of requests up so just\nneed to know if you need some additional support.",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-15T08:12:34.469Z",
-      "preview": "Hi Simon,  Yes, I've asked Connor for access to the meeting recording and\ntranscript so I can go back through the steps that were covered before making\nthe changes in UOXU. On the documentation point,",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-06-12T15:54:13.735Z",
-      "preview": "Would you like to try linking the pay code access groups to the departments in\nUOXU? I think you should have access as I updated the menu profile in that\nenvironment. I have created all of the rest of",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-06-12T10:54:07.501Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": true
-    },
-    {
-      "channel": "DTP1092 College staff into PXD Team meeting",
       "kind": "chat",
       "sender": "",
-      "time": "2026-09-08T14:23:47.916Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "DTP1092 College staff into PXD Team meeting",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-08T14:23:46.663Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "DTP1092 College staff into PXD Team meeting",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T16:15:35.543Z",
-      "preview": "",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "DTP1092 College staff into PXD Team meeting",
-      "kind": "chat",
-      "sender": "",
-      "time": "2026-09-07T16:15:35.52Z",
+      "time": "",
       "preview": "",
       "is_from_me": false,
       "has_attachments": false
@@ -2643,44 +1891,341 @@
     {
       "channel": "",
       "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-09-08T14:58:59.48Z",
-      "preview": "OK cool  Just good to know",
+      "sender": "",
+      "time": "",
+      "preview": "",
       "is_from_me": false,
       "has_attachments": false
     },
     {
       "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-09-08T14:58:25.907Z",
-      "preview": "Hi Simon - just putting the slides together now, I was going to ask Michael",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Simon Burford",
-      "time": "2026-09-08T14:57:17.397Z",
-      "preview": "Hi Kevin, who is presenting the FA team kpis tomorrow?",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "",
-      "kind": "chat",
-      "sender": "Kevin Lelitte",
-      "time": "2026-09-08T14:59:55.793Z",
-      "preview": "Hi Michael  \\- are you ok to present the kpi's tomorrow? I have a physio\nappointment",
-      "is_from_me": false,
-      "has_attachments": false
-    },
-    {
-      "channel": "DTP1092 College staff into PXD Team meeting",
       "kind": "chat",
       "sender": "",
-      "time": "2026-09-08T14:23:47.916Z",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
+      "preview": "",
+      "is_from_me": false,
+      "has_attachments": false
+    },
+    {
+      "channel": "",
+      "kind": "chat",
+      "sender": "",
+      "time": "",
       "preview": "",
       "is_from_me": false,
       "has_attachments": false
