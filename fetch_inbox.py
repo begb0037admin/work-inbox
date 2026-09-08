@@ -2128,6 +2128,18 @@ FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary"
 # priority response tasks." Sick-leave / cover-needed cases deliberately are
 # NOT here -- they default to fyi and the AI promotion pass lifts them only if a
 # reply/cover is genuinely required.
+# Manager-approvals queue (Kevin's 8 Sep brief, queue 2 of 3). Consulted ONLY
+# when WI_NEEDS_AI_PROMOTE is ON, and checked FIRST -- a leave / approval
+# request routes to its own "approvals" tier, not Needs and not FYI. Gated on
+# kevin_is_primary_recipient so a request where Kevin is only Cc'd (someone else
+# is the approver) still falls through to FYI.
+APPROVAL_SUBJECTS = ["leave request", "annual leave request", "a/l request", "holiday request",
+                     "time off request", "requesting leave", "request for leave", "leave application",
+                     "absence request", "approve leave", "leave approval", "authorise leave",
+                     "authorisation required", "approval required", "approval requested",
+                     "awaiting your approval", "pending your approval", "requires your approval",
+                     "for your approval", "needs your approval", "sickness absence approval",
+                     "expenses approval", "expense claim", "overtime approval", "timesheet approval"]
 FYI_ALWAYS       = ["starting soon", "is starting", "meeting forward notification",
                     "flu vaccination", "flu jab", "flu clinic", "vaccination reminder",
                     "university bulletin", "bulletin:", "staff bulletin", "clockify",
@@ -2171,6 +2183,8 @@ def categorise(msg):
         #  3. everything else -> fyi; Phase 3.3-promote lifts it to needs only
         #     if Phase 3.2's AI verdict says needs_reply=true.
         # is_read is no longer a "needs" trigger on its own.
+        if kevin_primary and any(kw in subj for kw in APPROVAL_SUBJECTS):
+            return "approvals"
         for kw in FYI_ALWAYS:
             if kw in subj:
                 return "fyi"
@@ -2251,16 +2265,19 @@ def make_card(msg, category):
     }
     return card
 
-urgent = []
-needs  = []
-fyi    = []
-low    = []
+urgent    = []
+needs     = []
+approvals = []          # Manager-approvals queue -- only ever populated when WI_NEEDS_AI_PROMOTE is ON
+fyi       = []
+low       = []
 
 for msg in inbox:
     cat  = categorise(msg)
     card = make_card(msg, cat)
     if cat == "urgent":
         urgent.append(card)
+    elif cat == "approvals":
+        approvals.append(card)
     elif cat == "needs":
         needs.append(card)
     elif cat == "fyi":
@@ -2268,7 +2285,7 @@ for msg in inbox:
     else:
         low.append(card)
 
-print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
+print(f"Phase 3 done - urgent:{len(urgent)} approvals:{len(approvals)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
 
 # -- Phase 3.2 - AI summaries for urgent/needs email cards --
 # Same pattern as Phase 3.7's priority-task summaries, applied to raw email
@@ -2748,6 +2765,58 @@ try:
           f"({collapsed_count} collapsed), {aged_out_count} aged out (>{FYI_MAX_AGE_DAYS}d)")
 except Exception as fyi_clean_err:
     print(f"WARNING: Phase 3.3c FYI thread-collapse/aging failed, FYI left unchanged - {fyi_clean_err}")
+
+# -- Phase 3.3d -- cross-section thread dedup (WI_NEEDS_AI_PROMOTE / triage v2) --
+# Kevin's 8 Sep brief: "Repeated messages on the same thread should consolidate
+# to one entry, across ALL sections -- a thread shouldn't appear in both Needs
+# and Parked." Phase 3.3c above only collapses WITHIN FYI. This pass runs over
+# urgent + needs + approvals + fyi together, on a normalised-subject key that
+# also strips #external# / [external] markers and re:/fw:/fwd: chains in any
+# order. Keeps ONE card per thread -- the one in the highest-priority section
+# (urgent > approvals > needs > fyi), most-recent within that -- and removes the
+# rest, summing messageCount onto the kept card (already a rendered field, from
+# the Phase 3.3c change). v1 = exact normalised-subject only; fuzzy/near-dupe
+# matching deliberately deferred (would risk over-collapsing distinct threads).
+if NEEDS_AI_PROMOTE:
+    try:
+        _EXT_MARK = re.compile(r'^\s*(\[\s*external\s*\]|#\s*external\s*#|external:\s*)', re.IGNORECASE)
+        _REFWD_X  = re.compile(r'^\s*(re|fw|fwd)\s*:\s*', re.IGNORECASE)
+
+        def _xsec_key(card):
+            s = re.sub(r'\s+', ' ', (card.get("subject") or "").strip().lower())
+            while True:
+                s2 = _EXT_MARK.sub('', _REFWD_X.sub('', s)).strip()
+                if s2 == s:
+                    break
+                s = s2
+            return s or ("id:" + str(card.get("entry_id") or card.get("message_id") or id(card)))
+
+        _RANK = {"urgent": 0, "approvals": 1, "needs": 2, "fyi": 3}
+        _xsections = {"urgent": urgent, "approvals": approvals, "needs": needs, "fyi": fyi}
+        _xgroups = {}
+        for _sec, _lst in _xsections.items():
+            for _c in _lst:
+                _xgroups.setdefault(_xsec_key(_c), []).append((_sec, _c))
+
+        _xremoved = 0
+        for _members in _xgroups.values():
+            if len(_members) < 2:
+                continue
+            _members.sort(key=lambda m: str(m[1].get("received_raw") or ""), reverse=True)
+            _members.sort(key=lambda m: _RANK.get(m[0], 9))          # stable -> recency kept within rank
+            _win_sec, _win_card = _members[0]
+            _win_card["messageCount"] = sum(c.get("messageCount", 1) for _s, c in _members)
+            for _sec, _c in _members[1:]:
+                try:
+                    _xsections[_sec].remove(_c)
+                    _xremoved += 1
+                except ValueError:
+                    pass
+        if _xremoved:
+            print(f"Phase 3.3d done - cross-section thread dedup: removed {_xremoved} duplicate card(s) "
+                  f"across {'/'.join(_xsections)}")
+    except Exception as _xsec_err:
+        print(f"WARNING: Phase 3.3d cross-section dedup failed, sections left unchanged - {_xsec_err}")
 
 # -- Calendar post-processing --
 KNOWN_ABSENCES = []
@@ -4010,6 +4079,7 @@ briefing = {
     "subtitle":     subtitle,
     "context":      context,
     "urgent":       urgent,
+    "approvals":    approvals,
     "needs":        needs,
     "fyi":          fyi,
     "fyiRawCount":  fyi_raw_count,
