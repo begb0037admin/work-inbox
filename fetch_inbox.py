@@ -2213,7 +2213,15 @@ print(f"Phase 3 done - urgent:{len(urgent)} needs:{len(needs)} fyi:{len(fyi)} lo
 # cards instead - so Urgent/Needs show a genuine one-sentence summary rather
 # than the first ~150 characters of the email body verbatim (card["sub"]).
 log("Phase 3.2 - generating AI email summaries...")
-summary_candidates = [c for c in (urgent + needs) if c.get("entry_id")]
+# 8 Sep 2026: was `if c.get("entry_id")` only -- under MAIL_BACKEND=imap every
+# fresh card has entry_id="" (no COM EntryID equivalent) and carries
+# message_id instead, so this filter silently excluded ALL new IMAP mail from
+# ever getting an AI summary / no_action_needed verdict, meaning Phase 3.3's
+# demotion-to-FYI below could only ever act on carried-forward COM-era cards.
+# Widened to entry_id OR message_id so fresh IMAP Needs/Urgent cards are
+# actually eligible for demotion too -- see the entry_id-only-suppressor
+# confirmed-fact memory candidate (drew repo) for the full diagnosis.
+summary_candidates = [c for c in (urgent + needs) if c.get("entry_id") or c.get("message_id")]
 # Entry IDs of cards actually demoted by Phase 3.3/3.3b below (AI-confirmed
 # no_action_needed). Declared unconditionally, before the Phase 3.2 block
 # below, so it always exists (empty set) even if Phase 3.2 is skipped or
@@ -2470,7 +2478,7 @@ if summary_candidates and anthropic_available:
                     card["badge"], card["badgeType"] = badge_for(card, "fyi")
                     newly_fyi.append(card)
                     demoted_count += 1
-                    eid = card.get("entry_id")
+                    eid = card.get("entry_id") or card.get("message_id")
                     if eid:
                         demoted_ids_this_pass.add(eid)
                 else:
@@ -2515,7 +2523,7 @@ if summary_candidates and anthropic_available:
                     card["badge"], card["badgeType"] = badge_for(card, "fyi")
                     newly_fyi_from_urgent.append(card)
                     demoted_urgent_count += 1
-                    eid = card.get("entry_id")
+                    eid = card.get("entry_id") or card.get("message_id")
                     if eid:
                         demoted_urgent_ids_this_pass.add(eid)
                 else:
@@ -3163,7 +3171,8 @@ try:
         # personally has nothing to do about it, so it stays a valid
         # candidate for that purpose; only brand-new task proposals are
         # noise here, matching the same demotion logic applied elsewhere.
-        if src.get("entry_id") and src["entry_id"] in _noise_demoted_entry_ids:
+        _src_id = src.get("entry_id") or src.get("message_id")
+        if _src_id and _src_id in _noise_demoted_entry_ids:
             suppressed_no_action += 1
             continue
         suggestions["new_tasks"].append({
@@ -4014,7 +4023,7 @@ elif GITHUB_PAT:
             carried = 0
             carry_suppressed_no_action = 0
             for old in prev_suggestions.get("new_tasks", []):
-                oid = old.get("entry_id")
+                oid = old.get("entry_id") or old.get("message_id")
                 if not oid or oid in seen or oid in ledger.get("promoted", {}):
                     continue
                 # 12 Aug 2026: also drop a previously-persisted suggestion
