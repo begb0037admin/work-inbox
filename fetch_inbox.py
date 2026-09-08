@@ -361,7 +361,21 @@ PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
 # I) -- the `re:`/`fw:`/`fwd:` net + the `if not is_read: return "needs"`
 # catch-all were the source. Restore point / one-line revert to OFF:
 # `os.environ.get("WI_TRIAGE_V2", "1")` -> `os.environ.get("WI_TRIAGE_V2", "")`.
-TRIAGE_V2 = os.environ.get("WI_TRIAGE_V2", "1").strip().lower() in ("1", "true", "yes")
+TRIAGE_V2 = os.environ.get("WI_TRIAGE_V2", "").strip().lower() in ("1", "true", "yes")
+# REVERTED TO OFF 8 Sep 2026 ~22:20 -- the live flip-ON run (commit 3799338)
+# proved Needs Response got WORSE (29 -> 39), not better. Root cause: Phase
+# 3.9's tracked_needs_urgent carry-forward re-injects previously-tracked
+# Needs/Urgent cards from prior runs regardless of the fresh categorise()/
+# suppression outcome this run -- it runs AFTER Phase 3.3d and was never
+# updated to respect the new suppressed-bucket rules. Real log evidence: this
+# run's own fresh classification was exactly as designed (`Phase 3 done -
+# urgent:2 suppressed:28 needs:8 fyi:10 low:1`), but `Phase 3.9 done -
+# carried:28` then reinstated 28 old tracked cards (incl. Athena A/L, IRIS/
+# IEX, the FP68261303 thread x4) straight back into needs, bypassing the Cc
+# gate and FYI_ALWAYS floor entirely. Needs to be fixed at Phase 3.9 (re-
+# validate/re-suppress carried items against current categorise() rules, or
+# drop a carried item if it would now classify as suppressed) before
+# flipping back ON. See HANDOVER.md section K for full detail.
 _AI_OUT_PREFIX = "claude_" if AI_PARALLEL else ""
 CLAUDE_BIN          = os.environ.get("WI_CLAUDE_BIN", "claude")
 CLAUDE_CFG_PRIMARY  = os.environ.get("WI_CLAUDE_CONFIG_DIR", "").strip()
