@@ -1,4 +1,26 @@
-# Handover -- 8 September 2026, ~09:55 (Drew) -- WORK-INBOX DASHBOARD "open email" now uses the connector OWA deep-link (new tab), not openmail:// / classic Outlook. Ported from command-centre. CLOSED -- SHIPPED + live-verified against a real production pipeline run (Kevin's proof-of-concept request), not just the merge/deploy. Phase 3.1 confirmed working end-to-end: `webLinks reused:0 newly_resolved:8 connector_calls:8`, briefing commit `da9da447`, live dashboard click-tested opening real OWA links. work-inbox is now at connector parity with command-centre for this feature.
+# Handover -- 8 September 2026, later (Drew) -- TRIAGE TIGHTENING: fixed the false-positive Command Centre task creation from meeting invites and Cc-only mail. SHIPPED, merged to main, verified live. See section H below.
+
+## H. Triage tightening -- stop over-creating Command Centre tasks from meeting invites / Cc-only mail. SHIPPED, merged, verified.
+
+**Root cause (diagnosed prior session, this session fixed it):** `kevin_is_primary_recipient` (To vs Cc) was never passed into Phase 3.5 task triage, and `_SYS_TRIAGE` was explicitly biased toward creating tasks ("better to propose a task Kevin dismisses than leave real work invisible"), with `AUTO_PROMOTE_NEW_TASKS` writing them straight to command-centre `tasks.json` unreviewed. Command Centre's This Week bucket had grown to 37 tasks, ~55-65% false positives -- dominated by meeting-invite "Attend X" tasks and Cc-only/distribution-list "review for implications" mail.
+
+**Fix, merged to `main` (`28dd9e8`, branch `drew/triage-tighten-primary-recipient-meeting-invite`, commit `0cd14bc`):**
+- New `_is_meeting_invite()` helper (subject-prefix regex + iCal/Teams body tell).
+- `kevin_is_primary_recipient` + `is_meeting_invite` now threaded into BOTH the live combined-call payload (`_ec`/`_api_emails`, the `claude_code` backend path) and the legacy per-phase API payload (`email_candidates`/`api_emails`, Phase 3.5) -- these two must stay index-aligned (existing code comment), so both were changed together.
+- `_SYS_TRIAGE` `new_tasks` rule rewritten to an explicit ALL-conditions gate (Kevin on To OR named directly with an explicit ask; a specific personal action/decision required, not "be aware"/"review for implications"/"for visibility"/"for your records"; not a meeting invite/calendar notification/automated message/newsletter; not already covered by an existing task). Removed "better to propose than leave invisible"; added "when unsure, do not create the task."
+- `_SYS_EMAIL_SUMMARY` cc-only guidance flipped to default `no_action_needed: true` for a cc-only email with no explicit direct ask (was: default false unless clearly visibility-only) -- defence-in-depth via the existing Phase 3.3 demotion/suppression path.
+- Urgent/Needs/FYI email surfacing in the dashboard is unchanged -- this only gates Command Centre task *creation*.
+
+**Verified:** `py_compile` clean; `_is_meeting_invite` unit-tested against 13 real subject lines + 2 body-tell cases, 0 false pos/neg. Live `claude -p` dry-run, 3 iterations, old prompt (no signals) vs new prompt (with signals) on synthetic mail built from real 37-task titles/patterns: old prompt created a false-positive "Review org structure for implications" task 2/3 runs (Cc-only, distribution-list sender, no direct ask); new prompt suppressed it 3/3 while still creating both genuine-ask test tasks (urgent access request, effort estimate with a real deadline) every run. Valid JSON on all 6 calls.
+
+**Command Centre cleanup applied same session (see command-centre `docs/HANDOVER.md` for full detail):** archived 12 confirmed false-positive This-Week tasks (8 meeting/attendance, 4 Cc-only/circulated-for-review) + the specific `t2609041614321` pension FYI, merged 1 true duplicate (`t2608201500590` -> `t2608191801190`) -- This Week 37 -> 23, total 67 -> 53. Command-centre commit `a071de43`, backup `Archive/tasks_backup_20260908_1437.json` (commit `71ac7943`).
+
+**Change and Approval Protocol amended (Kevin, standing instruction, permanent):** `CLAUDE.md` now carries a "Change and Approval Protocol" section -- for routine changes, no UI-screenshot gate / no per-step check-in, implement-verify-apply-report instead. Backup-before-write, pipeline/JSON validation, and a heads-up before any production deploy all stay in force; destructive/irreversible/out-of-scope actions still get flagged. Commit `dfa3af9`.
+
+**Next action:** none open on this item. Watch the next scheduled `fetch_inbox.py` run (next natural fire) for `new_tasks` volume -- expect materially fewer than the ~6-8/day that produced the 37-task backlog. If Command Centre's This Week creeps back up over the next few days, re-check whether the triage gate is actually being hit in production (not just in this dry-run) before assuming a regression.
+
+---
+
 
 ## G. Work-inbox dashboard "open email" -> Outlook Web (connector webLink), matching command-centre. CLOSED -- SHIPPED + PROOF-OF-CONCEPT VERIFIED LIVE.
 
