@@ -347,7 +347,7 @@ AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "tr
                or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
 
-# WI_NEEDS_AI_PROMOTE (default OFF -- unset behaviour is byte-identical to the
+# WI_TRIAGE_V2 (default OFF -- unset behaviour is byte-identical to the
 # pre-8-Sep-2026 pipeline). When ON: categorise() stops dumping every unread
 # reply/forward into "needs" -- an email only lands in Needs Response from the
 # keyword pass on a STRONG explicit action signal (NEEDS_SUBJECTS_STRICT) with
@@ -356,7 +356,7 @@ PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
 # needs_reply=true. Rationale: the 8 Sep "Needs Response = 32, ~75% noise"
 # diagnosis (HANDOVER I) -- the `re:`/`fw:`/`fwd:` net + the `if not is_read:
 # return "needs"` catch-all were the source.
-NEEDS_AI_PROMOTE = os.environ.get("WI_NEEDS_AI_PROMOTE", "").strip().lower() in ("1", "true", "yes")
+TRIAGE_V2 = os.environ.get("WI_TRIAGE_V2", "").strip().lower() in ("1", "true", "yes")
 _AI_OUT_PREFIX = "claude_" if AI_PARALLEL else ""
 CLAUDE_BIN          = os.environ.get("WI_CLAUDE_BIN", "claude")
 CLAUDE_CFG_PRIMARY  = os.environ.get("WI_CLAUDE_CONFIG_DIR", "").strip()
@@ -2108,7 +2108,7 @@ URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", 
 NEEDS_SUBJECTS   = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
                     "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
                     "import", "failed", "issue", "case ", "support"]
-# Strict subset used only when WI_NEEDS_AI_PROMOTE is ON -- a genuine, explicit
+# Strict subset used only when WI_TRIAGE_V2 is ON -- a genuine, explicit
 # "Kevin, do something" signal in the subject line, not just "this is a reply".
 # Anything not matching this (and not high-importance) starts in FYI and only
 # reaches Needs Response if Phase 3.2's needs_reply verdict promotes it.
@@ -2121,7 +2121,7 @@ NEEDS_SUBJECTS_STRICT = ["action required", "action needed", "please review", "p
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
                     "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
-# Consulted ONLY when WI_NEEDS_AI_PROMOTE is ON, and checked BEFORE the strong-
+# Consulted ONLY when WI_TRIAGE_V2 is ON, and checked BEFORE the strong-
 # action-keyword test -- these categories never belong in the main action queue
 # even if the subject also carries an action word. Kevin's 8 Sep brief:
 # "Informational messages and automated notifications should not appear as
@@ -2129,7 +2129,7 @@ FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary"
 # NOT here -- they default to fyi and the AI promotion pass lifts them only if a
 # reply/cover is genuinely required.
 # Manager-approvals queue (Kevin's 8 Sep brief, queue 2 of 3). Consulted ONLY
-# when WI_NEEDS_AI_PROMOTE is ON, and checked FIRST -- a leave / approval
+# when WI_TRIAGE_V2 is ON, and checked FIRST -- a leave / approval
 # request routes to its own "approvals" tier, not Needs and not FYI. Gated on
 # kevin_is_primary_recipient so a request where Kevin is only Cc'd (someone else
 # is the approver) still falls through to FYI.
@@ -2172,8 +2172,8 @@ def categorise(msg):
         if kw in subj:
             return "urgent"
 
-    if NEEDS_AI_PROMOTE:
-        # New model (WI_NEEDS_AI_PROMOTE ON). Order matters:
+    if TRIAGE_V2:
+        # New model (WI_TRIAGE_V2 ON). Order matters:
         #  1. FYI_ALWAYS / FYI_SUBJECTS -> fyi. Bulletins, reminders, auto-
         #     replies, leave notices, "logged"/"created"/"completed"
         #     confirmations never enter Needs Response, even if the subject also
@@ -2267,7 +2267,7 @@ def make_card(msg, category):
 
 urgent    = []
 needs     = []
-approvals = []          # Manager-approvals queue -- only ever populated when WI_NEEDS_AI_PROMOTE is ON
+approvals = []          # Manager-approvals queue -- only ever populated when WI_TRIAGE_V2 is ON
 fyi       = []
 low       = []
 
@@ -2300,12 +2300,12 @@ log("Phase 3.2 - generating AI email summaries...")
 # Widened to entry_id OR message_id so fresh IMAP Needs/Urgent cards are
 # actually eligible for demotion too -- see the entry_id-only-suppressor
 # confirmed-fact memory candidate (drew repo) for the full diagnosis.
-# WI_NEEDS_AI_PROMOTE ON: also feed every FYI card through the Phase 3.2 AI
+# WI_TRIAGE_V2 ON: also feed every FYI card through the Phase 3.2 AI
 # summary so Phase 3.3c can promote a genuine "needs_reply" one back into Needs
 # Response. Raises this call's payload from ~40 to ~70 entries -- well inside
 # the max_tokens=14000 headroom (comment below is sized for ~165). OFF: exactly
 # the urgent+needs set as before.
-if NEEDS_AI_PROMOTE:
+if TRIAGE_V2:
     summary_candidates = [c for c in (urgent + needs + fyi) if c.get("entry_id") or c.get("message_id")]
 else:
     summary_candidates = [c for c in (urgent + needs) if c.get("entry_id") or c.get("message_id")]
@@ -2319,7 +2319,7 @@ else:
 # limits (12 Aug 2026, extending the same-day Phase 3.3 Needs fix).
 _noise_demoted_entry_ids = set()
 # Identities (entry_id or message_id) of FYI cards promoted UP into Needs
-# Response by Phase 3.3-promote (WI_NEEDS_AI_PROMOTE). Declared unconditionally
+# Response by Phase 3.3-promote (WI_TRIAGE_V2). Declared unconditionally
 # so it always exists. Currently used for run logging / the before-after report
 # only. NOT wired into Phase 3.5 Command Centre task triage: the combined
 # `claude -p` call's triage payload is assembled BEFORE Phase 3.2/3.3 run, so a
@@ -2600,7 +2600,7 @@ if summary_candidates and anthropic_available:
         except Exception as demote_err:
             print(f"WARNING: Phase 3.3 demotion failed, Needs left unchanged - {demote_err}")
 
-        # -- Phase 3.3-promote -- WI_NEEDS_AI_PROMOTE ON: lift an FYI card whose
+        # -- Phase 3.3-promote -- WI_TRIAGE_V2 ON: lift an FYI card whose
         # Phase 3.2 verdict says needs_reply=true up into Needs Response. This is
         # the counterpart to Phase 3.3's demotion: with the new categorise()
         # default (fyi unless a strong explicit ask + Kevin on To), this pass is
@@ -2608,7 +2608,7 @@ if summary_candidates and anthropic_available:
         # 3.3's demotion (a just-demoted card has needs_reply=False so it is
         # never re-promoted) and before 3.3b. Same atomic-temp-list + own
         # try/except safety pattern as the demotion passes.
-        if NEEDS_AI_PROMOTE:
+        if TRIAGE_V2:
             try:
                 promoted_count = 0
                 still_fyi = []
@@ -2774,7 +2774,7 @@ try:
 except Exception as fyi_clean_err:
     print(f"WARNING: Phase 3.3c FYI thread-collapse/aging failed, FYI left unchanged - {fyi_clean_err}")
 
-# -- Phase 3.3d -- cross-section thread dedup (WI_NEEDS_AI_PROMOTE / triage v2) --
+# -- Phase 3.3d -- cross-section thread dedup (WI_TRIAGE_V2 / triage v2) --
 # Kevin's 8 Sep brief: "Repeated messages on the same thread should consolidate
 # to one entry, across ALL sections -- a thread shouldn't appear in both Needs
 # and Parked." Phase 3.3c above only collapses WITHIN FYI. This pass runs over
@@ -2785,7 +2785,7 @@ except Exception as fyi_clean_err:
 # rest, summing messageCount onto the kept card (already a rendered field, from
 # the Phase 3.3c change). v1 = exact normalised-subject only; fuzzy/near-dupe
 # matching deliberately deferred (would risk over-collapsing distinct threads).
-if NEEDS_AI_PROMOTE:
+if TRIAGE_V2:
     try:
         _EXT_MARK = re.compile(r'^\s*(\[\s*external\s*\]|#\s*external\s*#|external:\s*)', re.IGNORECASE)
         _REFWD_X  = re.compile(r'^\s*(re|fw|fwd)\s*:\s*', re.IGNORECASE)
