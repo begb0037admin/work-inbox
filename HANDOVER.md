@@ -1,4 +1,34 @@
-# Handover -- 8 September 2026, afternoon (Drew) -- "Needs Response" 32-item bloat diagnosed + partial fix shipped. Session wound down by Kevin ("stop for now"). See section I; triage-tightening context in section H below.
+# Handover -- 8 September 2026, evening (Drew) -- TRIAGE V2 built end-to-end behind WI_TRIAGE_V2 (default OFF): classifier rework + cross-section thread dedup + Manager Approvals queue + dashboard section. Codex Pass 1 done + folded. Before/after report + screenshot for Kevin in C:\Users\admin\Documents\Meetings\. Flag stays OFF pending Kevin's review. See section J; earlier "Needs Response" diagnosis in section I.
+
+## J. Triage V2 -- classifier rework (A) + thread dedup (B) + Manager Approvals queue (C). BUILT, behind WI_TRIAGE_V2 (default OFF). Awaiting Kevin's review of the before/after report before the default is flipped ON.
+
+**Kevin's 8 Sep brief (verbatim):** "The work inbox should surface only emails that require Kevin's decision, reply, approval, or action. Informational messages and automated notifications should not appear as priority response tasks." Plus a "remove from main queue" list, a dedup requirement with named test cases, and a three-queue structure (Needs my action / Manager approvals / FYI-no-action).
+
+**All behind one flag `WI_TRIAGE_V2` (module const `TRIAGE_V2`), default OFF = byte-identical to the pre-8-Sep pipeline** (only diff when OFF: an inert `"approvals": []` key in briefing.json, ignored by the dashboard). Commits, in order:
+- `d3d0526` flag + strict keyword net (`NEEDS_SUBJECTS_STRICT`) + Kevin-on-To gate + `if not is_read -> needs` catch-all flipped to fyi + Phase 3.3-promote (fyi->needs on AI verdict) + `summary_candidates` widened to include fyi.
+- `f3e1f13` `FYI_ALWAYS` list (bulletins/reminders/auto-replies/"reports created"/"completed"/leave notices/receipts/...).
+- `ae0bc8c` `FYI_ALWAYS` = hard floor against promotion.
+- `35440dd` **B** Phase 3.3d cross-section thread dedup + **C** `approvals` tier + `APPROVAL_SUBJECTS` + briefing.json key.
+- `3a3f296` **C** `js/app.js` Manager Approvals board section (renders only when `data.approvals` non-empty; `_priSetOrder`/`_priGetOrder`/`validSecs`/`allSecs`/collapse array all gain `appr`).
+- `f635434` rename `WI_NEEDS_AI_PROMOTE` -> `WI_TRIAGE_V2`.
+- `d7adbf0` promote criterion changed `needs_reply=true` -> `no_action_needed=false` (validation showed `needs_reply` alone dropped genuine offline-action items -- PDR status, Sickness data catch-up).
+- `83aa587` **Codex Pass 1 fixes** (all BLOCKING actioned): Urgent removed from Phase 3.3d dedup; `reminder:`/`automated` added to FYI floor; branch reordered; `sign-off` moved to `APPROVAL_SUBJECTS`; `_is_kevin_primary()` string coercion; promote badges set post-commit; Phase 3.3d collect-then-remove; Phase 3 log line flag-gated; approvals section renders on `data.approvals` only. Deferred (documented): normalised-subject-only dedup key (fuzzy/thread-header follow-up), approvals tier gets no AI summary, promoted card can't get a same-run CC task.
+- `243cc48` restored leave-notice hard floor (`annual leave`/` a/l` back in `FYI_ALWAYS`, APPROVAL checked first so "annual leave request" still routes to approvals) -- regression caught in validation where "Athena A/L" was being AI-promoted into Needs.
+
+**Validation (offline sim of the v2 pipeline over the 16:00 live mail set, commit `e64a34c2`, + a fresh `claude -p` verdict pass):**
+- Needs Response **29 -> ~18** (17-20 across repeat runs -- the promote layer leans on the AI's per-email `no_action_needed` verdict, which is not perfectly stable for Cc'd items; e.g. "RE: IRIS/IEX" landed in Needs 2/3 runs, FYI 1/3).
+- **16 duplicate/near-duplicate cards removed** by Phase 3.3d (deterministic). All Kevin's named dedup cases collapse: FP 68261303 (#external x5->1), Cority error x2->1, "38 day balance...decisions needed" (Needs+Parked->1), "changing to 38 day balance" +FW x3->1, WFM Pay Code x2->1, Change # 20020762 x2->1, REF29 UDF x3->1, Athena A/L (Needs+Parked->1).
+- **Urgent / Today / Tomorrow / This Week: unchanged** (Urgent path runs before the v2 branch + excluded from dedup; the priority tiers are a separate command-centre data source).
+- Approvals tier: 0 in this window (nothing to route); tier + dashboard section built and screenshot-verified with synthetic data.
+- Known pre-existing bug surfaced (NOT introduced by v2): `URGENT_SUBJECTS` keyword `"p1"` substring-matches "DT**P1**092"/"DTP1334" -> those get flagged Urgent then AI-demoted. Worth a separate token-anchored fix.
+
+**Deliverables for Kevin (C:\Users\admin\Documents\Meetings\):**
+- `Work Inbox triage v2 - before-after - 08-09-2026.html` -- full before/after: counts table, every Needs item's before->after, the 8-genuine + 24-noise cross-check, unexpected moves, Urgent/priority confirmation, commit list, Codex Pass 1 findings + actions.
+- `wi-triage-v2-manager-approvals-section-08-09-2026.png` -- dashboard render showing the new section.
+
+**Next action:** Kevin reviews the before/after report. If OK -> flip the default ON in a one-line commit (`WI_TRIAGE_V2` env-parse default `"1"`, or `TRIAGE_V2 = ... or True`) + wire `WI_TRIAGE_V2=1` into the laptop wrapper `Run Laptop Bridge Briefing.ps1`. If not -> stays OFF; candidate refinements listed in the report's iteration note (promote-criterion tuning, self-sent share-confirmation floor, thread-header dedup key). **Codex Pass 2 (broad review of both dashboards) is a separate dispatch the coordinator is spinning -- not this session.** Restore point: `main` @ `77f178e`.
+
+**Validation environment note:** the controlled parallel A/B (`WI_AI_PARALLEL=1` with/without the flag) could NOT run via SSH -- the SSH user (`begb0037-a`) has a Python without `msal`, while the scheduled task runs as `begb0037.AD-OAK`. Worked around with the offline-sim-over-live-briefing approach above. A real flag-ON run needs the env var wired into the wrapper (per "Next action").
 
 ## I. "Needs Response" bucket (32 items, ~75% noise) -- diagnosis + entry_id/message_id demotion fix. SHIPPED (partial). Deeper fix PARKED pending Kevin.
 
