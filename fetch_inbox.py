@@ -501,15 +501,13 @@ _SYS_EMAIL_SUMMARY = (
     "no_action_needed must always be false whenever needs_reply is true - never set both true.\n"
     "Weigh two extra signals given for each email:\n"
     "- kevin_is_primary_recipient: false means Kevin was only cc'd, not directly addressed. "
-    "Default toward needs_reply: false for cc-only threads UNLESS the content clearly still "
-    "asks Kevin himself something directly (e.g. someone names him and asks a question even "
-    "on a cc'd thread) - don't flip mechanically, use judgement. Being cc'd does NOT by itself "
-    "mean no_action_needed: true - a cc'd thread can still need Kevin to review, approve, or "
-    "follow up on something even without a direct question. Only set no_action_needed: true "
-    "for a cc'd thread when it's genuinely visibility-only (e.g. two other people confirming "
-    "something between themselves that doesn't involve a decision or action of Kevin's) - if "
-    "in doubt whether a cc'd thread needs Kevin to do something, leave no_action_needed: "
-    "false.\n"
+    "For a cc-only email with no explicit ask directed at Kevin by name, set no_action_needed: "
+    "true and needs_reply: false - being cc'd is for visibility. Keep no_action_needed: false "
+    "on a cc-only email ONLY when the body clearly asks Kevin himself to do or decide something "
+    "specific (names him and makes a direct request, or he is the named owner of an action) - "
+    "not merely 'for review', 'for awareness', 'for your information', 'for your records', or a "
+    "status update he is cc'd on. When genuinely unsure on a cc-only thread, prefer "
+    "no_action_needed: true.\n"
     "- age_days: how many days old the email is. Default toward needs_reply: false for "
     "anything genuinely old (multiple weeks+) - an unanswered thread that old is more likely "
     "already resolved elsewhere than still genuinely awaiting Kevin's reply.\n"
@@ -526,10 +524,15 @@ _SYS_EMAIL_SUMMARY = (
 _SYS_TRIAGE = (
     "You are Kevin's task triage assistant at Oxford University Personnel Services.\n"
     "You receive his existing Command Centre task list, his recent action-required received emails, and emails Kevin himself sent (direction: sent).\n"
+    "Each received email carries two signals: kevin_is_primary_recipient (false = Kevin was only cc'd, not directly addressed) and is_meeting_invite (true = it is a calendar / meeting-invite / accept-decline / cancellation notification, which is NEVER a task).\n"
     "Identify:\n"
-    "1. new_tasks - emails that represent real, actionable work for Kevin that is NOT covered by any existing task. Max 12. "
-    "Do not be over-cautious: if an email asks Kevin for something, or commits him to something, and no existing task covers it, propose it. "
-    "It is better to propose a task Kevin dismisses in one click than to leave real work invisible.\n"
+    "1. new_tasks - emails that represent real, actionable work Kevin must personally do. Max 12. "
+    "Create a new task ONLY when ALL of the following hold:\n"
+    "   a. Kevin is on the To line (kevin_is_primary_recipient is true) OR the email body names Kevin directly with an explicit ask or commitment addressed to him;\n"
+    "   b. a specific action or decision by Kevin personally is required - NOT merely 'be aware', 'review for implications', 'for visibility', 'for your records', 'note the below', or a status update on someone else's work;\n"
+    "   c. it is NOT a meeting invitation or calendar notification (is_meeting_invite is true), an automated or system-generated message, a newsletter or digest, or an out-of-office reply;\n"
+    "   d. no existing task already covers it, even partially.\n"
+    "When you are unsure whether a new task is warranted, do NOT create it - the email stays visible to Kevin in his work inbox regardless. A missed task is recoverable; inbox-to-task noise is the problem being solved here.\n"
     "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
     "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 20. "
     "A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
@@ -565,6 +568,41 @@ _SYS_CAL = (
     "Return ONLY valid JSON: {\"day_idx\": \"2-3 concise sentences\"} where day_idx is 'today_0', 'today_1', 'tomorrow_0' etc.\n"
     "Example: {\"today_0\": \"Pick up the evaluation scoring from last week -- Helen still needs a decision on weightings. Confirm whether James has resolved the reporting extract and agree the next owner before Friday.\"}"
 )
+
+# Meeting-invite / calendar-notification detector. Subject-prefix driven
+# (Outlook, Google Calendar and Teams all emit these prefixes), with an
+# iCal / Teams body tell as a secondary signal. Used only as a triage signal
+# for Phase 3.5 (task creation) -- it does NOT hide the email from the
+# Urgent/Needs/FYI board. Added 2026-09-08 (Drew): meeting invites were the
+# single largest false-positive source of auto-created Command Centre tasks
+# ("Attend X"). Kept deliberately tight to avoid demoting genuine mail.
+_MEETING_INVITE_SUBJECT_RE = re.compile(
+    r"^\s*(re:\s*|fw:\s*|fwd:\s*)*"
+    r"(invitation|updated invitation|canceled|cancelled|canceled event|"
+    r"cancelled event|updated|accepted|declined|declined with comments|"
+    r"tentative|tentatively accepted|not accepted|new time proposed|"
+    r"meeting forward notification):",
+    re.I,
+)
+
+def _is_meeting_invite(entry):
+    """True if this inbox entry looks like a calendar/meeting-invite
+    notification (invite, update, cancellation, accept/decline response,
+    forward notification) rather than a real actionable email."""
+    try:
+        subj = entry.get("subject") or ""
+        if _MEETING_INVITE_SUBJECT_RE.match(subj):
+            return True
+        body = (entry.get("body_preview") or "").lower()
+        if "when:" in body and "where:" in body:
+            return True
+        if "microsoft teams meeting" in body and (
+            "join the meeting" in body or "organizer:" in body or "meeting id:" in body
+        ):
+            return True
+        return False
+    except Exception:
+        return False
 
 # Command Centre + Granola config -- hoisted to module scope so the early
 # combined call can use them (originals below just call the loader).
@@ -806,6 +844,8 @@ def _cc_run_combined():
                 "received":     (m.get("received", "") or "")[:16],
                 "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
                 "entry_id":     m.get("entry_id", ""),
+                "kevin_is_primary_recipient": m.get("kevin_is_primary_recipient", True),
+                "is_meeting_invite": _is_meeting_invite(m),
             })
     for s in sent[:30]:
         _ec.append({
@@ -815,10 +855,14 @@ def _cc_run_combined():
             "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
             "entry_id":     s.get("entry_id", ""),
             "direction":    "sent",
+            "kevin_is_primary_recipient": True,
+            "is_meeting_invite": False,
         })
     _api_emails = [
         {"n": i, "direction": e.get("direction", "received"), "subject": e["subject"],
-         "from": e["from"], "received": e["received"], "body_preview": e["body_preview"]}
+         "from": e["from"], "received": e["received"], "body_preview": e["body_preview"],
+         "kevin_is_primary_recipient": e.get("kevin_is_primary_recipient", True),
+         "is_meeting_invite": e.get("is_meeting_invite", False)}
         for i, e in enumerate(_ec)
     ]
     p3_user = (
@@ -3053,6 +3097,8 @@ try:
                 "entry_id":     m.get("entry_id", ""),
                 "message_id":   m.get("message_id", ""),
                 "web_link":     m.get("web_link", "") or _owa_link(m.get("message_id", "")),
+                "kevin_is_primary_recipient": m.get("kevin_is_primary_recipient", True),
+                "is_meeting_invite": _is_meeting_invite(m),
             })
 
     for s in sent[:30]:
@@ -3064,12 +3110,16 @@ try:
             "entry_id":     s.get("entry_id", ""),
             "message_id":   s.get("message_id", ""),
             "web_link":     s.get("web_link", "") or _owa_link(s.get("message_id", "")),
-            "direction":    "sent"
+            "direction":    "sent",
+            "kevin_is_primary_recipient": True,
+            "is_meeting_invite": False,
         })
 
     api_emails = [{"n": i, "direction": e.get("direction", "received"),
                    "subject": e["subject"], "from": e["from"],
-                   "received": e["received"], "body_preview": e["body_preview"]}
+                   "received": e["received"], "body_preview": e["body_preview"],
+                   "kevin_is_primary_recipient": e.get("kevin_is_primary_recipient", True),
+                   "is_meeting_invite": e.get("is_meeting_invite", False)}
                   for i, e in enumerate(email_candidates)]
 
     TRIAGE_SYSTEM = _SYS_TRIAGE  # verbatim; hoisted to module scope
