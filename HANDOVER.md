@@ -1,6 +1,14 @@
-# Handover -- 8 September 2026, ~08:45 (Drew) -- WORK-INBOX DASHBOARD "open email" now uses the connector OWA deep-link (new tab), not openmail:// / classic Outlook. Ported from command-centre. BRANCH ONLY, not merged, pending Kevin's visual approval.
+# Handover -- 8 September 2026, ~08:50 (Drew) -- WORK-INBOX DASHBOARD "open email" now uses the connector OWA deep-link (new tab), not openmail:// / classic Outlook. Ported from command-centre. SHIPPED to main (merge `fe4439d2`), Pages built + live-verified. First pipeline run after this resolves the webLinks -- watch the `Phase 3.1 done` log line.
 
-## G. Work-inbox dashboard "open email" -> Outlook Web (connector webLink), matching command-centre
+## G. Work-inbox dashboard "open email" -> Outlook Web (connector webLink), matching command-centre. SHIPPED.
+
+**SHIPPED 8 Sept 2026, ~08:50.** Kevin approved the screenshots. Branch `drew/wi-dashboard-owa-open-email` merged to `main` via the Merges API -- **merge commit `fe4439d2f5d2ed288b314258bb4b412b438dac8b`** (parents `d1bf1ca7` old main + `69127ec9` branch tip). Restore point = pre-merge main `d1bf1ca78a13886a7f03251a79e25e6314fb3c68`. GitHub Pages build for `fe4439d2` polled to `built` (2026-09-08T07:46:48Z). Live-served `js/app.js` byte-verified identical to the merged HEAD blob (sha256 `9b7a525e5230e9172e9164363a4263307a95f5aa158045a3849d4b3180a5630a`, 92165 bytes). Branch deleted post-merge.
+
+**Divergence from Phase 3.6 kept as built** (Kevin did not veto): a failed webLink resolve is left as `web_link=""` and retried next run -- no broken `outlook.office.com/mail/search` (`_owa_link`) fallback baked into the card.
+
+**One-line revert if needed:** `git revert -m 1 fe4439d2` on a fresh clone of `main`, or reset `main` to `d1bf1ca78a13886a7f03251a79e25e6314fb3c68` (pre-merge). Both `fetch_inbox.py` and `js/app.js` at `d1bf1ca7` are the clean pre-change state; no data files changed.
+
+**WATCH:** the next `fetch_inbox.py` run (laptop bridge `Work Inbox Bridge Briefing`, 07:00/12:00/16:00 Mon-Fri) is the first to execute Phase 3.1 live. Expect a `Phase 3.1 done - webLinks reused:N newly_resolved:M connector_calls:K (cap 8)` line in that run's console/log. `connector_calls` should be small (0-8). If it errors, the line is `WARNING: Phase 3.1 webLink resolution failed entirely, ...` and mail cards simply stay on the `openmail://` fallback -- non-fatal. First run after this merge: **8 Sept 12:00 UK** (or the next scheduled fire).
 
 **Report:** clicking an email on https://begb0037admin.github.io/work-inbox/ still opened Outlook **Classic** (desktop). The 3 Sept "open-email regression" fix (section E, `fcb47a9` / `0096cac`) only covered the **command-centre** task board -- the work-inbox dashboard's own cards were never migrated and still emitted `openmail://<EntryID>` -> `open_email.py` -> `win32com` `.Display()` -> desktop Outlook. GitHub Pages was current (built 2026-09-08 06:43, live `js/app.js` byte-identical to HEAD) -- not stale, not a reverted regression: a scope gap.
 
@@ -27,7 +35,11 @@
 - `[EntryID only]` card (no web_link) -> envelope still `onclick="openEmail('...',event)"` (COM fallback intact).
 - `[no link]` card -> no envelope. Dashboard layout unchanged. Screenshots: `scratchpad/shot_1_dashboard.png`, `shot_A_urgent_section.png`, `shot_B_viewport_after_click.png`.
 
-**NOT done / next action:** await Kevin's visual approval. On "approved": merge branch to `main` (backup-and-verify per repo rule), poll Pages build to `built`, byte-verify live `js/app.js` == merged blob, update this section to SHIPPED. First real pipeline run after merge will resolve webLinks only for that run's new cards (watch the `Phase 3.1 done - ...` log line). **Known remaining divergence, not in scope of this branch:** `_priRenderOneCard`'s CC-task cards that carry a camelCase `webLink` from Phase 3.6 will now also use `openEmailWeb` (intended, consistent) -- no separate action, just noting the behaviour change reaches CC-sourced priority cards too, not only inbox cards.
+**Post-ship verification done:** merge `fe4439d2`; Pages `built`; live `js/app.js` sha256 == merged blob (see top of section). Local-harness proof (real edited `js/app.js` + fetch-shimmed fixture `briefing.json`): `[web_link]` card envelope calls `window.open()` with the exact `https://outlook.office365.com/owa/?ItemID=...&viewmodel=ReadMessageItem` deep-link, new tab, no `openmail://`; `[EntryID only]` card keeps `openEmail('...')`; `[no link]` card shows no icon; layout unchanged. Screenshots: session scratchpad `shot_1_dashboard.png`, `shot_A_urgent_section.png`, `shot_B_viewport_after_click.png`.
+
+**Not verified live yet:** Phase 3.1's connector resolution has not run against the live codex_apps connector -- compile-checked, mirrors the proven Phase 3.6 path. First real run = next scheduled `fetch_inbox.py` (see WATCH above).
+
+**Known remaining divergence (intended, no action):** `_priRenderOneCard`'s CC-task priority cards that carry a camelCase `webLink` from Phase 3.6 now also use `openEmailWeb` -- consistent, but the behaviour change reaches CC-sourced priority cards on this dashboard too, not only inbox cards.
 
 ---
 
