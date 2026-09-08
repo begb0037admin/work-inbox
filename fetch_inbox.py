@@ -2116,8 +2116,8 @@ NEEDS_SUBJECTS_STRICT = ["action required", "action needed", "please review", "p
                          "please advise", "please confirm", "please respond", "please complete",
                          "please provide", "please send", "response required", "reply required",
                          "rsvp", "overdue", "deadline", "chasing", "chase up", "awaiting your",
-                         "for your approval", "for your action", "for your review", "sign-off",
-                         "sign off", "your input needed", "needs your input", "needs your approval"]
+                         "for your action", "for your review", "your input needed",
+                         "needs your input", "decisions needed", "decision needed", "your thoughts"]
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
                     "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
@@ -2139,27 +2139,36 @@ APPROVAL_SUBJECTS = ["leave request", "annual leave request", "a/l request", "ho
                      "authorisation required", "approval required", "approval requested",
                      "awaiting your approval", "pending your approval", "requires your approval",
                      "for your approval", "needs your approval", "sickness absence approval",
-                     "expenses approval", "expense claim", "overtime approval", "timesheet approval"]
+                     "expenses approval", "expense claim", "overtime approval", "timesheet approval",
+                     "sign-off", "sign off", "signoff", "for sign off", "for sign-off"]
 FYI_ALWAYS       = ["starting soon", "is starting", "meeting forward notification",
                     "flu vaccination", "flu jab", "flu clinic", "vaccination reminder",
                     "university bulletin", "bulletin:", "staff bulletin", "clockify",
                     "problem logged", "has been logged", "now been logged", "ticket logged",
                     "reports created", "report created", "report has been created",
                     "update completed", "completed update", "has been completed",
-                    "annual leave", " a/l", "a/l ", "leave approval", "leave request",
-                    "approve leave", "tentative:", "canceled:", "no action required",
+                    "tentative:", "canceled:", "no action required", "reminder:",
+                    "automated", "automatic reply", "auto-reply", "autoreply",
                     "for information", "for your information", "for your records",
-                    "read receipt", "delivery receipt", "auto-reply", "autoreply",
-                    "invited you to edit"]
+                    "read receipt", "delivery receipt", "invited you to edit"]
 LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
                     "github", "pages", "build", "deploy", "run failed", "wisp"]
+
+def _is_kevin_primary(msg):
+    """kevin_is_primary_recipient, robust to missing/string values. Missing ->
+    True (fail-open, matching _kevin_is_primary_recipient's own philosophy);
+    an explicit false / "false" / "0" / "no" -> False."""
+    v = msg.get("kevin_is_primary_recipient", True)
+    if isinstance(v, str):
+        return v.strip().lower() not in ("false", "0", "no", "")
+    return bool(v)
 
 def categorise(msg):
     subj    = (msg.get("subject") or "").lower()
     sender  = (msg.get("from_email") or "").lower()
     is_read = msg.get("is_read", True)
     imp     = msg.get("importance", 1)
-    kevin_primary = msg.get("kevin_is_primary_recipient", True)
+    kevin_primary = _is_kevin_primary(msg)
 
     # High importance flag always pushes to urgent
     if imp == 2:
@@ -2174,25 +2183,25 @@ def categorise(msg):
             return "urgent"
 
     if TRIAGE_V2:
-        # New model (WI_TRIAGE_V2 ON). Order matters:
-        #  1. FYI_ALWAYS / FYI_SUBJECTS -> fyi. Bulletins, reminders, auto-
-        #     replies, leave notices, "logged"/"created"/"completed"
-        #     confirmations never enter Needs Response, even if the subject also
-        #     carries an action word.
-        #  2. STRONG explicit ask (NEEDS_SUBJECTS_STRICT) AND Kevin on the To
-        #     line -> needs.
-        #  3. everything else -> fyi; Phase 3.3-promote lifts it to needs only
-        #     if Phase 3.2's AI verdict says needs_reply=true.
+        # New model (WI_TRIAGE_V2 ON). Order matters (Codex Pass 1 review, 8 Sep):
+        #  1. FYI_ALWAYS  -> fyi. Bulletins, reminders, auto-replies,
+        #     "logged"/"created"/"completed" confirmations etc. never reach
+        #     Needs OR Manager approvals, even with an action word in the subject.
+        #  2. APPROVAL_SUBJECTS + Kevin on To -> approvals (leave / sign-off).
+        #  3. FYI_SUBJECTS -> fyi.
+        #  4. STRONG explicit ask (NEEDS_SUBJECTS_STRICT) + Kevin on To -> needs.
+        #  5. everything else -> fyi; Phase 3.3-promote lifts it to needs only
+        #     if Phase 3.2's AI verdict says no_action_needed=false.
         # is_read is no longer a "needs" trigger on its own.
-        if kevin_primary and any(kw in subj for kw in APPROVAL_SUBJECTS):
-            return "approvals"
         for kw in FYI_ALWAYS:
             if kw in subj:
                 return "fyi"
+        if kevin_primary and any(kw in subj for kw in APPROVAL_SUBJECTS):
+            return "approvals"
         for kw in FYI_SUBJECTS:
             if kw in subj:
                 return "fyi"
-        if any(kw in subj for kw in NEEDS_SUBJECTS_STRICT) and kevin_primary:
+        if kevin_primary and any(kw in subj for kw in NEEDS_SUBJECTS_STRICT):
             return "needs"
         return "fyi"
 
@@ -2286,7 +2295,8 @@ for msg in inbox:
     else:
         low.append(card)
 
-print(f"Phase 3 done - urgent:{len(urgent)} approvals:{len(approvals)} needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
+print(f"Phase 3 done - urgent:{len(urgent)}" + (f" approvals:{len(approvals)}" if TRIAGE_V2 else "")
+      + f" needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
 
 # -- Phase 3.2 - AI summaries for urgent/needs email cards --
 # Same pattern as Phase 3.7's priority-task summaries, applied to raw email
@@ -2615,6 +2625,17 @@ if summary_candidates and anthropic_available:
         # try/except safety pattern as the demotion passes.
         if TRIAGE_V2:
             try:
+                # AI-outage fallback (Codex Pass 1): if the Phase 3.2 summary
+                # phase did not produce verdicts this run, the strict-keyword
+                # categorise() alone would leave Needs Response near-empty and
+                # hide genuine work in FYI. In that case fall back to the OLD
+                # heuristic for the promote decision (Kevin on To + a weak
+                # NEEDS_SUBJECTS keyword), so an AI outage degrades toward
+                # "noisier" rather than "missing".
+                _ai_ok = any(c.get("_ai_verdict_valid") for c in (needs + fyi + urgent))
+                if not _ai_ok:
+                    print("WARNING: Phase 3.3-promote - no AI verdicts this run; "
+                          "falling back to keyword heuristic for FYI->Needs promotion")
                 promoted_count = 0
                 still_fyi = []
                 newly_needs = []
@@ -2628,8 +2649,15 @@ if summary_candidates and anthropic_available:
                     # emails were being lifted). Kevin's brief is explicit that
                     # these categories must not appear as priority response tasks.
                     _fyi_locked = any(kw in _cs for kw in FYI_ALWAYS)
-                    if (not _fyi_locked) and card.get("_ai_verdict_valid") and card.get("no_action_needed") is False:
-                        card["badge"], card["badgeType"] = badge_for(card, "needs")
+                    if _fyi_locked:
+                        _promote = False
+                    elif card.get("_ai_verdict_valid"):
+                        _promote = card.get("no_action_needed") is False
+                    elif not _ai_ok:
+                        _promote = _is_kevin_primary(card) and any(kw in _cs for kw in NEEDS_SUBJECTS)
+                    else:
+                        _promote = False
+                    if _promote:
                         newly_needs.append(card)
                         promoted_count += 1
                         pid = card.get("entry_id") or card.get("message_id")
@@ -2638,6 +2666,8 @@ if summary_candidates and anthropic_available:
                     else:
                         still_fyi.append(card)
                 fyi = still_fyi
+                for _pc in newly_needs:                 # set badges only after the move is committed
+                    _pc["badge"], _pc["badgeType"] = badge_for(_pc, "needs")
                 needs.extend(newly_needs)
                 if promoted_count:
                     try:
@@ -2784,13 +2814,18 @@ except Exception as fyi_clean_err:
 # Kevin's 8 Sep brief: "Repeated messages on the same thread should consolidate
 # to one entry, across ALL sections -- a thread shouldn't appear in both Needs
 # and Parked." Phase 3.3c above only collapses WITHIN FYI. This pass runs over
-# urgent + needs + approvals + fyi together, on a normalised-subject key that
-# also strips #external# / [external] markers and re:/fw:/fwd: chains in any
-# order. Keeps ONE card per thread -- the one in the highest-priority section
-# (urgent > approvals > needs > fyi), most-recent within that -- and removes the
-# rest, summing messageCount onto the kept card (already a rendered field, from
-# the Phase 3.3c change). v1 = exact normalised-subject only; fuzzy/near-dupe
-# matching deliberately deferred (would risk over-collapsing distinct threads).
+# approvals + needs + fyi together (NOT urgent -- Codex Pass 1 flagged that
+# including urgent could shrink the Urgent tier, which Kevin wants untouched;
+# urgent is tiny and a cross-tier urgent dup is rare), on a normalised-subject
+# key that also strips #external#/[external] markers and re:/fw:/fwd: chains in
+# any order. Keeps ONE card per thread -- highest-priority section
+# (approvals > needs > fyi), most-recent within that -- and removes the rest,
+# summing messageCount onto the kept card (a rendered field, from the 3.3c
+# change). All removals are computed first, then applied in one pass, so a
+# failure partway cannot leave the sections half-deduped. v1 = exact normalised
+# subject only; fuzzy/near-dupe matching deferred (would risk over-collapsing
+# distinct threads, e.g. the two differently-worded 38-day-balance subjects --
+# noted for a follow-up using real Message-ID/References thread headers).
 if TRIAGE_V2:
     try:
         _EXT_MARK = re.compile(r'^\s*(\[\s*external\s*\]|#\s*external\s*#|external:\s*)', re.IGNORECASE)
@@ -2805,27 +2840,28 @@ if TRIAGE_V2:
                 s = s2
             return s or ("id:" + str(card.get("entry_id") or card.get("message_id") or id(card)))
 
-        _RANK = {"urgent": 0, "approvals": 1, "needs": 2, "fyi": 3}
-        _xsections = {"urgent": urgent, "approvals": approvals, "needs": needs, "fyi": fyi}
+        _RANK = {"approvals": 0, "needs": 1, "fyi": 2}
+        _xsections = {"approvals": approvals, "needs": needs, "fyi": fyi}
         _xgroups = {}
         for _sec, _lst in _xsections.items():
             for _c in _lst:
                 _xgroups.setdefault(_xsec_key(_c), []).append((_sec, _c))
 
-        _xremoved = 0
+        _to_remove = []   # (section, card) -- computed fully before any mutation
         for _members in _xgroups.values():
             if len(_members) < 2:
                 continue
             _members.sort(key=lambda m: str(m[1].get("received_raw") or ""), reverse=True)
             _members.sort(key=lambda m: _RANK.get(m[0], 9))          # stable -> recency kept within rank
-            _win_sec, _win_card = _members[0]
-            _win_card["messageCount"] = sum(c.get("messageCount", 1) for _s, c in _members)
-            for _sec, _c in _members[1:]:
-                try:
-                    _xsections[_sec].remove(_c)
-                    _xremoved += 1
-                except ValueError:
-                    pass
+            _members[0][1]["messageCount"] = sum(c.get("messageCount", 1) for _s, c in _members)
+            _to_remove.extend(_members[1:])
+        _xremoved = 0
+        for _sec, _c in _to_remove:
+            try:
+                _xsections[_sec].remove(_c)
+                _xremoved += 1
+            except ValueError:
+                pass
         if _xremoved:
             print(f"Phase 3.3d done - cross-section thread dedup: removed {_xremoved} duplicate card(s) "
                   f"across {'/'.join(_xsections)}")

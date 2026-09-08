@@ -1123,7 +1123,7 @@ function renderBriefing(data,key){
         ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priSecs.nr.length)}
         <div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
-      ${(priSecs.appr.length||(Array.isArray(data.approvals)&&data.approvals.length))?`<div id="sec-approvals-wrap" style="margin-top:18px">
+      ${(Array.isArray(data.approvals)&&data.approvals.length)?`<div id="sec-approvals-wrap" style="margin-top:18px">
         ${_secHeadHtml('appr','dot-o','Manager approvals – leave &amp; sign-off requests',priSecs.appr.length)}
         <div class="pri-drop-zone" data-sec="appr" ondragover="priZoneDragOver(event,'appr')" ondragleave="priZoneDragLeave(event,'appr')" ondrop="priZoneDrop(event,'appr')">${priSecs.appr.length?renderPriorityCards(priSecs.appr,key,'appr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>`:''}
