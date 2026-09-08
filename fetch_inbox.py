@@ -4128,11 +4128,56 @@ try:
     live_ids = set(tracked.keys()) & ({c.get("entry_id") for c in urgent if c.get("entry_id")} |
                                        {c.get("entry_id") for c in needs if c.get("entry_id")})
 
+    # -- FIX 8 Sep 2026 evening (Drew, HANDOVER L regression) -- "superseded
+    # by fresh classification" resolution signal, added BEFORE the Outlook-
+    # lookup signal below. Root cause of the regression: signal (a) (Outlook
+    # GetItemFromID -> Parent.EntryID) requires `mapi`, which is None on
+    # MAIL_BACKEND=imap with no classic Outlook (this laptop, always, not a
+    # transient condition) -- so it has been throwing -> "unknown" -> fail-
+    # open -> carried, for EVERY tracked item, on EVERY run, since before the
+    # 28 Aug IMAP migration. Live proof: `data/triage_ledger.json` held 28
+    # entries, ALL 140-char COM-era EntryIDs, first_tracked 21 Aug - 5 Sep,
+    # last_confirmed re-stamped to today on every run without ever actually
+    # resolving -- pure zombies, already inflating Needs before this session
+    # (masked previously because the old broad `re:`/`fw:` classifier
+    # happened to also freshly re-classify most of them as "needs" anyway,
+    # so the carry-forward was invisible; the new tighter classifier removed
+    # that mask). Real fix: this laptop's Inbox is small (33-49 items, log-
+    # confirmed) and Phase 1 re-pulls up to MAX_READ+MAX_UNREAD items every
+    # run, so if a tracked item's email is still genuinely sitting in the
+    # Inbox, its subject will appear in THIS run's fresh `inbox` pull
+    # regardless of entry_id/message_id format compatibility across the
+    # IMAP migration boundary. If it does appear, trust THIS run's fresh
+    # categorise() outcome completely (needs/urgent, fyi, or suppressed) --
+    # it already got a fair, up-to-date shot at classification under the
+    # current rules, so Phase 3.9 must not override that by blind carry-
+    # forward. Only genuinely ABSENT-from-this-run's-pull subjects fall
+    # through to the existing Outlook-lookup-or-carry logic below,
+    # unchanged -- that conservative fail-open behaviour is still correct
+    # for a truly scrolled-out item (the original 20 Aug bug this mechanism
+    # exists to fix). Subject-match, not exact-identity -- deliberately
+    # fail-open in the SAME direction as before on a genuine ambiguity (two
+    # unrelated emails sharing one subject): worst case is one wrongly
+    # trusts a fresh "suppressed" verdict instead of carrying, no worse than
+    # every other AI-verdict-trusting decision already made elsewhere in
+    # this pipeline.
+    _RE_FWD_P39 = re.compile(r'^\s*(re|fw|fwd)\s*:\s*', re.IGNORECASE)
+    def _p39_subj_key(s):
+        s = re.sub(r'\s+', ' ', (s or '').strip().lower())
+        while True:
+            s2 = _RE_FWD_P39.sub('', s).strip()
+            if s2 == s:
+                break
+            s = s2
+        return s
+    _fresh_pull_subjects = {_p39_subj_key(m.get("subject")) for m in inbox if m.get("subject")}
+
     # 2. Resolve or carry anything that scrolled out of this run's pull.
     carried = 0
     dropped_resolved = 0
     inconclusive = 0
     stale_warnings = 0
+    superseded_by_fresh = 0
     for eid, rec in list(tracked.items()):
         if eid in live_ids:
             continue  # already handled by the checkpoint above
@@ -4143,6 +4188,11 @@ try:
         if eid in _ticked_done_entry_ids:
             del tracked[eid]
             dropped_resolved += 1
+            continue
+        _tracked_subj = _p39_subj_key((rec.get("card") or {}).get("subject"))
+        if _tracked_subj and _tracked_subj in _fresh_pull_subjects:
+            del tracked[eid]
+            superseded_by_fresh += 1
             continue
 
         outcome = "unknown"
@@ -4180,9 +4230,9 @@ try:
         except Exception:
             pass
 
-    if carried or dropped_resolved or inconclusive:
+    if carried or dropped_resolved or inconclusive or superseded_by_fresh:
         dry_run_tag = " [DRY RUN - no writes]" if _WI_PHASE39_DRY_RUN else ""
-        print(f"Phase 3.9 done - carried:{carried} dropped_resolved:{dropped_resolved} inconclusive_lookups_carried:{inconclusive} stale_over_90d:{stale_warnings} tracked_total:{len(tracked)}{dry_run_tag}")
+        print(f"Phase 3.9 done - carried:{carried} dropped_resolved:{dropped_resolved} superseded_by_fresh:{superseded_by_fresh} inconclusive_lookups_carried:{inconclusive} stale_over_90d:{stale_warnings} tracked_total:{len(tracked)}{dry_run_tag}")
 
     if _WI_PHASE39_DRY_RUN:
         print("Phase 3.9 dry run - skipping triage_ledger.json write and briefing carry-forward injection."
