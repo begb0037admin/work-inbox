@@ -2150,7 +2150,13 @@ FYI_ALWAYS       = ["starting soon", "is starting", "meeting forward notificatio
                     "tentative:", "canceled:", "no action required", "reminder:",
                     "automated", "automatic reply", "auto-reply", "autoreply",
                     "for information", "for your information", "for your records",
-                    "read receipt", "delivery receipt", "invited you to edit"]
+                    "read receipt", "delivery receipt", "invited you to edit",
+                    # leave NOTICES (not requests -- those are caught by
+                    # APPROVAL_SUBJECTS, which is checked first): "Simon - Annual
+                    # Leave", "Athena A/L". Hard floor so the AI promote pass
+                    # can't lift a leave notice into Needs (Kevin: "Athena's
+                    # annual leave ... NOT the main queue").
+                    "annual leave", " a/l", "a/l ", "a/l-", "-a/l", " a/l "]
 LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
                     "github", "pages", "build", "deploy", "run failed", "wisp"]
 
@@ -2184,20 +2190,25 @@ def categorise(msg):
 
     if TRIAGE_V2:
         # New model (WI_TRIAGE_V2 ON). Order matters (Codex Pass 1 review, 8 Sep):
-        #  1. FYI_ALWAYS  -> fyi. Bulletins, reminders, auto-replies,
-        #     "logged"/"created"/"completed" confirmations etc. never reach
-        #     Needs OR Manager approvals, even with an action word in the subject.
-        #  2. APPROVAL_SUBJECTS + Kevin on To -> approvals (leave / sign-off).
+        #  1. APPROVAL_SUBJECTS + Kevin on To -> approvals. Checked FIRST so an
+        #     explicit "annual leave request" / "for sign-off" routes to the
+        #     Manager-approvals queue before FYI_ALWAYS's leave-NOTICE keywords
+        #     ("annual leave", "a/l") would send it to fyi. APPROVAL_SUBJECTS
+        #     terms are specific request/approval phrases, so a bulletin/auto-
+        #     reply is very unlikely to match here.
+        #  2. FYI_ALWAYS -> fyi (hard floor -- Phase 3.3-promote can't lift it).
+        #     Bulletins, reminders, auto-replies, "logged"/"created"/"completed"
+        #     confirmations, leave NOTICES.
         #  3. FYI_SUBJECTS -> fyi.
         #  4. STRONG explicit ask (NEEDS_SUBJECTS_STRICT) + Kevin on To -> needs.
         #  5. everything else -> fyi; Phase 3.3-promote lifts it to needs only
         #     if Phase 3.2's AI verdict says no_action_needed=false.
         # is_read is no longer a "needs" trigger on its own.
+        if kevin_primary and any(kw in subj for kw in APPROVAL_SUBJECTS):
+            return "approvals"
         for kw in FYI_ALWAYS:
             if kw in subj:
                 return "fyi"
-        if kevin_primary and any(kw in subj for kw in APPROVAL_SUBJECTS):
-            return "approvals"
         for kw in FYI_SUBJECTS:
             if kw in subj:
                 return "fyi"
