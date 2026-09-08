@@ -2128,11 +2128,12 @@ FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary"
 # priority response tasks." Sick-leave / cover-needed cases deliberately are
 # NOT here -- they default to fyi and the AI promotion pass lifts them only if a
 # reply/cover is genuinely required.
-# Manager-approvals queue (Kevin's 8 Sep brief, queue 2 of 3). Consulted ONLY
-# when WI_TRIAGE_V2 is ON, and checked FIRST -- a leave / approval
-# request routes to its own "approvals" tier, not Needs and not FYI. Gated on
-# kevin_is_primary_recipient so a request where Kevin is only Cc'd (someone else
-# is the approver) still falls through to FYI.
+# Explicit approval/sign-off/leave-request asks (Kevin's 8 Sep brief). No
+# longer a separate "approvals" tier (Kevin dropped the Manager Approvals
+# dashboard section 8 Sep evening -- "more noise, he doesn't want it") -- these
+# now route straight to "needs" like any other direct ask. Checked FIRST,
+# before FYI_ALWAYS, so "annual leave request" (a genuine ask) doesn't get
+# caught by FYI_ALWAYS's leave-NOTICE keywords ("annual leave", "a/l") first.
 APPROVAL_SUBJECTS = ["leave request", "annual leave request", "a/l request", "holiday request",
                      "time off request", "requesting leave", "request for leave", "leave application",
                      "absence request", "approve leave", "leave approval", "authorise leave",
@@ -2176,10 +2177,61 @@ def categorise(msg):
     imp     = msg.get("importance", 1)
     kevin_primary = _is_kevin_primary(msg)
 
+    if TRIAGE_V2:
+        # New model (WI_TRIAGE_V2 ON). Order matters (Codex Pass 1 review, 8 Sep;
+        # hardened 8 Sep evening per Kevin's two follow-up instructions):
+        #  0. LOW_SUBJECTS -> low. Lower bar than even the Cc-only gate below
+        #     (github/deploy noise never gets a card at all either way).
+        #  1. Cc-only HARD GATE -> suppressed. Kevin, verbatim, 8 Sep evening:
+        #     "any email i am cc'd into should not be in here, work inbox is
+        #     not for my attention, it is for my action ... i can pickup cc
+        #     emails myself in the outlook inbox." Checked BEFORE urgent/
+        #     importance -- explicitly no exception for an urgent-sounding Cc
+        #     thread. Only mail where Kevin is on the To line is eligible for
+        #     ANY of urgent/needs/fyi below this point.
+        #  2. imp==2 / URGENT_SUBJECTS -> urgent (kevin_primary guaranteed True
+        #     from here on down).
+        #  3. APPROVAL_SUBJECTS -> needs. Checked before FYI_ALWAYS so an
+        #     explicit "annual leave request" / "for sign-off" ask isn't
+        #     caught by FYI_ALWAYS's leave-NOTICE keywords first.
+        #  4. FYI_ALWAYS -> suppressed (hard floor -- never fyi, never needs,
+        #     never rendered anywhere. Bulletins, reminders, auto-replies,
+        #     "logged"/"created"/"completed" confirmations, leave NOTICES,
+        #     meeting-start reminders, "no action required"). Kevin: this
+        #     whole class "should not appear ANYWHERE. not needs, not fyi,
+        #     not parked."
+        #  5. FYI_SUBJECTS -> fyi (still a real, visible, informational tier
+        #     for genuine To-Kevin mail that isn't in the noise floor above).
+        #  6. STRONG explicit ask (NEEDS_SUBJECTS_STRICT) -> needs.
+        #  7. everything else -> fyi; Phase 3.3-promote lifts it to needs only
+        #     if Phase 3.2's AI verdict says no_action_needed=false.
+        # is_read is no longer a "needs" trigger on its own.
+        for kw in LOW_SUBJECTS:
+            if kw in subj or kw in sender:
+                return "low"
+        if not kevin_primary:
+            return "suppressed"
+        if imp == 2:
+            return "urgent"
+        for kw in URGENT_SUBJECTS:
+            if kw in subj:
+                return "urgent"
+        if any(kw in subj for kw in APPROVAL_SUBJECTS):
+            return "needs"
+        for kw in FYI_ALWAYS:
+            if kw in subj:
+                return "suppressed"
+        for kw in FYI_SUBJECTS:
+            if kw in subj:
+                return "fyi"
+        if any(kw in subj for kw in NEEDS_SUBJECTS_STRICT):
+            return "needs"
+        return "fyi"
+
+    # -- Original behaviour (flag unset) -- byte-identical to the pre-8-Sep pipeline --
     # High importance flag always pushes to urgent
     if imp == 2:
         return "urgent"
-
     # Subject keyword matching
     for kw in LOW_SUBJECTS:
         if kw in subj or kw in sender:
@@ -2187,36 +2239,6 @@ def categorise(msg):
     for kw in URGENT_SUBJECTS:
         if kw in subj:
             return "urgent"
-
-    if TRIAGE_V2:
-        # New model (WI_TRIAGE_V2 ON). Order matters (Codex Pass 1 review, 8 Sep):
-        #  1. APPROVAL_SUBJECTS + Kevin on To -> approvals. Checked FIRST so an
-        #     explicit "annual leave request" / "for sign-off" routes to the
-        #     Manager-approvals queue before FYI_ALWAYS's leave-NOTICE keywords
-        #     ("annual leave", "a/l") would send it to fyi. APPROVAL_SUBJECTS
-        #     terms are specific request/approval phrases, so a bulletin/auto-
-        #     reply is very unlikely to match here.
-        #  2. FYI_ALWAYS -> fyi (hard floor -- Phase 3.3-promote can't lift it).
-        #     Bulletins, reminders, auto-replies, "logged"/"created"/"completed"
-        #     confirmations, leave NOTICES.
-        #  3. FYI_SUBJECTS -> fyi.
-        #  4. STRONG explicit ask (NEEDS_SUBJECTS_STRICT) + Kevin on To -> needs.
-        #  5. everything else -> fyi; Phase 3.3-promote lifts it to needs only
-        #     if Phase 3.2's AI verdict says no_action_needed=false.
-        # is_read is no longer a "needs" trigger on its own.
-        if kevin_primary and any(kw in subj for kw in APPROVAL_SUBJECTS):
-            return "approvals"
-        for kw in FYI_ALWAYS:
-            if kw in subj:
-                return "fyi"
-        for kw in FYI_SUBJECTS:
-            if kw in subj:
-                return "fyi"
-        if kevin_primary and any(kw in subj for kw in NEEDS_SUBJECTS_STRICT):
-            return "needs"
-        return "fyi"
-
-    # -- Original behaviour (flag unset) -- byte-identical to the pre-8-Sep pipeline --
     # Unread + needs keywords -- needs response
     if not is_read:
         for kw in NEEDS_SUBJECTS:
@@ -2286,27 +2308,29 @@ def make_card(msg, category):
     }
     return card
 
-urgent    = []
-needs     = []
-approvals = []          # Manager-approvals queue -- only ever populated when WI_TRIAGE_V2 is ON
-fyi       = []
-low       = []
+urgent     = []
+needs      = []
+fyi        = []
+low        = []
+suppressed = []   # Cc-only + FYI_ALWAYS-floor noise, WI_TRIAGE_V2 only. Never
+                   # rendered on any dashboard tier -- kept server-side only
+                   # for dedup/count-reporting sanity (Kevin, 8 Sep evening).
 
 for msg in inbox:
     cat  = categorise(msg)
     card = make_card(msg, cat)
     if cat == "urgent":
         urgent.append(card)
-    elif cat == "approvals":
-        approvals.append(card)
     elif cat == "needs":
         needs.append(card)
     elif cat == "fyi":
         fyi.append(card)
+    elif cat == "suppressed":
+        suppressed.append(card)
     else:
         low.append(card)
 
-print(f"Phase 3 done - urgent:{len(urgent)}" + (f" approvals:{len(approvals)}" if TRIAGE_V2 else "")
+print(f"Phase 3 done - urgent:{len(urgent)}" + (f" suppressed:{len(suppressed)}" if TRIAGE_V2 else "")
       + f" needs:{len(needs)} fyi:{len(fyi)} low:{len(low)}")
 
 # -- Phase 3.2 - AI summaries for urgent/needs email cards --
@@ -2793,6 +2817,29 @@ try:
     fyi = [threads[k] for k in thread_order]
     collapsed_count = fyi_raw_count - len(fyi)
 
+    # (1b) Same thread-collapse applied to `suppressed` -- Kevin, 8 Sep evening:
+    # "keep the dedup logic collapsing duplicates into one before suppressing
+    # ... for data hygiene / count-reporting sanity." Nothing here is ever
+    # rendered, so this only affects the reported suppressed_count, not the
+    # dashboard -- but a raw 5x-duplicate Cc thread should count as one
+    # suppressed thread, not five, for that count to mean anything. Reuses
+    # the exact same _thread_key function (TRIAGE_V2-only, always defined
+    # by the point this line runs since it's declared unconditionally above).
+    suppressed_raw_count = len(suppressed)
+    _sup_threads = {}
+    _sup_order = []
+    for card in suppressed:
+        key = _thread_key(card)
+        if key not in _sup_threads:
+            card["messageCount"] = 1
+            _sup_threads[key] = card
+            _sup_order.append(key)
+        else:
+            existing = _sup_threads[key]
+            existing["messageCount"] = existing.get("messageCount", 1) + 1
+    suppressed = [_sup_threads[k] for k in _sup_order]
+    suppressed_collapsed_count = suppressed_raw_count - len(suppressed)
+
     # (2) Explicit age cutoff, belt-and-braces on top of the restrict_date()
     # fix above (not a replacement for it). Consistent with the pipeline's
     # own existing precedent of date-bounding again at the point of use
@@ -2817,21 +2864,26 @@ try:
     aged_out_count = _fyi_before_age_filter - len(fyi)
 
     print(f"Phase 3.3c done - FYI thread-collapse: {fyi_raw_count} raw -> {len(fyi)} threads "
-          f"({collapsed_count} collapsed), {aged_out_count} aged out (>{FYI_MAX_AGE_DAYS}d)")
+          f"({collapsed_count} collapsed), {aged_out_count} aged out (>{FYI_MAX_AGE_DAYS}d)"
+          + (f"; suppressed thread-collapse: {suppressed_raw_count} raw -> {len(suppressed)} "
+             f"threads ({suppressed_collapsed_count} collapsed)" if TRIAGE_V2 else ""))
 except Exception as fyi_clean_err:
-    print(f"WARNING: Phase 3.3c FYI thread-collapse/aging failed, FYI left unchanged - {fyi_clean_err}")
+    print(f"WARNING: Phase 3.3c FYI/suppressed thread-collapse/aging failed, left unchanged - {fyi_clean_err}")
 
 # -- Phase 3.3d -- cross-section thread dedup (WI_TRIAGE_V2 / triage v2) --
 # Kevin's 8 Sep brief: "Repeated messages on the same thread should consolidate
 # to one entry, across ALL sections -- a thread shouldn't appear in both Needs
-# and Parked." Phase 3.3c above only collapses WITHIN FYI. This pass runs over
-# approvals + needs + fyi together (NOT urgent -- Codex Pass 1 flagged that
-# including urgent could shrink the Urgent tier, which Kevin wants untouched;
-# urgent is tiny and a cross-tier urgent dup is rare), on a normalised-subject
-# key that also strips #external#/[external] markers and re:/fw:/fwd: chains in
-# any order. Keeps ONE card per thread -- highest-priority section
-# (approvals > needs > fyi), most-recent within that -- and removes the rest,
-# summing messageCount onto the kept card (a rendered field, from the 3.3c
+# and Parked." Phase 3.3c above only collapses WITHIN FYI (and, since 8 Sep
+# evening, within suppressed). This pass runs over needs + fyi + suppressed
+# together (NOT urgent -- Codex Pass 1 flagged that including urgent could
+# shrink the Urgent tier, which Kevin wants untouched; urgent is tiny and a
+# cross-tier urgent dup is rare), on a normalised-subject key that also strips
+# #external#/[external] markers and re:/fw:/fwd: chains in any order. Keeps ONE
+# card per thread -- highest-priority section (needs > fyi > suppressed),
+# most-recent within that -- and removes the rest, so e.g. 5 copies of the same
+# thread where one landed in Needs and the rest suppressed collapse to the one
+# Needs card, not five separate cards scattered across sections, summing
+# messageCount onto the kept card (a rendered field, from the 3.3c
 # change). All removals are computed first, then applied in one pass, so a
 # failure partway cannot leave the sections half-deduped. v1 = exact normalised
 # subject only; fuzzy/near-dupe matching deferred (would risk over-collapsing
@@ -2851,8 +2903,8 @@ if TRIAGE_V2:
                 s = s2
             return s or ("id:" + str(card.get("entry_id") or card.get("message_id") or id(card)))
 
-        _RANK = {"approvals": 0, "needs": 1, "fyi": 2}
-        _xsections = {"approvals": approvals, "needs": needs, "fyi": fyi}
+        _RANK = {"needs": 0, "fyi": 1, "suppressed": 2}
+        _xsections = {"needs": needs, "fyi": fyi, "suppressed": suppressed}
         _xgroups = {}
         for _sec, _lst in _xsections.items():
             for _c in _lst:
@@ -4140,10 +4192,13 @@ briefing = {
     "subtitle":     subtitle,
     "context":      context,
     "urgent":       urgent,
-    "approvals":    approvals,
     "needs":        needs,
     "fyi":          fyi,
     "fyiRawCount":  fyi_raw_count,
+    "suppressedCount": (len(suppressed) if TRIAGE_V2 else 0),  # count only --
+                        # never the cards themselves. Never rendered on any
+                        # dashboard tier by design (Kevin, 8 Sep evening);
+                        # kept purely for audit / count-reporting sanity.
     "low":          low,
     "calToday":     cal_today_items,
     "calTomorrow":  cal_tomorrow_items,
