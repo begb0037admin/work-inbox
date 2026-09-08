@@ -2121,6 +2121,23 @@ NEEDS_SUBJECTS_STRICT = ["action required", "action needed", "please review", "p
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
                     "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
+# Consulted ONLY when WI_NEEDS_AI_PROMOTE is ON, and checked BEFORE the strong-
+# action-keyword test -- these categories never belong in the main action queue
+# even if the subject also carries an action word. Kevin's 8 Sep brief:
+# "Informational messages and automated notifications should not appear as
+# priority response tasks." Sick-leave / cover-needed cases deliberately are
+# NOT here -- they default to fyi and the AI promotion pass lifts them only if a
+# reply/cover is genuinely required.
+FYI_ALWAYS       = ["starting soon", "is starting", "meeting forward notification",
+                    "flu vaccination", "flu jab", "flu clinic", "vaccination reminder",
+                    "university bulletin", "bulletin:", "staff bulletin", "clockify",
+                    "problem logged", "has been logged", "now been logged", "ticket logged",
+                    "reports created", "report created", "report has been created",
+                    "update completed", "completed update", "has been completed",
+                    "annual leave", " a/l", "a/l ", "leave approval", "leave request",
+                    "approve leave", "tentative:", "canceled:", "no action required",
+                    "for information", "for your information", "for your records",
+                    "read receipt", "delivery receipt", "auto-reply", "autoreply"]
 LOW_SUBJECTS     = ["unsubscribe", "noreply", "no-reply", "do not reply", "automated",
                     "github", "pages", "build", "deploy", "run failed", "wisp"]
 
@@ -2144,17 +2161,24 @@ def categorise(msg):
             return "urgent"
 
     if NEEDS_AI_PROMOTE:
-        # New model (WI_NEEDS_AI_PROMOTE ON): the keyword pass only puts an
-        # email in "needs" on a STRONG explicit action signal AND with Kevin on
-        # the To line. FYI keywords still win over a weak/no signal. Everything
-        # else -> fyi; Phase 3.3c promotes fyi -> needs on an AI needs_reply
-        # verdict. is_read is no longer a "needs" trigger on its own.
-        strong = any(kw in subj for kw in NEEDS_SUBJECTS_STRICT)
-        if strong and kevin_primary:
-            return "needs"
+        # New model (WI_NEEDS_AI_PROMOTE ON). Order matters:
+        #  1. FYI_ALWAYS / FYI_SUBJECTS -> fyi. Bulletins, reminders, auto-
+        #     replies, leave notices, "logged"/"created"/"completed"
+        #     confirmations never enter Needs Response, even if the subject also
+        #     carries an action word.
+        #  2. STRONG explicit ask (NEEDS_SUBJECTS_STRICT) AND Kevin on the To
+        #     line -> needs.
+        #  3. everything else -> fyi; Phase 3.3-promote lifts it to needs only
+        #     if Phase 3.2's AI verdict says needs_reply=true.
+        # is_read is no longer a "needs" trigger on its own.
+        for kw in FYI_ALWAYS:
+            if kw in subj:
+                return "fyi"
         for kw in FYI_SUBJECTS:
             if kw in subj:
                 return "fyi"
+        if any(kw in subj for kw in NEEDS_SUBJECTS_STRICT) and kevin_primary:
+            return "needs"
         return "fyi"
 
     # -- Original behaviour (flag unset) -- byte-identical to the pre-8-Sep pipeline --
