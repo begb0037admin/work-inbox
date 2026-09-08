@@ -346,6 +346,17 @@ def _load_lane_b_teams():
 AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
                or MAIL_PARALLEL)
 PUSH_ENABLED = bool(GITHUB_PAT) and not AI_PARALLEL
+
+# WI_NEEDS_AI_PROMOTE (default OFF -- unset behaviour is byte-identical to the
+# pre-8-Sep-2026 pipeline). When ON: categorise() stops dumping every unread
+# reply/forward into "needs" -- an email only lands in Needs Response from the
+# keyword pass on a STRONG explicit action signal (NEEDS_SUBJECTS_STRICT) with
+# Kevin on the To line. Everything else starts in FYI, and Phase 3.3c below
+# promotes an FYI card into Needs when Phase 3.2's AI verdict says
+# needs_reply=true. Rationale: the 8 Sep "Needs Response = 32, ~75% noise"
+# diagnosis (HANDOVER I) -- the `re:`/`fw:`/`fwd:` net + the `if not is_read:
+# return "needs"` catch-all were the source.
+NEEDS_AI_PROMOTE = os.environ.get("WI_NEEDS_AI_PROMOTE", "").strip().lower() in ("1", "true", "yes")
 _AI_OUT_PREFIX = "claude_" if AI_PARALLEL else ""
 CLAUDE_BIN          = os.environ.get("WI_CLAUDE_BIN", "claude")
 CLAUDE_CFG_PRIMARY  = os.environ.get("WI_CLAUDE_CONFIG_DIR", "").strip()
@@ -2097,6 +2108,16 @@ URGENT_SUBJECTS  = ["major incident", "priority 1", "p1", "urgent", "critical", 
 NEEDS_SUBJECTS   = ["re:", "fw:", "fwd:", "action", "required", "please", "timeline", "update",
                     "chasing", "waiting", "overdue", "follow", "scoping", "handover", "error",
                     "import", "failed", "issue", "case ", "support"]
+# Strict subset used only when WI_NEEDS_AI_PROMOTE is ON -- a genuine, explicit
+# "Kevin, do something" signal in the subject line, not just "this is a reply".
+# Anything not matching this (and not high-importance) starts in FYI and only
+# reaches Needs Response if Phase 3.2's needs_reply verdict promotes it.
+NEEDS_SUBJECTS_STRICT = ["action required", "action needed", "please review", "please approve",
+                         "please advise", "please confirm", "please respond", "please complete",
+                         "please provide", "please send", "response required", "reply required",
+                         "rsvp", "overdue", "deadline", "chasing", "chase up", "awaiting your",
+                         "for your approval", "for your action", "for your review", "sign-off",
+                         "sign off", "your input needed", "needs your input", "needs your approval"]
 FYI_SUBJECTS     = ["fyi", "notification", "scheduled", "maintenance", "summary", "workshop",
                     "invitation", "invite", "digest", "recap", "newsletter", "annual leave",
                     "out of office", "automatic reply", "accepted:", "declined:", "cancelled:"]
@@ -2108,6 +2129,7 @@ def categorise(msg):
     sender  = (msg.get("from_email") or "").lower()
     is_read = msg.get("is_read", True)
     imp     = msg.get("importance", 1)
+    kevin_primary = msg.get("kevin_is_primary_recipient", True)
 
     # High importance flag always pushes to urgent
     if imp == 2:
@@ -2120,6 +2142,22 @@ def categorise(msg):
     for kw in URGENT_SUBJECTS:
         if kw in subj:
             return "urgent"
+
+    if NEEDS_AI_PROMOTE:
+        # New model (WI_NEEDS_AI_PROMOTE ON): the keyword pass only puts an
+        # email in "needs" on a STRONG explicit action signal AND with Kevin on
+        # the To line. FYI keywords still win over a weak/no signal. Everything
+        # else -> fyi; Phase 3.3c promotes fyi -> needs on an AI needs_reply
+        # verdict. is_read is no longer a "needs" trigger on its own.
+        strong = any(kw in subj for kw in NEEDS_SUBJECTS_STRICT)
+        if strong and kevin_primary:
+            return "needs"
+        for kw in FYI_SUBJECTS:
+            if kw in subj:
+                return "fyi"
+        return "fyi"
+
+    # -- Original behaviour (flag unset) -- byte-identical to the pre-8-Sep pipeline --
     # Unread + needs keywords -- needs response
     if not is_read:
         for kw in NEEDS_SUBJECTS:
@@ -2221,7 +2259,15 @@ log("Phase 3.2 - generating AI email summaries...")
 # Widened to entry_id OR message_id so fresh IMAP Needs/Urgent cards are
 # actually eligible for demotion too -- see the entry_id-only-suppressor
 # confirmed-fact memory candidate (drew repo) for the full diagnosis.
-summary_candidates = [c for c in (urgent + needs) if c.get("entry_id") or c.get("message_id")]
+# WI_NEEDS_AI_PROMOTE ON: also feed every FYI card through the Phase 3.2 AI
+# summary so Phase 3.3c can promote a genuine "needs_reply" one back into Needs
+# Response. Raises this call's payload from ~40 to ~70 entries -- well inside
+# the max_tokens=14000 headroom (comment below is sized for ~165). OFF: exactly
+# the urgent+needs set as before.
+if NEEDS_AI_PROMOTE:
+    summary_candidates = [c for c in (urgent + needs + fyi) if c.get("entry_id") or c.get("message_id")]
+else:
+    summary_candidates = [c for c in (urgent + needs) if c.get("entry_id") or c.get("message_id")]
 # Entry IDs of cards actually demoted by Phase 3.3/3.3b below (AI-confirmed
 # no_action_needed). Declared unconditionally, before the Phase 3.2 block
 # below, so it always exists (empty set) even if Phase 3.2 is skipped or
@@ -2231,6 +2277,18 @@ summary_candidates = [c for c in (urgent + needs) if c.get("entry_id") or c.get(
 # see that phase's own comment for the full reasoning and its own scope
 # limits (12 Aug 2026, extending the same-day Phase 3.3 Needs fix).
 _noise_demoted_entry_ids = set()
+# Identities (entry_id or message_id) of FYI cards promoted UP into Needs
+# Response by Phase 3.3-promote (WI_NEEDS_AI_PROMOTE). Declared unconditionally
+# so it always exists. Currently used for run logging / the before-after report
+# only. NOT wired into Phase 3.5 Command Centre task triage: the combined
+# `claude -p` call's triage payload is assembled BEFORE Phase 3.2/3.3 run, so a
+# promoted card can't be fed to that same run's task-triage phase without
+# reordering the combined call (out of scope here). Net effect: a genuine ask
+# that only the AI promotes is visible + actionable in Kevin's Needs Response
+# section immediately, but may not get an auto-created task until a later run
+# where it lands in "needs" by other means. Acceptable given Part A already
+# made task auto-creation deliberately conservative.
+_promoted_to_needs_ids = set()
 
 # ---------------------------------------------------------------------------
 # claude_code backend: assemble + fire the SINGLE combined `claude -p` call
@@ -2500,6 +2558,40 @@ if summary_candidates and anthropic_available:
                 print(f"Phase 3.3 done - {demoted_count} Needs card(s) demoted to FYI (AI-confirmed no action needed)")
         except Exception as demote_err:
             print(f"WARNING: Phase 3.3 demotion failed, Needs left unchanged - {demote_err}")
+
+        # -- Phase 3.3-promote -- WI_NEEDS_AI_PROMOTE ON: lift an FYI card whose
+        # Phase 3.2 verdict says needs_reply=true up into Needs Response. This is
+        # the counterpart to Phase 3.3's demotion: with the new categorise()
+        # default (fyi unless a strong explicit ask + Kevin on To), this pass is
+        # what populates Needs Response for the bulk of genuine asks. Runs after
+        # 3.3's demotion (a just-demoted card has needs_reply=False so it is
+        # never re-promoted) and before 3.3b. Same atomic-temp-list + own
+        # try/except safety pattern as the demotion passes.
+        if NEEDS_AI_PROMOTE:
+            try:
+                promoted_count = 0
+                still_fyi = []
+                newly_needs = []
+                for card in fyi:
+                    if card.get("_ai_verdict_valid") and card.get("needs_reply") is True:
+                        card["badge"], card["badgeType"] = badge_for(card, "needs")
+                        newly_needs.append(card)
+                        promoted_count += 1
+                        pid = card.get("entry_id") or card.get("message_id")
+                        if pid:
+                            _promoted_to_needs_ids.add(pid)
+                    else:
+                        still_fyi.append(card)
+                fyi = still_fyi
+                needs.extend(newly_needs)
+                if promoted_count:
+                    try:
+                        needs.sort(key=lambda c: str(c.get("received_raw") or ""), reverse=True)
+                    except Exception as sort_err:
+                        print(f"WARNING: Phase 3.3-promote Needs re-sort failed, order preserved as-is - {sort_err}")
+                    print(f"Phase 3.3-promote done - {promoted_count} FYI card(s) promoted to Needs Response (AI-confirmed needs_reply)")
+            except Exception as promote_err:
+                print(f"WARNING: Phase 3.3-promote failed, FYI left unchanged - {promote_err}")
 
         # -- Phase 3.3b -- same demotion logic applied to Urgent, 12 Aug 2026 --
         # Kevin approved extending Phase 3.3 above to Urgent after ~9
