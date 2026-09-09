@@ -1973,4 +1973,43 @@ def _write_run_log(ts, args, per_domain, sha_before, sha_after, n_hits, *, halte
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    # Top-level exception guard -- added 9 Sept 2026 after a REAL live incident:
+    # an unrelated environment error (codex binary not resolvable on PATH in a
+    # test session's user context) raised an uncaught FileNotFoundError deep in
+    # run_codex_json()'s subprocess.Popen() call. Python's default behaviour for
+    # an uncaught exception is to print a traceback and exit with code 1 -- the
+    # EXACT SAME exit code main() deliberately returns for a genuine
+    # re-contamination GUARD TRIPPED (a real write/off-scope tool call
+    # observed). The caller (Run Laptop Bridge Briefing.ps1's mail guard block,
+    # and lane_b_cal_guard.py's cmd_run() for calendar/Teams) cannot tell these
+    # two completely different situations apart from the exit code alone --
+    # both look like "exit 1" -- and reacted to the environment error exactly
+    # as if a write had been detected: it disabled the live scheduled task.
+    # That is precisely backwards for an environment/plumbing failure that has
+    # nothing to do with mailbox safety. Fix: catch anything that reaches this
+    # top level (main()'s own deliberate `return 1` for a genuine HALT never
+    # raises -- it returns a value, so it is NOT caught here) and exit 2
+    # ("usage/environment error", already a documented, distinct exit code)
+    # instead of falling through to Python's default exit-1 behaviour.
+    # ReContaminationDetected is handled explicitly and separately: it SHOULD
+    # map to a HALT-shaped exit if it were ever to escape uncaught this far
+    # (it currently never does -- _fetch_domain_one_identity() always catches
+    # it and converts it into a status="halt" result dict -- this is defensive
+    # depth in case that invariant is ever broken by a future change).
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except ReContaminationDetected as _e:
+        _log(f"UNCAUGHT ReContaminationDetected at top level (should have been caught "
+             f"inside _fetch_domain_one_identity -- this is a defensive fallback, "
+             f"investigate why it escaped): {_e}")
+        sys.exit(1)
+    except SystemExit:
+        raise
+    except Exception as _e:  # noqa: BLE001 -- deliberate catch-all, see comment above
+        _log(f"UNCAUGHT EXCEPTION ({type(_e).__name__}): {_e} -- this is an "
+             f"environment/plumbing failure, NOT a detected write. Exiting 2 "
+             f"(usage/environment error), not 1, so the caller does not mistake "
+             f"this for a re-contamination guard HALT and disable the scheduled task.")
+        import traceback
+        traceback.print_exc()
+        sys.exit(2)
