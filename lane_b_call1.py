@@ -1235,16 +1235,51 @@ def mail_messages_to_raw(messages: list, *, kind: str) -> list[dict]:
     build_mail_sent_prompt), so there is no need to infer folder from the
     connector's own tool arguments here.
 
-    Field names UNCONFIRMED against a real multi-field live pull as of first
-    write (9 Sept 2026) -- only the narrower resolve_mail_weblink() filter-only
-    call (subject/web_link) has been live-proven so far. Defensive-first,
-    same pattern as calendar/teams: try the likely connector-native snake_case
-    name first, fall back to Graph's own camelCase, never raise on a missing
-    field. MUST be re-checked against the first real live probe transcript
-    (see lane_b_call1.py --domain mail --dry-run, then a real small-window
-    run) before this is trusted at pipeline scale -- flag any field that
-    comes back empty across a real pull for a follow-up fix, same as Teams'
-    3 Sept field-name correction."""
+    Field names CONFIRMED live 9 Sept 2026 (real 6h-window probe against the
+    personal Lane B identity, both inbox (26 items) and sent (4 items), guard
+    clean, see HANDOVER.md section Q's build log). The real returned message
+    object's keys, exactly as observed (mixed camelCase/snake_case -- this is
+    the connector's own inconsistency, not a mapping bug): `id`, `subject`,
+    `body` ({content_type/contentType, content}), `bodyPreview`, `web_link`,
+    `isRead`, `has_attachments`, `receivedDateTime`, `sender`
+    ({emailAddress:{name,address}}), `toRecipients`/`ccRecipients`/
+    `bccRecipients` (each a list of {emailAddress:{name,address}}),
+    `categories`, `display_title`, `display_url`.
+
+    TWO CONFIRMED GAPS, both accepted, neither a security concern (data-shape
+    only), disclosed here rather than silently worked around:
+      1. No `importance` field is returned by `list_messages`, even though it
+         was explicitly requested via the tool's own `select` argument (the
+         model's own arguments included it, per the raw transcript). This
+         connector's bulk-list endpoint appears to return a fixed field set
+         regardless of `select` -- `_importance_to_int(None)` falls back to 1
+         (normal), the same safe default `imap_mail.py`'s own
+         `_importance_from_headers()` uses when no priority header is present.
+         (`CODEX_CONNECTOR_PIPELINE_PLAN.md` §1's claim that "the connector
+         fetch_message full-detail call returns importance" refers to the
+         PER-MESSAGE `fetch_message` tool, not bulk `list_messages` -- not
+         contradicted by this finding, just a different call this build does
+         not make, to avoid one extra codex-exec call per message at pipeline
+         scale.)
+      2. No `internetMessageId`/`internet_message_id` field is returned either
+         (also requested via `select`, also absent) -- only the connector's
+         own Graph `id` (a long opaque string, NOT the RFC822 `<...@...>`
+         Message-ID format IMAP/COM use as the cross-backend dedup key).
+         `message_id` therefore becomes the connector's `id` for
+         connector-sourced mail. This is a ONE-TIME discontinuity on cutover,
+         not an ongoing correctness problem: `id` is Graph's own stable
+         identifier for a message and is fully sufficient as this pipeline's
+         *going-forward* dedup key (`data/triage_ledger.json`, Phase 3.9
+         carry-forward) once mail is fully on the connector -- existing
+         ledger entries keyed on the old IMAP-era Message-ID simply won't
+         match on the FIRST connector-sourced run (each currently-tracked
+         thread looks "new" once), which is a cosmetic one-cycle re-surface,
+         not data loss or a duplicate-send risk. Not worth an extra
+         per-message resolution call (30+ items/run) to avoid a one-time,
+         one-cycle cosmetic effect.
+    Defensive-first field mapping (calendar/teams' own established pattern)
+    is kept even though the live shape is now confirmed, in case the
+    connector's schema shifts again the way Teams' did on 3 Sept."""
     out: list[dict] = []
     for m in messages:
         if not isinstance(m, dict):
