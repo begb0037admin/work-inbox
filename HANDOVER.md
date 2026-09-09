@@ -1,3 +1,26 @@
+# Handover -- 9 September 2026, ~evening (Drew) -- Q. Kevin's fresh, explicit risk acceptance received and recorded. Mail migration proceeding on that basis. Full detail below.
+
+## Q. Kevin's fresh explicit risk acceptance for the connector mail write-risk (cross-refs section P and `docs/CONNECTOR_SAFEGUARDS.md`'s 29 Aug "NOT SOUND" verdict) -- ACCEPTED, not resolved technically
+
+**This entry records a risk-acceptance decision, not a technical fix.** Section P (immediately below) and `docs/CONNECTOR_SAFEGUARDS.md` (29 Aug, Drew + a commissioned Codex second opinion, both concurring) remain accurate and unretracted: the connector-attached mail fetch architecture is structurally capable of a prompt-injection-triggered write (e.g. `send_email`) firing mid-call, before the fetch's own JSON ever returns to any of this pipeline's guard code -- "one turn" does not mean "one tool call." Nothing built this session changes that underlying mechanism. What changed is that Kevin has now given the fresh, explicit, informed re-acceptance that section P (and `docs/MAIL_CONNECTOR_ASSESSMENT_9SEPT.md` before it) said was the one thing missing before mail could follow calendar/Teams onto the connector.
+
+**Kevin's instruction, verbatim (record precisely, this is a durable decision record):**
+
+> "We have already been down this route and we have already agreed that the current gates we have in place for Calendar and Teams will suffice for emails. It's unlikely that this issue will ever arise. A very slim chance and I am prepared to accept that and also this is an Oxford University approved system and being used across the university so Oxford has also accepted the risks. Please proceed."
+
+**What this decision is, precisely:**
+- Options P1 (stay on IMAP) and P2 (a genuinely enforced read-only proxy service) are both explicitly declined by Kevin, not because either was infeasible, but because he judges the existing verb-based guard (`guard_recontamination()` / `LANE_B_NAMESPACES` / `READ_VERB_RE` / `WRITE_VERB_RE`, already live for calendar/Teams and already listing `microsoft_outlook_email` since 3 Sept's weblink-resolution feature) sufficient for mail too.
+- No new safety mechanism is being built for this cutover -- no kill-switch rework (§6a), no Sent-folder delta-check, no read-only proxy. Same mechanism, same code path, wider scope (mail added to the domains it already gates for calendar/Teams).
+- The residual risk this accepts is real and specifically identified, not generic: a hostile inbound email's body could, in principle, cause a write-capable tool call (`send_email`/`reply_to_email`/`forward_email`/etc.) to fire during Call 1's connector session, before `normalise_pull.py` or any downstream sanitiser ever sees the content -- the guard can HALT and disable the pipeline the instant it observes this, but detection is not prevention for whatever fired before the HALT registered. Kevin's acceptance is explicit on this exact mechanism, not a general "connectors are a bit risky" wave-through -- see the quote above.
+- Kevin's own stated basis for "slim chance": (a) the same class of risk was already accepted for calendar/Teams on 1 Sept ("this is closed... not to be re-raised as a veto" -- see the 1 Sept decision-reversal entry further down this file) and mail is judged to widen the blast radius (a stray real email vs a stray Teams message) but not the underlying likelihood; (b) Oxford's own approval/entitlement of this connector for university-wide use is read by Kevin as Oxford's own institutional acceptance of the same residual risk, not just his personal one.
+- **This is accepted, not fixed.** `docs/CONNECTOR_SAFEGUARDS.md`'s NOT SOUND verdict is not superseded, retracted, or technically resolved by anything in this entry or by the code built this session -- a future session must not read "mail is live on the connector" as evidence the structural finding was wrong or has been mitigated. It has been knowingly accepted by the risk owner, on the record, twice now (calendar/Teams 1 Sept, mail 9 Sept).
+
+**Per the instruction, this specific risk is not to be re-raised as a reason to stop or revert** -- consistent with the same standing closure already in force for the 1 Sept calendar/Teams acceptance. A genuinely NEW and destructive/irreversible finding, not already covered by this acceptance or by the existing verb-based guard, is still reportable.
+
+**What this entry does NOT claim:** that mail is necessarily live yet at the moment this entry was written -- see the build/test entries below (this same session, following this one) for the actual state of the code, the live probe results, and whether the scheduled task's default was actually flipped. Check those entries' own restore points, not this one, for exact live status.
+
+---
+
 # Handover -- 9 September 2026, ~afternoon (Drew) -- Mail-to-connector cutover instruction received, NOT actioned. Live IMAP mail path untouched. Full detail below.
 
 ## P. Full mail migration instruction -- HELD, not built, not cut over. Repo's own unresolved "NOT SOUND" safety verdict takes precedence.
