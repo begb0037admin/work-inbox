@@ -2479,7 +2479,25 @@ def make_card(msg, category):
         "from":      sender,
         "entry_id":  msg.get("entry_id", ""),
         "message_id": msg.get("message_id", ""),
-        "web_link":  "",
+        # FIX 9 Sept 2026 (Drew, found live during the mail-connector cutover,
+        # HANDOVER.md section Q): this was hardcoded "" regardless of what msg
+        # actually carried -- a PRE-EXISTING gap affecting BOTH backends
+        # equally, not introduced by the connector work, just surfaced by it.
+        # imap_mail.py's _build_entry() has ALWAYS populated a real web_link
+        # (_owa_search_link()) on every entry; _load_lane_b_mail() does the
+        # same for connector-sourced mail (a REAL Graph web_link, no extra
+        # codex-exec call needed -- it's already in the bulk list_messages
+        # pull). Throwing it away here forced EVERY card through Phase 3.1's
+        # expensive, capped (WI_WEBLINK_MAX_RESOLVES=8/run) per-message
+        # connector resolve just to reconstruct what Phase 1 already had for
+        # free -- confirmed live: 0/40 real cards had a web_link in the first
+        # full connector-mail production run, Phase 3.1 hit its 8-call cap.
+        # Phase 3.1 (further down) already gracefully skips any card that
+        # arrives here with a non-empty web_link (line ~3512), so this is a
+        # safe, backward-compatible fix -- it does not change Phase 3.1's own
+        # logic, it just means Phase 3.1 now only does real work for the
+        # genuine edge cases it was actually designed for.
+        "web_link":  msg.get("web_link", ""),
         "received":  received_str,
         "received_raw": msg.get("received", ""),
         "kevin_is_primary_recipient": msg.get("kevin_is_primary_recipient", True)
