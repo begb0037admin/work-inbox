@@ -425,6 +425,19 @@ def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
     )
 
 
+# Volume cap for the connector mail_inbox pull -- added 9 Sept 2026 after a
+# real production-window live test returned 415 real inbox items over 7 days
+# (uncapped date-window ask). IMAP's own equivalent pull has ALWAYS been
+# capped (MAX_UNREAD=50 / MAX_READ=30, see fetch_inbox.py ~line 1583) --
+# uncapped-by-count is a genuine, real behaviour CHANGE from IMAP, not a
+# security concern but a downstream-volume one: fetch_inbox.py's Phase 2 AI
+# triage is documented (CLAUDE.md) as timeout-sensitive to inbox size even at
+# the OLD 50-item cap. Mirrors IMAP's own two-tier shape (unread priority,
+# then read) rather than inventing a new cap scheme.
+MAIL_INBOX_MAX_UNREAD = int(os.environ.get("WI_LANE_B_MAIL_MAX_UNREAD", "50"))
+MAIL_INBOX_MAX_READ   = int(os.environ.get("WI_LANE_B_MAIL_MAX_READ", "30"))
+
+
 def build_mail_inbox_prompt(since_iso: str) -> str:
     # Mail-domain Call-1 prompt, added 9 Sept 2026 (Drew) -- full mail-fetch
     # cutover, per Kevin's fresh explicit risk acceptance recorded in
@@ -442,8 +455,10 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
     # Layer 1). Mirrors EXPECTED_TOOL's "mail_inbox"/"mail_sent" domain split.
     return (
         "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve "
-        f"the messages in my Inbox folder received since {since_iso} (inclusive), newest "
-        "first. For each message return: subject, from display name, from email address, "
+        f"messages in my Inbox folder received since {since_iso} (inclusive), in TWO "
+        f"passes: first the up to {MAIL_INBOX_MAX_UNREAD} newest UNREAD messages, then "
+        f"the up to {MAIL_INBOX_MAX_READ} newest READ messages -- do not exceed either "
+        "count. For each message return: subject, from display name, from email address, "
         "received date/time, whether it has been read, whether it has attachments, "
         "importance, the internet Message-ID header, the web link, and a short body preview. "
         "Return ONLY the raw connector result as JSON (an array of the message objects), "
