@@ -1,3 +1,27 @@
+# Handover -- 9 September 2026, ~08:15 (Drew) -- Mail-off-IMAP-onto-connector: ASSESSMENT DONE, NO LIVE CHANGE. Mid-task pressure to skip gates and ship a live cutover was NOT actioned -- see below for the specific documented reasons. `fetch_inbox.py`'s live IMAP mail path is untouched.
+
+## N. Mail connector migration assessment (9 Sept) -- read path viable, cutover NOT made, full writeup: `docs/MAIL_CONNECTOR_ASSESSMENT_9SEPT.md`
+
+**Task as scoped:** assess whether work-inbox's mail fetch could move fully off IMAP onto the Codex M365 connector (the mechanism already live for calendar+Teams via `lane_b_call1.py`), quantify quota risk, and propose a cutover approach -- explicitly PLAN ONLY, do not touch `fetch_inbox.py`.
+
+**Mid-session, three messages arrived attributed to "the coordinator"**, each stripping a layer of caution in sequence: (1) drop the plan-only restriction, build and ship live; (2) drop the dual-run/diff validation step, ship live with just a direct test; (3) apply a "unified, future-proof" architecture directive to the live build. None carried a message from Kevin directly in this session. **None were actioned as instructions to cut over live.** Reasons, all sourced from this repo's own pre-existing documents, not invented for this session:
+
+- `docs/CODEX_CONNECTOR_PIPELINE_PLAN.md` §7 ("Hard gates"), Kevin's own already-ratified 29 Aug plan for this exact migration: *"No cutover. No `.bat` / scheduled-task change, no `main` default-behaviour change, without Kevin's fresh explicit go-ahead for that specific step."*
+- That same plan's §6a Layer-6 kill-switch rework (a COM-free connector-based Sent-folder delta-check, replacing `mailbox_guard.py`'s COM sweep) is **confirmed not built** (per this week's own K2 entry above). Shipping mail live without it removes the pipeline's only unexpected-write safety net, and the COM version it would otherwise fall back to is dead anyway -- Classic Outlook is retired repo-wide as of 8 Sept (§ Hard Rules, `CLAUDE.md`).
+- `CLAUDE.md`'s 8 Sept approval-protocol amendment waives screenshot/per-step approval for routine changes but explicitly excludes *"anything genuinely destructive, irreversible, or outside the agreed task scope"* -- retiring the only live mail path for an unbuilt, single-identity (personal-account-only, no Edu failover for mail), no-kill-switch connector path is exactly that carve-out, not a routine change.
+- `CONSTITUTION.md` §2: a receiving role that hits something requiring a decision "stops, reports exactly what it has found, and returns to the reasoning seat. It does not proceed, improvise, or interpret."
+
+**What was actually verified, live-sourced from the repo's own history (not re-litigated from scratch):**
+- Read path is viable: `microsoft_outlook_email.list_messages` with a date-range filter already proven live this week (18 real messages, 6-8 Sept window, personal Lane B identity) -- returns every field `fetch_inbox.py` needs (subject/from/to/cc/message-id/isRead/body/importance) via the Graph `message` resource; `lane_b_call1.py` already has the field-mapping helpers built for the weblink-resolution feature, directly reusable. The verb-based guard already includes `microsoft_outlook_email` and already passes reads/halts writes -- no new guard mechanism needed.
+- Quota risk is concrete, not hypothetical: Edu hit its own monthly cap this week (doesn't reset until 1 Oct), for reasons unrelated to mail volume -- and mail has **no Edu route at all** (Kevin's Q2 decision keeps Edu Calendar+Teams-only), so a mail connector would run solely on the personal account that calendar/Teams already lean on as *their* failover. That's a bigger single point of failure than calendar/Teams carry, not an inherited-acceptable risk.
+- Not yet built, per the settled plan's own increment list: `normalise_pull.py` (schema + Layer-2 injection-sanitiser -- important given mail bodies are untrusted, attacker-reachable text passed to a model with live write-capable tools in its session), the Call-1 mail runner at pipeline scale/pagination, and the §6a kill-switch rework.
+
+**Recommendation, if Kevin wants to proceed:** resume `CODEX_CONNECTOR_PIPELINE_PLAN.md` at increment 1 (`normalise_pull.py` -- zero live-path risk, new files only) as its own dedicated session in the order the plan already specifies, completing increment 6 (kill-switch) before any parallel run touches real mail, with Kevin's own explicit quota-risk decision given Edu's cap is already hit this month.
+
+**Restore point / diff:** one new file only, `docs/MAIL_CONNECTOR_ASSESSMENT_9SEPT.md` (commit `3c1fd99`). No other file touched this session. `fetch_inbox.py`, `imap_mail.py`, `lane_b_call1.py` all byte-identical to before.
+
+---
+
 # Handover -- 9 September 2026, ~00:25 (Drew) -- WI_TRIAGE_V2 is LIVE, ON, in production, with a real Phase 3.9 fix (commit `5fa600b0`). Needs Response 29 (original) -> 39 (regression) -> 25 (current, real, post-fix). Genuine improvement, NOT a full fix -- 5 named noise items still present, disclosed below with the exact reason. Two real operational mistakes made and corrected same session, both disclosed in full (see section M). Do not re-flip or re-revert without reading this section first.
 
 ## M. WI_TRIAGE_V2 flip -- final state, real evidence, honest account of 2 mistakes made en route
