@@ -67,6 +67,28 @@ PARAMS
                      proof/testing only until Kevin's cutover go-ahead). Independent
                      of -CalBackend (Teams has no COM/classic-Outlook equivalent to
                      fall back to -- it has only ever been connector-or-nothing).
+  -MailBackend       imap (default) | connector -- added 9 Sept 2026 per Kevin's
+                     fresh explicit risk acceptance, HANDOVER.md section Q. Runs
+                     `lane_b_call1.py --domain mail` directly (NOT through
+                     lane_b_cal_guard.py -- that guard's pre/post snapshot-diff is
+                     calendar-specific and Kevin explicitly declined a kill-switch
+                     rework for mail; the SAME verb-based re-contamination guard
+                     already live for calendar/Teams, inside lane_b_call1.py
+                     itself, is the sole mechanism here too). Exit 0 -> proceed with
+                     MAIL_BACKEND=connector. Exit 1 (HALT -- a write/off-scope tool
+                     call was observed) -> disable THIS task + local BurntToast +
+                     fall back to MAIL_BACKEND=imap for this cycle only, same
+                     response shape as the calendar/Teams guard. Any other exit
+                     (2/3 -- usage error / codex run failed) -> fall back to imap
+                     for this cycle, task stays enabled, retries next cadence.
+                     IMAP is NEVER removed -- it stays the one-line rollback
+                     (this flag back to 'imap') regardless of how long connector
+                     mail has been live. KNOWN GAP, disclosed not hidden: unlike
+                     calendar/Teams' guard, a mail HALT/fallback is NOT yet threaded
+                     through Push-LaptopRunStatus.ps1/Watch-BridgeBriefing.ps1, so
+                     there is no CROSS-MACHINE desktop toast for it yet -- only the
+                     local laptop toast + this run's own log. Follow-up, not a
+                     safety gap (the guard/disable/fallback all still fire).
 
 LIVE COPY   %USERPROFILE%\work-inbox\Run Laptop Bridge Briefing.ps1
 REFERENCE   work-inbox/docs/desktop-scripts/Run Laptop Bridge Briefing.ps1
@@ -79,7 +101,8 @@ REVERT / END OF BRIDGE
 param(
   [switch]$CoreOnly,
   [ValidateSet('com','connector')] [string]$CalBackend = 'com',
-  [ValidateSet('off','connector')] [string]$TeamsBackend = 'off'
+  [ValidateSet('off','connector')] [string]$TeamsBackend = 'off',
+  [ValidateSet('imap','connector')] [string]$MailBackend = 'imap'
 )
 
 # ============================================================================
@@ -183,7 +206,7 @@ $LaneBGuardDetail = ''
 $LaneBDomainsSummary = $null
 
 Log "=== Laptop Bridge Briefing START  (user $env:USERDOMAIN\$env:USERNAME  host $env:COMPUTERNAME) ==="
-Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  TeamsBackend=$TeamsBackend  log=$log"
+Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  TeamsBackend=$TeamsBackend  MailBackend=$MailBackend  log=$log"
 Set-Location $root
 
 # --- isolated Claude Code config: kevin@ ONLY (no hope@ failover on the laptop yet) ---
@@ -200,7 +223,7 @@ $env:AI_BACKEND                    = 'claude_code'
 $env:ANTHROPIC_API_KEY            = ''            # force subscription billing (matches desktop .bat)
 $env:WI_CLAUDE_CONFIG_DIR         = $kevinCfg     # -> claude -p gets CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin
 $env:WI_CLAUDE_CONFIG_DIR_FALLBACK = ''           # explicit: single account, no hope@ overflow
-$env:MAIL_BACKEND                 = 'imap'
+$env:MAIL_BACKEND                 = $MailBackend
 $env:CAL_BACKEND                  = $CalBackend
 $env:TEAMS_BACKEND                = $TeamsBackend
 $env:WI_BRIDGE_ALLOW_EMPTY_CALENDAR = '1'         # no calendar source on the laptop -> empty calendar/absences must not veto the Phase 4 push
@@ -407,8 +430,62 @@ if ($laneBDomain) {
   $env:TEAMS_BACKEND = $TeamsBackend  # re-assert in case the guard downgraded it above
 }
 
-# --- CORE: fetch_inbox.py  (Phase 1 IMAP -> combined claude -p triage -> Phase 4 push -> Phase 5 CC sync) ---
-Log "running: python -u fetch_inbox.py   [MAIL_BACKEND=imap  CAL_BACKEND=$CalBackend  TEAMS_BACKEND=$TeamsBackend  AI_BACKEND=claude_code  cfg=$kevinCfg]"
+# --- LANE B MAIL guard -- added 9 Sept 2026, HANDOVER.md section Q (Kevin's fresh
+#     explicit risk acceptance). Only when -MailBackend connector was explicitly
+#     passed (the live task does not pass it yet at the moment this was written --
+#     see the header note for exactly when that changes). Runs
+#     `lane_b_call1.py --domain mail` DIRECTLY, not through lane_b_cal_guard.py --
+#     that guard's pre/post snapshot-diff is calendar-specific and Kevin explicitly
+#     declined a kill-switch rework for mail; the SAME verb-based re-contamination
+#     guard already live for calendar/Teams (inside lane_b_call1.py itself) is the
+#     sole safety mechanism here too. Mail's fetch_mail_domain() always targets
+#     FAILOVER_CODEX_HOME directly regardless of ambient CODEX_HOME (see that
+#     function's own docstring), so the CODEX_HOME-clearing dance the calendar/
+#     Teams block does above is not needed here -- mail is not exposed to that
+#     regression class. --
+$LaneBMailGuardResult = 'not-run'
+$LaneBMailGuardDetail = ''
+if ($MailBackend -eq 'connector') {
+  Log "running: python lane_b_call1.py --domain mail"
+  & python -u (Join-Path $root 'lane_b_call1.py') --domain mail 2>&1 | Tee-Object -FilePath $log -Append
+  $mailGuardRc = $LASTEXITCODE
+  Log "lane_b_call1.py --domain mail exit $mailGuardRc"
+  switch ($mailGuardRc) {
+    0 {
+      Log "Lane B mail guard CLEAN (or a sub-domain was merely unavailable this cycle, not halted) -- proceeding with MAIL_BACKEND=connector"
+      $LaneBMailGuardResult = 'clean'
+    }
+    1 {
+      Log "Lane B mail guard HALT (a write/off-scope tool call was observed) -- disabling '$TaskName' and falling back to MAIL_BACKEND=imap for THIS cycle only"
+      $MailBackend = 'imap'
+      $LaneBMailGuardResult = 'halted'
+      $LaneBMailGuardDetail = "task '$TaskName' disabled; mail fell back to IMAP this cycle. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
+      try {
+        Disable-ScheduledTask -TaskName $TaskName -ErrorAction Stop | Out-Null
+        Log "Disabled scheduled task '$TaskName' -- re-enable manually after investigating: Enable-ScheduledTask -TaskName '$TaskName'"
+      } catch {
+        Log "WARN: could not Disable-ScheduledTask '$TaskName' ($($_.Exception.Message)) -- disable it manually"
+      }
+      try {
+        Import-Module BurntToast -ErrorAction Stop
+        New-BurntToastNotification -Text 'Work Inbox - Lane B MAIL guard HALTED', $LaneBMailGuardDetail
+        Log "local BurntToast fired (mail guard HALT)"
+      } catch {
+        Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the HALT + task-disable above are still real. KNOWN GAP (disclosed, not a safety gap): unlike calendar/Teams, this is not yet threaded through Push-LaptopRunStatus.ps1, so there is no cross-machine desktop toast for a mail HALT yet -- this run's own log is authoritative until that follow-up is built."
+      }
+    }
+    default {
+      Log "Lane B mail guard non-zero exit $mailGuardRc (2=usage/env error, 3=codex run failed, other=unexpected) -- treating conservatively: falling back to MAIL_BACKEND=imap for THIS cycle only; task stays enabled, will retry next cadence"
+      $MailBackend = 'imap'
+      $LaneBMailGuardResult = "unexpected-$mailGuardRc"
+      $LaneBMailGuardDetail = "lane_b_call1.py --domain mail exited $mailGuardRc -- treated conservatively, not disabled."
+    }
+  }
+  $env:MAIL_BACKEND = $MailBackend  # re-assert in case the guard downgraded it above
+}
+
+# --- CORE: fetch_inbox.py  (Phase 1 mail -> combined claude -p triage -> Phase 4 push -> Phase 5 CC sync) ---
+Log "running: python -u fetch_inbox.py   [MAIL_BACKEND=$MailBackend  CAL_BACKEND=$CalBackend  TEAMS_BACKEND=$TeamsBackend  AI_BACKEND=claude_code  cfg=$kevinCfg]"
 & python -u (Join-Path $root 'fetch_inbox.py') 2>&1 | Tee-Object -FilePath $log -Append
 $rc = $LASTEXITCODE
 Log "fetch_inbox.py exit $rc"
