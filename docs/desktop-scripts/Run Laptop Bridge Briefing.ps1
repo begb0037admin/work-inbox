@@ -205,6 +205,13 @@ $env:CAL_BACKEND                  = $CalBackend
 $env:TEAMS_BACKEND                = $TeamsBackend
 $env:WI_BRIDGE_ALLOW_EMPTY_CALENDAR = '1'         # no calendar source on the laptop -> empty calendar/absences must not veto the Phase 4 push
 $env:WI_MAIL_PARALLEL            = ''             # explicit: this is a REAL run, not a parallel capture
+$env:WI_TRIAGE_V2                = '1'            # explicit pin, 9 Sep 2026 (Kevin, "turn it on"). fetch_inbox.py's own
+                                                   # os.environ.get("WI_TRIAGE_V2","1") default is already ON as of HANDOVER
+                                                   # section M (live-proven: needs=25, suppressedCount=17 on the 07:23 run)
+                                                   # -- this line makes that explicit on the laptop task rather than relying
+                                                   # solely on the code default, so a future default change can't silently
+                                                   # flip this task's behaviour too. To roll back: set this to '' (or delete
+                                                   # the line) AND see HANDOVER.md restore point at fetch_inbox.py ~line 364.
 $env:PYTHONUTF8                  = '1'
 
 # --- refresh pipeline scripts from main (cache-busted raw pull, same mechanism the desktop uses) ---
