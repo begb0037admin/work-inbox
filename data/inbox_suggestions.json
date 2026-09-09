@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09 00:22",
+  "generated_at": "2026-09-09 07:22",
   "new_tasks": [
     {
       "title": "Review IRIS Changes project plan - September 2026",
@@ -76,30 +76,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608031500570",
-      "task_title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
-      "note": "Crispin Muncaster provides meeting update on DTP1092 College Staff into PeopleXD integration.",
-      "email_subject": "DTP1092 College staff into PXD Team meeting",
-      "email_from": "Crispin Muncaster",
-      "received": "2026-09-08 15:24",
-      "entry_id": "",
-      "message_id": "<LOVP265MB870942DB14A449F97B629441F4B12@LOVP265MB8709.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "https://outlook.office.com/mail/search?query=LOVP265MB870942DB14A449F97B629441F4B12%40LOVP265MB8709.GBRP265.PROD.OUTLOOK.COM",
-      "mail_key": "LOVP265MB870942DB14A449F97B629441F4B12@LOVP265MB8709.GBRP265.PROD.OUTLOOK.COM"
-    },
-    {
-      "task_id": "t2609082321250",
-      "task_title": "Review IRIS Changes project plan - September 2026",
-      "note": "Christopher Sanders provided detailed IRIS Changes project plan for September 2026; Kevin must review and confirm HR Systems readiness.",
-      "email_subject": "Finance code B8 Review",
-      "email_from": "Kevin (sent to: Anthony Kong <anthony.kong@admin.ox.ac.uk>)",
-      "received": "2026-09-08 15:46",
-      "entry_id": "",
-      "message_id": "<CWLP265MB596983B629BEE8A6E735CEB788B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM>",
-      "web_link": "",
-      "mail_key": "CWLP265MB596983B629BEE8A6E735CEB788B12@CWLP265MB5969.GBRP265.PROD.OUTLOOK.COM"
-    }
-  ]
+  "task_updates": []
 }
