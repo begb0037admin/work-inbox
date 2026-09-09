@@ -201,7 +201,15 @@ LANE_B_NAMESPACES = {"microsoft_outlook_calendar", "microsoft_teams", "microsoft
 # HALT, off-namespace HALT. Personal-account-only: Edu has no Outlook Email
 # connector attached (Kevin removed it deliberately, Q2 decision) -- there is no
 # primary/failover choice to make for mail, only the one identity that has it.
-READ_VERB_RE = re.compile(r"^(list|get|fetch|search|resolve)(_|$)", re.IGNORECASE)
+# "find" added 9 Sept 2026 (Drew) after a REAL live mail_sent probe: the model
+# called microsoft_outlook_email.find_mail_folder to locate the Sent Items
+# folder before list_messages -- a genuine read-only lookup (semantically
+# identical to the already-recognised resolve_* verbs), not a write, but the
+# unrecognised-verb fail-closed rule correctly HALTed on it since "find" wasn't
+# yet in this list. Same shape as calendar's search_events addition (1 Sept) --
+# the model picks its own real read tools; the guard is corrected from live
+# evidence, not widened speculatively.
+READ_VERB_RE = re.compile(r"^(list|get|fetch|search|resolve|find)(_|$)", re.IGNORECASE)
 WRITE_VERB_RE = re.compile(
     r"^(send|create|update|delete|remove|add|reply|forward|draft|cancel|respond|"
     r"accept|decline|tentatively|move|mark|set|patch|post|schedule|invite|share|"
