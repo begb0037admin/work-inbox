@@ -126,11 +126,29 @@ AI_BACKEND  = os.environ.get("AI_BACKEND", "api").strip().lower()
 #                     diff_mail_pull.py parity is clean over several cycles
 #                     AND Kevin has given a fresh explicit go-ahead. See
 #                     docs/MAIL_BACKEND_MIGRATION_PLAN.md.
+#  MAIL_BACKEND=connector -- mail pull reads data/lane_b/lane_b_normalised.json's
+#                     "inbox"/"sent" arrays, produced OUT OF BAND by
+#                     `lane_b_call1.py --domain mail` against the codex_apps
+#                     ChatGPT M365 connector (personal-account-only -- Edu has
+#                     no Outlook Email connector attached, Kevin's Q2
+#                     decision). Same out-of-band posture as CAL_BACKEND/
+#                     TEAMS_BACKEND=connector -- fetch_inbox.py does NOT invoke
+#                     codex itself. Added 9 Sept 2026 per Kevin's fresh
+#                     explicit risk acceptance recorded in HANDOVER.md section
+#                     Q -- the SAME verb-based re-contamination guard already
+#                     live for calendar/Teams is the sole safety mechanism
+#                     here too, no new kill-switch. Missing / stale (>
+#                     WI_LANE_B_MAX_AGE_H) / guard-HALT file => mail empty +
+#                     warning this run (same degrade-gracefully shape as
+#                     calendar/Teams) -- NOT a fallback to IMAP/COM
+#                     automatically; see `_load_lane_b_mail()`.
 #  WI_MAIL_PARALLEL=1 -- dump the raw COM/IMAP mail lists to data/parallel/
 #                     for diff_mail_pull.py and push / mutate NOTHING
 #                     (folds into the same no-write posture as WI_AI_PARALLEL).
 # --------------------------------------------------------------------------- #
-MAIL_BACKEND  = os.environ.get("MAIL_BACKEND", "com").strip().lower()
+_MAIL_BACKEND_REQ = os.environ.get("MAIL_BACKEND", "com").strip().lower()
+MAIL_BACKEND  = _MAIL_BACKEND_REQ if _MAIL_BACKEND_REQ in ("com", "imap", "connector") else "com"
+MAIL_CONNECTOR = (MAIL_BACKEND == "connector")
 MAIL_PARALLEL = os.environ.get("WI_MAIL_PARALLEL", "").strip().lower() in ("1", "true", "yes")
 # --------------------------------------------------------------------------- #
 #  Calendar-source backend  (added 2026-08-29, Drew -- laptop migration Phase 3)
@@ -341,6 +359,109 @@ def _load_lane_b_teams():
         print(f"WARNING: Lane B Teams load failed ({_lb_e}) -- Teams section empty this run, "
               f"mail briefing continues")
         return []
+
+
+def _load_lane_b_mail():
+    """MAIL_BACKEND=connector: map data/lane_b/lane_b_normalised.json's
+    "inbox"/"sent" arrays (written by `lane_b_call1.py --domain mail`) into the
+    exact flat dict shape `imap_mail.py`'s own `_build_entry()`/`_pull_sent()`
+    produce -- so downstream code (categorise(), the VIP-sweep-style merge,
+    Phase 3.9's `message_still_in_inbox`) needs no backend-specific branching.
+    Added 9 Sept 2026 per HANDOVER.md section Q.
+
+    File/staleness checks mirror `_load_lane_b_calendar()`/`_load_lane_b_teams()`
+    exactly (same file, same meta.lane_b shape, same WI_LANE_B_MAX_AGE_H).
+    UNLIKE those two, mail's two sub-domains (mail_inbox/mail_sent) are checked
+    INDEPENDENTLY rather than via the shared top-level lane_b.halt flag -- they
+    are two separate connector calls (see lane_b_call1.py's
+    build_mail_inbox_prompt/build_mail_sent_prompt) that can genuinely succeed
+    or fail independently (proven live 9 Sept: the first probe had mail_inbox
+    ok / mail_sent halt in the same run), and the merge-not-overwrite fix in
+    lane_b_call1.py's main() already preserves each sub-domain's own last-good
+    status separately. A HALT/stale/unavailable domain degrades to an EMPTY
+    list + warning for that side only -- it does not zero out the other side,
+    and it does not fall back to IMAP/COM automatically (this repo's own
+    Outlook Classic retirement rule means there is no COM to fall back to
+    silently, and an automatic IMAP fallback was never asked for or built --
+    a genuine mail-source outage should be visible as an empty/stale section,
+    not silently patched over with a different backend). Never raises."""
+    empty = {"inbox": [], "sent": []}
+    try:
+        if not os.path.exists(LANE_B_NORMALISED):
+            print(f"WARNING: MAIL_BACKEND=connector but {LANE_B_NORMALISED} not found "
+                  f"-- mail empty this run")
+            return empty
+        with open(LANE_B_NORMALISED, "r", encoding="utf-8") as fh:
+            doc = json.load(fh)
+        meta   = (doc.get("meta") or {})
+        lane_b = (meta.get("lane_b") or {})
+        domains = (lane_b.get("domains") or {})
+        mail_inbox_dom = domains.get("mail_inbox") or {}
+        mail_sent_dom  = domains.get("mail_sent") or {}
+
+        ts = lane_b.get("ts") or meta.get("ts")
+        age_h = None
+        if ts:
+            try:
+                t0 = datetime.strptime(ts, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+                age_h = (datetime.now(timezone.utc) - t0).total_seconds() / 3600.0
+            except ValueError:
+                age_h = None
+        if age_h is None:
+            age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
+        if age_h > LANE_B_MAX_AGE_H:
+            print(f"WARNING: Lane B mail file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
+                  f"-- treating mail as unavailable this run")
+            return empty
+
+        def _side_ok(dom, label):
+            status = dom.get("status")
+            if status == "halt":
+                print(f"WARNING: Lane B {label} guard is HALT/tripped -- {label} empty this run "
+                      f"(the OTHER mail side, if ok, is unaffected)")
+                return False
+            if status not in ("ok", None):
+                print(f"WARNING: Lane B {label} status is '{status}' -- {label} empty this run")
+                return False
+            return True
+
+        inbox_raw = doc.get("inbox") or [] if _side_ok(mail_inbox_dom, "mail_inbox") else []
+        sent_raw  = doc.get("sent") or []  if _side_ok(mail_sent_dom,  "mail_sent")  else []
+
+        inbox = [{
+            "subject":                    m.get("subject") or "",
+            "from":                       m.get("from") or "",
+            "from_email":                 m.get("from_email") or "",
+            "received":                   m.get("received") or "",
+            "is_read":                    bool(m.get("is_read")),
+            "has_attachments":            bool(m.get("has_attachments")),
+            "importance":                 int(m.get("importance")) if isinstance(m.get("importance"), (int, float)) else 1,
+            "entry_id":                   "",   # no IMAP/COM equivalent, same as imap_mail.py's own convention
+            "message_id":                 m.get("message_id") or "",
+            "web_link":                   m.get("web_link") or "",
+            "mail_backend":               "connector",
+            "kevin_is_primary_recipient": bool(m.get("kevin_is_primary_recipient", True)),
+            **({"source_folder": m["source_folder"]} if m.get("source_folder") else {}),
+            **({"body_preview": m["body_preview"]} if m.get("body_preview") else {}),
+        } for m in inbox_raw]
+
+        sent = [{
+            "subject":      m.get("subject") or "",
+            "to":           m.get("to") or "",
+            "sent":         m.get("sent") or "",
+            "body_preview": m.get("body_preview") or "",
+            "entry_id":     "",
+            "message_id":   m.get("message_id") or "",
+        } for m in sent_raw]
+
+        print(f"Phase 1 - Lane B connector mail: inbox {len(inbox)} sent {len(sent)} "
+              f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, "
+              f"inbox_calls {mail_inbox_dom.get('tool_calls')}, sent_calls {mail_sent_dom.get('tool_calls')})")
+        return {"inbox": inbox, "sent": sent}
+    except Exception as _lb_e:
+        print(f"WARNING: Lane B mail load failed ({_lb_e}) -- mail empty this run, "
+              f"briefing continues (calendar/Teams unaffected)")
+        return empty
 
 
 AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
@@ -1325,7 +1446,7 @@ def connect_to_outlook(max_attempts=3, retry_wait_seconds=45, allow_launch=True)
             "'Connected to: Microsoft Exchange' (not Work Offline), then re-run the briefing.")
     raise last_error
 
-if MAIL_BACKEND == "imap":
+if MAIL_BACKEND in ("imap", "connector"):
     # Mail comes from IMAP. Outlook COM is now ONLY a calendar source, and only
     # in the pre-1-Sept interim (CAL_BACKEND=com). Attempt it ONLY when the
     # calendar phases will genuinely use a COM source this run:
@@ -1590,7 +1711,7 @@ def _kevin_is_primary_recipient(msg):
 # Reuses the folder handle connect_to_outlook() already opened (and retried)
 # above, rather than issuing a second unretried GetDefaultFolder(6) call --
 # this is exactly the call site both of today's real failures hit.
-for msg in ([] if MAIL_BACKEND == "imap" else restrict_date(_inbox_folder, cutoff)):
+for msg in ([] if MAIL_BACKEND in ("imap", "connector") else restrict_date(_inbox_folder, cutoff)):
     try:
         if unread_count >= MAX_UNREAD and read_count >= MAX_READ:
             break
@@ -1624,7 +1745,7 @@ inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 
 # VIP sweep -- pick up any VIP emails missed by the cap
 captured_ids = {e["entry_id"] for e in inbox}
-for msg in ([] if MAIL_BACKEND == "imap" else restrict_date(mapi.GetDefaultFolder(6), cutoff)):
+for msg in ([] if MAIL_BACKEND in ("imap", "connector") else restrict_date(mapi.GetDefaultFolder(6), cutoff)):
     try:
         if msg.EntryID in captured_ids:
             continue
@@ -1721,7 +1842,7 @@ def _build_subfolder_entry(msg, is_read, source_folder):
 subfolder_unread = 0
 subfolder_read   = 0
 subfolder_count  = 0
-for tree_name in ([] if MAIL_BACKEND == "imap" else SUBFOLDER_TREES):
+for tree_name in ([] if MAIL_BACKEND in ("imap", "connector") else SUBFOLDER_TREES):
     try:
         top_folder = None
         for f in _inbox_folder.Folders:
@@ -1771,7 +1892,7 @@ inbox.sort(key=lambda x: (not x["is_read"], x["received"]), reverse=True)
 print(f"Phase 1c subfolder sweep done - added {subfolder_count} (unread:{subfolder_unread} read:{subfolder_read}) from {len(SUBFOLDER_TREES)} named trees - total inbox now: {len(inbox)}")
 
 sent = []
-for msg in ([] if MAIL_BACKEND == "imap" else mapi.GetDefaultFolder(5).Items):
+for msg in ([] if MAIL_BACKEND in ("imap", "connector") else mapi.GetDefaultFolder(5).Items):
     try:
         t = dt(msg.SentOn)
         if t and t >= cutoff:
@@ -1812,6 +1933,19 @@ if MAIL_BACKEND == "imap":
     print(f"Phase 1 - IMAP mail pull: inbox {len(inbox)} "
           f"(unread {_imap_res['meta']['inbox_unread']}) sent {len(sent)}")
 
+# -- MAIL_BACKEND=connector: the four COM loops above ran empty (same as imap);
+#    source the mail lists from data/lane_b/lane_b_normalised.json instead,
+#    produced OUT OF BAND by `lane_b_call1.py --domain mail`. See
+#    _load_lane_b_mail()'s own docstring for the exact staleness/HALT gating --
+#    mirrors _load_lane_b_calendar()/_load_lane_b_teams() exactly. Added 9 Sept
+#    2026 per HANDOVER.md section Q (Kevin's fresh explicit risk acceptance).
+elif MAIL_BACKEND == "connector":
+    _lb_mail = _load_lane_b_mail()
+    inbox = _lb_mail["inbox"]
+    sent  = _lb_mail["sent"]
+    print(f"Phase 1 - Lane B connector mail pull: inbox {len(inbox)} "
+          f"(unread {sum(1 for m in inbox if not m.get('is_read'))}) sent {len(sent)}")
+
 # -- WI_MAIL_PARALLEL: dump the raw mail lists for diff_mail_pull.py, then EXIT.
 #    The parity test compares mail fields only (subject / from / importance /
 #    is_read / ...). Everything after this point -- calendar (COM), Granola
@@ -1823,7 +1957,7 @@ if MAIL_BACKEND == "imap":
 #    (Granola included) is untouched. --
 if MAIL_PARALLEL:
     _pdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "parallel")
-    _pfx = "imap" if MAIL_BACKEND == "imap" else "com"
+    _pfx = MAIL_BACKEND if MAIL_BACKEND in ("imap", "connector") else "com"
     _dump_ok = False
     try:
         os.makedirs(_pdir, exist_ok=True)
