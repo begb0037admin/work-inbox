@@ -1949,9 +1949,18 @@ if MAIL_BACKEND == "imap":
 #    mirrors _load_lane_b_calendar()/_load_lane_b_teams() exactly. Added 9 Sept
 #    2026 per HANDOVER.md section Q (Kevin's fresh explicit risk acceptance).
 elif MAIL_BACKEND == "connector":
-    _lb_mail = _load_lane_b_mail()
-    inbox = _lb_mail["inbox"]
-    sent  = _lb_mail["sent"]
+    # NAMING: deliberately NOT `_lb_mail` -- that name is already a MODULE-LEVEL
+    # global (the `import lane_b_call1 as _lb_mail` a few hundred lines above,
+    # used by _resolve_mail_weblink()/Phase 3.1's OWA-link resolution). Since
+    # this whole file is a flat top-level script (not wrapped in main()), an
+    # assignment here at module scope would SILENTLY OVERWRITE that import with
+    # a dict -- confirmed as a REAL live bug this session (9 Sept 2026): Phase
+    # 3.1 failed 8 times with "'dict' object has no attribute
+    # 'resolve_mail_weblink'" because an earlier version of this line did
+    # exactly that, clobbering the module reference before Phase 3.1 ever ran.
+    _lb_mail_data = _load_lane_b_mail()
+    inbox = _lb_mail_data["inbox"]
+    sent  = _lb_mail_data["sent"]
     print(f"Phase 1 - Lane B connector mail pull: inbox {len(inbox)} "
           f"(unread {sum(1 for m in inbox if not m.get('is_read'))}) sent {len(sent)}")
 
