@@ -242,7 +242,11 @@ def _load_lane_b_calendar(_week_end, _lookback):
         lane_b = (meta.get("lane_b") or {})
         cal_dom = ((lane_b.get("domains") or {}).get("calendar") or {})
 
-        ts = lane_b.get("ts") or meta.get("ts")
+        # per-domain ts preferred (9 Sept 2026 fix -- see lane_b_call1.py's own
+        # comment on why the shared lane_b.ts is no longer reliable once mail
+        # runs as its own separate invocation touching the same file); falls
+        # back to the shared value for an older file written before this fix.
+        ts = cal_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
         age_h = None
         if ts:
             try:
@@ -313,7 +317,8 @@ def _load_lane_b_teams():
         lane_b = (meta.get("lane_b") or {})
         teams_dom = ((lane_b.get("domains") or {}).get("teams") or {})
 
-        ts = lane_b.get("ts") or meta.get("ts")
+        # per-domain ts preferred -- see _load_lane_b_calendar()'s matching comment.
+        ts = teams_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
         age_h = None
         if ts:
             try:
@@ -399,7 +404,11 @@ def _load_lane_b_mail():
         mail_inbox_dom = domains.get("mail_inbox") or {}
         mail_sent_dom  = domains.get("mail_sent") or {}
 
-        ts = lane_b.get("ts") or meta.get("ts")
+        # per-domain ts preferred -- see _load_lane_b_calendar()'s matching
+        # comment. mail_inbox/mail_sent always run together in one
+        # lane_b_call1.py invocation (--domain mail), so they share one ts;
+        # either one (whichever is present) is authoritative for both.
+        ts = mail_inbox_dom.get("ts") or mail_sent_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
         age_h = None
         if ts:
             try:

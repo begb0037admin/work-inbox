@@ -1884,8 +1884,17 @@ def main(argv: list[str]) -> int:
     # produced this domain's result this cycle -- "primary" (Edu, normal), "failover"
     # (personal -- informational, not alarming by itself, but worth being visible;
     # see the toast/HANDOVER work), or None if neither identity produced a result.
+    # "ts" added 9 Sept 2026, per-DOMAIN (not just the shared top-level lane_b.ts):
+    # now that mail runs as its own separate invocation from calendar/teams (not
+    # folded into "both"), the single shared lane_b.ts reflects whichever
+    # invocation wrote the file MOST RECENTLY, regardless of which domain that
+    # invocation actually touched -- e.g. a mail-only run refreshes the shared ts
+    # even though calendar/teams' own data may be hours older, which would make
+    # fetch_inbox.py's staleness check on calendar/teams look artificially fresh
+    # (or vice versa). Each domain now carries its OWN last-successful-write ts,
+    # independent of which other domain last touched the shared file.
     _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by", "primary_failover_identical")
-    _domains_meta = {d: {k: per_domain[d].get(k) for k in _dom_keys} for d in per_domain}
+    _domains_meta = {d: {**{k: per_domain[d].get(k) for k in _dom_keys}, "ts": ts} for d in per_domain}
     for _cli_domain in _domain_out_key:
         if _cli_domain not in per_domain and _cli_domain in _existing_domains_meta:
             _domains_meta[_cli_domain] = _existing_domains_meta[_cli_domain]
