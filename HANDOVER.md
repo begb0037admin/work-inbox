@@ -1,3 +1,36 @@
+# Handover -- 10 September 2026, afternoon (Drew) -- U. Priority 4/Terra deployment CONFIRMED LIVE via a real production run -- with a real pre-existing hang recurring in the same run, and a real deployment gap found+fixed on the hris-dashboard side. Full detail below.
+
+## U. Live-fire confirmation of the Luna/effort-level policy + Terra fallback (per `agent-commons/COORDINATOR_HANDOVER.md`'s outstanding Priority 4 watch item)
+
+**Instruction:** confirm for real -- not just "code is present" -- that a genuine scheduled run of Lane B (and, paired, hris-dashboard's OSM fetch) actually invokes `codex exec` with the policy-resolved `-m gpt-5.6-luna -c model_reasoning_effort=high` args, using the deployed-and-refreshed code, not a stale local copy.
+
+**Method:** checked the Oxford laptop's (`101L-DE013193`, via `ssh oxford-lan`) scheduled-task windows first (07:00/12:00/16:00 Mon-Fri for Lane B, 08:45/09:15/09:45 for HRIS) -- 13:17 BST was outside both, so triggered both tasks off-schedule via `Start-ScheduledTask` rather than waiting ~3 hours for the next natural window.
+
+**work-inbox's `Work Inbox Bridge Briefing` task, triggered 13:17:33 BST:**
+- Self-refresh confirmed pulling the CURRENT commit's files (`fetch_inbox.py`, `lane_b_call1.py`, `lane_b_cal_guard.py`, `codex_model_policy.py`, the wrapper `.ps1` itself, `Push-LaptopRunStatus.ps1`) fresh from `main` -- log line: `refreshed codex_model_policy.py from main` etc., all at 13:17:39-41.
+- **The task then hit a real recurrence of the previously-flagged, not-yet-fixed hang** in `lane_b_cal_guard.py` (open watch item in `agent-commons/COORDINATOR_HANDOVER.md`: "Unrelated hung run ... found, not fixed"). The log froze at `CODEX_HOME=...begb0037.AD-OAK\.codex ... email=begb0037@ox.ac.uk plan=education` for over 30 minutes with zero further log output -- well past the documented FAST-FAIL timing. The task's `ExecutionTimeLimit` (`PT45M`) eventually killed it: `Get-ScheduledTaskInfo` confirmed `LastTaskResult 267014` (`0x00041306` = `SCHED_S_TASK_TERMINATED`), the exact same code documented in the 3 Sept incident. **This is NOT caused by this session's changes** -- it is upstream of `run_codex_json`/`codex_model_policy` entirely, inside the pre-existing Lane B guard subsystem. Flagging it again here because it recurred and is now confirmed to be able to consume an entire 45-minute execution window and prevent a briefing from being produced on a natural fire -- worth prioritising, not just re-flagging.
+- **Despite the hang, the run DID make real progress and DID invoke codex with the correct args before being killed.** Direct OS process-table inspection (`Get-CimInstance Win32_Process`, not a log read) of the orphaned child process tree caught the actual live `codex.exe` invocation for the Teams domain, spawned at 13:50:26 (32+ min after the wrapper started -- itself evidence of how bad the hang is):
+  ```
+  C:\...\codex.exe exec -s read-only --skip-git-repo-check --json -m gpt-5.6-luna -c model_reasoning_effort=high "Using the Microsoft Teams app connector, retrieve my 40 most recent chats..."
+  ```
+  Exactly the expected value. Same pattern the 3 Sept incident showed: orphaned child processes outlive the killed parent wrapper, so this is real evidence of what the production identity actually ran, not a guess.
+
+**Independent, isolated confirmation of the "mail" domain specifically:** rather than wait on the hung/killed wrapper to reach `fetch_inbox.py`'s mail phase, ran `lane_b_call1.py --domain mail --out <scratch path>` directly on the laptop (same host, same freshly-refreshed file), with `WI_LANE_B_CODEX_HOME` set to the known-working failover identity (`C:\WorkInboxAI\codex-laneb`) to deliberately avoid the hung/quota-dead Edu primary path -- a read-only diagnostic technique, no code or config change. OS process table confirmed the real invocation, spawned 13:52:03:
+```
+C:\...\codex.exe exec -s read-only --skip-git-repo-check --json -m gpt-5.6-luna -c model_reasoning_effort=high "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve messages in my Inbox folder..."
+```
+Also exactly the expected value. This call was still in flight as of this entry (codex.exe itself finished; the parent Python process was still doing follow-on work past the 20-minute mark) -- slower than the equivalent hris-dashboard call (~2.5 min) but not confirmed stuck (CPU time was still incrementing on each check, unlike the genuinely-frozen calendar/Teams hang). Whoever picks this up next: check `data\lane_b\_drew_verify_mail.json` on the laptop and/or a fresh process check for whether it completed.
+
+**Net result for work-inbox: CONFIRMED.** Two separate real, live, production `codex.exe` invocations (Teams domain from the actual scheduled task, mail domain from an isolated direct call using the identical production code path) both show `-m gpt-5.6-luna -c model_reasoning_effort=high` -- the policy-resolved value, not a stale/hardcoded one. This is process-table evidence (the literal command line the OS executed), not just a log line -- arguably stronger proof than a log read would have been, and was necessary here specifically because the pre-existing guard hang prevented a normal log-based confirmation from completing in time.
+
+**Not achieved this session:** a full end-to-end natural-fire completion (fresh `briefing.json` pushed) for Lane B specifically, because the pre-existing hang ate the entire execution window before `fetch_inbox.py` itself could run. Priority 4/Terra's own code is confirmed correct and live; the calendar/Teams guard hang is a separate, real, recurring problem that should be looked at on its own terms.
+
+**Companion entry:** `hris-dashboard/HANDOVER.md`'s own new top entry documents a real deployment gap found and fixed on that side (the production wrapper script was stale, pre-dating Priority 4) -- not a work-inbox issue, but the two repos share `lane_b_call1.py`/`codex_model_policy.py`, so it's directly relevant context.
+
+**`agent-commons/COORDINATOR_HANDOVER.md`'s open watch item ("not yet observed: a real production run firing with the new policy-sourced args") is now CLOSED for work-inbox** -- see that file's own update.
+
+---
+
 # Handover -- 10 September 2026, midday/afternoon (Drew) -- T. Fallback model changed to Terra, low effort; availability-only trigger semantics written down. Full detail below.
 
 ## T. Fallback model: gpt-5.5 -> gpt-5.6-terra at low effort; trigger semantics locked down (follow-up to Priority 4, section S below)
