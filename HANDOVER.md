@@ -1,3 +1,39 @@
+# Handover -- 10 September 2026, midday/afternoon (Drew) -- T. Fallback model changed to Terra, low effort; availability-only trigger semantics written down. Full detail below.
+
+## T. Fallback model: gpt-5.5 -> gpt-5.6-terra at low effort; trigger semantics locked down (follow-up to Priority 4, section S below)
+
+**Instruction:** Kevin, two explicit decisions confirmed 10 Sep 2026, same day as Priority 4 shipped (section S below): (1) change the fallback model (used when `luna_available=False`) from `gpt-5.5` to `gpt-5.6-terra`, run at LOW reasoning effort specifically on the fallback path regardless of `workload_class`; (2) Terra is an AVAILABILITY fallback only -- never a quality-based swap. Kevin's own words: "Terra is an availability fallback only. Do not invoke Terra because Luna produced a weak answer, required more reasoning, or failed a quality check. Quality failures should be surfaced for review rather than silently changing model. Terra should be used only when Luna itself is unavailable, unsupported, rate-limited, or fails for a technical/service reason." Full spec now lives in `constitution/MODEL_POLICY.md`'s "Fallback trigger semantics" section (`constitution@71ca17f`) -- read it before touching anything about when `luna_available` gets set to `False`.
+
+**gpt-5.6-terra confirmed real and available** -- same `models_cache.json` methodology as the earlier Luna/gpt-5.5 check: `supported_in_api: true` on both the primary (Edu, `C:\Users\begb0037.AD-OAK\.codex`) and failover (personal, `C:\WorkInboxAI\codex-laneb`) CODEX_HOME identities on the real production host, checked live via SSH (`oxford-lan`), fetched 10 Sep 2026, `client_version 0.151.0`, alongside `gpt-5.6-luna` and `gpt-5.5` themselves.
+
+**Audit finding (this is the part of the task that mattered most): no quality-based model-swap logic exists anywhere, so nothing needed removing.** Read every retry loop in `lane_b_call1.py` (`_fetch_domain_one_identity`, `run_codex_json`, `resolve_mail_weblink`) and `hris-dashboard/fetch_osm_report_connector.py` (`fetch_osm_attachment_via_connector`) in full. The ONLY mechanism anywhere in either repo that ever sets `luna_available=False` is `WI_CODEX_LUNA_UNAVAILABLE=1` -- a static environment variable read once at process start into `lane_b_call1.py`'s module-level `CODEX_LUNA_AVAILABLE`, i.e. a deliberate, manual, operator-flipped toggle, not automatic Luna-health detection. Every retry in both files is triggered by a technical condition (timeout, non-zero/failed `codex exec` run, the expected connector tool not firing, a `ModelPolicyViolation`, or a guard HALT -- immediately terminal, never retried) and every retry re-runs the identical, previously-resolved model/effort selection, never a different one. `fetch_osm_report_connector.py` doesn't even accept a `luna_available` kwarg on its own call to `run_codex_json()` -- it relies entirely on `lane_b_call1.py`'s shared module-level toggle. **Neither `lane_b_call1.py` nor `fetch_osm_report_connector.py` needed any code change as a result.**
+
+**What changed, `work-inbox/codex_model_policy.py` (`work-inbox@0858a81`):**
+1. `FALLBACK_MODEL = "gpt-5.6-terra"` (was `"gpt-5.5"`).
+2. `resolve_model_effort()`: `luna_available=False` now forces `"low"` effort regardless of `workload_class`, but ONLY when the caller supplied no explicit `effort_override` (falsy -- `None` or `""`) -- an intentional, narrowly-scoped bypass of the `workload_class` -> effort tier mapping, applied AFTER the hard-ceiling/allowed-effort checks so it can never be a route around the ceiling.
+3. The downgrade-rejection guard for `effort_override` is now explicitly UNCONDITIONAL on `luna_available` -- identical validation whether a call is running Luna or falling back to Terra.
+
+**Two real bugs caught live by Codex during touchpoint-1 review, both fixed before any commit -- read these before changing this function again:**
+1. An earlier draft gated the downgrade-rejection guard on `luna_available`, meaning ANY `effort_override` passed alongside `luna_available=False` bypassed downgrade-rejection entirely -- e.g. `resolve_model_effort("high", luna_available=False, effort_override="medium")` silently returned `("gpt-5.6-terra", "medium")` instead of raising. Caught by Codex live-probing the actual control flow with real calls, not just reading the self-test. Fixed by removing the `luna_available and` from that guard's condition.
+2. The forced-low default checked `effort_override is None`, so `effort_override=""` (empty string, falsy, already treated as "no override" everywhere else in the function) escaped the forced-low default and silently ran the mapped tier's effort instead of low. Fixed: `not effort_override`.
+Both are now explicit regression tests in `_selftest()`.
+
+**Self-test:** `python codex_model_policy.py` -- 26/26 checks pass (was 15 before this change). New coverage: `luna_available=False` -> `(gpt-5.6-terra, "low")` for every `workload_class` including `"high"`; the two regression tests above; `xhigh`/`max` still hard-rejected through the fallback path; a documentation test proving a default call (simulating "Luna answered, even a short/thin answer") can never select `FALLBACK_MODEL` -- there is no response-content parameter on this function's surface at all, the only way in is the explicit boolean `luna_available=False`.
+
+**Mandatory three-touchpoint Codex review (`agent-commons/operating-model/COORDINATOR_AND_CODEX_POLICY.md` §3):** touchpoint 1 ran live control-flow probes against the actual function (not just the self-test) and found the two bugs above -- the Codex process itself crashed/closed (`collab: CloseAgent`) before writing a final verdict file, a Codex CLI reliability quirk, not a review-process failure; the live findings were real and both fixed immediately. Touchpoint 2 (diff re-review after the fix): **PASS**, no remaining issues. Touchpoint 3 (full end-to-end pass across all four files -- `MODEL_POLICY.md`, `codex_model_policy.py`, confirming `lane_b_call1.py`/`fetch_osm_report_connector.py` genuinely have no working-tree changes, both repos' own pre-existing self-tests still pass): **PASS, no blockers.** 2 of a maximum 4 passes used (touchpoint 1's crash doesn't reset the count -- its findings were real and counted).
+
+**Verification:**
+- `python codex_model_policy.py` -- 26/26.
+- `python lane_b_call1.py --selftest` -- all 15 pre-existing checks still pass unchanged (confirms this change didn't regress the re-contamination guard).
+- `python -c "import lane_b_call1"` -- clean import.
+- `cd hris-dashboard && python fetch_osm_report_connector.py --selftest-guard` -- all 5 checks still pass unchanged.
+
+**Status:** Committed and pushed. `constitution@71ca17f`, `work-inbox@0858a81`. hris-dashboard needed no code change (confirmed no diff -- it imports `codex_model_policy` fresh via a `sys.path` insert to the sibling `work-inbox` clone, so the model swap flows through automatically); see its own `HANDOVER.md` for its paired checkpoint entry.
+
+**Unrelated, noticed in passing, NOT investigated or fixed (out of scope for this task):** `data/laptop_status/briefing_status.json` shows a `2026-09-10T12:00:19+01:00` briefing run with `"result": "failed"`, `"exit_code": 2`, `"lane_b_guard": "unexpected-2"` ("lane_b_cal_guard.py exited 2 (not 0/1/3) -- treated conservatively, not disabled"), before either of this session's commits landed. mail_inbox/mail_sent both still came back `"ok"` served by failover. Flagging for whoever picks up calendar/Teams next -- not touched here, this session's change never ran in production before that failure.
+
+---
+
 # Handover -- 10 September 2026, morning (Drew) -- S. Priority 4: Luna/effort-level policy wired into lane_b_call1.py. Full detail below.
 
 ## S. Priority 4 (coordinator handover) -- Luna/effort-level policy sourced from constitution/MODEL_POLICY.md, not hardcoded
