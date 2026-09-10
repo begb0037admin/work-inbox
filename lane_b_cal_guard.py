@@ -46,6 +46,10 @@ Single entry point for the wrapper:
   exit 3  = the Call-1 codex run failed / connector unavailable this cycle
             (can't verify -> treated as unsafe: no calendar this run, task
             stays enabled, retried next cadence).
+  exit 5  = MODEL POLICY VIOLATION -- deterministic model/effort code/config
+            bug, not connector flakiness and not a mailbox-safety HALT. The
+            wrapper should keep the task enabled but surface the violation for
+            investigation rather than retrying it as transient.
 
 Diagnostic-only, NOT part of the live gate (see note above):
   python lane_b_cal_guard.py --snapshot --out data/codex_runs/cal_baseline_<ts>.json
@@ -217,6 +221,11 @@ def take_snapshot(tag: str, window=None) -> tuple[dict | None, dict]:
     for n in range(1, SNAP_RETRIES + 1):
         try:
             events, _raw = lb.run_codex_json(prompt, timeout_s=SNAPSHOT_TIMEOUT_S, tag=f"snap-{tag}#{n}")
+        except lb.codex_model_policy.ModelPolicyViolation:
+            # This is a deterministic model/effort code/config violation, not
+            # a transient connector failure. Do not consume SNAP_RETRIES or
+            # flatten it into the diagnostic "unavailable" result.
+            raise
         except lb.ReContaminationDetected as e:
             # A write was actually observed, even in partial/timed-out output -- never
             # retry this, propagate as the real HALT it is (same as a full-attempt catch below).
@@ -353,6 +362,22 @@ def cmd_run(domain: str = "calendar") -> int:
         _quarantine_normalised(ts, "lane_b_call1 re-contamination guard tripped")
         _write_trip(ts, {"ts": ts, "phase": "call1", "halt": True, "call1_exit": rc, "domain": domain})
         return 1
+    if rc == 5:
+        # Added 10 Sep 2026, touchpoint-3 Codex review finding: MUST be
+        # distinguished from the generic `rc != 0` branch below, which maps
+        # everything else (including the pre-existing usage/environment-error
+        # exit 2) to this function's own exit 3 ("codex failed / all domains
+        # unavailable... NOT disabling the task, retry next cadence"). A
+        # ModelPolicyViolation (lane_b_call1.py exit 5) is a deterministic
+        # code/config bug, not connector flakiness -- folding it into "3"
+        # here would mean the caller (Run Laptop Bridge Briefing.ps1) also
+        # cannot tell it apart, and would silently retry it on the normal
+        # cadence indefinitely. Propagated as its own distinct 5, not folded.
+        _log("lane_b_call1 MODEL POLICY VIOLATION (exit 5) -- code/config bug, not connector "
+             "unavailability; not disabling the task (not a security HALT), but this needs "
+             "investigation, not just a retry")
+        _quarantine_normalised(ts, f"lane_b_call1 MODEL POLICY VIOLATION (exit {rc})")
+        return 5
     if rc != 0:
         _log(f"lane_b_call1 exit {rc} (codex failed / all domains unavailable) -- "
              f"no connector data this run; NOT disabling the task")
@@ -372,6 +397,9 @@ def cmd_snapshot(out: str) -> int:
     ts = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     try:
         fp, meta = take_snapshot("adhoc")
+    except lb.codex_model_policy.ModelPolicyViolation as e:
+        _log(f"snapshot MODEL POLICY VIOLATION -- {e}")
+        return 5
     except RuntimeError as e:
         _log(f"snapshot re-contamination HALT: {e}")
         return 1
@@ -396,7 +424,7 @@ def cmd_dry_diff() -> int:
     """Two snapshots with NO Call-1 between them; assert zero diff. The cheap
     validator for the normalisation before any full guard cutover retry.
     exit 0 = stable, 1 = residual diff (normalisation still imperfect),
-    3 = connector unavailable.
+    3 = connector unavailable, 5 = model-policy code/config violation.
     NOTE (2 Sept 2026): PRE and POST are no longer truly "back-to-back" --
     lane_b_call1.py's run_codex_json() now enforces a minimum quiet gap
     (WI_LANE_B_SNAPSHOT_GAP_S, default 75s) since the last connector touch
@@ -411,6 +439,9 @@ def cmd_dry_diff() -> int:
     try:
         a_fp, a_meta = take_snapshot("dry-pre", window)
         b_fp, b_meta = take_snapshot("dry-post", window)
+    except lb.codex_model_policy.ModelPolicyViolation as e:
+        _log(f"--dry-diff MODEL POLICY VIOLATION -- {e}")
+        return 5
     except RuntimeError as e:
         _log(f"re-contamination guard tripped during --dry-diff: {e}")
         return 1

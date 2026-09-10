@@ -37,7 +37,16 @@ Usage:
 Exit codes: 0 ok (incl. "connector unavailable this cycle" -> empty + warning);
             1 GUARD TRIPPED (re-contamination / unexpected tool) -- caller should HALT;
             2 usage / environment error;
-            3 codex run failed (timeout / non-zero / no parseable output).
+            3 codex run failed (timeout / non-zero / no parseable output);
+            5 MODEL POLICY VIOLATION (added 10 Sep 2026, Priority 4) --
+              codex_model_policy.ModelPolicyViolation propagated uncaught
+              (e.g. an xhigh/max ceiling breach). Deliberately distinct from
+              2 -- a caller must NOT treat this as an ordinary transient
+              usage/environment error and silently retry it on the normal
+              cadence; it is a deterministic code/config bug (see
+              touchpoint-3 Codex review finding, 10 Sep 2026: callers were
+              folding this into generic "environment error, retry next
+              cycle" handling, masking a real misconfiguration).
 """
 
 from __future__ import annotations
@@ -59,6 +68,12 @@ try:
     import normalise_pull
 except Exception as _e:  # pragma: no cover
     print(f"lane_b_call1: cannot import normalise_pull ({_e})", file=sys.stderr)
+    sys.exit(2)
+
+try:
+    import codex_model_policy
+except Exception as _e:  # pragma: no cover
+    print(f"lane_b_call1: cannot import codex_model_policy ({_e})", file=sys.stderr)
     sys.exit(2)
 
 # --------------------------------------------------------------------------- #
@@ -94,7 +109,17 @@ _KNOWN_CONFIG_SHA1 = {v.lower() for v in CONFIG_TOML_SHA1_BASELINES.values()}
 CONFIG_TOML_SHA1_BASELINE = _ENV_CONFIG_SHA1 or CONFIG_TOML_SHA1_BASELINES.get(_HOST, "")
 
 CODEX_BIN   = os.environ.get("WI_CODEX_BIN", "codex")
-CODEX_MODEL = os.environ.get("WI_CODEX_MODEL", "").strip()   # optional -m <model>
+# Model/effort selection (added 10 Sep 2026, coordinator handover Priority 4):
+# sourced from codex_model_policy.py (constitution/MODEL_POLICY.md's machine-
+# readable implementation), not hardcoded here. WI_CODEX_MODEL remains a
+# debug-only ABSOLUTE MODEL override (e.g. to force a specific model during a
+# one-off investigation) -- it does NOT touch effort selection or bypass the
+# xhigh/max ceiling, which codex_model_policy.resolve_model_effort() enforces
+# regardless of what model is in play. WI_CODEX_LUNA_UNAVAILABLE=1 forces the
+# policy's own defined fallback model (see codex_model_policy.FALLBACK_MODEL)
+# -- the deliberate way to test/operate the fallback path, rather than ad hoc.
+CODEX_MODEL = os.environ.get("WI_CODEX_MODEL", "").strip()   # debug-only -m override
+CODEX_LUNA_AVAILABLE = os.environ.get("WI_CODEX_LUNA_UNAVAILABLE", "").strip().lower() not in ("1", "true", "yes")
 # codex-cli 0.151.0 cold-starts SLOW on the Oxford laptop -- attempt 1 of a real
 # call was observed taking ~3m37s (1 Sept). Bumped from 240; a one-shot warm-up
 # call (see _ensure_warm) absorbs the cold start once per process.
@@ -599,24 +624,40 @@ def _codex_argv0() -> list[str]:
 _WARMED_HOMES: set[str] = set()
 
 
-def _ensure_warm(codex_home: str | None = None) -> None:
+def _ensure_warm(codex_home: str | None = None, effort_args: list[str] | None = None) -> None:
     """One throwaway `codex exec` per process, PER CODEX_HOME, to absorb the
     cold-start hang (codex-cli 0.151.0 on the Oxford laptop can take 3+ min on
     the first call). Tracked per-identity (not a single process-wide flag) since
     2 Sept's primary/failover design means a process may need to warm BOTH the
     primary (Edu) and failover (personal) CODEX_HOME if failover ever triggers.
-    Skipped when WI_LANE_B_SKIP_WARMUP=1 (e.g. the guard already warmed the box)."""
+    Skipped when WI_LANE_B_SKIP_WARMUP=1 (e.g. the guard already warmed the box).
+
+    effort_args (added 10 Sep 2026, touchpoint-2 Codex review finding): this
+    function IS a `codex exec` launch, and previously carried no `-m`/`-c`
+    args at all -- meaning it ran on ambient model/effort even when the real
+    call it was warming up for was policy-controlled. `run_codex_json()`
+    passes its own already-validated `codex_model_policy.build_codex_effort_args()`
+    result through here so the warm-up call is governed by the exact same
+    ceiling, never a separate, unvalidated path. If ever called without
+    effort_args (there is currently no such caller), falls back to
+    resolving "high" itself -- fails closed, consistent with every other
+    default in this file, rather than silently running with no policy at
+    all."""
+    if effort_args is None:
+        effort_args = codex_model_policy.build_codex_effort_args("high", luna_available=CODEX_LUNA_AVAILABLE)
     home = codex_home or PRIMARY_CODEX_HOME
     if home in _WARMED_HOMES or os.environ.get("WI_LANE_B_SKIP_WARMUP", "").strip().lower() in ("1", "true", "yes"):
         _WARMED_HOMES.add(home)
         return
     _WARMED_HOMES.add(home)
-    _log(f"warming codex (CODEX_HOME={home}, timeout {CALL1_WARMUP_TIMEOUT_S}s)...")
+    _log(f"warming codex (CODEX_HOME={home}, timeout {CALL1_WARMUP_TIMEOUT_S}s, "
+         f"-m {effort_args[1]} -c {effort_args[3]})...")
     t0 = time.time()
     try:
         subprocess.run(
-            _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check",
-                              "Reply with the single word OK. Use no tools, change nothing."],
+            _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check"]
+                            + effort_args
+                            + ["Reply with the single word OK. Use no tools, change nothing."],
             capture_output=True, text=True, timeout=CALL1_WARMUP_TIMEOUT_S,
             cwd=str(REPO_ROOT), env=_codex_env(home),
             encoding="utf-8", errors="replace",   # 2 Sept fix: text=True with no encoding= defaults to
@@ -676,7 +717,7 @@ def _mark_connector_touch() -> None:
 
 
 def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | None = None,
-                   max_attempts: int = 2) -> tuple[list[dict], str]:
+                   max_attempts: int = 2, workload_class: str = "high") -> tuple[list[dict], str]:
     """Return (parsed_json_objects, raw_stdout). Raises RuntimeError on hard failure.
     codex_home: which CODEX_HOME to run this call against -- defaults to
     PRIMARY_CODEX_HOME (Edu) when not given. The primary/failover ORCHESTRATION
@@ -687,11 +728,44 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
     (FAILOVER's unchanged behaviour); PRIMARY is called with max_attempts=1 by
     fetch_domain() specifically -- see PRIMARY_MAX_ATTEMPTS's own comment for
     the full tradeoff (losing the cold-start-hang retry for primary only,
-    accepted for speed tonight)."""
-    _ensure_warm(codex_home)
-    cmd = _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check", "--json"]
+    accepted for speed tonight).
+
+    workload_class (added 10 Sep 2026, Priority 4): fed to
+    codex_model_policy.resolve_model_effort() to pick model + reasoning
+    effort. Defaults to "high" -- fail-closed, per MODEL_POLICY.md's
+    precedence rule: every call this function makes goes through the
+    codex_apps connector, whose namespaces structurally include write-
+    capable tools (mitigated by the verb-based guard, not excluded from the
+    tool surface) -- MODEL_POLICY.md classifies that High regardless of how
+    narrow/read-only the specific prompt is. Every current caller in this
+    file passes "high" explicitly for that reason; the default exists so a
+    future caller that forgets to specify one fails closed instead of
+    silently running cheaper/lower-scrutiny than intended.
+
+    Policy resolution happens FIRST, before _ensure_warm() -- touchpoint-1
+    Codex review finding, 10 Sep 2026: warm-up is itself a `codex exec`
+    launch, and used to fire before the policy/ceiling check, so a rejected
+    workload_class (codex_model_policy.ModelPolicyViolation) would still have
+    spent a warm-up call under ambient defaults first. Resolving (and
+    potentially raising) before any subprocess is launched means a policy
+    violation aborts the call with zero `codex exec` invocations, not one."""
+    effort_args = codex_model_policy.build_codex_effort_args(
+        workload_class, luna_available=CODEX_LUNA_AVAILABLE)
     if CODEX_MODEL:
-        cmd += ["-m", CODEX_MODEL]
+        # Debug-only absolute model override -- replaces the policy-selected
+        # model in-place but leaves the policy-selected (and ceiling-checked)
+        # effort arg untouched. See CODEX_MODEL's own comment above. Arbitrary
+        # model slugs are intentionally allowed here (not allowlisted) -- this
+        # is an operator/debug-only escape hatch (same trust level as
+        # WI_CODEX_BIN elsewhere in this file), not attacker- or
+        # untrusted-content-controlled input.
+        effort_args[1] = CODEX_MODEL
+    _log(f"[{tag}] codex model/effort: -m {effort_args[1]} -c {effort_args[3]} "
+         f"(workload_class={workload_class!r}, luna_available={CODEX_LUNA_AVAILABLE})")
+
+    _ensure_warm(codex_home, effort_args=effort_args)
+    cmd = _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check", "--json"]
+    cmd += effort_args
     cmd.append(prompt)
 
     last_raw = ""
@@ -1026,11 +1100,31 @@ def resolve_mail_weblink(message_id: str) -> str:
         "anything -- this is a read-only lookup, change nothing."
     )
     try:
+        # workload_class="high": MODEL_POLICY.md precedence rule -- this goes
+        # through the microsoft_outlook_email connector namespace, which is
+        # write-capable (guarded, not excluded), so it classifies High even
+        # though this specific prompt is a narrow single-record lookup.
         objs, raw = run_codex_json(prompt, timeout_s=120, tag="mail",
-                                    codex_home=FAILOVER_CODEX_HOME, max_attempts=1)
+                                    codex_home=FAILOVER_CODEX_HOME, max_attempts=1,
+                                    workload_class="high")
     except ReContaminationDetected as e:
         _log(f"[mail] RE-CONTAMINATION resolving webLink for {mid!r} -- {e} -- "
              f"skipped, investigate before relying on this identity again")
+        return ""
+    except codex_model_policy.ModelPolicyViolation as e:
+        # Deliberately NOT re-raised, unlike _fetch_domain_one_identity's own
+        # handling of this same exception type (touchpoint-1 Codex review
+        # finding, 10 Sep 2026) -- this function's own explicit, pre-existing
+        # contract is "FAILS SOFT, always... never raises" (see docstring: a
+        # missing webLink must degrade the dashboard link, never break the
+        # whole briefing). A policy violation here is still a real code/
+        # config bug, so it is logged LOUDLY and distinctly from an ordinary
+        # connector failure below -- just not propagated, since this call is
+        # a best-effort enrichment on one card, not the core data-fetch path.
+        _log(f"[mail] MODEL POLICY VIOLATION resolving webLink for {mid!r} -- {e} -- "
+             f"this is a code/config bug, NOT a connector-availability issue; "
+             f"investigate codex_model_policy usage, do not assume this will "
+             f"self-resolve on retry")
         return ""
     except Exception as e:  # noqa: BLE001 -- best-effort, must never fail the briefing
         _log(f"[mail] webLink resolution failed for {mid!r} (non-fatal): {e}")
@@ -1454,8 +1548,14 @@ def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts
     result: dict | None = None
     for n in range(1, retries + 1):
         try:
+            # workload_class="high": MODEL_POLICY.md precedence rule -- every
+            # domain here (calendar/teams/mail) goes through the codex_apps
+            # connector's write-capable tool namespaces (guarded, not
+            # excluded), so it classifies High regardless of the read-only
+            # prompt content.
             events, raw = run_codex_json(prompt, timeout_s=timeout_s, max_attempts=max_attempts,
-                                         tag=f"{domain}#{identity_label}{n}", codex_home=codex_home)
+                                         tag=f"{domain}#{identity_label}{n}", codex_home=codex_home,
+                                         workload_class="high")
         except ReContaminationDetected as e:
             # A write/unexpected tool call was actually observed -- even if only in
             # partial output salvaged from a killed/timed-out attempt. Non-retryable:
@@ -1468,6 +1568,17 @@ def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts
                       "guard": {"seen": [], "unexpected": [str(e)]},
                       "tool_calls": [], "count": 0, "raw_items": []}
             break
+        except codex_model_policy.ModelPolicyViolation:
+            # MUST NOT be caught by the generic `except RuntimeError` below --
+            # touchpoint-1 Codex review finding, 10 Sep 2026: a policy
+            # violation is a deterministic code/config bug, not connector
+            # flakiness. Retrying it burns the whole retry budget pointlessly
+            # and, worse, an exhausted retry budget degrades to a silent
+            # "unavailable this cycle" (empty, no HALT) -- which would hide a
+            # real misconfiguration behind ordinary flaky-connector semantics,
+            # possibly for days. Re-raise uncaught so the run fails loudly
+            # (non-zero exit) instead.
+            raise
         except RuntimeError as e:
             attempts.append({"n": n, "identity": identity_label, "outcome": "codex_failed", "detail": str(e)[:200]})
             _log(f"[{domain}/{identity_label}] attempt {n}/{retries}: codex run failed -- {e}")
@@ -1509,9 +1620,20 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
     regardless of which identity would make them.
     Returns a run_domain-shaped dict + 'served_by' (which identity actually
     produced the result, or None if neither did) + 'attempts' (both identities'
-    attempts, concatenated, each tagged). Never raises. Terminal statuses:
-    'ok', 'halt' (re-contamination), 'unavailable' (expected tool never fired
-    on either identity), 'codex_failed' (every attempt on both failed)."""
+    attempts, concatenated, each tagged). Terminal statuses: 'ok', 'halt'
+    (re-contamination), 'unavailable' (expected tool never fired on either
+    identity), 'codex_failed' (every attempt on both failed).
+
+    EXCEPTION TO "never raises" (added 10 Sep 2026, Priority 4):
+    codex_model_policy.ModelPolicyViolation is deliberately NOT caught here
+    and propagates uncaught out of this function. MODEL_POLICY.md requires an
+    out-of-policy model/effort selection to abort the call loudly -- folding
+    it into any of this function's normal terminal statuses (especially
+    'codex_failed', which primary/failover retries treat as ordinary
+    flakiness) would silently hide a deterministic code/config bug behind
+    connector-unreliability semantics. The caller (main()) is expected to let
+    this crash the run (non-zero exit, visible in the scheduled task/log),
+    not swallow it."""
     # Collision guard (added 3 Sept 2026, regression fix): if PRIMARY_CODEX_HOME
     # and FAILOVER_CODEX_HOME resolve to the SAME path, automatic failover is a
     # no-op by construction -- there is nothing distinct to fail over to, and a
@@ -1586,8 +1708,10 @@ def fetch_mail_domain(domain: str, prompt: str, *, ts: str, retries: int) -> dic
     safety mechanism). Deliberately NOT routed through fetch_domain()'s
     primary/failover orchestration -- attempting PRIMARY_CODEX_HOME (Edu) for
     mail would always fail (no connector attached) and just waste a full
-    PRIMARY_TIMEOUT_S budget every run for no benefit. Never raises; terminal
-    statuses same as fetch_domain(): 'ok', 'halt', 'unavailable', 'codex_failed'."""
+    PRIMARY_TIMEOUT_S budget every run for no benefit. Terminal statuses same
+    as fetch_domain(): 'ok', 'halt', 'unavailable', 'codex_failed'. Same
+    exception to "never raises" as fetch_domain() -- see that function's
+    docstring: codex_model_policy.ModelPolicyViolation propagates uncaught."""
     result, attempts = _fetch_domain_one_identity(
         domain, prompt, window_days=0, ts=ts, retries=retries,
         codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
@@ -1723,6 +1847,34 @@ def cmd_selftest() -> int:
             all_quiet = False
     check("empty/unparseable partial output -> no raise (nothing to find is not evidence of "
           "anything, never a false HALT)", all_quiet)
+
+    # --- _ensure_warm() carries the validated model/effort args (touchpoint-2 ---
+    # Codex review finding, 10 Sep 2026): the warm-up call is itself a
+    # `codex exec` launch and must never run on ambient/unvalidated settings
+    # while the real call it warms up for is policy-controlled. Captures the
+    # actual subprocess.run() argv via monkeypatching -- no real codex process
+    # is launched by this check.
+    import unittest.mock as _mock
+    _captured_cmd = {}
+
+    def _fake_run(cmd, **kwargs):
+        _captured_cmd["cmd"] = cmd
+        class _R:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+        return _R()
+
+    _WARMED_HOMES.discard("selftest-warm-home")
+    with _mock.patch.object(subprocess, "run", _fake_run):
+        _ensure_warm("selftest-warm-home",
+                     effort_args=["-m", "gpt-5.6-luna", "-c", "model_reasoning_effort=high"])
+    warm_cmd = _captured_cmd.get("cmd") or []
+    check("_ensure_warm() passes its effort_args through to the actual codex exec argv "
+          "(not a separate, unvalidated warm-up path)",
+          "-m" in warm_cmd and "gpt-5.6-luna" in warm_cmd
+          and "-c" in warm_cmd and "model_reasoning_effort=high" in warm_cmd)
+    _WARMED_HOMES.discard("selftest-warm-home")
 
     print("")
     if fails:
@@ -2003,6 +2155,19 @@ if __name__ == "__main__":
              f"inside _fetch_domain_one_identity -- this is a defensive fallback, "
              f"investigate why it escaped): {_e}")
         sys.exit(1)
+    except codex_model_policy.ModelPolicyViolation as _e:
+        # Added 10 Sep 2026, touchpoint-3 Codex review finding: this MUST NOT
+        # fall through to the generic `except Exception` below, which exits 2
+        # ("usage/environment error") -- both `Run Laptop Bridge Briefing.ps1`
+        # (its mail-guard switch) and `lane_b_cal_guard.py`'s cmd_run() treat
+        # exit 2 as ordinary transient flakiness and silently retry on the
+        # normal cadence, masking a deterministic code/config bug potentially
+        # indefinitely. Exit 5 is distinct and both wrapper layers now handle
+        # it explicitly -- see their own comments.
+        _log(f"MODEL POLICY VIOLATION at top level: {_e} -- this is a code/config bug, "
+             f"NOT connector flakiness or a detected write; do not expect this to "
+             f"self-resolve on the normal cadence.")
+        sys.exit(5)
     except SystemExit:
         raise
     except Exception as _e:  # noqa: BLE001 -- deliberate catch-all, see comment above

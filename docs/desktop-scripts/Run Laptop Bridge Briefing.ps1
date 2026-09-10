@@ -35,6 +35,10 @@ wiring added 2 Sept 2026 evening (Drew) -- NEITHER LIVE YET:
     exit 3 (transient -- connector unavailable / could not verify this cycle)
             -> log + fall back to CAL_BACKEND=com AND TEAMS_BACKEND=off for this
             cycle; task STAYS enabled; try again next cadence.
+    exit 5 (MODEL POLICY VIOLATION -- deterministic model/effort code/config bug)
+            -> log + local BurntToast + fall back to CAL_BACKEND=com AND
+            TEAMS_BACKEND=off for this cycle; task STAYS enabled, but this needs
+            investigation rather than another silent transient retry.
   TEAMS HAS NO SEPARATE GUARD: fetch_inbox.py's own TEAMS_BACKEND comment block
   documents that lane_b_call1.py's re-contamination guard already covers the
   microsoft_teams.* tool namespace exactly like it covers calendar's -- Teams
@@ -78,9 +82,13 @@ PARAMS
                      MAIL_BACKEND=connector. Exit 1 (HALT -- a write/off-scope tool
                      call was observed) -> disable THIS task + local BurntToast +
                      fall back to MAIL_BACKEND=imap for this cycle only, same
-                     response shape as the calendar/Teams guard. Any other exit
-                     (2/3 -- usage error / codex run failed) -> fall back to imap
-                     for this cycle, task stays enabled, retries next cadence.
+                     response shape as the calendar/Teams guard. Exit 5 (MODEL
+                     POLICY VIOLATION) -> log + local BurntToast + fall back to
+                     imap for this cycle, task stays enabled, but investigate
+                     the deterministic code/config bug rather than treating it
+                     as ordinary connector flakiness. Any other exit (2/3 --
+                     usage error / codex run failed) -> fall back to imap for
+                     this cycle, task stays enabled, retries next cadence.
                      IMAP is NEVER removed -- it stays the one-line rollback
                      (this flag back to 'imap') regardless of how long connector
                      mail has been live. KNOWN GAP, disclosed not hidden: unlike
@@ -240,7 +248,15 @@ $env:PYTHONUTF8                  = '1'
 # --- refresh pipeline scripts from main (cache-busted raw pull, same mechanism the desktop uses) ---
 $t    = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $base = 'https://raw.githubusercontent.com/begb0037admin/work-inbox/main'
-foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py') {
+foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py','codex_model_policy.py') {
+  # codex_model_policy.py added 10 Sep 2026 (Priority 4, touchpoint-3 Codex
+  # review finding) -- lane_b_call1.py now imports it; without refreshing it
+  # here alongside lane_b_call1.py, a refreshed lane_b_call1.py could import
+  # a stale or missing copy and fail loudly at import time (exit 2) on the
+  # very next run. hris-dashboard's fetch_osm_report_connector.py imports
+  # this same module from this sibling work-inbox clone on the same laptop,
+  # so refreshing it here also keeps that script current -- no separate
+  # refresh step needed in hris-dashboard's own wrapper for this file.
   try {
     Invoke-WebRequest -UseBasicParsing "$base/$f`?t=$t" -OutFile (Join-Path $root $f)
     Log "refreshed $f from main"
@@ -418,6 +434,26 @@ if ($laneBDomain) {
       $LaneBGuardResult = 'transient'
       $LaneBGuardDetail = 'connector unavailable this cycle; not actionable, no toast.'
     }
+    5 {
+      # Added 10 Sep 2026 (Priority 4, touchpoint-3 Codex review finding):
+      # MUST be distinguished from `default` below, which the pre-existing
+      # code already treats identically to "unexpected, retry silently" --
+      # exactly the masking this exit code exists to prevent. Not a security
+      # HALT (task stays enabled), but genuinely not a normal transient
+      # failure either -- surfaced with a toast so it doesn't sit silent.
+      Log "Lane B guard MODEL POLICY VIOLATION (a code/config bug in codex_model_policy usage, NOT connector unavailability) -- falling back to CAL_BACKEND=com / TEAMS_BACKEND=off for THIS cycle only; task stays enabled but this needs investigation, not just a retry"
+      $CalBackend = 'com'
+      $TeamsBackend = 'off'
+      $LaneBGuardResult = 'policy-violation'
+      $LaneBGuardDetail = 'MODEL POLICY VIOLATION -- code/config bug in codex_model_policy usage. See lane_b_call1.py / hris-dashboard fetch_osm_report_connector.py HANDOVER.md. Not disabled (not a mailbox-safety issue), but will keep failing every cycle until fixed.'
+      try {
+        Import-Module BurntToast -ErrorAction Stop
+        New-BurntToastNotification -Text 'Work Inbox - Lane B MODEL POLICY VIOLATION', $LaneBGuardDetail
+        Log "local BurntToast fired (model policy violation)"
+      } catch {
+        Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the violation is still real and logged above"
+      }
+    }
     default {
       Log "Lane B guard unexpected exit $guardRc -- treating conservatively: falling back to CAL_BACKEND=com / TEAMS_BACKEND=off for THIS cycle only; task stays enabled"
       $CalBackend = 'com'
@@ -472,6 +508,23 @@ if ($MailBackend -eq 'connector') {
         Log "local BurntToast fired (mail guard HALT)"
       } catch {
         Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the HALT + task-disable above are still real. KNOWN GAP (disclosed, not a safety gap): unlike calendar/Teams, this is not yet threaded through Push-LaptopRunStatus.ps1, so there is no cross-machine desktop toast for a mail HALT yet -- this run's own log is authoritative until that follow-up is built."
+      }
+    }
+    5 {
+      # Added 10 Sep 2026 (Priority 4, touchpoint-3 Codex review finding):
+      # MUST be distinguished from `default` below -- same reasoning as the
+      # calendar/Teams switch above. Not a security HALT (task stays
+      # enabled), but not ordinary transient flakiness either.
+      Log "Lane B mail guard MODEL POLICY VIOLATION (a code/config bug in codex_model_policy usage, NOT connector unavailability) -- falling back to MAIL_BACKEND=imap for THIS cycle only; task stays enabled but this needs investigation, not just a retry"
+      $MailBackend = 'imap'
+      $LaneBMailGuardResult = 'policy-violation'
+      $LaneBMailGuardDetail = 'MODEL POLICY VIOLATION -- code/config bug in codex_model_policy usage. Not disabled (not a mailbox-safety issue), but will keep failing every cycle until fixed.'
+      try {
+        Import-Module BurntToast -ErrorAction Stop
+        New-BurntToastNotification -Text 'Work Inbox - Lane B mail MODEL POLICY VIOLATION', $LaneBMailGuardDetail
+        Log "local BurntToast fired (mail model policy violation)"
+      } catch {
+        Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the violation is still real and logged above"
       }
     }
     default {
