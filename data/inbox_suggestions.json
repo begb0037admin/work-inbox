@@ -1,19 +1,6 @@
 {
-  "generated_at": "2026-09-09 16:22",
+  "generated_at": "2026-09-10 07:21",
   "new_tasks": [
-    {
-      "title": "Approve annual leave for James Salas Guillen (25-28 September)",
-      "tier": "today",
-      "description": "James Salas Guillen has submitted duplicate annual leave requests (received 13:43 today, 9 September) for 25-28 September 2026; Kevin must review and approve or decline these requests as his manager.",
-      "email_subject": "ANNUAL LEAVE request submitted. ACTION REQUIRED.",
-      "email_from": "peoplexd@accessacloud.com",
-      "received": "2026-09-09T13:43",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l4AACN_5xoUtxaQ7clOANLv-U1AAe6H9QqAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l4AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6H9QqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l4AACN_5xoUtxaQ7clOANLv-U1AAe6H9QqAAA=",
-      "auto_promoted": true
-    },
     {
       "title": "Review IRIS Changes project plan - September 2026",
       "tier": "today",
@@ -89,18 +76,5 @@
       "carried_forward": true
     }
   ],
-  "applied_updates": [
-    {
-      "task_id": "t2608121801280",
-      "task_title": "Review 38-day balance implementation timeline and decisions",
-      "note": "Kevin confirmed to Julie that Chemistry is ready as 38-day balance pilot with 131 workgroups.",
-      "email_subject": "Re: 38 day balance for departments update and decisions needed",
-      "email_from": "Kevin (sent to: Julie Hickman)",
-      "received": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ-AAA=",
-      "web_link": "",
-      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ-AAA="
-    }
-  ]
+  "task_updates": []
 }
