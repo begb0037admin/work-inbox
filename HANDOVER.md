@@ -19,7 +19,29 @@
 ```
 C:\...\codex.exe exec -s read-only --skip-git-repo-check --json -m gpt-5.6-luna -c model_reasoning_effort=high "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve messages in my Inbox folder..."
 ```
-Also exactly the expected value. This call was still in flight as of this entry (codex.exe itself finished; the parent Python process was still doing follow-on work past the 20-minute mark) -- slower than the equivalent hris-dashboard call (~2.5 min) but not confirmed stuck (CPU time was still incrementing on each check, unlike the genuinely-frozen calendar/Teams hang). Whoever picks this up next: check `data\lane_b\_drew_verify_mail.json` on the laptop and/or a fresh process check for whether it completed.
+Also exactly the expected value.
+
+**This call completed (49.5 min wall-clock, 12:44:43Z-13:34:16Z) and surfaced a second, separate, real finding: `mail_inbox` connector calls are currently hitting a systematic 360s timeout.** Full completed log:
+```
+[mail_inbox#failover1] codex model/effort: -m gpt-5.6-luna -c model_reasoning_effort=high (workload_class='high', luna_available=True)
+[mail_inbox#failover1] codex exec attempt 1/2 (timeout 360s) ... timeout 360s hit -- killing process tree ... timed out after 360s (cold-start hang?) -- retrying once
+[mail_inbox#failover1] codex exec attempt 2/2 ... timed out again -- no more attempts for this identity
+[mail_inbox/failover] attempt 1/3: codex run failed ...
+[mail_inbox#failover2] codex model/effort: -m gpt-5.6-luna -c model_reasoning_effort=high ... (same timeout x2 pattern)
+[mail_inbox#failover3] codex model/effort: -m gpt-5.6-luna -c model_reasoning_effort=high ... (same timeout x2 pattern)
+[mail_inbox] final status=codex_failed served_by=None after 3 attempt(s) (personal-only, no primary/failover pair for mail)
+[mail_sent#failover1] codex model/effort: -m gpt-5.6-luna -c model_reasoning_effort=high (workload_class='high', luna_available=True)
+[mail_sent#failover1] codex exec attempt 1/2 (timeout 360s) ...
+[mail_sent] tool calls observed: [...list_messages, fetch_message, find_mail_folder...]
+[mail_sent] extracted 84 item(s)
+[mail_sent] final status=ok served_by=failover after 1 attempt(s)
+wrote ..._drew_verify_mail.json calendar=0 teams=0 inbox=0 sent=84 sanitiser_hits=61 status={'mail_inbox': 'codex_failed', 'mail_sent': 'ok'}
+EXIT CODE: 0
+```
+
+**Every single codex model/effort log line across all 4 sub-calls (`mail_inbox` attempts 1/2/3, `mail_sent`) shows the exact expected `-m gpt-5.6-luna -c model_reasoning_effort=high` -- this is now the strongest possible confirmation for work-inbox: not a single log line, but every retry across a real 49.5-minute production run, using the identical policy resolution every time, with zero drift or fallback-to-stale-value even under repeated failure.**
+
+**The `mail_inbox` failure itself is a genuine, separate operational finding, NOT a Priority 4/Terra regression:** `mail_inbox` timed out at 360s twice per identity attempt, three full identity attempts (6 timeouts total, ~36 of the 49.5 minutes), while `mail_sent` -- run immediately after, same CODEX_HOME, same account, same model/effort args -- succeeded cleanly on its very first attempt in under 6 minutes with 84 items extracted. Whatever is wrong is specific to the `mail_inbox` connector call/prompt combination right now, not the identity, not the model policy, and not a blanket connector outage. Worth a fresh look -- flagging here rather than investigating further, out of scope for this verification task.
 
 **Net result for work-inbox: CONFIRMED.** Two separate real, live, production `codex.exe` invocations (Teams domain from the actual scheduled task, mail domain from an isolated direct call using the identical production code path) both show `-m gpt-5.6-luna -c model_reasoning_effort=high` -- the policy-resolved value, not a stale/hardcoded one. This is process-table evidence (the literal command line the OS executed), not just a log line -- arguably stronger proof than a log read would have been, and was necessary here specifically because the pre-existing guard hang prevented a normal log-based confirmation from completing in time.
 
