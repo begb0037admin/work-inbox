@@ -1,24 +1,23 @@
 {
     "kind":  "briefing",
-    "result":  "failed",
-    "exit_code":  2,
-    "ts":  "2026-09-10T12:00:19+01:00",
+    "result":  "ok",
+    "exit_code":  0,
+    "ts":  "2026-09-11T16:08:55+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
-    "lane_b_guard":  "unexpected-2",
-    "lane_b_guard_detail":  "lane_b_cal_guard.py exited 2 (not 0/1/3) -- treated conservatively, not disabled.",
+    "lane_b_guard":  "clean",
     "lane_b_domains":  {
-                           "mail_inbox":  {
-                                              "status":  "ok",
-                                              "count":  80,
-                                              "served_by":  "failover",
-                                              "primary_failover_identical":  false
-                                          },
-                           "mail_sent":  {
-                                             "status":  "ok",
-                                             "count":  57,
-                                             "served_by":  "failover",
-                                             "primary_failover_identical":  false
-                                         }
+                           "teams":  {
+                                         "status":  "unavailable",
+                                         "count":  0,
+                                         "served_by":  "failover",
+                                         "primary_failover_identical":  false
+                                     },
+                           "calendar":  {
+                                            "status":  "unavailable",
+                                            "count":  0,
+                                            "served_by":  "failover",
+                                            "primary_failover_identical":  false
+                                        }
                        }
 }
