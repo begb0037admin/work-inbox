@@ -1,3 +1,86 @@
+# Handover -- 13 September 2026, later evening (Drew) -- Codex M365 connector reflap: ROOT CAUSE CORRECTED (cross-machine token-holder collision, not kill-during-refresh alone) + `codex_connector_reauth.ps1` built
+
+## CORRECTION to the entry directly below (read this first)
+
+Kevin reauthenticated the personal identity TWICE after the entry below was
+written and it broke again both times -- the kill-cooldown fix (still real, still
+applied, still worth keeping) is **a secondary contributing factor, not the root
+cause**. Re-investigated per the coordinator's push-back; see
+`begb0037admin/drew` `memory/codex-m365-connector-cross-machine-root-cause-13sept.md`
+for the full evidence trail. Short version:
+
+**Root cause: the same `kevin@lelitte.co.uk` OAuth refresh token is independently
+held by at least three live things at once, and Microsoft's standard
+refresh-token-rotation invalidates every OTHER holder's copy the moment any one
+of them refreshes:**
+1. This desktop's own `~/.codex/auth.json`.
+2. A long-lived Codex Desktop app process on this same desktop (`OpenAI.Codex`
+   package's Electron shell, PID 28756, running continuously since 12 Sep 11:15 --
+   over a day -- with its own child `codex.exe ... app-server` maintaining its own
+   live session) that Kevin didn't realise was still open.
+3. The Oxford laptop's Lane B FAILOVER credential store
+   (`C:\WorkInboxAI\codex-laneb\auth.json`), logged in independently rather than
+   synced from the desktop -- confirmed to also have its own separate "ChatGPT
+   Classic" desktop app process running (a different OpenAI package,
+   `OpenAI.ChatGPT-Desktop`, under the `begb0037-a` account) since 10 Sep 22:50.
+
+Live evidence: every state file in `C:\WorkInboxAI\codex-laneb` (auth.json,
+sqlite session stores) was rewritten in a single burst at 19:54:37-19:54:57 on 13
+Sep -- a cold start, first touch since 1 Sep -- landing at the EXACT minute the
+13 Sep incident's own timeline recorded the SharePoint probe returning
+`oauth_token_invalid_grant`. That stale copy, untouched for 12 days, got
+rejected the moment it was finally used, consistent with the desktop's own
+morning reauth (or the long-lived app-server process) having already rotated the
+shared token out from under it. Matches published Codex behaviour:
+`openai/codex#14144` (reauth in one place doesn't help while another
+already-running session keeps its stale cached copy) and `#39054` (Codex doesn't
+discard a rejected refresh token on `invalid_grant` -- it keeps retrying the same
+dead token instead of cleanly re-prompting, which is why this looked
+"permanently stuck" rather than self-healing).
+
+## Fix: `codex_connector_reauth.ps1` (this repo's root), tested in `-DryRun`
+
+One script, run on the desktop, collapses the two/three-holder problem to one:
+kills every long-lived Codex/ChatGPT process on the desktop AND the Oxford
+laptop (over SSH, `oxford-lan`) first, does a single fresh `codex login
+--device-auth` on the desktop only (Kevin's one unavoidable manual step is
+completing that sign-in link), verifies the desktop's own connector access with
+one narrow probe, then pushes that exact `auth.json` to the Oxford laptop's
+failover store via `scp` and verifies THAT independently too -- refusing to
+declare success unless both machines return real data. Deliberately does not
+touch work-inbox's own one-shot `codex exec ...` pipeline calls (matched by
+command-line, excludes anything with `exec` in it) -- only the long-lived
+app-server/GUI processes that can silently hold a stale session for days.
+
+**Verified in `-DryRun` (no changes made):** correctly detects and reports the
+live desktop Electron+app-server tree (11 processes under PID 28756) and the
+Oxford laptop's separate ChatGPT Classic tree (5 processes under PID 45688,
+account `begb0037-a`) without killing anything. The live (non-dry-run) path --
+logout/login/copy/verify -- has NOT been run; it needs Kevin present for the
+one sign-in click, and per his own instruction was not to be fired again without
+a working plan, which this now is.
+
+**No auto-start mechanism found to disable** (checked HKCU/HKLM `Run` keys, the
+Startup folder, and scheduled tasks on the desktop for anything referencing
+Codex/ChatGPT/OpenAI -- none exists). Both long-lived processes were left running
+from a manual launch, not an auto-launch; the practical fix is the kill step in
+this script, since there is nothing to turn off. Work-inbox's own scheduled
+tasks (`Work Inbox Bridge Briefing`, `HRIS Dashboard Morning Refresh (connector)`,
+`Work Inbox Laptop Parity Shadow`, `Work Inbox Laptop Draft Diff`) were checked
+for auto-restart settings that could be a recurring trigger -- all four have
+`RestartCount=0`, ruled out.
+
+**Structural fix flagged, not built today:** hris-dashboard's
+`fetch_osm_report_connector.py` imports the same `FAILOVER_CODEX_HOME` constant
+from `lane_b_call1.py`, so it shares this exact credential store and benefits
+from the same fix automatically. The genuinely durable fix would be for the
+Oxford laptop to never hold its own independently-logged-in copy at all (e.g.
+re-derive from the desktop's store on every run, or a real single source of
+truth with no local persistence on the laptop side) -- not implemented, flagged
+for whoever picks this up next if it recurs a third time.
+
+---
+
 # Handover -- 13 September 2026, evening (Drew) -- Codex M365 connector oauth_token_invalid_grant reflap: diagnosed, kill-cooldown fix applied
 
 ## Diagnosis: personal-identity connector token re-invalidating after reauth
