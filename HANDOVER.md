@@ -1,3 +1,56 @@
+# Handover -- 13 September 2026, evening (Drew) -- Codex M365 connector oauth_token_invalid_grant reflap: diagnosed, kill-cooldown fix applied
+
+## Diagnosis: personal-identity connector token re-invalidating after reauth
+
+Investigated why `kevin@lelitte.co.uk`'s Codex M365 connector re-broke
+(`oauth_token_invalid_grant`/`TRIGGER_REAUTHENTICATION`) within under an hour of a
+confirmed-working reauth on 13 Sep 2026 (see `begb0037admin/drew`
+`memory/codex-m365-connector-oauth-reflapped-after-reauth-13sept.md`). Read every
+real connector call site in this repo end to end (`lane_b_call1.py`,
+`lane_b_cal_guard.py`, `fetch_inbox.py`, `parity_vs_briefing.py`, `Run Laptop Bridge
+Briefing.ps1`).
+
+**Concurrent/parallel connector calls ruled out** -- no code path here (or in
+command-centre or hris-dashboard) fires the Codex M365 connector concurrently.
+Every domain pull is sequential, single-process, gated by `run_codex_json()`'s own
+`_wait_for_quiet_gap()`.
+
+**Leading candidate instead:** the source incident's own timeline shows 6
+consecutive forced `taskkill /T /F` process-tree kills (timeout retries, ~43
+minutes, only the standard 75s gap between them) immediately before the token
+re-invalidated on a domain never touched that session. `codex exec`'s real OAuth
+client lives in a grandchild `node.exe` process that `taskkill /T /F` kills
+unconditionally. If a kill lands mid-token-refresh -- after the IdP has rotated the
+refresh token server-side but before the client persists the new pair to local
+`auth.json` -- the local store is left holding a stale, already-consumed refresh
+token, and the next call gets `invalid_grant` with a full reauth required. This
+matches this file's own pre-existing 2 Sept 2026 comment (above `SNAPSHOT_GAP_S` in
+`lane_b_call1.py`) suspecting a "killed/timed-out call leaves a shared
+connector-bridge/session resource in a bad state" -- this is a second, more severe
+data point for the same mechanism, not conclusively proven.
+
+## Fix applied -- commit `e01c929f`
+
+`lane_b_call1.py`: new `KILL_COOLDOWN_S` (env `WI_LANE_B_KILL_COOLDOWN_S`, default
+300s). After any forced `taskkill` on timeout, `_wait_for_quiet_gap()` now enforces
+this longer cooldown instead of the standard 75s `SNAPSHOT_GAP_S`, until a clean
+(non-killed) call resets it. Applies automatically inside `run_codex_json()`'s own
+retry loop too (FAILOVER's attempt-1-to-attempt-2), so a killed attempt 1 now waits
+5 minutes before attempt 2, not 75s. Zero behaviour change on any call that
+completes without being killed. `python -m py_compile` clean, pushed content
+byte-verified live against GitHub.
+
+Full findings, ranked candidates, and a flagged-not-fixed residual cross-process
+risk (Lane B vs hris-dashboard both eventually touching the personal identity on
+separate, currently non-overlapping schedules) are in
+`begb0037admin/drew` `memory/codex-m365-connector-oauth-reflap-diagnosis-13sept.md`.
+
+**Not done:** no reauthentication attempted or requested. Personal identity remains
+in `oauth_token_invalid_grant` as of this writing -- Kevin's own reauth is still
+needed before Lane B/HRIS connector reads succeed again.
+
+---
+
 # Handover -- 10 September 2026, afternoon (Drew) -- U. Priority 4/Terra deployment CONFIRMED LIVE via a real production run -- with a real pre-existing hang recurring in the same run, and a real deployment gap found+fixed on the hris-dashboard side. Full detail below.
 
 ## U. Live-fire confirmation of the Luna/effort-level policy + Terra fallback (per `agent-commons/COORDINATOR_HANDOVER.md`'s outstanding Priority 4 watch item)
