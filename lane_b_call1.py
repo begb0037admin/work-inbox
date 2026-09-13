@@ -697,22 +697,54 @@ def _ensure_warm(codex_home: str | None = None, effort_args: list[str] | None = 
 SNAPSHOT_GAP_S = int(os.environ.get("WI_LANE_B_SNAPSHOT_GAP_S", "75"))
 _LAST_CONNECTOR_TOUCH_MONO: float | None = None
 
+# KILL_COOLDOWN_S (added 13 Sept 2026, oauth_token_invalid_grant reflap
+# investigation -- see memory/codex-m365-connector-oauth-reflapped-after-
+# reauth-13sept.md in begb0037admin/drew). Distinct, longer gap enforced
+# specifically after a `taskkill /T /F` process-tree kill (timeout path),
+# as opposed to the standard SNAPSHOT_GAP_S used after a clean call.
+# Suspected mechanism: the actual OAuth client living inside the killed
+# node.exe worker can be interrupted mid-token-refresh -- if the IdP had
+# already rotated the refresh token server-side but the killed process
+# never got to persist the new pair to local auth.json, the next call
+# presents a stale, already-consumed refresh token and gets
+# oauth_token_invalid_grant/TRIGGER_REAUTHENTICATION (full reauth
+# required, not just a retry). 13 Sep incident: 6 forced kills in ~43
+# minutes (only the standard 75s gap between them, since every one of
+# those was a timeout) were followed within the hour by exactly that
+# error on a fresh, never-before-touched domain (SharePoint) on the same
+# identity Kevin had reauthenticated less than an hour earlier. Not
+# proven, but consistent with this file's own pre-existing 2 Sept 2026
+# comment above SNAPSHOT_GAP_S about a killed/timed-out call leaving a
+# shared connector-bridge/session resource in a bad state until real
+# quiet time passes -- this is a second, more severe data point for the
+# same suspected mechanism. This cooldown does not fully rule the theory
+# in or out (a short-lived/unstable server-side grant remains a live
+# alternative explanation, see the memory record), but it costs nothing
+# to apply defensively: a genuinely long pause after a kill is strictly
+# cheaper than a full reauth cycle if it helps even some of the time.
+KILL_COOLDOWN_S = int(os.environ.get("WI_LANE_B_KILL_COOLDOWN_S", "300"))
+_LAST_CONNECTOR_TOUCH_WAS_KILL = False
+
 
 def _wait_for_quiet_gap(tag: str) -> None:
     global _LAST_CONNECTOR_TOUCH_MONO
     if _LAST_CONNECTOR_TOUCH_MONO is None:
         return
+    gap_s = KILL_COOLDOWN_S if _LAST_CONNECTOR_TOUCH_WAS_KILL else SNAPSHOT_GAP_S
     elapsed = time.monotonic() - _LAST_CONNECTOR_TOUCH_MONO
-    remaining = SNAPSHOT_GAP_S - elapsed
+    remaining = gap_s - elapsed
     if remaining > 0:
-        _log(f"[{tag}] waiting {remaining:.0f}s quiet gap since the last connector touch "
-             f"(WI_LANE_B_SNAPSHOT_GAP_S={SNAPSHOT_GAP_S}) before the next codex exec call")
+        _kind = "KILL_COOLDOWN (last touch was a forced taskkill)" if _LAST_CONNECTOR_TOUCH_WAS_KILL \
+            else "standard quiet gap"
+        _log(f"[{tag}] waiting {remaining:.0f}s {_kind} since the last connector touch "
+             f"(gap={gap_s}s) before the next codex exec call")
         time.sleep(remaining)
 
 
-def _mark_connector_touch() -> None:
-    global _LAST_CONNECTOR_TOUCH_MONO
+def _mark_connector_touch(*, was_kill: bool = False) -> None:
+    global _LAST_CONNECTOR_TOUCH_MONO, _LAST_CONNECTOR_TOUCH_WAS_KILL
     _LAST_CONNECTOR_TOUCH_MONO = time.monotonic()
+    _LAST_CONNECTOR_TOUCH_WAS_KILL = was_kill
 # ------------------------------------------------------------------------------------------- #
 
 
@@ -807,7 +839,7 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
             out, err = proc.communicate(timeout=timeout_s)
             returncode = proc.returncode
         except subprocess.TimeoutExpired:
-            _mark_connector_touch()
+            _mark_connector_touch(was_kill=True)
             _log(f"[{tag}] timeout {timeout_s}s hit -- killing process tree (PID {proc.pid}) so an orphaned "
                  f"grandchild can't keep the real call running underneath a defeated timeout")
             try:
