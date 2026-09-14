@@ -711,24 +711,53 @@ def _ensure_warm(codex_home: str | None = None, effort_args: list[str] | None = 
     _log(f"warming codex (CODEX_HOME={home}, timeout {CALL1_WARMUP_TIMEOUT_S}s, "
          f"-m {effort_args[1]} -c {effort_args[3]})...")
     t0 = time.time()
+    # Popen + a real timed communicate(), not subprocess.run(timeout=...) --
+    # fixed 14 Sep 2026, same Bridge Briefing hang investigation. This call previously used
+    # subprocess.run(timeout=CALL1_WARMUP_TIMEOUT_S) directly, which on
+    # TimeoutExpired kills only the DIRECT child -- the exact defeated-timeout
+    # bug documented at length in run_codex_json()'s own 3 Sept 2026 comment
+    # below (codex resolves to an npm-global .ps1/.cmd shim here, so the real
+    # worker is a GRANDCHILD node.exe that a direct-child-only kill leaves
+    # running). The `except Exception` below made a timed-out warm-up LOOK
+    # harmless ("did not complete ... continuing") while silently leaving an
+    # orphaned codex/node process running in the background -- worth fixing
+    # even though warm-up itself is throwaway/best-effort, since an orphan
+    # left behind here can still hold a shared connector-bridge/session
+    # resource other calls contend with (this file's own long-standing
+    # SNAPSHOT_GAP_S/KILL_COOLDOWN_S theory). Now uses the identical
+    # Popen + `taskkill /T /F` tree-kill pattern as run_codex_json() itself.
     try:
-        subprocess.run(
+        proc = subprocess.Popen(
             _codex_argv0() + ["exec", "-s", "read-only", "--skip-git-repo-check"]
                             + effort_args
                             + ["Reply with the single word OK. Use no tools, change nothing."],
-            capture_output=True, text=True, timeout=CALL1_WARMUP_TIMEOUT_S,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             cwd=str(REPO_ROOT), env=_codex_env(home),
-            encoding="utf-8", errors="replace",   # 2 Sept fix: text=True with no encoding= defaults to
-                                                   # locale.getpreferredencoding() -- cp1252 on Windows,
-                                                   # not UTF-8 -- and a real Teams message body with an
-                                                   # emoji/accent crashed the subprocess module's own
-                                                   # background _readerthread with UnicodeDecodeError.
-                                                   # Force UTF-8 (codex's own stdout is UTF-8) with
-                                                   # errors=replace so an undecodable byte never crashes
-                                                   # the read, worst case one character comes through as U+FFFD.
+            text=True, encoding="utf-8", errors="replace",   # see run_codex_json()'s own comment: force UTF-8,
+                                                              # errors=replace, so an undecodable byte (emoji/
+                                                              # accent) can never crash the reader thread.
             stdin=subprocess.DEVNULL,   # codex exec BLOCKS reading stdin until EOF -- give it EOF now
         )
+        proc.communicate(timeout=CALL1_WARMUP_TIMEOUT_S)
         _log(f"codex warm-up done in {time.time() - t0:.0f}s")
+    except subprocess.TimeoutExpired:
+        _log(f"codex warm-up did not complete in {time.time() - t0:.0f}s -- killing process tree "
+             f"(PID {proc.pid}) so an orphaned grandchild can't keep running in the background, then continuing")
+        try:
+            kill_result = subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)],
+                                         capture_output=True, timeout=15)
+            if kill_result.returncode != 0:
+                raise RuntimeError(f"taskkill exited {kill_result.returncode}")
+        except Exception as kill_exc:  # noqa: BLE001 -- non-Windows / taskkill missing / already exited
+            _log(f"codex warm-up taskkill failed ({kill_exc}) -- falling back to proc.kill() (direct child only)")
+            try:
+                proc.kill()
+            except Exception:  # noqa: BLE001
+                pass
+        try:
+            proc.communicate(timeout=10)   # tree should be dead now -- bounded anyway, never unbounded
+        except subprocess.TimeoutExpired:
+            pass
     except Exception as e:  # noqa: BLE001
         _log(f"codex warm-up did not complete in {time.time() - t0:.0f}s ({e}) -- continuing")
 
@@ -1970,21 +1999,23 @@ def cmd_selftest() -> int:
     # Codex review finding, 10 Sep 2026): the warm-up call is itself a
     # `codex exec` launch and must never run on ambient/unvalidated settings
     # while the real call it warms up for is policy-controlled. Captures the
-    # actual subprocess.run() argv via monkeypatching -- no real codex process
+    # actual subprocess.Popen() argv via monkeypatching -- no real codex process
     # is launched by this check.
     import unittest.mock as _mock
     _captured_cmd = {}
 
-    def _fake_run(cmd, **kwargs):
+    class _FakeWarmProc:
+        pid = 12345
+
+        def communicate(self, timeout=None):
+            return "", ""
+
+    def _fake_popen(cmd, **kwargs):
         _captured_cmd["cmd"] = cmd
-        class _R:
-            returncode = 0
-            stdout = ""
-            stderr = ""
-        return _R()
+        return _FakeWarmProc()
 
     _WARMED_HOMES.discard("selftest-warm-home")
-    with _mock.patch.object(subprocess, "run", _fake_run):
+    with _mock.patch.object(subprocess, "Popen", _fake_popen):
         _ensure_warm("selftest-warm-home",
                      effort_args=["-m", "gpt-5.6-luna", "-c", "model_reasoning_effort=high"])
     warm_cmd = _captured_cmd.get("cmd") or []

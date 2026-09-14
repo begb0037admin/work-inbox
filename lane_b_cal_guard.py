@@ -85,6 +85,85 @@ NORMALISED     = LANE_B_DIR / "lane_b_normalised.json"
 
 SNAPSHOT_TIMEOUT_S = int(lb.os.environ.get("WI_LANE_B_SNAP_TIMEOUT", "360"))
 
+# GUARD_RUN_TIMEOUT_S -- added 14 Sep 2026, Bridge Briefing hang investigation
+# follow-up (see HANDOVER.md's EDU_PARKED entries for the incident this
+# closes). Before this fix, cmd_run()'s subprocess.run() launch of
+# lane_b_call1.py carried NO timeout at all -- the only thing that could ever
+# stop a hung child was the wrapper .ps1's own scheduled-task
+# ExecutionTimeLimit (PT45M), which (a) only fires after the FULL 45-minute
+# budget is spent, starving every phase after this one (mail domain,
+# fetch_inbox.py's own triage, the dashboard push), and (b) does not
+# reliably reach a multi-generation process tree either -- documented live:
+# orphaned grandchild python/codex/node processes survived a Task Scheduler
+# kill on 14 Sep and needed manual cleanup. This mirrors the exact fix
+# already proven one level down, inside lane_b_call1.py's own
+# run_codex_json(): a real process-level enforced timeout via
+# Popen+wait(timeout=...), and on TimeoutExpired a `taskkill /T /F` against
+# the WHOLE process tree (not just the direct child) so an orphaned
+# grandchild codex.exe/node.exe can't keep running underneath a defeated
+# parent.
+#
+# COMPUTED, not a hand-guessed constant (a first pass hardcoded 2400s, which
+# a Codex review same day correctly flagged as BELOW lane_b_call1.py's own
+# documented worst case for `--domain both` -- ~2700-2750s once warm-up +
+# EDU_PARKED_RETRIES outer attempts + 2 inner sub-attempts at
+# CALL1_TIMEOUT_S + KILL_COOLDOWN_S gaps are counted for both domains. A
+# timeout tighter than the thing it's meant to bound would fire on a
+# legitimate slow run, not just a genuine hang -- exactly the class of bug
+# this whole investigation exists to close, just moved one level up).
+# _guard_run_timeout_s() below computes this from lane_b_call1.py's OWN live
+# constants so it can never silently go stale if those are retuned later,
+# and honestly logs the case where the real worst case would exceed what
+# can safely fit under the wrapper's own PT45M (2700s) outer
+# ExecutionTimeLimit rather than hiding it. WI_LANE_B_GUARD_RUN_TIMEOUT_S
+# still wins outright over the computed value if set, for manual tuning.
+_GUARD_HARD_CAP_S = 2500  # stay safely under the wrapper's PT45M (2700s) so
+                          # OUR clean tree-kill always wins the race against
+                          # Task Scheduler's own less-reliable one.
+
+
+def _guard_run_timeout_s(domain: str) -> int:
+    """Realistic worst-case budget for cmd_run()'s lane_b_call1.py child,
+    computed from lane_b_call1.py's own live timeout/retry constants (not a
+    hand-guessed number -- see the comment block above this function).
+
+    Per domain, worst case = EDU_PARKED_RETRIES outer attempts, each up to
+    2 inner sub-attempts at CALL1_TIMEOUT_S, separated by a KILL_COOLDOWN_S
+    gap (the worst-case gap -- assumes the previous sub-attempt was itself
+    killed). Warm-up (CALL1_WARMUP_TIMEOUT_S) is counted ONCE, not once per
+    domain, since lane_b_call1.py's own `_WARMED_HOMES` caches it per
+    CODEX_HOME for the life of the process -- `--domain both` still only
+    warms up once. `--domain both` also pays one extra SNAPSHOT_GAP_S
+    between the two domains' calls. +10% on top as a rounding/margin buffer.
+
+    If that computed worst case is ABOVE _GUARD_HARD_CAP_S, this is capped
+    there instead and a loud WARNING is logged -- a disclosed tradeoff
+    (reliability of a clean kill over giving every possible benefit of the
+    doubt to an extreme-worst-case-but-genuinely-legitimate run), not a
+    silent bug. If this cap fires often in practice, the real fix is
+    revisiting the wrapper's PT45M and/or the retry constants this formula
+    is built from, not just raising this number further -- flagged, not
+    solved here."""
+    override = lb.os.environ.get("WI_LANE_B_GUARD_RUN_TIMEOUT_S", "").strip()
+    if override:
+        return int(override)
+    domains = 2 if domain == "both" else 1
+    per_domain = lb.EDU_PARKED_RETRIES * (2 * lb.CALL1_TIMEOUT_S + lb.KILL_COOLDOWN_S)
+    total = lb.CALL1_WARMUP_TIMEOUT_S + per_domain * domains
+    if domains == 2:
+        total += lb.SNAPSHOT_GAP_S  # the extra between-domain gap `both` pays that a single domain doesn't
+    computed = int(total * 1.10)
+    if computed > _GUARD_HARD_CAP_S:
+        _log(f"WARNING: computed guard timeout ({computed}s, domain={domain!r}) exceeds the "
+             f"{_GUARD_HARD_CAP_S}s hard cap kept under the wrapper's PT45M (2700s) outer "
+             f"ExecutionTimeLimit -- capping to {_GUARD_HARD_CAP_S}s so this guard's own clean "
+             f"tree-kill always fires before Task Scheduler's own less-reliable one. An extreme-"
+             f"worst-case but genuinely legitimate (not hung) run could occasionally be treated as "
+             f"transient/retried by this cap -- a disclosed tradeoff, not a silent bug. If this "
+             f"fires often, revisit PT45M and/or the retry constants this formula is built from.")
+        return _GUARD_HARD_CAP_S
+    return computed
+
 
 def _log(m: str) -> None:
     print(f"[{_dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}] lane_b_cal_guard: {m}")
@@ -351,11 +430,87 @@ def cmd_run(domain: str = "calendar") -> int:
     _log(f"CODEX_HOME={lb._codex_home()}  account_id={lb._codex_account_id()}")
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
-    rc = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "lane_b_call1.py"), "--domain", domain],
+    # `-u` (added 14 Sep 2026, same investigation): the PREVIOUS bare
+    # `sys.executable` launch (no `-u`) meant this child's own stdout was
+    # block-buffered whenever it wasn't a real terminal -- true here, since
+    # this process's own stdout is itself already piped through the wrapper
+    # .ps1's `Tee-Object` (python -u lane_b_cal_guard.py ... | Tee-Object).
+    # Buffering is decided per-process by each interpreter, not inherited
+    # from an already-piped fd, so lane_b_call1.py's own real-time `_log()`
+    # lines could sit invisible in memory for the full length of a run and
+    # only appear (or never appear, if killed) at exit -- this is the exact
+    # "log froze ... zero further log output" symptom the 10 Sep and 14 Sep
+    # incidents both recorded, indistinguishable from a genuinely stuck run
+    # until now. `-u` forces this child unbuffered, matching every other
+    # `python -u ...` invocation the wrapper .ps1 already uses directly.
+    #
+    # Popen + a real timed wait (see _guard_run_timeout_s() above), not a
+    # bare subprocess.run() with no timeout at all: on TimeoutExpired, kill
+    # the WHOLE process tree by PID (`taskkill /T /F`) so an orphaned
+    # grandchild can't keep the real call running underneath a defeated/
+    # reaped parent -- same fix already proven in run_codex_json() and
+    # _ensure_warm(). taskkill's own RETURN CODE is checked, not just
+    # exceptions from launching it (Codex review finding, 14 Sep 2026: a
+    # non-zero taskkill result -- e.g. "process not found", which can mean
+    # genuinely already gone OR that the kill itself failed -- must not be
+    # silently treated as success; on a non-zero result this also falls back
+    # to proc.kill() as a second, best-effort attempt).
+    timeout_s = _guard_run_timeout_s(domain)
+    _log(f"running: {sys.executable} -u lane_b_call1.py --domain {domain} (enforced timeout {timeout_s}s)")
+    proc = subprocess.Popen(
+        [sys.executable, "-u", str(REPO_ROOT / "lane_b_call1.py"), "--domain", domain],
         cwd=str(REPO_ROOT),
         env={**lb.os.environ},
-    ).returncode
+    )
+    try:
+        rc = proc.wait(timeout=timeout_s)
+    except subprocess.TimeoutExpired:
+        _log(f"TIMEOUT {timeout_s}s hit waiting for lane_b_call1.py (PID {proc.pid}) -- "
+             f"killing its whole process tree so an orphaned grandchild codex/node process can't "
+             f"keep running underneath a defeated timeout")
+        try:
+            kill_result = subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)],
+                                         capture_output=True, timeout=15)
+            if kill_result.returncode != 0:
+                raise RuntimeError(
+                    f"taskkill exited {kill_result.returncode}: "
+                    f"{(kill_result.stdout or b'').decode('utf-8', 'replace').strip()!r} / "
+                    f"{(kill_result.stderr or b'').decode('utf-8', 'replace').strip()!r}"
+                )
+        except Exception as kill_exc:  # noqa: BLE001 -- non-Windows / taskkill missing / non-zero result / already exited
+            _log(f"WARNING: taskkill did not confirm success ({kill_exc}) -- falling back to proc.kill() "
+                 f"(direct child only; a grandchild codex/node process may still be running, check manually)")
+            try:
+                proc.kill()
+            except Exception:  # noqa: BLE001
+                pass
+        try:
+            proc.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            _log("WARNING: process did not exit within 15s of the taskkill -- check manually")
+        # Honest note on what a timeout here does and doesn't tell us (Codex
+        # review finding, 14 Sep 2026): this maps to TRANSIENT (exit 3), not
+        # a guard HALT (1) -- but that is NOT because a kill here proves no
+        # write happened. lane_b_call1.py's own re-contamination guard scans
+        # partial output as it's received DURING a call it manages itself
+        # (see _scan_partial_output_for_writes() in that file); if THIS
+        # outer timeout instead fires while lane_b_call1.py is still mid-
+        # call, whatever it had buffered but not yet scanned is lost with
+        # it, and this guard cannot positively rule out a write in that
+        # window. This exposure already existed before this fix, via the
+        # wrapper's own PT45M outer kill (the only backstop previously) --
+        # this change makes the HANG itself get caught reliably and cleanly
+        # (no orphans), it does not add a new safety gap or close this
+        # residual one. Mapping to exit 3 (not disabling the scheduled task
+        # on every ordinary slow-connector timeout) is the same tradeoff
+        # this file's own design has always made; if evidence ever shows a
+        # write slipping through specifically via a killed run, that needs
+        # its own fix (e.g. capturing and scanning partial output here too),
+        # not just a comment update.
+        _log(f"lane_b_call1.py --domain {domain} TIMED OUT after {timeout_s}s and was killed -- "
+             f"treating as TRANSIENT (exit 3), not a guard HALT.")
+        _quarantine_normalised(ts, f"lane_b_call1 timed out after {timeout_s}s (killed by guard)")
+        return 3
     _log(f"lane_b_call1.py --domain {domain} exit {rc}")
     if rc == 1:
         _log("lane_b_call1 RE-CONTAMINATION guard TRIPPED -- persistent HALT")
