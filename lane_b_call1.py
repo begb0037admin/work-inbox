@@ -371,6 +371,34 @@ LANE_B_CODEX_HOME = PRIMARY_CODEX_HOME   # backward-compat alias -- some callers
 # No code change needed for the revert -- this is a one-line flip back.
 EDU_PARKED = os.environ.get("WI_LANE_B_EDU_PARKED", "1").strip().lower() not in ("0", "false", "no")
 
+# EDU_PARKED_RETRIES (added same day, same-run follow-up fix -- see HANDOVER.md
+# for the full incident). The FIRST live verification of EDU_PARKED (14 Sep
+# 2026, ~15:02-15:47 UK) reused FAILOVER's full CALL1_RETRIES budget (default
+# 3 outer retries x up to 2 inner sub-attempts x up to 360s each, plus
+# CALL1_RETRY_BACKOFF_S between outer retries and SNAPSHOT_GAP_S between every
+# call) unchanged -- correct while failover was the RARE path (Edu usually
+# succeeded fast, failover only paid this cost occasionally), but wrong once
+# personal became the ONLY path called every run: the calendar domain alone
+# consumed the task's entire PT45M ExecutionTimeLimit on its own retry budget,
+# Task Scheduler force-terminated the whole task before Teams, mail, or
+# fetch_inbox.py's own phases ever ran, and orphaned grandchild python/codex/
+# node processes survived that termination and had to be killed by hand
+# (Task Scheduler's own kill does not reliably reach a multi-generation
+# process tree either -- same class of problem 3 Sept's `taskkill /T /F` fix
+# solved one level down, just one level higher up the tree this time).
+# EDU_PARKED_RETRIES governs the OUTER retry loop only (how many times
+# _fetch_domain_one_identity re-tries the WHOLE domain fetch after an
+# "unavailable this cycle"/codex_failed outcome) -- the inner per-call
+# protections (max_attempts=2 cold-start-hang absorber, the real
+# Popen+taskkill timeout, the re-contamination guard) are UNCHANGED and still
+# apply on every single attempt. Default 1: personal still gets one full,
+# real attempt (itself internally protected by the 2-sub-attempt absorber, up
+# to ~720s worst case for that one domain) -- just not FAILOVER's old
+# "benefit of the doubt, try up to 3 times" allowance, which no longer fits
+# now that every domain, every run, goes through this path. Tune via
+# WI_LANE_B_EDU_PARKED_RETRIES if 1 proves too thin in practice.
+EDU_PARKED_RETRIES = max(1, int(os.environ.get("WI_LANE_B_EDU_PARKED_RETRIES", "1")))
+
 
 def _codex_home(codex_home: str | None = None) -> Path:
     return Path(codex_home or PRIMARY_CODEX_HOME)
@@ -1706,11 +1734,13 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
         # timeout/max_attempts), just applied to calendar/teams instead of mail.
         _log(f"[{domain}] Edu parked (WI_LANE_B_EDU_PARKED) -- calling PERSONAL "
              f"({FAILOVER_CODEX_HOME}) directly as the sole identity this run; no attempt "
-             f"against Edu ({PRIMARY_CODEX_HOME}) at all.")
+             f"against Edu ({PRIMARY_CODEX_HOME}) at all. Outer retry budget "
+             f"{EDU_PARKED_RETRIES} (WI_LANE_B_EDU_PARKED_RETRIES) -- see that constant's own "
+             f"comment for why this is tighter than FAILOVER's old default.")
         result, attempts = _fetch_domain_one_identity(
-            domain, prompt, window_days=window_days, ts=ts, retries=retries,
+            domain, prompt, window_days=window_days, ts=ts, retries=EDU_PARKED_RETRIES,
             codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
-            timeout_s=CALL1_TIMEOUT_S, max_attempts=2)   # same budget fetch_mail_domain() uses
+            timeout_s=CALL1_TIMEOUT_S, max_attempts=2)   # inner cold-start-hang absorber unchanged
         if result is None:
             result = {"domain": domain, "status": "codex_failed", "served_by": None,
                       "guard": {"seen": [], "unexpected": []},
