@@ -1,3 +1,82 @@
+# Handover -- 14 September 2026, evening (Drew) -- Bridge Briefing hang investigation broadened estate-wide: real enforced process-tree timeouts + real-time output everywhere a Codex connector subprocess runs
+
+Kevin broadened the scope of the same-day hang investigation (EDU_PARKED,
+below) to every connector call site across work-inbox/command-centre/
+meeting-records-engineering/hris-dashboard, not just this repo's Bridge
+Briefing. Full findings:
+
+**work-inbox (`5340153`):** two real structural gaps found beyond EDU_PARKED:
+1. `lane_b_cal_guard.py::cmd_run()` launched `lane_b_call1.py` via a bare
+   `subprocess.run()` with **no timeout at all** -- the actual hang site of
+   the 14+ minute incident documented below. Fixed: `Popen`+`wait(timeout=...)`
+   with a `taskkill /T /F` tree-kill on timeout, mirroring
+   `run_codex_json()`'s own proven pattern. The timeout
+   (`_guard_run_timeout_s()`) is COMPUTED from `lane_b_call1.py`'s own live
+   retry/timeout constants (not hand-guessed) and capped under the
+   wrapper's own PT45M so this guard's kill always wins the race against
+   Task Scheduler's less-reliable one (logs a warning when the cap binds --
+   confirmed live: computed ~2722s for `--domain both`, capped to 2500s).
+2. `_ensure_warm()`'s codex warm-up call had the identical defeated-timeout
+   bug `run_codex_json()` itself had before its 3 Sept fix (Windows
+   `subprocess.run(timeout=...)` only kills the direct child, leaving a
+   grandchild `codex`/`node` worker running on timeout). Same
+   `Popen`+`taskkill` tree-kill pattern applied.
+3. Every subprocess launch of a Python child that itself launches a
+   connector call now runs genuinely unbuffered (`-u`), so real-time
+   `_log()` progress can never sit invisibly buffered during a hang -- the
+   exact "log froze, zero further output" symptom from both the 10 Sep and
+   14 Sep incidents.
+
+Live-verified end to end on this desktop (no real connector creds here,
+but the process-tree mechanics are real): proved `taskkill /T /F` reaps a
+genuine grandchild process, then ran `cmd_run()` for both `--domain
+calendar` and `--domain both` with a forced short timeout -- confirmed
+real-time log interleaving and a clean timeout -> taskkill -> exit-3
+sequence, zero orphans. Pre-existing selftest suite still passes.
+
+**hris-dashboard (`b7f1f2d`):** already personal-identity-only by
+construction (no EDU_PARKED-equivalent needed) and already reuses
+`run_codex_json()`'s real tree-kill timeout -- only gap was the wrapper
+`.ps1` invoking python without `-u`. Fixed. Flagged, not fixed: no
+whole-run deadline on the OSM fetch's own 4x2-attempt retry loop (mirrors
+work-inbox's pre-fix gap one level up); `WI_LANE_B_CODEX_HOME_FAILOVER`
+could in principle override which identity counts as "personal" with no
+assertion. Note: this wrapper self-refreshes `lane_b_call1.py` from
+work-inbox's `main` at the start of every laptop run, so its warm-up fix
+only took effect once work-inbox's fix was pushed (both pushed same
+session, work-inbox first).
+
+**command-centre:** no connector call site exists in that repo at all
+(confirmed via full-repo grep) -- no change needed.
+
+**meeting-records:** Edu-parked routing already documented same day
+(`1cd587a`, README) -- no checked-in connector wrapper exists there (every
+pull is a one-off `codex exec`), so there was no code to patch for any of
+the three items.
+
+**Process finding, recorded to `begb0037admin/drew` memory and
+`agent-commons` (cross-cutting, applies to any agent dispatching parallel
+`codex exec` review calls):** two concurrent `codex exec --sandbox
+read-only` review dispatches, each individually instructed "make no file
+edits, read-only", nonetheless resulted in real file writes to
+`lane_b_call1.py`'s `_ensure_warm()` -- traced to an apparent inter-session
+"collab" reconciliation between the two Codex processes (one session's own
+transcript explicitly referenced waiting on / agreeing with "Drew's
+delegated review", i.e. the other concurrent session). The write itself
+was substantively correct (matched a review finding, and a pre-existing
+selftest's monkeypatch needed the identical fix, which was also applied
+correctly) and no file outside the two intended targets was touched, but
+`--sandbox read-only` did not prevent it -- that flag governs shell-command
+execution inside Codex's sandbox, not its own native file-edit tool.
+Full diff was independently re-verified, reconciled, and re-tested before
+commit either way. Practical implication: do not treat `--sandbox
+read-only` (or a read-only instruction in the prompt) as a guarantee no
+file changes will occur, especially when running more than one `codex
+exec` concurrently against related files -- always diff the working tree
+after any `codex exec` call, read-only or not, before trusting it.
+
+---
+
 # Handover -- 13 September 2026, later evening (Drew) -- Codex M365 connector reflap: ROOT CAUSE CORRECTED (cross-machine token-holder collision, not kill-during-refresh alone) + `codex_connector_reauth.ps1` built
 
 ## CORRECTION to the entry directly below (read this first)
