@@ -1,3 +1,7 @@
+# Handover -- 14 September 2026, later evening (Drew) -- priority-card OWA backfill completed after the missed-email + tab-reuse fixes
+
+Task 1 follow-up completed by Codex: every one of the 25 `prioritiesToday`/`prioritiesTomorrow`/`prioritiesWeek` cards now has a live connector-verified `message_id` and native OWA `web_link`. The five rendered `needs` cards that lacked a link were also backfilled; existing FYI/needs links were preserved. Backup: `Archive/briefing_backup_20260914_2121.json`. Task 2 and the calendar-dedup follow-up remain the next actions.
+
 # Handover -- 14 September 2026, later evening (Drew) -- missed-email + tab-reuse fixes: root-caused a real dropped email (James Salas Guillen's IRIS/IEX reply), fixed the mail_inbox fetch + a CC webLink write bug, fixed target=_blank tab spam
 
 Four things Kevin flagged after the hang-investigation work above shipped, all closed this session:
