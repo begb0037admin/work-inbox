@@ -1082,7 +1082,7 @@ function renderBriefing(data,key){
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
   renderCalPanel(data);
-  setupCtxTicker(data.context);
+  setupCtxTicker(data.subtitle?(data.subtitle+(data.context?'. '+data.context:'')):data.context);
   const absEl=document.getElementById('absencesSidebar');
   if(absEl){
     if(data.absences&&data.absences.length){
