@@ -130,7 +130,7 @@ Get-CimInstance Win32_Process | Where-Object {
 $RemoteProbeScriptTemplate = @'
 param([string]$CodexHome)
 $env:CODEX_HOME = $CodexHome
-codex exec -s read-only --json "__PROMPT__"
+codex exec -s read-only --skip-git-repo-check --json "__PROMPT__"
 '@
 
 $tmpDir = [System.IO.Path]::GetTempPath()
@@ -184,7 +184,7 @@ if ($status -notmatch 'Logged in') {
 
 # --- Step 4: verify the fresh grant works from the desktop's own CODEX_HOME ---
 Write-Step "Step 4/6: verifying desktop connector access (single narrow probe, no retries)"
-$desktopProbe = & codex exec -s read-only --json $ProbePrompt 2>&1
+$desktopProbe = & codex exec -s read-only --skip-git-repo-check --json $ProbePrompt 2>&1
 $desktopProbeText = $desktopProbe -join "`n"
 if ($desktopProbeText -match 'oauth_token_invalid_grant|TRIGGER_REAUTHENTICATION') {
     Write-Error "Desktop probe still shows oauth_token_invalid_grant right after a fresh login -- stopping. Do not push this to the Oxford laptop. Report this back rather than retrying immediately."
