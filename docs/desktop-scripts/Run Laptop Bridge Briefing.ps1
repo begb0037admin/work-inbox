@@ -58,6 +58,15 @@ wiring added 2 Sept 2026 evening (Drew) -- NEITHER LIVE YET:
   Passing -CalBackend connector by hand (this script only, not the live task)
   is how Kevin/the coordinator proves it end to end before that go-ahead.
 
+  ** 14 SEPT 2026 UPDATE, supersedes "primary (Edu, tried first)" below **:
+  Edu is now PARKED -- taken fully out of the active routing path, not just a
+  fast-fail primary. This task hung 14+ minutes that day on
+  `lane_b_cal_guard.py --run --domain both` right after resolving the Edu
+  identity, never reaching failure or failover. `WI_LANE_B_EDU_PARKED=1` (set
+  below, also the code default in lane_b_call1.py) makes every Lane B domain
+  call PERSONAL directly with no attempt against Edu at all. See the "EDU
+  PARKED" block further down for the mechanism and revert instructions.
+
 Mirrors the live desktop "Run Inbox Briefing.bat" environment, minus Outlook COM
 and minus the hope@ overflow config (single account on the laptop for now -- a
 Pro-cap hit degrades that one run; acceptable for a short bridge).
@@ -337,31 +346,31 @@ if ($laneBDomain) {
   }
   Log "running: python lane_b_cal_guard.py --run --domain $laneBDomain"
 
-  # FAST-FAIL Lane B primary (added 3 Sept 2026, Kevin's explicit requirement).
-  # Edu's connector quota is exhausted until 1 Oct -- every primary attempt on
-  # Edu is currently either a guaranteed failure or, on the evidence of the
-  # 3 Sept 12:51 test run, an intermittent success; either way the default
-  # budget (Teams primary: 2 sub-attempts x 360s + 75s quiet-gaps around every
-  # call) could burn ~15 min/run before ever reaching failover. Force ONE short
-  # primary attempt per domain, no outer retry, a short inter-call quiet gap;
-  # switch to personal (failover) immediately if primary doesn't succeed.
-  # Failover's own budget (WI_LANE_B_TIMEOUT/WI_LANE_B_RETRIES, unset here) is
-  # left at full strength -- personal is proven reliable and keeps the benefit
-  # of the doubt. Live-proven 3 Sept: ~29 min (double-failover, pre-change) ->
-  # ~Xm (fast-fail, see HANDOVER.md for the exact proving-run number).
-  # REVERT THIS WHOLE BLOCK after 1 Oct 2026 when Edu's monthly quota resets --
-  # it deliberately overrides the 3 Sept Teams-primary-budget fix (which exists
-  # for exactly the case this block short-circuits: a primary genuinely worth
-  # waiting on) and is only correct while Edu cannot be trusted to finish in a
-  # reasonable time.
-  $env:WI_LANE_B_PRIMARY_TIMEOUT            = '45'
-  $env:WI_LANE_B_PRIMARY_MAX_ATTEMPTS       = '1'
-  $env:WI_LANE_B_PRIMARY_TIMEOUT_TEAMS      = '45'
-  $env:WI_LANE_B_PRIMARY_MAX_ATTEMPTS_TEAMS = '1'
-  $env:WI_LANE_B_PRIMARY_RETRIES            = '1'
-  $env:WI_LANE_B_SNAPSHOT_GAP_S             = '15'
-  $env:WI_LANE_B_WARMUP_TIMEOUT             = '45'
-  Log "Lane B: FAST-FAIL primary active -- 1 attempt/45s per domain, 15s inter-call gap, immediate personal failover on any primary failure (Edu quota dead until 1 Oct -- REVERT after)"
+  # EDU PARKED -- Edu taken OUT of the active routing path entirely (14 Sept
+  # 2026, Kevin's explicit instruction, supersedes the 3 Sept "FAST-FAIL
+  # primary" block this replaces). Root problem with FAST-FAIL: it still
+  # ISSUED a real call against Edu every run (just with a short 45s/1-attempt
+  # budget) -- that only catches an explicit error/timeout return, not a call
+  # that never returns control at all. Confirmed live 14 Sept: this task hung
+  # 14+ minutes on `lane_b_cal_guard.py --run --domain both` right after
+  # resolving the Edu identity, never reaching the 45s fast-fail timeout or
+  # failover. `lane_b_call1.py`'s own `EDU_PARKED` switch (default ON) now
+  # makes `fetch_domain()` skip Edu completely -- zero subprocess launches
+  # against it, so there is structurally nothing left to hang on -- and calls
+  # PERSONAL directly using personal's own already-generous retry/timeout
+  # budget. The WI_LANE_B_PRIMARY_* fast-fail env vars below are no longer
+  # needed (Edu is never attempted, so there's no primary budget to tune) and
+  # have been removed from this script; they still work as env-var overrides
+  # if a future session sets WI_LANE_B_EDU_PARKED=0 and wants a bounded
+  # primary again.
+  #
+  # REVERT: set `$env:WI_LANE_B_EDU_PARKED = '0'` (or delete this whole
+  # explicit-set line so the process falls through to whatever the OS
+  # environment has) to restore Edu-primary/personal-failover behaviour.
+  # Kevin's stated intent is to revisit this ~1 Oct 2026 -- re-check with him
+  # before flipping it back rather than assuming the date alone is sufficient.
+  $env:WI_LANE_B_EDU_PARKED = '1'
+  Log "Lane B: Edu PARKED -- every domain calls PERSONAL directly as the sole identity this run, no attempt against Edu at all (set WI_LANE_B_EDU_PARKED=0 to revert)"
   & python -u (Join-Path $root 'lane_b_cal_guard.py') --run --domain $laneBDomain 2>&1 | Tee-Object -FilePath $log -Append
   $guardRc = $LASTEXITCODE
   Log "lane_b_cal_guard.py exit $guardRc"

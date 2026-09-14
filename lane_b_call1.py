@@ -341,6 +341,36 @@ else:
     PRIMARY_CODEX_HOME = _OS_DEFAULT_CODEX_HOME
 LANE_B_CODEX_HOME = PRIMARY_CODEX_HOME   # backward-compat alias -- some callers/logs still read this name
 
+# EDU PARK SWITCH (added 14 Sep 2026, Kevin's explicit instruction -- routing
+# fix for the same-day incident where "Work Inbox Bridge Briefing" hung 14+
+# minutes on `lane_b_cal_guard.py --run --domain both` right after resolving
+# the Edu identity, never reaching the ps1's own 45s fast-fail timeout or
+# failover at all. Root problem: the 3 Sept "FAST-FAIL primary" design (see
+# `Run Laptop Bridge Briefing.ps1`) still ISSUES a real call against Edu every
+# run, just with a short budget -- it only catches an explicit error/timeout
+# return, not a call that never returns control at all (the observed hang).
+# Kevin's decision (superseding "leave Edu as a fast-fail primary"): take Edu
+# fully OUT of the active routing path -- not attempted at all, not even a
+# short fast-fail attempt -- so there is structurally nothing left to hang on.
+# Personal becomes the sole identity Lane B ever calls, using personal's own
+# already-generous, already-proven retry/timeout budget (same numbers
+# `fetch_mail_domain()` already uses for mail, which has never had a primary
+# at all -- see that function's own docstring for the precedent this mirrors).
+#
+# Default ON (Edu parked): matches Kevin's existing 13 Sep decision to keep
+# Edu out of use until he revisits ~1 Oct 2026 (agent-commons
+# `candidate_codex_edu_connector_deferred_until_1oct.md`) -- this flag changes
+# HOW that parking is enforced (route away entirely, zero attempts) rather
+# than WHETHER Edu is parked (already true). Not a permanent architecture
+# change: Edu-primary/personal-failover (`fetch_domain()`'s pre-14-Sept
+# behaviour) is fully intact below, just skipped while this flag is on.
+#
+# REVERT: set WI_LANE_B_EDU_PARKED=0 (env var, e.g. in
+# `Run Laptop Bridge Briefing.ps1` or the scheduled task's environment) to
+# restore Edu-primary/personal-failover exactly as it was before 14 Sep 2026.
+# No code change needed for the revert -- this is a one-line flip back.
+EDU_PARKED = os.environ.get("WI_LANE_B_EDU_PARKED", "1").strip().lower() not in ("0", "false", "no")
+
 
 def _codex_home(codex_home: str | None = None) -> Path:
     return Path(codex_home or PRIMARY_CODEX_HOME)
@@ -1666,6 +1696,32 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
     connector-unreliability semantics. The caller (main()) is expected to let
     this crash the run (non-zero exit, visible in the scheduled task/log),
     not swallow it."""
+    if EDU_PARKED:
+        # Edu parked (see EDU_PARKED's own comment above, 14 Sep 2026) -- route
+        # straight to PERSONAL as the sole identity for this run. Deliberately
+        # NOT calling _fetch_domain_one_identity() against PRIMARY_CODEX_HOME at
+        # all -- zero subprocess launches against Edu, so there is nothing to
+        # hang, time out, or fast-fail on. Mirrors fetch_mail_domain()'s own
+        # personal-only shape exactly (same codex_home, same generous
+        # timeout/max_attempts), just applied to calendar/teams instead of mail.
+        _log(f"[{domain}] Edu parked (WI_LANE_B_EDU_PARKED) -- calling PERSONAL "
+             f"({FAILOVER_CODEX_HOME}) directly as the sole identity this run; no attempt "
+             f"against Edu ({PRIMARY_CODEX_HOME}) at all.")
+        result, attempts = _fetch_domain_one_identity(
+            domain, prompt, window_days=window_days, ts=ts, retries=retries,
+            codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
+            timeout_s=CALL1_TIMEOUT_S, max_attempts=2)   # same budget fetch_mail_domain() uses
+        if result is None:
+            result = {"domain": domain, "status": "codex_failed", "served_by": None,
+                      "guard": {"seen": [], "unexpected": []},
+                      "tool_calls": [], "count": 0, "raw_items": []}
+        result["attempts"] = attempts
+        result["primary_failover_identical"] = False
+        result["edu_parked"] = True
+        _log(f"[{domain}] final status={result['status']} served_by={result.get('served_by')} "
+             f"after {len(attempts)} attempt(s) (Edu parked -- personal-only this run)")
+        return result
+
     # Collision guard (added 3 Sept 2026, regression fix): if PRIMARY_CODEX_HOME
     # and FAILOVER_CODEX_HOME resolve to the SAME path, automatic failover is a
     # no-op by construction -- there is nothing distinct to fail over to, and a
@@ -1939,11 +1995,17 @@ def main(argv: list[str]) -> int:
     ts = _utcstamp()
     _log(f"start domain={args.domain} window_days={args.window_days} ts={ts}")
     if not args.from_file:
+        if EDU_PARKED:
+            _log(f"EDU PARKED (WI_LANE_B_EDU_PARKED) -- PRIMARY ({PRIMARY_CODEX_HOME}) will NOT be "
+                 f"attempted this run; every domain calls PERSONAL directly as the sole identity. "
+                 f"Set WI_LANE_B_EDU_PARKED=0 to restore Edu-primary/personal-failover.")
         _log(f"PRIMARY   CODEX_HOME={PRIMARY_CODEX_HOME}  account_id={_codex_account_id(PRIMARY_CODEX_HOME)}"
-             + ("  [WI_LANE_B_CODEX_HOME override]" if os.environ.get('WI_LANE_B_CODEX_HOME', '').strip() else ""))
+             + ("  [WI_LANE_B_CODEX_HOME override]" if os.environ.get('WI_LANE_B_CODEX_HOME', '').strip() else "")
+             + ("  [PARKED -- not attempted]" if EDU_PARKED else ""))
         _log(f"FAILOVER  CODEX_HOME={FAILOVER_CODEX_HOME}  account_id={_codex_account_id(FAILOVER_CODEX_HOME)}"
              + ("  [WI_LANE_B_CODEX_HOME_FAILOVER override]" if os.environ.get('WI_LANE_B_CODEX_HOME_FAILOVER', '').strip() else "")
-             + ("  (same as primary -- no distinct failover configured)" if FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME else ""))
+             + ("  (same as primary -- no distinct failover configured)" if FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME else "")
+             + ("  [ACTIVE -- sole identity while Edu parked]" if EDU_PARKED else ""))
     LANE_B_DIR.mkdir(parents=True, exist_ok=True)
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
