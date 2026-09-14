@@ -1077,7 +1077,7 @@ function renderBriefing(data,key){
   currentData=data; currentKey=key;
   window._wipData=data; window._wipKey=key;
   document.getElementById('pageTitle').textContent=getGreeting();
-  document.getElementById('headerDate').textContent=data.date+(data.subtitle?' · '+data.subtitle:'');
+  document.getElementById('headerDate').textContent=data.date;
   renderStaleBanner(data);
   const stamp=document.getElementById('refresh-stamp');
   if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
