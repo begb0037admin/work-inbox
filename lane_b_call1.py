@@ -1331,6 +1331,120 @@ def resolve_mail_weblink(message_id: str) -> str:
     return ""
 
 
+def resolve_mail_weblink_by_subject(subject: str, received_raw: str = "") -> str:
+    """Subject-search fallback for resolve_mail_weblink(), added 14 Sep 2026
+    (Drew) to close a flagged gap: Phase 3.1's message_id lookup has nothing
+    to filter on for a card whose only identifier is a legacy Outlook COM
+    `entry_id` (a local, non-Graph identifier) -- those cards were
+    structurally unreachable by resolve_mail_weblink() and, once carried
+    forward by Phase 3.9, permanently stuck with no envelope icon.
+
+    Looks the message up by EXACT subject (Graph `subject eq` filter) instead
+    of internetMessageId. A card's `subject` field is the literal subject
+    string as originally captured (COM/IMAP/connector all preserve it
+    verbatim, including any Re:/RE:/Fwd: prefix), so an exact match against
+    THAT specific string is expected to be precise. Deliberately NOT using a
+    fuzzy contains()-style search -- this function must never guess a card
+    onto the wrong email (same "FAILS SOFT... never fabricate" contract as
+    resolve_mail_weblink() above).
+
+    Disambiguation happens here in Python against the raw tool-call result,
+    never by trusting the model's own narrative (same philosophy as
+    resolve_mail_weblink()): if the exact-subject search returns more than
+    one message, narrow to whichever candidate(s) have a receivedDateTime
+    within 3 days of `received_raw` (the date this card's email first
+    arrived, if known). If exactly one candidate remains, use it. If zero or
+    more than one remain ambiguous, return "" and log why -- never picks one
+    arbitrarily.
+
+    Same PERSONAL-ACCOUNT-ONLY / guard / fail-soft contract as
+    resolve_mail_weblink(): always runs against FAILOVER_CODEX_HOME, a guard
+    HALT or any exception returns "" rather than raising."""
+    subj = (subject or "").strip()
+    if not subj:
+        return ""
+    filt_subj = subj.replace("'", "''")  # OData literal escaping, same convention as elsewhere in this file
+    prompt = (
+        "Using the Microsoft Outlook Email connector, in READ-ONLY mode: look up "
+        f"email message(s) whose subject is EXACTLY '{subj}'. Call list_messages "
+        f"with filter subject eq '{filt_subj}', order by receivedDateTime desc, "
+        "top 10. Report back the full result list as returned by the tool "
+        "(subject, receivedDateTime, web_link for each) -- do not filter, "
+        "narrow, or pick one yourself, just report what the tool returned. If "
+        "none are found, say so plainly. Do not send, reply, forward, move, "
+        "delete, draft, or modify anything -- this is a read-only lookup, "
+        "change nothing."
+    )
+    try:
+        objs, raw = run_codex_json(prompt, timeout_s=120, tag="mail",
+                                    codex_home=FAILOVER_CODEX_HOME, max_attempts=1,
+                                    workload_class="high")
+    except ReContaminationDetected as e:
+        _log(f"[mail] RE-CONTAMINATION resolving webLink-by-subject for {subj!r} -- {e} -- "
+             f"skipped, investigate before relying on this identity again")
+        return ""
+    except codex_model_policy.ModelPolicyViolation as e:
+        _log(f"[mail] MODEL POLICY VIOLATION resolving webLink-by-subject for {subj!r} -- {e} -- "
+             f"this is a code/config bug, NOT a connector-availability issue; not propagated, "
+             f"same non-fatal contract as resolve_mail_weblink()")
+        return ""
+    except Exception as e:  # noqa: BLE001 -- best-effort, must never fail the briefing
+        _log(f"[mail] webLink-by-subject resolution failed for {subj!r} (non-fatal): {e}")
+        return ""
+
+    try:
+        _ts = _utcstamp()
+        (LANE_B_DIR / f"{_ts}_call1_mail_bysubj_failover_a1.jsonl").write_text(raw, encoding="utf-8")
+    except OSError:
+        pass
+
+    tool_calls = extract_tool_calls(objs)
+    status, detail = guard_recontamination(tool_calls, "mail")
+    if status == "halt":
+        _log(f"[mail] RE-CONTAMINATION guard HALT resolving webLink-by-subject for {subj!r} -- "
+             f"{detail} -- skipped, investigate before relying on this identity again")
+        return ""
+    if status == "unavailable":
+        _log(f"[mail] webLink-by-subject resolution for {subj!r}: list_messages never fired "
+             f"(connector unavailable this cycle) -- skipped")
+        return ""
+
+    candidates = []
+    for tc in tool_calls:
+        if tc["tool"].split(".")[-1] != "list_messages":
+            continue
+        sc = tc.get("result") or {}
+        for m in (sc.get("value") or []):
+            wl = (m.get("web_link") or m.get("webLink") or "").strip()
+            if wl:
+                candidates.append(m)
+
+    if not candidates:
+        _log(f"[mail] webLink-by-subject resolution for {subj!r}: message not found via the connector")
+        return ""
+
+    if len(candidates) > 1 and received_raw:
+        target_dt = _parse_iso_utc(received_raw)
+        if target_dt is not None:
+            narrowed = []
+            for m in candidates:
+                m_dt = _parse_iso_utc(m.get("receivedDateTime") or m.get("received_date_time") or "")
+                if m_dt is not None and abs((m_dt - target_dt).total_seconds()) <= 3 * 86400:
+                    narrowed.append(m)
+            if narrowed:
+                candidates = narrowed
+
+    if len(candidates) != 1:
+        _log(f"[mail] webLink-by-subject resolution for {subj!r}: "
+             f"{len(candidates)} ambiguous candidate(s) after date-narrowing -- not guessing, leaving unresolved")
+        return ""
+
+    wl = (candidates[0].get("web_link") or candidates[0].get("webLink") or "").strip()
+    if wl:
+        _log(f"[mail] resolved webLink-by-subject for {subj!r}")
+    return wl
+
+
 # --------------------------------------------------------------------------- #
 #  Map connector event/message objects -> normalise_pull raw shape
 # --------------------------------------------------------------------------- #
