@@ -1058,17 +1058,25 @@ function renderStaleBanner(data){
     if(headerDate&&headerDate.parentNode) headerDate.parentNode.insertBefore(el,headerDate.nextSibling);
     else document.body.insertBefore(el,document.body.firstChild);
   }
+  el.style.cssText='display:block;padding:8px 16px;border-radius:8px;margin:10px 0 4px;font-size:13px;font-weight:600;';
   const now=new Date();
   const refreshed=_parseRefreshedAt(data.refreshed_at,now.getFullYear());
   const expected=_mostRecentExpectedRun(now);
-  if(!refreshed||!expected||refreshed>=expected){
-    el.style.display='none';
-    el.innerHTML='';
+  const ok = refreshed && expected && refreshed>=expected;
+  if(ok){
+    el.style.background='#1e7e34';
+    el.style.color='#fff';
+    el.innerHTML='&#9679; Up to date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown');
+    return;
+  }
+  el.style.background='#a3271f';
+  el.style.color='#fff';
+  if(!refreshed){
+    el.innerHTML='&#9888; No refresh time available &mdash; run status unknown. Run "Run Inbox Briefing.bat" manually if this persists.';
     return;
   }
   const hoursBehind=Math.round((now-refreshed)/3600000);
-  el.style.cssText='display:block;background:#a3271f;color:#fff;padding:10px 18px;border-radius:8px;margin:10px 0 4px;font-size:13px;font-weight:600;';
-  el.innerHTML='&#9888; Data may be out of date &mdash; last refreshed '+escapeHtml(data.refreshed_at||'unknown')+
+  el.innerHTML='&#9888; Data may be out of date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown')+
     ' ('+hoursBehind+'h ago). A refresh was expected by '+escapeHtml(expected.toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}))+
     '. Run "Run Inbox Briefing.bat" manually if this persists.';
 }
@@ -1079,8 +1087,6 @@ function renderBriefing(data,key){
   document.getElementById('pageTitle').textContent=getGreeting();
   document.getElementById('headerDate').textContent=data.date;
   renderStaleBanner(data);
-  const stamp=document.getElementById('refresh-stamp');
-  if(stamp&&data.refreshed_at) stamp.textContent='Last refreshed: '+data.refreshed_at;
   renderCalPanel(data);
   setupCtxTicker(data.subtitle?(data.subtitle+(data.context?'. '+data.context:'')):data.context);
   const absEl=document.getElementById('absencesSidebar');
