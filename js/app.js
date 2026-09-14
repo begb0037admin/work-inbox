@@ -326,7 +326,7 @@ function openEmailWeb(ev,el){
   const raw=(el&&el.getAttribute)?el.getAttribute('data-weburl'):'';
   const url=_owaWebUrl({web_link:raw});
   if(url){
-    window.open(url,'_blank','noopener');
+    window.open(url,'wi-email-view','noopener');
   }else{
     alert('No usable Outlook Web link is stored for this email (an https link on outlook.office.com / outlook.office365.com is required), so it cannot be opened from here.');
   }
@@ -941,7 +941,7 @@ function _priRenderOneCard(p,sec){
     : (p.entry_id||p.entryId)
       ? `<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`
       : '';
-  const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','_blank');event.stopPropagation()">CC&#8594;</span>`:'';
+  const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','wi-cc-task-view');event.stopPropagation()">CC&#8594;</span>`:'';
   const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
   return `<div class="card-ph${ticked?' done':''}${hiddenCls}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
       <span class="card-drag" onclick="event.stopPropagation()">&#10783;</span>
@@ -1063,22 +1063,36 @@ function renderStaleBanner(data){
   const refreshed=_parseRefreshedAt(data.refreshed_at,now.getFullYear());
   const expected=_mostRecentExpectedRun(now);
   const ok = refreshed && expected && refreshed>=expected;
+  // Mail-fetch truncation-risk line (14 Sep 2026, Drew) -- surfaces
+  // data.mail_truncation_risk (set by fetch_inbox.py/lane_b_call1.py when
+  // the connector mail_inbox fetch's unread or read pass hit its own cap,
+  // meaning an older-but-in-window message was likely dropped silently).
+  // Root-cause incident: James Salas Guillen's 14 Sep "RE: IRIS / IEX -
+  // Incidents Changes" reply never appeared in that day's briefing at all,
+  // crowded out by same-day lower-priority mail with nothing visible to
+  // flag it. Appended as its own line regardless of the up-to-date/stale
+  // state above, since truncation risk is orthogonal to staleness.
+  const truncNote = data.mail_truncation_risk
+    ? '<div style="margin-top:4px;">&#9888; Mail fetch may be incomplete this run &mdash; the inbox pull hit its own message cap, '
+      + 'so an older (but still in-window) email could be missing from this briefing. Check Outlook directly if you are expecting '
+      + 'something specific.</div>'
+    : '';
   if(ok){
     el.style.background='#1e7e34';
     el.style.color='#fff';
-    el.innerHTML='&#9679; Up to date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown');
+    el.innerHTML='&#9679; Up to date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown')+truncNote;
     return;
   }
   el.style.background='#a3271f';
   el.style.color='#fff';
   if(!refreshed){
-    el.innerHTML='&#9888; No refresh time available &mdash; run status unknown. Run "Run Inbox Briefing.bat" manually if this persists.';
+    el.innerHTML='&#9888; No refresh time available &mdash; run status unknown. Run "Run Inbox Briefing.bat" manually if this persists.'+truncNote;
     return;
   }
   const hoursBehind=Math.round((now-refreshed)/3600000);
   el.innerHTML='&#9888; Data may be out of date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown')+
     ' ('+hoursBehind+'h ago). A refresh was expected by '+escapeHtml(expected.toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}))+
-    '. Run "Run Inbox Briefing.bat" manually if this persists.';
+    '. Run "Run Inbox Briefing.bat" manually if this persists.'+truncNote;
 }
 
 function renderBriefing(data,key){
@@ -1255,7 +1269,7 @@ function renderCalPanel(data){
       // Kevin's explicit ask, 10 Aug 2026: "it should high[light] the item
       // so i can drill dowwn into the email if required." No matching task
       // -> no CC link at all, rather than one that goes nowhere useful.
-      const ccLink=c.ccTaskId?`<a class="summary-cc-link" href="https://cc.lelitte.co.uk/#${encodeURIComponent(c.ccTaskId)}" target="_blank">CC &#8594;</a>`:'';
+      const ccLink=c.ccTaskId?`<a class="summary-cc-link" href="https://cc.lelitte.co.uk/#${encodeURIComponent(c.ccTaskId)}" target="wi-cc-task-view">CC &#8594;</a>`:'';
       return `<div class="main-cal-item${cls}"><span class="main-cal-time">${escapeHtml(c.time||'')}</span><div style="flex:1;min-width:0"><div class="main-cal-title">${escapeHtml(c.title)}</div>${c.sub?`<div class="main-cal-sub">${escapeHtml(c.sub)}</div>`:''}${c.summary?`<div class="main-cal-summary-wrap"><div class="main-cal-summary-text" id="${sumId}">${escapeHtml(c.summary)}</div><div class="main-cal-summary-footer"><button class="summary-toggle" onclick="toggleSum('${sumId}',this)">Show more</button>${ccLink}</div></div>`:''}</div></div>`;
     }).join('');
     return `<div class="main-cal-block"><div class="main-cal-block-header">${headerHtml}</div><div class="cal-col-body" id="${bodyId}">${rows}</div></div>`;
@@ -1542,7 +1556,7 @@ function openDraftOriginal(ev,btn){
   let url='';
   if(raw){try{const u=new URL(raw);if(u.protocol==='https:'&&hosts[u.hostname]) url=raw;}catch(_){url='';}}
   if(url){
-    window.open(url,'_blank','noopener');
+    window.open(url,'wi-email-view','noopener');
   }else{
     const subj=(btn&&btn.getAttribute)?btn.getAttribute('data-subject'):'';
     alert('This draft has no linked original message that can be opened from here'+(subj?' — find it in Outlook by subject:\n\n'+subj:'')+'.');
