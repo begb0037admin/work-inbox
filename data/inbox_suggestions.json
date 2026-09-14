@@ -1,6 +1,45 @@
 {
-  "generated_at": "2026-09-11 16:08",
+  "generated_at": "2026-09-14 16:47",
   "new_tasks": [
+    {
+      "title": "Investigate P5 Incident# 11710565 - Task# 50985406 assigned",
+      "tier": "today",
+      "description": "Michael O'Sullivan assigned this P5 incident directly to Kevin on 14 September for urgent investigation affecting multiple users who reported the issue. Requires immediate diagnostic and troubleshooting work to identify root cause and resolution path for the affected user group.",
+      "email_subject": "Orthopaedic Hand Surgery Follow-up Review",
+      "email_from": "Kevin (sent to: Marie Cooksey, Simon Burford)",
+      "received": "",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ9AAA=",
+      "web_link": "",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ9AAA=",
+      "auto_promoted": true
+    },
+    {
+      "title": "Submit Expression of Interest for 2nd Cohort AI/Data apprenticeships (Multiverse)",
+      "tier": "week",
+      "description": "Charlie Richards-Gladstone (Multiverse) flagged that the cohort deadline for Expression of Interest forms is this Wednesday 16 September and Kevin's EOI submission is the only outstanding item blocking the cohort approval. Deadline is imminent and must be submitted to meet the Wednesday cutoff.",
+      "email_subject": "Re: 38 day balance for departments update and decisions needed",
+      "email_from": "Kevin (sent to: Julie Hickman)",
+      "received": "",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ-AAA=",
+      "web_link": "",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ-AAA=",
+      "auto_promoted": true
+    },
+    {
+      "title": "Confirm and finalize FA works data file upload by 18 September",
+      "tier": "week",
+      "description": "Nathan Kirwan has completed UDF template structure matching and data item alignment; Kevin confirmed structure is correct and has answered technical questions (appointment vs person-level UDFs, null-value handling, UTF-8 encoding). Final task is to confirm submission approach and ensure upload by Thursday 17 September ahead of Friday 18 September deadline.",
+      "email_subject": "Physio (Hand and Knee)",
+      "email_from": "Kevin (sent to: Marie Cooksey, Simon Burford)",
+      "received": "",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe6xa7hAAA=",
+      "web_link": "",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe6xa7hAAA=",
+      "auto_promoted": true
+    },
     {
       "title": "Review IRIS Changes project plan - September 2026",
       "tier": "today",
@@ -76,5 +115,78 @@
       "carried_forward": true
     }
   ],
-  "task_updates": []
+  "applied_updates": [
+    {
+      "task_id": "t2608031500570",
+      "task_title": "DTP1092 College Staff into PXD - complete integrations testing by 14 Aug",
+      "note": "Crispin Muncaster shared DTP1092 weekly team meeting notes from 8 September showing Organization Hierarchy Option 2 agreed and project progressing on schedule.",
+      "email_subject": "DTP1092 College Staff into PXD - Weekly team meeting notes - 8-Sep-26",
+      "email_from": "Crispin Muncaster",
+      "received": "2026-09-10T14:31",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAe6xYVRAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6xYVRAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAe6xYVRAAA="
+    },
+    {
+      "task_id": "t2608121801280",
+      "task_title": "Review 38-day balance implementation timeline and decisions",
+      "note": "Julie Hickman confirmed Chemistry department batching all 38-day balance system updates in one phase; Chemistry ready as pilot with 131 workgroups and minor changes being chased next week.",
+      "email_subject": "RE: 38 day balance for departments update and decisions needed",
+      "email_from": "Julie Hickman",
+      "received": "2026-09-10T13:19",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAe6xYVOAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6xYVOAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAe6xYVOAAA="
+    },
+    {
+      "task_id": "task-1787072363309",
+      "task_title": "URGENT -- Organisational Structure Update - August 2026 - FINAL",
+      "note": "Anna Gilbert responded with Trinity Term 2026 non-college changes findings from Sally Vine (HAF Department of Physiology, Anatomy and Genetics); B8 finance code conflict still requires decision on reactivation vs fresh code assignment.",
+      "email_subject": "James - off sick",
+      "email_from": "Kevin (sent to: hrsystems@maillist.ox.ac.uk)",
+      "received": "",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ_AAA=",
+      "web_link": "",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrQ_AAA="
+    },
+    {
+      "task_id": "task-1787645383808",
+      "task_title": "Book PDR sessions with Simon Burford and the FA team",
+      "note": "Michael O'Sullivan submitted completed 2026 PDR form ahead of today's 1:30pm review meeting with Kevin.",
+      "email_subject": "Accepted: SHSMS Moderation Meeting Non-functional/Technical requirements (Strategic Health & Safety Modular system)",
+      "email_from": "Kevin (sent to: Helen Harbour)",
+      "received": "",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrRBAAA=",
+      "web_link": "",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe5PrRBAAA="
+    },
+    {
+      "task_id": "t035",
+      "task_title": "WFM / GLAM Rostering -- set up resolution meeting",
+      "note": "Julie Hickman confirmed that Tracy and Mel in IT Services are handling GLAM Ashmolean Visitor Experience Incident 11688462 (leave/absence and rostering issues Kevin escalated).",
+      "email_subject": "RE: Application form - identification of internal candidates",
+      "email_from": "Kevin (sent to: Simon Burford)",
+      "received": "",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe6ICD6AAA=",
+      "web_link": "",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe6ICD6AAA="
+    },
+    {
+      "task_id": "t2608111331410",
+      "task_title": "URGENT -- Cority Applicant Data Import file (James Salas Guillen / Simon Burford thread)",
+      "note": "Simon Burford reported progress on Cority Applicant Data Import file; created test subscription report and exporting CSV file to network location for review.",
+      "email_subject": "Canceled: Kevin A/L (pm)",
+      "email_from": "Kevin (sent to: Marie Cooksey, Simon Burford, Athena Artuso, Sarah Rowles)",
+      "received": "",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe6xa7lAAA=",
+      "web_link": "",
+      "mail_key": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAe6xa7lAAA="
+    }
+  ]
 }
