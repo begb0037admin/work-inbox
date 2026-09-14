@@ -536,16 +536,55 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
     # tell them apart (the model is told "return ONLY the raw result", so it
     # cannot be asked to add its own inbox/sent tagging without breaking
     # Layer 1). Mirrors EXPECTED_TOOL's "mail_inbox"/"mail_sent" domain split.
+    #
+    # REWRITTEN 14 Sep 2026 (Drew) -- root-cause fix for a real missed-email
+    # incident (James Salas Guillen's 14 Sep 10:37 "RE: IRIS / IEX -
+    # Incidents Changes" reply, cc Kevin, never appeared in that day's
+    # briefing at all). Root-caused live via a direct read-only connector
+    # probe: the message was genuinely READ, received the same morning, and
+    # NEVER LEFT THE MAILBOX -- but the live run's own log showed the old
+    # prompt's "in TWO passes: first up to N UNREAD, then up to M READ"
+    # instruction produced exactly ONE list_messages tool call for the whole
+    # domain (not two filtered/sorted calls), extracting exactly
+    # MAIL_INBOX_MAX_UNREAD-observed(1) + MAIL_INBOX_MAX_READ(30) = 31 items
+    # -- consistent with the model collapsing the two-pass instruction into a
+    # single "give me the ~31 newest messages by receipt time" fetch rather
+    # than genuinely separating and preserving unread-priority. On a busy
+    # inbox, same-day lower-priority mail received AFTER the target message
+    # (confirmed live: an IT "Phoneman update" notice and a marketing email
+    # both landed ahead of it in that single fetch) silently pushed a real,
+    # already-read, action-relevant reply out of the window -- with no error,
+    # no warning, nothing for Kevin or any agent to notice short of manually
+    # cross-referencing a specific email against the dashboard.
+    #
+    # Fix: stop asking the model to interpret "two passes" in prose. Tell it
+    # explicitly to issue TWO SEPARATE, FILTERED, SORTED list_messages calls
+    # (this connector's list_messages tool is confirmed live -- 14 Sep 2026
+    # probe -- to accept `filter` (OData-style, e.g. "isRead eq false") and
+    # `top`; orderby is requested explicitly too). This removes the model's
+    # discretion over what "newest" and "two passes" mean and makes the
+    # unread/read split a deterministic API-level operation instead of an
+    # LLM judgement call.
     return (
         "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve "
-        f"messages in my Inbox folder received since {since_iso} (inclusive), in TWO "
-        f"passes: first the up to {MAIL_INBOX_MAX_UNREAD} newest UNREAD messages, then "
-        f"the up to {MAIL_INBOX_MAX_READ} newest READ messages -- do not exceed either "
-        "count. For each message return: subject, from display name, from email address, "
+        f"messages in my Inbox folder received since {since_iso} (inclusive) by making "
+        "list_messages calls against the Inbox folder ONLY (do not use search_messages "
+        "for this). You MUST make exactly two separate list_messages calls, in this "
+        "order, and MUST NOT combine them into one call or skip either one:\n"
+        "1) filter=\"isRead eq false\", orderby=\"receivedDateTime desc\", "
+        f"top={MAIL_INBOX_MAX_UNREAD} -- every result from this call is UNREAD.\n"
+        "2) filter=\"isRead eq true\", orderby=\"receivedDateTime desc\", "
+        f"top={MAIL_INBOX_MAX_READ} -- every result from this call is READ.\n"
+        f"Do not exceed {MAIL_INBOX_MAX_UNREAD} results from call 1 or {MAIL_INBOX_MAX_READ} "
+        "results from call 2. If the tool does not accept a filter/orderby argument in "
+        "this exact form, retry with the closest equivalent it does accept, but still "
+        "make two separate calls -- one scoped to unread mail, one to read mail -- never "
+        "a single unscoped fetch. "
+        "For each message return: subject, from display name, from email address, "
         "received date/time, whether it has been read, whether it has attachments, "
         "importance, the internet Message-ID header, the web link, and a short body preview. "
-        "Return ONLY the raw connector result as JSON (an array of the message objects), "
-        "with no summary, no interpretation, and no prose. "
+        "Return ONLY the raw connector results as JSON (an array combining both calls' "
+        "message objects), with no summary, no interpretation, and no prose. "
         "Do not use any other app or tool. Do not send, reply to, forward, move, delete, "
         "mark as read, categorise, flag, or otherwise modify any message. "
         f"{SAFETY_RULE}"
@@ -1628,6 +1667,7 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
         _log(f"[{domain}] UNEXPECTED tools: {guard_detail['unexpected']}")
 
     raw_items: list = []
+    truncation_risk = False
     if status == "ok":
         objs = _events_from_results(tool_calls, domain, events)
         if domain == "calendar":
@@ -1639,6 +1679,26 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
         else:
             raw_items = teams_messages_to_raw(objs)
         _log(f"[{domain}] extracted {len(raw_items)} item(s)")
+        # 14 Sep 2026 (Drew) -- truncation-risk detection, added alongside the
+        # build_mail_inbox_prompt rewrite above (same incident). Even with a
+        # deterministic two-call prompt, a genuinely busy inbox CAN legitimately
+        # have more than MAIL_INBOX_MAX_READ read messages in the window -- that
+        # is an expected, disclosed cap, not a bug. What must not happen again
+        # is that cap binding SILENTLY, with nothing for Kevin or any agent to
+        # notice short of manually cross-referencing a specific email against
+        # the dashboard. If the read-pass count lands exactly on the configured
+        # cap, at least one older-but-still-in-window read message was almost
+        # certainly dropped -- flagged here so fetch_inbox.py can surface it on
+        # the dashboard status banner rather than swallowing it.
+        if domain == "mail_inbox":
+            unread_n = sum(1 for it in raw_items if it.get("is_read") is False)
+            read_n   = sum(1 for it in raw_items if it.get("is_read") is True)
+            if unread_n >= MAIL_INBOX_MAX_UNREAD or read_n >= MAIL_INBOX_MAX_READ:
+                truncation_risk = True
+                _log(f"[{domain}] WARNING: truncation risk -- unread={unread_n} "
+                     f"(cap {MAIL_INBOX_MAX_UNREAD}) read={read_n} (cap {MAIL_INBOX_MAX_READ}); "
+                     "one of the two passes hit its cap, so an older-but-in-window "
+                     "message may have been dropped from this fetch.")
     elif status == "unavailable":
         _log(f"[{domain}] connector did not return {EXPECTED_TOOL[domain]} -- treating as unavailable this cycle (empty, no HALT)")
 
@@ -1649,6 +1709,7 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
         "tool_calls": [f"{t['server']}::{t['tool']}" for t in tool_calls],
         "count": len(raw_items),
         "raw_items": raw_items,
+        "truncation_risk": truncation_risk,
     }
 
 
@@ -2215,7 +2276,7 @@ def main(argv: list[str]) -> int:
     # fetch_inbox.py's staleness check on calendar/teams look artificially fresh
     # (or vice versa). Each domain now carries its OWN last-successful-write ts,
     # independent of which other domain last touched the shared file.
-    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by", "primary_failover_identical")
+    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by", "primary_failover_identical", "truncation_risk")
     _domains_meta = {d: {**{k: per_domain[d].get(k) for k in _dom_keys}, "ts": ts} for d in per_domain}
     for _cli_domain in _domain_out_key:
         if _cli_domain not in per_domain and _cli_domain in _existing_domains_meta:
