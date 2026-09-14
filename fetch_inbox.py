@@ -466,11 +466,21 @@ def _load_lane_b_mail():
         print(f"Phase 1 - Lane B connector mail: inbox {len(inbox)} sent {len(sent)} "
               f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, "
               f"inbox_calls {mail_inbox_dom.get('tool_calls')}, sent_calls {mail_sent_dom.get('tool_calls')})")
-        return {"inbox": inbox, "sent": sent}
+        # 14 Sep 2026 (Drew) -- carries lane_b_call1.py's truncation_risk flag
+        # (set when the mail_inbox fetch's unread or read pass hit its own
+        # cap, meaning an older-but-in-window message was likely dropped)
+        # through to the briefing so index.html's status banner can warn
+        # Kevin in real time instead of a missed email only surfacing when
+        # he happens to notice a stale task and cross-references it himself.
+        trunc = bool(mail_inbox_dom.get("truncation_risk"))
+        if trunc:
+            print("WARNING: Phase 1 - mail_inbox fetch hit its unread/read cap this run "
+                  "-- an older in-window message may be missing from this briefing")
+        return {"inbox": inbox, "sent": sent, "truncation_risk": trunc}
     except Exception as _lb_e:
         print(f"WARNING: Lane B mail load failed ({_lb_e}) -- mail empty this run, "
               f"briefing continues (calendar/Teams unaffected)")
-        return empty
+        return dict(empty, truncation_risk=False)
 
 
 AI_PARALLEL = (os.environ.get("WI_AI_PARALLEL", "").strip().lower() in ("1", "true", "yes")
@@ -1916,6 +1926,11 @@ for msg in ([] if MAIL_BACKEND in ("imap", "connector") else mapi.GetDefaultFold
     except:
         continue
 
+# Default -- overwritten below only for MAIL_BACKEND=connector, where a
+# genuine truncation-risk signal can exist. com/imap have no equivalent cap
+# mechanism at this layer, so False is the correct (and only) value for them.
+MAIL_TRUNCATION_RISK = False
+
 # -- MAIL_BACKEND=imap: the four COM loops above ran empty; source the mail
 #    lists from IMAP+OAuth2 instead. Calendar block below is untouched (COM). --
 if MAIL_BACKEND == "imap":
@@ -1961,6 +1976,7 @@ elif MAIL_BACKEND == "connector":
     _lb_mail_data = _load_lane_b_mail()
     inbox = _lb_mail_data["inbox"]
     sent  = _lb_mail_data["sent"]
+    MAIL_TRUNCATION_RISK = bool(_lb_mail_data.get("truncation_risk"))
     print(f"Phase 1 - Lane B connector mail pull: inbox {len(inbox)} "
           f"(unread {sum(1 for m in inbox if not m.get('is_read'))}) sent {len(sent)}")
 
@@ -3810,8 +3826,23 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                         task["entryId"] = upd["entry_id"]
                     if upd.get("message_id"):
                         task["messageId"] = (upd.get("message_id") or "").strip().strip("<>")
-                        if upd.get("web_link"):
-                            task["webLink"] = upd["web_link"]
+                    # 14 Sep 2026 (Drew) -- BUG FIX: webLink used to be written only
+                    # when message_id was ALSO present this cycle (nested under the
+                    # `if upd.get("message_id")` block above). Any task_update whose
+                    # triggering email had a real, resolvable web_link but an empty/
+                    # missing message_id (e.g. a sent-item-sourced candidate, or any
+                    # future mail source that doesn't populate message_id) silently
+                    # never got its card's email-open icon populated, even though a
+                    # good link was sitting right there in `upd`. This is the
+                    # confirmed root cause of most of the 38/57 live Command Centre
+                    # tasks found missing an email-open icon on 14 Sep 2026 (existing
+                    # tasks bumped via this task_updates path, not newly-created
+                    # ones -- new_tasks' own webLink assignment a few dozen lines
+                    # below was never coupled this way). Decoupled: webLink is now
+                    # written whenever a real web_link value is present on the
+                    # update, independent of entry_id/message_id.
+                    if upd.get("web_link"):
+                        task["webLink"] = upd["web_link"]
                     applied += 1
                     break
 
@@ -4445,7 +4476,8 @@ briefing = {
     "prioritiesToday":    priorities_today,
     "prioritiesTomorrow": priorities_tomorrow,
     "prioritiesWeek":     priorities_week,
-    "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M")
+    "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M"),
+    "mail_truncation_risk": MAIL_TRUNCATION_RISK
 }
 if teams_digest is not None:
     briefing["teams"] = teams_digest
