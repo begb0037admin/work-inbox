@@ -1544,6 +1544,29 @@ def calendar_events_to_raw(events: list) -> list[dict]:
     return out
 
 
+def _dedup_calendar_items(items: list[dict]) -> tuple[list[dict], int]:
+    """Collapse repeated connector results before they reach the persisted file.
+
+    The connector can return the same event more than once when it first probes
+    a calendar call and then repeats it with an explicit ``select`` list.  The
+    two result objects have different request arguments, so
+    ``extract_tool_calls()`` quite correctly keeps both; the event itself is
+    nevertheless the same dashboard item.  Keep the first occurrence and use
+    the same stable identity as the downstream safety net: (subject, start).
+    """
+    out: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    removed = 0
+    for item in items:
+        key = (str(item.get("subject") or ""), str(item.get("start") or ""))
+        if key in seen:
+            removed += 1
+            continue
+        seen.add(key)
+        out.append(item)
+    return out, removed
+
+
 def teams_messages_to_raw(messages: list) -> list[dict]:
     """Map codex_apps `microsoft_teams.list_chat_messages`/`list_channel_messages`
     result objects to the pipeline's raw shape.
@@ -1786,6 +1809,10 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
         objs = _events_from_results(tool_calls, domain, events)
         if domain == "calendar":
             raw_items = calendar_events_to_raw(objs)
+            raw_items, _calendar_dupes = _dedup_calendar_items(raw_items)
+            if _calendar_dupes:
+                _log(f"[{domain}] removed {_calendar_dupes} duplicate event(s) by (subject, start) "
+                     "after aggregating connector results")
         elif domain == "mail_inbox":
             raw_items = mail_messages_to_raw(objs, kind="inbox")
         elif domain == "mail_sent":

@@ -1,6 +1,14 @@
 # Handover -- 14 September 2026, later evening (Drew) -- priority-card OWA backfill completed after the missed-email + tab-reuse fixes
 
-Task 1 follow-up completed by Codex: every one of the 25 `prioritiesToday`/`prioritiesTomorrow`/`prioritiesWeek` cards now has a live connector-verified `message_id` and native OWA `web_link`. The five rendered `needs` cards that lacked a link were also backfilled; existing FYI/needs links were preserved. Backup: `Archive/briefing_backup_20260914_2121.json`. Task 2 and the calendar-dedup follow-up remain the next actions.
+Task 1 follow-up completed by Codex: every one of the 25 `prioritiesToday`/`prioritiesTomorrow`/`prioritiesWeek` cards now has a live connector-verified `message_id` and native OWA `web_link`. The five rendered `needs` cards that lacked a link were also backfilled; existing FYI/needs links were preserved. Backup: `Archive/briefing_backup_20260914_2121.json`. The paired command-centre Task 2 backfill is complete and pushed as `d39d665` (with its required backup commit `0aa9eba`).
+
+## Task 3 -- calendar duplication fixed at Lane B source and loader (14 Sep 2026)
+
+The duplicated calendar rows were traced to the Lane B connector transcript, not an append when writing `lane_b_normalised.json`: the model issued two `list_events` calls for each calendar, first without `select` and then with an explicit `select`, and `_events_from_results()` aggregated both because their request arguments differed. `lane_b_call1.py` now removes repeated calendar rows by `(subject, start)` immediately after connector aggregation, before sanitising and persisting. `_load_lane_b_calendar()` in `fetch_inbox.py` also has the required defensive `(subject, start)` deduplication and reports the number removed.
+
+Fixture replay against `data/lane_b/20260903T075546Z_call1_calendar_primary_a1.jsonl` reproduced 94 source rows with 48 duplicate rows and 46 unique `(subject, start)` pairs; after `run_domain()` and `normalise_pull`, 46 rows remained. The loader replay showed 94 -> 46 and removed 48. The named 13 Sep fixture was not usable for duplicate replay: its calendar domain is `unavailable` with an OAuth reauthentication failure (count 0). No live Oxford-host verification was performed.
+
+Exact next action: let the next scheduled Lane B calendar run complete, then confirm its run log reports zero or only expected duplicate removals and that the dashboard calendar counts remain stable.
 
 # Handover -- 14 September 2026, later evening (Drew) -- missed-email + tab-reuse fixes: root-caused a real dropped email (James Salas Guillen's IRIS/IEX reply), fixed the mail_inbox fetch + a CC webLink write bug, fixed target=_blank tab spam
 

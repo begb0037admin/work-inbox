@@ -269,6 +269,8 @@ def _load_lane_b_calendar(_week_end, _lookback):
             return []
 
         out = []
+        seen_calendar_keys = set()
+        deduped_calendar = 0
         for e in (doc.get("calendar") or []):
             start = e.get("start") or ""
             try:
@@ -277,8 +279,14 @@ def _load_lane_b_calendar(_week_end, _lookback):
                 continue
             if d > _week_end or d < _lookback:
                 continue
+            subject = e.get("subject") or ""
+            dedup_key = (subject, start)
+            if dedup_key in seen_calendar_keys:
+                deduped_calendar += 1
+                continue
+            seen_calendar_keys.add(dedup_key)
             out.append({
-                "subject":      e.get("subject") or "",
+                "subject":      subject,
                 "start":        start,
                 "end":          e.get("end") or "",
                 "location":     e.get("location") or "",
@@ -289,7 +297,8 @@ def _load_lane_b_calendar(_week_end, _lookback):
                 "all_day":      bool(e.get("all_day") or e.get("is_all_day")),
             })
         print(f"Phase 1 - Lane B connector calendar: {len(out)} event(s) in window "
-              f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {cal_dom.get('tool_calls')})")
+              f"(removed {deduped_calendar} duplicate(s) by (subject, start); "
+              f"source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {cal_dom.get('tool_calls')})")
         return out
     except Exception as _lb_e:
         print(f"WARNING: Lane B calendar load failed ({_lb_e}) -- calendar empty this run, "
