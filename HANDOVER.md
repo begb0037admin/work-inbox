@@ -1,3 +1,111 @@
+# Handover -- 15 September 2026, connector calendar cold-start fix -- investigated, implemented, and proven live
+
+## Final checkpoint after the all-connector calendar investigation
+
+The open thread from the previous entry is closed with a code change and live evidence. The
+Oxford scheduled task was checked before testing: `Work Inbox Bridge Briefing` was `Ready`,
+principal `begb0037`, and its action explicitly passed `-CalBackend connector -TeamsBackend
+connector -MailBackend connector`. The preflight found no bridge/lane/python/codex process,
+but did find the exact stale shared lock `C:\Users\Public\bridge_briefing.lock` (zero bytes at
+the first check); after that absence was verified, only that lock was removed. The same exact
+process-and-lock check was repeated after the live runs. No Edu identity was reauthenticated or
+called.
+
+### What the fresh traces established
+
+`_ensure_warm()` is genuinely exercised in a fresh `lane_b_call1.py` subprocess before the
+calendar call, but it is a no-tool Codex CLI warm-up, not a Microsoft calendar-session warm-up.
+The live traces show warm-ups completing in 14s (`bridge_briefing_20260915-083616.log`), 8s
+(`...-085959.log`), 11s (`...-093338.log`) and 8s (`...-100637.log`), followed by a separate
+calendar connector attempt. This rules out “the warm-up was skipped” while leaving the real
+calendar connector cold-start as the relevant boundary.
+
+The two scheduled observations supplied the missing comparison. In `...-083616.log`, the
+personal/failover calendar call started at `07:36:36Z`, issued the calendar tools and extracted
+10 items by `07:41:16Z`, then the task completed with result 0 and published `bc48958`. In
+`...-085959.log`, the first personal calendar attempt timed out at `08:06:12Z` after the full
+360s and entered the existing 299s kill cooldown; inner attempt 2 started at `08:11:12Z`, issued
+`list_calendars`, `list_event_instances`, `list_events`, and `list_recurring_series`, extracted
+38 items at `08:15:51Z`, and the task again completed with result 0, publishing `4d6a0cd`.
+Successful personal calls therefore range from roughly 128-150s historically to 279-280s in
+these fresh traces, with one current recovery at roughly 358s. The failed attempt produced no
+calendar tool-call evidence before the 360s kill. That is intermittent connector/session
+startup contention, not evidence that simply raising the timeout would cure a genuine hang.
+
+The separate all-connector desktop run `...-093338.log` reproduced the thin-budget case: both
+inner personal calendar attempts timed out (`08:39:52Z` and `08:50:53Z`) with the cooldown in
+between, then calendar ended `codex_failed` with zero items. With `EDU_PARKED=1`, the old
+`EDU_PARKED_RETRIES=1` allowed no further outer calendar recovery attempt. This is the
+calendar-specific failure mode the earlier handover could not observe because the 07:00 run was
+stopped during its cooldown.
+
+### Code fix
+
+`lane_b_call1.py` now keeps the generic parked-mode budget at one outer retry for Teams and
+other domains, but gives calendar a targeted default of two outer retries through
+`EDU_PARKED_CALENDAR_RETRIES` / `WI_LANE_B_EDU_PARKED_CALENDAR_RETRIES`. The existing two inner
+360s attempts, process-tree kill, and cooldown are unchanged. `lane_b_cal_guard.py` now computes
+the calendar and Teams budgets separately and logs when its existing 2500s hard cap is the
+limiting worst-case budget. No timeout was guessed upward, no Edu fallback was restored, and no
+Microsoft Graph call was introduced. `python -m py_compile lane_b_call1.py
+lane_b_cal_guard.py` and `git diff --check` passed.
+
+The fix was authored as `dd4ebd0` and pushed to `main` as `efbb018` after rebasing onto the live
+scheduled-run commits. The corrected fresh run `...-100637.log` then showed the new calendar
+budget of 2, timed out its first inner attempt at `09:12:48Z`, waited the 299s cooldown, and
+recovered on inner attempt 2: the four calendar connector tools fired at `09:23:46Z`, 23
+duplicates were removed, 46 calendar items were extracted, and the domain ended
+`status=ok served_by=failover`. Teams was unavailable in that particular cycle, but the
+calendar result remained successful and the mail phases completed.
+
+### Live publication proof
+
+The literal scheduled task's clean publication at commit `4d6a0cd` was fetched fresh from
+GitHub with a cache-busted raw URL. It contained non-empty arrays in all four required sections:
+
+```json
+{"calToday":[{"time":"09:30","title":"FA Team Daily Catchup"}],
+ "calTomorrow":[{"time":"09:30","title":"FA Team Daily Catchup"}],
+ "calDay2":[{"time":"09:30","title":"FA Team Daily Catchup"}],
+ "calDay3":[{"time":"09:30","title":"FA Team Daily Catchup"}]}
+```
+
+The observed counts were `calToday=7`, `calTomorrow=6`, `calDay2=5`, and `calDay3=6`; the
+fetched object had no `calendarUnavailable` flag. This is genuine calendar data, including
+`HR Systems Managers Meeting`, `People Forum: Developing talent and skills at Oxford`, and
+`Roadmap review`, not the empty COM/off degrade.
+
+The restored desktop shortcut also ran with all three connector arguments in
+`...-100637.log`. Its Lane B summary recorded `calendar=46`, `fetch_inbox.py exit 0`, and the
+remote wrapper ended `=== Laptop Bridge Briefing END (core OK) ===`; Phase 4 published briefing
+commit `3c891bd`. A cache-busted fetch of that exact commit again showed counts 7/6/5/6 and real
+event rows in all four arrays. The combined AI summary call failed twice in the
+`begb0037-a` profile, so that particular briefing also set `calendarUnavailable=true` as the
+existing Phase 4 fallback marker even though its calendar arrays were populated; this is an
+independent AI-summary/profile issue, not a calendar connector failure. The scheduled-task
+publication above is the clean end-to-end dashboard proof.
+
+### Desktop trigger state
+
+`D:\OneDrive - lelitte.com\Desktop\Trigger-Laptop-Refresh.ps1` was backed up before editing as
+`Trigger-Laptop-Refresh.ps1.bak-20260915-calendar-fix`, SHA-256
+`6C927B3C311E11011B68880F59DD2D09AC5BCD3505D74F11DFA770D61560A911`. The live file now uses
+`-CalBackend connector -TeamsBackend connector -MailBackend connector`, waits up to 2400s for
+the connector recovery budget, parses cleanly, and has SHA-256
+`B9E8E6BE80365A9F955B0615C44A7C04ED7BE098599F3DB0A7ECE4D30B5C07F6`. Its watcher error match
+was tightened after the live run showed it mistaking the word `refused` inside Claude's JSON
+diagnostic counters for a transport failure; the remote run itself still completed core OK.
+The stale lock left by that completed run was removed only after the exact bridge-process scan
+was empty, and the lock was verified absent.
+
+Exact next action: leave the all-connector calendar path under normal scheduled observation. The
+calendar cold-start failure is now bounded by a calendar-specific outer recovery retry and has
+been proven to recover in a fresh desktop run; if the 2500s guard cap is hit in a future
+calendar-plus-Teams worst-case, revisit the wrapper/task time budget with a new trace rather than
+silently increasing it.
+
+---
+
 # Handover -- 15 September 2026, live bridge incident -- manual refresh root cause fixed and proven live
 
 ## Final checkpoint after the production proof
