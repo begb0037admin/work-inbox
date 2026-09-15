@@ -1,3 +1,19 @@
+# Handover -- 15 September 2026, live bridge incident -- manual refresh root cause fixed, live proof still pending
+
+## Checkpoint before the next production run
+
+The Oxford laptop incident was reproduced directly under SSH identity `101L-DE013193\begb0037-a`. The cleaner failed run `C:\Users\begb0037-a\work-inbox\logs\bridge_briefing_20260915-070831.log` shows the 401 was GitHub Contents API access from `fetch_inbox.py` (`load_existing_briefing` / `_gh_get`), not an M365 connector call. The `GITHUB_PAT` User variable was literally `<PASTE PAT HERE>` (length 16) and direct `Invoke-WebRequest` calls to both `/user` and `data/briefing.json` returned 401. The same identity's `gh auth status` is valid for `begb0037admin`; the corrected trigger injects `gh auth token` into the remote process only and writes no credential to disk. The same log also proves the independent AI failure: Python's bare `claude` launch raised `WinError 2`; the laptop has `claude.cmd`/`claude.ps1` on PATH but no `claude.exe` there.
+
+Commit `02a4973` (rebased onto remote `98aaf40`) is pushed to `main`. It makes `fetch_inbox.py` route the Windows `claude.cmd` shim through `cmd.exe` for `shell=False` subprocess calls, and adds an atomic cross-profile lock to `docs/desktop-scripts/Run Laptop Bridge Briefing.ps1` at `C:\Users\Public\Documents\WorkInbox\bridge_briefing.lock`. The existing unconditional `WI_BRIDGE_ALLOW_EMPTY_CALENDAR=1` line is unchanged. The two checkout directories were verified as separate ordinary directories (no reparse points); their `fetch_inbox.py` hashes matched.
+
+Desktop-only `D:\OneDrive - lelitte.com\Desktop\Trigger-Laptop-Refresh.ps1` was backed up first as `Trigger-Laptop-Refresh.ps1.bak-20260915` (SHA-256 `8F534C9B85665668EC93ECC33D2DE40246A21BFAF3EF79FB746E41273FBE87E2`). Its corrected path probes the shared lock and runs the SSH identity's own checkout with `-CalBackend com -TeamsBackend off -MailBackend connector`, injecting the valid `gh` token for that process. A first probe bug treating a missing lock directory as busy was corrected before any launch; the revised trigger parses cleanly. The wrapper and Python files parse/compile cleanly locally.
+
+Classic Outlook was re-verified absent from the Oxford laptop (`OUTLOOK.EXE` path not present; `C:\WorkInboxAI\kevin\.credentials.json` and the `GITHUB_PAT` User variable are present). The live task is `Ready`, principal `begb0037 / Interactive`, and still configured all-connector; no pipeline process was found during the last process inventory. The first post-patch lock preflight found the lock directory did not yet exist; after the trigger-probe correction, the next action is to re-check exact pipeline processes and the lock, run the corrected trigger once, and independently confirm a new 15 Sep 2026 GitHub `data/briefing.json` commit before claiming success.
+
+The double calendar timeout remains under bounded investigation. The live evidence currently proves two consecutive 360s personal calendar attempts in the 07:00 run, but does not identify why the connector hung twice. Do not present the explanation as closed until the read-only history review and the live run evidence are recorded.
+
+---
+
 # Handover -- 15 September 2026, early morning (Drew) -- desktop `Run Inbox Briefing.bat` COM audit: pinned explicit backends, kept preflight (deliberately, not stale), surfaced a real pre-1-Nov-2026 gap
 
 Kevin flagged `D:\OneDrive - lelitte.com\Desktop\Run Inbox Briefing.bat` (desktop `DESKTOP-MJDJM64` manual-fallback launcher, PROJECT_DIR `C:\Users\admin\Documents\Claude\Projects\work-inbox`) as still tied to classic-Outlook COM despite the 8 Sep OWA-only rule. Investigated fully rather than applying the literal requested fix (remove preflight, set all three backends to `connector`) — that fix would have broken the pipeline, not modernised it. Full facts below; nothing here was assumed from doc prose without a live check.
