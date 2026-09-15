@@ -13,10 +13,11 @@ pushes for real:
     ->  Phase 5  command-centre task-suggestion sync
     ->  (best effort) needs_reply.json + drafted_replies.json publishers
 
-Calendar: NONE by default. CAL_BACKEND=com, but there is no classic Outlook on
-the laptop, so fetch_inbox.py degrades the calendar phases to empty + a warning
-(handled path, not a crash). The bridge briefing simply has no calendar section.
-Accepted for the bridge.
+Calendar: NONE by default. CAL_BACKEND=com, but classic Outlook is not running /
+connected on the laptop, so fetch_inbox.py degrades the calendar phases to empty
+and a warning (handled path, not a crash). The bridge briefing simply has no
+calendar section. Accepted for the bridge; do not generalise this no-op to other
+machines without checking their Outlook installation and session state.
 
 LANE B (connector calendar + Teams) GLUE -- calendar added 1 Sept 2026, Teams
 wiring added 2 Sept 2026 evening (Drew) -- NEITHER LIVE YET:
@@ -39,6 +40,10 @@ wiring added 2 Sept 2026 evening (Drew) -- NEITHER LIVE YET:
             -> log + local BurntToast + fall back to CAL_BACKEND=com AND
             TEAMS_BACKEND=off for this cycle; task STAYS enabled, but this needs
             investigation rather than another silent transient retry.
+    exit -1 (external/native termination surfaced by PowerShell as 0xFFFFFFFF)
+            -> log the abnormal termination + fall back to CAL_BACKEND=com AND
+            TEAMS_BACKEND=off for this cycle; task STAYS enabled and retries next
+            cadence. This is distinct from an ordinary connector-transient exit.
   TEAMS HAS NO SEPARATE GUARD: fetch_inbox.py's own TEAMS_BACKEND comment block
   documents that lane_b_call1.py's re-contamination guard already covers the
   microsoft_teams.* tool namespace exactly like it covers calendar's -- Teams
@@ -178,9 +183,7 @@ New-Item -ItemType Directory -Force -Path $root, $tools, $logdir | Out-Null
 # scheduled AD-OAK run colliding with an SSH/manual begb0037-a run.  Holding an
 # exclusive FileStream makes the check atomic; a stale lock file is reused on
 # the next run once its old process has released the handle.
-$lockDir  = 'C:\Users\Public\Documents\WorkInbox'
-$lockPath = Join-Path $lockDir 'bridge_briefing.lock'
-New-Item -ItemType Directory -Force -Path $lockDir | Out-Null
+$lockPath = 'C:\Users\Public\bridge_briefing.lock'
 $script:BridgeLockStream = $null
 try {
   $script:BridgeLockStream = [System.IO.File]::Open(
@@ -193,9 +196,14 @@ try {
   $lockBytes = [Text.Encoding]::UTF8.GetBytes($lockText)
   $script:BridgeLockStream.Write($lockBytes, 0, $lockBytes.Length)
   $script:BridgeLockStream.Flush()
-} catch {
+  Write-Host "BRIDGE LOCK ACQUIRED -- $lockPath"
+} catch [System.IO.IOException] {
   Write-Host "BRIDGE ALREADY RUNNING -- another Work Inbox pipeline holds $lockPath" -ForegroundColor Yellow
   Write-Host "Wait for that run to finish; no duplicate was started."
+  exit 2
+} catch {
+  Write-Host "BRIDGE LOCK ERROR -- could not establish $lockPath ($($_.Exception.Message))" -ForegroundColor Red
+  Write-Host "No pipeline was started."
   exit 2
 }
 Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
@@ -494,6 +502,17 @@ if ($laneBDomain) {
       } catch {
         Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the violation is still real and logged above"
       }
+    }
+    -1 {
+      # PowerShell exposes a terminated native child returning 0xFFFFFFFF as
+      # -1. lane_b_cal_guard.py does not intentionally return this value;
+      # surface it separately so external termination is not mislabeled as an
+      # ordinary unexpected connector result.
+      Log "Lane B guard EXTERNALLY TERMINATED (exit -1 / 0xFFFFFFFF) -- falling back to CAL_BACKEND=com / TEAMS_BACKEND=off for THIS cycle only; task stays enabled, will retry next cadence"
+      $CalBackend = 'com'
+      $TeamsBackend = 'off'
+      $LaneBGuardResult = 'external-termination'
+      $LaneBGuardDetail = 'lane_b_cal_guard.py surfaced exit -1 (0xFFFFFFFF), which is not an intentional guard return; likely external/native termination. Fell back conservatively and left the task enabled.'
     }
     default {
       Log "Lane B guard unexpected exit $guardRc -- treating conservatively: falling back to CAL_BACKEND=com / TEAMS_BACKEND=off for THIS cycle only; task stays enabled"
