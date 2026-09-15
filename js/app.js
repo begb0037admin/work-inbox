@@ -1086,13 +1086,13 @@ function renderStaleBanner(data){
   el.style.background='#a3271f';
   el.style.color='#fff';
   if(!refreshed){
-    el.innerHTML='&#9888; No refresh time available &mdash; run status unknown. Run "Run Inbox Briefing.bat" manually if this persists.'+truncNote;
+    el.innerHTML='&#9888; No refresh time available &mdash; run status unknown. Double-click "Trigger Laptop Refresh Now.bat" on the Desktop if this persists.'+truncNote;
     return;
   }
   const hoursBehind=Math.round((now-refreshed)/3600000);
   el.innerHTML='&#9888; Data may be out of date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown')+
     ' ('+hoursBehind+'h ago). A refresh was expected by '+escapeHtml(expected.toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}))+
-    '. Run "Run Inbox Briefing.bat" manually if this persists.'+truncNote;
+    '. Double-click "Trigger Laptop Refresh Now.bat" on the Desktop if this persists.'+truncNote;
 }
 
 function renderBriefing(data,key){
