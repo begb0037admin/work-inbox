@@ -1,3 +1,61 @@
+# Handover -- 15 September 2026, later (Drew) -- Priorities-card email-link fix SHIPPED, Codex-implemented + independently verified live
+
+## Priorities board (Today/Tomorrow/This Week) cards now carry a working open-email link
+
+Root cause: `_cc_load_priorities()` (`fetch_inbox.py`, function starting ~L846) builds Priorities
+cards from command-centre's `data/tasks.json` via an `entry` dict that copied
+id/text/description/actions/source/dateType but never copied any link field -- even though the
+source tasks already carry a real Outlook Web deep-link. `js/app.js`'s `_owaWebUrl()` already
+had the candidate-order logic to render it (`[o.web_link, o.display_url, o.webLink]`) -- this
+was purely a backend gap, confirmed before touching anything by live-fetching command-centre's
+`tasks.json` directly: 33/57 tasks carry snake_case `web_link`, 27/57 carry camelCase `webLink`
+(only 1 task carries both, values differ in casing convention not content), `display_url` is
+present as a key but currently always empty. Union coverage per tier (excluding done): Today
+10/10, Tomorrow 1/1, Week 34/34, Parked 11/12 (Parked is out of scope -- work-inbox is
+today/tomorrow/week only).
+
+**Fix (`fetch_inbox.py` ~L880-883, one file, one hunk):** the `entry` dict now also carries
+`web_link`, `display_url`, and `webLink`, each `task.get(<key>, "")` -- straight passthrough, no
+renaming, matching the frontend's existing candidate order exactly. Full sweep of the file
+confirmed this is the ONLY site that builds Priorities-tier cards from command-centre task data
+(the function's own docstring already describes it as the single idempotent consolidation
+point) -- no second gap found.
+
+**Implementer: Codex**, per the estate's Codex-as-implementer pattern (`agent-commons/
+operating-model/COORDINATOR_AND_CODEX_POLICY.md` --3), dispatched via `codex exec -s
+workspace-write --skip-git-repo-check --json` with the exact required dict keys and the sweep
+instruction given explicitly in the prompt. Codex made exactly the scoped 4-line change, ran its
+own `git diff --check` + a `compile()` syntax check, confirmed no second construction site, and
+touched no other file (checked directly via `git diff` and `git status --short` after the run,
+not just trusted from Codex's own summary).
+
+**Verification, all against live production data, not assumed:**
+- Live `data/briefing.json` (current, unfixed) re-confirmed the stated starting point exactly:
+  prioritiesToday 8 cards/0 linked, prioritiesTomorrow 1/0, prioritiesWeek 16/0.
+- Ran the exact new dict-construction logic in a standalone Python simulation against a live,
+  cache-busted pull of command-centre's `tasks.json` (full pipeline run wasn't possible from
+  this desktop -- no Outlook COM/connector access here; this is the accepted alternative per the
+  task's own step 6). Result: prioritiesToday 8/8 linked, prioritiesTomorrow 1/1, prioritiesWeek
+  16/16 -- 100% of today's live data now resolves a link.
+- Spot-checked actual DOM rendering: built a scratch copy of `index.html`/`js/app.js`/`css/`
+  pointed at a patched local `briefing.json` (live briefing.json with prioritiesToday/Tomorrow/
+  Week replaced by the fixed-logic output), served it locally, and inspected the rendered page
+  via Playwright. Confirmed live in the DOM: zone `pt` (Today) 8/8 cards with a real
+  `data-weburl` pointing at a genuine `outlook.office365.com/owa/?ItemID=...&viewmodel=
+  ReadMessageItem` link, zone `ptom` (Tomorrow) 1/1, zone `pw` (This Week) 16/16. Other zones
+  (`ur`/`nr`/`pfyi` -- inbox-sourced cards, unrelated to this fix) unaffected, already linked
+  from the earlier 8-9 Sept OWA-link work.
+
+**Shipped:** `main` commit `b5f149a`. Code-only change, no `data/*.json` touched by this commit
+-- the fix takes effect on the next scheduled pipeline run, which will regenerate
+`briefing.json` with real links baked in for every CC-sourced Priorities card going forward.
+
+**Not touched, as instructed:** `lane_b_call1.py`, `lane_b_cal_guard.py`, and the calendar path
+in general -- the 15 Sept connector calendar cold-start fix below this entry stands independently
+verified and was left alone.
+
+---
+
 # Handover -- 15 September 2026, connector calendar cold-start fix -- investigated, implemented, and proven live
 
 ## Final checkpoint after the all-connector calendar investigation
