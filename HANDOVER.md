@@ -1,3 +1,89 @@
+# Handover -- 15 September 2026, CONSOLIDATED STATUS (Drew) -- COM/IMAP physical-removal escalation: all 3 machines in one place
+
+Kevin escalated past the phased 1 Nov 2026 migration to immediate, physical removal of
+COM/IMAP on every machine -- verbatim in `begb0037admin/agent-commons`
+`memory/outlook-classic-retirement-1nov2026.md` (commit `76af220`) and `AGENT_DIRECTORY.md`
+(commit `f8fde32`), both 15 Sep 2026: *"we are no longer using COM or IMAP on any machines
+- i want it gone for good ... i dont want to hear this again."* **This entry is the single
+consolidated status for all three machines -- read this first.** The dated entries below
+remain as the full evidence trail; this roll-up will be kept current here going forward
+rather than requiring anyone to reconstruct status from HANDOVER prose, `.bak` files, or
+commit messages scattered across sessions.
+
+## Oxford laptop (`101L-DE013193`) -- connector-only, live-proven, COM/IMAP files still present but unused
+Mail/calendar/Teams have run via the ChatGPT M365 connector (`MAIL_BACKEND=connector` /
+`CAL_BACKEND=connector` / `TEAMS_BACKEND=connector`) since ~9 Sep 2026. Live-verified again
+today: the calendar cold-start fix (`efbb018`) confirmed recovering via
+`EDU_PARKED_CALENDAR_RETRIES`, and three consecutive clean scheduled runs today (08:56,
+09:30, 16:14 -- `data/laptop_status/briefing_status.json`, `exit_code 0`,
+`lane_b_guard: clean`). **Not done here either:** `imap_mail.py`, `reauth_imap.py`, and the
+`win32com` Outlook path in `fetch_inbox.py` are still physically present in this checkout
+(shared code across every machine) -- nothing has been deleted from the codebase on any
+machine yet, including this one.
+
+## Desktop (`DESKTOP-MJDJM64`) -- Lane B deployed, 1 of 3 domains proven, COM deliberately still in place
+- Early morning: audited the manual-fallback launcher `Run Inbox Briefing.bat` (outside
+  git, Desktop only, backup `Run Inbox Briefing.bat.bak-20260915`). This checkout had zero
+  Lane B connector files, so `Ensure-ClassicOutlook.ps1`'s COM preflight was kept
+  deliberately -- removing it would have broken calendar retrieval outright, with no working
+  alternative on this machine yet. Pinned explicit `MAIL_BACKEND=com` / `CAL_BACKEND=com` /
+  `TEAMS_BACKEND=off` (no behaviour change, just stops it silently depending on defaults).
+- Evening: deployed `lane_b_call1.py`, `normalise_pull.py`, `codex_model_policy.py`,
+  `lane_b_cal_guard.py`, `fetch_inbox.py` into this desktop's own checkout (backup
+  `fetch_inbox.py.backup-20260915-154559-preLaneB`). Live-tested `--domain mail` only:
+  - `mail_inbox`: **proven clean, 80 real items** -- real Oxford senders/subjects/OWA
+    deep-links verified directly in the raw log, not assumed.
+  - `mail_sent`: **halted.** The re-contamination guard correctly tripped on an unexpected
+    `cua_repl::js` tool call (Codex's own sandboxed "code mode" JS REPL, not the
+    `codex_apps` Outlook connector) -- confirmed via live process-table inspection (real
+    `node.exe`/`kernel.js` children), a genuine trip, not a false alarm or logging glitch.
+    Leading hypothesis, unconfirmed: this Codex CLI build (`0.152.0`) may have code-mode on
+    as a binary-level default rather than a per-`CODEX_HOME` config setting -- not yet
+    compared against the Oxford laptop's own Codex CLI version.
+  - Calendar and Teams domains: **not tested at all this pass.**
+- **COM/IMAP deliberately NOT touched on this machine** -- `imap_mail.py`, `reauth_imap.py`,
+  and the Outlook COM path in `fetch_inbox.py` are all still fully in place, per the explicit
+  sequencing rule: prove connector fully working first, then remove COM/IMAP from that same
+  machine in the same pass.
+
+## Personal laptop (`LAPTOP-L06TH25`) -- not started, no evidence anywhere
+Searched commit messages, `HANDOVER.md`, and Drew's own memory (19 commits logged today)
+across `work-inbox`, `command-centre`, `drew`, and `agent-commons` for this machine name:
+zero hits. No Lane B files deployed, no launcher audited, no COM/IMAP status checked. This
+does not match the "connector deployment in progress" status recorded for it in
+`agent-commons` -- flagging the discrepancy rather than assuming work has quietly started
+somewhere undocumented.
+
+## Exact next action, in order
+1. **Desktop:** root-cause the `cua_repl::js` re-contamination trip -- compare this
+   machine's Codex CLI version against the Oxford laptop's, and determine whether
+   `features.code_mode_host` can be disabled per-`CODEX_HOME` via `config.toml`.
+2. **Desktop:** re-run `--domain mail` clean (no halt), then run `--domain calendar` and
+   `--domain teams` -- all three domains must prove live before this machine can be called
+   "connector proven."
+3. **Desktop:** only once all three domains are proven, physically remove `imap_mail.py`,
+   `reauth_imap.py`, the `win32com` Outlook path in `fetch_inbox.py`, and the COM
+   preflight/keepalive scripts (`Ensure-ClassicOutlook.ps1`,
+   `Register-ClassicOutlookKeepalive.ps1`, `Unregister-ClassicOutlookKeepalive.ps1`) from
+   this machine's checkout -- verify live, report done, do not ask whether to proceed (per
+   Kevin's explicit instruction in the escalation above).
+4. **Personal laptop (`LAPTOP-L06TH25`):** has not begun -- start from scratch, same
+   three-step sequence as Desktop (deploy Lane B code, prove all three domains live, then
+   physically remove COM/IMAP).
+5. Only once all three machines are physically clean does this workstream close -- the
+   Oxford laptop's own shared `imap_mail.py`/`reauth_imap.py`/COM code should also come out
+   of the codebase at that point, since it's shared across all machines' checkouts.
+
+## Where the detail lives
+This entry is the single consolidated status -- do not reconstruct this from the entries
+below or from commit messages. Full component detail (exact traces, commit hashes, live log
+excerpts) remains in the dated entries immediately below this one, and in
+`begb0037admin/drew` `memory/wi-desktop-launcher-com-audit-15sept.md`. Cross-linked from
+`begb0037admin/agent-commons` `memory/outlook-classic-retirement-1nov2026.md` and
+`AGENT_DIRECTORY.md`.
+
+---
+
 # Handover -- 15 September 2026, evening (Drew) -- Desktop connector deployment: PARTIAL PROOF, halted on a real safety-guard trip, COM/IMAP NOT touched
 
 ## Desktop machine (`101L admin` account, checkout `C:\Users\admin\Documents\Claude\Projects\work-inbox`) connector deployment
