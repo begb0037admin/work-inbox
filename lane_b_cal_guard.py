@@ -127,8 +127,8 @@ def _guard_run_timeout_s(domain: str) -> int:
     computed from lane_b_call1.py's own live timeout/retry constants (not a
     hand-guessed number -- see the comment block above this function).
 
-    Per domain, worst case = EDU_PARKED_RETRIES outer attempts, each up to
-    2 inner sub-attempts at CALL1_TIMEOUT_S, separated by a KILL_COOLDOWN_S
+    Per domain, worst case = the parked-mode retry budget for that domain, each
+    outer attempt up to 2 inner sub-attempts at CALL1_TIMEOUT_S, separated by a KILL_COOLDOWN_S
     gap (the worst-case gap -- assumes the previous sub-attempt was itself
     killed). Warm-up (CALL1_WARMUP_TIMEOUT_S) is counted ONCE, not once per
     domain, since lane_b_call1.py's own `_WARMED_HOMES` caches it per
@@ -148,8 +148,20 @@ def _guard_run_timeout_s(domain: str) -> int:
     if override:
         return int(override)
     domains = 2 if domain == "both" else 1
-    per_domain = lb.EDU_PARKED_RETRIES * (2 * lb.CALL1_TIMEOUT_S + lb.KILL_COOLDOWN_S)
-    total = lb.CALL1_WARMUP_TIMEOUT_S + per_domain * domains
+    one_attempt = 2 * lb.CALL1_TIMEOUT_S + lb.KILL_COOLDOWN_S
+    if domain == "both":
+        # Calendar deliberately has one extra parked-mode outer retry: a fresh
+        # 15 Sep personal-only run exhausted both inner attempts, while the
+        # scheduled task recovered on its retry path. Teams keeps the original
+        # parked budget so a calendar recovery does not silently double every
+        # domain's wall-clock allowance.
+        per_domain = (lb.EDU_PARKED_CALENDAR_RETRIES * one_attempt
+                      + lb.EDU_PARKED_RETRIES * one_attempt)
+    else:
+        retries = (lb.EDU_PARKED_CALENDAR_RETRIES if domain == "calendar"
+                   else lb.EDU_PARKED_RETRIES)
+        per_domain = retries * one_attempt
+    total = lb.CALL1_WARMUP_TIMEOUT_S + per_domain
     if domains == 2:
         total += lb.SNAPSHOT_GAP_S  # the extra between-domain gap `both` pays that a single domain doesn't
     computed = int(total * 1.10)

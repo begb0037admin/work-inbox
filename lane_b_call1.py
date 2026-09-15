@@ -391,13 +391,28 @@ EDU_PARKED = os.environ.get("WI_LANE_B_EDU_PARKED", "1").strip().lower() not in 
 # "unavailable this cycle"/codex_failed outcome) -- the inner per-call
 # protections (max_attempts=2 cold-start-hang absorber, the real
 # Popen+taskkill timeout, the re-contamination guard) are UNCHANGED and still
-# apply on every single attempt. Default 1: personal still gets one full,
-# real attempt (itself internally protected by the 2-sub-attempt absorber, up
-# to ~720s worst case for that one domain) -- just not FAILOVER's old
+# apply on every single attempt. Default 1 for Teams: personal still gets one
+# full, real attempt (itself internally protected by the 2-sub-attempt absorber,
+# up to ~720s worst case for that one domain) -- just not FAILOVER's old
 # "benefit of the doubt, try up to 3 times" allowance, which no longer fits
 # now that every domain, every run, goes through this path. Tune via
-# WI_LANE_B_EDU_PARKED_RETRIES if 1 proves too thin in practice.
+# WI_LANE_B_EDU_PARKED_RETRIES if needed.
 EDU_PARKED_RETRIES = max(1, int(os.environ.get("WI_LANE_B_EDU_PARKED_RETRIES", "1")))
+# Calendar is the critical parked-mode path and has now demonstrated that one
+# outer budget can be too thin even after the two inner cold-start attempts:
+# on 15 Sep 2026 a fresh personal-only run exhausted both 360s attempts, while
+# two earlier same-day scheduled runs recovered once the connector session was
+# recreated. Give calendar one additional whole-domain retry by default. This
+# does NOT touch Edu, change the per-call timeout, or add another connector
+# identity. The generic parked override remains an upper bound so an operator
+# raising WI_LANE_B_EDU_PARKED_RETRIES still gets that larger budget for
+# calendar too. Override this targeted budget with
+# WI_LANE_B_EDU_PARKED_CALENDAR_RETRIES if a shorter/longer production window
+# is deliberately chosen.
+EDU_PARKED_CALENDAR_RETRIES = max(
+    EDU_PARKED_RETRIES,
+    int(os.environ.get("WI_LANE_B_EDU_PARKED_CALENDAR_RETRIES", "2")),
+)
 
 
 def _codex_home(codex_home: str | None = None) -> Path:
@@ -1963,13 +1978,15 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
         # hang, time out, or fast-fail on. Mirrors fetch_mail_domain()'s own
         # personal-only shape exactly (same codex_home, same generous
         # timeout/max_attempts), just applied to calendar/teams instead of mail.
+        parked_retries = (EDU_PARKED_CALENDAR_RETRIES if domain == "calendar"
+                          else EDU_PARKED_RETRIES)
         _log(f"[{domain}] Edu parked (WI_LANE_B_EDU_PARKED) -- calling PERSONAL "
              f"({FAILOVER_CODEX_HOME}) directly as the sole identity this run; no attempt "
              f"against Edu ({PRIMARY_CODEX_HOME}) at all. Outer retry budget "
-             f"{EDU_PARKED_RETRIES} (WI_LANE_B_EDU_PARKED_RETRIES) -- see that constant's own "
-             f"comment for why this is tighter than FAILOVER's old default.")
+             f"{parked_retries} ({'WI_LANE_B_EDU_PARKED_CALENDAR_RETRIES' if domain == 'calendar' else 'WI_LANE_B_EDU_PARKED_RETRIES'}) -- "
+             f"see that constant's own comment for why this is tighter than FAILOVER's old default.")
         result, attempts = _fetch_domain_one_identity(
-            domain, prompt, window_days=window_days, ts=ts, retries=EDU_PARKED_RETRIES,
+            domain, prompt, window_days=window_days, ts=ts, retries=parked_retries,
             codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
             timeout_s=CALL1_TIMEOUT_S, max_attempts=2)   # inner cold-start-hang absorber unchanged
         if result is None:
