@@ -1472,6 +1472,43 @@ initTabs();
 init();
 
 // CC ticker — reads Command Centre tasks.json
+var CC_MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+// ============================================================================
+// DELIBERATE HAND-MAINTAINED PORT of command-centre/js/app.js's
+// lastActivityTs() (the canonical definition). command-centre/js/app.js and
+// command-centre/docs/mockups/cc-full-v5.html carry independent copies too.
+// Any change to the genuine-activity definition (email-tag patterns,
+// thresholds, etc.) must be applied in all three places or they will drift
+// apart again — exactly the stale-detection bug fixed today.
+// ============================================================================
+function ccLastActivityTs(t){
+  var best=0,earliest=Infinity,genuine=0;
+  ['lastUpdated','dateAdded'].forEach(function(f){
+    if(t[f]){var v=new Date(t[f]).getTime();if(!isNaN(v)&&v>best)best=v;}
+  });
+  var acts=t.actions;
+  if(acts){
+    if(!Array.isArray(acts))acts=[acts];
+    acts.forEach(function(a){
+      var s=String(a);
+      var m=/^\s*\[(\d{1,2})\s+([A-Za-z]{3})[A-Za-z]*\.?\s*(\d{4})?/.exec(s);
+      if(!m)return;
+      var mo=CC_MONTHS[m[2].toLowerCase()];
+      if(mo===undefined)return;
+      var yr=m[3]?parseInt(m[3],10):new Date().getFullYear();
+      var v=new Date(yr,mo,parseInt(m[1],10)).getTime();
+      if(isNaN(v))return;
+      if(v<earliest)earliest=v;
+      var hasEmailTag=/\(email:/i.test(s);
+      var isKevinSent=/\(email:\s*Kevin\s*\(sent to:/i.test(s);
+      if(hasEmailTag&&!isKevinSent)return;
+      if(v>genuine)genuine=v;
+    });
+  }
+  if(genuine>best)best=genuine;
+  if(!best&&earliest!==Infinity)best=earliest;
+  return best;
+}
 async function loadCcTicker(){
   try{
     const res=await fetch('https://github-proxy.lelitte.co.uk/command-centre/data/tasks.json?t='+Date.now(),{cache:'no-store'});
@@ -1480,9 +1517,18 @@ async function loadCcTicker(){
     const tasks=Array.isArray(d)?d:(d.tasks||[]);
     const openTasks=tasks.filter(t=>!t.done);
     const now=new Date(); now.setHours(0,0,0,0);
+    // ========================================================================
+    // DELIBERATE HAND-MAINTAINED PORT of command-centre/js/app.js's
+    // lastActivityTs() (the canonical definition). command-centre/js/app.js
+    // and command-centre/docs/mockups/cc-full-v5.html carry independent copies
+    // too. Any change to the genuine-activity definition (email-tag patterns,
+    // thresholds, etc.) must be applied in all three places or they will drift
+    // apart again — exactly the stale-detection bug fixed today.
+    // ========================================================================
     function ageDays(t){
-      if(!t.dateAdded) return 0;
-      const dd=new Date(t.dateAdded); dd.setHours(0,0,0,0);
+      const ts=ccLastActivityTs(t);
+      if(!ts) return 0;
+      const dd=new Date(ts); dd.setHours(0,0,0,0);
       return Math.max(0,Math.round((now-dd)/86400000));
     }
     const todayTasks=openTasks.filter(t=>t.tier==='today');
