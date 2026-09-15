@@ -1,4 +1,4 @@
-import json, os, base64, html, re, urllib.request, urllib.error, urllib.parse, subprocess, time
+import json, os, base64, html, re, urllib.request, urllib.error, urllib.parse, subprocess, time, shutil
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
@@ -556,8 +556,23 @@ def _looks_like_usage_limit(s):
 
 
 def _claude_code_once(model, system, user, timeout_s, cfg_dir):
-    cmd = [
-        CLAUDE_BIN, "-p",
+    # Windows' CreateProcess cannot launch a .cmd shim directly when
+    # shell=False.  The global Claude Code npm install on the Oxford laptop
+    # exposes claude.cmd/claude.ps1 (not claude.exe on PATH), so a bare
+    # `claude` here raised WinError 2 before the first AI call.  Keep the
+    # default shell-free path everywhere else, but route the Windows cmd shim
+    # through cmd.exe explicitly.  This preserves argument boundaries and
+    # lets the same code work for scheduled tasks and SSH-launched runs.
+    claude_cmd = CLAUDE_BIN
+    if os.name == "nt" and CLAUDE_BIN == "claude":
+        claude_cmd_path = shutil.which("claude.cmd")
+        if claude_cmd_path:
+            claude_cmd = claude_cmd_path
+    cmd_prefix = (["cmd.exe", "/d", "/c", claude_cmd]
+                  if os.name == "nt" and claude_cmd.lower().endswith(".cmd")
+                  else [claude_cmd])
+    cmd = cmd_prefix + [
+        "-p",
         "--model", model,
         "--system-prompt", system,
         "--exclude-dynamic-system-prompt-sections",

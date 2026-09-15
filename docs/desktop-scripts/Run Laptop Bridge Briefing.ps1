@@ -173,6 +173,38 @@ $tools  = Join-Path $root 'tools'
 $logdir = Join-Path $root 'logs'
 New-Item -ItemType Directory -Force -Path $root, $tools, $logdir | Out-Null
 
+# One lock shared by both Oxford Windows identities.  The two profile
+# checkouts are separate directories, so a lock under $root would not stop a
+# scheduled AD-OAK run colliding with an SSH/manual begb0037-a run.  Holding an
+# exclusive FileStream makes the check atomic; a stale lock file is reused on
+# the next run once its old process has released the handle.
+$lockDir  = 'C:\Users\Public\Documents\WorkInbox'
+$lockPath = Join-Path $lockDir 'bridge_briefing.lock'
+New-Item -ItemType Directory -Force -Path $lockDir | Out-Null
+$script:BridgeLockStream = $null
+try {
+  $script:BridgeLockStream = [System.IO.File]::Open(
+    $lockPath,
+    [System.IO.FileMode]::OpenOrCreate,
+    [System.IO.FileAccess]::ReadWrite,
+    [System.IO.FileShare]::None)
+  $script:BridgeLockStream.SetLength(0)
+  $lockText = "PID=$PID`nUSER=$env:USERDOMAIN\$env:USERNAME`nSTART=$([DateTime]::Now.ToString('o'))`n"
+  $lockBytes = [Text.Encoding]::UTF8.GetBytes($lockText)
+  $script:BridgeLockStream.Write($lockBytes, 0, $lockBytes.Length)
+  $script:BridgeLockStream.Flush()
+} catch {
+  Write-Host "BRIDGE ALREADY RUNNING -- another Work Inbox pipeline holds $lockPath" -ForegroundColor Yellow
+  Write-Host "Wait for that run to finish; no duplicate was started."
+  exit 2
+}
+Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+  if ($script:BridgeLockStream) {
+    $script:BridgeLockStream.Dispose()
+    $script:BridgeLockStream = $null
+  }
+} | Out-Null
+
 $stamp  = [DateTime]::Now.ToString('yyyyMMdd-HHmmss')
 $log    = Join-Path $logdir "bridge_briefing_$stamp.log"
 $latest = Join-Path $logdir 'bridge_briefing_last_run.log'
