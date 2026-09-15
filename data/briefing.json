@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 15 September 2026",
   "subtitle": "Apprenticeship EOI due tomorrow, Kate away until 21 Sept",
-  "context": "Katherine Corr is on annual leave until 21 September, leaving Anna Gilbert to manage today's Organisational Structure Update - August 2026 walk-through which is scheduled for this afternoon. Finance code B8 remains blocked pending confirmation from Sally Vine (HAF for Department of Physiology, Anatomy and Genetics) on whether historic data exists in the inactive code prior to reactivation. The Expression of Interest form for the 2nd Cohort AI and Data Apprenticeships with Multiverse is due Wednesday 16 September and is the only item blocking cohort approval according to Charlie Richards-Gladstone on 14 September. Nathan Kirwan is standing by for final confirmation on the FA works data file structure before uploading by Thursday 18 September. Michael O'Sullivan assigned P5 Incident# 11710565 (Task# 50985406) to Kevin on 14 September for urgent investigation affecting multiple users. Open the Multiverse apprenticeship EOI submission immediately - the deadline is tomorrow and blocks the entire cohort. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
+  "context": "Katherine Corr is on annual leave until 21 September, leaving Anna Gilbert to manage today's Organisational Structure Update - August 2026 walk-through which is scheduled for this afternoon. Finance code B8 remains blocked pending confirmation from Sally Vine (HAF for Department of Physiology, Anatomy and Genetics) on whether historic data exists in the inactive code prior to reactivation. The Expression of Interest form for the 2nd Cohort AI and Data Apprenticeships with Multiverse is due Wednesday 16 September and is the only item blocking cohort approval according to Charlie Richards-Gladstone on 14 September. Nathan Kirwan is standing by for final confirmation on the FA works data file structure before uploading by Thursday 18 September. Michael O'Sullivan assigned P5 Incident# 11710565 (Task# 50985406) to Kevin on 14 September for urgent investigation affecting multiple users. Open the Multiverse apprenticeship EOI submission immediately - the deadline is tomorrow and blocks the entire cohort. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
   "urgent": [
     {
       "title": "DTP1092 College Staff into PXD - Weekly team meeting notes - 8-Sep-26",
@@ -462,7 +462,7 @@
       "received": "11 Sep",
       "received_raw": "2026-09-11T08:32:40Z",
       "kevin_is_primary_recipient": true,
-      "messageCount": 2
+      "messageCount": 1
     },
     {
       "title": "Accepted: Kevin's PDR Review 2026",
@@ -613,24 +613,9 @@
       "received_raw": "2026-09-08T11:02:35Z",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
-    },
-    {
-      "title": "Accepted: Orthopaedic Hand Surgery Follow-up Review",
-      "sub": "From <strong>Simon Burford</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Accepted: Orthopaedic Hand Surgery Follow-up Review",
-      "from": "Simon Burford",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAe5PtHKAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHKAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Sep",
-      "received_raw": "2026-09-08T09:17:20Z",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
     }
   ],
-  "fyiRawCount": 28,
+  "fyiRawCount": 26,
   "suppressedCount": 14,
   "low": [
     {
@@ -676,10 +661,134 @@
       "kevin_is_primary_recipient": true
     }
   ],
-  "calToday": [],
-  "calTomorrow": [],
-  "calDay2": [],
-  "calDay3": [],
+  "calToday": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:00",
+      "title": "People Forum: Developing talent and skills at Oxford",
+      "sub": "PA to HR Director"
+    },
+    {
+      "time": "13:00",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "13:30",
+      "title": "Organisational Structure Update - August 2026 - Walk through",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
+  "calTomorrow": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "HR Systems Managers Meeting",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "11:30",
+      "title": "Review new fortnightly patch release notes",
+      "sub": "Michael O'Sullivan"
+    },
+    {
+      "time": "14:00",
+      "title": "HR Systems team meeting",
+      "sub": "Michelle Williams"
+    },
+    {
+      "time": "15:00",
+      "title": "Simon / Kevin 121s",
+      "sub": "Simon Burford"
+    }
+  ],
+  "calDay2": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
+  "calDay3": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "09:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:30",
+      "title": "Roadmap meeting - later catch up.",
+      "sub": "Simon Burford"
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
   "calFull": [
     {
       "date": "2026-09-14",
@@ -690,25 +799,179 @@
     {
       "date": "2026-09-15",
       "label": "Tuesday 15 Sep",
-      "items": [],
+      "items": [
+        {
+          "time": "All day",
+          "title": "Marie K: Non-working day",
+          "sub": "Marie King"
+        },
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "11:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "12:00",
+          "title": "People Forum: Developing talent and skills at Oxford",
+          "sub": "PA to HR Director"
+        },
+        {
+          "time": "13:00",
+          "title": "Keep free",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "13:30",
+          "title": "Organisational Structure Update - August 2026 - Walk through",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "16:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        }
+      ],
       "isToday": true
     },
     {
       "date": "2026-09-16",
       "label": "Wednesday 16 Sep",
-      "items": [],
+      "items": [
+        {
+          "time": "All day",
+          "title": "Kevin - Annual Leave",
+          "sub": "People Department - HR Systems"
+        },
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "HR Systems Managers Meeting",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "11:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "11:30",
+          "title": "Review new fortnightly patch release notes",
+          "sub": "Michael O'Sullivan"
+        },
+        {
+          "time": "12:30",
+          "title": "Kevin A/L (pm)",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:00",
+          "title": "HR Systems team meeting",
+          "sub": "Michelle Williams"
+        },
+        {
+          "time": "15:00",
+          "title": "Simon / Kevin 121s",
+          "sub": "Simon Burford"
+        }
+      ],
       "isToday": false
     },
     {
       "date": "2026-09-17",
       "label": "Thursday 17 Sep",
-      "items": [],
+      "items": [
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "12:30",
+          "title": "Keep free",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:30",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "16:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        }
+      ],
       "isToday": false
     },
     {
       "date": "2026-09-18",
       "label": "Friday 18 Sep",
-      "items": [],
+      "items": [
+        {
+          "time": "All day",
+          "title": "Michael - AL",
+          "sub": "Michael O'Sullivan"
+        },
+        {
+          "time": "All day",
+          "title": "Chris Annual Leave",
+          "sub": "Christopher Sanders"
+        },
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "09:30",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "Roadmap review",
+          "sub": "Marie Cooksey"
+        },
+        {
+          "time": "12:30",
+          "title": "Keep free",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:00",
+          "title": "University of Oxford - 69014928   - Holiday Reports",
+          "sub": "Conor O'Shea"
+        },
+        {
+          "time": "14:30",
+          "title": "Roadmap meeting - later catch up.",
+          "sub": "Simon Burford"
+        },
+        {
+          "time": "16:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        }
+      ],
       "isToday": false
     }
   ],
@@ -1123,7 +1386,7 @@
       "dateType": "orange"
     }
   ],
-  "refreshed_at": "Tuesday 15 September · 10:04",
+  "refreshed_at": "Tuesday 15 September · 10:33",
   "mail_truncation_risk": true,
   "teams": [],
   "calendarUnavailable": true
