@@ -41,10 +41,38 @@ machine yet, including this one.
     as a binary-level default rather than a per-`CODEX_HOME` config setting -- not yet
     compared against the Oxford laptop's own Codex CLI version.
   - Calendar and Teams domains: **not tested at all this pass.**
+- **Later the same night: attempted fix for the `cua_repl::js` trip, tested live, REVERTED --
+  made things worse, not better.** Compared Codex CLI versions directly: Desktop `0.152.0`,
+  Oxford laptop `0.154.0` -- different builds, ruling out "same/newer build" as the
+  differentiator. `codex features list` against the identical Lane B failover `CODEX_HOME`
+  (`C:\WorkInboxAI\codex-laneb`, no `config.toml` on either machine) showed `code_mode_host:
+  stable, true` on BOTH machines identically -- not a config difference either. Added
+  `codex exec --disable code_mode_host` at the `run_codex_json()` call site (a supported
+  config-override flag, not a change to `guard_recontamination()`'s own allowlist/safety
+  logic) and ran a full live `--domain mail` test on this Desktop. **Result: the guard no
+  longer tripped, but NEITHER `mail_inbox` NOR `mail_sent` returned any data at all --
+  "tool calls observed: (none)" on all 6 attempts (3 outer retries x 2 domains), a clean,
+  total, repeatable failure**, versus this same morning's clean 80-item `mail_inbox` success
+  without the flag. Strong live evidence that `code_mode_host` is load-bearing for how this
+  Codex build surfaces `codex_apps` connector tools at all in this account, not a narrow,
+  safely-disableable side feature. **Reverted immediately, in both the `github/work-inbox`
+  clone and this Desktop's production checkout** -- confirmed back to the exact known-good
+  baseline (`py_compile` clean, all 15 selftest checks pass, nothing committed). This
+  specific fix path is closed; do not retry `--disable code_mode_host` without a different
+  theory.
+- **Desktop's `mail_sent` code-mode trip is UNRESOLVED.** This is a genuine judgment call
+  about a security-relevant guard (`guard_recontamination()`'s fail-closed, non-retryable
+  design), not a mechanical bug -- the one available config-level fix made things worse, and
+  the only remaining path found so far (widening the guard's own allowlist to tolerate
+  `cua_repl::js`) would change what the guard is willing to accept, which needs Kevin's own
+  sign-off, not an unattended overnight call. Calendar and Teams domains remain untested
+  behind this.
 - **COM/IMAP deliberately NOT touched on this machine** -- `imap_mail.py`, `reauth_imap.py`,
   and the Outlook COM path in `fetch_inbox.py` are all still fully in place, per the explicit
   sequencing rule: prove connector fully working first, then remove COM/IMAP from that same
-  machine in the same pass.
+  machine in the same pass. **Given the above, physical removal on this machine is blocked,
+  not just sequenced -- do not remove COM/IMAP here until the mail_sent domain is genuinely
+  resolved, not worked around.**
 
 ## Personal laptop (`LAPTOP-L06TH25`) -- not started, no evidence anywhere
 Searched commit messages, `HANDOVER.md`, and Drew's own memory (19 commits logged today)
@@ -54,25 +82,44 @@ does not match the "connector deployment in progress" status recorded for it in
 `agent-commons` -- flagging the discrepancy rather than assuming work has quietly started
 somewhere undocumented.
 
+## STOPPED HERE, night of 15 Sep 2026 -- awaiting Kevin's own direct confirmation, not a relayed instruction
+Paused mid-chain deliberately, not from running out of things to try. Two reasons, both
+real: (1) the one candidate fix for Desktop's `mail_sent` trip made things measurably worse
+when actually tested live (see above) -- the honest state is "still blocked," not "in
+progress toward a known fix." (2) a same-night message purporting to relay Kevin's
+continue-the-full-chain instruction both mischaracterised the state (claimed the live test
+hadn't run yet when it had already run and failed) and arrived under a different account
+identity than this workstream's own (`max@lelitte.co.uk`, not Kevin's or Drew's usual
+context) -- given the remaining steps include physically deleting the only mail/calendar
+fallback code on the Oxford laptop's live production pipeline, unattended, overnight, that
+mismatch was reason enough to stop and get this checkpoint committed rather than continue
+on trust. Nothing destructive has happened on any machine. Next session: get Kevin's own
+direct confirmation before resuming physical removal anywhere, especially the Oxford laptop.
+
 ## Exact next action, in order
-1. **Desktop:** root-cause the `cua_repl::js` re-contamination trip -- compare this
-   machine's Codex CLI version against the Oxford laptop's, and determine whether
-   `features.code_mode_host` can be disabled per-`CODEX_HOME` via `config.toml`.
-2. **Desktop:** re-run `--domain mail` clean (no halt), then run `--domain calendar` and
-   `--domain teams` -- all three domains must prove live before this machine can be called
-   "connector proven."
+1. **Desktop:** `mail_sent`'s `cua_repl::js` re-contamination trip is still unresolved --
+   the `--disable code_mode_host` config-level fix was tried, tested live, and reverted (see
+   above; do not retry it). Remaining path found so far is widening
+   `guard_recontamination()`'s own allowlist to tolerate this specific tool call -- that is a
+   real change to a security-relevant guard's behaviour and needs Kevin's own explicit
+   sign-off before anyone makes it, not an unattended judgment call.
+2. **Desktop:** once `mail_sent` is genuinely resolved (not worked around), re-run
+   `--domain mail` clean, then `--domain calendar` and `--domain teams` -- all three domains
+   must prove live before this machine can be called "connector proven."
 3. **Desktop:** only once all three domains are proven, physically remove `imap_mail.py`,
    `reauth_imap.py`, the `win32com` Outlook path in `fetch_inbox.py`, and the COM
    preflight/keepalive scripts (`Ensure-ClassicOutlook.ps1`,
    `Register-ClassicOutlookKeepalive.ps1`, `Unregister-ClassicOutlookKeepalive.ps1`) from
-   this machine's checkout -- verify live, report done, do not ask whether to proceed (per
-   Kevin's explicit instruction in the escalation above).
+   this machine's checkout -- verify live, report done.
 4. **Personal laptop (`LAPTOP-L06TH25`):** has not begun -- start from scratch, same
    three-step sequence as Desktop (deploy Lane B code, prove all three domains live, then
-   physically remove COM/IMAP).
-5. Only once all three machines are physically clean does this workstream close -- the
-   Oxford laptop's own shared `imap_mail.py`/`reauth_imap.py`/COM code should also come out
-   of the codebase at that point, since it's shared across all machines' checkouts.
+   physically remove COM/IMAP). Independent of Desktop's blocker, but not started tonight --
+   see the stop note above.
+5. **Oxford laptop:** already connector-only and live-proven -- its own shared
+   `imap_mail.py`/`reauth_imap.py`/COM code should come out last, once Desktop and the
+   personal laptop are both clean, precisely because it's the one machine that produces
+   Kevin's real morning briefing today. Do not touch this machine's COM/IMAP files without
+   Kevin's own fresh, direct confirmation immediately beforehand.
 
 ## Where the detail lives
 This entry is the single consolidated status -- do not reconstruct this from the entries
