@@ -1,3 +1,64 @@
+# Handover -- 15 September 2026, evening (Drew) -- Desktop connector deployment: PARTIAL PROOF, halted on a real safety-guard trip, COM/IMAP NOT touched
+
+## Desktop machine (`101L admin` account, checkout `C:\Users\admin\Documents\Claude\Projects\work-inbox`) connector deployment
+
+Continuation of the 15 Sep early-morning entry below, which had found the Desktop's own local checkout
+had no Lane B connector files at all and flagged full connector deployment there as "not closeable
+tonight." This session deployed them and ran a real live test. **Do not read this as "connector proven"
+-- it is a partial, genuinely-verified-live proof with one domain still halted, and COM/IMAP has NOT been
+touched, per the explicit instruction to sequence physical removal only after the connector is proven.**
+
+**Deployed** (15:45-15:46, backed up first -- `fetch_inbox.py.backup-20260915-154559-preLaneB`):
+`lane_b_call1.py`, `normalise_pull.py`, `codex_model_policy.py`, `lane_b_cal_guard.py`, `fetch_inbox.py`
+copied into the Desktop's own local checkout, mirroring what the Oxford laptop already has.
+
+**Live test run** (`python -u lane_b_call1.py --domain mail`, started 14:46:05Z): confirmed finished by
+directly polling the OS process table for the PID until it exited (not assumed, not taken from a prior
+status line) and reading the run's own output file,
+`data/lane_b/20260915T144605Z_lane_b.json`:
+- `mail_inbox`: **status "ok", count 80, served_by "failover"** -- genuinely proven live. Read the raw
+  `.jsonl` log directly: real Oxford senders (`@admin.ox.ac.uk`, `@it.ox.ac.uk`), real subjects, real
+  `outlook.office365.com/owa/?ItemID=...` deep-links, real body previews. Not silently empty.
+- `mail_sent`: **status "halt", count 0.** The existing re-contamination guard (`ReContaminationDetected`,
+  designed to be non-retryable by intent -- see `lane_b_call1.py` ~L1895-1900) correctly stopped the run
+  after detecting an unexpected tool call in the partial output: `cua_repl::js (server != codex_apps)`.
+  This is Codex's own "code mode" JS-sandboxed REPL tool, not the `codex_apps` Outlook connector. Traced
+  this to real sandboxed `node.exe`/`kernel.js`/`trusted-worker.js` child processes actually spawned
+  during that exact call (confirmed via `Get-CimInstance Win32_Process`, not inferred) -- a genuine trip,
+  not a false alarm or a logging glitch.
+
+**Root cause not fully pinned down, ruled out one candidate:** it is NOT simply "this desktop's broad
+personal Codex profile leaking in" -- the call was `served_by: failover`, and the failover
+`CODEX_HOME` (`C:\WorkInboxAI\codex-laneb`, freshly created this run, no `config.toml`) has a plugin
+cache containing only `canva/github/granola/openai-templates/outlook-calendar/outlook-email/
+plugin-management/sharepoint/teams` -- no computer-use/browser/chrome plugin present. `codex-cli
+--version` on this machine is `0.152.0`. Leading open hypothesis, not confirmed: "code mode"
+(`features.code_mode_host`) may be a binary-level default in this Codex CLI build, not something
+enabled per-`CODEX_HOME` by `config.toml` -- which would make this reproducible on the Oxford laptop too
+if it's running the same or a newer Codex CLI build, not desktop-specific. **Not yet checked:** the
+Oxford laptop's own `codex-cli --version` for comparison. This needs that comparison, plus a decision on
+whether the guard's allowlist should be widened to explicitly reject code-mode tool calls with a clearer
+message, before this is safe to call closed.
+
+**Not tested at all in this run:** calendar and Teams domains (`--domain mail` only). Even mail alone is
+only 1-for-2 proven.
+
+**What was correctly NOT done:** no retry of the halted `mail_sent` call (retrying after a suspected
+unexpected-tool trip increases exposure by the guard's own explicit design, does not resolve anything),
+no edit to `C:\Users\admin\.codex\config.toml` (Kevin's personal, broad profile, shared with
+voice-workflows/other tools -- not safe to touch blind), and **no COM/IMAP code path touched or removed
+on this machine** -- `imap_mail.py`, `reauth_imap.py`, and the Outlook COM path in `fetch_inbox.py` are
+all still fully in place on this Desktop checkout, exactly as sequencing required.
+
+**Exact next action:** root-cause the `cua_repl::js` trip (start with the Oxford laptop's Codex CLI
+version for comparison, and whether `features.code_mode_host` can be explicitly disabled per-`CODEX_HOME`
+via `config.toml` rather than relying on it never firing), then re-run `--domain mail` clean, then run
+`--domain calendar` and `--domain teams` before this can be called "connector proven" on this machine.
+Only after all of that should physical COM/IMAP removal begin. This is genuinely not closeable in this
+session -- flagging rather than pushing past a real safety trip to hit a "done" report.
+
+---
+
 # Handover -- 15 September 2026, later (Drew) -- Priorities-card email-link fix SHIPPED, Codex-implemented + independently verified live
 
 ## Priorities board (Today/Tomorrow/This Week) cards now carry a working open-email link
