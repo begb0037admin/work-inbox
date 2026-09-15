@@ -877,7 +877,10 @@ def _cc_load_priorities():
                 "description": task.get("description", ""),
                 "actions":     task.get("actions", []),
                 "source":      task.get("source", ""),
-                "dateType":    "red" if tier == "today" else "orange"
+                "dateType":    "red" if tier == "today" else "orange",
+                "web_link":    task.get("web_link", ""),
+                "display_url": task.get("display_url", ""),
+                "webLink":     task.get("webLink", "")
             }
             if tier == "today":
                 priorities_today.append(entry)
