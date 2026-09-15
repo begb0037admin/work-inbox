@@ -2,23 +2,23 @@
     "kind":  "draftdiff",
     "result":  "ok",
     "exit_code":  0,
-    "ts":  "2026-09-15T12:32:03+01:00",
+    "ts":  "2026-09-15T16:31:07+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "stats":  {
                   "mail_backend":  "imap",
                   "ai_backend":  "claude_code",
-                  "drafts_tracked_now":  110,
-                  "drafts_vanished_since_last_run":  4,
-                  "abandoned_or_discarded":  3,
-                  "draft_final_pairs_found":  1,
+                  "drafts_tracked_now":  112,
+                  "drafts_vanished_since_last_run":  0,
+                  "abandoned_or_discarded":  0,
+                  "draft_final_pairs_found":  0,
                   "pairs_excluded_by_redaction":  0,
-                  "pairs_classified_this_run":  1,
+                  "pairs_classified_this_run":  0,
                   "pairs_permanently_failed":  0,
                   "backlog_size_after_this_run":  0,
                   "ai_unavailable_this_run":  false,
                   "total_diffs_accumulated":  4,
                   "window_hours":  72,
-                  "run_time":  "2026-09-15T12:32:03.210881"
+                  "run_time":  "2026-09-15T16:31:06.697466"
               }
 }
