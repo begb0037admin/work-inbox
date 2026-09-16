@@ -1,3 +1,138 @@
+# Handover -- 16 September 2026, CONSOLIDATED STATUS (Drew) -- COM/IMAP physical-removal: Oxford BLOCKED on a real live-dependency finding, Desktop mail_sent root-caused + fixed, calendar proven, Teams/personal laptop still open
+
+Supersedes the 15 Sep consolidated entry immediately below as the current single source of
+truth for all three machines (kept here per that entry's own stated convention). Kevin gave
+direct, explicit go-ahead today for Oxford's physical deletion specifically, and separately
+authorized continuing through Desktop's root-cause/fix/proving work without per-step check-ins
+while AFK -- both addressed below. Full evidence trail (live traces, exact file diffs, exact
+schtasks output) preserved in `begb0037admin/drew` memory:
+`candidate_wi_oxford_imap_still_live_dependency_16sept.md` and
+`candidate_wi_mail_sent_cua_repl_root_cause_16sept.md`.
+
+## Oxford laptop (`101L-DE013193`) -- deletion PAUSED, not done: found two live scheduled tasks that hard-depend on the exact files targeted for removal
+Before deleting anything, enumerated every scheduled task on the live machine (not just "Work
+Inbox Bridge Briefing", the task the original approval was framed around) via
+`schtasks /Query /FO CSV /V`. Found two others, both `Ready`, both healthy as of today:
+- **"Work Inbox Laptop Parity Shadow"** (last run 15/09 17:21:44, result 0) deliberately sets
+  `MAIL_BACKEND=imap` to do an ongoing IMAP-vs-connector parity comparison -- this is its entire
+  job, not a dormant fallback.
+- **"Work Inbox Laptop Draft Diff"** (last run 15/09 16:30:00, result 0) runs
+  `draft_diff_imap.py`, which does `from imap_mail import (...)` -- a hard Python import,
+  confirmed by reading the source on GitHub. Deleting `imap_mail.py` would break this task with
+  an `ImportError` on its very next scheduled run, not just remove unused code.
+
+Also confirmed (separately real, would have caused a silent false-"done" report even without
+the above): `Run Laptop Bridge Briefing.ps1` re-pulls `fetch_inbox.py`, `imap_mail.py`, and
+`reauth_imap.py` fresh from `raw.githubusercontent.com/.../main` on **every single run**
+(refresh loop, ~line 300 of that script). A local-only file deletion on this checkout would
+have been silently undone by tomorrow's 07:00 scheduled run -- verifying "clean scheduled runs
+continue" would have trivially passed for the wrong reason (the files would already be back).
+
+**Nothing was deleted.** `imap_mail.py` and `reauth_imap.py` are confirmed still present and
+untouched on `C:\Users\begb0037.AD-OAK\work-inbox\` (verified via live `Get-FileHash`/
+`Get-ChildItem`, last-write times match the two tasks' own last-run times). `fetch_inbox.py`'s
+win32com path was also not touched -- it is the SAME shared file Desktop still needs for its
+own COM fallback (Desktop is explicitly not approved for deletion yet), so stripping it from
+`main` would break Desktop, and freezing an Oxford-only fork of it would create an ongoing
+maintenance-drift liability neither the prior session's plan nor today's approval accounted for.
+
+**Recommended path, not yet actioned -- needs Kevin's call:** decide whether "Work Inbox Laptop
+Parity Shadow" (explicitly Phase-4 migration-validation tooling, arguably done its job now that
+Oxford has been connector-live and stable for over a week) should simply be retired
+(`Unregister-ScheduledTask`), and whether "Work Inbox Laptop Draft Diff" (the ongoing
+draft/style-corpus capture feeding Lauren's drafting-loop work) should be re-engineered onto a
+non-IMAP auth path before `imap_mail.py`/`reauth_imap.py` can come out of this machine at all.
+Until one or both of those are resolved, Oxford's IMAP files are genuinely load-bearing, not
+leftover fallback code, and physically deleting them now would break live, currently-healthy
+automation -- this is a "stop and flag" case, not a "decide it myself and proceed" case, because
+retiring/re-engineering an active feature is Kevin's call, not an engineering implementation
+detail.
+
+## Desktop (`DESKTOP-MJDJM64`) -- mail_sent root-caused AND fixed (verified live), calendar proven live for the first time, Teams/personal laptop still open, COM/IMAP correctly NOT touched
+**mail_sent cua_repl::js root cause, found from real trace evidence, not guessed:** compared the
+raw `.jsonl` of the 15 Sep halted run against the 15 Sep clean run 10 minutes later (same
+unmodified code). The open-ended prompt (`build_mail_sent_prompt()`, unlike mail_inbox's already
+-rigid one) left the model to discover the Sent Items folder itself -- the clean run's own trace
+showed it calling `list_mail_folders` six times and re-querying `list_messages` against the same
+folder while hunting, plus redundant `fetch_message`/`fetch_messages_batch`/`search_messages`
+calls (13 tool calls total for one domain). Directly inspecting one `list_messages` result proved
+it already returns the FULL message body, not a preview -- every one of those extra fetch calls
+was genuinely unnecessary. The halted run tripped the guard on an unexpected `cua_repl::js` call
+during this same kind of open-ended, many-step task -- consistent with Codex's own "code mode"
+being reached for during exactly this shape of iterative multi-tool orchestration. Confirmed
+intermittent, not deterministic: the unmodified prompt succeeded cleanly with zero `cua_repl`
+calls in the very next run.
+
+**Fix implemented and shipped (`main` commit `9178bd5`), guard's allowlist untouched as
+instructed:** rewrote `build_mail_sent_prompt()` into the same rigid shape as the 14 Sep
+mail_inbox rewrite -- exactly one `list_mail_folders` call, then exactly one `list_messages` call
+with explicit `filter`/`orderby`/`top` (new `MAIL_SENT_MAX` env-overridable cap, default 150),
+and an explicit ban on `fetch_message`/`fetch_messages_batch`/`search_messages` (proven redundant
+above). This is a prompt-only change -- `guard_recontamination()`'s own allowlist was not
+touched, per Kevin's explicit instruction.
+
+**Live-verified on Desktop, 2 real runs post-fix:** run 1 -- `--domain mail` completed ok, 33
+sent items, exactly 2 tool calls, ~82s (down from 13 calls and halt risk). Run 2 -- mail_inbox ok
+again (80 items), mail_sent came back `unavailable` (connector didn't return `list_messages` this
+cycle) but **zero guard trips** -- the same benign transient pattern already seen on Teams today
+(below), not a new regression. **0/2 post-fix runs tripped the guard**, versus the pre-fix
+baseline's real halt. Stopped live-testing here rather than continuing to hammer the same
+failover connector identity (this was its 8th+ live call today across calendar/Teams/mail
+testing) -- diminishing returns and real contention risk, not budget-driven.
+
+**Calendar proven live on Desktop for the first time** (previously completely untested here):
+`lane_b_cal_guard.py --run --domain both`, exit 0. Calendar hit the same documented cold-start
+pattern already fixed for Oxford (attempt 1 timed out at 360s, 300s kill-cooldown, attempt 2
+recovered) -- final `status=ok served_by=failover`, 39 real items. Guard clean, no re-
+contamination.
+
+**Teams tested twice on Desktop, not yet proven with real data:** both attempts came back
+`status=unavailable` (connector did not fire `list_chats` at all, ~30-70s each) -- not a guard
+trip, not an error, the same soft "didn't return this cycle" pattern mail_sent's second run also
+hit. Not pursued further today for the same connector-contention reason above. Next session:
+retry teams alone, ideally after a longer quiet gap / on a fresh day, before treating this as
+anything other than "tested, inconclusive."
+
+**COM/IMAP correctly NOT touched on Desktop, per the standing instruction that this needs Kevin's
+own separate go-ahead:** `imap_mail.py`, `reauth_imap.py`, and the win32com path in
+`fetch_inbox.py` remain fully in place on this checkout. Desktop has NOT reached "fully clean
+across all domains" (Teams unproven, mail_sent's live success rate this session was 1 ok / 1
+unavailable post-fix) -- the "stop and report, wait for Kevin's deletion go-ahead" trigger point
+was not reached today regardless.
+
+**Minor, unrelated, not actioned:** Desktop's live `.codex/config.toml` sha1
+(`8ae159d21e08cc49957228a40c7c22ece1ceed2d`) is not among the recorded
+`CONFIG_TOML_SHA1_BASELINES` for this host -- logged as a non-halting note on every run today.
+Left alone rather than silently added to the baseline list, since its provenance (a legitimate
+expected change vs. real drift) wasn't investigated this session -- flagging for next session
+rather than guessing.
+
+## Personal laptop (`LAPTOP-L06TH25`) -- confirmed still not started, lowest priority (Kevin's explicit ordering)
+Live-checked today (not assumed from the 15 Sep entry): `Test-Path` for a `work-inbox` checkout
+under this machine's own profile returns `False`. No Lane B files, no launcher, nothing deployed.
+Deliberately not started this session -- Desktop was the explicit priority, and Oxford's
+live-dependency finding took real, necessary investigation time. Same three-step sequence as
+Desktop applies whenever this is picked up: deploy Lane B code, prove all four domains live, then
+physically remove COM/IMAP -- not yet approved for this machine either.
+
+## Exact next action, in order
+1. **Oxford:** get Kevin's decision on retiring "Work Inbox Laptop Parity Shadow" and/or
+   re-engineering "Work Inbox Laptop Draft Diff" off `imap_mail.py` -- only after that can
+   `imap_mail.py`/`reauth_imap.py` actually come out of this machine without breaking live
+   automation. The win32com path in `fetch_inbox.py` stays blocked by the shared-file problem
+   until Desktop (and ideally the personal laptop) are also connector-proven.
+2. **Desktop:** retry `--domain teams` alone (ideally after a longer gap since today's heavy
+   testing) to get a genuine success/failure read rather than two inconclusive `unavailable`
+   cycles. Re-run `--domain mail` a few more times over the next few scheduled cycles to build
+   further confidence the cua_repl fix holds (0/2 clean so far, guard-trip-free).
+3. **Desktop:** once mail_sent and Teams both show real, repeated clean success, THEN it's safe
+   to ask Kevin for the Desktop COM/IMAP deletion go-ahead -- not reached yet.
+4. **Personal laptop:** start from scratch when Desktop and Oxford's blockers are clearer --
+   deploy Lane B files, prove mail_inbox/mail_sent/calendar/teams, then COM/IMAP removal
+   (separately not yet approved).
+
+---
+
 # Handover -- 15 September 2026, CONSOLIDATED STATUS (Drew) -- COM/IMAP physical-removal escalation: all 3 machines in one place
 
 Kevin escalated past the phased 1 Nov 2026 migration to immediate, physical removal of
