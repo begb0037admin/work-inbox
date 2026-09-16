@@ -92,10 +92,25 @@ Every entry point logs a timestamp via the injected `log` callable, same
 convention as draft_diff_imap.py.
 """
 
+import os
 import re
 from datetime import datetime, timedelta, timezone
 
 import lane_b_call1 as _lb
+
+# DRAFTS_MAX / SENT_MAX -- added 16 Sep 2026 after a live probe against
+# Kevin's REAL Oxford mailbox (not the failover-identity test mailbox this
+# module was originally verified against): the Drafts folder genuinely has
+# more than 200 items -- the connector returned a pagination continuation
+# link, and _list_folder_messages() correctly refused the partial pull
+# (ConnectorResultIncomplete) rather than silently dropping data. Raising the
+# cap rather than implementing multi-call pagination -- pagination would
+# reintroduce the exact multi-call folder-hunting shape the 16 Sep mail_sent
+# rigid-prompt fix (lane_b_call1.build_mail_sent_prompt()) was built to
+# eliminate. If this cap is ever hit again, raise it further via the env var
+# rather than adding a second list_messages call.
+DRAFTS_MAX = int(os.environ.get("WI_DRAFTDIFF_DRAFTS_MAX", "1000"))
+SENT_MAX = int(os.environ.get("WI_DRAFTDIFF_SENT_MAX", "1000"))
 
 # ---------------------------------------------------------------------------
 #  Conversation key (subject/topic only -- see module docstring)
@@ -324,7 +339,7 @@ def snapshot_drafts_connector(log=print) -> dict:
     semantics as draft_final_diff_capture.snapshot_drafts() /
     draft_diff_imap.snapshot_drafts_imap()."""
     now_iso = datetime.now().isoformat()
-    messages = _list_folder_messages("Drafts", extra_filter=None, top=200,
+    messages = _list_folder_messages("Drafts", extra_filter=None, top=DRAFTS_MAX,
                                       tag="draftdiff_drafts#failover", retries=_lb.CALL1_RETRIES, log=log)
     snap: dict = {}
     ambiguous_keys = set()
@@ -390,7 +405,7 @@ class SentIndexConnector:
         self._by_key: dict[str, list[dict]] = {}
         floor = datetime.now(timezone.utc) - timedelta(hours=window_hours + 240)  # +10gd slack, mirrors draft_diff_imap's own
         extra_filter = f"sentDateTime ge {floor.strftime('%Y-%m-%dT%H:%M:%S')}Z"
-        messages = _list_folder_messages("Sent Items", extra_filter=extra_filter, top=500,
+        messages = _list_folder_messages("Sent Items", extra_filter=extra_filter, top=SENT_MAX,
                                           tag="draftdiff_sent#failover", retries=_lb.CALL1_RETRIES, log=log)
         indexed = 0
         for m in messages:
