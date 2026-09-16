@@ -3,7 +3,7 @@ Register-LaptopBridgeBriefing.ps1
 ================================
 Registers the TEMPORARY scheduled task "Work Inbox Bridge Briefing" on Kevin's
 Oxford laptop (101L-DE013193 / begb0037.AD-OAK) for the duration of the desktop
-M365 outage. It runs "Run Laptop Bridge Briefing.ps1" (full pipeline: IMAP mail
+M365 outage. It runs "Run Laptop Bridge Briefing.ps1" (full pipeline: Microsoft 365 connector mail
 pull -> claude -p triage -> Phase 4 GitHub push -> Phase 5 command-centre sync
 -> best-effort publishers). No calendar.
 
@@ -14,8 +14,8 @@ RUN THIS ONCE, in a normal (NON-elevated) PowerShell, signed in as ad-oak\begb00
   -Cadence Full                06:00 / 09:00 / 12:00 / 15:00 / 18:00 Mon-Fri   (matches the old desktop task -- only if a real week shows the Pro cap is fine)
 
 LogonType = Interactive: the task only runs while ad-oak\begb0037 is logged on.
-That is required -- the MSAL broker silent-token path and the periodic one-click
-browser re-auth both need the interactive session. Keep the laptop docked + logged in.
+That is required for the connector/Codex session and the `claude -p` subscription
+session. Keep the laptop docked + logged in.
 
 UNREGISTER (end of bridge):
   Unregister-ScheduledTask -TaskName 'Work Inbox Bridge Briefing' -Confirm:$false
@@ -59,7 +59,7 @@ $settings = New-ScheduledTaskSettingsSet `
 
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $triggers `
   -Principal $principal -Settings $settings -Force `
-  -Description "TEMPORARY work-inbox bridge during the desktop M365 outage. Real mail-only briefing: IMAP pull -> claude -p triage -> Phase 4 push -> Phase 5 command-centre sync. No calendar. Unregister + re-enable the desktop 'Work Inbox Briefing' task when the desktop is fixed."
+  -Description "TEMPORARY work-inbox bridge during the desktop M365 outage. Real mail-only briefing: Microsoft 365 connector pull -> claude -p triage -> Phase 4 push -> Phase 5 command-centre sync. No calendar. Unregister + re-enable the desktop 'Work Inbox Briefing' task when the desktop is fixed."
 
 Write-Host "Registered '$taskName'  (cadence: $Cadence -> $($times -join ', ') Mon-Fri, as $env:USERDOMAIN\$env:USERNAME, run-only-when-logged-on)."
 (Get-ScheduledTask -TaskName $taskName).Triggers | Format-Table -AutoSize

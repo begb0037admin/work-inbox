@@ -3,8 +3,8 @@ Register-LaptopDraftDiff.ps1
 ============================
 Registers the scheduled task "Work Inbox Laptop Draft Diff" on Kevin's Oxford
 laptop (101L-DE013193 / begb0037.AD-OAK). It runs "Run Laptop Draft Diff.ps1":
-the ongoing draft/final diff capture, reading Drafts + Sent over IMAP+OAuth2
-(no Outlook COM). Writes/logs only, plus one tiny GitHub run-status file
+the ongoing draft/final diff capture, reading Drafts + Sent over the Microsoft 365
+connector (no Outlook COM or IMAP). Writes/logs only, plus one tiny GitHub run-status file
 (data/laptop_status/draftdiff_status.json -- counts + exit code, no email content).
 
 RUN THIS ONCE, in a normal (NON-elevated) PowerShell, signed in as ad-oak\begb0037
@@ -23,11 +23,11 @@ RUN THIS ONCE, in a normal (NON-elevated) PowerShell, signed in as ad-oak\begb00
                    ANTHROPIC_API_KEY stripped -- no metered key needed).
 
 LogonType = Interactive: runs only while ad-oak\begb0037 is logged on -- required
-for the MSAL broker silent-token path AND the `claude -p` subscription session.
+for the connector/Codex session AND the `claude -p` subscription session.
 Keep the laptop docked + logged in.
 StartWhenAvailable is deliberately OFF (mirrors the desktop task): a skipped
-catch-up costs nothing -- Thread-Index correlation picks up any pending pair on
-the next real run.
+catch-up costs nothing -- the connector's subject/topic + recipient correlation
+picks up any pending pair on the next real run.
 
 UNREGISTER:
   Unregister-ScheduledTask -TaskName 'Work Inbox Laptop Draft Diff' -Confirm:$false
@@ -94,7 +94,7 @@ $settings = New-ScheduledTaskSettingsSet `
 
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $triggers `
   -Principal $principal -Settings $settings -Force `
-  -Description "work-inbox draft/final diff capture on the laptop over IMAP (no Outlook COM). Writes local-only staging + one tiny GitHub run-status file. Replaces the desktop 'Draft Diff Capture' task -- disable that once this is proven."
+  -Description "work-inbox draft/final diff capture on the laptop over the Microsoft 365 connector (no Outlook COM or IMAP). Writes local-only staging + one tiny GitHub run-status file. Replaces the desktop 'Draft Diff Capture' task -- disable that once this is proven."
 
 Write-Host "Registered '$taskName'  (cadence: $Cadence -> $($times -join ', ') Mon-Fri, enrichment=$(if($NoAI){'OFF (-NoAI)'}else{'claude -p'}), as $env:USERDOMAIN\$env:USERNAME, run-only-when-logged-on)."
 (Get-ScheduledTask -TaskName $taskName).Triggers | Format-Table -AutoSize

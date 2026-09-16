@@ -336,13 +336,16 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
         max_classifications_per_run=25, mail_backend=None):
     # MAIL_BACKEND mirrors fetch_inbox.py: "com" (default) is the Outlook COM
     # path, unchanged and byte-identical; "imap" reads Drafts + Sent Items over
-    # IMAP+OAuth2 (draft_diff_imap.py) and never imports win32com.
+    # IMAP+OAuth2 (draft_diff_imap.py) and never imports win32com; "connector"
+    # (added 16 Sep 2026) reads Drafts + Sent Items over the same ChatGPT M365
+    # connector already proven for mail_inbox/mail_sent/calendar
+    # (draft_diff_connector.py) -- never imports win32com or imap_mail.
     backend = (mail_backend or os.environ.get("MAIL_BACKEND", "com")).strip().lower()
 
     previous_ledger = load_ledger(ledger_path)
 
     sent_folder = None   # COM path only
-    sent_index = None    # IMAP path only
+    sent_index = None    # IMAP and connector paths
 
     if backend == "imap":
         import draft_diff_imap
@@ -350,6 +353,13 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
               f"MAIL_BACKEND=imap: reading Drafts + Sent over IMAP (no Outlook COM)")
         current_snapshot = draft_diff_imap.snapshot_drafts_imap(log=print)
         sent_index = draft_diff_imap.SentIndex(window_hours, log=print)
+    elif backend == "connector":
+        import draft_diff_connector
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
+              f"MAIL_BACKEND=connector: reading Drafts + Sent over the M365 connector "
+              f"(no Outlook COM, no IMAP)")
+        current_snapshot = draft_diff_connector.snapshot_drafts_connector(log=print)
+        sent_index = draft_diff_connector.SentIndexConnector(window_hours, log=print)
     else:
         import win32com.client.dynamic
 
@@ -388,6 +398,8 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
             continue
         if backend == "imap":
             final = sent_index.find(conv_id, last_seen_dt)
+        elif backend == "connector":
+            final = sent_index.find(conv_id, last_seen_dt, draft.get("to_addrs"))
         else:
             final_msg = find_sent_match(sent_folder, conv_id, last_seen_dt, window_hours)
             if final_msg is None:
@@ -435,6 +447,7 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
 
         _bl = {
             "conversation_id": conv_id,
+            "correlation_backend": backend,
             "draft_body": draft["body"],
             "final_body": final_body,
             "final_entry_id": final_entry_id,
@@ -529,6 +542,12 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
                 continue
 
             pairs_classified += 1
+            if item.get("correlation_backend") == "connector":
+                correlation_method = "subject/topic key + recipient-email overlap (connector)"
+            elif item["final_entry_id"]:
+                correlation_method = "ConversationID"
+            else:
+                correlation_method = "Thread-Index conversation key (IMAP)"
             diffs.append({
                 "channel": "email",
                 "draft": item["draft_body"],
@@ -538,7 +557,7 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
                 "recipient_tier": item["recipient_tier"],
                 "confirmed_via": (
                     f"draft_final_diff_capture.py, matched via "
-                    f"{'ConversationID' if item['final_entry_id'] else 'Thread-Index conversation key (IMAP)'}"
+                    f"{correlation_method}"
                     f" + sent within {item['window_hours']}h of last-seen draft snapshot "
                     f"(last_seen={item['last_seen']}, sent={item['final_sent']}), "
                     + (f"final_entry_id={item['final_entry_id']}" if item['final_entry_id']
@@ -617,9 +636,11 @@ if __name__ == "__main__":
     parser.add_argument("--no-ai", action="store_true", help="Skip edit_type/note classification (diagnostic only)")
     parser.add_argument("--stats-only", action="store_true", help="No writes, no AI calls, aggregate counts only")
     parser.add_argument(
-        "--mail-backend", default=None, choices=["com", "imap"],
+        "--mail-backend", default=None, choices=["com", "imap", "connector"],
         help="Override the MAIL_BACKEND env var. 'com' (default) = Outlook COM, unchanged. "
-             "'imap' = read Drafts + Sent Items over IMAP+OAuth2 (draft_diff_imap.py), no win32com.",
+             "'imap' = read Drafts + Sent Items over IMAP+OAuth2 (draft_diff_imap.py), no win32com. "
+             "'connector' = read Drafts + Sent Items over the M365 connector "
+             "(draft_diff_connector.py), no win32com, no IMAP.",
     )
     parser.add_argument(
         "--stats-out", default=None,

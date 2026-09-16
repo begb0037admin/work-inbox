@@ -4,21 +4,22 @@ Run Laptop Draft Diff.ps1
 work-inbox LAPTOP MIGRATION -- the ongoing draft/final diff capture
 (tools/draft_final_diff_capture.py) moved off the admin DESKTOP / off Outlook
 COM onto Kevin's Oxford laptop (101L-DE013193 / begb0037.AD-OAK, user
-ad-oak\begb0037), reading the server-side Drafts + Sent Items folders over
-IMAP+OAuth2 -- the same MSAL broker-silent auth as "Run Laptop Bridge Briefing.ps1".
+ad-oak\begb0037), reading the server-side Drafts + Sent Items folders over the
+same Microsoft 365 connector already proven for mail_inbox/mail_sent/calendar.
 
-  MAIL_BACKEND=imap  ->  draft_diff_imap.py reads Drafts + Sent over IMAP
-                         (no win32com, no classic Outlook)
-  ->  ConversationID-equivalent correlation via the Thread-Index header
+  MAIL_BACKEND=connector  ->  draft_diff_connector.py reads Drafts + Sent over
+                              the M365 connector (no win32com, no IMAP)
+  ->  subject/topic correlation plus strict recipient-email overlap; ambiguous
+      or absent correlation is dropped rather than guessed
   ->  whole-pair redaction (style_corpus_common.py), same as on the desktop
   AI_BACKEND=claude_code  ->  edit_type/note enrichment via headless `claude -p`
                          (subscription auth, CLAUDE_CONFIG_DIR=C:\WorkInboxAI\kevin,
                          ANTHROPIC_API_KEY stripped) -- drains
                          pending_classification.json in the same run. A `claude -p`
                          failure just re-stages the pair (never hard-fails the run).
-  ->  LOCAL-ONLY staging dir  <MyDocuments>\CorpusStaging\draft_watch_imap\
-      (its own ledger -- the key scheme differs from the COM ledger, so a first
-       run here re-baselines and produces ZERO pairs, by design)
+  ->  LOCAL-ONLY staging dir  <MyDocuments>\CorpusStaging\draft_watch_connector\
+      (its own ledger -- the key scheme differs from the COM/IMAP ledgers, so a
+       first connector run re-baselines and produces ZERO pairs, by design)
 
 This wrapper WRITES a tiny run-status file to GitHub via Push-LaptopRunStatus.ps1:
   data/laptop_status/draftdiff_status.json   (counts + exit code ONLY, never
@@ -50,7 +51,7 @@ $ErrorActionPreference = 'Continue'
 $repo   = 'begb0037admin/work-inbox'
 $root   = Join-Path $env:USERPROFILE 'work-inbox'
 $logdir = Join-Path $root 'logs'
-$stage  = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'CorpusStaging\draft_watch_imap'
+$stage  = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'CorpusStaging\draft_watch_connector'
 New-Item -ItemType Directory -Force -Path $root, $logdir, $stage | Out-Null
 
 $stamp    = [DateTime]::Now.ToString('yyyyMMdd-HHmmss')
@@ -102,9 +103,10 @@ $base = "https://raw.githubusercontent.com/$repo/main"
 $need = @{
   'draft_final_diff_capture.py' = "$base/tools/draft_final_diff_capture.py"
   'style_corpus_common.py'      = "$base/tools/style_corpus_common.py"
-  'draft_diff_imap.py'          = "$base/draft_diff_imap.py"
-  'imap_mail.py'                = "$base/imap_mail.py"
-  'reauth_imap.py'              = "$base/reauth_imap.py"
+  'draft_diff_connector.py'     = "$base/draft_diff_connector.py"
+  'lane_b_call1.py'             = "$base/lane_b_call1.py"
+  'normalise_pull.py'           = "$base/normalise_pull.py"
+  'codex_model_policy.py'       = "$base/codex_model_policy.py"
 }
 foreach ($name in $need.Keys) {
   try {
@@ -115,8 +117,8 @@ foreach ($name in $need.Keys) {
   }
 }
 
-# --- environment: mirror the bridge briefing minus Outlook ---
-$env:MAIL_BACKEND      = 'imap'
+# --- environment: connector-only mail pull, no Outlook/IMAP ---
+$env:MAIL_BACKEND      = 'connector'
 $env:PYTHONUTF8        = '1'
 $env:ANTHROPIC_API_KEY = ''            # force subscription billing (belt-and-braces; the subprocess also strips it)
 if ($NoAI) {
@@ -131,9 +133,9 @@ if ($NoAI) {
 }
 
 $ledger = Join-Path $stage 'ledger.json'
-Log "running: python -u draft_final_diff_capture.py --mail-backend imap $($aiArgs -join ' ') --ledger-path <stage>\ledger.json --out-dir <stage> --stats-out <temp>"
+Log "running: python -u draft_final_diff_capture.py --mail-backend connector $($aiArgs -join ' ') --ledger-path <stage>\ledger.json --out-dir <stage> --stats-out <temp>"
 & python -u (Join-Path $root 'draft_final_diff_capture.py') `
-    --mail-backend imap @aiArgs `
+    --mail-backend connector @aiArgs `
     --ledger-path $ledger `
     --out-dir $stage `
     --stats-out $statsOut 2>&1 | Tee-Object -FilePath $log -Append
@@ -147,7 +149,7 @@ if (Test-Path $statsOut) { Remove-Item $statsOut -Force -ErrorAction SilentlyCon
 if ($rc -ne 0) {
   Log "=== Laptop Draft Diff END (FAILED, exit $rc) ==="
   if ($rc -eq 1) {
-    Log "exit 1 = a phase raised. Common cause: expired IMAP token -> the log shows 'silent token refresh failed'; fix with:  cd `"$root`"; python reauth_imap.py   (one browser click) then re-run."
+    Log "exit 1 = a phase raised. Check the connector/Lane B error above; no IMAP re-auth fallback exists on this retired path."
   }
   exit $rc
 }

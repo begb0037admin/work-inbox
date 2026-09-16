@@ -8,7 +8,7 @@ is dead. Kevin + Max are repairing the desktop separately.
 
 This is NOT the Phase 4 parity shadow ("Run Laptop Parity Shadow.ps1"). This one
 pushes for real:
-    IMAP+OAuth2 mail pull  ->  claude -p triage (kevin@ isolated config)
+    Microsoft 365 connector mail pull  ->  claude -p triage (kevin@ isolated config)
     ->  Phase 4  data/briefing.json  -> GitHub
     ->  Phase 5  command-centre task-suggestion sync
     ->  (best effort) needs_reply.json + drafted_replies.json publishers
@@ -59,7 +59,7 @@ wiring added 2 Sept 2026 evening (Drew) -- NEITHER LIVE YET:
   and the two wrong ideas rejected en route to this design.
   **THE LIVE SCHEDULED TASK STAYS ON CAL_BACKEND=com.** This wiring is dormant
   until Kevin gives the explicit go-ahead to register/re-register the task with
-  -CalBackend connector -- same cutover discipline as the mail IMAP migration.
+  -CalBackend connector -- same cutover discipline as the connector mail path.
   Passing -CalBackend connector by hand (this script only, not the live task)
   is how Kevin/the coordinator proves it end to end before that go-ahead.
 
@@ -85,32 +85,27 @@ PARAMS
                      proof/testing only until Kevin's cutover go-ahead). Independent
                      of -CalBackend (Teams has no COM/classic-Outlook equivalent to
                      fall back to -- it has only ever been connector-or-nothing).
-  -MailBackend       imap (default) | connector -- added 9 Sept 2026 per Kevin's
-                     fresh explicit risk acceptance, HANDOVER.md section Q. Runs
+  -MailBackend       connector (default; IMAP retired on this laptop). Runs
                      `lane_b_call1.py --domain mail` directly (NOT through
                      lane_b_cal_guard.py -- that guard's pre/post snapshot-diff is
                      calendar-specific and Kevin explicitly declined a kill-switch
                      rework for mail; the SAME verb-based re-contamination guard
                      already live for calendar/Teams, inside lane_b_call1.py
-                     itself, is the sole mechanism here too). Exit 0 -> proceed with
-                     MAIL_BACKEND=connector. Exit 1 (HALT -- a write/off-scope tool
-                     call was observed) -> disable THIS task + local BurntToast +
-                     fall back to MAIL_BACKEND=imap for this cycle only, same
-                     response shape as the calendar/Teams guard. Exit 5 (MODEL
-                     POLICY VIOLATION) -> log + local BurntToast + fall back to
-                     imap for this cycle, task stays enabled, but investigate
-                     the deterministic code/config bug rather than treating it
-                     as ordinary connector flakiness. Any other exit (2/3 --
-                     usage error / codex run failed) -> fall back to imap for
-                     this cycle, task stays enabled, retries next cadence.
-                     IMAP is NEVER removed -- it stays the one-line rollback
-                     (this flag back to 'imap') regardless of how long connector
-                     mail has been live. KNOWN GAP, disclosed not hidden: unlike
-                     calendar/Teams' guard, a mail HALT/fallback is NOT yet threaded
-                     through Push-LaptopRunStatus.ps1/Watch-BridgeBriefing.ps1, so
-                     there is no CROSS-MACHINE desktop toast for it yet -- only the
-                     local laptop toast + this run's own log. Follow-up, not a
-                     safety gap (the guard/disable/fallback all still fire).
+                      itself, is the sole mechanism here too). Exit 0 -> proceed with
+                      MAIL_BACKEND=connector. Exit 1 (HALT -- a write/off-scope tool
+                      call was observed) -> disable THIS task + local BurntToast +
+                      abort this cycle. Exit 5 (MODEL POLICY VIOLATION) -> log +
+                      local BurntToast + abort this cycle, task stays enabled, but
+                      investigate the deterministic code/config bug rather than
+                      treating it as ordinary connector flakiness. Any other exit
+                      (2/3 -- usage error / codex run failed) -> abort this cycle,
+                      task stays enabled, and retry next cadence. There is no
+                      IMAP fallback on this retired laptop. KNOWN GAP, disclosed
+                      not hidden: unlike calendar/Teams' guard, a mail HALT is NOT
+                      yet threaded through Push-LaptopRunStatus.ps1/Watch-
+                      BridgeBriefing.ps1, so there is no CROSS-MACHINE desktop toast
+                      for it yet -- only the local laptop toast + this run's own log.
+                      Follow-up, not a safety gap (the guard/disable still fire).
 
 LIVE COPY   %USERPROFILE%\work-inbox\Run Laptop Bridge Briefing.ps1
 REFERENCE   work-inbox/docs/desktop-scripts/Run Laptop Bridge Briefing.ps1
@@ -124,7 +119,7 @@ param(
   [switch]$CoreOnly,
   [ValidateSet('com','connector')] [string]$CalBackend = 'com',
   [ValidateSet('off','connector')] [string]$TeamsBackend = 'off',
-  [ValidateSet('imap','connector')] [string]$MailBackend = 'imap'
+  [ValidateSet('connector')] [string]$MailBackend = 'connector'
 )
 
 # ============================================================================
@@ -297,7 +292,7 @@ $env:PYTHONUTF8                  = '1'
 # --- refresh pipeline scripts from main (cache-busted raw pull, same mechanism the desktop uses) ---
 $t    = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $base = 'https://raw.githubusercontent.com/begb0037admin/work-inbox/main'
-foreach ($f in 'fetch_inbox.py','imap_mail.py','reauth_imap.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py','codex_model_policy.py') {
+foreach ($f in 'fetch_inbox.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py','codex_model_policy.py') {
   # codex_model_policy.py added 10 Sep 2026 (Priority 4, touchpoint-3 Codex
   # review finding) -- lane_b_call1.py now imports it; without refreshing it
   # here alongside lane_b_call1.py, a refreshed lane_b_call1.py could import
@@ -527,9 +522,7 @@ if ($laneBDomain) {
 }
 
 # --- LANE B MAIL guard -- added 9 Sept 2026, HANDOVER.md section Q (Kevin's fresh
-#     explicit risk acceptance). Only when -MailBackend connector was explicitly
-#     passed (the live task does not pass it yet at the moment this was written --
-#     see the header note for exactly when that changes). Runs
+#     explicit risk acceptance). The laptop is now connector-only, so this runs
 #     `lane_b_call1.py --domain mail` DIRECTLY, not through lane_b_cal_guard.py --
 #     that guard's pre/post snapshot-diff is calendar-specific and Kevin explicitly
 #     declined a kill-switch rework for mail; the SAME verb-based re-contamination
@@ -552,10 +545,9 @@ if ($MailBackend -eq 'connector') {
       $LaneBMailGuardResult = 'clean'
     }
     1 {
-      Log "Lane B mail guard HALT (a write/off-scope tool call was observed) -- disabling '$TaskName' and falling back to MAIL_BACKEND=imap for THIS cycle only"
-      $MailBackend = 'imap'
+      Log "Lane B mail guard HALT (a write/off-scope tool call was observed) -- disabling '$TaskName' and aborting; no IMAP fallback exists on this retired laptop"
       $LaneBMailGuardResult = 'halted'
-      $LaneBMailGuardDetail = "task '$TaskName' disabled; mail fell back to IMAP this cycle. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
+      $LaneBMailGuardDetail = "task '$TaskName' disabled; connector run aborted. See data\lane_b\ and data\codex_runs\GUARD_TRIPPED_* on the laptop."
       try {
         Disable-ScheduledTask -TaskName $TaskName -ErrorAction Stop | Out-Null
         Log "Disabled scheduled task '$TaskName' -- re-enable manually after investigating: Enable-ScheduledTask -TaskName '$TaskName'"
@@ -569,14 +561,17 @@ if ($MailBackend -eq 'connector') {
       } catch {
         Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the HALT + task-disable above are still real. KNOWN GAP (disclosed, not a safety gap): unlike calendar/Teams, this is not yet threaded through Push-LaptopRunStatus.ps1, so there is no cross-machine desktop toast for a mail HALT yet -- this run's own log is authoritative until that follow-up is built."
       }
+      Copy-Item $log $latest -Force
+      Publish-Status 1
+      Log "=== Laptop Bridge Briefing END (mail guard halted) ==="
+      exit 1
     }
     5 {
       # Added 10 Sep 2026 (Priority 4, touchpoint-3 Codex review finding):
       # MUST be distinguished from `default` below -- same reasoning as the
       # calendar/Teams switch above. Not a security HALT (task stays
       # enabled), but not ordinary transient flakiness either.
-      Log "Lane B mail guard MODEL POLICY VIOLATION (a code/config bug in codex_model_policy usage, NOT connector unavailability) -- falling back to MAIL_BACKEND=imap for THIS cycle only; task stays enabled but this needs investigation, not just a retry"
-      $MailBackend = 'imap'
+      Log "Lane B mail guard MODEL POLICY VIOLATION (a code/config bug in codex_model_policy usage, NOT connector unavailability) -- aborting this cycle; task stays enabled but this needs investigation, not just a retry"
       $LaneBMailGuardResult = 'policy-violation'
       $LaneBMailGuardDetail = 'MODEL POLICY VIOLATION -- code/config bug in codex_model_policy usage. Not disabled (not a mailbox-safety issue), but will keep failing every cycle until fixed.'
       try {
@@ -586,15 +581,22 @@ if ($MailBackend -eq 'connector') {
       } catch {
         Log "WARN: BurntToast unavailable/failed ($($_.Exception.Message)) -- LOCAL toast skipped; the violation is still real and logged above"
       }
+      Copy-Item $log $latest -Force
+      Publish-Status 5
+      Log "=== Laptop Bridge Briefing END (mail model policy violation) ==="
+      exit 5
     }
     default {
-      Log "Lane B mail guard non-zero exit $mailGuardRc (2=usage/env error, 3=codex run failed, other=unexpected) -- treating conservatively: falling back to MAIL_BACKEND=imap for THIS cycle only; task stays enabled, will retry next cadence"
-      $MailBackend = 'imap'
+      Log "Lane B mail guard non-zero exit $mailGuardRc (2=usage/env error, 3=codex run failed, other=unexpected) -- aborting this cycle; task stays enabled and will retry next cadence"
       $LaneBMailGuardResult = "unexpected-$mailGuardRc"
-      $LaneBMailGuardDetail = "lane_b_call1.py --domain mail exited $mailGuardRc -- treated conservatively, not disabled."
+      $LaneBMailGuardDetail = "lane_b_call1.py --domain mail exited $mailGuardRc -- connector-only run aborted; task stays enabled."
+      Copy-Item $log $latest -Force
+      Publish-Status $mailGuardRc
+      Log "=== Laptop Bridge Briefing END (mail connector unavailable/error) ==="
+      exit $mailGuardRc
     }
   }
-  $env:MAIL_BACKEND = $MailBackend  # re-assert in case the guard downgraded it above
+  $env:MAIL_BACKEND = $MailBackend  # re-assert the connector-only backend
 }
 
 # --- CORE: fetch_inbox.py  (Phase 1 mail -> combined claude -p triage -> Phase 4 push -> Phase 5 CC sync) ---
@@ -606,7 +608,7 @@ Log "fetch_inbox.py exit $rc"
 if ($rc -ne 0) {
   Log "CORE FAILED (exit $rc). NOT running publishers. Check the log above for the failing phase."
   if ($rc -eq 1) {
-    Log "exit 1 = a phase raised. Common causes: (a) expired IMAP token -> the log shows 'IMAP mail sign-in expired'; fix with:  cd `"$root`"; python reauth_imap.py   (one browser click) then re-run.  (b) a Phase 4 safe-write veto -> the log shows 'Safe write blocked briefing update: ...'."
+    Log "exit 1 = a phase raised. Check the connector/Lane B error above; there is no IMAP re-auth fallback on this retired path. A Phase 4 safe-write veto is also logged as 'Safe write blocked briefing update: ...'."
   }
   Copy-Item $log $latest -Force
   Publish-Status $rc
