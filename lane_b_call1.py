@@ -535,6 +535,13 @@ def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
 MAIL_INBOX_MAX_UNREAD = int(os.environ.get("WI_LANE_B_MAIL_MAX_UNREAD", "50"))
 MAIL_INBOX_MAX_READ   = int(os.environ.get("WI_LANE_B_MAIL_MAX_READ", "30"))
 
+# MAIL_SENT_MAX -- added 16 Sep 2026 (Drew), part of the mail_sent rigid-prompt
+# rewrite below. Previous prompt had no top= cap at all; the one clean live
+# run on record (15 Sep 2026, ts=20260915T145639Z) returned 130 real items
+# uncapped over a 7-day window. 150 gives headroom above that observed volume
+# without leaving the call genuinely unbounded the way the old prompt did.
+MAIL_SENT_MAX = int(os.environ.get("WI_LANE_B_MAIL_SENT_MAX", "150"))
+
 
 def build_mail_inbox_prompt(since_iso: str) -> str:
     # Mail-domain Call-1 prompt, added 9 Sept 2026 (Drew) -- full mail-fetch
@@ -607,10 +614,60 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
 
 
 def build_mail_sent_prompt(since_iso: str) -> str:
+    # REWRITTEN 16 Sep 2026 (Drew) -- root-cause fix for the Desktop mail_sent
+    # cua_repl::js re-contamination trip (see memory/candidate_wi_mail_sent_
+    # cua_repl_root_cause_16sept.md in begb0037admin/drew for the full trace
+    # evidence). The OLD prompt below was open-ended ("retrieve the messages
+    # in my Sent Items folder... newest first") with no folder id, no filter/
+    # orderby/top, and no explicit tool list. Reading the raw trace of the one
+    # CLEAN live run on record (15 Sep, ts=20260915T145639Z) line by line
+    # showed the model, left to its own discretion, calling
+    # list_mail_folders SIX separate times (200 folders each time) and
+    # re-issuing list_messages against the SAME folder_id repeatedly while it
+    # hunted for which folder was actually Sent Items, THEN also calling
+    # fetch_messages_batch, fetch_message, and search_messages on top --
+    # 13 tool calls total for one domain, vastly more than mail_inbox's fixed
+    # 2. Critically, inspecting one of those list_messages results directly
+    # showed the FULL message body (not a preview) was already present in the
+    # plain list_messages response -- every one of those extra fetch_message/
+    # fetch_messages_batch/search_messages calls was genuinely redundant, not
+    # a real tool requirement. The OTHER (non-clean) run on record, 10 minutes
+    # earlier, halted mid-flight on an unexpected cua_repl::js call while this
+    # same open-ended, many-call, folder-hunting task was in progress -- the
+    # kind of iterative multi-step orchestration Codex's "code mode" exists to
+    # help with. Root cause: task looseness, not a fixed/deterministic
+    # trigger (an unmodified re-run completed cleanly with zero cua_repl
+    # calls) -- see the memory file for the full comparison.
+    #
+    # Fix: same shape as the 14 Sep mail_inbox rewrite -- remove the model's
+    # discretion. Exactly ONE list_mail_folders call to resolve the Sent
+    # Items folder id by display_name (this connector's list_messages needs a
+    # real folder_id, not a well-known alias -- confirmed by the trace, not
+    # assumed), then exactly ONE list_messages call scoped to that folder
+    # with an explicit filter/orderby/top, matching mail_inbox's own rigid
+    # pattern. fetch_message, fetch_messages_batch, and search_messages are
+    # explicitly banned -- proven unnecessary above, and every one of them is
+    # a namespace/verb the guard already allows (a read verb), so banning
+    # them here is a prompt-level determinism fix, not a guard change; the
+    # guard's own allowlist is untouched.
     return (
         "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve "
         f"the messages in my Sent Items folder sent since {since_iso} (inclusive), newest "
-        "first. For each message return: subject, to recipients, sent date/time, the "
+        "first. You MUST do this in exactly two tool calls, in this order, and MUST NOT "
+        "skip either one or add any other tool call:\n"
+        "1) Call list_mail_folders exactly once to find the folder whose display_name is "
+        "\"Sent Items\" (or the well-known Sent Items folder if display_name differs "
+        "slightly) and note its folder id.\n"
+        "2) Call list_messages exactly once, scoped to that folder id, with "
+        f"filter=\"sentDateTime ge {since_iso}\", orderby=\"sentDateTime desc\", "
+        f"top={MAIL_SENT_MAX}. If the tool does not accept filter/orderby/top in this "
+        "exact form, retry this SECOND call once with the closest equivalent it does "
+        "accept -- but still make only one list_mail_folders call and only one "
+        "list_messages call in total, never more.\n"
+        "Do NOT call fetch_message, fetch_messages_batch, or search_messages for this -- "
+        "list_messages already returns the full message content needed, including the "
+        "body, so none of those additional calls are necessary. "
+        "For each message return: subject, to recipients, sent date/time, the "
         "internet Message-ID header, the web link, and a short body preview. "
         "Return ONLY the raw connector result as JSON (an array of the message objects), "
         "with no summary, no interpretation, and no prose. "
