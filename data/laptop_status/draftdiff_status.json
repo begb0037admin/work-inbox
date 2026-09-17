@@ -2,12 +2,12 @@
     "kind":  "draftdiff",
     "result":  "failed",
     "exit_code":  1,
-    "ts":  "2026-09-17T07:35:22+01:00",
+    "ts":  "2026-09-17T12:35:17+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "stats":  {
                   "mail_backend":  "connector",
-                  "run_time":  "2026-09-17T07:35:21.912030",
-                  "error":  "ConnectorResultIncomplete: Drafts: list_messages returned a continuation link; refusing a partial pull"
+                  "run_time":  "2026-09-17T12:35:16.759548",
+                  "error":  "ConnectorResultUnavailable: Drafts: {\u0027seen\u0027: [], \u0027unexpected\u0027: []}"
               }
 }
