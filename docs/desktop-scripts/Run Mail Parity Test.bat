@@ -1,7 +1,7 @@
 @echo off
 REM ===================================================================
-REM  Run Mail Parity Test   (reference copy of the Desktop script)
-REM  Live location: D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat
+REM  Run Mail Parity Test   (reference copy of the Manual Tools script)
+REM  Live location: C:\Users\admin\Documents\Manual Tools\Run Mail Parity Test.bat
 REM
 REM  Captures the Phase 1 MAIL pull BOTH ways (Outlook COM and IMAP+OAuth2)
 REM  in the same window and diffs them field-by-field on the internet

@@ -101,18 +101,18 @@ Writes `data/parallel/parity_<ts>.json` + a console report. Exit 0 only on total
 ### Deployment (done 28 Aug 2026 — the parity test is self-contained)
 The scheduled `\Work Inbox Briefing` task pulls **only** `fetch_inbox.py` fresh from `raw.githubusercontent.com/.../main/` into the run dir `C:\Users\admin\Documents\Claude\Projects\work-inbox` — it does not fetch sibling modules. So:
 - `imap_mail.py`, `reauth_imap.py`, `diff_mail_pull.py` were pulled from `main` into the run dir directly, and `fetch_inbox.py` there was refreshed to `main` (byte-identical `com` behaviour; a `.backup-*-pre-mailbackend-siblings` copy was kept). All four compile in place.
-- **`D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat`** — primes the token. Pulls `imap_mail.py` + `reauth_imap.py` fresh into the run dir, then runs `reauth_imap.py`. Reference copy: `docs/desktop-scripts/Re-auth Work Inbox IMAP.bat`.
-- **`D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat`** — one-click parity run. Pulls `fetch_inbox.py` + `imap_mail.py` + `diff_mail_pull.py` fresh into the run dir, runs the `com` capture, the `imap` capture, then `diff_mail_pull.py`. Sets `MAIL_BACKEND` per-process only; unsets it before the diff. Reference copy: `docs/desktop-scripts/Run Mail Parity Test.bat`.
+- **`C:\Users\admin\Documents\Manual Tools\Re-auth Work Inbox IMAP.bat`** — primes the token. Pulls `imap_mail.py` + `reauth_imap.py` fresh into the run dir, then runs `reauth_imap.py`. Reference copy: `docs/desktop-scripts/Re-auth Work Inbox IMAP.bat`.
+- **`C:\Users\admin\Documents\Manual Tools\Run Mail Parity Test.bat`** — one-click parity run. Pulls `fetch_inbox.py` + `imap_mail.py` + `diff_mail_pull.py` fresh into the run dir, runs the `com` capture, the `imap` capture, then `diff_mail_pull.py`. Sets `MAIL_BACKEND` per-process only; unsets it before the diff. Reference copy: `docs/desktop-scripts/Run Mail Parity Test.bat`.
 - The run-dir local git clone is heavily drifted (HEAD `c8ab371`, large uncommitted delete diff) — the `.bat`s deliberately use `curl` raw pulls, never `git pull`, on that dir.
 
 ### Exact commands for Kevin (PowerShell 5.1)
 ```powershell
 # (a) prime the IMAP token once — approve the device code in a browser
-& "D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat"
+& "C:\Users\admin\Documents\Manual Tools\Re-auth Work Inbox IMAP.bat"
 
 # (b) run the COM + IMAP parallel capture and diff (classic Outlook must be
 #     running and "Connected to: Microsoft Exchange" for the com half)
-& "D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat"
+& "C:\Users\admin\Documents\Manual Tools\Run Mail Parity Test.bat"
 
 # (c) parity output:
 #     C:\Users\admin\Documents\Claude\Projects\work-inbox\data\parallel\

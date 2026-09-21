@@ -1,7 +1,7 @@
 @echo off
 REM ===================================================================
-REM  Re-auth Work Inbox IMAP   (reference copy of the Desktop script)
-REM  Live location: D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat
+REM  Re-auth Work Inbox IMAP   (reference copy of the Manual Tools script)
+REM  Live location: C:\Users\admin\Documents\Manual Tools\Re-auth Work Inbox IMAP.bat
 REM
 REM  Run this:
 REM    - ONCE, before MAIL_BACKEND=imap is ever used, to prime the token cache;

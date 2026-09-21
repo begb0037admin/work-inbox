@@ -1,3 +1,9 @@
+# Handover -- 21 September 2026 (Drew) -- docs-only: stale Desktop paths corrected after Kevin's folder reorg (no code, no scheduled-task, no production change)
+
+Relayed by the coordinator from Max's `memory/desktop-documents-tidy-2026-09-21.md` (verified live before editing). Corrected: (1) the drafted-open-original-fix screenshots now live at `C:\Users\admin\Documents\Media & Screenshots\drafted-open-original-fix-20260827\` (was `Desktop`); (2) the manual tools `Re-auth Work Inbox IMAP.bat` / `Run Mail Parity Test.bat` (and the other manual `.bat`s) are at `C:\Users\admin\Documents\Manual Tools\` (moved 5 Sep, not on Desktop) -- fixed in the two `docs/desktop-scripts/` header comments, `docs/MAIL_BACKEND_MIGRATION_PLAN.md`, and the 28-30 Aug entries below. Everything else on the Desktop root (the scheduled-task-called automation scripts) is unchanged and was not touched. The status in the entry immediately below is unchanged and still current as of that entry.
+
+---
+
 # Handover -- 16 September 2026, later (Drew) -- Oxford blockers RESOLVED via Codex review: Parity Shadow retired, Draft Diff migrated to the connector, Bridge Briefing hardened; imap_mail.py/reauth_imap.py deletion still pending one clean live proof
 
 Supersedes the entry immediately below (same day, earlier). Kevin's instruction after that entry: this dependency work should be resolved directly, not kicked back as a decision -- and, separately, routed through this repo's mandatory Codex review/implement pass rather than shipped solo. Both done. Full evidence in `begb0037admin/drew` memory (to be written this session) and the commit trail below.
@@ -3086,7 +3092,7 @@ The coordinator's park note assumed "common=0 / Sent over-collects / 2 subfolder
 - **Parity path is now Phase-1-only** -- `fetch_inbox.py` exits right after the `WI_MAIL_PARALLEL` mail dump: no Granola, no calendar, no AI call, no push. Each capture ~10-20s (was ~8 min with two `claude -p` calls). This is what made the earlier run look "stuck on Granola".
 - **imap_mail.py hardened**: separate BODY.PEEK[] fetch (body previews were empty), HTML->text preview fallback, `_has_attachments` from the parsed message, header whitespace/folding normalised, `from_email` case preserved to match COM, IMAP modified-UTF-7 subfolder match (`H&S`->`INBOX/H&-S`), Sent filters meeting requests/responses + dedups on Message-ID, meeting-response items filtered from the INBOX pull to match COM's effective mail-only behaviour, Kevin's `begb0037@ox.ac.uk` alias counted as a primary-recipient address.
 - **Known residual (not chased, by direction):** `INBOX/Bi-monthly CDR/PD working group` is not visible over IMAP (the `/` in the folder name collides with the IMAP hierarchy separator) -- low traffic, skipped + logged. The 5 read-cap-churn items are meeting-response/NDR noise near the 30-read cap.
-- Desktop `Run Mail Parity Test.bat` writes `mail_parity_last_run.log` (full stdout+stderr) and `data/parallel/parity_<ts>.json`.
+- `Run Mail Parity Test.bat` (now in `C:\Users\admin\Documents\Manual Tools\`) writes `mail_parity_last_run.log` (full stdout+stderr) and `data/parallel/parity_<ts>.json`.
 
 ## Connector technical questions Q2/Q3 -- investigation done (read-only; full detail + evidence in `docs/EMAIL_AUTOMATION_SECURITY_MITIGATIONS.md` "Q2 / Q3 findings")
 Baseline held: `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed3f6a` **unchanged** before/after. No `codex login`, no `[apps]` edit. One `codex exec -s read-only --skip-git-repo-check --json` enumeration run (exit 0, zero tool calls in the JSONL) + `codex mcp list` + `codex features list`. codex-cli still **0.149.1**.
@@ -3100,17 +3106,17 @@ Baseline held: `~/.codex/config.toml` sha1 `35f8910382373d525598194b2649159cfeed
 
 ## What was missing and what was done
 - **Run dir** `C:\Users\admin\Documents\Claude\Projects\work-inbox` now has `imap_mail.py`, `reauth_imap.py`, `diff_mail_pull.py` (curl-pulled from `main`), and `fetch_inbox.py` refreshed to `main` (byte-identical `com` behaviour; `.backup-*-pre-mailbackend-siblings` kept). All four `py_compile` clean in place. The run-dir git clone is heavily drifted (HEAD `c8ab371`) -- used `curl`, never `git pull`.
-- **`D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat`** -- primes the IMAP token. Pulls `imap_mail.py`+`reauth_imap.py` fresh into the run dir, runs `reauth_imap.py`, `pause`s. Reference copy `docs/desktop-scripts/`.
-- **`D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat`** -- one click: pulls `fetch_inbox.py`+`imap_mail.py`+`diff_mail_pull.py` fresh, runs `MAIL_BACKEND=com WI_MAIL_PARALLEL=1`, then `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1`, then `diff_mail_pull.py`. Sets `MAIL_BACKEND` per-process only; unsets before the diff. Pushes/mutates nothing. Reference copy `docs/desktop-scripts/`.
+- **`C:\Users\admin\Documents\Manual Tools\Re-auth Work Inbox IMAP.bat`** -- primes the IMAP token. Pulls `imap_mail.py`+`reauth_imap.py` fresh into the run dir, runs `reauth_imap.py`, `pause`s. Reference copy `docs/desktop-scripts/`.
+- **`C:\Users\admin\Documents\Manual Tools\Run Mail Parity Test.bat`** -- one click: pulls `fetch_inbox.py`+`imap_mail.py`+`diff_mail_pull.py` fresh, runs `MAIL_BACKEND=com WI_MAIL_PARALLEL=1`, then `MAIL_BACKEND=imap WI_MAIL_PARALLEL=1`, then `diff_mail_pull.py`. Sets `MAIL_BACKEND` per-process only; unsets before the diff. Pushes/mutates nothing. Reference copy `docs/desktop-scripts/`.
 - Stale repo-root `Re-auth Work Inbox IMAP.bat` (the `git fetch`-based first cut) removed; `docs/desktop-scripts/` copies are canonical.
 - Smoke-tested on the machine: both `.bat`s present on Desktop; `import reauth_imap, imap_mail, diff_mail_pull` OK from the run dir; `diff_mail_pull.py` runs (exit 2 = "no captures yet", correct).
 
 ## Kevin's exact sequence (PowerShell 5.1) -- every path exists now
 ```
 # (a) prime the IMAP token once (approve the device code in a browser)
-& "D:\OneDrive - lelitte.com\Desktop\Re-auth Work Inbox IMAP.bat"
+& "C:\Users\admin\Documents\Manual Tools\Re-auth Work Inbox IMAP.bat"
 # (b) run the parity capture + diff (classic Outlook must be running + Connected to Exchange)
-& "D:\OneDrive - lelitte.com\Desktop\Run Mail Parity Test.bat"
+& "C:\Users\admin\Documents\Manual Tools\Run Mail Parity Test.bat"
 # (c) output here:
 Get-ChildItem "C:\Users\admin\Documents\Claude\Projects\work-inbox\data\parallel"
 ```
@@ -3374,7 +3380,7 @@ A re-run with classic Outlook still closed fails identically. Safe + correct onc
 - **Restore point:** pre-merge `main` = `fc86916` (`docs: AI-triage backend CUT OVER...`). Rollback = `git revert 7e1f0cc` (or reset `main` to `fc86916`); the 3 dated `Archive/*_backup_20260827_2209.*` files are the pre-edit originals.
 - **Pages:** build `7e1f0cc` status `built`, `error: null`. `curl` of `https://begb0037admin.github.io/work-inbox/js/app.js` and `https://github-proxy.lelitte.co.uk/work-inbox/js/app.js` (cache-busted) both sha256-match `git show HEAD:js/app.js`; same for `css/styles.css`. `openDraftOriginal` / `draftIdentity` / `open_mode` / `dr-btn-muted` all present in the live copy.
 - **Interim data state (expected, transient, nothing broken):** `data/drafted_replies.json` is still the pre-fix shape (`generated` 2026-08-27T17:19:21Z, no `open_mode` / `tick_id`). The new `open_mode` / `tick_id` fields land on the **next `publish_drafted_replies.py` run** (piggybacks the 5x/day Work Inbox Briefing; next scheduled 28 Aug 06:00 UK). Until then, app.js sees no `open_mode` -> treats every drafted-reply row as `open_mode:"none"` -> "Open original" renders **de-emphasised with an explanatory `alert()`** on click. Verified live in this state via a headless Chromium render of the merged app.js against the live (old-shape) `drafted_replies.json` + live `ticks.json`: 3 pending cards (draft-15, draft-11, draft-14), **every card exactly one "Open original" control, all de-emphasised, zero console errors/warnings, no dead `openmail://` anywhere**, clicking each raises the explanatory dialog with no throw. The one temporary cost: `Re: My Development Insight reports` (draft-11) has a real EntryID but no `open_mode` yet, so its button is de-emphasised (graceful "find it in Outlook by subject" alert) instead of opening Outlook directly -- self-heals to a working `com` link on the next publish. draft-15 / draft-14 (no EntryID) stay correctly de-emphasised -- that IS the fix (they were dead `openmail://lauren-draft-*` buttons before).
-- **Screenshots** (`D:\OneDrive - lelitte.com\Desktop\drafted-open-original-fix-20260827\`): `drafted_open_original_real.png` (approved), `drafted_open_original_all.png` (all button states), `drafted_open_original_INTERIM.png` (post-merge live interim state).
+- **Screenshots** (`C:\Users\admin\Documents\Media & Screenshots\drafted-open-original-fix-20260827\`): `drafted_open_original_real.png` (approved), `drafted_open_original_all.png` (all button states), `drafted_open_original_INTERIM.png` (post-merge live interim state).
 
 ## Exact next action for a cold session
 Nothing to do. The fix is merged and live. On/after the 28 Aug 06:00 run, sanity-check the live "Drafted Replies" tab: real-EntryID rows should have a normal (non-muted) "Open original" link again; no-EntryID rows stay de-emphasised. `data/drafted_replies.json` `generated` timestamp should be newer than 2026-08-27T17:19Z and entries should carry `open_mode` + `tick_id`.
@@ -3399,7 +3405,7 @@ Nothing to do. The fix is merged and live. On/after the 28 Aug 06:00 run, sanity
   - realistic view (live `ticks.json` `draft_*` applied): 5 pending cards -- draft-11 (real EntryID) = normal "Open original" link; draft-14 + draft-15 = de-emphasised; synthetic-valid = normal button; synthetic-spoof = de-emphasised. **Every card has exactly one "Open original" control; zero dead buttons; zero console errors/warnings.**
   - all-rows view (no ticks): 14 cards, 9 `com` links + 1 `web` button + 4 de-emphasised, one control each, clean console.
   - interaction test: 4 de-emphasised buttons -> 4 explanatory `alert()`s (no throw); valid-link button -> `window.open` to the exact URL; spoofed host -> de-emphasised + alert, never navigates.
-- Screenshots for Kevin: `D:\OneDrive - lelitte.com\Desktop\drafted-open-original-fix-20260827\drafted_open_original_real.png` (primary) and `...\drafted_open_original_all.png`.
+- Screenshots for Kevin: `C:\Users\admin\Documents\Media & Screenshots\drafted-open-original-fix-20260827\drafted_open_original_real.png` (primary) and `...\drafted_open_original_all.png`.
 - Backups (dated, committed on the branch): `Archive/app_backup_20260827_2209.js`, `Archive/styles_backup_20260827_2209.css`, `Archive/publish_drafted_replies_backup_20260827_2209.py` -- byte-verified against pre-edit.
 - Syntax: `node --check js/app.js` OK; `ast.parse` on the Python OK; CSS braces balanced. No CRLF issue (`core.autocrlf=true`, no `.gitattributes`; index blobs stay LF; edits made as text, not Python `"w"`).
 
