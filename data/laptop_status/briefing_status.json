@@ -2,7 +2,7 @@
     "kind":  "briefing",
     "result":  "ok",
     "exit_code":  0,
-    "ts":  "2026-09-18T12:14:25+01:00",
+    "ts":  "2026-09-21T12:25:39+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "lane_b_guard":  "clean",
@@ -15,7 +15,7 @@
                                      },
                            "calendar":  {
                                             "status":  "ok",
-                                            "count":  43,
+                                            "count":  41,
                                             "served_by":  "failover",
                                             "primary_failover_identical":  false
                                         }
