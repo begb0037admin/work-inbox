@@ -17,6 +17,26 @@ SPEC.loader.exec_module(publisher)
 
 
 class DraftWeblinkTests(unittest.TestCase):
+    def test_matcher_prefers_mail_id_then_requires_subject_and_sender(self):
+        candidates = list(publisher._iter_link_candidates({
+            "entry_id": "message-1",
+            "subject": "Re: Quarterly review",
+            "from": "Alex Example",
+            "web_link": "https://outlook.office365.com/owa/?ItemID=one",
+        }))
+        self.assertEqual(publisher.find_matching_weblink({
+            "source_entry_id": "message-1",
+            "subject": "Unrelated subject",
+        }, candidates), "https://outlook.office365.com/owa/?ItemID=one")
+        self.assertEqual(publisher.find_matching_weblink({
+            "subject": "FW: Quarterly review",
+            "sender": "Alex Example",
+        }, candidates), "https://outlook.office365.com/owa/?ItemID=one")
+        self.assertEqual(publisher.find_matching_weblink({
+            "subject": "Quarterly review",
+            "sender": "Someone else",
+        }, candidates), "")
+
     def test_normalize_never_emits_com_and_rejects_non_owa_urls(self):
         base = {
             "subject": "Example", "sender_tier": "other", "draft_text": "Reply",
@@ -69,6 +89,43 @@ class DraftWeblinkTests(unittest.TestCase):
                 os.environ.pop("WI_DRAFT_WEBLINK_MAX_RESOLVES", None)
             else:
                 os.environ["WI_DRAFT_WEBLINK_MAX_RESOLVES"] = original_limit
+
+    def test_resolution_uses_local_match_before_connector(self):
+        calls = []
+        original_module = sys.modules.get("lane_b_call1")
+        original_load = publisher.load_weblink_cache
+        original_save = publisher.save_weblink_cache
+        try:
+            sys.modules["lane_b_call1"] = types.SimpleNamespace(
+                resolve_mail_weblink_by_subject=lambda subject, received: calls.append(subject) or ""
+            )
+            cache = {}
+            publisher.load_weblink_cache = lambda: cache
+            publisher.save_weblink_cache = lambda value: cache.update(value)
+            entries = [{
+                "draft_id": "draft-local",
+                "source_entry_id": "message-local",
+                "subject": "Re: Local match",
+                "sender": "Alex Example",
+                "received": "",
+                "open_mode": "none",
+            }]
+            candidates = list(publisher._iter_link_candidates({
+                "entry_id": "message-local",
+                "web_link": "https://outlook.office.com/owa/?ItemID=local",
+            }))
+            self.assertEqual(publisher.resolve_missing_weblinks(entries, candidates), 0)
+            self.assertEqual(entries[0]["open_mode"], "web")
+            self.assertEqual(entries[0]["web_link"], "https://outlook.office.com/owa/?ItemID=local")
+            self.assertEqual(calls, [])
+            self.assertEqual(cache["draft-local"]["source"], "local")
+        finally:
+            publisher.load_weblink_cache = original_load
+            publisher.save_weblink_cache = original_save
+            if original_module is None:
+                sys.modules.pop("lane_b_call1", None)
+            else:
+                sys.modules["lane_b_call1"] = original_module
 
 
 if __name__ == "__main__":

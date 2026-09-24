@@ -61,6 +61,8 @@ import base64
 import datetime
 import json
 import os
+from pathlib import Path
+import re
 import sys
 import urllib.request
 import urllib.error
@@ -80,6 +82,21 @@ WEBLINK_CACHE_PATH = os.path.join(
 )
 WEBLINK_FAILURE_RETRY = datetime.timedelta(hours=24)
 
+# These are deliberately explicit. ``id`` is included because the connector's
+# Graph-style message identifier uses that field; unrelated task/draft ids are
+# never compared unless the same exact value is present on both records.
+MAIL_ID_FIELDS = (
+    "source_entry_id", "entry_id", "entryId", "message_id", "messageId", "messageID",
+    "conversation_id", "conversationId", "conversationID", "thread_id", "threadId", "threadID",
+    "internet_message_id", "internetMessageId", "internetMessageID", "id",
+)
+SUBJECT_FIELDS = ("subject", "title")
+SENDER_FIELDS = (
+    "sender", "from", "sender_name", "senderName", "from_name", "fromName",
+    "sender_email", "senderEmail", "from_email", "fromEmail",
+)
+SUBJECT_PREFIX_RE = re.compile(r"^(?:(?:re|fw|fwd)\s*:\s*)+", re.IGNORECASE)
+
 
 def valid_owa_weblink(value):
     """Return a real Outlook Web URL, or an empty string.
@@ -97,6 +114,124 @@ def valid_owa_weblink(value):
     if parsed.username or parsed.password:
         return ""
     return value.strip()
+
+
+def first_valid_owa_weblink(*values):
+    for value in values:
+        link = valid_owa_weblink(value)
+        if link:
+            return link
+    return ""
+
+
+def normalize_draft_subject(value):
+    """Normalise only the safe subject equivalences used for fallback lookup."""
+    if not isinstance(value, str):
+        return ""
+    value = SUBJECT_PREFIX_RE.sub("", value.strip())
+    return re.sub(r"\s+", " ", value).casefold()
+
+
+def _text_values(value):
+    if isinstance(value, str):
+        value = value.strip().casefold()
+        return {value} if value else set()
+    if isinstance(value, dict):
+        values = set()
+        for key in ("email", "address", "name", "value", "displayName"):
+            values.update(_text_values(value.get(key)))
+        for key in ("emailAddress",):
+            values.update(_text_values(value.get(key)))
+        return values
+    if isinstance(value, list):
+        values = set()
+        for item in value:
+            values.update(_text_values(item))
+        return values
+    return set()
+
+
+def _field_values(record, fields):
+    values = set()
+    if not isinstance(record, dict):
+        return values
+    for field in fields:
+        value = record.get(field)
+        if field in SUBJECT_FIELDS:
+            value = normalize_draft_subject(value)
+            if value:
+                values.add(value)
+        elif field in MAIL_ID_FIELDS:
+            if isinstance(value, str) and value.strip():
+                values.add(value.strip())
+        else:
+            values.update(_text_values(value))
+    return values
+
+
+def _iter_link_candidates(value):
+    """Yield records carrying a validated link and matching metadata."""
+    if isinstance(value, dict):
+        link = first_valid_owa_weblink(
+            value.get("web_link"), value.get("display_url"), value.get("webLink")
+        )
+        if link:
+            yield {
+                "web_link": link,
+                "ids": _field_values(value, MAIL_ID_FIELDS),
+                "subjects": _field_values(value, SUBJECT_FIELDS),
+                "senders": _field_values(value, SENDER_FIELDS),
+            }
+        for child in value.values():
+            yield from _iter_link_candidates(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _iter_link_candidates(child)
+
+
+def _unique_candidate_link(matches):
+    links = {match["web_link"] for match in matches}
+    return next(iter(links)) if len(links) == 1 else ""
+
+
+def find_matching_weblink(draft, candidates):
+    """Return a local OWA link only when the mail identity is unambiguous.
+
+    Message/conversation IDs win. If none match, an exact normalised subject
+    plus the same sender is required. Multiple different links are treated as
+    ambiguous rather than guessing at the original.
+    """
+    if not isinstance(draft, dict):
+        return ""
+    draft_ids = _field_values(draft, MAIL_ID_FIELDS)
+    id_matches = [candidate for candidate in candidates if draft_ids & candidate["ids"]]
+    if id_matches:
+        return _unique_candidate_link(id_matches)
+
+    draft_subject = normalize_draft_subject(draft.get("subject"))
+    draft_senders = _field_values(draft, SENDER_FIELDS)
+    if not draft_subject or not draft_senders:
+        return ""
+    subject_matches = [
+        candidate for candidate in candidates
+        if draft_subject in candidate["subjects"] and draft_senders & candidate["senders"]
+    ]
+    return _unique_candidate_link(subject_matches)
+
+
+def load_local_weblink_candidates():
+    """Read existing validated links from the repo, without any mailbox call."""
+    data_root = Path(__file__).resolve().parent.parent / "data"
+    candidates = []
+    for path in data_root.rglob("*.json"):
+        if path.name in {"drafted_replies.json", "drafted_replies_weblinks.json"}:
+            continue
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                candidates.extend(_iter_link_candidates(json.load(f)))
+        except (OSError, ValueError):
+            continue
+    return candidates
 
 
 def load_weblink_cache():
@@ -130,8 +265,10 @@ def parse_cache_time(value):
         return None
 
 
-def resolve_missing_weblinks(entries):
-    """Fill missing links using a small, cached, read-only connector budget."""
+def resolve_missing_weblinks(entries, local_candidates=None):
+    """Use local links first, then a small cached connector budget."""
+    if local_candidates is None:
+        local_candidates = load_local_weblink_candidates()
     cache = load_weblink_cache()
     now = datetime.datetime.now(datetime.timezone.utc)
     try:
@@ -141,11 +278,25 @@ def resolve_missing_weblinks(entries):
     attempts = 0
 
     for entry in entries:
-        existing = valid_owa_weblink(entry.get("web_link") or entry.get("display_url"))
+        existing = first_valid_owa_weblink(entry.get("web_link"), entry.get("display_url"))
         if existing:
             entry["web_link"] = existing
             entry.pop("display_url", None)
             entry["open_mode"] = "web"
+            continue
+
+        local_link = find_matching_weblink(entry, local_candidates)
+        if local_link:
+            entry["web_link"] = local_link
+            entry.pop("display_url", None)
+            entry["open_mode"] = "web"
+            draft_id = entry.get("draft_id")
+            if draft_id:
+                cache[draft_id] = {
+                    "web_link": local_link,
+                    "source": "local",
+                    "matched_at": now.isoformat(),
+                }
             continue
 
         draft_id = entry.get("draft_id")
@@ -266,7 +417,7 @@ def normalize_entry(e):
         return None, "missing both composed_at and drafted_at"
 
     real_entry_id = (e.get("source_entry_id") or "").strip()
-    web_link = valid_owa_weblink(e.get("web_link") or e.get("display_url"))
+    web_link = first_valid_owa_weblink(e.get("web_link"), e.get("display_url"))
     open_mode = "web" if web_link else "none"
 
     normalized = {
@@ -294,7 +445,10 @@ def normalize_entry(e):
     # for it. corpus_provenance is where content_precedent actually lives
     # in the source shape -- passed through wholesale so the dashboard sees
     # the exact same structure Lauren wrote, no reshaping in this mirror.
-    for optional_field in ("confidence", "inline_flags", "received", "status", "draft_id", "corpus_provenance"):
+    for optional_field in (
+        "confidence", "inline_flags", "received", "status", "draft_id", "corpus_provenance",
+        *MAIL_ID_FIELDS, *SENDER_FIELDS,
+    ):
         if optional_field in e:
             normalized[optional_field] = e[optional_field]
 

@@ -1,3 +1,10 @@
+# Handover -- 24 September 2026 (Codex) -- local OWA fallback for Drafted Replies
+
+- Drafted Replies now resolves `Open original` from existing validated OWA links in the briefing: exact message/conversation identifier first, then exact subject after stripping `RE:`/`FW:`/`Fwd:` plus the same sender. Ambiguous or incomplete matches stay muted as `No linked original`.
+- The publisher applies the same local lookup across repo data, caches local matches, and only uses the connector when no local link or cached link exists. Draft identity/sender/message fields are preserved for future mirrors.
+- Current audit: 1 of 12 mirrored drafts has a reliable local match; the other 11 have no matching linked identifier, and the current mirror has no sender field to permit the subject+sender fallback.
+- Checks: `python -m py_compile tools/publish_drafted_replies.py`, `node --check js/app.js`, `python -m unittest tests/publish_drafted_replies_weblink_test.py` (4 tests), and `git diff --check`.
+
 # Handover -- 24 September 2026 ~21:45 (Drew) -- PR #43 LIVE: staleness banner follows the real schedule
 
 - The banner used `SCHEDULE_RUN_HOURS=[6,9,12,15,18]` with a 90-min grace, so it showed a false red every weekday evening ("expected by 18:00") and all weekend. Now it uses `[7,12,16]` with a 45-min grace, matching the laptop's real Work Inbox Bridge Briefing triggers (Mon-Fri, DaysOfWeek=62, per the coordinator's check of the laptop). Weekend days were already skipped.
@@ -9801,7 +9808,6 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 - **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
-
 
 
 

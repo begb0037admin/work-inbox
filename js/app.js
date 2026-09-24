@@ -1508,7 +1508,6 @@ async function init(){
   if(titleEl) titleEl.textContent=getGreeting();
 
   await loadRemoteTicks();
-  loadDraftedReplies();
 
   let data=null;
 
@@ -1536,6 +1535,7 @@ async function init(){
 
   if(!data){
     document.getElementById('headerDate').textContent='No briefing available. Run fetch_inbox.py to generate one.';
+    loadDraftedReplies();
     return;
   }
 
@@ -1556,6 +1556,9 @@ async function init(){
   }
 
   renderBriefing(data, currentKey);
+  // Draft originals can be matched against links in the briefing, so wait
+  // until the briefing (or its local fallback) is available before rendering.
+  loadDraftedReplies();
 }
 
 // Tabs -- added 10 Aug 2026 once Drafted Replies joined Calendar + Priorities
@@ -1693,15 +1696,68 @@ function draftIdentity(e){return (e&&(e.tick_id||e.source_entry_id||e.draft_id))
 // js/app.js openEmailWeb(): https only, exact-hostname allowlist, no
 // userinfo / subdomain / path-spoof tolerance (URL() parse + strict
 // hostname compare). Returns the first usable candidate or ''.
-function draftWebUrl(e){
-  const hosts={'outlook.office.com':1,'outlook.office365.com':1};
-  const cands=[e&&e.web_link,e&&e.display_url];
-  for(let i=0;i<cands.length;i++){
-    const c=cands[i];
-    if(!c) continue;
-    try{const u=new URL(c);if(u.protocol==='https:'&&hosts[u.hostname]) return c;}catch(_){/* not a URL */}
+const DRAFT_MAIL_ID_FIELDS=['source_entry_id','entry_id','entryId','message_id','messageId','messageID','conversation_id','conversationId','conversationID','thread_id','threadId','threadID','internet_message_id','internetMessageId','internetMessageID','id'];
+const DRAFT_SUBJECT_FIELDS=['subject','title'];
+const DRAFT_SENDER_FIELDS=['sender','from','sender_name','senderName','from_name','fromName','sender_email','senderEmail','from_email','fromEmail'];
+const DRAFT_SUBJECT_PREFIX_RE=/^(?:(?:re|fw|fwd)\s*:\s*)+/i;
+
+function _draftTextValues(value){
+  if(typeof value==='string'){
+    const text=value.trim().toLowerCase();
+    return text?[text]:[];
   }
-  return '';
+  if(Array.isArray(value)) return value.flatMap(_draftTextValues);
+  if(value&&typeof value==='object'){
+    return ['email','address','name','value','displayName','emailAddress'].flatMap(k=>_draftTextValues(value[k]));
+  }
+  return [];
+}
+function _draftSubject(value){
+  if(typeof value!=='string') return '';
+  return value.trim().replace(DRAFT_SUBJECT_PREFIX_RE,'').replace(/\s+/g,' ').toLowerCase();
+}
+function _draftFieldValues(record,fields,type){
+  if(!record||typeof record!=='object') return [];
+  const out=[];
+  fields.forEach(field=>{
+    const value=record[field];
+    if(type==='subject'){
+      const subject=_draftSubject(value);if(subject) out.push(subject);
+    }else if(type==='id'){
+      if(typeof value==='string'&&value.trim()) out.push(value.trim());
+    }else out.push(..._draftTextValues(value));
+  });
+  return [...new Set(out)];
+}
+function _draftLinkCandidates(value,out){
+  if(Array.isArray(value)){value.forEach(child=>_draftLinkCandidates(child,out));return;}
+  if(!value||typeof value!=='object') return;
+  const link=_owaWebUrl(value);
+  if(link) out.push({
+    link,
+    ids:_draftFieldValues(value,DRAFT_MAIL_ID_FIELDS,'id'),
+    subjects:_draftFieldValues(value,DRAFT_SUBJECT_FIELDS,'subject'),
+    senders:_draftFieldValues(value,DRAFT_SENDER_FIELDS,'sender')
+  });
+  Object.keys(value).forEach(key=>_draftLinkCandidates(value[key],out));
+}
+function _uniqueDraftLink(matches){
+  const links=[...new Set(matches.map(match=>match.link))];
+  return links.length===1?links[0]:'';
+}
+function draftWebUrl(e){
+  const direct=_owaWebUrl(e);
+  if(direct) return direct;
+  const candidates=[];
+  _draftLinkCandidates(window._wipData||{},candidates);
+  const ids=_draftFieldValues(e,DRAFT_MAIL_ID_FIELDS,'id');
+  const idMatches=candidates.filter(candidate=>ids.some(id=>candidate.ids.indexOf(id)!==-1));
+  if(idMatches.length){return _uniqueDraftLink(idMatches);}
+  const subject=_draftSubject(e&&e.subject);
+  const senders=_draftFieldValues(e,DRAFT_SENDER_FIELDS,'sender');
+  if(!subject||!senders.length) return '';
+  const subjectMatches=candidates.filter(candidate=>candidate.subjects.indexOf(subject)!==-1&&senders.some(sender=>candidate.senders.indexOf(sender)!==-1));
+  return _uniqueDraftLink(subjectMatches);
 }
 
 // "Open original" for drafts. Opens a validated Outlook Web link in a new tab
@@ -1793,7 +1849,9 @@ function renderDraftedReplies(payload){
     const idKey=draftIdentity(e);
     // Ignore open_mode: a validated OWA link is always the only opener.
     const webUrl=draftWebUrl(e);
-    const openLink=`<button type="button" class="dr-btn${webUrl?'':' dr-btn-muted'}" data-weburl="${escapeHtml(webUrl)}" title="${webUrl?'Open the original in Outlook on the web':'The original email link isn\'t available yet'}" onclick="openEmailWeb(event,this)">Open original</button>`;
+    const openLink=webUrl
+      ? `<button type="button" class="dr-btn" data-weburl="${escapeHtml(webUrl)}" title="Open the original in Outlook on the web" onclick="openEmailWeb(event,this)">Open original</button>`
+      : '<button type="button" class="dr-btn dr-btn-muted" title="No linked original is available" disabled>No linked original</button>';
 
     // Confidence -- Lauren's own design explicitly calls this "impossible to
     // miss, not a hover tooltip," so it renders as a visible badge + reason
