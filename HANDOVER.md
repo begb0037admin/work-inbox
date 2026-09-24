@@ -1,3 +1,11 @@
+# Handover -- 24 September 2026 (Codex) -- priority section counts and collapse-toggle styling
+
+Implemented `CODEX_BRIEF.md` on `drew/wi-section-counts`: one pure `_priCardVisible(p, ticks, showingDone)` rule now drives priority-card hidden state and every section-header count. Deleted cards never count; handled cards count only with Show done enabled. The incremental header updater also excludes hidden cards, so drag/targeted updates cannot restore a stale count. FYI retains its raw `threads (messages)` label with the visible thread count. Section controls now read `Collapse ▾` / `Expand ▸` with the tracker’s muted label styling. Added source-extracted Node regression coverage in `tests/section_count_test.js`.
+
+Checks: `node --check js/app.js`, `node tests/section_count_test.js`, and `git diff --check` passed. No deployment or push. Exact next action: retain this local commit until Kevin/Drew requests normal review or release.
+
+---
+
 # Handover -- 24 September 2026 ~19:45 (Drew) -- item 5 outcome: laptop back, token fixed, connector identity OUT OF USAGE until 27 Sep; read cap 100 merged
 
 **Where things stand:**
@@ -9757,7 +9765,6 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 - **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
-
 
 
 
