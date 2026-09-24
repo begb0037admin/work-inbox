@@ -1336,7 +1336,7 @@ def _run_mail_lookup_ring(prompt: str, tag: str) -> tuple[list[dict], str, str |
         label = identity["label"]
         try:
             objs, raw = run_codex_json(
-                prompt, timeout_s=120, tag=f"{tag}#{label}",
+                _prompt_for_identity(prompt, identity), timeout_s=120, tag=f"{tag}#{label}",
                 codex_home=identity["CODEX_HOME"], max_attempts=1,
                 workload_class="high")
         except ReContaminationDetected as e:
@@ -1349,6 +1349,10 @@ def _run_mail_lookup_ring(prompt: str, tag: str) -> tuple[list[dict], str, str |
             continue
         except Exception as e:  # noqa: BLE001 -- enrichment fails soft
             _log(f"[{tag}/{label}] failed ({type(e).__name__}: {e}) -- moving to next identity")
+            continue
+        mismatch = _account_mismatch_reason(objs, identity.get("m365_account"))
+        if mismatch:
+            _log(f"[{tag}/{label}] account_mismatch -- {mismatch}; moving to next identity")
             continue
         tool_calls = extract_tool_calls(objs)
         status, detail = guard_recontamination(tool_calls, "mail")
@@ -2370,8 +2374,11 @@ def main(argv: list[str]) -> int:
     }
 
     if args.dry_run:
+        configured = load_identity_config()
         for d in domains:
-            print(f"\n===== {d} prompt =====\n{prompts[d]}\n")
+            for identity in configured:
+                print(f"\n===== {d} prompt ({identity['label']}) =====\n"
+                      f"{_prompt_for_identity(prompts[d], identity)}\n")
         return 0
 
     sha_before = _config_toml_sha1()
