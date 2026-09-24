@@ -531,9 +531,13 @@ def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
 # security concern but a downstream-volume one: fetch_inbox.py's Phase 2 AI
 # triage is documented (CLAUDE.md) as timeout-sensitive to inbox size even at
 # the OLD 50-item cap. Mirrors IMAP's own two-tier shape (unread priority,
-# then read) rather than inventing a new cap scheme.
+# then read) rather than inventing a new cap scheme. On 24 Sep 2026 the
+# connector read-pass default rose to 100: the prior 30-item default bound on
+# every briefing since 15 Sep, dropping older in-window read mail and causing
+# a persistent truncation warning. 100 remains within the connector's
+# observed 200-item page; the environment override remains available.
 MAIL_INBOX_MAX_UNREAD = int(os.environ.get("WI_LANE_B_MAIL_MAX_UNREAD", "50"))
-MAIL_INBOX_MAX_READ   = int(os.environ.get("WI_LANE_B_MAIL_MAX_READ", "30"))
+MAIL_INBOX_MAX_READ   = int(os.environ.get("WI_LANE_B_MAIL_MAX_READ", "100"))
 
 # MAIL_SENT_MAX -- added 16 Sep 2026 (Drew), part of the mail_sent rigid-prompt
 # rewrite below. Previous prompt had no top= cap at all; the one clean live
@@ -568,7 +572,9 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
     # prompt's "in TWO passes: first up to N UNREAD, then up to M READ"
     # instruction produced exactly ONE list_messages tool call for the whole
     # domain (not two filtered/sorted calls), extracting exactly
-    # MAIL_INBOX_MAX_UNREAD-observed(1) + MAIL_INBOX_MAX_READ(30) = 31 items
+    # MAIL_INBOX_MAX_UNREAD-observed(1) + MAIL_INBOX_MAX_READ(30 at the time)
+    # = 31 items. The read default was raised to 100 on 24 Sep 2026 because
+    # 30 subsequently bound every briefing; see the volume-cap comment above.
     # -- consistent with the model collapsing the two-pass instruction into a
     # single "give me the ~31 newest messages by receipt time" fetch rather
     # than genuinely separating and preserving unread-priority. On a busy

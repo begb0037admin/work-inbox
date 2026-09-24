@@ -1,3 +1,9 @@
+# Handover -- 24 September 2026 (Codex) -- Lane B inbox read cap 30 -> 100
+
+Raised `WI_LANE_B_MAIL_MAX_READ`'s default in `lane_b_call1.py` from 30 to 100. `mail_truncation_risk` had been true on every briefing since 15 Sep because the 30-item read pass bound, dropping older in-window read mail and showing the incomplete-fetch warning. 100 remains within the connector's observed 200-item page; the environment override is unchanged. Verified with `python -m py_compile lane_b_call1.py`. Revert by restoring the default to 30, or set `WI_LANE_B_MAIL_MAX_READ=30` in the wrapper environment.
+
+---
+
 # Handover -- 24 September 2026 (Drew) -- dashboard: tracker-identical drag + 2x2 card actions + expand/collapse DEPLOYED LIVE, verified
 
 Kevin approved build + deploy (24 Sep, via Jacob). Dashboard only; no pipeline, mailbox, Graph, COM, IMAP or connector change. Codex (default account) built `04e6ec0` plus the rename-blur fix `1fd5574`; Drew vendored `js/vendor/Sortable.min.js` (1.15.6, sha256 `6dee1a4b…`, identical to command-centre's copy). The brief wrongly assumed it was already there, and the first browser test caught it (404, so drag was dead). Merged PR #37 (`dec6ac1`); wi.lelitte.co.uk served `app.js` byte-identical to main.
@@ -9711,7 +9717,6 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 - **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
-
 
 
 
