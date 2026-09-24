@@ -1,3 +1,11 @@
+# Handover -- 24 September 2026 ~21:20 (Drew) -- PR #42 LIVE: amber "Mail/calendar unavailable this run" banner (never green on failed data)
+
+- Kevin-approved. Codex (lelittecom only, per the coordinator's accounts.json change `8970b0f`: kevin@lelitte.co.uk is reserved for the pipeline and never used for builds) built `00a9e81`. Drew added two fixes: loader exceptions now count as `"error"` rather than `"n/a"`, and the status-file fallback reads the file's top-level `ts`.
+- **Pipeline:** `briefing.json` gains `connector_status` {mail_inbox, mail_sent, calendar, teams}. The laptop picks it up on its next run.
+- **Dashboard:** if a run is up to date but any domain isn't ok, the banner is amber and names the domains that failed. If the run is stale, the red banner keeps priority and gets the failed-domains sentence appended. Green shows only when the run is up to date and nothing failed. Older briefings without `connector_status` fall back to `data/laptop_status/briefing_status.json` (calendar/Teams), but only if its timestamp is within 2 hours of the refresh.
+- **Verified:** 5/5 local scenarios (fallback amber, connector_status amber, all-ok green, stale status file ignored, stale run stays red). Live 21:15: red "out of date", because the expected 18:00 refresh never ran, plus "calendar and Teams didn't load"; not green. Served app.js == main.
+- **Rollback:** revert PR #42.
+
 # Handover -- 24 September 2026 (Codex) -- amber banner for connector failures
 
 Implemented the connector-status honesty fix from `CODEX_BRIEF.md`: `fetch_inbox.py` now writes per-domain connector statuses into `briefing.json`, and the dashboard shows an amber unavailable banner whenever an up-to-date run has failed domains. Older briefings use the time-bounded laptop status fallback for calendar/Teams; stale runs remain red and include the failed-domain note.
