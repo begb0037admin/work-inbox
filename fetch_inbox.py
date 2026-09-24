@@ -7,6 +7,7 @@ from connector_carry_forward import (
     load_cache as load_connector_cache,
     reconcile_domains,
     save_cache as save_connector_cache,
+    is_success_status,
 )
 
 # win32com / pywintypes / anthropic are path-specific, not universal:
@@ -312,7 +313,7 @@ def _load_lane_b_calendar(_week_end, _lookback):
             _set_connector_status("calendar", "unavailable")
             print("WARNING: Lane B calendar guard is HALT/tripped -- calendar empty this run")
             return []
-        if cal_dom.get("status") not in ("ok", None):
+        if not is_success_status(cal_dom.get("status")):
             print(f"WARNING: Lane B calendar status is '{cal_dom.get('status')}' "
                   f"-- calendar empty this run")
             return []
@@ -404,7 +405,7 @@ def _load_lane_b_teams():
             _set_connector_status("teams", "unavailable")
             print("WARNING: Lane B guard is HALT/tripped -- Teams section empty this run")
             return []
-        if teams_dom.get("status") not in ("ok", None):
+        if not is_success_status(teams_dom.get("status")):
             print(f"WARNING: Lane B Teams status is '{teams_dom.get('status')}' "
                   f"-- Teams section empty this run")
             return []
@@ -499,7 +500,7 @@ def _load_lane_b_mail():
                 print(f"WARNING: Lane B {label} guard is HALT/tripped -- {label} empty this run "
                       f"(the OTHER mail side, if ok, is unaffected)")
                 return False
-            if status not in ("ok", None):
+            if not is_success_status(status):
                 print(f"WARNING: Lane B {label} status is '{status}' -- {label} empty this run")
                 return False
             return True

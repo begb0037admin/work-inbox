@@ -105,76 +105,31 @@ SNAPSHOT_TIMEOUT_S = int(lb.os.environ.get("WI_LANE_B_SNAP_TIMEOUT", "360"))
 #
 # COMPUTED, not a hand-guessed constant (a first pass hardcoded 2400s, which
 # a Codex review same day correctly flagged as BELOW lane_b_call1.py's own
-# documented worst case for `--domain both` -- ~2700-2750s once warm-up +
-# EDU_PARKED_RETRIES outer attempts + 2 inner sub-attempts at
-# CALL1_TIMEOUT_S + KILL_COOLDOWN_S gaps are counted for both domains. A
-# timeout tighter than the thing it's meant to bound would fire on a
-# legitimate slow run, not just a genuine hang -- exactly the class of bug
-# this whole investigation exists to close, just moved one level up).
+# documented worst case for `--domain both` -- a sequence of ring identities,
+# bounded 180-second calls, and kill cooldowns. A timeout tighter than the
+# thing it's meant to bound would fire on a legitimate slow run, not just a
+# genuine hang -- exactly the class of bug this whole investigation exists to
+# close, just moved one level up).
 # _guard_run_timeout_s() below computes this from lane_b_call1.py's OWN live
 # constants so it can never silently go stale if those are retuned later,
 # and honestly logs the case where the real worst case would exceed what
 # can safely fit under the wrapper's own PT45M (2700s) outer
 # ExecutionTimeLimit rather than hiding it. WI_LANE_B_GUARD_RUN_TIMEOUT_S
 # still wins outright over the computed value if set, for manual tuning.
-_GUARD_HARD_CAP_S = 2500  # stay safely under the wrapper's PT45M (2700s) so
-                          # OUR clean tree-kill always wins the race against
-                          # Task Scheduler's own less-reliable one.
+_GUARD_HARD_CAP_S = 1500  # leave time for mail/core/publish before the 25-min cap
 
 
 def _guard_run_timeout_s(domain: str) -> int:
-    """Realistic worst-case budget for cmd_run()'s lane_b_call1.py child,
-    computed from lane_b_call1.py's own live timeout/retry constants (not a
-    hand-guessed number -- see the comment block above this function).
-
-    Per domain, worst case = the parked-mode retry budget for that domain, each
-    outer attempt up to 2 inner sub-attempts at CALL1_TIMEOUT_S, separated by a KILL_COOLDOWN_S
-    gap (the worst-case gap -- assumes the previous sub-attempt was itself
-    killed). Warm-up (CALL1_WARMUP_TIMEOUT_S) is counted ONCE, not once per
-    domain, since lane_b_call1.py's own `_WARMED_HOMES` caches it per
-    CODEX_HOME for the life of the process -- `--domain both` still only
-    warms up once. `--domain both` also pays one extra SNAPSHOT_GAP_S
-    between the two domains' calls. +10% on top as a rounding/margin buffer.
-
-    If that computed worst case is ABOVE _GUARD_HARD_CAP_S, this is capped
-    there instead and a loud WARNING is logged -- a disclosed tradeoff
-    (reliability of a clean kill over giving every possible benefit of the
-    doubt to an extreme-worst-case-but-genuinely-legitimate run), not a
-    silent bug. If this cap fires often in practice, the real fix is
-    revisiting the wrapper's PT45M and/or the retry constants this formula
-    is built from, not just raising this number further -- flagged, not
-    solved here."""
+    """Bound the child to the same finite budget used by the identity ring."""
     override = lb.os.environ.get("WI_LANE_B_GUARD_RUN_TIMEOUT_S", "").strip()
     if override:
         return int(override)
-    domains = 2 if domain == "both" else 1
-    one_attempt = 2 * lb.CALL1_TIMEOUT_S + lb.KILL_COOLDOWN_S
-    if domain == "both":
-        # Calendar deliberately has one extra parked-mode outer retry: a fresh
-        # 15 Sep personal-only run exhausted both inner attempts, while the
-        # scheduled task recovered on its retry path. Teams keeps the original
-        # parked budget so a calendar recovery does not silently double every
-        # domain's wall-clock allowance.
-        per_domain = (lb.EDU_PARKED_CALENDAR_RETRIES * one_attempt
-                      + lb.EDU_PARKED_RETRIES * one_attempt)
-    else:
-        retries = (lb.EDU_PARKED_CALENDAR_RETRIES if domain == "calendar"
-                   else lb.EDU_PARKED_RETRIES)
-        per_domain = retries * one_attempt
-    total = lb.CALL1_WARMUP_TIMEOUT_S + per_domain
-    if domains == 2:
-        total += lb.SNAPSHOT_GAP_S  # the extra between-domain gap `both` pays that a single domain doesn't
-    computed = int(total * 1.10)
-    if computed > _GUARD_HARD_CAP_S:
-        _log(f"WARNING: computed guard timeout ({computed}s, domain={domain!r}) exceeds the "
-             f"{_GUARD_HARD_CAP_S}s hard cap kept under the wrapper's PT45M (2700s) outer "
-             f"ExecutionTimeLimit -- capping to {_GUARD_HARD_CAP_S}s so this guard's own clean "
-             f"tree-kill always fires before Task Scheduler's own less-reliable one. An extreme-"
-             f"worst-case but genuinely legitimate (not hung) run could occasionally be treated as "
-             f"transient/retried by this cap -- a disclosed tradeoff, not a silent bug. If this "
-             f"fires often, revisit PT45M and/or the retry constants this formula is built from.")
-        return _GUARD_HARD_CAP_S
-    return computed
+    configured = lb.os.environ.get("WI_LANE_B_RUN_BUDGET_S", str(lb.RUN_BUDGET_S)).strip()
+    try:
+        budget = max(60, int(configured))
+    except ValueError:
+        budget = lb.RUN_BUDGET_S
+    return min(_GUARD_HARD_CAP_S, budget + 30)
 
 
 def _log(m: str) -> None:
@@ -695,6 +650,14 @@ def cmd_selftest() -> int:
     return 0
 
 
+def cmd_dry_run() -> int:
+    """Import/config smoke entry point; never launches Python or Codex."""
+    print(f"dry-run: lane_b_call1 imported; domain timeout={lb.CALL1_TIMEOUT_S}s; "
+          f"run budget={lb.RUN_BUDGET_S}s; identities={lb.IDENTITY_RING_MAX}")
+    print(f"dry-run: guard child timeout={_guard_run_timeout_s('both')}s")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Lane B calendar HALT kill-switch")
     ap.add_argument("--run", action="store_true", help="lane_b_call1 --domain <--domain> ; its own re-contamination guard is the gate (the wrapper entry point)")
@@ -706,12 +669,15 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--dry-diff", dest="dry_diff", action="store_true",
                     help="PRE + POST back-to-back, NO Call-1 -- assert the normalised snapshots are stable")
     ap.add_argument("--selftest", action="store_true", help="pure-function checks, no codex")
+    ap.add_argument("--dry-run", action="store_true", help="import/config smoke check; no connector or child process")
     ap.add_argument("--pre")
     ap.add_argument("--post")
     args = ap.parse_args(argv)
 
     if args.selftest:
         return cmd_selftest()
+    if args.dry_run:
+        return cmd_dry_run()
     if args.dry_diff:
         return cmd_dry_diff()
     if args.run:

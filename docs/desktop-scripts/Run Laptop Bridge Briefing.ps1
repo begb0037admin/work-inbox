@@ -241,6 +241,9 @@ $env:WI_TRIAGE_V2                = '1'            # explicit pin, 9 Sep 2026 (Ke
                                                    # flip this task's behaviour too. To roll back: set this to '' (or delete
                                                    # the line) AND see HANDOVER.md restore point at fetch_inbox.py ~line 364.
 $env:PYTHONUTF8                  = '1'
+$connectorBudgetSeconds = 1200
+$env:WI_LANE_B_RUN_BUDGET_S = [string]$connectorBudgetSeconds
+$env:WI_LANE_B_RUN_DEADLINE_EPOCH = [string]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() + $connectorBudgetSeconds)
 
 # --- refresh pipeline scripts from main (cache-busted raw pull, same mechanism the desktop uses) ---
 $t    = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
@@ -255,7 +258,7 @@ foreach ($f in 'fetch_inbox.py','normalise_pull.py','lane_b_call1.py','lane_b_ca
   # so refreshing it here also keeps that script current -- no separate
   # refresh step needed in hris-dashboard's own wrapper for this file.
   try {
-    Invoke-WebRequest -UseBasicParsing "$base/$f`?t=$t" -OutFile (Join-Path $root $f)
+    Invoke-WebRequest -UseBasicParsing "$base/$f`?t=$t" -TimeoutSec 30 -OutFile (Join-Path $root $f)
     Log "refreshed $f from main"
   } catch {
     Log "WARN: could not refresh $f ($($_.Exception.Message)) -- using the local copy"
@@ -278,7 +281,7 @@ foreach ($sf in @(
 )) {
   $dl = (Join-Path $root $sf.Name) + '.download'
   try {
-    Invoke-WebRequest -UseBasicParsing "$base/docs/desktop-scripts/$($sf.Name)`?t=$t" -OutFile $dl
+    Invoke-WebRequest -UseBasicParsing "$base/docs/desktop-scripts/$($sf.Name)`?t=$t" -TimeoutSec 30 -OutFile $dl
     if ((Get-Item $dl).Length -lt 1000) { throw 'downloaded file too small' }
     if (-not (Select-String -Quiet -LiteralPath $dl -Pattern $sf.Marker)) { throw "missing marker /$($sf.Marker)/" }
     Move-Item -Force $dl (Join-Path $root $sf.Name)
@@ -548,7 +551,7 @@ if ($CoreOnly) {
 function Get-PipelineScript($url, $dest, $marker) {
   try {
     $tt = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-    Invoke-WebRequest -UseBasicParsing "$url`?t=$tt" -OutFile "$dest.download"
+    Invoke-WebRequest -UseBasicParsing "$url`?t=$tt" -TimeoutSec 30 -OutFile "$dest.download"
     if ((Get-Item "$dest.download").Length -lt 400) { throw 'downloaded file too small' }
     if ($marker -and -not (Select-String -Quiet -LiteralPath "$dest.download" -Pattern $marker)) {
       throw "downloaded file missing marker /$marker/"
@@ -562,26 +565,64 @@ function Get-PipelineScript($url, $dest, $marker) {
   }
 }
 
+function Invoke-PublisherWithTimeout([string]$scriptPath, [string]$name, [int]$timeoutSeconds) {
+  $proc = $null
+  try {
+    $python = (Get-Command python -ErrorAction Stop).Source
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $python
+    $psi.Arguments = '-u "' + $scriptPath + '"'
+    $psi.WorkingDirectory = $tools
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    $psi.RedirectStandardInput = $true
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $proc = New-Object System.Diagnostics.Process
+    $proc.StartInfo = $psi
+    [void]$proc.Start()
+    # Close stdin explicitly: a codex/connector child must see EOF, never the
+    # scheduler's inherited input stream.
+    $proc.StandardInput.Close()
+    $outTask = $proc.StandardOutput.ReadToEndAsync()
+    $errTask = $proc.StandardError.ReadToEndAsync()
+    if (-not $proc.WaitForExit($timeoutSeconds * 1000)) {
+      Log "WARN: $name exceeded ${timeoutSeconds}s -- killing its whole process tree and skipping"
+      try { & taskkill.exe /T /F /PID $proc.Id | Out-Null } catch { try { $proc.Kill() } catch {} }
+      try { [void]$proc.WaitForExit(10000) } catch {}
+      return 124
+    }
+    $stdout = $outTask.GetAwaiter().GetResult()
+    $stderr = $errTask.GetAwaiter().GetResult()
+    foreach ($line in (($stdout + "`n" + $stderr) -split "`r?`n")) {
+      if ($line) { Log "[$name] $line" }
+    }
+    return $proc.ExitCode
+  } catch {
+    Log "WARN: $name could not start/finish ($($_.Exception.Message)) -- publisher skipped"
+    if ($proc) { try { $proc.Kill() } catch {} }
+    return 125
+  } finally {
+    if ($proc) { $proc.Dispose() }
+  }
+}
+
 $tb = "$base/tools"
 $okDeps = (Get-PipelineScript "$tb/style_corpus_common.py"  (Join-Path $tools 'style_corpus_common.py')  '^def recipient_tier') `
       -and (Get-PipelineScript "$tb/phase_failure_notify.py" (Join-Path $tools 'phase_failure_notify.py') '^def notify_phase_failure')
 
 if ($okDeps -and (Get-PipelineScript "$tb/publish_needs_reply.py" (Join-Path $tools 'publish_needs_reply.py') '^def run\(token')) {
   Log "running: python -u tools\publish_needs_reply.py"
-  Push-Location $tools
-  & python -u (Join-Path $tools 'publish_needs_reply.py') 2>&1 | Tee-Object -FilePath $log -Append
-  Log "publish_needs_reply.py exit $LASTEXITCODE"
-  Pop-Location
+  $publisherRc = Invoke-PublisherWithTimeout (Join-Path $tools 'publish_needs_reply.py') 'publish_needs_reply.py' 180
+  Log "publish_needs_reply.py exit $publisherRc"
 } else {
   Log "SKIP publish_needs_reply.py (dependency/download issue) -- non-fatal"
 }
 
 if ($okDeps -and (Get-PipelineScript "$tb/publish_drafted_replies.py" (Join-Path $tools 'publish_drafted_replies.py') '^def run\(token')) {
   Log "running: python -u tools\publish_drafted_replies.py"
-  Push-Location $tools
-  & python -u (Join-Path $tools 'publish_drafted_replies.py') 2>&1 | Tee-Object -FilePath $log -Append
-  Log "publish_drafted_replies.py exit $LASTEXITCODE"
-  Pop-Location
+  $publisherRc = Invoke-PublisherWithTimeout (Join-Path $tools 'publish_drafted_replies.py') 'publish_drafted_replies.py' 180
+  Log "publish_drafted_replies.py exit $publisherRc"
 } else {
   Log "SKIP publish_drafted_replies.py (dependency/download issue) -- non-fatal"
 }

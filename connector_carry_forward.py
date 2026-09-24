@@ -16,6 +16,7 @@ import shutil
 
 
 MAX_CARRY_DAYS = 7
+SUCCESS_STATUS = "ok"
 
 DOMAIN_FIELDS = {
     "calendar": ("calToday", "calTomorrow", "calDay2", "calDay3", "calFull", "absences"),
@@ -32,6 +33,11 @@ def status_name(value):
     if isinstance(value, dict):
         return value.get("status") or "unavailable"
     return value or "unavailable"
+
+
+def is_success_status(value):
+    """Only the explicit connector success marker may replace last-good data."""
+    return status_name(value) == SUCCESS_STATUS
 
 
 def parse_as_of(value, *, now=None):
@@ -119,7 +125,7 @@ def _entry_from_doc(doc, domain, *, source_override=None, require_items=True):
         served_by = status_doc.get("served_by")
     if not as_of and isinstance(doc, dict):
         as_of = doc.get("refreshed_at")
-    if require_items and not _data_has_items(data, domain) and status_name(status_doc) != "ok":
+    if require_items and not _data_has_items(data, domain) and not is_success_status(status_doc):
         return None
     return {"as_of": iso_timestamp(as_of), "served_by": served_by, "data": data}
 
@@ -250,7 +256,7 @@ def reconcile_domains(
     for domain in enabled_domains:
         raw_status = statuses.get(domain)
         status = status_name(raw_status)
-        if status == "ok":
+        if status == SUCCESS_STATUS:
             source = source_overrides.get(domain)
             entry = _entry_from_doc(briefing, domain, source_override=source, require_items=False)
             if entry is None:

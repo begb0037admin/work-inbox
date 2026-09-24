@@ -67,6 +67,7 @@ from phase_failure_notify import notify_phase_failure
 GITHUB_API = "https://api.github.com"
 OWNER = "begb0037admin"
 REPO = "work-inbox"
+HTTP_TIMEOUT_S = max(5, int(os.environ.get("WI_PUBLISH_HTTP_TIMEOUT_S", "30")))
 
 
 def gh_get(path, token):
@@ -74,7 +75,7 @@ def gh_get(path, token):
         f"{GITHUB_API}/repos/{OWNER}/{REPO}/contents/{path}?ref=main",
         headers={"Authorization": f"token {token}", "Accept": "application/vnd.github+json"},
     )
-    with urllib.request.urlopen(req) as r:
+    with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT_S) as r:
         return json.load(r)
 
 
@@ -92,7 +93,7 @@ def gh_put(path, content_bytes, message, sha, token, branch="main"):
         headers={"Authorization": f"token {token}", "Accept": "application/vnd.github+json", "Content-Type": "application/json"},
         method="PUT",
     )
-    with urllib.request.urlopen(req) as r:
+    with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT_S) as r:
         return json.load(r)
 
 
@@ -101,7 +102,7 @@ def gh_blob(sha, token):
         f"{GITHUB_API}/repos/{OWNER}/{REPO}/git/blobs/{sha}",
         headers={"Authorization": f"token {token}", "Accept": "application/vnd.github+json"},
     )
-    with urllib.request.urlopen(req) as r:
+    with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT_S) as r:
         return base64.b64decode(json.load(r)["content"])
 
 

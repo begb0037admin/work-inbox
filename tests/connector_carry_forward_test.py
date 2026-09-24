@@ -13,6 +13,25 @@ def status(as_of, name="ok"):
 
 
 class ConnectorCarryForwardTests(unittest.TestCase):
+    def test_only_explicit_ok_is_fresh_for_every_non_success_status(self):
+        previous = {
+            "teams": [{"channel": "HR", "preview": "last good"}],
+            "connector_status": {"teams": status(NOW - timedelta(hours=2))},
+        }
+        for failed_status in ("n/a", "missing", "error", "timeout", "unavailable", "halt"):
+            with self.subTest(failed_status=failed_status):
+                current = {
+                    "teams": [{"channel": "HR", "preview": "must not be fresh"}],
+                    "connector_status": {"teams": failed_status},
+                }
+                result, _, carried = reconcile_domains(
+                    current, previous, {}, {"teams": failed_status},
+                    enabled_domains=["teams"], now=NOW,
+                )
+                self.assertEqual(carried, ["teams"])
+                self.assertEqual(result["teams"], previous["teams"])
+                self.assertEqual(result["connector_status"]["teams"]["status"], "carried_forward")
+
     def test_failed_domain_keeps_previous_data_as_one_snapshot(self):
         previous = {
             "calToday": [{"time": "09:00", "title": "Monday catch-up"}],

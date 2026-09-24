@@ -124,8 +124,8 @@ CODEX_LUNA_AVAILABLE = os.environ.get("WI_CODEX_LUNA_UNAVAILABLE", "").strip().l
 # codex-cli 0.151.0 cold-starts SLOW on the Oxford laptop -- attempt 1 of a real
 # call was observed taking ~3m37s (1 Sept). Bumped from 240; a one-shot warm-up
 # call (see _ensure_warm) absorbs the cold start once per process.
-CALL1_TIMEOUT_S        = int(os.environ.get("WI_LANE_B_TIMEOUT", "360"))
-CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
+CALL1_TIMEOUT_S        = int(os.environ.get("WI_LANE_B_TIMEOUT", "180"))
+CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "60"))
 # PRIMARY_TIMEOUT_S / PRIMARY_MAX_ATTEMPTS (added 2 Sept 2026, further cut after
 # Kevin's live 13-min-worst-case test -- he wants ~5 min before failover, not 13.
 # PRIMARY ONLY -- failover/personal keeps CALL1_TIMEOUT_S (360s) x 2 sub-attempts
@@ -146,7 +146,7 @@ CALL1_WARMUP_TIMEOUT_S = int(os.environ.get("WI_LANE_B_WARMUP_TIMEOUT", "360"))
 # to ~375s (~6.25 min) before failover's call actually STARTS, not a clean 5:00
 # -- the 280-300s timeout figure was implemented as given; the gap mechanism
 # wasn't touched (out of scope for this change) and adds real time on top.
-PRIMARY_TIMEOUT_S     = int(os.environ.get("WI_LANE_B_PRIMARY_TIMEOUT", "290"))
+PRIMARY_TIMEOUT_S     = int(os.environ.get("WI_LANE_B_PRIMARY_TIMEOUT", str(CALL1_TIMEOUT_S)))
 PRIMARY_MAX_ATTEMPTS  = int(os.environ.get("WI_LANE_B_PRIMARY_MAX_ATTEMPTS", "1"))
 # TEAMS gets its OWN, larger primary budget (added 3 Sept 2026, regression fix).
 # The 290s/1-attempt cut above was tuned and evidenced entirely on CALENDAR (a
@@ -199,6 +199,13 @@ CALL1_RETRY_BACKOFF_S = [5, 12, 20, 30]
 # run_codex_json's internal loop to 1 attempt for primary specifically
 # (worst case ~6 min) -- not done here, deliberately not decided unilaterally.
 PRIMARY_RETRIES = max(1, int(os.environ.get("WI_LANE_B_PRIMARY_RETRIES", "1")))
+
+# A single scheduled run has a finite connector budget shared by the calendar/
+# Teams and mail invocations.  The wrapper supplies an absolute deadline so a
+# second Python process cannot reset the budget after the first one consumed it.
+# Direct library/test callers have no deadline and remain unrestricted.
+RUN_BUDGET_S = max(60, int(os.environ.get("WI_LANE_B_RUN_BUDGET_S", "1200")))
+RUN_DEADLINE_ENV = "WI_LANE_B_RUN_DEADLINE_EPOCH"
 # (per-CODEX_HOME warm-up tracking is _WARMED_HOMES, defined near _ensure_warm() below --
 # replaces a single process-wide flag now that primary/failover means two identities)
 
@@ -448,6 +455,13 @@ PRIMARY_CODEX_HOME = (_DEFAULT_IDENTITIES[0]["CODEX_HOME"]
 FAILOVER_CODEX_HOME = (_DEFAULT_IDENTITIES[1]["CODEX_HOME"]
                        if len(_DEFAULT_IDENTITIES) > 1 else r"C:\WorkInboxAI\codex-laneb")
 LANE_B_CODEX_HOME = PRIMARY_CODEX_HOME  # compatibility for existing callers/logs
+# Compatibility for the pre-ring guard and wrapper.  The old names described
+# parked-mode retry counts; in the ring they mean the maximum number of
+# configured identities that may be tried.  Keep them exported because the
+# laptop may run a mixed-version guard during a deployment.
+IDENTITY_RING_MAX = max(1, len(_DEFAULT_IDENTITIES))
+EDU_PARKED_RETRIES = IDENTITY_RING_MAX
+EDU_PARKED_CALENDAR_RETRIES = IDENTITY_RING_MAX
 
 
 def _codex_home(codex_home: str | None = None) -> Path:
@@ -458,6 +472,31 @@ def _codex_env(codex_home: str | None = None) -> dict:
     e = {**os.environ, "PYTHONUTF8": "1"}
     e["CODEX_HOME"] = codex_home or PRIMARY_CODEX_HOME
     return e
+
+
+def _run_deadline_epoch() -> float | None:
+    """Return the shared wrapper deadline, or None for library callers."""
+    raw = os.environ.get(RUN_DEADLINE_ENV, "").strip()
+    if not raw:
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        _log(f"invalid {RUN_DEADLINE_ENV}={raw!r}; ignoring shared run deadline")
+        return None
+
+
+def _remaining_run_budget_s() -> int | None:
+    deadline = _run_deadline_epoch()
+    if deadline is None:
+        return None
+    return max(0, int(deadline - time.time()))
+
+
+def _ensure_run_deadline() -> None:
+    """Start a deadline only when this is the top-level CLI process."""
+    if _run_deadline_epoch() is None:
+        os.environ[RUN_DEADLINE_ENV] = str(time.time() + RUN_BUDGET_S)
 
 
 def _b64url_json(seg: str) -> dict:
@@ -961,7 +1000,7 @@ _LAST_CONNECTOR_TOUCH_MONO: float | None = None
 # alternative explanation, see the memory record), but it costs nothing
 # to apply defensively: a genuinely long pause after a kill is strictly
 # cheaper than a full reauth cycle if it helps even some of the time.
-KILL_COOLDOWN_S = int(os.environ.get("WI_LANE_B_KILL_COOLDOWN_S", "300"))
+KILL_COOLDOWN_S = int(os.environ.get("WI_LANE_B_KILL_COOLDOWN_S", "30"))
 _LAST_CONNECTOR_TOUCH_WAS_KILL = False
 
 
@@ -1336,7 +1375,7 @@ def _run_mail_lookup_ring(prompt: str, tag: str) -> tuple[list[dict], str, str |
         label = identity["label"]
         try:
             objs, raw = run_codex_json(
-                _prompt_for_identity(prompt, identity), timeout_s=120, tag=f"{tag}#{label}",
+                _prompt_for_identity(prompt, identity), timeout_s=CALL1_TIMEOUT_S, tag=f"{tag}#{label}",
                 codex_home=identity["CODEX_HOME"], max_attempts=1,
                 workload_class="high")
         except ReContaminationDetected as e:
@@ -2103,8 +2142,20 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
     result: dict | None = None
     for index, identity in enumerate(identities):
         label = identity["label"]
+        remaining = _remaining_run_budget_s()
+        if remaining is not None and remaining <= 0:
+            _log(f"[{domain}] shared run budget exhausted before identity {label}; skipping remaining identities")
+            attempts.append({"identity": label, "outcome": "timeout", "reason": "run_budget_exhausted"})
+            result = {"domain": domain, "status": "timeout", "served_by": None,
+                      "guard": {"seen": [], "unexpected": []}, "tool_calls": [],
+                      "count": 0, "raw_items": [], "failure_reason": "run_budget_exhausted"}
+            break
         timeout_s = (PRIMARY_TIMEOUT_S_BY_DOMAIN.get(domain, PRIMARY_TIMEOUT_S)
                      if index == 0 else CALL1_TIMEOUT_S)
+        if remaining is not None:
+            # Never allow an individual subprocess to outlive the shared
+            # deadline.  Explicit connector failures still raise immediately.
+            timeout_s = min(timeout_s, max(1, remaining))
         _log(f"[{domain}] trying identity {index + 1}/{len(identities)}: {label}")
         result, identity_attempts = _fetch_domain_one_identity(
             domain, _prompt_for_identity(prompt, identity), window_days=window_days, ts=ts, retries=1,
@@ -2380,6 +2431,11 @@ def main(argv: list[str]) -> int:
                 print(f"\n===== {d} prompt ({identity['label']}) =====\n"
                       f"{_prompt_for_identity(prompts[d], identity)}\n")
         return 0
+
+    _ensure_run_deadline()
+    remaining_budget = _remaining_run_budget_s()
+    if remaining_budget is not None:
+        _log(f"shared connector run budget: {remaining_budget}s")
 
     sha_before = _config_toml_sha1()
     if sha_before and not args.from_file:
