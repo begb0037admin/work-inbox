@@ -1,30 +1,34 @@
-# Codex brief — work-inbox: section counts must equal rendered cards (Kevin bug) + toggle style
+# Codex brief — work-inbox round 2 on this branch: remove every Outlook Classic path (Kevin bug)
 
-Branch `drew/wi-section-counts` off main. Work only in C:/Users/admin/github/work-inbox. Only
-touch `js/app.js`, `css/styles.css`, `tests/` (new), `HANDOVER.md`. Don't read other repos (except
-the read-only style reference `C:/Users/admin/github/kevin-task-tracker/public/style.css`), `data/`,
-`Archive/`, `js/vendor/`. Keep UTF-8 intact. Commit locally; no push; short final message.
+Branch `drew/wi-section-counts` (HEAD `50b436a`, keep that work). Work only in
+C:/Users/admin/github/work-inbox. Only touch `js/app.js`, `tools/publish_drafted_replies.py`,
+`HANDOVER.md` (and a new small test if useful). Don't read other repos, `data/`, `Archive/`,
+`js/vendor/`. Keep UTF-8 intact. Commit locally; no push; short final message.
 
-## Bug (Kevin, screenshot): "Urgent – action required today" shows 3 but only 2 cards
-Cause: `_secHeadHtml(sec,…,priSecs.X.length)` counts the section list BEFORE the renderer drops
-cards: `_priRenderOneCard` returns '' for a true `del_<key>` tick, and handled (ticked) cards get
-`card-hidden` when "Show done" is off. So deleted/handled cards (including a Command-Centre-backed
-card deleted "here only") still count.
-Fix: one pure predicate `_priCardVisible(p, ticks, showingDone)` (not deleted; and not handled
-unless showing done) used by BOTH the renderer and the count — the count passed to
-`_secHeadHtml` must be `priSecs.X.filter(visible).length`. (For FYI keep the existing
-"threads (messages)" raw-count label logic but base `count` on the visible list.) Counts are
-recomputed on every render, so they follow drag, archive, delete, undo, restore, section toggle.
+Hard rule (8 Sep 2026): Outlook Classic is retired; every open-email path opens OWA in the browser;
+never `openmail://`, never COM. Kevin: Draft Replies → "Open original" opens Outlook Classic.
 
-## Regression test — `tests/section_count_test.js` (Node, no deps)
-Extract `_priCardVisible` (and any tiny helpers it needs) from `js/app.js` by source (like
-command-centre's `tests/tier_order_test.js` does) and assert: deleted → invisible; handled →
-invisible unless showingDone; plain → visible; a section of [plain, handled, deleted] counts 1
-(3 with showingDone? no — deleted never counts: 2).
+## Dashboard (`js/app.js`)
+- Delete `openEmail()` (the `openmail://` opener, ~line 334) and every call to it:
+  - Draft Replies (~1755-1766): `open_mode==='com'` renders `openEmail(source_entry_id)`. Instead:
+    always use `draftWebUrl(e)` (validated OWA host); if it returns a URL → open in a new tab (same
+    helper as Priorities); otherwise render the existing honest muted "No linked original" button
+    (disabled look, tooltip "The original email link isn't available yet"). Ignore `open_mode`
+    for the decision.
+  - Priority card link fallback (~431) and icon fallback (~977): when no OWA link resolves, no
+    `openEmail` — render the Email slot as the muted/disabled state (keep the grid shape).
+- `grep -n "openmail" js/app.js` must return only comments (or nothing) afterwards; reword comments
+  so they state the rule, not a live fallback.
 
-## Toggle style (Kevin/Jacob: identical to the tracker)
-The section toggle label becomes the tracker's style: small muted text, "Collapse ▾" when open,
-"Expand ▸" when folded (same font size/colour/weight as the tracker's `.section-toggle-label`,
-no border/background). Update wherever the label is set (render + `applySecCollapse`).
-
-Checks: `node --check js/app.js`; `node tests/section_count_test.js`. Top-of-HANDOVER entry.
+## Source (`tools/publish_drafted_replies.py`)
+- Never emit `open_mode:"com"`. `open_mode` = "web" when a validated OWA link exists, else "none".
+- For drafts with no `web_link`/`display_url`, try to resolve one with the existing connector helper
+  `lane_b_call1.resolve_mail_weblink_by_subject(subject, received)` (read-only), capped at
+  `WI_DRAFT_WEBLINK_MAX_RESOLVES` (default 3) per run, results cached in
+  `data/drafted_replies_weblinks.json` keyed by `draft_id` (only real https outlook.office(365).com
+  links; failures cached with a timestamp and retried after 24h) so the connector isn't hit every
+  run. Any exception → leave the link empty, never break the publish. Keep `source_entry_id` in the
+  output as metadata only.
+- `python -m py_compile tools/publish_drafted_replies.py`.
+Top-of-HANDOVER entry (what changed; resolution can't be proven until the connector quota resets
+27 Sep 10:25).
