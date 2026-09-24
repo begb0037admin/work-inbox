@@ -1,3 +1,11 @@
+# Handover -- 24 September 2026 (Codex) -- dashboard card actions, Sortable drag and drawers
+
+Implemented the dashboard-only brief on `drew/wi-sortable-card-actions-24sep`: message-ID tick identity/migration, SortableJS priority moves with Undo, card Archive/Delete/Email/Edit actions, persistent expand drawers and section expand controls, plus in-page confirmations. No pipeline, data, mailbox or deployment action was taken.
+
+Checks: `node --check js/app.js` and `git diff --check` pass. Exact next action: Drew to browser-verify drag/drop, action Undo, drawer persistence and done-card view before any deployment.
+
+---
+
 # Handover -- 24 September 2026 (Drew) -- DIAGNOSIS ONLY: dashboards stale since Mon 21 Sep 12:25 (no code/task change)
 
 **Root cause: the only pipeline runner, the Oxford laptop `101L-DE013193`, has been offline since Mon 21 Sep ~16:36.** Evidence, checked live 24 Sep ~10:30 BST:
