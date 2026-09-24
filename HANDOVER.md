@@ -1,3 +1,11 @@
+# Handover -- 24 September 2026 (Codex) -- remove Outlook Classic from Drafted Replies and dashboard email paths
+
+Implemented `CODEX_BRIEF.md` on `drew/wi-section-counts`: removed the `openmail://` dashboard opener and all fallbacks to it. Every available email/original link now opens only a validated `https://outlook.office.com` or `https://outlook.office365.com` URL in a new tab; missing links retain their card/action-grid space but have no opener. Draft publishing now emits only `open_mode: "web"` or `"none"`, treats `source_entry_id` as metadata, and makes at most `WI_DRAFT_WEBLINK_MAX_RESOLVES` (default 3) read-only subject lookups per run for drafts lacking a link. Results use the local `data/drafted_replies_weblinks.json` cache by `draft_id`; failures are retried after 24 hours and connector/cache errors remain non-fatal.
+
+Checks: `node --check js/app.js`, `python -m py_compile tools/publish_drafted_replies.py`, `git diff --check`, and the targeted source assertions passed. No deployment or push. The connector quota prevents proving resolution until its reset at 27 September 2026 10:25; then run the normal draft publish and confirm valid OWA links resolve without exceeding the configured cap.
+
+---
+
 # Handover -- 24 September 2026 (Codex) -- priority section counts and collapse-toggle styling
 
 Implemented `CODEX_BRIEF.md` on `drew/wi-section-counts`: one pure `_priCardVisible(p, ticks, showingDone)` rule now drives priority-card hidden state and every section-header count. Deleted cards never count; handled cards count only with Show done enabled. The incremental header updater also excludes hidden cards, so drag/targeted updates cannot restore a stale count. FYI retains its raw `threads (messages)` label with the visible thread count. Section controls now read `Collapse ▾` / `Expand ▸` with the tracker’s muted label styling. Added source-extracted Node regression coverage in `tests/section_count_test.js`.
@@ -9765,7 +9773,6 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 - **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
-
 
 
 

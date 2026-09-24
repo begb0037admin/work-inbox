@@ -331,17 +331,11 @@ function toggleTick(id){
     else { prow.classList.remove('done'); prow.style.display=''; }
   }
 }
-function openEmail(entryId,ev){
-  if(ev){ev.preventDefault();ev.stopPropagation();}
-  window.location.href='openmail://'+entryId+'/';
-}
 // Open a mail card's stored OWA deep-link (server-resolved Graph web_link,
 // fetch_inbox.py Phase 3.1) in a new browser tab. Mirrors command-centre
 // js/app.js openEmailWeb(): https-only, exact-hostname allowlist, new tab,
 // visible notice (never a silent no-op, never a throw) when no usable link
-// is present. The connector-resolved web_link is the standard opener now;
-// openmail:// (COM / classic Outlook) survives only as the fallback for old
-// carried-forward cards that still carry a real Outlook EntryID.
+// is present. Outlook Web is the only supported email opener.
 function openEmailWeb(ev,el){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   const raw=(el&&el.getAttribute)?el.getAttribute('data-weburl'):'';
@@ -408,7 +402,6 @@ function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
-    const hasLink=item.entry_id&&item.entry_id.length>0;
     // Connector-resolved OWA deep-link (fetch_inbox.py Phase 3.1), validated
     // against the https + Outlook Web host allowlist. NOTE: renderItems() is
     // currently not on the live render path (renderBriefing() merges the
@@ -421,14 +414,10 @@ function renderItems(items,cls){
     const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
     const linkCls=`card-link${ticked?' done':''}${hiddenCls}`;
     const cardHtml=`<div class="card${ticked?' done':''}${hiddenCls}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
-    // web_link present -> open OWA in a new tab (connector standard, identical
-    // to command-centre). Otherwise fall back to the openmail://<EntryID> COM
-    // path so the residual carried-forward Outlook-EntryID cards still work.
+    // A validated web_link opens OWA in a new tab. Without one, retain the
+    // card in its normal grid slot but do not offer an email opener.
     if(webUrl){
       return `<a class="${linkCls}" href="javascript:void(0)" data-weburl="${escapeHtml(webUrl)}" onclick="openEmailWeb(event,this)" ${dragAttrs}>${cardHtml}</a>`;
-    }
-    if(hasLink){
-      return `<a class="${linkCls}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)" ${dragAttrs}>${cardHtml}</a>`;
     }
     return `<div ${dragAttrs}>${cardHtml}</div>`;
   }).join('');
@@ -964,18 +953,12 @@ function _priRenderOneCard(p,sec){
     if(latest) subText=latest.replace(/^\[[^\]]+\]\s*/,'');
   }
   const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.ai_summary||p.sub||'');
-  // Open-email icon. The connector-resolved OWA web_link (fetch_inbox.py
-  // Phase 3.1 for inbox cards; webLink from the Command Centre task feed) is
-  // the standard opener now -- identical behaviour to command-centre: opens
-  // Outlook Web in a new tab. openmail://<EntryID> (COM / classic Outlook)
-  // remains only as the fallback for residual carried-forward cards that
-  // still carry a real Outlook EntryID and have no web_link.
+  // Open-email icon. A connector-resolved, validated OWA link is the only
+  // supported email opener; preserve the action-grid slot when it is absent.
   const _pWeb=_owaWebUrl(p);
   const emailBtn=_pWeb
     ? `<span class="card-icon" title="Open email in Outlook web" data-weburl="${escapeHtml(_pWeb)}" onclick="openEmailWeb(event,this)">&#9993;</span>`
-    : (p.entry_id||p.entryId)
-      ? `<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`
-      : '';
+    : `<button type="button" class="card-icon dr-btn-muted" title="The original email link isn't available yet" aria-label="Email link unavailable" disabled>${_priSvg('M3 5h18v14H3z M3 6l9 7 9-7')}</button>`;
   const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','wi-cc-task-view');event.stopPropagation()">CC&#8594;</span>`:'';
   const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
   return `<div class="card-ph${ticked?' done':''}${hiddenCls}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
@@ -1668,10 +1651,11 @@ function draftWebUrl(e){
   return '';
 }
 
-// "Open original" for drafts with no resolvable Outlook COM EntryID. Opens a
-// validated Outlook Web link in a new tab if one is present; otherwise says
-// so. Never a silent no-op, never a throw, never a dead openmail:// call.
+// "Open original" for drafts. Opens a validated Outlook Web link in a new tab
+// if one is present; otherwise says so. Never a silent no-op or a Classic
+// Outlook fallback.
 function openDraftOriginal(ev,btn){
+  return openEmailWeb(ev,btn); /* Legacy wrapper: Draft Replies now binds directly to the shared helper.
   if(ev){ev.preventDefault();ev.stopPropagation();}
   const hosts={'outlook.office.com':1,'outlook.office365.com':1};
   const raw=(btn&&btn.getAttribute)?btn.getAttribute('data-weburl'):'';
@@ -1683,6 +1667,7 @@ function openDraftOriginal(ev,btn){
     const subj=(btn&&btn.getAttribute)?btn.getAttribute('data-subject'):'';
     alert('This draft has no linked original message that can be opened from here'+(subj?' — find it in Outlook by subject:\n\n'+subj:'')+'.');
   }
+  */
 }
 
 function drTierBadge(tier){
@@ -1753,21 +1738,9 @@ function renderDraftedReplies(payload){
     const id='dr'+i;
     const draftEsc=escapeHtml(e.draft_text||'');
     const idKey=draftIdentity(e);
-    // Opener routing keys on the mirror's machine-readable open_mode
-    // discriminator (publish_drafted_replies.py, 27 Aug 2026), never on the
-    // format/length of source_entry_id. "com" -> the openmail://<entryId>
-    // -> GetItemFromID path (unchanged). "web" -> a validated Outlook Web
-    // hyperlink. Anything else (incl. a stale pre-cutover payload with no
-    // open_mode) -> a de-emphasised button that explains itself on click;
-    // once the mirror next publishes, such rows get their real open_mode.
-    const openMode=e.open_mode||'none';
-    let openLink;
-    if(openMode==='com'&&e.source_entry_id){
-      openLink=`<a href="javascript:void(0)" class="dr-btn" onclick="openEmail('${e.source_entry_id}',event)">Open original</a>`;
-    }else{
-      const webUrl=draftWebUrl(e);
-      openLink=`<button type="button" class="dr-btn${webUrl?'':' dr-btn-muted'}" data-weburl="${escapeHtml(webUrl)}" data-subject="${escapeHtml(e.subject||'')}" title="${webUrl?'Open the original in Outlook on the web':'No linked original message is available for this draft'}" onclick="openDraftOriginal(event,this)">Open original</button>`;
-    }
+    // Ignore open_mode: a validated OWA link is always the only opener.
+    const webUrl=draftWebUrl(e);
+    const openLink=`<button type="button" class="dr-btn${webUrl?'':' dr-btn-muted'}" data-weburl="${escapeHtml(webUrl)}" title="${webUrl?'Open the original in Outlook on the web':'The original email link isn\'t available yet'}" onclick="openEmailWeb(event,this)">Open original</button>`;
 
     // Confidence -- Lauren's own design explicitly calls this "impossible to
     // miss, not a hover tooltip," so it renders as a visible badge + reason
