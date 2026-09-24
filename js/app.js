@@ -1073,8 +1073,8 @@ function _priInsertCardIntoBoard(item,cls,sec){
 // compute the most recent run time that should already have happened as of
 // right now, and compare that against data.refreshed_at. A 90-minute grace
 // period covers the run's own execution time before flagging it as missed.
-const SCHEDULE_RUN_HOURS=[6,9,12,15,18];
-const SCHEDULE_GRACE_MINUTES=90;
+const SCHEDULE_RUN_HOURS=[7,12,16]; // real laptop schedule: Work Inbox Bridge Briefing, Mon-Fri 07:00/12:00/16:00 (triggers since 30 Aug, DaysOfWeek=62)
+const SCHEDULE_GRACE_MINUTES=45;
 
 function _mostRecentExpectedRun(now){
   for(let dayOffset=0; dayOffset<9; dayOffset++){
