@@ -421,7 +421,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 /* ── Section count ── */
 .sec-count{font-size:12px;font-weight:700;color:var(--text-muted);margin-left:4px}
 /* ── card-ph — flat priority cards (v5 approved design) ── */
-.card-ph{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 14px 11px 10px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,33,71,.04);display:flex;align-items:flex-start;gap:9px;transition:opacity .2s}
+.card-ph{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 14px 11px 10px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,33,71,.04);display:flex;flex-wrap:wrap;align-items:flex-start;gap:0;transition:opacity .2s}
 .card-ph.done{opacity:.38}
 .card-ph.card-hidden{display:none}
 .card-ph.done .card-ph-title{text-decoration:line-through;color:var(--text-muted);font-weight:500}
@@ -433,10 +433,11 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 .card-done-btn:hover{border-color:#22c55e}
 .card-done-btn.done{background:#22c55e;border-color:#22c55e}
 .card-done-btn.done::after{content:'✓';color:#fff;font-size:9px;font-weight:800;line-height:1;display:block}
-.card-ph-body{flex:1;min-width:0}
+.card-ph-header{display:flex;align-items:flex-start;gap:9px;width:100%;min-width:0}
+.card-ph-body{flex:1 1 auto;min-width:0}
 .card-ph-title{font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:4px;line-height:1.4}
 .card-ph-sub{font-size:11.5px;color:var(--text-muted);line-height:1.45}
-.card-ph-actions{display:flex;flex-shrink:0;gap:5px;align-items:center;padding-top:1px}
+.card-ph-actions{display:flex;flex:0 0 auto;align-items:center;padding-top:1px}
 .card-icon{width:26px;height:26px;border-radius:5px;border:1px solid #e5e9f2;background:#f8fafc;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;font-size:12px;transition:background .15s,color .15s,border-color .15s;flex-shrink:0;text-decoration:none}
 .card-icon:hover{background:#eff6ff;color:#3b82f6;border-color:#bfdbfe}
 .card-icon-cc{width:auto;padding:0 7px;font-size:10px;font-weight:700;height:26px;border-radius:5px;border:1px solid #e5e9f2;background:#f8fafc;display:flex;align-items:center;cursor:pointer;color:#94a3b8;transition:background .15s,color .15s,border-color .15s;flex-shrink:0}
@@ -523,3 +524,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--main-bg);
 html{scrollbar-width:thin;scrollbar-color:#d1d5db transparent}
 html::-webkit-scrollbar{width:6px}
 html::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}
+
+/* Card layout hotfix: the header owns the full row and the six actions stay in a fixed 3x2 grid. */
+.card-action-grid{display:grid;grid-template-columns:repeat(3,26px);grid-template-rows:repeat(2,26px);gap:5px}
+.card-icon-placeholder{visibility:hidden;pointer-events:none}
+.pri-detail{box-sizing:border-box;min-width:0;margin:0 0 11px;overflow-wrap:anywhere}
+.pri-detail-text,.pri-detail-meta{overflow-wrap:anywhere}
+@media (max-width:600px){.card-ph-header{flex-wrap:wrap}.card-ph-body{flex:1 1 0}.card-ph-actions{width:100%;justify-content:flex-end;padding-top:0}}
