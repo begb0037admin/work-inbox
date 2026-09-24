@@ -1,3 +1,11 @@
+# Handover -- 24 September 2026 ~19:30 (Drew) -- section Collapse/Expand toggle + CC label + responsive columns LIVE (PR #39, main `4ac97f1`)
+
+- Kevin's rule (24 Sep): ONE section toggle per section labelled Collapse/Expand that folds the whole section (state remembered); NO bulk card-drawer expand -- each card's own › opens its details. Verified live 1440+1100px from folded/open/drawer-open state: 88/88 checks across all three boards, no page errors.
+- CC button shows 'CC' (Kevin's exact fix), fits its 26px slot. Two columns now fit/stack (right column no longer clipped at 1100px: right edge 1064 < 1100).
+- Rollback: revert PR #39 on main (static redeploy).
+
+---
+
 # Handover -- 24 September 2026 (Codex) -- single section collapse control
 
 Implemented the `CODEX_BRIEF.md` section-toggle change: each priorities header now has one accessible Collapse/Expand button controlling that section's card list, backed by the existing `workInbox_collapsedSecs_v1` state. Removed bulk card-drawer expansion and the separate fold chevron; card drawers remain individual and persistent. Checks: `node --check js/app.js` and `git diff --check`.
