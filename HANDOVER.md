@@ -1,3 +1,11 @@
+# Handover -- 24 September 2026 ~20:20 (Drew) -- PR #41 LIVE: section counts = rendered cards; every Outlook Classic path removed; drafts publish OWA links
+
+- Verified live at 1440+1100 (51/51): section counts == rendered cards after drag/archive/delete (incl. CC-backed)/undo/reload/fold on all three boards; top-panel and #hash jump links unfold a folded tier then scroll/highlight (CC, tracker); no openmail:// anywhere; no page errors.
+- Kevin's bugs: Urgent count 3 vs 2 cards (counts included deleted/handled cards) -- fixed via one `_priCardVisible` predicate + `tests/section_count_test.js`. Draft Replies 'Open original' opened Outlook Classic -- `openEmail()`/openmail:// removed from the dashboard; no OWA link -> honest muted 'Open original'. `tools/publish_drafted_replies.py` never emits open_mode 'com'; resolves up to 3 OWA links/run via `lane_b_call1.resolve_mail_weblink_by_subject`, cached in `data/drafted_replies_weblinks.json` (24h retry). Drew fixed a Codex miss: tools/ script couldn't import repo-root `lane_b_call1` (sys.path). Link resolution can't be proven until the connector quota resets 27 Sep 10:25 -- until then every draft shows the muted button.
+- Rollback: revert PR #41 on main.
+
+---
+
 # Handover -- 24 September 2026 (Codex) -- remove Outlook Classic from Drafted Replies and dashboard email paths
 
 Implemented `CODEX_BRIEF.md` on `drew/wi-section-counts`: removed the `openmail://` dashboard opener and all fallbacks to it. Every available email/original link now opens only a validated `https://outlook.office.com` or `https://outlook.office365.com` URL in a new tab; missing links retain their card/action-grid space but have no opener. Draft publishing now emits only `open_mode: "web"` or `"none"`, treats `source_entry_id` as metadata, and makes at most `WI_DRAFT_WEBLINK_MAX_RESOLVES` (default 3) read-only subject lookups per run for drafts lacking a link. Results use the local `data/drafted_replies_weblinks.json` cache by `draft_id`; failures are retried after 24 hours and connector/cache errors remain non-fatal.
