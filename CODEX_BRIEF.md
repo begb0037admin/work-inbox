@@ -1,6 +1,6 @@
 # Codex brief — URGENT work-inbox card layout + Expand all hotfix (Kevin, 24 Sep)
 
-Branch `drew/wi-card-layout-hotfix` off main. Only touch `js/app.js`, `css/styles.css` (additive
+Branch `drew/wi-card-layout-hotfix` off main. Work only in C:/Users/admin/github/work-inbox. Only touch `js/app.js`, `css/styles.css` (additive
 rules / edits to the rules added in PR #37), `HANDOVER.md`. Do not read other repos except the
 read-only reference `C:/Users/admin/github/command-centre/css/styles.css`. Don't read `data/`,
 `Archive/`, `js/vendor/`. Keep UTF-8 intact. Commit locally; no push; short final message.
@@ -15,14 +15,16 @@ read-only reference `C:/Users/admin/github/command-centre/css/styles.css`. Don't
 ## Required layout (Kevin's annotated screenshot — exact)
 - Card header row = full card width: drag grip, then title + meta taking ALL remaining width
   (`flex:1; min-width:0`, normal word wrapping), then a fixed action area on the right.
-- Action area = ONE grid, two 26px columns, same gap as now, THREE rows:
-  - Row 1: **Archive | Delete** (Restore takes Archive's slot on handled cards)
-  - Row 2: **Email ✉ | Edit ✎**
-  - Row 3: **› (expand chevron) | CC→**
-  Missing Email or CC→ → an invisible same-size placeholder so every card's grid has the same
-  shape. The CC→ button moves out of the title/meta flow into row 3 right; make it a 26px square
+- Action area = ONE grid, **3 columns x 2 rows**, 26px cells, same gap as now (Kevin's final
+  annotated mock-up — supersedes any 2x2/3-row version):
+  - Row 1: **› (expand chevron) | Archive | Delete** (Restore takes Archive's slot on handled cards)
+  - Row 2: **CC→ | Email ✉ | Edit ✎**
+  i.e. DOM order: chevron, archive, delete, cc, email, edit; `grid-template-columns:repeat(3,26px)`.
+  Missing CC→ or Email → an invisible same-size placeholder so every card's grid has the same
+  shape. The CC→ button moves out of the title/meta flow into row 2 left; make it a 26px square
   `.card-icon` showing "CC→" in small text (keep its existing click behaviour, `title` +
-  `aria-label` "Open in Command Centre"). The › button keeps its aria attributes and toggle.
+  `aria-label` "Open in Command Centre"). The › keeps its aria attributes and toggle. Nothing
+  from the action area may sit inside or on top of the title/meta.
 - Expanded `.pri-detail` goes BELOW the header row, spanning the card's full width
   (`flex-basis:100%` with `flex-wrap:wrap` on the card, or make the header its own row element),
   with long text wrapping (`overflow-wrap:anywhere`), no horizontal overflow.
