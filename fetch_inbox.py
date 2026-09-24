@@ -235,10 +235,10 @@ if TEAMS_CONNECTOR:
 # Per-domain connector status is carried into briefing.json for the dashboard.
 # Keep the safe default for every non-connector or failed/unconfigured backend.
 CONNECTOR_STATUS = {
-    "mail_inbox": "n/a",
-    "mail_sent": "n/a",
-    "calendar": "n/a",
-    "teams": "n/a",
+    "mail_inbox": {"status": "n/a", "served_by": None},
+    "mail_sent": {"status": "n/a", "served_by": None},
+    "calendar": {"status": "n/a", "served_by": None},
+    "teams": {"status": "n/a", "served_by": None},
 }
 CONNECTOR_AS_OF = {
     "mail_inbox": None,
@@ -249,6 +249,26 @@ CONNECTOR_AS_OF = {
 CONNECTOR_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     "data", "connector_last_good.json")
 CONNECTOR_CACHE_ARCHIVE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Archive")
+
+
+def _connector_status(domain, domain_meta):
+    status = (domain_meta.get("status") if isinstance(domain_meta, dict) else None)
+    served_by = (domain_meta.get("served_by") if isinstance(domain_meta, dict) else None)
+    CONNECTOR_STATUS[domain] = {
+        "status": status if isinstance(status, str) and status else "n/a",
+        "served_by": served_by if isinstance(served_by, str) and served_by else None,
+    }
+
+
+def _set_connector_status(domain, status):
+    """Update a status while keeping the normalized provenance shape."""
+    current = CONNECTOR_STATUS.get(domain)
+    served_by = current.get("served_by") if isinstance(current, dict) else None
+    CONNECTOR_STATUS[domain] = {"status": status, "served_by": served_by}
+
+
+def _connector_status_name(value):
+    return value.get("status") if isinstance(value, dict) else value
 
 
 def _load_lane_b_calendar(_week_end, _lookback):
@@ -266,9 +286,7 @@ def _load_lane_b_calendar(_week_end, _lookback):
         meta   = (doc.get("meta") or {})
         lane_b = (meta.get("lane_b") or {})
         cal_dom = ((lane_b.get("domains") or {}).get("calendar") or {})
-        CONNECTOR_STATUS["calendar"] = (cal_dom.get("status")
-                                         if isinstance(cal_dom.get("status"), str)
-                                         and cal_dom.get("status") else "ok")
+        _connector_status("calendar", cal_dom)
 
         # per-domain ts preferred (9 Sept 2026 fix -- see lane_b_call1.py's own
         # comment on why the shared lane_b.ts is no longer reliable once mail
@@ -286,12 +304,12 @@ def _load_lane_b_calendar(_week_end, _lookback):
         if age_h is None:
             age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
         if age_h > LANE_B_MAX_AGE_H:
-            CONNECTOR_STATUS["calendar"] = "unavailable"
+            _set_connector_status("calendar", "unavailable")
             print(f"WARNING: Lane B calendar file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
                   f"-- treating calendar as unavailable this run")
             return []
         if lane_b.get("halt") or cal_dom.get("status") == "halt":
-            CONNECTOR_STATUS["calendar"] = "unavailable"
+            _set_connector_status("calendar", "unavailable")
             print("WARNING: Lane B calendar guard is HALT/tripped -- calendar empty this run")
             return []
         if cal_dom.get("status") not in ("ok", None):
@@ -332,7 +350,7 @@ def _load_lane_b_calendar(_week_end, _lookback):
               f"source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {cal_dom.get('tool_calls')})")
         return out
     except Exception as _lb_e:
-        CONNECTOR_STATUS["calendar"] = "error"
+        _set_connector_status("calendar", "error")
         print(f"WARNING: Lane B calendar load failed ({_lb_e}) -- calendar empty this run, "
               f"mail briefing continues")
         return []
@@ -357,9 +375,7 @@ def _load_lane_b_teams():
         meta   = (doc.get("meta") or {})
         lane_b = (meta.get("lane_b") or {})
         teams_dom = ((lane_b.get("domains") or {}).get("teams") or {})
-        CONNECTOR_STATUS["teams"] = (teams_dom.get("status")
-                                      if isinstance(teams_dom.get("status"), str)
-                                      and teams_dom.get("status") else "ok")
+        _connector_status("teams", teams_dom)
 
         # per-domain ts preferred -- see _load_lane_b_calendar()'s matching comment.
         ts = teams_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
@@ -374,7 +390,7 @@ def _load_lane_b_teams():
         if age_h is None:
             age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
         if age_h > LANE_B_MAX_AGE_H:
-            CONNECTOR_STATUS["teams"] = "unavailable"
+            _set_connector_status("teams", "unavailable")
             print(f"WARNING: Lane B Teams file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
                   f"-- treating Teams as unavailable this run")
             return []
@@ -385,7 +401,7 @@ def _load_lane_b_teams():
         # when only calendar fired this cycle (headless connector availability
         # is known to flip run-to-run, confirmed 1 Sept).
         if lane_b.get("halt") or teams_dom.get("status") == "halt":
-            CONNECTOR_STATUS["teams"] = "unavailable"
+            _set_connector_status("teams", "unavailable")
             print("WARNING: Lane B guard is HALT/tripped -- Teams section empty this run")
             return []
         if teams_dom.get("status") not in ("ok", None):
@@ -408,7 +424,7 @@ def _load_lane_b_teams():
               f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {teams_dom.get('tool_calls')})")
         return out
     except Exception as _lb_e:
-        CONNECTOR_STATUS["teams"] = "error"
+        _set_connector_status("teams", "error")
         print(f"WARNING: Lane B Teams load failed ({_lb_e}) -- Teams section empty this run, "
               f"mail briefing continues")
         return []
@@ -451,14 +467,8 @@ def _load_lane_b_mail():
         domains = (lane_b.get("domains") or {})
         mail_inbox_dom = domains.get("mail_inbox") or {}
         mail_sent_dom  = domains.get("mail_sent") or {}
-        CONNECTOR_STATUS["mail_inbox"] = (mail_inbox_dom.get("status")
-                                           if isinstance(mail_inbox_dom.get("status"), str)
-                                           and mail_inbox_dom.get("status") else "n/a")
-        CONNECTOR_STATUS["mail_sent"] = (mail_sent_dom.get("status")
-                                          if isinstance(mail_sent_dom.get("status"), str)
-                                          and mail_sent_dom.get("status") else "ok")
-        if CONNECTOR_STATUS["mail_inbox"] == "n/a":
-            CONNECTOR_STATUS["mail_inbox"] = "ok"
+        _connector_status("mail_inbox", mail_inbox_dom)
+        _connector_status("mail_sent", mail_sent_dom)
 
         # per-domain ts preferred -- see _load_lane_b_calendar()'s matching
         # comment. mail_inbox/mail_sent always run together in one
@@ -477,8 +487,8 @@ def _load_lane_b_mail():
         if age_h is None:
             age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
         if age_h > LANE_B_MAX_AGE_H:
-            CONNECTOR_STATUS["mail_inbox"] = "unavailable"
-            CONNECTOR_STATUS["mail_sent"] = "unavailable"
+            _set_connector_status("mail_inbox", "unavailable")
+            _set_connector_status("mail_sent", "unavailable")
             print(f"WARNING: Lane B mail file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
                   f"-- treating mail as unavailable this run")
             return empty
@@ -538,8 +548,8 @@ def _load_lane_b_mail():
                   "-- an older in-window message may be missing from this briefing")
         return {"inbox": inbox, "sent": sent, "truncation_risk": trunc}
     except Exception as _lb_e:
-        CONNECTOR_STATUS["mail_inbox"] = "error"
-        CONNECTOR_STATUS["mail_sent"] = "error"
+        _set_connector_status("mail_inbox", "error")
+        _set_connector_status("mail_sent", "error")
         print(f"WARNING: Lane B mail load failed ({_lb_e}) -- mail empty this run, "
               f"briefing continues (calendar/Teams unaffected)")
         return dict(empty, truncation_risk=False)
@@ -2246,7 +2256,7 @@ connector_cache = load_connector_cache(CONNECTOR_CACHE_PATH)
 # input to the context/triage phases.  Reuse its complete last-good source
 # snapshot on a failed mail_sent fetch so the AI does not see a mixed fresh /
 # stale source for that domain.
-if MAIL_CONNECTOR and CONNECTOR_STATUS.get("mail_sent") != "ok":
+if MAIL_CONNECTOR and _connector_status_name(CONNECTOR_STATUS.get("mail_sent")) != "ok":
     _sent_last_good = last_good_data(
         existing_briefing, connector_cache, "mail_sent", now=datetime.now(timezone.utc)
     )
@@ -4619,8 +4629,8 @@ for _domain, _enabled in (
     ("mail_inbox", MAIL_CONNECTOR),
     ("mail_sent", MAIL_CONNECTOR),
 ):
-    if _enabled and CONNECTOR_STATUS.get(_domain) in (None, "", "n/a"):
-        CONNECTOR_STATUS[_domain] = "unavailable"
+    if _enabled and _connector_status_name(CONNECTOR_STATUS.get(_domain)) in (None, "", "n/a"):
+        _set_connector_status(_domain, "unavailable")
 
 briefing = {
     "date":         today_str,

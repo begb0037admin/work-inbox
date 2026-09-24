@@ -109,6 +109,7 @@ _KNOWN_CONFIG_SHA1 = {v.lower() for v in CONFIG_TOML_SHA1_BASELINES.values()}
 CONFIG_TOML_SHA1_BASELINE = _ENV_CONFIG_SHA1 or CONFIG_TOML_SHA1_BASELINES.get(_HOST, "")
 
 CODEX_BIN   = os.environ.get("WI_CODEX_BIN", "codex")
+IDENTITIES_CONFIG_PATH = REPO_ROOT / "lane_b_identities.json"
 # Model/effort selection (added 10 Sep 2026, coordinator handover Priority 4):
 # sourced from codex_model_policy.py (constitution/MODEL_POLICY.md's machine-
 # readable implementation), not hardcoded here. WI_CODEX_MODEL remains a
@@ -267,152 +268,186 @@ def _log(msg: str) -> None:
     print(f"[{_dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}] lane_b_call1: {msg}")
 
 
-# --- Lane B codex identity: EDU is PRIMARY, PERSONAL is AUTOMATIC FAILOVER ---
-# CORRECTED 2 Sept 2026 evening (Kevin, after tonight's Teams investigation):
-# the 1 Sept move to personal-only was a testing-phase workaround for burning
-# through Edu's 500/month hard credit cap fast during heavy testing -- it was
-# never meant to be the permanent architecture. Edu is tried FIRST, always;
-# personal is the safety net for when Edu's own retry budget is exhausted, not
-# the new default. Tonight's evidence: Teams failed 4x on Edu (generic
-# timeouts, no clean "quota exhausted" signal to key off) then worked
-# cleanly, first attempt, on personal (44 items, ~4.5 min). Deliberately NOT
-# trying to distinguish "Edu's cap is exhausted" from any other transient
-# Edu failure -- that signal isn't clean/reliable enough to key off from
-# codex's own error output (see HANDOVER.md). Failover triggers on ANY
-# exhausted-retries failure on primary, full stop.
-#
-# PRIMARY_CODEX_HOME: WI_LANE_B_CODEX_HOME wins; else an inherited CODEX_HOME;
-#   else codex's OS default (~/.codex). On the laptop today that OS default IS
-#   Edu, by virtue of whatever `codex login` state already exists there -- not
-#   because this code hardcodes "Edu" (there's no portable way to hardcode an
-#   account, only a CODEX_HOME path). This is now an EXPLICIT, deliberate
-#   default (computed once, logged, reused) rather than ambient/accidental
-#   inheritance the way a bare `codex exec` on a fresh env would fall through.
-# FAILOVER_CODEX_HOME: WI_LANE_B_CODEX_HOME_FAILOVER wins; else the known
-#   dedicated Lane B personal-account login (confirmed working for both
-#   calendar (1 Sept) and Teams (2 Sept) -- see HANDOVER.md).
-#
-# ANTI-COLLISION GUARD (added 3 Sept 2026, root cause of the 2 Sept 20:58 live
-# regression -- see docs/HANDOVER-LATEST-2026-09-02-teams-regression.md and
-# HANDOVER.md). The "inherited CODEX_HOME" step above is meant to catch a
-# deliberately-set session env var, but a scheduled-task process inherits the
-# FULL ambient user/system environment, including anything left set from
-# earlier interactive testing. 1 Sept's now-superseded personal-only phase
-# used CODEX_HOME=C:\WorkInboxAI\codex-laneb -- the EXACT SAME literal path as
-# FAILOVER_CODEX_HOME's own hardcoded default below -- and that env var was
-# still present (never cleared) on the live host's scheduled-task environment
-# on 2 Sept. Result: PRIMARY_CODEX_HOME silently resolved to the same path as
-# FAILOVER_CODEX_HOME, collapsing primary/failover into one identity --
-# automatic failover became structurally impossible (fetch_domain()'s own
-# "nothing distinct to fail over to" branch), "primary" silently ran as the
-# old personal test account instead of Edu, and only ONE attempt was ever
-# logged per domain, exactly matching the incident evidence. An ambient
-# CODEX_HOME that happens to equal FAILOVER_CODEX_HOME's resolved value could
-# never be a deliberate, useful choice (nobody wants PRIMARY == FAILOVER by
-# passive inheritance) -- it is disregarded here, falling through to the true
-# OS default instead, and logged loudly so this can never again pass silently.
-# WI_LANE_B_CODEX_HOME (the EXPLICIT override, e.g. the wrapper's own escape
-# hatch) is NEVER second-guessed -- an explicit ask is always honoured even if
-# it happens to equal FAILOVER_CODEX_HOME, since that could be a deliberate
-# single-identity test.
-FAILOVER_CODEX_HOME = (os.environ.get("WI_LANE_B_CODEX_HOME_FAILOVER", "").strip()
-                       or r"C:\WorkInboxAI\codex-laneb")
-_OS_DEFAULT_CODEX_HOME = str(Path(os.path.expanduser("~")) / ".codex")
-_WI_LANE_B_CODEX_HOME_ENV = os.environ.get("WI_LANE_B_CODEX_HOME", "").strip()
-_AMBIENT_CODEX_HOME_ENV = os.environ.get("CODEX_HOME", "").strip()
+class ConnectorCallFailure(RuntimeError):
+    """A connector call failed in a way that should advance the identity ring."""
+
+    def __init__(self, message: str, *, reason: str):
+        super().__init__(message)
+        self.reason = reason
 
 
-def _norm_home_path(p: str) -> str:
-    return str(Path(p)).lower() if p else p
+def _explicit_connector_failure_reason(raw: str, stderr: str, returncode: int) -> str | None:
+    """Classify explicit connector errors before a parseable exit-0 can look OK."""
+    text = f"{stderr or ''}\n{raw or ''}".lower()
+    if any(marker in text for marker in (
+        "oauth_token_invalid_grant", "trigger_reauthentication", "invalid_grant",
+        "reauthentication required", "authentication required", "unauthenticated",
+    )):
+        return "authentication"
+    if any(marker in text for marker in (
+        "usage limit", "rate limit", "rate_limit", "rate-limit", "quota",
+        "usage cap", "limit reached", "exceeded your limit", "try again at",
+    )):
+        return "usage_limit"
+    if re.search(r"(?<!\d)(?:403|404)(?!\d)", text) or any(marker in text for marker in (
+        "forbidden", "permission denied", "access denied", "authorization_requestdenied",
+        "not found", "resource_not_found",
+    )):
+        return "permission"
+    if returncode != 0 and not raw.strip():
+        return "codex_exit"
+    return None
 
 
-if _WI_LANE_B_CODEX_HOME_ENV:
-    PRIMARY_CODEX_HOME = _WI_LANE_B_CODEX_HOME_ENV
-elif _AMBIENT_CODEX_HOME_ENV and _norm_home_path(_AMBIENT_CODEX_HOME_ENV) == _norm_home_path(FAILOVER_CODEX_HOME):
-    PRIMARY_CODEX_HOME = _OS_DEFAULT_CODEX_HOME
-    print(f"[{__name__}] WARNING: ambient CODEX_HOME env var ({_AMBIENT_CODEX_HOME_ENV}) is IDENTICAL "
-          f"to FAILOVER_CODEX_HOME's resolved value -- almost certainly leftover pollution from "
-          f"earlier testing (the 2 Sept regression's root cause), not a deliberate override. "
-          f"Disregarded for PRIMARY; falling through to the true OS default ({_OS_DEFAULT_CODEX_HOME}). "
-          f"Set WI_LANE_B_CODEX_HOME explicitly instead if a non-default PRIMARY is genuinely intended.")
-elif _AMBIENT_CODEX_HOME_ENV:
-    PRIMARY_CODEX_HOME = _AMBIENT_CODEX_HOME_ENV
-else:
-    PRIMARY_CODEX_HOME = _OS_DEFAULT_CODEX_HOME
-LANE_B_CODEX_HOME = PRIMARY_CODEX_HOME   # backward-compat alias -- some callers/logs still read this name
+# --- Lane B codex identity ring --------------------------------------------
+# The ring is deliberately data-driven. CODEX_HOME contains only a local
+# Codex login; Microsoft connector grants remain attached to that ChatGPT
+# identity on the connector service. Never copy auth.json between entries.
+IDENTITIES_CONFIG_PATH = Path(os.environ.get(
+    "WI_LANE_B_IDENTITIES_CONFIG", str(IDENTITIES_CONFIG_PATH)))
 
-# EDU PARK SWITCH (added 14 Sep 2026, Kevin's explicit instruction -- routing
-# fix for the same-day incident where "Work Inbox Bridge Briefing" hung 14+
-# minutes on `lane_b_cal_guard.py --run --domain both` right after resolving
-# the Edu identity, never reaching the ps1's own 45s fast-fail timeout or
-# failover at all. Root problem: the 3 Sept "FAST-FAIL primary" design (see
-# `Run Laptop Bridge Briefing.ps1`) still ISSUES a real call against Edu every
-# run, just with a short budget -- it only catches an explicit error/timeout
-# return, not a call that never returns control at all (the observed hang).
-# Kevin's decision (superseding "leave Edu as a fast-fail primary"): take Edu
-# fully OUT of the active routing path -- not attempted at all, not even a
-# short fast-fail attempt -- so there is structurally nothing left to hang on.
-# Personal becomes the sole identity Lane B ever calls, using personal's own
-# already-generous, already-proven retry/timeout budget (same numbers
-# `fetch_mail_domain()` already uses for mail, which has never had a primary
-# at all -- see that function's own docstring for the precedent this mirrors).
-#
-# Default ON (Edu parked): matches Kevin's existing 13 Sep decision to keep
-# Edu out of use until he revisits ~1 Oct 2026 (agent-commons
-# `candidate_codex_edu_connector_deferred_until_1oct.md`) -- this flag changes
-# HOW that parking is enforced (route away entirely, zero attempts) rather
-# than WHETHER Edu is parked (already true). Not a permanent architecture
-# change: Edu-primary/personal-failover (`fetch_domain()`'s pre-14-Sept
-# behaviour) is fully intact below, just skipped while this flag is on.
-#
-# REVERT: set WI_LANE_B_EDU_PARKED=0 (env var, e.g. in
-# `Run Laptop Bridge Briefing.ps1` or the scheduled task's environment) to
-# restore Edu-primary/personal-failover exactly as it was before 14 Sep 2026.
-# No code change needed for the revert -- this is a one-line flip back.
-EDU_PARKED = os.environ.get("WI_LANE_B_EDU_PARKED", "1").strip().lower() not in ("0", "false", "no")
 
-# EDU_PARKED_RETRIES (added same day, same-run follow-up fix -- see HANDOVER.md
-# for the full incident). The FIRST live verification of EDU_PARKED (14 Sep
-# 2026, ~15:02-15:47 UK) reused FAILOVER's full CALL1_RETRIES budget (default
-# 3 outer retries x up to 2 inner sub-attempts x up to 360s each, plus
-# CALL1_RETRY_BACKOFF_S between outer retries and SNAPSHOT_GAP_S between every
-# call) unchanged -- correct while failover was the RARE path (Edu usually
-# succeeded fast, failover only paid this cost occasionally), but wrong once
-# personal became the ONLY path called every run: the calendar domain alone
-# consumed the task's entire PT45M ExecutionTimeLimit on its own retry budget,
-# Task Scheduler force-terminated the whole task before Teams, mail, or
-# fetch_inbox.py's own phases ever ran, and orphaned grandchild python/codex/
-# node processes survived that termination and had to be killed by hand
-# (Task Scheduler's own kill does not reliably reach a multi-generation
-# process tree either -- same class of problem 3 Sept's `taskkill /T /F` fix
-# solved one level down, just one level higher up the tree this time).
-# EDU_PARKED_RETRIES governs the OUTER retry loop only (how many times
-# _fetch_domain_one_identity re-tries the WHOLE domain fetch after an
-# "unavailable this cycle"/codex_failed outcome) -- the inner per-call
-# protections (max_attempts=2 cold-start-hang absorber, the real
-# Popen+taskkill timeout, the re-contamination guard) are UNCHANGED and still
-# apply on every single attempt. Default 1 for Teams: personal still gets one
-# full, real attempt (itself internally protected by the 2-sub-attempt absorber,
-# up to ~720s worst case for that one domain) -- just not FAILOVER's old
-# "benefit of the doubt, try up to 3 times" allowance, which no longer fits
-# now that every domain, every run, goes through this path. Tune via
-# WI_LANE_B_EDU_PARKED_RETRIES if needed.
-EDU_PARKED_RETRIES = max(1, int(os.environ.get("WI_LANE_B_EDU_PARKED_RETRIES", "1")))
-# Calendar is the critical parked-mode path and has now demonstrated that one
-# outer budget can be too thin even after the two inner cold-start attempts:
-# on 15 Sep 2026 a fresh personal-only run exhausted both 360s attempts, while
-# two earlier same-day scheduled runs recovered once the connector session was
-# recreated. Give calendar one additional whole-domain retry by default. This
-# does NOT touch Edu, change the per-call timeout, or add another connector
-# identity. The generic parked override remains an upper bound so an operator
-# raising WI_LANE_B_EDU_PARKED_RETRIES still gets that larger budget for
-# calendar too. Override this targeted budget with
-# WI_LANE_B_EDU_PARKED_CALENDAR_RETRIES if a shorter/longer production window
-# is deliberately chosen.
-EDU_PARKED_CALENDAR_RETRIES = max(
-    EDU_PARKED_RETRIES,
-    int(os.environ.get("WI_LANE_B_EDU_PARKED_CALENDAR_RETRIES", "2")),
-)
+def _identity_log(msg: str) -> None:
+    logger = globals().get("_log")
+    if logger:
+        logger(msg)
+    else:
+        print(f"lane_b_call1: {msg}")
+
+
+def load_identity_config(path: Path | str = IDENTITIES_CONFIG_PATH) -> list[dict]:
+    """Read the ordered identity ring from the one checked-in config file."""
+    try:
+        raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001 -- a bad config is a run-level failure
+        _identity_log(f"[identity ring] could not read {path}: {e}")
+        return []
+    if not isinstance(raw, list):
+        _identity_log(f"[identity ring] {path} must contain an ordered JSON list")
+        return []
+    identities = []
+    for n, item in enumerate(raw, 1):
+        if not isinstance(item, dict):
+            _identity_log(f"[identity ring] skipping entry {n}: expected an object")
+            continue
+        label = str(item.get("label") or "").strip()
+        home = str(item.get("CODEX_HOME") or item.get("codex_home") or "").strip()
+        if not label or not home:
+            _identity_log(f"[identity ring] skipping entry {n}: label and CODEX_HOME are required")
+            continue
+        account = str(item.get("m365_account") or "").strip()
+        identities.append({"label": label, "CODEX_HOME": home, "m365_account": account})
+    return identities
+
+
+def _profile_skip_reason(identity: dict) -> str | None:
+    """Return a safe, human-readable reason when a profile cannot be used."""
+    label, home = identity["label"], Path(identity["CODEX_HOME"])
+    if not home.is_dir():
+        return f"CODEX_HOME missing ({home})"
+    auth_path = home / "auth.json"
+    if not auth_path.is_file():
+        return f"auth.json missing ({home}) -- run `codex login` in this CODEX_HOME"
+    try:
+        auth = json.loads(auth_path.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        return f"auth.json unreadable ({type(e).__name__})"
+    tokens = auth.get("tokens") if isinstance(auth, dict) else None
+    tokens = tokens if isinstance(tokens, dict) else {}
+    if not any(auth.get(k) or tokens.get(k) for k in ("access_token", "refresh_token", "id_token")):
+        return "auth.json has no Codex tokens -- profile is unauthenticated"
+    return None
+
+
+def available_identity_ring() -> list[dict]:
+    """Return usable entries in config order, logging skipped profiles."""
+    available = []
+    for identity in load_identity_config():
+        reason = _profile_skip_reason(identity)
+        if reason:
+            _identity_log(f"[identity ring] skipping {identity['label']}: {reason}")
+            continue
+        available.append(identity)
+    if available:
+        _identity_log("[identity ring] order for this call: " + " -> ".join(i["label"] for i in available))
+    else:
+        _identity_log("[identity ring] no authenticated profiles available for this call")
+    return available
+
+
+def _prompt_for_identity(prompt: str, identity: dict) -> str:
+    account = str(identity.get("m365_account") or "").strip()
+    if not account:
+        return prompt
+    return (
+        f"{prompt}\n\nTARGET MICROSOFT 365 ACCOUNT: {account}. "
+        "Use this exact Oxford account for every Outlook mail, Outlook calendar, "
+        "and Microsoft Teams operation in this request. Do not use any other "
+        "connected account, including a personal Outlook account."
+    )
+
+
+_ACCOUNT_KEYS = {
+    "account", "accountemail", "account_email", "accountmail", "account_mail",
+    "connectedaccount", "connected_account", "mailbox", "mailboxemail",
+    "mailbox_email", "mailboxaddress", "mailbox_address", "userprincipalname",
+    "user_principal_name", "targetaccount", "target_account",
+}
+_ACCOUNT_EMAIL_RE = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
+
+
+def _reported_m365_accounts(events: list[dict]) -> set[str]:
+    """Extract explicit mailbox/account metadata from connector output.
+
+    Message sender/recipient fields are intentionally ignored; only fields that
+    identify the connected mailbox/account, plus explicit assistant wording,
+    are considered provenance signals.
+    """
+    accounts: set[str] = set()
+
+    def walk(node, account_context=False):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                normalized = re.sub(r"[^a-z0-9]", "", str(key).lower())
+                is_account_key = normalized in {
+                    re.sub(r"[^a-z0-9]", "", key_name) for key_name in _ACCOUNT_KEYS
+                }
+                walk(value, account_context or is_account_key)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value, account_context)
+        elif account_context and isinstance(node, str):
+            accounts.update(email.lower() for email in _ACCOUNT_EMAIL_RE.findall(node))
+
+    walk(events)
+    text = final_assistant_text(events)
+    for match in re.finditer(
+        r"(?:account|mailbox|connected\s+to|using)\b[^\n]{0,100}?"
+        r"([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})",
+        text,
+        re.I,
+    ):
+        accounts.add(match.group(1).lower())
+    return accounts
+
+
+def _account_mismatch_reason(events: list[dict], expected_account: str | None) -> str | None:
+    expected = str(expected_account or "").strip().lower()
+    if not expected:
+        return None
+    reported = _reported_m365_accounts(events)
+    mismatched = sorted(account for account in reported if account != expected)
+    if mismatched:
+        return f"connector reported account(s) {', '.join(mismatched)}; expected {expected}"
+    return None
+
+
+_DEFAULT_IDENTITIES = load_identity_config()
+PRIMARY_CODEX_HOME = (_DEFAULT_IDENTITIES[0]["CODEX_HOME"]
+                      if _DEFAULT_IDENTITIES else r"C:\Users\begb0037.AD-OAK\.codex")
+FAILOVER_CODEX_HOME = (_DEFAULT_IDENTITIES[1]["CODEX_HOME"]
+                       if len(_DEFAULT_IDENTITIES) > 1 else r"C:\WorkInboxAI\codex-laneb")
+LANE_B_CODEX_HOME = PRIMARY_CODEX_HOME  # compatibility for existing callers/logs
 
 
 def _codex_home(codex_home: str | None = None) -> Path:
@@ -1005,6 +1040,7 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
     cmd.append(prompt)
 
     last_raw = ""
+    last_failure_reason = "codex_error"
     for attempt in range(1, max_attempts + 1):
         _wait_for_quiet_gap(tag)
         _log(f"[{tag}] codex exec attempt {attempt}/{max_attempts} (timeout {timeout_s}s) "
@@ -1062,6 +1098,7 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
                 out, err = "", ""
             last_raw = out or ""
             _scan_partial_output_for_writes(last_raw, tag)   # raises ReContaminationDetected, uncaught here on purpose
+            last_failure_reason = "timeout"
             _log(f"[{tag}] timed out after {timeout_s}s (cold-start hang?) -- retrying once" if attempt < max_attempts
                  else f"[{tag}] timed out again -- no more attempts for this identity")
             continue
@@ -1069,6 +1106,13 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
         _mark_connector_touch()
         raw = out or ""
         last_raw = raw
+        explicit_reason = _explicit_connector_failure_reason(raw, err or "", returncode)
+        if explicit_reason:
+            _log(f"[{tag}] explicit connector failure ({explicit_reason}); advancing identity ring")
+            raise ConnectorCallFailure(
+                f"[{tag}] connector reported {explicit_reason} (exit {returncode})",
+                reason=explicit_reason,
+            )
         objs = _parse_jsonl(raw)
         if objs:
             if returncode != 0:
@@ -1079,8 +1123,11 @@ def run_codex_json(prompt: str, *, timeout_s: int, tag: str, codex_home: str | N
         if attempt < max_attempts:
             continue
 
-    raise RuntimeError(f"[{tag}] codex exec produced no usable JSON output after {max_attempts} attempt(s) "
-                       f"(CODEX_HOME={codex_home or PRIMARY_CODEX_HOME})")
+    raise ConnectorCallFailure(
+        f"[{tag}] codex exec produced no usable JSON output after {max_attempts} attempt(s) "
+        f"(CODEX_HOME={codex_home or PRIMARY_CODEX_HOME})",
+        reason=last_failure_reason,
+    )
 
 
 def _parse_jsonl(raw: str) -> list[dict]:
@@ -1282,6 +1329,41 @@ def guard_recontamination(tool_calls: list[dict], domain: str) -> tuple[str, dic
     return "ok", detail
 
 
+def _run_mail_lookup_ring(prompt: str, tag: str) -> tuple[list[dict], str, str | None]:
+    """Best-effort mail enrichment through the same ring as mail fetches."""
+    identities = available_identity_ring()
+    for index, identity in enumerate(identities):
+        label = identity["label"]
+        try:
+            objs, raw = run_codex_json(
+                prompt, timeout_s=120, tag=f"{tag}#{label}",
+                codex_home=identity["CODEX_HOME"], max_attempts=1,
+                workload_class="high")
+        except ReContaminationDetected as e:
+            _log(f"[{tag}/{label}] RE-CONTAMINATION -- {e}; enrichment stops")
+            return [], "", label
+        except codex_model_policy.ModelPolicyViolation:
+            raise
+        except ConnectorCallFailure as e:
+            _log(f"[{tag}/{label}] failed ({e.reason}) -- moving to next identity")
+            continue
+        except Exception as e:  # noqa: BLE001 -- enrichment fails soft
+            _log(f"[{tag}/{label}] failed ({type(e).__name__}: {e}) -- moving to next identity")
+            continue
+        tool_calls = extract_tool_calls(objs)
+        status, detail = guard_recontamination(tool_calls, "mail")
+        _log(f"[{tag}/{label}] tool calls observed: {detail['seen'] or '(none)'}")
+        if status == "ok":
+            _log(f"[{tag}] served by {label}")
+            return objs, raw, label
+        if status == "halt":
+            _log(f"[{tag}/{label}] safety HALT -- enrichment stops")
+            return [], raw, label
+        _log(f"[{tag}/{label}] list_messages missing -- moving to next identity")
+    _log(f"[{tag}] all identities failed")
+    return [], "", None
+
+
 # --------------------------------------------------------------------------- #
 #  Mail webLink resolution (option 1, 3 Sept 2026 -- the "Open email" OWA
 #  deep-link fix). Kevin's explicit go-ahead, gated on identity/tenant
@@ -1303,10 +1385,9 @@ def resolve_mail_weblink(message_id: str) -> str:
     tool-native field (https://outlook.office365.com/owa/?ItemID=...&exvsurl=1&
     viewmodel=ReadMessageItem), not something the agent had to construct itself.
 
-    PERSONAL-ACCOUNT-ONLY, no primary/failover choice: Edu has no Outlook Email
-    connector attached (Kevin's Q2 decision, deliberate, calendar+Teams only) --
-    there is nothing to fail over FROM, this always runs against
-    FAILOVER_CODEX_HOME directly.
+    Uses the same ordered identity ring as the four briefing domains. A missing
+    Outlook Email connector on one ChatGPT identity is treated as a normal
+    ring failure and the lookup advances to the next identity.
 
     SAME re-contamination guard as calendar/Teams, no new design: verb-based via
     guard_recontamination()/LANE_B_NAMESPACES (now includes
@@ -1336,17 +1417,7 @@ def resolve_mail_weblink(message_id: str) -> str:
         "anything -- this is a read-only lookup, change nothing."
     )
     try:
-        # workload_class="high": MODEL_POLICY.md precedence rule -- this goes
-        # through the microsoft_outlook_email connector namespace, which is
-        # write-capable (guarded, not excluded), so it classifies High even
-        # though this specific prompt is a narrow single-record lookup.
-        objs, raw = run_codex_json(prompt, timeout_s=120, tag="mail",
-                                    codex_home=FAILOVER_CODEX_HOME, max_attempts=1,
-                                    workload_class="high")
-    except ReContaminationDetected as e:
-        _log(f"[mail] RE-CONTAMINATION resolving webLink for {mid!r} -- {e} -- "
-             f"skipped, investigate before relying on this identity again")
-        return ""
+        objs, raw, served_by = _run_mail_lookup_ring(prompt, "mail-weblink")
     except codex_model_policy.ModelPolicyViolation as e:
         # Deliberately NOT re-raised, unlike _fetch_domain_one_identity's own
         # handling of this same exception type (touchpoint-1 Codex review
@@ -1366,12 +1437,15 @@ def resolve_mail_weblink(message_id: str) -> str:
         _log(f"[mail] webLink resolution failed for {mid!r} (non-fatal): {e}")
         return ""
 
+    if not served_by:
+        return ""
+
     # persist a raw transcript for auditability, same convention as the
     # calendar/teams <ts>_call1_<domain>_<identity>_a<n>.jsonl files -- best
     # effort, a write failure here must never affect the actual result.
     try:
         _ts = _utcstamp()
-        (LANE_B_DIR / f"{_ts}_call1_mail_failover_a1.jsonl").write_text(raw, encoding="utf-8")
+        (LANE_B_DIR / f"{_ts}_call1_mail_{served_by}_a1.jsonl").write_text(raw, encoding="utf-8")
     except OSError:
         pass
 
@@ -1435,8 +1509,7 @@ def resolve_mail_weblink_by_subject(subject: str, received_raw: str = "") -> str
     more than one remain ambiguous, return "" and log why -- never picks one
     arbitrarily.
 
-    Same PERSONAL-ACCOUNT-ONLY / guard / fail-soft contract as
-    resolve_mail_weblink(): always runs against FAILOVER_CODEX_HOME, a guard
+    Same ring / guard / fail-soft contract as resolve_mail_weblink(): a guard
     HALT or any exception returns "" rather than raising."""
     subj = (subject or "").strip()
     if not subj:
@@ -1454,13 +1527,7 @@ def resolve_mail_weblink_by_subject(subject: str, received_raw: str = "") -> str
         "change nothing."
     )
     try:
-        objs, raw = run_codex_json(prompt, timeout_s=120, tag="mail",
-                                    codex_home=FAILOVER_CODEX_HOME, max_attempts=1,
-                                    workload_class="high")
-    except ReContaminationDetected as e:
-        _log(f"[mail] RE-CONTAMINATION resolving webLink-by-subject for {subj!r} -- {e} -- "
-             f"skipped, investigate before relying on this identity again")
-        return ""
+        objs, raw, served_by = _run_mail_lookup_ring(prompt, "mail-weblink-subject")
     except codex_model_policy.ModelPolicyViolation as e:
         _log(f"[mail] MODEL POLICY VIOLATION resolving webLink-by-subject for {subj!r} -- {e} -- "
              f"this is a code/config bug, NOT a connector-availability issue; not propagated, "
@@ -1470,9 +1537,12 @@ def resolve_mail_weblink_by_subject(subject: str, received_raw: str = "") -> str
         _log(f"[mail] webLink-by-subject resolution failed for {subj!r} (non-fatal): {e}")
         return ""
 
+    if not served_by:
+        return ""
+
     try:
         _ts = _utcstamp()
-        (LANE_B_DIR / f"{_ts}_call1_mail_bysubj_failover_a1.jsonl").write_text(raw, encoding="utf-8")
+        (LANE_B_DIR / f"{_ts}_call1_mail_bysubj_{served_by}_a1.jsonl").write_text(raw, encoding="utf-8")
     except OSError:
         pass
 
@@ -1934,6 +2004,7 @@ def run_domain(domain: str, events: list[dict], *, window_days: int) -> dict:
 
 def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts: str,
                                retries: int, codex_home: str, identity_label: str,
+                               m365_account: str | None = None,
                                timeout_s: int = CALL1_TIMEOUT_S, max_attempts: int = 2) -> tuple[dict | None, list[dict]]:
     """The pre-2-Sept-evening fetch_domain() retry loop, unchanged in behaviour,
     now parameterized by WHICH identity (codex_home/identity_label) it runs
@@ -1978,8 +2049,18 @@ def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts
             # possibly for days. Re-raise uncaught so the run fails loudly
             # (non-zero exit) instead.
             raise
+        except ConnectorCallFailure as e:
+            attempts.append({"n": n, "identity": identity_label, "outcome": "codex_failed",
+                             "reason": e.reason, "detail": str(e)[:300]})
+            _log(f"[{domain}/{identity_label}] attempt {n}/{retries}: {e.reason} -- {e}; moving to next identity")
+            # Explicit connector errors and a hard timeout are identity failures.
+            # The ring, not an extra retry against the same profile, is the
+            # availability mechanism. This keeps the worst case to one bounded
+            # call per configured identity per domain.
+            continue
         except RuntimeError as e:
-            attempts.append({"n": n, "identity": identity_label, "outcome": "codex_failed", "detail": str(e)[:200]})
+            attempts.append({"n": n, "identity": identity_label, "outcome": "codex_failed",
+                             "reason": "runtime_error", "detail": str(e)[:200]})
             _log(f"[{domain}/{identity_label}] attempt {n}/{retries}: codex run failed -- {e}")
             if n < retries:
                 time.sleep(CALL1_RETRY_BACKOFF_S[min(n - 1, len(CALL1_RETRY_BACKOFF_S) - 1)])
@@ -1988,9 +2069,19 @@ def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts
             (LANE_B_DIR / f"{ts}_call1_{domain}_{identity_label}_a{n}.jsonl").write_text(raw, encoding="utf-8")
         except OSError:
             pass
+        mismatch = _account_mismatch_reason(events, m365_account)
+        if mismatch:
+            attempts.append({"n": n, "identity": identity_label, "outcome": "codex_failed",
+                             "reason": "account_mismatch", "detail": mismatch})
+            _log(f"[{domain}/{identity_label}] attempt {n}/{retries}: account_mismatch -- {mismatch}; moving to next identity")
+            result = None
+            continue
         result = run_domain(domain, events, window_days=window_days)
         result["served_by"] = identity_label
+        if result["status"] == "unavailable":
+            result["failure_reason"] = "missing_connector"
         attempts.append({"n": n, "identity": identity_label, "outcome": result["status"],
+                         "reason": result.get("failure_reason"),
                          "tools": result["tool_calls"], "count": result["count"]})
         if result["status"] in ("ok", "halt"):
             break
@@ -2002,158 +2093,50 @@ def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts
 
 
 def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries: int) -> dict:
-    """PRIMARY/FAILOVER orchestration (added 2 Sept 2026 evening, Kevin's
-    correction; retry budgets split same evening after a live 43-minute test --
-    see PRIMARY_RETRIES's own comment for the full evidence/tradeoff). Try
-    PRIMARY (Edu) first, with its own deliberately SMALL retry budget
-    (PRIMARY_RETRIES, default 1 -- NOT `retries`/CALL1_RETRIES, which is now
-    FAILOVER's budget). If primary's budget is exhausted with no 'ok'/'halt'
-    result -- for ANY reason, deliberately not trying to distinguish "Edu's
-    cap is exhausted" from any other transient failure, since real failures
-    tonight showed only generic timeouts with no clean quota-exhaustion signal
-    to key off -- automatically retry the SAME domain fetch against FAILOVER
-    (personal), using `retries` (its own, more generous budget -- personal has
-    proven reliable, worth a real chance once we're paying to switch to it).
-    A re-contamination HALT on primary is terminal and does NOT trigger
-    failover -- more calls after a detected write is the wrong direction
-    regardless of which identity would make them.
-    Returns a run_domain-shaped dict + 'served_by' (which identity actually
-    produced the result, or None if neither did) + 'attempts' (both identities'
-    attempts, concatenated, each tagged). Terminal statuses: 'ok', 'halt'
-    (re-contamination), 'unavailable' (expected tool never fired on either
-    identity), 'codex_failed' (every attempt on both failed).
+    """Run one domain through the configured identities, in ring order."""
+    identities = available_identity_ring()
+    attempts: list[dict] = []
+    result: dict | None = None
+    for index, identity in enumerate(identities):
+        label = identity["label"]
+        timeout_s = (PRIMARY_TIMEOUT_S_BY_DOMAIN.get(domain, PRIMARY_TIMEOUT_S)
+                     if index == 0 else CALL1_TIMEOUT_S)
+        _log(f"[{domain}] trying identity {index + 1}/{len(identities)}: {label}")
+        result, identity_attempts = _fetch_domain_one_identity(
+            domain, _prompt_for_identity(prompt, identity), window_days=window_days, ts=ts, retries=1,
+            codex_home=identity["CODEX_HOME"], identity_label=label,
+            m365_account=identity.get("m365_account"),
+            timeout_s=timeout_s, max_attempts=1)
+        attempts.extend(identity_attempts)
+        if result is not None and result["status"] == "ok":
+            _log(f"[{domain}] identity {label} served this call")
+            break
+        if result is not None and result["status"] == "halt":
+            _log(f"[{domain}] safety HALT on {label}; not failing over after a detected write/off-scope tool")
+            break
+        _log(f"[{domain}] identity {label} failed; continuing at next ring position")
 
-    EXCEPTION TO "never raises" (added 10 Sep 2026, Priority 4):
-    codex_model_policy.ModelPolicyViolation is deliberately NOT caught here
-    and propagates uncaught out of this function. MODEL_POLICY.md requires an
-    out-of-policy model/effort selection to abort the call loudly -- folding
-    it into any of this function's normal terminal statuses (especially
-    'codex_failed', which primary/failover retries treat as ordinary
-    flakiness) would silently hide a deterministic code/config bug behind
-    connector-unreliability semantics. The caller (main()) is expected to let
-    this crash the run (non-zero exit, visible in the scheduled task/log),
-    not swallow it."""
-    if EDU_PARKED:
-        # Edu parked (see EDU_PARKED's own comment above, 14 Sep 2026) -- route
-        # straight to PERSONAL as the sole identity for this run. Deliberately
-        # NOT calling _fetch_domain_one_identity() against PRIMARY_CODEX_HOME at
-        # all -- zero subprocess launches against Edu, so there is nothing to
-        # hang, time out, or fast-fail on. Mirrors fetch_mail_domain()'s own
-        # personal-only shape exactly (same codex_home, same generous
-        # timeout/max_attempts), just applied to calendar/teams instead of mail.
-        parked_retries = (EDU_PARKED_CALENDAR_RETRIES if domain == "calendar"
-                          else EDU_PARKED_RETRIES)
-        _log(f"[{domain}] Edu parked (WI_LANE_B_EDU_PARKED) -- calling PERSONAL "
-             f"({FAILOVER_CODEX_HOME}) directly as the sole identity this run; no attempt "
-             f"against Edu ({PRIMARY_CODEX_HOME}) at all. Outer retry budget "
-             f"{parked_retries} ({'WI_LANE_B_EDU_PARKED_CALENDAR_RETRIES' if domain == 'calendar' else 'WI_LANE_B_EDU_PARKED_RETRIES'}) -- "
-             f"see that constant's own comment for why this is tighter than FAILOVER's old default.")
-        result, attempts = _fetch_domain_one_identity(
-            domain, prompt, window_days=window_days, ts=ts, retries=parked_retries,
-            codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
-            timeout_s=CALL1_TIMEOUT_S, max_attempts=2)   # inner cold-start-hang absorber unchanged
-        if result is None:
-            result = {"domain": domain, "status": "codex_failed", "served_by": None,
-                      "guard": {"seen": [], "unexpected": []},
-                      "tool_calls": [], "count": 0, "raw_items": []}
-        result["attempts"] = attempts
-        result["primary_failover_identical"] = False
-        result["edu_parked"] = True
-        _log(f"[{domain}] final status={result['status']} served_by={result.get('served_by')} "
-             f"after {len(attempts)} attempt(s) (Edu parked -- personal-only this run)")
-        return result
-
-    # Collision guard (added 3 Sept 2026, regression fix): if PRIMARY_CODEX_HOME
-    # and FAILOVER_CODEX_HOME resolve to the SAME path, automatic failover is a
-    # no-op by construction -- there is nothing distinct to fail over to, and a
-    # primary failure silently becomes a hard domain failure with only one
-    # attempt logged. This is exactly the shape of the 2 Sept 20:58 live
-    # regression: an ambient/leftover CODEX_HOME (or WI_LANE_B_CODEX_HOME) env
-    # var on the host -- set during 1 Sept's now-superseded personal-only
-    # testing phase and never cleared -- made PRIMARY_CODEX_HOME resolve to the
-    # exact same literal path as FAILOVER_CODEX_HOME's hardcoded default
-    # (C:\WorkInboxAI\codex-laneb), collapsing "primary" and "failover" into one
-    # identity and defeating the Edu-primary/personal-failover architecture
-    # entirely -- without ever raising a HALT or any other loud signal. Made
-    # loud here (not just a routine _log line) so it can never again silently
-    # ride along as "working as designed". This does NOT fix a genuinely
-    # misconfigured environment by itself -- the actual fix is the wrapper
-    # explicitly clearing CODEX_HOME/WI_LANE_B_CODEX_HOME before every Lane B
-    # invocation (see Run Laptop Bridge Briefing.ps1) -- but this guard makes
-    # the failure mode visible in the run log/summary instead of indistinguishable
-    # from "no failover was needed".
-    _identity_collision = (FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME)
-    if _identity_collision:
-        _log(f"[{domain}] WARNING: PRIMARY_CODEX_HOME and FAILOVER_CODEX_HOME are IDENTICAL "
-             f"({PRIMARY_CODEX_HOME}) -- automatic failover CANNOT fire for this run. This is "
-             f"almost certainly unintentional (an ambient CODEX_HOME/WI_LANE_B_CODEX_HOME env var "
-             f"left over from earlier testing) -- check the host's environment. See lane_b_call1.py "
-             f"fetch_domain()'s collision-guard comment for the 2 Sept incident this matches.")
-
-    result, attempts = _fetch_domain_one_identity(
-        domain, prompt, window_days=window_days, ts=ts, retries=PRIMARY_RETRIES,
-        codex_home=PRIMARY_CODEX_HOME, identity_label="primary",
-        timeout_s=PRIMARY_TIMEOUT_S_BY_DOMAIN.get(domain, PRIMARY_TIMEOUT_S),
-        max_attempts=PRIMARY_MAX_ATTEMPTS_BY_DOMAIN.get(domain, PRIMARY_MAX_ATTEMPTS))
-
-    if result is not None and result["status"] in ("ok", "halt"):
-        pass   # success, or a terminal re-contamination HALT -- no failover either way
-    elif FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME:
-        _log(f"[{domain}] PRIMARY exhausted with no success, but FAILOVER_CODEX_HOME is identical "
-             f"to primary ({PRIMARY_CODEX_HOME}) -- nothing distinct to fail over to")
-    else:
-        _log(f"[{domain}] PRIMARY ({PRIMARY_CODEX_HOME}) exhausted its retry budget with no success "
-             f"-- failing over to PERSONAL ({FAILOVER_CODEX_HOME}) for this domain fetch")
-        fo_result, fo_attempts = _fetch_domain_one_identity(
-            domain, prompt, window_days=window_days, ts=ts, retries=retries,
-            codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
-            timeout_s=CALL1_TIMEOUT_S, max_attempts=2)   # explicit, unchanged -- personal keeps full benefit of the doubt
-        attempts = attempts + fo_attempts
-        if fo_result is not None:
-            result = fo_result
-            if fo_result["status"] == "ok":
-                _log(f"[{domain}] FAILOVER succeeded -- this cycle's {domain} data was served by the "
-                     f"personal account, not Edu. Informational, not a HALT.")
-
-    if result is None:
-        result = {"domain": domain, "status": "codex_failed", "served_by": None,
-                  "guard": {"seen": [], "unexpected": []},
-                  "tool_calls": [], "count": 0, "raw_items": []}
+    if result is None or result.get("status") != "ok":
+        status = (result or {}).get("status") or "codex_failed"
+        result = result or {"domain": domain, "status": status,
+                            "guard": {"seen": [], "unexpected": []},
+                            "tool_calls": [], "count": 0, "raw_items": []}
+        if status == "ok":
+            status = "codex_failed"
+        result["status"] = status
+        result["served_by"] = None
+        _log(f"[{domain}] all configured identities failed; domain status={status}")
     result["attempts"] = attempts
-    result["primary_failover_identical"] = _identity_collision
+    result["identity_ring"] = [i["label"] for i in identities]
+    result["primary_failover_identical"] = False
     _log(f"[{domain}] final status={result['status']} served_by={result.get('served_by')} "
-         f"after {len(attempts)} total attempt(s) across both identities"
-         + (" -- ** PRIMARY==FAILOVER, failover was structurally unavailable this run **" if _identity_collision else ""))
+         f"after {len(attempts)} ring attempt(s)")
     return result
 
 
 def fetch_mail_domain(domain: str, prompt: str, *, ts: str, retries: int) -> dict:
-    """Mail-domain fetch, added 9 Sept 2026. PERSONAL-ACCOUNT-ONLY, no primary/
-    failover choice -- Edu has no Outlook Email connector attached (Kevin's Q2
-    decision, deliberate, calendar+Teams only), so there is nothing to try or
-    fail over FROM. Mirrors resolve_mail_weblink()'s own established precedent
-    (same FAILOVER_CODEX_HOME-direct pattern, same re-contamination guard via
-    _fetch_domain_one_identity -> run_domain -> guard_recontamination, no new
-    safety mechanism). Deliberately NOT routed through fetch_domain()'s
-    primary/failover orchestration -- attempting PRIMARY_CODEX_HOME (Edu) for
-    mail would always fail (no connector attached) and just waste a full
-    PRIMARY_TIMEOUT_S budget every run for no benefit. Terminal statuses same
-    as fetch_domain(): 'ok', 'halt', 'unavailable', 'codex_failed'. Same
-    exception to "never raises" as fetch_domain() -- see that function's
-    docstring: codex_model_policy.ModelPolicyViolation propagates uncaught."""
-    result, attempts = _fetch_domain_one_identity(
-        domain, prompt, window_days=0, ts=ts, retries=retries,
-        codex_home=FAILOVER_CODEX_HOME, identity_label="failover",
-        timeout_s=CALL1_TIMEOUT_S, max_attempts=2)
-    if result is None:
-        result = {"domain": domain, "status": "codex_failed", "served_by": None,
-                  "guard": {"seen": [], "unexpected": []},
-                  "tool_calls": [], "count": 0, "raw_items": []}
-    result["attempts"] = attempts
-    result["primary_failover_identical"] = False   # meaningless for mail -- there is no primary
-    _log(f"[{domain}] final status={result['status']} served_by={result.get('served_by')} "
-         f"after {len(attempts)} attempt(s) (personal-only, no primary/failover pair for mail)")
-    return result
+    """Mail uses the same ordered ring as calendar and Teams."""
+    return fetch_domain(domain, prompt, window_days=0, ts=ts, retries=retries)
 
 
 # --------------------------------------------------------------------------- #
@@ -2338,17 +2321,9 @@ def main(argv: list[str]) -> int:
     ts = _utcstamp()
     _log(f"start domain={args.domain} window_days={args.window_days} ts={ts}")
     if not args.from_file:
-        if EDU_PARKED:
-            _log(f"EDU PARKED (WI_LANE_B_EDU_PARKED) -- PRIMARY ({PRIMARY_CODEX_HOME}) will NOT be "
-                 f"attempted this run; every domain calls PERSONAL directly as the sole identity. "
-                 f"Set WI_LANE_B_EDU_PARKED=0 to restore Edu-primary/personal-failover.")
-        _log(f"PRIMARY   CODEX_HOME={PRIMARY_CODEX_HOME}  account_id={_codex_account_id(PRIMARY_CODEX_HOME)}"
-             + ("  [WI_LANE_B_CODEX_HOME override]" if os.environ.get('WI_LANE_B_CODEX_HOME', '').strip() else "")
-             + ("  [PARKED -- not attempted]" if EDU_PARKED else ""))
-        _log(f"FAILOVER  CODEX_HOME={FAILOVER_CODEX_HOME}  account_id={_codex_account_id(FAILOVER_CODEX_HOME)}"
-             + ("  [WI_LANE_B_CODEX_HOME_FAILOVER override]" if os.environ.get('WI_LANE_B_CODEX_HOME_FAILOVER', '').strip() else "")
-             + ("  (same as primary -- no distinct failover configured)" if FAILOVER_CODEX_HOME == PRIMARY_CODEX_HOME else "")
-             + ("  [ACTIVE -- sole identity while Edu parked]" if EDU_PARKED else ""))
+        configured = load_identity_config()
+        _log("identity config=" + str(IDENTITIES_CONFIG_PATH) + " order="
+             + " -> ".join(i["label"] for i in configured))
     LANE_B_DIR.mkdir(parents=True, exist_ok=True)
     CODEX_RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -2497,7 +2472,8 @@ def main(argv: list[str]) -> int:
     # fetch_inbox.py's staleness check on calendar/teams look artificially fresh
     # (or vice versa). Each domain now carries its OWN last-successful-write ts,
     # independent of which other domain last touched the shared file.
-    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by", "primary_failover_identical", "truncation_risk")
+    _dom_keys = ("status", "count", "tool_calls", "guard", "attempts", "served_by",
+                 "identity_ring", "primary_failover_identical", "truncation_risk")
     _domains_meta = {d: {**{k: per_domain[d].get(k) for k in _dom_keys}, "ts": ts} for d in per_domain}
     for _cli_domain in _domain_out_key:
         if _cli_domain not in per_domain and _cli_domain in _existing_domains_meta:
@@ -2524,6 +2500,20 @@ def main(argv: list[str]) -> int:
         # (headless connector flakiness). Do NOT overwrite a previous good file --
         # fetch_inbox.py will use it until it ages past WI_LANE_B_MAX_AGE_H, then
         # degrade to empty+warning. This is the documented flaky path, not an error.
+        # Keep that last-good payload, but refresh its per-domain metadata so the
+        # current briefing cannot mistake carried-forward data for a successful
+        # connector call (especially important after all three identities fail).
+        if _existing:
+            _existing_meta = _existing.setdefault("meta", {})
+            _existing_lane_b = _existing_meta.setdefault("lane_b", {})
+            _existing_lane_b["ts"] = ts
+            _existing_lane_b["domains"] = _domains_meta
+            _existing_lane_b["halt"] = overall_rc == 1
+            try:
+                Path(args.out).write_text(json.dumps(_existing, indent=2, ensure_ascii=False), encoding="utf-8")
+                _log(f"updated {Path(args.out).name} status metadata while carrying forward last-good domain data")
+            except OSError as e:
+                _log(f"WARNING: could not update carried-forward status metadata ({e})")
         _log(f"no domain returned data this cycle "
              f"({ {d: per_domain[d]['status'] for d in per_domain} }); "
              f"leaving any existing {Path(args.out).name} in place (last-good until it ages out).")
@@ -2549,7 +2539,8 @@ def _write_run_log(ts, args, per_domain, sha_before, sha_after, n_hits, *, halte
         "domains_requested": args.domain,
         "window_days": args.window_days,
         "per_domain": {d: {k: per_domain[d].get(k)
-                           for k in ("status", "count", "tool_calls", "guard", "attempts", "served_by", "primary_failover_identical")}
+                           for k in ("status", "count", "tool_calls", "guard", "attempts", "served_by",
+                                     "identity_ring", "primary_failover_identical")}
                        for d in per_domain},
         "sanitiser_hits": n_hits,
         "config_toml_sha1_before": sha_before,

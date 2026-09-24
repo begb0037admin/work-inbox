@@ -1,9 +1,15 @@
+# Handover -- 24 September 2026 (Codex) -- three-identity connector failover ring
+
+- Lane B now uses the ordered ring in [`lane_b_identities.json`](lane_b_identities.json): `edu` (`begb0037@ox.ac.uk`), `personal-uk` (`kevin@lelitte.co.uk`), then `personal-com` (`kevin@lelitte.com`). Mail inbox, mail sent, calendar, Teams, and the optional mail-link lookups all restart at ring position 1 for each call and each run.
+- Each identity is one separate `CODEX_HOME`. Missing or unauthenticated profiles are logged and skipped. Any connector failure advances immediately, including authentication/reauthentication errors, usage limits even when Codex exits 0, permission 403/404 responses, timeouts (with the existing process-tree kill), and a missing connector. A domain with no successful identity is marked failed for that run; the existing carry-forward and amber dashboard behavior handles it.
+- `lane_b_call1.py` records per-identity outcomes/reasons in the local Lane B run log and records `served_by` as a label only in each domain's metadata. `briefing.json` exposes `connector_status` as `{status, served_by}` per domain; the dashboard accepts this shape and older string statuses.
+- **One-time laptop setup still needed for `personal-com`:** create `C:\WorkInboxAI\codex-lanec`, run a separate Codex login as `kevin@lelitte.com`, and connect the Outlook/M365 connector on that ChatGPT account. This must be a **separate login**, not a copied `auth.json`; copying it would recreate the refresh-token rotation race documented below.
+- Tests: `python -m unittest tests/lane_b_failover_ring_test.py`, `python -m py_compile lane_b_call1.py fetch_inbox.py`, `node --check js/app.js`, and `git diff --check`. No laptop run, deployment, push, or merge was performed by this change.
+
 # Handover -- 24 September 2026 ~21:55 (Codex) -- per-domain connector carry-forward
 
 - Added `connector_carry_forward.py` and wired `fetch_inbox.py` so calendar, Teams, inbox mail, and sent mail are handled independently. A failed domain carries one complete last-good snapshot only when it is no more than 7 days old; older/missing snapshots are cleared and reported as unavailable. Calendar snapshots are reprojected from dated `calFull` into the current four rolling day columns. The local cache is `data/connector_last_good.json` (ignored by git) and is backed up to `Archive/` before replacement.
 - Dashboard labels carried-forward Calendar/Inbox/Teams data with its `as_of` timestamp, keeps the amber connector banner, and renders the Teams digest when available. Added Python carry-forward tests and a Node rendering check.
-- Restored `data/briefing.json` from commit `1fbf1ca6` (21 Sep 12:25:26 BST) after backing up the failed 24 Sep file to `Archive/briefing_backup_20260924_215418_203.json`. JSON validation passed: 39 full-week calendar events, 6 today, 11 tomorrow; Teams was empty in that last within-window good snapshot and is labelled accordingly. No push or deployment.
-- **Git handoff:** this linked worktree's shared Git directory is outside the writable workspace. Creating `codex/carry-forward-last-good-data`, staging, and committing all fail with permission denied on the shared `.git` refs/index lock. The worktree changes are intentionally left unstaged for commit from a Git-writable clone.
 
 # Handover -- 24 September 2026 ~21:45 (Drew) -- PR #43 LIVE: staleness banner follows the real schedule
 

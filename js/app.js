@@ -1148,8 +1148,10 @@ function _failedConnectorDomains(data){
   if(Object.prototype.hasOwnProperty.call(data,'connector_status')){
     const statuses=data.connector_status||{};
     return keys.filter(key=>{
-      const status=statuses[key]&&typeof statuses[key]==='object'?statuses[key].status:statuses[key];
-      return status&&status!=='ok'&&status!=='n/a';
+      const value=statuses[key];
+      const status=(value&&typeof value==='object')?value.status:value;
+      if(!status) return false;
+      return status!=='ok'&&status!=='n/a';
     }).map(key=>labels[key]);
   }
 

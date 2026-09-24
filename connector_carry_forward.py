@@ -113,13 +113,15 @@ def _entry_from_doc(doc, domain, *, source_override=None, require_items=True):
         return None
     status_doc = (doc.get("connector_status") or {}).get(domain) if isinstance(doc, dict) else None
     as_of = None
+    served_by = None
     if isinstance(status_doc, dict):
         as_of = status_doc.get("as_of")
+        served_by = status_doc.get("served_by")
     if not as_of and isinstance(doc, dict):
         as_of = doc.get("refreshed_at")
     if require_items and not _data_has_items(data, domain) and status_name(status_doc) != "ok":
         return None
-    return {"as_of": iso_timestamp(as_of), "data": data}
+    return {"as_of": iso_timestamp(as_of), "served_by": served_by, "data": data}
 
 
 def _best_candidate(previous_doc, cache, domain):
@@ -180,8 +182,9 @@ def _reproject_calendar(data, now):
         data[field] = by_date.get(day.isoformat(), [])
 
 
-def _status_record(status, as_of, *, reason=None, now=None):
+def _status_record(status, as_of, *, served_by=None, reason=None, now=None):
     record = {"status": status}
+    record["served_by"] = served_by
     normalized = iso_timestamp(as_of, now=now)
     if normalized:
         record["as_of"] = normalized
@@ -228,7 +231,9 @@ def reconcile_domains(
                 entry = {"data": deepcopy(source or {})}
             entry["as_of"] = iso_timestamp(as_of_by_domain.get(domain), now=now) or now.isoformat(timespec="seconds")
             cache["domains"][domain] = entry
-            briefing.setdefault("connector_status", {})[domain] = _status_record("ok", entry["as_of"], now=now)
+            briefing.setdefault("connector_status", {})[domain] = _status_record(
+                "ok", entry["as_of"], served_by=entry.get("served_by"), now=now
+            )
             continue
 
         candidate = _best_candidate(previous_briefing, cache, domain)
@@ -241,7 +246,7 @@ def reconcile_domains(
             for field, value in data.items():
                 briefing[field] = value
             briefing.setdefault("connector_status", {})[domain] = _status_record(
-                "carried_forward", candidate.get("as_of"), now=now
+                "carried_forward", candidate.get("as_of"), served_by=candidate.get("served_by"), now=now
             )
             carried.append(domain)
             continue
@@ -249,7 +254,9 @@ def reconcile_domains(
         _empty_domain(briefing, domain)
         reason = "last_good_data_older_than_7_days" if candidate_as_of else "no_last_good_data"
         briefing.setdefault("connector_status", {})[domain] = _status_record(
-            "unavailable", candidate.get("as_of") if candidate else None, reason=reason, now=now
+            "unavailable", candidate.get("as_of") if candidate else None,
+            served_by=candidate.get("served_by") if candidate else None,
+            reason=reason, now=now
         )
 
     return briefing, cache, carried

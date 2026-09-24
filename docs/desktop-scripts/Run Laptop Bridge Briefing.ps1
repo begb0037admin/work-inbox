@@ -51,26 +51,15 @@ wiring added 2 Sept 2026 evening (Drew) -- NEITHER LIVE YET:
   docs/LANE_B_TEAMS_CAL_DESIGN.md), so the same single kill-switch that halts
   on any unexpected/write tool call is the deliberate, sufficient safety
   mechanism for both domains. No separate Teams-specific HALT logic is planned.
-  CODEX_HOME for the guard/Call-1: UPDATED 2 Sept 2026 evening -- lane_b_call1.py
-  now resolves its own primary (Edu, tried first) / failover (personal,
-  automatic once Edu's own retry budget is exhausted for ANY reason) identity
-  and logs which one served each call. $LaneBCodexHome below is an escape
-  hatch only (normally blank) -- see its own comment block for the full story
-  and the two wrong ideas rejected en route to this design.
+  CODEX_HOME for the guard/Call-1: lane_b_call1.py reads the ordered
+  lane_b_identities.json ring and logs each identity's result. Profiles that
+  are missing or unauthenticated are skipped. Every domain starts again at
+  ring position 1 on its next call and next run.
   **THE LIVE SCHEDULED TASK STAYS ON CAL_BACKEND=com.** This wiring is dormant
   until Kevin gives the explicit go-ahead to register/re-register the task with
   -CalBackend connector -- same cutover discipline as the connector mail path.
   Passing -CalBackend connector by hand (this script only, not the live task)
   is how Kevin/the coordinator proves it end to end before that go-ahead.
-
-  ** 14 SEPT 2026 UPDATE, supersedes "primary (Edu, tried first)" below **:
-  Edu is now PARKED -- taken fully out of the active routing path, not just a
-  fast-fail primary. This task hung 14+ minutes that day on
-  `lane_b_cal_guard.py --run --domain both` right after resolving the Edu
-  identity, never reaching failure or failover. `WI_LANE_B_EDU_PARKED=1` (set
-  below, also the code default in lane_b_call1.py) makes every Lane B domain
-  call PERSONAL directly with no attempt against Edu at all. See the "EDU
-  PARKED" block further down for the mechanism and revert instructions.
 
 Mirrors the live desktop "Run Inbox Briefing.bat" environment, minus Outlook COM
 and minus the hope@ overflow config (single account on the laptop for now -- a
@@ -123,48 +112,12 @@ param(
 )
 
 # ============================================================================
-# LANE B identity -- CORRECTED 2 Sept 2026 evening (Kevin, after tonight's Teams
-# investigation). Two DIFFERENT wrong ideas were tried and rejected in quick
-# succession tonight before landing here, both worth recording so a future
-# session doesn't re-propose them:
-#   (a) leaving this blank (the state since 1 Sept) -- silently falls through to
-#       whatever codex is already logged into on the calling session, which on
-#       the laptop's RDP default profile is Edu. That's not "wrong" by itself
-#       (Edu IS meant to be tried first -- see below) but it was ACCIDENTAL, not
-#       deliberate, and gave no fallback at all when Edu failed (which is
-#       exactly what happened to Teams tonight: 4 straight timed-out attempts,
-#       no data, ever, on Edu).
-#   (b) hardcoding this to the personal account (`C:\WorkInboxAI\codex-laneb`)
-#       -- tried first as "the fix" tonight, then Kevin corrected it: the 1 Sept
-#       move to personal-only was a TESTING-PHASE workaround for burning
-#       through Edu's monthly cap fast during heavy testing, not the permanent
-#       architecture. Edu should still be tried first, every time; personal is
-#       the safety net, not the new default.
-# ACTUAL design: `lane_b_call1.py` itself now has explicit primary(Edu)/
-# failover(personal) resolution + automatic failover built in (PRIMARY_CODEX_HOME
-# / FAILOVER_CODEX_HOME, WI_LANE_B_CODEX_HOME_FAILOVER env override) -- Edu is
-# tried first, its EXISTING retry budget is exhausted, and only then does it
-# automatically retry the same call against personal, logging clearly which
-# identity actually served each call. This wrapper does NOT need to pick an
-# identity or implement any fallback itself any more -- that decision now lives
-# in the Python code, not here. This var is kept ONLY as an explicit escape
-# hatch to override BOTH calendar's and Teams' primary identity in one place if
-# ever needed (e.g. Edu login expires and needs bypassing entirely) -- leave it
-# blank for normal operation, which lets lane_b_call1.py's own primary/failover
-# logic run as designed.
-#   $LaneBCodexHome = '' (blank, NORMAL)      -> lane_b_call1.py resolves its
-#                                                 own primary (Edu, explicit
-#                                                 deliberate default) and
-#                                                 failover (personal) itself.
-#   $LaneBCodexHome = '<any path>'            -> escape hatch: forces BOTH
-#                                                 CODEX_HOME and
-#                                                 WI_LANE_B_CODEX_HOME to this
-#                                                 path, which becomes
-#                                                 lane_b_call1.py's PRIMARY
-#                                                 (its own failover logic still
-#                                                 applies on top of that).
+# LANE B identity ring -- the ordered entries in lane_b_identities.json are
+# the only source of identity/path configuration. lane_b_call1.py skips a
+# missing or unauthenticated profile and advances to the next entry on any
+# connector failure. This wrapper clears ambient CODEX_HOME values so they
+# cannot override the checked-in ring.
 # ============================================================================
-$LaneBCodexHome = ''
 $TaskName       = 'Work Inbox Bridge Briefing'   # this task's own name, for Disable-ScheduledTask on a guard HALT
 
 $ErrorActionPreference = 'Continue'
@@ -261,7 +214,7 @@ Log "=== Laptop Bridge Briefing START  (user $env:USERDOMAIN\$env:USERNAME  host
 Log "params: CoreOnly=$CoreOnly  CalBackend=$CalBackend  TeamsBackend=$TeamsBackend  MailBackend=$MailBackend  log=$log"
 Set-Location $root
 
-# --- isolated Claude Code config: kevin@ ONLY (no hope@ failover on the laptop yet) ---
+# --- isolated Claude Code config for the briefing triage phase ---
 $kevinCfg = 'C:\WorkInboxAI\kevin'
 if (-not (Test-Path (Join-Path $kevinCfg '.credentials.json'))) {
   Log "FATAL: $kevinCfg\.credentials.json not found -- the kevin@ isolated Claude Code config is not logged in."
@@ -292,7 +245,7 @@ $env:PYTHONUTF8                  = '1'
 # --- refresh pipeline scripts from main (cache-busted raw pull, same mechanism the desktop uses) ---
 $t    = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $base = 'https://raw.githubusercontent.com/begb0037admin/work-inbox/main'
-foreach ($f in 'fetch_inbox.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py','codex_model_policy.py') {
+foreach ($f in 'fetch_inbox.py','normalise_pull.py','lane_b_call1.py','lane_b_cal_guard.py','codex_model_policy.py','lane_b_identities.json') {
   # codex_model_policy.py added 10 Sep 2026 (Priority 4, touchpoint-3 Codex
   # review finding) -- lane_b_call1.py now imports it; without refreshing it
   # here alongside lane_b_call1.py, a refreshed lane_b_call1.py could import
@@ -372,40 +325,9 @@ if ($laneBDomain) {
   Remove-Item Env:\WI_LANE_B_CODEX_HOME_FAILOVER -ErrorAction SilentlyContinue
   Log "Lane B: cleared any ambient CODEX_HOME/WI_LANE_B_CODEX_HOME(_FAILOVER) from this process's environment before resolving identity (regression fix, 3 Sept 2026)"
 
-  if ($LaneBCodexHome -ne '') {
-    $env:CODEX_HOME           = $LaneBCodexHome
-    $env:WI_LANE_B_CODEX_HOME = $LaneBCodexHome
-    Log "Lane B: CODEX_HOME escape-hatch override -> $LaneBCodexHome (becomes lane_b_call1.py's PRIMARY; its own failover logic still applies on top)"
-  } else {
-    Log "Lane B: `$LaneBCodexHome not set (normal) -- lane_b_call1.py resolves its own primary(Edu)/failover(personal) identity and logs which one actually served each call"
-  }
+  Log "Lane B: lane_b_call1.py will load lane_b_identities.json and start each domain at ring position 1"
   Log "running: python lane_b_cal_guard.py --run --domain $laneBDomain"
 
-  # EDU PARKED -- Edu taken OUT of the active routing path entirely (14 Sept
-  # 2026, Kevin's explicit instruction, supersedes the 3 Sept "FAST-FAIL
-  # primary" block this replaces). Root problem with FAST-FAIL: it still
-  # ISSUED a real call against Edu every run (just with a short 45s/1-attempt
-  # budget) -- that only catches an explicit error/timeout return, not a call
-  # that never returns control at all. Confirmed live 14 Sept: this task hung
-  # 14+ minutes on `lane_b_cal_guard.py --run --domain both` right after
-  # resolving the Edu identity, never reaching the 45s fast-fail timeout or
-  # failover. `lane_b_call1.py`'s own `EDU_PARKED` switch (default ON) now
-  # makes `fetch_domain()` skip Edu completely -- zero subprocess launches
-  # against it, so there is structurally nothing left to hang on -- and calls
-  # PERSONAL directly using personal's own already-generous retry/timeout
-  # budget. The WI_LANE_B_PRIMARY_* fast-fail env vars below are no longer
-  # needed (Edu is never attempted, so there's no primary budget to tune) and
-  # have been removed from this script; they still work as env-var overrides
-  # if a future session sets WI_LANE_B_EDU_PARKED=0 and wants a bounded
-  # primary again.
-  #
-  # REVERT: set `$env:WI_LANE_B_EDU_PARKED = '0'` (or delete this whole
-  # explicit-set line so the process falls through to whatever the OS
-  # environment has) to restore Edu-primary/personal-failover behaviour.
-  # Kevin's stated intent is to revisit this ~1 Oct 2026 -- re-check with him
-  # before flipping it back rather than assuming the date alone is sufficient.
-  $env:WI_LANE_B_EDU_PARKED = '1'
-  Log "Lane B: Edu PARKED -- every domain calls PERSONAL directly as the sole identity this run, no attempt against Edu at all (set WI_LANE_B_EDU_PARKED=0 to revert)"
   & python -u (Join-Path $root 'lane_b_cal_guard.py') --run --domain $laneBDomain 2>&1 | Tee-Object -FilePath $log -Append
   $guardRc = $LASTEXITCODE
   Log "lane_b_cal_guard.py exit $guardRc"
@@ -528,10 +450,7 @@ if ($laneBDomain) {
 #     declined a kill-switch rework for mail; the SAME verb-based re-contamination
 #     guard already live for calendar/Teams (inside lane_b_call1.py itself) is the
 #     sole safety mechanism here too. Mail's fetch_mail_domain() always targets
-#     FAILOVER_CODEX_HOME directly regardless of ambient CODEX_HOME (see that
-#     function's own docstring), so the CODEX_HOME-clearing dance the calendar/
-#     Teams block does above is not needed here -- mail is not exposed to that
-#     regression class. --
+#     the configured identity ring; no ambient CODEX_HOME is used. --
 $LaneBMailGuardResult = 'not-run'
 $LaneBMailGuardDetail = ''
 if ($MailBackend -eq 'connector') {
