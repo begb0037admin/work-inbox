@@ -1130,7 +1130,7 @@ function _failedConnectorDomains(data){
   if(!refreshed||!domains) return [];
   return ['calendar','teams'].filter(key=>{
     const domain=domains[key];
-    const ts=domain&&_parseConnectorStatusTs(domain.ts);
+    const ts=domain&&_parseConnectorStatusTs(domain.ts||statusDoc.ts);
     return domain&&domain.status!=='ok'&&ts&&Math.abs(ts.getTime()-refreshed.getTime())<=2*60*60*1000;
   }).map(key=>labels[key]);
 }
