@@ -52,7 +52,7 @@ async function pushTicks(){
     wiNotify('Ticks not synced - local only. '+(e.message||''));
   }
 }
-function wiNotify(msg){
+function wiNotify(msg,actionLabel,action){
   let el=document.getElementById('wiToast');
   if(!el){
     el=document.createElement('div');
@@ -60,10 +60,28 @@ function wiNotify(msg){
     el.style.cssText='position:fixed;bottom:18px;right:18px;max-width:340px;background:#1a2740;color:#fff;padding:12px 16px;border-radius:10px;font-size:13px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.25);line-height:1.45';
     document.body.appendChild(el);
   }
-  el.textContent=msg;
+  el.replaceChildren(document.createTextNode(msg));
+  if(actionLabel&&typeof action==='function'){
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='wi-toast-action';btn.textContent=actionLabel;
+    btn.onclick=()=>{action();el.style.display='none';};
+    el.appendChild(btn);
+  }
   el.style.display='block';
   clearTimeout(el._t);
   el._t=setTimeout(()=>{el.style.display='none'},7000);
+}
+function wiAskConfirm(message,onConfirm){
+  let el=document.getElementById('wiConfirm');
+  if(!el){
+    el=document.createElement('div');el.id='wiConfirm';el.className='wi-confirm';
+    el.innerHTML='<div class="wi-confirm-card" role="dialog" aria-modal="true" aria-labelledby="wiConfirmText"><p id="wiConfirmText"></p><div><button type="button" class="btn" data-wi-cancel>Cancel</button><button type="button" class="btn btn-primary" data-wi-remove>Remove</button></div></div>';
+    document.body.appendChild(el);
+  }
+  el.querySelector('#wiConfirmText').textContent=message;
+  el.querySelector('[data-wi-cancel]').onclick=()=>el.classList.remove('open');
+  el.querySelector('[data-wi-remove]').onclick=()=>{el.classList.remove('open');onConfirm();};
+  el.classList.add('open');el.querySelector('[data-wi-cancel]').focus();
 }
 async function loadRemoteTicks(){
   try{
@@ -181,14 +199,15 @@ function purgeArchiveDay(di){
   const e=entries[di];
   if(!e) return;
   const items=getAllItemsForDay(e.data);
-  if(!confirm('Purge "'+e.dateStr+'" ('+items.length+' items)? This cannot be undone.')) return;
+  wiAskConfirm('Purge "'+e.dateStr+'" ('+items.length+' items)? This cannot be undone.',()=>{
   const store=getStore(), ticks=getTicks();
   delete store[e.key];
   Object.keys(ticks).filter(tk=>tk.startsWith(e.key+'_')).forEach(tk=>{delete ticks[tk];});
   saveStore(store);
   saveTicks(ticks);
   renderArchiveList();
-  alert('"'+e.dateStr+'" purged.');
+  wiNotify('"'+e.dateStr+'" purged.');
+  });
 }
 function exportArchiveMd(){
   const entries=getArchiveData();
@@ -223,7 +242,7 @@ function exportArchiveMd(){
 }
 function purgeOldTicks(){
   const days=parseInt(document.getElementById('purgeDays').value)||30;
-  if(!confirm('Purge all briefings and ticks older than '+days+' days? This cannot be undone.')) return;
+  wiAskConfirm('Purge all briefings and ticks older than '+days+' days? This cannot be undone.',()=>{
   const cutoff=new Date();
   cutoff.setDate(cutoff.getDate()-days);
   const store=getStore(), ticks=getTicks();
@@ -241,7 +260,8 @@ function purgeOldTicks(){
   saveStore(store);
   saveTicks(ticks);
   renderArchiveList();
-  alert('Purge complete.');
+  wiNotify('Purge complete.');
+  });
 }
 function loadFromImport(){
   const raw=document.getElementById('importInput').value.trim();
@@ -256,9 +276,10 @@ function loadFromImport(){
   renderBriefing(data,key);
 }
 function clearToday(){
-  if(!confirm('Clear today and return to seed data?')) return;
-  localStorage.removeItem(TODAY_KEY);
-  renderBriefing(SEED,'seed');
+  wiAskConfirm('Clear today and return to seed data?',()=>{
+    localStorage.removeItem(TODAY_KEY);
+    renderBriefing(SEED,'seed');
+  });
 }
 // Tick storage key -- day-independent and position-independent for any id
 // carrying a stable identity (the 'eid_'/'id_' prefix _priGetKey() below
@@ -273,7 +294,7 @@ function clearToday(){
 // swept up in an unrelated same-night full revert; reused verbatim here
 // rather than reinvented, since it was never the part that was wrong.
 function _tickStorageKey(id){
-  return (typeof id==='string'&&(id.indexOf('eid_')===0||id.indexOf('id_')===0)) ? id : (currentKey+'_'+id);
+  return (typeof id==='string'&&(id.indexOf('eid_')===0||id.indexOf('mid_')===0||id.indexOf('id_')===0)) ? id : (currentKey+'_'+id);
 }
 function toggleTick(id){
   const ticks=getTicks(), k=_tickStorageKey(id);
@@ -349,7 +370,18 @@ function _owaWebUrl(o){
   }
   return '';
 }
-function isTicked(id){if(!currentKey) return false; return !!getTicks()[_tickStorageKey(id)];}
+function isTicked(id,legacyKey){
+  if(!currentKey) return false;
+  const ticks=getTicks(), key=_tickStorageKey(id);
+  if(ticks[key]!==undefined) return !!ticks[key];
+  // Email cards used to be keyed by their title and scoped to the briefing
+  // date. Preserve that state when moving to message_id based identities.
+  if(legacyKey&&ticks[currentKey+'_'+legacyKey]===true){
+    ticks[key]=true; saveTicks(ticks);
+    return true;
+  }
+  return false;
+}
 function badge(text,type){return text?`<span class="badge badge-${type||'gray'}">${text}</span>`:''}
 
 function escapeHtml(text){
@@ -369,7 +401,7 @@ function sanitizeSub(text){
     .replace(/<https?:\/\/[^\s<>]*/gi, '')
     .replace(/<(?!\/?strong\b)[^>]*>/gi, '')
     .replace(/<(?!\/?strong\b)[^>]*$/gi, '')
-    .replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' ');
+    .replace(/\r\n/g,'\n').replace(/\r/g,'\n');
 }
 
 function renderItems(items,cls){
@@ -504,6 +536,7 @@ function _priGetLegacyTitleKey(p){return(p.title||p.text||p.subject||'').toLower
 function _priGetKey(p){
   if(p.entry_id) return 'eid_'+p.entry_id;
   if(p.entryId) return 'eid_'+p.entryId;
+  if(p.message_id) return 'mid_'+p.message_id;
   if(p.id) return 'id_'+p.id;
   return _priGetLegacyTitleKey(p);
 }
@@ -545,7 +578,7 @@ function applyPriOverrides(data){
   // Array.prototype.sort is spec-guaranteed stable, so multiple new items
   // arriving in the same pull keep their relative merge order among
   // themselves at the top, they don't get shuffled.
-  for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>(om[a._priKey]??-1)-(om[b._priKey]??-1));}}
+  for(const s of validSecs){if(ord[s]&&ord[s].length){const om={};ord[s].forEach((k,i)=>om[k]=i);secs[s].sort((a,b)=>{const ak=om[a._priKey]??om[_priGetLegacyTitleKey(a)]??-1;const bk=om[b._priKey]??om[_priGetLegacyTitleKey(b)]??-1;return ak-bk;});}}
   return secs;
 }
 
@@ -908,7 +941,9 @@ function _priRenderOneCard(p,sec){
   const _mo2={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
   function _firstActionDate(actions){if(!actions||!actions.length)return null;const m=actions[0].match(/^\[(\d{1,2}) (\w{3}) (\d{4})\]/);if(!m)return null;return new Date(parseInt(m[3]),_mo2[m[2]],parseInt(m[1]),12,0,0);}
   const priKey=p._priKey||_priGetKey(p);
-  const id=priKey, ticked=isTicked(id);
+  const id=priKey, legacyKey=_priGetLegacyTitleKey(p), ticks=getTicks();
+  const ticked=isTicked(id,legacyKey);
+  if(ticks['del_'+_tickStorageKey(id)]) return '';
   const titleText=(p.title||p.text||'(untitled)').replace(' -- ',' — ');
   const aiBadge=(p.badge&&sec!=='pfyi')?badge(p.badge,p.badgeType||'gray'):'';
   const createdDate=p.dateAdded?new Date(p.dateAdded+'T12:00:00'):_firstActionDate(p.actions);
@@ -952,6 +987,29 @@ function _priRenderOneCard(p,sec){
       </div>
       <div class="card-ph-actions">${theBadge}${staleBadge}${emailBtn}${ccBtn}</div>
     </div>`;
+}
+// Dashboard card actions and drawers. Defined here deliberately after the
+// legacy renderer so all current board renders use this Sortable-era markup.
+const PRI_EXPANDED_KEY='workInbox_expanded_v1';
+let _priSortables=[],_priDragging=false,_priDeferredRender=false,_priDragEndedAt=0,_priBeforeLayout=null;
+function _priExpanded(){try{return new Set(JSON.parse(localStorage.getItem(PRI_EXPANDED_KEY)||'[]'));}catch(e){return new Set();}}
+function _priIsExpanded(id){return _priExpanded().has(id);}
+function _priSaveExpanded(ids){try{localStorage.setItem(PRI_EXPANDED_KEY,JSON.stringify([...ids]));}catch(e){}}
+function priToggleExpanded(e,id){if(e)e.stopPropagation();if(Date.now()-_priDragEndedAt<250)return;const x=_priExpanded();x.has(id)?x.delete(id):x.add(id);_priSaveExpanded(x);renderBriefing(window._wipData,window._wipKey);}
+function priArchive(e,id){if(e)e.stopPropagation();const t=getTicks(),k=_tickStorageKey(id),old=!!t[k];t[k]=true;saveTicks(t);wiNotify('Marked handled','Undo',()=>{const q=getTicks();q[k]=old;saveTicks(q);renderBriefing(window._wipData,window._wipKey);});renderBriefing(window._wipData,window._wipKey);}
+function priRestore(e,id){if(e)e.stopPropagation();const t=getTicks(),k=_tickStorageKey(id);t[k]=false;saveTicks(t);renderBriefing(window._wipData,window._wipKey);}
+function priDelete(e,id){if(e)e.stopPropagation();wiAskConfirm('Remove this card from the dashboard permanently?',()=>{const t=getTicks(),k=_tickStorageKey(id),del='del_'+k,oldDel=!!t[del],oldTick=!!t[k];t[del]=true;if(k.indexOf('eid_')===0||k.indexOf('mid_')===0)t[k]=true;saveTicks(t);wiNotify('Removed','Undo',()=>{const q=getTicks();q[del]=false;q[k]=oldTick;saveTicks(q);renderBriefing(window._wipData,window._wipKey);});renderBriefing(window._wipData,window._wipKey);});}
+function priRename(e,id){if(e)e.stopPropagation();const card=document.getElementById('item_'+id),title=card&&card.querySelector('[data-pri-title]');if(!title)return;const old=title.textContent,input=document.createElement('input');input.className='title-edit-input';input.value=old;title.replaceWith(input);input.focus();input.select();let done=false;const finish=save=>{if(done)return;done=true;input.onblur=null;if(save){const t=getTicks(),k='title_'+_tickStorageKey(id);t[k]=input.value.trim();saveTicks(t);}renderBriefing(window._wipData,window._wipKey);};input.onkeydown=ev=>{if(ev.key==='Enter')finish(true);if(ev.key==='Escape')finish(false);};input.onblur=()=>finish(true);}
+function _priSvg(path){return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg>`;}
+function _priRenderOneCard(p,sec){
+  const id=p._priKey||_priGetKey(p), legacy=_priGetLegacyTitleKey(p), ticks=getTicks(), key=_tickStorageKey(id), ticked=isTicked(id,legacy);
+  if(ticks['del_'+key])return '';
+  const title=(ticks['title_'+key]!==undefined?ticks['title_'+key]:(p.title||p.text||'(untitled)'));
+  const expanded=_priIsExpanded(id), panel='pridetail_'+id.replace(/[^a-zA-Z0-9_-]/g,'_'), email=_owaWebUrl(p);
+  const emailButton=email?`<button type="button" class="card-icon" aria-label="Open email" data-weburl="${escapeHtml(email)}" onclick="openEmailWeb(event,this)">${_priSvg('M3 5h18v14H3z M3 6l9 7 9-7')}</button>`:`<span class="card-icon card-icon-placeholder" aria-hidden="true"></span>`;
+  const archive=ticked?`<button type="button" class="card-icon" aria-label="Restore" onclick="priRestore(event,'${id}')">${_priSvg('M5 12a7 7 0 1 0 2-5 M5 4v4h4')}</button>`:`<button type="button" class="card-icon" aria-label="Archive" onclick="priArchive(event,'${id}')">${_priSvg('M4 7h16v13H4z M3 4h18v3H3z M9 11h6')}</button>`;
+  const detail=p.id?`${p.description?`<div class="pri-detail-label">Description</div><div class="pri-detail-text">${escapeHtml(p.description)}</div>`:''}${p.actions&&p.actions.length?`<div class="pri-detail-label">Actions</div><div class="pri-detail-text">${p.actions.slice().reverse().map(escapeHtml).join('\n')}</div>`:''}`:`${p.ai_summary?`<div class="pri-detail-label">Summary</div><div class="pri-detail-text">${escapeHtml(p.ai_summary)}</div>`:''}${p.sub?`<div class="pri-detail-text">${sanitizeSub(p.sub)}</div>`:''}<div class="pri-detail-meta">${p.from?`From: ${escapeHtml(p.from)}\n`:''}${p.received?`Received: ${escapeHtml(p.received)}`:''}</div>`;
+  return `<div class="card-ph${ticked?' done':''}${ticked&&!showingDoneItems?' card-hidden':''}" id="item_${id}" data-prikey="${id}" data-sec="${sec}"><span class="card-drag">&#10783;</span><div class="card-ph-body" onclick="priToggleExpanded(event,'${id}')"><div class="card-ph-title${ticked?' done':''}" data-pri-title>${escapeHtml(title)}</div>${p.source||p.ai_summary?`<div class="card-ph-sub">${sanitizeSub(p.source||p.ai_summary)}</div>`:''}</div><div class="card-ph-actions">${p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','wi-cc-task-view');event.stopPropagation()">CC&#8594;</span>`:''}<div class="card-actions"><button type="button" class="card-icon drawer-chevron" aria-label="${expanded?'Collapse':'Expand'}" aria-expanded="${expanded}" aria-controls="${panel}" onclick="priToggleExpanded(event,'${id}')">${_priSvg(expanded?'M6 9l6 6-6':'M9 6l6 6-6 6')}</button><div class="card-action-grid">${archive}<button type="button" class="card-icon" aria-label="Delete" onclick="priDelete(event,'${id}')">${_priSvg('M5 7h14 M9 7V4h6v3 M7 7l1 13h8l1-13 M10 11v5 M14 11v5')}</button>${emailButton}<button type="button" class="card-icon" aria-label="Edit" onclick="priRename(event,'${id}')">${_priSvg('M4 17.5V20h2.5L18 8.5 15.5 6z M14.5 7l2.5 2.5')}</button></div></div></div><div class="pri-detail${expanded?' open':''}" id="${panel}">${detail}</div></div>`;
 }
 function _priZonePlaceholderHtml(sec){return sec==='pfyi'?'Drop items here to park':'Drop items here';}
 function renderPriorityCards(priorities,key,sec){
@@ -1096,6 +1154,8 @@ function renderStaleBanner(data){
 }
 
 function renderBriefing(data,key){
+  if(_priDragging){_priDeferredRender=true;return;}
+  _priSortables.forEach(s=>s.destroy());_priSortables=[];
   currentData=data; currentKey=key;
   window._wipData=data; window._wipKey=key;
   document.getElementById('pageTitle').textContent=getGreeting();
@@ -1123,33 +1183,34 @@ function renderBriefing(data,key){
     <div id="col-left">
       <div id="sec-urgent-wrap">
         ${_secHeadHtml('ur','dot-r','Urgent – action required today',priSecs.ur.length)}
-        <div class="pri-drop-zone" data-sec="ur" ondragover="priZoneDragOver(event,'ur')" ondragleave="priZoneDragLeave(event,'ur')" ondrop="priZoneDrop(event,'ur')">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" data-sec="ur">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-tomorrow-wrap" style="margin-top:18px">
         ${_secHeadHtml('ptom','dot-o','Priority actions – tomorrow',priSecs.ptom.length)}
-        <div class="pri-drop-zone" data-sec="ptom" ondragover="priZoneDragOver(event,'ptom')" ondragleave="priZoneDragLeave(event,'ptom')" ondrop="priZoneDrop(event,'ptom')">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" data-sec="ptom">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-week-wrap" style="margin-top:18px">
         ${_secHeadHtml('pw','dot-green','Priority actions – this week',priSecs.pw.length)}
-        <div class="pri-drop-zone" data-sec="pw" ondragover="priZoneDragOver(event,'pw')" ondragleave="priZoneDragLeave(event,'pw')" ondrop="priZoneDrop(event,'pw')">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" data-sec="pw">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
     </div>
     <div id="col-right">
       <div id="sec-today-wrap">
         ${_secHeadHtml('pt','dot-r','Priority actions – today',priSecs.pt.length)}
-        <div class="pri-drop-zone" data-sec="pt" ondragover="priZoneDragOver(event,'pt')" ondragleave="priZoneDragLeave(event,'pt')" ondrop="priZoneDrop(event,'pt')">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" data-sec="pt">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-needs-wrap" style="margin-top:18px">
         ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priSecs.nr.length)}
-        <div class="pri-drop-zone" data-sec="nr" ondragover="priZoneDragOver(event,'nr')" ondragleave="priZoneDragLeave(event,'nr')" ondrop="priZoneDrop(event,'nr')">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" data-sec="nr">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-parked-wrap" style="margin-top:18px">
         ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length,typeof data.fyiRawCount==='number'?data.fyiRawCount:undefined)}
-        <div class="pri-drop-zone" data-sec="pfyi" ondragover="priZoneDragOver(event,'pfyi')" ondragleave="priZoneDragLeave(event,'pfyi')" ondrop="priZoneDrop(event,'pfyi')">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
+        <div class="pri-drop-zone" data-sec="pfyi">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
       </div>
     </div>
   </div>`;
   ['pt','ptom','ur','pw','nr','pfyi'].forEach(sec=>applySecCollapse(sec,!!getCollapsedSecs()[sec]));
+  _priInitSortables();
   _runCardSearch();
 }
 
@@ -1230,8 +1291,11 @@ function _secHeadHtml(sec,dotClass,label,count,rawCount){
     : String(count);
   return '<div class="sec-head" onclick="toggleSecCollapse(\''+sec+'\')" style="cursor:pointer;user-select:none">'
     +'<span class="sec-chev" id="chev_'+sec+'" style="display:inline-block;width:14px;color:var(--text-muted);font-size:11px">&#9662;</span>'
-    +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span></div>';
+    +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span><button type="button" class="expand-all" onclick="event.stopPropagation();priExpandSection(\''+sec+'\')">Expand all</button></div>';
 }
+function priExpandSection(sec){const ids=_priExpanded(),cards=[...document.querySelectorAll(`.pri-drop-zone[data-sec="${sec}"] .card-ph`)];const all=cards.length&&cards.every(c=>ids.has(c.dataset.prikey));cards.forEach(c=>all?ids.delete(c.dataset.prikey):ids.add(c.dataset.prikey));_priSaveExpanded(ids);renderBriefing(window._wipData,window._wipKey);}
+function _priSnapshot(){const order={};document.querySelectorAll('.pri-drop-zone').forEach(z=>order[z.dataset.sec]=[...z.querySelectorAll('.card-ph')].map(c=>c.dataset.prikey));return order;}
+function _priInitSortables(){if(!window.Sortable)return;document.querySelectorAll('.pri-drop-zone').forEach(zone=>{zone.addEventListener('dragover',e=>{if(_emailDragData)e.preventDefault();});zone.addEventListener('drop',e=>{if(!_emailDragData)return;e.preventDefault();const d=_emailDragData;_addEmailCardToPriority(d.item,d.cls,zone.dataset.sec);_emailDragData=null;renderBriefing(window._wipData,window._wipKey);wiNotify('Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[zone.dataset.sec]||zone.dataset.sec));});_priSortables.push(new Sortable(zone,{group:'work-inbox-priorities',animation:150,forceFallback:true,fallbackOnBody:true,ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',dragClass:'sortable-fallback',filter:'.pri-zone-empty,button,a,.drawer-chevron',preventOnFilter:false,delay:150,delayOnTouchOnly:true,onStart:()=>{_priDragging=true;_priBeforeLayout={order:_priSnapshot(),overrides:_priGetOverrides()};},onEnd:evt=>{const from=evt.from.dataset.sec,to=evt.to.dataset.sec,id=evt.item&&evt.item.dataset.prikey;_priDragging=false;_priDragEndedAt=Date.now();if(evt.oldIndex===evt.newIndex&&from===to){if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}return;}const before=_priBeforeLayout;const now=_priSnapshot();_priSetOrder(now.pt,now.ptom,now.pw,now.pfyi,now.ur,now.nr);if(id&&from!==to)_priSetOverride(id,to);renderBriefing(window._wipData,window._wipKey);wiNotify(from!==to?'Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[to]||to):'Order saved','Undo',()=>{if(before){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify(before.order));localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(before.overrides));renderBriefing(window._wipData,window._wipKey);}});_priBeforeLayout=null;if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}}}));});}
 
 function toggleSum(id,btn){const el=document.getElementById(id);const exp=el.classList.toggle('expanded');btn.textContent=exp?'Show less':'Show more';}
 
