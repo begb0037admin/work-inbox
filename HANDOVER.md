@@ -1,3 +1,17 @@
+# Handover -- 24 September 2026 (Drew) -- DIAGNOSIS ONLY: dashboards stale since Mon 21 Sep 12:25 (no code/task change)
+
+**Root cause: the only pipeline runner, the Oxford laptop `101L-DE013193`, has been offline since Mon 21 Sep ~16:36.** Evidence, checked live 24 Sep ~10:30 BST:
+- Last laptop commit to this repo is `d909ef1` (21 Sep 16:36, draftdiff run-status). Last briefing is `1fbf1ca` / `data/laptop_status/briefing_status.json` ts `2026-09-21T12:25:39+01:00`, result ok. Nothing from the laptop on 22, 23 or 24 Sep, not even the draftdiff status push that normally follows every scheduled fire, so the scheduled tasks are not running (machine off, asleep or signed out).
+- `ssh oxford-lan`: `101l-de013193.local` doesn't resolve. `ssh oxford` (Tailscale 100.75.69.98): times out, and the laptop isn't listed in `tailscale status` at all. LAN scan of port 22: the only hosts that answered were the Desktop and two other machines, and neither accepts the Oxford key.
+- Desktop `Work Inbox Briefing` / `Draft Diff Capture` tasks are Disabled by design (the laptop is the connector-proven runner; the Desktop connector path is still unproven, see the 16 Sep scoping). COM/IMAP are retired, so there's no fallback runner.
+- **Fix:** the laptop has to be powered on and signed in as AD-OAK\begb0037. The tasks then resume on their own at the next 07:00/12:00/16:00 fire, and the wrapper self-refreshes code from main. No agent can do this remotely. The Edu identity is parked until 1 Oct and is not the cause here: 21 Sep's run served calendar via failover, ok.
+
+**"Mail fetch hit its message cap" banner: a separate, real issue, unchanged since 15 Sep.** `mail_truncation_risk` has been `true` on every briefing since 15 Sep. `lane_b_call1.py` flags it whenever the read pass returns `>= WI_LANE_B_MAIL_MAX_READ` (default 30) or unread `>= 50`. Kevin's inbox always has more than 30 read messages in the window, so the cap binds on every run and older read mail in the window can be dropped. **Proposed fix (not built; Codex was out on both accounts 24 Sep until ~14:39):** raise the read cap default to 100 in `lane_b_call1.py` (the Drafts pull shows the connector pages at 200, so 100 stays in one page). It self-deploys via the wrapper's refresh-from-main. It can only be proven on the laptop's next run.
+
+Also seen, separate: `draftdiff_status.json` fails every run with `ConnectorResultIncomplete: Drafts: list_messages returned a continuation link; refusing a partial pull` (Drafts > 200 items). Not in scope today; recorded so it isn't mistaken for the staleness cause.
+
+---
+
 # Handover -- 21 September 2026 (Drew) -- docs-only: stale Desktop paths corrected after Kevin's folder reorg (no code, no scheduled-task, no production change)
 
 Relayed by the coordinator from Max's `memory/desktop-documents-tidy-2026-09-21.md` (verified live before editing). Corrected: (1) the drafted-open-original-fix screenshots now live at `C:\Users\admin\Documents\Media & Screenshots\drafted-open-original-fix-20260827\` (was `Desktop`); (2) the manual tools `Re-auth Work Inbox IMAP.bat` / `Run Mail Parity Test.bat` (and the other manual `.bat`s) are at `C:\Users\admin\Documents\Manual Tools\` (moved 5 Sep, not on Desktop) -- fixed in the two `docs/desktop-scripts/` header comments, `docs/MAIL_BACKEND_MIGRATION_PLAN.md`, and the 28-30 Aug entries below. Everything else on the Desktop root (the scheduled-task-called automation scripts) is unchanged and was not touched. The status in the entry immediately below is unchanged and still current as of that entry.
