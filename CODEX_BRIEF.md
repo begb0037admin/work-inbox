@@ -1,16 +1,27 @@
-# Codex brief — raise the Lane B inbox read cap 30 → 100 (small)
+# Codex brief — work-inbox: single section toggle (Kevin, 24 Sep)
 
-Branch `drew/wi-mail-read-cap-100`. Only touch `lane_b_call1.py` and `HANDOVER.md`. Do not read
-other repos, `data/`, `Archive/` or `js/`. Commit locally; no push; short final message.
+Branch `drew/wi-cc-label-and-columns` (HEAD `be713fb`). Work only in C:/Users/admin/github/work-inbox. Only touch `js/app.js`, `css/styles.css`, `HANDOVER.md`. Don't read other repos, `data/`, `Archive/`, `js/vendor/`. Keep UTF-8 intact. Commit locally; no push; short final message.
 
-Why: `mail_truncation_risk` has been true on every briefing since 15 Sep — the read pass returns
-exactly `WI_LANE_B_MAIL_MAX_READ` (default 30) every run, so older in-window read mail is dropped
-and the dashboard shows "Mail fetch may be incomplete". The connector pages at 200 (see
-`draft_diff_connector.py`), so 100 stays within one page.
+Existing code: `getCollapsedSecs()`/`toggleSecCollapse()`/`applySecCollapse()` (`workInbox_collapsedSecs_v1`, header onclick + arrow), and `priExpandSection()` + the `.expand-all` header buttons (bulk drawer expand — remove).
 
-1. `lane_b_call1.py`: change the default of `WI_LANE_B_MAIL_MAX_READ` from `"30"` to `"100"`
-   (env override unchanged). Update the nearby comments that state the old number (e.g. the
-   "(30)" in the 14 Sep rewrite comment) so they don't mislead, noting the 24 Sep change and why.
-2. `python -m py_compile lane_b_call1.py`.
-3. Short entry at the top of `HANDOVER.md` (what/why, how to revert: set the default back to 30 or
-   set `WI_LANE_B_MAIL_MAX_READ=30` in the wrapper env).
+## Kevin's rule (24 Sep, final): ONE section toggle per section — no bulk card expand
+Kevin: "I would expect it to expand the section and click it again to collapse the section... not
+expand the already opened tiles and show me the information. I can do that with whichever tile I
+want to read."
+- Replace the per-section "Expand all"/"Collapse all" (which bulk-opens card drawers) with a
+  SECTION toggle button in the section header. Label: **"Collapse"** when the section is open,
+  **"Expand"** when it is folded. Clicking folds/unfolds the whole section (all its cards hidden /
+  shown). Merge it with the existing section-fold mechanism (reuse the existing remembered
+  collapse state and storage key so Kevin's current folded/open choices carry over) so there is
+  ONE clear control per section: remove the separate small fold chevron/arrow glyph (or put the
+  glyph inside the same button, e.g. "Collapse ▾" / "Expand ▸"). Clicking the header row itself
+  may keep toggling the same state, but the button is the visible control and its label must
+  always match the state (after reload, drag, re-render, and header click).
+- When folded, keep the header showing the section name and its card count, so it's obvious the
+  section has hidden cards.
+- Remove the bulk card-drawer expand function and its button entirely. Each card's own › still
+  opens/closes that card's details, remembered per card as now.
+- Button: `type="button"`, `aria-expanded` true/false, `aria-controls` the section's list,
+  keyboard Enter/Space, `event.stopPropagation()` so it doesn't double-toggle with the header.
+
+Checks: `node --check js/app.js`; UTF-8 non-ASCII unchanged. Top-of-HANDOVER entry.

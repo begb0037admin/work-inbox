@@ -4,6 +4,33 @@ Raised `WI_LANE_B_MAIL_MAX_READ`'s default in `lane_b_call1.py` from 30 to 100. 
 
 ---
 
+
+# Handover -- 24 September 2026 ~19:30 (Drew) -- section Collapse/Expand toggle + CC label + responsive columns LIVE (PR #39, main `4ac97f1`)
+
+- Kevin's rule (24 Sep): ONE section toggle per section labelled Collapse/Expand that folds the whole section (state remembered); NO bulk card-drawer expand -- each card's own › opens its details. Verified live 1440+1100px from folded/open/drawer-open state: 88/88 checks across all three boards, no page errors.
+- CC button shows 'CC' (Kevin's exact fix), fits its 26px slot. Two columns now fit/stack (right column no longer clipped at 1100px: right edge 1064 < 1100).
+- Rollback: revert PR #39 on main (static redeploy).
+
+---
+
+# Handover -- 24 September 2026 (Codex) -- single section collapse control
+
+Implemented the `CODEX_BRIEF.md` section-toggle change: each priorities header now has one accessible Collapse/Expand button controlling that section's card list, backed by the existing `workInbox_collapsedSecs_v1` state. Removed bulk card-drawer expansion and the separate fold chevron; card drawers remain individual and persistent. Checks: `node --check js/app.js` and `git diff --check`.
+
+---
+
+# Handover -- 24 September 2026 (Codex) -- CC control fit + responsive priority columns
+
+Implemented the `CODEX_BRIEF.md` layout fixes: the priority-card Command Centre control now shares the fixed 26px action geometry, with a compact clipped `CC→` label and unchanged accessible name. The priorities grid now uses shrinkable columns and stacks when the main content container is below 900px, preventing right-column clipping without changing the desktop layout. No data, pipeline, mailbox or deployment action was taken. Checks: `node --check js/app.js` and `git diff --check`.
+
+---
+
+# Handover -- 24 September 2026 (Codex) -- urgent card layout + Expand all hotfix
+
+Implemented the dashboard-only card layout hotfix from `CODEX_BRIEF.md`: priority card headers now keep title/meta separate from a fixed 3x2 action grid, expanded details occupy a full-width wrapping row, and the Command Centre control is a fixed-size second-row action with placeholders on cards that lack it. Section controls now recompute between `Expand all` and `Collapse all` from visible cards on every render and persist through `workInbox_expanded_v1`. No pipeline, data, mailbox or deployment action was taken. Checks: `node --check js/app.js` and `git diff --check`.
+
+---
+
 # Handover -- 24 September 2026 (Drew) -- dashboard: tracker-identical drag + 2x2 card actions + expand/collapse DEPLOYED LIVE, verified
 
 Kevin approved build + deploy (24 Sep, via Jacob). Dashboard only; no pipeline, mailbox, Graph, COM, IMAP or connector change. Codex (default account) built `04e6ec0` plus the rename-blur fix `1fd5574`; Drew vendored `js/vendor/Sortable.min.js` (1.15.6, sha256 `6dee1a4b…`, identical to command-centre's copy). The brief wrongly assumed it was already there, and the first browser test caught it (404, so drag was dead). Merged PR #37 (`dec6ac1`); wi.lelitte.co.uk served `app.js` byte-identical to main.
@@ -9717,6 +9744,7 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 - **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
+
 
 
 

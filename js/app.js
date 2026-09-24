@@ -1007,9 +1007,10 @@ function _priRenderOneCard(p,sec){
   const title=(ticks['title_'+key]!==undefined?ticks['title_'+key]:(p.title||p.text||'(untitled)'));
   const expanded=_priIsExpanded(id), panel='pridetail_'+id.replace(/[^a-zA-Z0-9_-]/g,'_'), email=_owaWebUrl(p);
   const emailButton=email?`<button type="button" class="card-icon" aria-label="Open email" data-weburl="${escapeHtml(email)}" onclick="openEmailWeb(event,this)">${_priSvg('M3 5h18v14H3z M3 6l9 7 9-7')}</button>`:`<span class="card-icon card-icon-placeholder" aria-hidden="true"></span>`;
+  const ccButton=p.id?`<button type="button" class="card-icon card-icon-cc" title="Open in Command Centre" aria-label="Open in Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','wi-cc-task-view');event.stopPropagation()">CC</button>`:`<span class="card-icon card-icon-placeholder" aria-hidden="true"></span>`;
   const archive=ticked?`<button type="button" class="card-icon" aria-label="Restore" onclick="priRestore(event,'${id}')">${_priSvg('M5 12a7 7 0 1 0 2-5 M5 4v4h4')}</button>`:`<button type="button" class="card-icon" aria-label="Archive" onclick="priArchive(event,'${id}')">${_priSvg('M4 7h16v13H4z M3 4h18v3H3z M9 11h6')}</button>`;
   const detail=p.id?`${p.description?`<div class="pri-detail-label">Description</div><div class="pri-detail-text">${escapeHtml(p.description)}</div>`:''}${p.actions&&p.actions.length?`<div class="pri-detail-label">Actions</div><div class="pri-detail-text">${p.actions.slice().reverse().map(escapeHtml).join('\n')}</div>`:''}`:`${p.ai_summary?`<div class="pri-detail-label">Summary</div><div class="pri-detail-text">${escapeHtml(p.ai_summary)}</div>`:''}${p.sub?`<div class="pri-detail-text">${sanitizeSub(p.sub)}</div>`:''}<div class="pri-detail-meta">${p.from?`From: ${escapeHtml(p.from)}\n`:''}${p.received?`Received: ${escapeHtml(p.received)}`:''}</div>`;
-  return `<div class="card-ph${ticked?' done':''}${ticked&&!showingDoneItems?' card-hidden':''}" id="item_${id}" data-prikey="${id}" data-sec="${sec}"><span class="card-drag">&#10783;</span><div class="card-ph-body" onclick="priToggleExpanded(event,'${id}')"><div class="card-ph-title${ticked?' done':''}" data-pri-title>${escapeHtml(title)}</div>${p.source||p.ai_summary?`<div class="card-ph-sub">${sanitizeSub(p.source||p.ai_summary)}</div>`:''}</div><div class="card-ph-actions">${p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','wi-cc-task-view');event.stopPropagation()">CC&#8594;</span>`:''}<div class="card-actions"><button type="button" class="card-icon drawer-chevron" aria-label="${expanded?'Collapse':'Expand'}" aria-expanded="${expanded}" aria-controls="${panel}" onclick="priToggleExpanded(event,'${id}')">${_priSvg(expanded?'M6 9l6 6-6':'M9 6l6 6-6 6')}</button><div class="card-action-grid">${archive}<button type="button" class="card-icon" aria-label="Delete" onclick="priDelete(event,'${id}')">${_priSvg('M5 7h14 M9 7V4h6v3 M7 7l1 13h8l1-13 M10 11v5 M14 11v5')}</button>${emailButton}<button type="button" class="card-icon" aria-label="Edit" onclick="priRename(event,'${id}')">${_priSvg('M4 17.5V20h2.5L18 8.5 15.5 6z M14.5 7l2.5 2.5')}</button></div></div></div><div class="pri-detail${expanded?' open':''}" id="${panel}">${detail}</div></div>`;
+  return `<div class="card-ph${ticked?' done':''}${ticked&&!showingDoneItems?' card-hidden':''}" id="item_${id}" data-prikey="${id}" data-sec="${sec}"><div class="card-ph-header"><span class="card-drag">&#10783;</span><div class="card-ph-body" onclick="priToggleExpanded(event,'${id}')"><div class="card-ph-title${ticked?' done':''}" data-pri-title>${escapeHtml(title)}</div>${p.source||p.ai_summary?`<div class="card-ph-sub">${sanitizeSub(p.source||p.ai_summary)}</div>`:''}</div><div class="card-ph-actions"><div class="card-action-grid"><button type="button" class="card-icon drawer-chevron" aria-label="${expanded?'Collapse':'Expand'}" aria-expanded="${expanded}" aria-controls="${panel}" onclick="priToggleExpanded(event,'${id}')">${_priSvg(expanded?'M6 9l6 6-6':'M9 6l6 6-6 6')}</button>${archive}<button type="button" class="card-icon" aria-label="Delete" onclick="priDelete(event,'${id}')">${_priSvg('M5 7h14 M9 7V4h6v3 M7 7l1 13h8l1-13 M10 11v5 M14 11v5')}</button>${ccButton}${emailButton}<button type="button" class="card-icon" aria-label="Edit" onclick="priRename(event,'${id}')">${_priSvg('M4 17.5V20h2.5L18 8.5 15.5 6z M14.5 7l2.5 2.5')}</button></div></div></div><div class="pri-detail${expanded?' open':''}" id="${panel}">${detail}</div></div>`;
 }
 function _priZonePlaceholderHtml(sec){return sec==='pfyi'?'Drop items here to park':'Drop items here';}
 function renderPriorityCards(priorities,key,sec){
@@ -1183,29 +1184,29 @@ function renderBriefing(data,key){
     <div id="col-left">
       <div id="sec-urgent-wrap">
         ${_secHeadHtml('ur','dot-r','Urgent – action required today',priSecs.ur.length)}
-        <div class="pri-drop-zone" data-sec="ur">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-ur" data-sec="ur">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-tomorrow-wrap" style="margin-top:18px">
         ${_secHeadHtml('ptom','dot-o','Priority actions – tomorrow',priSecs.ptom.length)}
-        <div class="pri-drop-zone" data-sec="ptom">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-ptom" data-sec="ptom">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-week-wrap" style="margin-top:18px">
         ${_secHeadHtml('pw','dot-green','Priority actions – this week',priSecs.pw.length)}
-        <div class="pri-drop-zone" data-sec="pw">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-pw" data-sec="pw">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
     </div>
     <div id="col-right">
       <div id="sec-today-wrap">
         ${_secHeadHtml('pt','dot-r','Priority actions – today',priSecs.pt.length)}
-        <div class="pri-drop-zone" data-sec="pt">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-pt" data-sec="pt">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-needs-wrap" style="margin-top:18px">
         ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priSecs.nr.length)}
-        <div class="pri-drop-zone" data-sec="nr">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-nr" data-sec="nr">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-parked-wrap" style="margin-top:18px">
         ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length,typeof data.fyiRawCount==='number'?data.fyiRawCount:undefined)}
-        <div class="pri-drop-zone" data-sec="pfyi">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-pfyi" data-sec="pfyi">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
       </div>
     </div>
   </div>`;
@@ -1273,9 +1274,12 @@ function toggleSecCollapse(sec){
 }
 function applySecCollapse(sec,collapsed){
   const zone=document.querySelector('.pri-drop-zone[data-sec="'+sec+'"]');
-  const chev=document.getElementById('chev_'+sec);
+  const toggle=document.getElementById('section_toggle_'+sec);
   if(zone) zone.style.display=collapsed?'none':'';
-  if(chev) chev.innerHTML=collapsed?'&#9656;':'&#9662;';
+  if(toggle){
+    toggle.textContent=collapsed?'Expand':'Collapse';
+    toggle.setAttribute('aria-expanded',String(!collapsed));
+  }
 }
 function _secHeadHtml(sec,dotClass,label,count,rawCount){
   // rawCount (optional): the true pre-dedup message count, when it differs
@@ -1290,10 +1294,8 @@ function _secHeadHtml(sec,dotClass,label,count,rawCount){
     ? count+' threads <span class="sec-count-raw" style="font-weight:400;color:var(--text-muted)">('+rawCount+' messages)</span>'
     : String(count);
   return '<div class="sec-head" onclick="toggleSecCollapse(\''+sec+'\')" style="cursor:pointer;user-select:none">'
-    +'<span class="sec-chev" id="chev_'+sec+'" style="display:inline-block;width:14px;color:var(--text-muted);font-size:11px">&#9662;</span>'
-    +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span><button type="button" class="expand-all" onclick="event.stopPropagation();priExpandSection(\''+sec+'\')">Expand all</button></div>';
+     +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span><button type="button" class="section-toggle" id="section_toggle_'+sec+'" aria-expanded="true" aria-controls="pri-zone-'+sec+'" onclick="event.stopPropagation();toggleSecCollapse(\''+sec+'\')">Collapse</button></div>';
 }
-function priExpandSection(sec){const ids=_priExpanded(),cards=[...document.querySelectorAll(`.pri-drop-zone[data-sec="${sec}"] .card-ph`)];const all=cards.length&&cards.every(c=>ids.has(c.dataset.prikey));cards.forEach(c=>all?ids.delete(c.dataset.prikey):ids.add(c.dataset.prikey));_priSaveExpanded(ids);renderBriefing(window._wipData,window._wipKey);}
 function _priSnapshot(){const order={};document.querySelectorAll('.pri-drop-zone').forEach(z=>order[z.dataset.sec]=[...z.querySelectorAll('.card-ph')].map(c=>c.dataset.prikey));return order;}
 function _priInitSortables(){if(!window.Sortable)return;document.querySelectorAll('.pri-drop-zone').forEach(zone=>{zone.addEventListener('dragover',e=>{if(_emailDragData)e.preventDefault();});zone.addEventListener('drop',e=>{if(!_emailDragData)return;e.preventDefault();const d=_emailDragData;_addEmailCardToPriority(d.item,d.cls,zone.dataset.sec);_emailDragData=null;renderBriefing(window._wipData,window._wipKey);wiNotify('Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[zone.dataset.sec]||zone.dataset.sec));});_priSortables.push(new Sortable(zone,{group:'work-inbox-priorities',animation:150,forceFallback:true,fallbackOnBody:true,ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',dragClass:'sortable-fallback',filter:'.pri-zone-empty,button,a,.drawer-chevron',preventOnFilter:false,delay:150,delayOnTouchOnly:true,onStart:()=>{_priDragging=true;_priBeforeLayout={order:_priSnapshot(),overrides:_priGetOverrides()};},onEnd:evt=>{const from=evt.from.dataset.sec,to=evt.to.dataset.sec,id=evt.item&&evt.item.dataset.prikey;_priDragging=false;_priDragEndedAt=Date.now();if(evt.oldIndex===evt.newIndex&&from===to){if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}return;}const before=_priBeforeLayout;const now=_priSnapshot();_priSetOrder(now.pt,now.ptom,now.pw,now.pfyi,now.ur,now.nr);if(id&&from!==to)_priSetOverride(id,to);renderBriefing(window._wipData,window._wipKey);wiNotify(from!==to?'Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[to]||to):'Order saved','Undo',()=>{if(before){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify(before.order));localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(before.overrides));renderBriefing(window._wipData,window._wipKey);}});_priBeforeLayout=null;if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}}}));});}
 
