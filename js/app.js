@@ -1184,29 +1184,29 @@ function renderBriefing(data,key){
     <div id="col-left">
       <div id="sec-urgent-wrap">
         ${_secHeadHtml('ur','dot-r','Urgent – action required today',priSecs.ur.length)}
-        <div class="pri-drop-zone" data-sec="ur">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-ur" data-sec="ur">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-tomorrow-wrap" style="margin-top:18px">
         ${_secHeadHtml('ptom','dot-o','Priority actions – tomorrow',priSecs.ptom.length)}
-        <div class="pri-drop-zone" data-sec="ptom">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-ptom" data-sec="ptom">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-week-wrap" style="margin-top:18px">
         ${_secHeadHtml('pw','dot-green','Priority actions – this week',priSecs.pw.length)}
-        <div class="pri-drop-zone" data-sec="pw">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-pw" data-sec="pw">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
     </div>
     <div id="col-right">
       <div id="sec-today-wrap">
         ${_secHeadHtml('pt','dot-r','Priority actions – today',priSecs.pt.length)}
-        <div class="pri-drop-zone" data-sec="pt">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-pt" data-sec="pt">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-needs-wrap" style="margin-top:18px">
         ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priSecs.nr.length)}
-        <div class="pri-drop-zone" data-sec="nr">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-nr" data-sec="nr">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-parked-wrap" style="margin-top:18px">
         ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length,typeof data.fyiRawCount==='number'?data.fyiRawCount:undefined)}
-        <div class="pri-drop-zone" data-sec="pfyi">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
+        <div class="pri-drop-zone" id="pri-zone-pfyi" data-sec="pfyi">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
       </div>
     </div>
   </div>`;
@@ -1259,7 +1259,6 @@ function _runCardSearch(){
   });
   const countEl=document.getElementById('wiSearchCount');
   if(countEl) countEl.textContent=_wiSearchTerm?(totalMatched+' of '+totalCards+' match'+(totalCards===1?'':'es')):'';
-  _priUpdateExpandAllLabels();
 }
 
 // Collapse/expand per section (Urgent, Needs response, etc.) - state persists
@@ -1275,9 +1274,12 @@ function toggleSecCollapse(sec){
 }
 function applySecCollapse(sec,collapsed){
   const zone=document.querySelector('.pri-drop-zone[data-sec="'+sec+'"]');
-  const chev=document.getElementById('chev_'+sec);
+  const toggle=document.getElementById('section_toggle_'+sec);
   if(zone) zone.style.display=collapsed?'none':'';
-  if(chev) chev.innerHTML=collapsed?'&#9656;':'&#9662;';
+  if(toggle){
+    toggle.textContent=collapsed?'Expand':'Collapse';
+    toggle.setAttribute('aria-expanded',String(!collapsed));
+  }
 }
 function _secHeadHtml(sec,dotClass,label,count,rawCount){
   // rawCount (optional): the true pre-dedup message count, when it differs
@@ -1292,12 +1294,8 @@ function _secHeadHtml(sec,dotClass,label,count,rawCount){
     ? count+' threads <span class="sec-count-raw" style="font-weight:400;color:var(--text-muted)">('+rawCount+' messages)</span>'
     : String(count);
   return '<div class="sec-head" onclick="toggleSecCollapse(\''+sec+'\')" style="cursor:pointer;user-select:none">'
-    +'<span class="sec-chev" id="chev_'+sec+'" style="display:inline-block;width:14px;color:var(--text-muted);font-size:11px">&#9662;</span>'
-     +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span><button type="button" class="expand-all" data-sec="'+sec+'" onclick="event.stopPropagation();priExpandSection(\''+sec+'\')">Expand all</button></div>';
+     +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span><button type="button" class="section-toggle" id="section_toggle_'+sec+'" aria-expanded="true" aria-controls="pri-zone-'+sec+'" onclick="event.stopPropagation();toggleSecCollapse(\''+sec+'\')">Collapse</button></div>';
 }
-function _priVisibleCards(sec){return [...document.querySelectorAll(`.pri-drop-zone[data-sec="${sec}"] .card-ph`)].filter(card=>card.style.display!=='none'&&!card.classList.contains('card-hidden'));}
-function _priUpdateExpandAllLabels(){document.querySelectorAll('.expand-all').forEach(btn=>{const cards=_priVisibleCards(btn.dataset.sec),all=cards.length>0&&cards.every(card=>_priIsExpanded(card.dataset.prikey));btn.textContent=all?'Collapse all':'Expand all';});}
-function priExpandSection(sec){const ids=_priExpanded(),cards=_priVisibleCards(sec);if(!cards.length)return;const all=cards.every(c=>ids.has(c.dataset.prikey));cards.forEach(c=>all?ids.delete(c.dataset.prikey):ids.add(c.dataset.prikey));_priSaveExpanded(ids);renderBriefing(window._wipData,window._wipKey);}
 function _priSnapshot(){const order={};document.querySelectorAll('.pri-drop-zone').forEach(z=>order[z.dataset.sec]=[...z.querySelectorAll('.card-ph')].map(c=>c.dataset.prikey));return order;}
 function _priInitSortables(){if(!window.Sortable)return;document.querySelectorAll('.pri-drop-zone').forEach(zone=>{zone.addEventListener('dragover',e=>{if(_emailDragData)e.preventDefault();});zone.addEventListener('drop',e=>{if(!_emailDragData)return;e.preventDefault();const d=_emailDragData;_addEmailCardToPriority(d.item,d.cls,zone.dataset.sec);_emailDragData=null;renderBriefing(window._wipData,window._wipKey);wiNotify('Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[zone.dataset.sec]||zone.dataset.sec));});_priSortables.push(new Sortable(zone,{group:'work-inbox-priorities',animation:150,forceFallback:true,fallbackOnBody:true,ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',dragClass:'sortable-fallback',filter:'.pri-zone-empty,button,a,.drawer-chevron',preventOnFilter:false,delay:150,delayOnTouchOnly:true,onStart:()=>{_priDragging=true;_priBeforeLayout={order:_priSnapshot(),overrides:_priGetOverrides()};},onEnd:evt=>{const from=evt.from.dataset.sec,to=evt.to.dataset.sec,id=evt.item&&evt.item.dataset.prikey;_priDragging=false;_priDragEndedAt=Date.now();if(evt.oldIndex===evt.newIndex&&from===to){if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}return;}const before=_priBeforeLayout;const now=_priSnapshot();_priSetOrder(now.pt,now.ptom,now.pw,now.pfyi,now.ur,now.nr);if(id&&from!==to)_priSetOverride(id,to);renderBriefing(window._wipData,window._wipKey);wiNotify(from!==to?'Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[to]||to):'Order saved','Undo',()=>{if(before){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify(before.order));localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(before.overrides));renderBriefing(window._wipData,window._wipKey);}});_priBeforeLayout=null;if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}}}));});}
 

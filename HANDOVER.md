@@ -1,3 +1,9 @@
+# Handover -- 24 September 2026 (Codex) -- single section collapse control
+
+Implemented the `CODEX_BRIEF.md` section-toggle change: each priorities header now has one accessible Collapse/Expand button controlling that section's card list, backed by the existing `workInbox_collapsedSecs_v1` state. Removed bulk card-drawer expansion and the separate fold chevron; card drawers remain individual and persistent. Checks: `node --check js/app.js` and `git diff --check`.
+
+---
+
 # Handover -- 24 September 2026 (Codex) -- CC control fit + responsive priority columns
 
 Implemented the `CODEX_BRIEF.md` layout fixes: the priority-card Command Centre control now shares the fixed 26px action geometry, with a compact clipped `CC→` label and unchanged accessible name. The priorities grid now uses shrinkable columns and stacks when the main content container is below 900px, preventing right-column clipping without changing the desktop layout. No data, pipeline, mailbox or deployment action was taken. Checks: `node --check js/app.js` and `git diff --check`.
