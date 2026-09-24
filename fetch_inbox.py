@@ -313,7 +313,7 @@ def _load_lane_b_calendar(_week_end, _lookback):
               f"source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {cal_dom.get('tool_calls')})")
         return out
     except Exception as _lb_e:
-        CONNECTOR_STATUS["calendar"] = "n/a"
+        CONNECTOR_STATUS["calendar"] = "error"
         print(f"WARNING: Lane B calendar load failed ({_lb_e}) -- calendar empty this run, "
               f"mail briefing continues")
         return []
@@ -386,7 +386,7 @@ def _load_lane_b_teams():
               f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {teams_dom.get('tool_calls')})")
         return out
     except Exception as _lb_e:
-        CONNECTOR_STATUS["teams"] = "n/a"
+        CONNECTOR_STATUS["teams"] = "error"
         print(f"WARNING: Lane B Teams load failed ({_lb_e}) -- Teams section empty this run, "
               f"mail briefing continues")
         return []
@@ -510,8 +510,8 @@ def _load_lane_b_mail():
                   "-- an older in-window message may be missing from this briefing")
         return {"inbox": inbox, "sent": sent, "truncation_risk": trunc}
     except Exception as _lb_e:
-        CONNECTOR_STATUS["mail_inbox"] = "n/a"
-        CONNECTOR_STATUS["mail_sent"] = "n/a"
+        CONNECTOR_STATUS["mail_inbox"] = "error"
+        CONNECTOR_STATUS["mail_sent"] = "error"
         print(f"WARNING: Lane B mail load failed ({_lb_e}) -- mail empty this run, "
               f"briefing continues (calendar/Teams unaffected)")
         return dict(empty, truncation_risk=False)
