@@ -66,11 +66,119 @@ import urllib.request
 import urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Repo root too: lane_b_call1.py (the connector weblink resolver) lives there, not in tools/.
+sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from phase_failure_notify import notify_phase_failure
 
 GITHUB_API = "https://api.github.com"
 WI_OWNER, WI_REPO = "begb0037admin", "work-inbox"
 AC_OWNER, AC_REPO = "begb0037admin", "agent-commons"
+OWA_HOSTS = {"outlook.office.com", "outlook.office365.com"}
+WEBLINK_CACHE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data", "drafted_replies_weblinks.json",
+)
+WEBLINK_FAILURE_RETRY = datetime.timedelta(hours=24)
+
+
+def valid_owa_weblink(value):
+    """Return a real Outlook Web URL, or an empty string.
+
+    This deliberately mirrors the dashboard's exact-host allowlist. The
+    connector can return arbitrary text on an error path, so never publish an
+    unchecked URL into the public mirror or cache.
+    """
+    if not isinstance(value, str):
+        return ""
+    from urllib.parse import urlparse
+    parsed = urlparse(value.strip())
+    if parsed.scheme != "https" or parsed.hostname not in OWA_HOSTS:
+        return ""
+    if parsed.username or parsed.password:
+        return ""
+    return value.strip()
+
+
+def load_weblink_cache():
+    try:
+        with open(WEBLINK_CACHE_PATH, "r", encoding="utf-8") as f:
+            value = json.load(f)
+        return value if isinstance(value, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def save_weblink_cache(cache):
+    try:
+        os.makedirs(os.path.dirname(WEBLINK_CACHE_PATH), exist_ok=True)
+        temp_path = WEBLINK_CACHE_PATH + ".tmp"
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=True, indent=2, sort_keys=True)
+            f.write("\n")
+        os.replace(temp_path, WEBLINK_CACHE_PATH)
+    except OSError:
+        # The cache only reduces connector calls; failure to write it must not
+        # stop the publish path.
+        pass
+
+
+def parse_cache_time(value):
+    try:
+        parsed = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=datetime.timezone.utc)
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+
+def resolve_missing_weblinks(entries):
+    """Fill missing links using a small, cached, read-only connector budget."""
+    cache = load_weblink_cache()
+    now = datetime.datetime.now(datetime.timezone.utc)
+    try:
+        max_resolves = max(0, int(os.environ.get("WI_DRAFT_WEBLINK_MAX_RESOLVES", "3")))
+    except ValueError:
+        max_resolves = 3
+    attempts = 0
+
+    for entry in entries:
+        existing = valid_owa_weblink(entry.get("web_link") or entry.get("display_url"))
+        if existing:
+            entry["web_link"] = existing
+            entry.pop("display_url", None)
+            entry["open_mode"] = "web"
+            continue
+
+        draft_id = entry.get("draft_id")
+        if not draft_id:
+            continue
+        cached = cache.get(draft_id) if isinstance(cache.get(draft_id), dict) else {}
+        cached_url = valid_owa_weblink(cached.get("web_link"))
+        if cached_url:
+            entry["web_link"] = cached_url
+            entry["open_mode"] = "web"
+            continue
+        attempted_at = parse_cache_time(cached.get("attempted_at"))
+        if attempted_at and now - attempted_at < WEBLINK_FAILURE_RETRY:
+            continue
+        if attempts >= max_resolves:
+            continue
+
+        attempts += 1
+        resolved = ""
+        try:
+            from lane_b_call1 import resolve_mail_weblink_by_subject
+            resolved = valid_owa_weblink(resolve_mail_weblink_by_subject(
+                entry.get("subject", ""), entry.get("received", ""),
+            ))
+        except Exception:
+            resolved = ""
+        cache[draft_id] = {"web_link": resolved, "attempted_at": now.isoformat()}
+        if resolved:
+            entry["web_link"] = resolved
+            entry["open_mode"] = "web"
+
+    save_weblink_cache(cache)
+    return attempts
 
 
 def gh_get(owner, repo, path, token):
@@ -131,13 +239,8 @@ def normalize_entry(e):
     # rendered an "Open original" button that then failed
     # GetItemFromID("lauren-draft-15-...") with "The parameter is incorrect"
     # (draft-14/15/16 -- HANDOVER 27 Aug ~09:55 UTC). source_entry_id now
-    # means strictly "a real Outlook COM EntryID, or empty". Two new fields
-    # split out its old dual role, mirroring command-centre js/app.js
-    # openEmailWeb()'s `sourceType` discriminator pattern:
-    #   * open_mode ("com" | "web" | "none") -- machine-readable: which
-    #     opener the dashboard should wire for this row. NOT `source`
-    #     (that stays human-readable provenance; a Phase 2 task-writer sets
-    #     it).
+    # means metadata only: it never selects an email opener. open_mode is
+    # "web" only when an OWA link is available, otherwise "none".
     #   * tick_id -- stable per-row identity for the mark-sent/discard tick
     #     dedup. Byte-identical to the old fallback value (EntryID when
     #     present, else draft_id), so every existing data/ticks.json
@@ -146,7 +249,7 @@ def normalize_entry(e):
     # supplies one; the dashboard validates and opens it as a plain new-tab
     # Outlook Web hyperlink. No draft carries one today, so today's
     # no-EntryID rows render the button de-emphasised with an explanatory
-    # click, never a dead openmail://.
+    # click, never a Classic Outlook fallback.
     core = {"subject", "sender_tier", "draft_text"}
     missing_core = core - e.keys()
     if missing_core:
@@ -163,22 +266,13 @@ def normalize_entry(e):
         return None, "missing both composed_at and drafted_at"
 
     real_entry_id = (e.get("source_entry_id") or "").strip()
-    web_link = e.get("web_link") or e.get("display_url") or ""
-    if real_entry_id:
-        open_mode = "com"
-    elif web_link:
-        open_mode = "web"
-    else:
-        open_mode = "none"
+    web_link = valid_owa_weblink(e.get("web_link") or e.get("display_url"))
+    open_mode = "web" if web_link else "none"
 
     normalized = {
-        # Real Outlook COM EntryID ONLY (resolvable by open_email.py ->
-        # GetItemFromID). Never a draft_id fallback -- see the block comment
-        # above (27 Aug 2026 fix).
+        # Legacy source metadata only; never used to open Classic Outlook.
         "source_entry_id": real_entry_id,
-        # Opener discriminator for the dashboard. "com" -> openmail://<id>;
-        # "web" -> open web_link/display_url in a new tab; "none" -> no
-        # resolvable original, render the button de-emphasised.
+        # "web" opens a validated OWA link; "none" renders a disabled look.
         "open_mode": open_mode,
         # Stable tick-dedup identity: EntryID when present, else draft_id --
         # byte-identical to the pre-27-Aug source_entry_id fallback value so
@@ -189,12 +283,8 @@ def normalize_entry(e):
         "draft_text": e["draft_text"],
         "drafted_at": timestamp,
     }
-    # Outlook Web deep links, passed through untouched (snake_case) when
-    # present so the dashboard can validate + open them itself. Absent on
-    # every draft today.
-    for link_field in ("web_link", "display_url"):
-        if e.get(link_field):
-            normalized[link_field] = e[link_field]
+    if web_link:
+        normalized["web_link"] = web_link
     # Pass through optional richer fields as-is when present -- these are
     # real content Lauren already produces (confidence level/reason,
     # inline_flags for anything she couldn't verify, corpus_provenance for
@@ -250,6 +340,8 @@ def run(token, dry_run=False):
         else:
             drop_reasons.append({"draft_id": e.get("draft_id") if isinstance(e, dict) else None, "reason": reason})
 
+    resolve_attempts = resolve_missing_weblinks(clean_entries)
+
     payload = {
         # Timezone-aware UTC, not datetime.now() (local/BST) -- a naive
         # local timestamp sitting next to agent-commons' UTC timestamps is
@@ -269,6 +361,7 @@ def run(token, dry_run=False):
         "entries_published": len(clean_entries),
         "entries_dropped_bad_shape": len(drop_reasons),
         "drop_reasons": drop_reasons,
+        "weblink_resolve_attempts": resolve_attempts,
     }
 
     if dry_run:

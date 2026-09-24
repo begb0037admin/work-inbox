@@ -331,17 +331,11 @@ function toggleTick(id){
     else { prow.classList.remove('done'); prow.style.display=''; }
   }
 }
-function openEmail(entryId,ev){
-  if(ev){ev.preventDefault();ev.stopPropagation();}
-  window.location.href='openmail://'+entryId+'/';
-}
 // Open a mail card's stored OWA deep-link (server-resolved Graph web_link,
 // fetch_inbox.py Phase 3.1) in a new browser tab. Mirrors command-centre
 // js/app.js openEmailWeb(): https-only, exact-hostname allowlist, new tab,
 // visible notice (never a silent no-op, never a throw) when no usable link
-// is present. The connector-resolved web_link is the standard opener now;
-// openmail:// (COM / classic Outlook) survives only as the fallback for old
-// carried-forward cards that still carry a real Outlook EntryID.
+// is present. Outlook Web is the only supported email opener.
 function openEmailWeb(ev,el){
   if(ev){ev.preventDefault();ev.stopPropagation();}
   const raw=(el&&el.getAttribute)?el.getAttribute('data-weburl'):'';
@@ -408,7 +402,6 @@ function renderItems(items,cls){
   if(!items||!items.length) return '<div class="no-items">None today.</div>';
   return items.map((item,i)=>{
     const id=cls+'_'+i, ticked=isTicked(id);
-    const hasLink=item.entry_id&&item.entry_id.length>0;
     // Connector-resolved OWA deep-link (fetch_inbox.py Phase 3.1), validated
     // against the https + Outlook Web host allowlist. NOTE: renderItems() is
     // currently not on the live render path (renderBriefing() merges the
@@ -421,14 +414,10 @@ function renderItems(items,cls){
     const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
     const linkCls=`card-link${ticked?' done':''}${hiddenCls}`;
     const cardHtml=`<div class="card${ticked?' done':''}${hiddenCls}" id="item_${id}"><div class="cb-wrap"><div class="cb${ticked?' checked':''}" id="cb_${id}" onclick="toggleTick('${id}');event.stopPropagation()"></div></div><div class="card-accent ac-${cls==="urgent"?"r":cls==="needs"?"o":cls==="fyi"?"b":"g"}"></div><div class="card-body"><div class="card-title">${item.title} ${badge(item.badge,item.badgeType)}${(()=>{if(!item.received)return '';const c=new Date();c.setDate(c.getDate()-4);c.setHours(0,0,0,0);return new Date(item.received+'T12:00:00')>=c?badge('NEW','green'):'';})()}</div>${item.sub?`<div class="card-sub">${sanitizeSub(item.sub)}</div>`:''}</div><div class="card-date">${item.received||''}</div></div>`;
-    // web_link present -> open OWA in a new tab (connector standard, identical
-    // to command-centre). Otherwise fall back to the openmail://<EntryID> COM
-    // path so the residual carried-forward Outlook-EntryID cards still work.
+    // A validated web_link opens OWA in a new tab. Without one, retain the
+    // card in its normal grid slot but do not offer an email opener.
     if(webUrl){
       return `<a class="${linkCls}" href="javascript:void(0)" data-weburl="${escapeHtml(webUrl)}" onclick="openEmailWeb(event,this)" ${dragAttrs}>${cardHtml}</a>`;
-    }
-    if(hasLink){
-      return `<a class="${linkCls}" href="javascript:void(0)" onclick="openEmail('${item.entry_id}',event)" ${dragAttrs}>${cardHtml}</a>`;
     }
     return `<div ${dragAttrs}>${cardHtml}</div>`;
   }).join('');
@@ -964,18 +953,12 @@ function _priRenderOneCard(p,sec){
     if(latest) subText=latest.replace(/^\[[^\]]+\]\s*/,'');
   }
   const subLine=(p.source&&subText)?p.source+' · '+subText:(p.source||subText||p.ai_summary||p.sub||'');
-  // Open-email icon. The connector-resolved OWA web_link (fetch_inbox.py
-  // Phase 3.1 for inbox cards; webLink from the Command Centre task feed) is
-  // the standard opener now -- identical behaviour to command-centre: opens
-  // Outlook Web in a new tab. openmail://<EntryID> (COM / classic Outlook)
-  // remains only as the fallback for residual carried-forward cards that
-  // still carry a real Outlook EntryID and have no web_link.
+  // Open-email icon. A connector-resolved, validated OWA link is the only
+  // supported email opener; preserve the action-grid slot when it is absent.
   const _pWeb=_owaWebUrl(p);
   const emailBtn=_pWeb
     ? `<span class="card-icon" title="Open email in Outlook web" data-weburl="${escapeHtml(_pWeb)}" onclick="openEmailWeb(event,this)">&#9993;</span>`
-    : (p.entry_id||p.entryId)
-      ? `<span class="card-icon" title="Open email" onclick="openEmail('${p.entry_id||p.entryId}',event)">&#9993;</span>`
-      : '';
+    : `<button type="button" class="card-icon dr-btn-muted" title="The original email link isn't available yet" aria-label="Email link unavailable" disabled>${_priSvg('M3 5h18v14H3z M3 6l9 7 9-7')}</button>`;
   const ccBtn=p.id?`<span class="card-icon-cc" title="Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','wi-cc-task-view');event.stopPropagation()">CC&#8594;</span>`:'';
   const hiddenCls=(ticked&&!showingDoneItems)?' card-hidden':'';
   return `<div class="card-ph${ticked?' done':''}${hiddenCls}" id="item_${id}" data-prikey="${priKey}" data-sec="${sec}" draggable="true" ondragstart="priDragStart(event,'${sec}','${priKey}')" ondragend="priDragEnd(event)" ondragover="priCardDragOver(event,'${sec}','${priKey}')" ondragleave="priCardDragLeave(event,'${priKey}')" ondrop="priCardDrop(event,'${sec}','${priKey}')">
@@ -1001,8 +984,17 @@ function priRestore(e,id){if(e)e.stopPropagation();const t=getTicks(),k=_tickSto
 function priDelete(e,id){if(e)e.stopPropagation();wiAskConfirm('Remove this card from the dashboard permanently?',()=>{const t=getTicks(),k=_tickStorageKey(id),del='del_'+k,oldDel=!!t[del],oldTick=!!t[k];t[del]=true;if(k.indexOf('eid_')===0||k.indexOf('mid_')===0)t[k]=true;saveTicks(t);wiNotify('Removed','Undo',()=>{const q=getTicks();q[del]=false;q[k]=oldTick;saveTicks(q);renderBriefing(window._wipData,window._wipKey);});renderBriefing(window._wipData,window._wipKey);});}
 function priRename(e,id){if(e)e.stopPropagation();const card=document.getElementById('item_'+id),title=card&&card.querySelector('[data-pri-title]');if(!title)return;const old=title.textContent,input=document.createElement('input');input.className='title-edit-input';input.value=old;title.replaceWith(input);input.focus();input.select();let done=false;const finish=save=>{if(done)return;done=true;input.onblur=null;if(save){const t=getTicks(),k='title_'+_tickStorageKey(id);t[k]=input.value.trim();saveTicks(t);}renderBriefing(window._wipData,window._wipKey);};input.onkeydown=ev=>{if(ev.key==='Enter')finish(true);if(ev.key==='Escape')finish(false);};input.onblur=()=>finish(true);}
 function _priSvg(path){return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg>`;}
+function _priCardVisible(p,ticks,showingDone){
+  const id=p._priKey||_priGetKey(p), key=_tickStorageKey(id), legacy=_priGetLegacyTitleKey(p);
+  const deleted=!!ticks['del_'+key];
+  const handled=ticks[key]!==undefined
+    ? !!ticks[key]
+    : !!(legacy&&ticks[currentKey+'_'+legacy]===true);
+  return !deleted&&(showingDone||!handled);
+}
 function _priRenderOneCard(p,sec){
   const id=p._priKey||_priGetKey(p), legacy=_priGetLegacyTitleKey(p), ticks=getTicks(), key=_tickStorageKey(id), ticked=isTicked(id,legacy);
+  const visible=_priCardVisible(p,ticks,showingDoneItems);
   if(ticks['del_'+key])return '';
   const title=(ticks['title_'+key]!==undefined?ticks['title_'+key]:(p.title||p.text||'(untitled)'));
   const expanded=_priIsExpanded(id), panel='pridetail_'+id.replace(/[^a-zA-Z0-9_-]/g,'_'), email=_owaWebUrl(p);
@@ -1010,7 +1002,7 @@ function _priRenderOneCard(p,sec){
   const ccButton=p.id?`<button type="button" class="card-icon card-icon-cc" title="Open in Command Centre" aria-label="Open in Command Centre" onclick="window.open('https://cc.lelitte.co.uk/#${p.id}','wi-cc-task-view');event.stopPropagation()">CC</button>`:`<span class="card-icon card-icon-placeholder" aria-hidden="true"></span>`;
   const archive=ticked?`<button type="button" class="card-icon" aria-label="Restore" onclick="priRestore(event,'${id}')">${_priSvg('M5 12a7 7 0 1 0 2-5 M5 4v4h4')}</button>`:`<button type="button" class="card-icon" aria-label="Archive" onclick="priArchive(event,'${id}')">${_priSvg('M4 7h16v13H4z M3 4h18v3H3z M9 11h6')}</button>`;
   const detail=p.id?`${p.description?`<div class="pri-detail-label">Description</div><div class="pri-detail-text">${escapeHtml(p.description)}</div>`:''}${p.actions&&p.actions.length?`<div class="pri-detail-label">Actions</div><div class="pri-detail-text">${p.actions.slice().reverse().map(escapeHtml).join('\n')}</div>`:''}`:`${p.ai_summary?`<div class="pri-detail-label">Summary</div><div class="pri-detail-text">${escapeHtml(p.ai_summary)}</div>`:''}${p.sub?`<div class="pri-detail-text">${sanitizeSub(p.sub)}</div>`:''}<div class="pri-detail-meta">${p.from?`From: ${escapeHtml(p.from)}\n`:''}${p.received?`Received: ${escapeHtml(p.received)}`:''}</div>`;
-  return `<div class="card-ph${ticked?' done':''}${ticked&&!showingDoneItems?' card-hidden':''}" id="item_${id}" data-prikey="${id}" data-sec="${sec}"><div class="card-ph-header"><span class="card-drag">&#10783;</span><div class="card-ph-body" onclick="priToggleExpanded(event,'${id}')"><div class="card-ph-title${ticked?' done':''}" data-pri-title>${escapeHtml(title)}</div>${p.source||p.ai_summary?`<div class="card-ph-sub">${sanitizeSub(p.source||p.ai_summary)}</div>`:''}</div><div class="card-ph-actions"><div class="card-action-grid"><button type="button" class="card-icon drawer-chevron" aria-label="${expanded?'Collapse':'Expand'}" aria-expanded="${expanded}" aria-controls="${panel}" onclick="priToggleExpanded(event,'${id}')">${_priSvg(expanded?'M6 9l6 6-6':'M9 6l6 6-6 6')}</button>${archive}<button type="button" class="card-icon" aria-label="Delete" onclick="priDelete(event,'${id}')">${_priSvg('M5 7h14 M9 7V4h6v3 M7 7l1 13h8l1-13 M10 11v5 M14 11v5')}</button>${ccButton}${emailButton}<button type="button" class="card-icon" aria-label="Edit" onclick="priRename(event,'${id}')">${_priSvg('M4 17.5V20h2.5L18 8.5 15.5 6z M14.5 7l2.5 2.5')}</button></div></div></div><div class="pri-detail${expanded?' open':''}" id="${panel}">${detail}</div></div>`;
+  return `<div class="card-ph${ticked?' done':''}${visible?'':' card-hidden'}" id="item_${id}" data-prikey="${id}" data-sec="${sec}"><div class="card-ph-header"><span class="card-drag">&#10783;</span><div class="card-ph-body" onclick="priToggleExpanded(event,'${id}')"><div class="card-ph-title${ticked?' done':''}" data-pri-title>${escapeHtml(title)}</div>${p.source||p.ai_summary?`<div class="card-ph-sub">${sanitizeSub(p.source||p.ai_summary)}</div>`:''}</div><div class="card-ph-actions"><div class="card-action-grid"><button type="button" class="card-icon drawer-chevron" aria-label="${expanded?'Collapse':'Expand'}" aria-expanded="${expanded}" aria-controls="${panel}" onclick="priToggleExpanded(event,'${id}')">${_priSvg(expanded?'M6 9l6 6-6':'M9 6l6 6-6 6')}</button>${archive}<button type="button" class="card-icon" aria-label="Delete" onclick="priDelete(event,'${id}')">${_priSvg('M5 7h14 M9 7V4h6v3 M7 7l1 13h8l1-13 M10 11v5 M14 11v5')}</button>${ccButton}${emailButton}<button type="button" class="card-icon" aria-label="Edit" onclick="priRename(event,'${id}')">${_priSvg('M4 17.5V20h2.5L18 8.5 15.5 6z M14.5 7l2.5 2.5')}</button></div></div></div><div class="pri-detail${expanded?' open':''}" id="${panel}">${detail}</div></div>`;
 }
 function _priZonePlaceholderHtml(sec){return sec==='pfyi'?'Drop items here to park':'Drop items here';}
 function renderPriorityCards(priorities,key,sec){
@@ -1029,7 +1021,7 @@ function _priZoneCardCount(sec){
 function _priUpdateZoneChrome(sec){
   const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
   if(!zone)return;
-  const count=zone.querySelectorAll('.card-ph').length;
+  const count=zone.querySelectorAll('.card-ph:not(.card-hidden)').length;
   const wrap=zone.closest('[id^="sec-"]');
   const countEl=wrap?wrap.querySelector('.sec-count'):null;
   // Only overwrite the plain-number case -- if the header is showing the
@@ -1179,33 +1171,34 @@ function renderBriefing(data,key){
       absEl.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,0.3);font-style:italic">None recorded</span>';
     }
   }
-  const priSecs=applyPriOverrides(data);
+  const priSecs=applyPriOverrides(data), priTicks=getTicks();
+  const priVisibleCount=sec=>priSecs[sec].filter(p=>_priCardVisible(p,priTicks,showingDoneItems)).length;
   document.getElementById('inboxCol').innerHTML=`<div class="inbox-grid" id="inboxGrid">
     <div id="col-left">
       <div id="sec-urgent-wrap">
-        ${_secHeadHtml('ur','dot-r','Urgent – action required today',priSecs.ur.length)}
+        ${_secHeadHtml('ur','dot-r','Urgent – action required today',priVisibleCount('ur'))}
         <div class="pri-drop-zone" id="pri-zone-ur" data-sec="ur">${priSecs.ur.length?renderPriorityCards(priSecs.ur,key,'ur'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-tomorrow-wrap" style="margin-top:18px">
-        ${_secHeadHtml('ptom','dot-o','Priority actions – tomorrow',priSecs.ptom.length)}
+        ${_secHeadHtml('ptom','dot-o','Priority actions – tomorrow',priVisibleCount('ptom'))}
         <div class="pri-drop-zone" id="pri-zone-ptom" data-sec="ptom">${priSecs.ptom.length?renderPriorityCards(priSecs.ptom,key,'ptom'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-week-wrap" style="margin-top:18px">
-        ${_secHeadHtml('pw','dot-green','Priority actions – this week',priSecs.pw.length)}
+        ${_secHeadHtml('pw','dot-green','Priority actions – this week',priVisibleCount('pw'))}
         <div class="pri-drop-zone" id="pri-zone-pw" data-sec="pw">${priSecs.pw.length?renderPriorityCards(priSecs.pw,key,'pw'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
     </div>
     <div id="col-right">
       <div id="sec-today-wrap">
-        ${_secHeadHtml('pt','dot-r','Priority actions – today',priSecs.pt.length)}
+        ${_secHeadHtml('pt','dot-r','Priority actions – today',priVisibleCount('pt'))}
         <div class="pri-drop-zone" id="pri-zone-pt" data-sec="pt">${priSecs.pt.length?renderPriorityCards(priSecs.pt,key,'pt'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-needs-wrap" style="margin-top:18px">
-        ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priSecs.nr.length)}
+        ${_secHeadHtml('nr','dot-o','Needs response – within 24–48 hrs',priVisibleCount('nr'))}
         <div class="pri-drop-zone" id="pri-zone-nr" data-sec="nr">${priSecs.nr.length?renderPriorityCards(priSecs.nr,key,'nr'):'<div class="pri-zone-empty">Drop items here</div>'}</div>
       </div>
       <div id="sec-parked-wrap" style="margin-top:18px">
-        ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priSecs.pfyi.length,typeof data.fyiRawCount==='number'?data.fyiRawCount:undefined)}
+        ${_secHeadHtml('pfyi','dot-g','FYI / Parked',priVisibleCount('pfyi'),typeof data.fyiRawCount==='number'?data.fyiRawCount:undefined)}
         <div class="pri-drop-zone" id="pri-zone-pfyi" data-sec="pfyi">${priSecs.pfyi.length?renderPriorityCards(priSecs.pfyi,key,'pfyi'):'<div class="pri-zone-empty">Drop items here to park</div>'}</div>
       </div>
     </div>
@@ -1277,7 +1270,7 @@ function applySecCollapse(sec,collapsed){
   const toggle=document.getElementById('section_toggle_'+sec);
   if(zone) zone.style.display=collapsed?'none':'';
   if(toggle){
-    toggle.textContent=collapsed?'Expand':'Collapse';
+    toggle.innerHTML='<span class="section-toggle-label">'+(collapsed?'Expand &#9656;':'Collapse &#9662;')+'</span>';
     toggle.setAttribute('aria-expanded',String(!collapsed));
   }
 }
@@ -1294,7 +1287,7 @@ function _secHeadHtml(sec,dotClass,label,count,rawCount){
     ? count+' threads <span class="sec-count-raw" style="font-weight:400;color:var(--text-muted)">('+rawCount+' messages)</span>'
     : String(count);
   return '<div class="sec-head" onclick="toggleSecCollapse(\''+sec+'\')" style="cursor:pointer;user-select:none">'
-     +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span><button type="button" class="section-toggle" id="section_toggle_'+sec+'" aria-expanded="true" aria-controls="pri-zone-'+sec+'" onclick="event.stopPropagation();toggleSecCollapse(\''+sec+'\')">Collapse</button></div>';
+     +'<span class="sec-dot '+dotClass+'"></span><span class="sec-lbl">'+label+'</span><span class="sec-rule"></span><span class="sec-count">'+countHtml+'</span><button type="button" class="section-toggle" id="section_toggle_'+sec+'" aria-expanded="true" aria-controls="pri-zone-'+sec+'" onclick="event.stopPropagation();toggleSecCollapse(\''+sec+'\')"><span class="section-toggle-label">Collapse &#9662;</span></button></div>';
 }
 function _priSnapshot(){const order={};document.querySelectorAll('.pri-drop-zone').forEach(z=>order[z.dataset.sec]=[...z.querySelectorAll('.card-ph')].map(c=>c.dataset.prikey));return order;}
 function _priInitSortables(){if(!window.Sortable)return;document.querySelectorAll('.pri-drop-zone').forEach(zone=>{zone.addEventListener('dragover',e=>{if(_emailDragData)e.preventDefault();});zone.addEventListener('drop',e=>{if(!_emailDragData)return;e.preventDefault();const d=_emailDragData;_addEmailCardToPriority(d.item,d.cls,zone.dataset.sec);_emailDragData=null;renderBriefing(window._wipData,window._wipKey);wiNotify('Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[zone.dataset.sec]||zone.dataset.sec));});_priSortables.push(new Sortable(zone,{group:'work-inbox-priorities',animation:150,forceFallback:true,fallbackOnBody:true,ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',dragClass:'sortable-fallback',filter:'.pri-zone-empty,button,a,.drawer-chevron',preventOnFilter:false,delay:150,delayOnTouchOnly:true,onStart:()=>{_priDragging=true;_priBeforeLayout={order:_priSnapshot(),overrides:_priGetOverrides()};},onEnd:evt=>{const from=evt.from.dataset.sec,to=evt.to.dataset.sec,id=evt.item&&evt.item.dataset.prikey;_priDragging=false;_priDragEndedAt=Date.now();if(evt.oldIndex===evt.newIndex&&from===to){if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}return;}const before=_priBeforeLayout;const now=_priSnapshot();_priSetOrder(now.pt,now.ptom,now.pw,now.pfyi,now.ur,now.nr);if(id&&from!==to)_priSetOverride(id,to);renderBriefing(window._wipData,window._wipKey);wiNotify(from!==to?'Moved to '+({pt:'Today',ptom:'Tomorrow',pw:'This week',pfyi:'FYI / Parked',ur:'Urgent',nr:'Needs response'}[to]||to):'Order saved','Undo',()=>{if(before){localStorage.setItem('workInbox_priOrder_v1',JSON.stringify(before.order));localStorage.setItem('workInbox_priOverrides_v1',JSON.stringify(before.overrides));renderBriefing(window._wipData,window._wipKey);}});_priBeforeLayout=null;if(_priDeferredRender){_priDeferredRender=false;renderBriefing(window._wipData,window._wipKey);}}}));});}
@@ -1658,10 +1651,11 @@ function draftWebUrl(e){
   return '';
 }
 
-// "Open original" for drafts with no resolvable Outlook COM EntryID. Opens a
-// validated Outlook Web link in a new tab if one is present; otherwise says
-// so. Never a silent no-op, never a throw, never a dead openmail:// call.
+// "Open original" for drafts. Opens a validated Outlook Web link in a new tab
+// if one is present; otherwise says so. Never a silent no-op or a Classic
+// Outlook fallback.
 function openDraftOriginal(ev,btn){
+  return openEmailWeb(ev,btn); /* Legacy wrapper: Draft Replies now binds directly to the shared helper.
   if(ev){ev.preventDefault();ev.stopPropagation();}
   const hosts={'outlook.office.com':1,'outlook.office365.com':1};
   const raw=(btn&&btn.getAttribute)?btn.getAttribute('data-weburl'):'';
@@ -1673,6 +1667,7 @@ function openDraftOriginal(ev,btn){
     const subj=(btn&&btn.getAttribute)?btn.getAttribute('data-subject'):'';
     alert('This draft has no linked original message that can be opened from here'+(subj?' — find it in Outlook by subject:\n\n'+subj:'')+'.');
   }
+  */
 }
 
 function drTierBadge(tier){
@@ -1743,21 +1738,9 @@ function renderDraftedReplies(payload){
     const id='dr'+i;
     const draftEsc=escapeHtml(e.draft_text||'');
     const idKey=draftIdentity(e);
-    // Opener routing keys on the mirror's machine-readable open_mode
-    // discriminator (publish_drafted_replies.py, 27 Aug 2026), never on the
-    // format/length of source_entry_id. "com" -> the openmail://<entryId>
-    // -> GetItemFromID path (unchanged). "web" -> a validated Outlook Web
-    // hyperlink. Anything else (incl. a stale pre-cutover payload with no
-    // open_mode) -> a de-emphasised button that explains itself on click;
-    // once the mirror next publishes, such rows get their real open_mode.
-    const openMode=e.open_mode||'none';
-    let openLink;
-    if(openMode==='com'&&e.source_entry_id){
-      openLink=`<a href="javascript:void(0)" class="dr-btn" onclick="openEmail('${e.source_entry_id}',event)">Open original</a>`;
-    }else{
-      const webUrl=draftWebUrl(e);
-      openLink=`<button type="button" class="dr-btn${webUrl?'':' dr-btn-muted'}" data-weburl="${escapeHtml(webUrl)}" data-subject="${escapeHtml(e.subject||'')}" title="${webUrl?'Open the original in Outlook on the web':'No linked original message is available for this draft'}" onclick="openDraftOriginal(event,this)">Open original</button>`;
-    }
+    // Ignore open_mode: a validated OWA link is always the only opener.
+    const webUrl=draftWebUrl(e);
+    const openLink=`<button type="button" class="dr-btn${webUrl?'':' dr-btn-muted'}" data-weburl="${escapeHtml(webUrl)}" title="${webUrl?'Open the original in Outlook on the web':'The original email link isn\'t available yet'}" onclick="openEmailWeb(event,this)">Open original</button>`;
 
     // Confidence -- Lauren's own design explicitly calls this "impossible to
     // miss, not a hover tooltip," so it renders as a visible badge + reason
