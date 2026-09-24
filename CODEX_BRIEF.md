@@ -1,27 +1,30 @@
-# Codex brief — work-inbox: single section toggle (Kevin, 24 Sep)
+# Codex brief — work-inbox: section counts must equal rendered cards (Kevin bug) + toggle style
 
-Branch `drew/wi-cc-label-and-columns` (HEAD `be713fb`). Work only in C:/Users/admin/github/work-inbox. Only touch `js/app.js`, `css/styles.css`, `HANDOVER.md`. Don't read other repos, `data/`, `Archive/`, `js/vendor/`. Keep UTF-8 intact. Commit locally; no push; short final message.
+Branch `drew/wi-section-counts` off main. Work only in C:/Users/admin/github/work-inbox. Only
+touch `js/app.js`, `css/styles.css`, `tests/` (new), `HANDOVER.md`. Don't read other repos (except
+the read-only style reference `C:/Users/admin/github/kevin-task-tracker/public/style.css`), `data/`,
+`Archive/`, `js/vendor/`. Keep UTF-8 intact. Commit locally; no push; short final message.
 
-Existing code: `getCollapsedSecs()`/`toggleSecCollapse()`/`applySecCollapse()` (`workInbox_collapsedSecs_v1`, header onclick + arrow), and `priExpandSection()` + the `.expand-all` header buttons (bulk drawer expand — remove).
+## Bug (Kevin, screenshot): "Urgent – action required today" shows 3 but only 2 cards
+Cause: `_secHeadHtml(sec,…,priSecs.X.length)` counts the section list BEFORE the renderer drops
+cards: `_priRenderOneCard` returns '' for a true `del_<key>` tick, and handled (ticked) cards get
+`card-hidden` when "Show done" is off. So deleted/handled cards (including a Command-Centre-backed
+card deleted "here only") still count.
+Fix: one pure predicate `_priCardVisible(p, ticks, showingDone)` (not deleted; and not handled
+unless showing done) used by BOTH the renderer and the count — the count passed to
+`_secHeadHtml` must be `priSecs.X.filter(visible).length`. (For FYI keep the existing
+"threads (messages)" raw-count label logic but base `count` on the visible list.) Counts are
+recomputed on every render, so they follow drag, archive, delete, undo, restore, section toggle.
 
-## Kevin's rule (24 Sep, final): ONE section toggle per section — no bulk card expand
-Kevin: "I would expect it to expand the section and click it again to collapse the section... not
-expand the already opened tiles and show me the information. I can do that with whichever tile I
-want to read."
-- Replace the per-section "Expand all"/"Collapse all" (which bulk-opens card drawers) with a
-  SECTION toggle button in the section header. Label: **"Collapse"** when the section is open,
-  **"Expand"** when it is folded. Clicking folds/unfolds the whole section (all its cards hidden /
-  shown). Merge it with the existing section-fold mechanism (reuse the existing remembered
-  collapse state and storage key so Kevin's current folded/open choices carry over) so there is
-  ONE clear control per section: remove the separate small fold chevron/arrow glyph (or put the
-  glyph inside the same button, e.g. "Collapse ▾" / "Expand ▸"). Clicking the header row itself
-  may keep toggling the same state, but the button is the visible control and its label must
-  always match the state (after reload, drag, re-render, and header click).
-- When folded, keep the header showing the section name and its card count, so it's obvious the
-  section has hidden cards.
-- Remove the bulk card-drawer expand function and its button entirely. Each card's own › still
-  opens/closes that card's details, remembered per card as now.
-- Button: `type="button"`, `aria-expanded` true/false, `aria-controls` the section's list,
-  keyboard Enter/Space, `event.stopPropagation()` so it doesn't double-toggle with the header.
+## Regression test — `tests/section_count_test.js` (Node, no deps)
+Extract `_priCardVisible` (and any tiny helpers it needs) from `js/app.js` by source (like
+command-centre's `tests/tier_order_test.js` does) and assert: deleted → invisible; handled →
+invisible unless showingDone; plain → visible; a section of [plain, handled, deleted] counts 1
+(3 with showingDone? no — deleted never counts: 2).
 
-Checks: `node --check js/app.js`; UTF-8 non-ASCII unchanged. Top-of-HANDOVER entry.
+## Toggle style (Kevin/Jacob: identical to the tracker)
+The section toggle label becomes the tracker's style: small muted text, "Collapse ▾" when open,
+"Expand ▸" when folded (same font size/colour/weight as the tracker's `.section-toggle-label`,
+no border/background). Update wherever the label is set (render + `applySecCollapse`).
+
+Checks: `node --check js/app.js`; `node tests/section_count_test.js`. Top-of-HANDOVER entry.
