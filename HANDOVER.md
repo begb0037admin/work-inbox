@@ -1,3 +1,16 @@
+# Handover -- 24 September 2026 ~19:45 (Drew) -- item 5 outcome: laptop back, token fixed, connector identity OUT OF USAGE until 27 Sep; read cap 100 merged
+
+**Where things stand:**
+- **Laptop runner:** back online 24 Sep ~14:18 (Kevin powered it on). Scheduled fires are running again: 14:37 and 16:18 briefings pushed, result "ok".
+- **Refresh-token revocation (fixed 14:30):** Jacob's fresh desktop `codex login` as kevin@lelitte.co.uk revoked the laptop's `C:\WorkInboxAI\codex-laneb` copy (the 13 Sep rotation race). Copied the desktop `~/.codex/auth.json` over it (old one kept as `auth.json.revoked-20260924`), per `codex_connector_reauth.ps1` steps 5-6. Probe OK. **Rule: any fresh desktop login as kevin@lelitte.co.uk must be followed by that copy.**
+- **Current blocker, not fixable without Kevin:** from the 16:00 run on, every connector call (mail inbox/sent, calendar, Teams) returns `You've hit your usage limit ... try again at Sep 27th, 2026 10:25 AM` for kevin@lelitte.co.uk, the only working connector identity (Edu is parked until 1 Oct). The same account was the desktop's default Codex profile for today's build work, so development usage drained the pipeline's quota. The kevin@lelitte.com (lelittecom) account doesn't have the Outlook connector (a probe returned an "install Outlook Calendar" suggestion), and adding it would need Kevin to sign in, so I stopped there. **Result:** briefings until 27 Sep 10:25 have no inbox, calendar or Teams data (Needs response survives via carry-forward). The first scheduled fire after the reset should recover on its own, with no action needed.
+- **Recommendation:** keep kevin@lelitte.co.uk out of development Codex usage (make lelittecom the desktop default for builds) so the pipeline's quota is protected. That's the coordinator's call.
+- **Dashboard honesty gap (proposed, not built):** the 16:18 briefing shows the green "Up to date" banner even though every connector domain was unavailable. Proposal: show an amber "Mail/calendar unavailable this run (connector usage limit)" banner whenever `lane_b_domains` or the mail status is unavailable.
+- **Read cap 30 -> 100:** merged (PR #40, `12de77b`). The wrapper pulls it on the next run. It can't be proven until the connector is back (27 Sep). Check then: `mail_truncation_risk` false with more than 30 read messages in the log.
+- **Draft Diff Capture:** still fails every run (`Drafts: list_messages returned a continuation link`). Separate, not in scope.
+
+---
+
 # Handover -- 24 September 2026 (Codex) -- Lane B inbox read cap 30 -> 100
 
 Raised `WI_LANE_B_MAIL_MAX_READ`'s default in `lane_b_call1.py` from 30 to 100. `mail_truncation_risk` had been true on every briefing since 15 Sep because the 30-item read pass bound, dropping older in-window read mail and showing the incomplete-fetch warning. 100 remains within the connector's observed 200-item page; the environment override is unchanged. Verified with `python -m py_compile lane_b_call1.py`. Revert by restoring the default to 30, or set `WI_LANE_B_MAIL_MAX_READ=30` in the wrapper environment.
