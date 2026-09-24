@@ -1,3 +1,9 @@
+# Handover -- 24 September 2026 ~21:45 (Drew) -- PR #43 LIVE: staleness banner follows the real schedule
+
+- The banner used `SCHEDULE_RUN_HOURS=[6,9,12,15,18]` with a 90-min grace, so it showed a false red every weekday evening ("expected by 18:00") and all weekend. Now it uses `[7,12,16]` with a 45-min grace, matching the laptop's real Work Inbox Bridge Briefing triggers (Mon-Fri, DaysOfWeek=62, per the coordinator's check of the laptop). Weekend days were already skipped.
+- **Verified:** simulated times 7/7. Fri 20:00 and Sat 12:00 after a Fri 16:18 run show green. Mon 07:50 with no Monday run shows red ("expected by Mon 07:00"). Mon 07:30 (inside the grace period) shows green. A missed 16:00 shows red. Amber still works. **Live 21:45:** amber, "calendar and Teams didn't load" (correct for today's connector usage limit). Served app.js == main.
+- **Rollback:** revert PR #43.
+
 # Handover -- 24 September 2026 ~21:20 (Drew) -- PR #42 LIVE: amber "Mail/calendar unavailable this run" banner (never green on failed data)
 
 - Kevin-approved. Codex (lelittecom only, per the coordinator's accounts.json change `8970b0f`: kevin@lelitte.co.uk is reserved for the pipeline and never used for builds) built `00a9e81`. Drew added two fixes: loader exceptions now count as `"error"` rather than `"n/a"`, and the status-file fallback reads the file's top-level `ts`.
