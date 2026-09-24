@@ -1,7 +1,7 @@
 {
   "date": "Thursday 24 September 2026",
   "subtitle": "Clear inbox, active projects on track",
-  "context": "Thursday 24 September 2026: Kevin's inbox is clear with no incoming emails awaiting response and no meetings scheduled today or tomorrow. No colleagues have reported absences blocking Oxford University Personnel Services projects in recent correspondence. Recent sent activity shows coordination on incident 11700438 (Michael O'Sullivan, Simon Hamerton, Emma Fitz-Gibbon), progress on Holiday Records Reports with Access Group (Alan Quirke, Conor O'Shea, case 69001638 kicked off 18 Sep), and PDR reviews with James Salas Guillen and Asta Siautilaite scheduled this week. Kevin should monitor completion of the FA works data file upload (deadline 18 Sep, completed), IRIS/IEX incidents changes implementation on 28 September, and Chemistry's 38-day balance pilot launch. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
+  "context": "Thursday 24 September 2026: Kevin's inbox is clear with no incoming emails awaiting response and no meetings scheduled today or tomorrow. No colleagues have reported absences blocking Oxford University Personnel Services projects in recent correspondence. Recent sent activity shows coordination on incident 11700438 (Michael O'Sullivan, Simon Hamerton, Emma Fitz-Gibbon), progress on Holiday Records Reports with Access Group (Alan Quirke, Conor O'Shea, case 69001638 kicked off 18 Sep), and PDR reviews with James Salas Guillen and Asta Siautilaite scheduled this week. Kevin should monitor completion of the FA works data file upload (deadline 18 Sep, completed), IRIS/IEX incidents changes implementation on 28 September, and Chemistry's 38-day balance pilot launch. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
   "urgent": [
     {
       "title": "SHSMS Demonstration Moderation Meeting (DTP1334 Strategic Health & Safety Modular system) - Placeholder",
@@ -759,326 +759,39 @@
       "kevin_is_primary_recipient": true
     }
   ],
-  "calToday": [
-    {
-      "time": "All day",
-      "title": "Marie K: Non-working day",
-      "sub": "Marie King"
-    },
-    {
-      "time": "09:30",
-      "title": "FA Team Daily Catchup",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "11:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "12:30",
-      "title": "Keep free",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "14:30",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "16:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    }
-  ],
-  "calTomorrow": [
-    {
-      "time": "All day",
-      "title": "A/L - Susan",
-      "sub": "Susan Pratt"
-    },
-    {
-      "time": "All day",
-      "title": "Kevin - Annual Leave",
-      "sub": "People Department - HR Systems"
-    },
-    {
-      "time": "All day",
-      "title": "JS - Annual Leave",
-      "sub": "James Salas Guillen"
-    },
-    {
-      "time": "All day",
-      "title": "Marie K: Non-working day",
-      "sub": "Marie King"
-    },
-    {
-      "time": "09:30",
-      "title": "FA Team Daily Catchup",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "10:00",
-      "title": "Roadmap review",
-      "sub": "Marie Cooksey"
-    },
-    {
-      "time": "11:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "12:00",
-      "title": "Asta Siautiaite - PDR Review 2026",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "13:00",
-      "title": "Keep free",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "14:30",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "16:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte"
-    }
-  ],
+  "calToday": [],
+  "calTomorrow": [],
   "calDay2": [],
   "calDay3": [],
   "calFull": [
     {
       "date": "2026-09-21",
       "label": "Monday 21 Sep",
-      "items": [
-        {
-          "time": "All day",
-          "title": "Michael A/L",
-          "sub": "Michael O'Sullivan"
-        },
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "10:00",
-          "title": "H&S Roadmap",
-          "sub": "Christopher Sanders"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "13:00",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        }
-      ],
+      "items": [],
       "isToday": false
     },
     {
       "date": "2026-09-22",
       "label": "Tuesday 22 Sep",
-      "items": [
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "10:00",
-          "title": "Azure Integration Platform Sprint Review",
-          "sub": "Erika Braverman"
-        },
-        {
-          "time": "11:00",
-          "title": "Sickness Absence Survey working group",
-          "sub": "Simon Burford"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:30",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "13:30",
-          "title": "James Salas Guillen - PDR Review 2026",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "15:00",
-          "title": "DTP1092 College staff into PXD Team meeting",
-          "sub": "Crispin Muncaster"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        }
-      ],
+      "items": [],
       "isToday": false
     },
     {
       "date": "2026-09-23",
       "label": "Wednesday 23 Sep",
-      "items": [
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "13:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:00",
-          "title": "HR Systems team meeting",
-          "sub": "Michelle Williams"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        }
-      ],
+      "items": [],
       "isToday": false
     },
     {
       "date": "2026-09-24",
       "label": "Thursday 24 Sep",
-      "items": [
-        {
-          "time": "All day",
-          "title": "Marie K: Non-working day",
-          "sub": "Marie King"
-        },
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:30",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        }
-      ],
+      "items": [],
       "isToday": true
     },
     {
       "date": "2026-09-25",
       "label": "Friday 25 Sep",
-      "items": [
-        {
-          "time": "All day",
-          "title": "A/L - Susan",
-          "sub": "Susan Pratt"
-        },
-        {
-          "time": "All day",
-          "title": "Kevin - Annual Leave",
-          "sub": "People Department - HR Systems"
-        },
-        {
-          "time": "All day",
-          "title": "JS - Annual Leave",
-          "sub": "James Salas Guillen"
-        },
-        {
-          "time": "All day",
-          "title": "Marie K: Non-working day",
-          "sub": "Marie King"
-        },
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "10:00",
-          "title": "Roadmap review",
-          "sub": "Marie Cooksey"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:00",
-          "title": "Asta Siautiaite - PDR Review 2026",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "13:00",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        }
-      ],
+      "items": [],
       "isToday": false
     }
   ],
@@ -1120,8 +833,7 @@
       "dateType": "red",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotMAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Organisational Structure update for College/Society entities moving from PACS level 2 to 3 is in progress; Finance code B8 Trinity Term conflict pending decision on reactivation vs. new code assignment. Chris Taylor flagged overcomplicated change coordination; Anna Gilbert continues to provide Sally Vine feedback requiring final resolution."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotMAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "task-1787044968753",
@@ -1139,8 +851,7 @@
       "dateType": "red",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwCN%2B5xoUtxaQ7clOANLv%2FU1AARyARmoAACN%2B5xoUtxaQ7clOANLv%2FU1AAesuzIKAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Job alert email wording changes were approved February 2026 but configuration failed to apply to outgoing notification emails. Kevin must verify the fix works and send screenshot to Laura Porter for sign-off before pushing to Live production."
+      "webLink": ""
     },
     {
       "id": "t035",
@@ -1158,8 +869,7 @@
       "dateType": "red",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6xYVQAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "GLAM failed to load rostering data for two waves, blocking Sarah Rowles from running UC dashboards for SBS, PEDS, and GLAM areas. Kevin must convene resolution meeting with Simon, Marie, Michelle, and Julie to understand gaps and produce action list."
+      "webLink": ""
     },
     {
       "id": "t2608111331410",
@@ -1185,8 +895,7 @@
       "dateType": "red",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6H%2F92AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Simon Burford created test subscription report for Cority Applicant Data Import with CSV export to network location ready for review (Grace originally built; handover complete). Test data now available for validation and sign-off."
+      "webLink": ""
     },
     {
       "id": "t2609020705201",
@@ -1203,8 +912,7 @@
       "dateType": "red",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqmnAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Michael O'Sullivan assigned urgent P5 Incident 11706988 (Task 50981420) on 1 September affecting multiple users. Gillian Wilson's team is investigating; Kevin must confirm resolution when investigation completes."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqmnAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2609082321250",
@@ -1221,8 +929,7 @@
       "dateType": "red",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHUAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Christopher Sanders provided detailed IRIS Changes project plan for September 2026 implementation; Kevin must review and confirm HR Systems readiness and dependencies. Christopher also requested Kevin check GDPR implications of supervisor notification content changes with Brian."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHUAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2609091622020",
@@ -1235,8 +942,7 @@
       "dateType": "red",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l4AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6H9QqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "James Salas Guillen submitted duplicate annual leave requests on 9 September for 25-28 September - now 15 days overdue for approval. Kevin must approve or decline as his manager; this is blocking James's H&S handover completion."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l4AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6H9QqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2609141647140",
@@ -1251,8 +957,7 @@
       "dateType": "red",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHKAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Michael O'Sullivan assigned urgent P5 Incident 11710565 (Task 50985406) on 14 September affecting multiple users. Immediate diagnostic and troubleshooting work required; investigation status pending."
+      "webLink": ""
     }
   ],
   "prioritiesTomorrow": [
@@ -1276,8 +981,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe8y99RAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "James confirmed with Amanda that IRIS/IEX incidents changes will proceed 28 September after 5:00 PM, with review meeting 9 October at 1:30 PM. Kevin confirmed agreement with 28 September date given tight 3-day window before Amanda returns 5 October."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe8y99RAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
   "prioritiesWeek": [
@@ -1309,8 +1013,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jxSCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Access Group Project Scope Document (case 69001638) approved 24 June; 3 Holiday Records reports worth 2,800 flex points ready for scheduling. Kevin confirmed Friday 18 September availability for kickoff call with Access Group; awaiting final calendar invite and schedule confirmation."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jxSCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "task-1785704715215",
@@ -1328,8 +1031,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAede4rEAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Julie Hickman flagged outstanding actions on Development Insight reports following conversation with Ilona. Kevin declined related Cross-Team Process Improvement meeting due to schedule conflict; must follow up with Julie to understand specific action items needed."
+      "webLink": ""
     },
     {
       "id": "t2608121801280",
@@ -1369,8 +1071,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHQAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Chemistry department selected as 38-day balance scheme pilot with 131 workgroups, preferring single-phase batching of all system updates. Kevin confirmed Chemistry batching approach is acceptable and confirmed implementation timings on 18 September."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHQAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2608121801281",
@@ -1389,8 +1090,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAepmwIfAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Jessica Oldershaw indicated September decision point reached on PeopleXD uplift; Michael O'Sullivan recommends October with detailed analysis provided. Kevin must confirm HR Systems readiness and identify dependencies affecting implementation."
+      "webLink": ""
     },
     {
       "id": "t2608181201060",
@@ -1405,8 +1105,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09vAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Simon Burford requested confirmation of employer pension rates for university annual Financial Statements (original request 28 May). Kevin bumped on 18 August but no confirmation provided yet; still outstanding."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09vAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2608181201061",
@@ -1424,8 +1123,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09tAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Anna Carter-Windle's original request (28 May) for GLAM rostering on Botanic Gardens Ticket Office and Ashmolean Security remains unresolved. Kevin escalated Ashmolean Visitor Experience incident 11688462 to Julie on 8 September; Tracy and Mel in IT Services now handling."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09tAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2608181201062",
@@ -1440,8 +1138,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09sAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Joanne Grant's original email (28 May) regarding EcoOnline/University engagement remains unanswered. Kevin bumped the email on 18 August signalling follow-up needed but no response sent yet."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09sAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2608181501150",
@@ -1455,8 +1152,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeqtbfIAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Julie Hickman requested creation of user guidance for staff on leave entitlement calculations for new grades (39Q, 30S, 38S, 36S) as part of 38-day balance implementation. Julie scheduled planning Teams meeting for departments' move to scheme."
+      "webLink": ""
     },
     {
       "id": "t2608191801190",
@@ -1475,8 +1171,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6ICD6AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Simon Burford forwarded request for Functional Analysis effort estimation on internal candidate identification feature for application form. Kevin provided effort estimation on 9 September; awaiting any follow-up or implementation decision."
+      "webLink": ""
     },
     {
       "id": "t2608211201050",
@@ -1489,8 +1184,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeuly9VAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Sarah Rowles sent sickness absence data completeness analysis file (OUTPUT_SicknessDataChecks_20260811.xlsx) on 21 August. Kevin must review findings and discuss any data quality issues or follow-up actions required."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeuly9VAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "task-1787645383808",
@@ -1516,8 +1210,7 @@
       "dateType": "orange",
       "web_link": "",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAeyeYwqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "PDR review deadline end of September 2026 tracked centrally via HR Systems PDR Completion 2026 SharePoint tracker. James Salas Guillen submitted completed form 21 September and received calendar invite 24 September; Michael O'Sullivan completed form for 18 September review."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAeyeYwqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "task-1787652746063",
@@ -1536,8 +1229,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAexPHkmAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Kevin and Michael must confirm approximate Functional Analysis validation effort per department to determine Michael's capacity and whether additional BA/FA support is needed. Kevin discussed capacity with Michael 25 August but formal sizing still pending."
+      "webLink": ""
     },
     {
       "id": "task-1787652746064",
@@ -1553,8 +1245,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAexPMLpAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "'Second batch' WFM/SBS sickness data files were never handed over from 11 August working group; Kevin identified miss on 25 August. Kevin must check project folders for files starting with Smith's School and Geography."
+      "webLink": ""
     },
     {
       "id": "t2608251201190",
@@ -1571,8 +1262,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwCN%2B5xoUtxaQ7clOANLv%2FU1AAd8Kb8pAACN%2B5xoUtxaQ7clOANLv%2FU1AAe6IISjAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "",
-      "ai_summary": "Sophie Levy confirmed 25 August that Quality project (PO E22033553) is fully staffed with internal transition from sales to professional services proceeding. Kevin must follow up to ensure clear handover and identify HR Systems dependencies before project execution begins."
+      "webLink": ""
     },
     {
       "id": "t2609141647411",
@@ -1589,8 +1279,7 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe8y99VAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe96mRIAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Charlie Richards-Gladstone flagged Multiverse 2nd Cohort AI/Data apprenticeship EOI deadline was 16 September (now past) with Kevin's submission the only outstanding item blocking cohort approval. Jonathan Roger signed as second signatory; form ready for submission."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe96mRIAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
       "id": "t2609141649162",
@@ -1607,30 +1296,30 @@
       "dateType": "orange",
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6xYVYAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Nathan Kirwan completed UDF template structure matching with data items by 15 September; Kevin confirmed structure is correct and answered technical questions. UAT spot-checks complete with no errors found; file ready for production upload by 18 September deadline (now past)."
+      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Thursday 24 September · 16:18",
+  "refreshed_at": "Thursday 24 September · 22:58",
   "mail_truncation_risk": true,
-  "teams": [],
-  "calendarUnavailable": true,
   "connector_status": {
-    "calendar": {
-      "status": "carried_forward",
-      "as_of": "2026-09-21T11:25:26+00:00"
-    },
-    "teams": {
-      "status": "carried_forward",
-      "as_of": "2026-09-21T11:25:26+00:00"
-    },
     "mail_inbox": {
       "status": "carried_forward",
+      "served_by": null,
       "as_of": "2026-09-21T11:25:26+00:00"
     },
     "mail_sent": {
       "status": "unavailable",
+      "served_by": null,
       "reason": "no_last_good_data"
+    },
+    "calendar": {
+      "status": "n/a",
+      "served_by": null
+    },
+    "teams": {
+      "status": "n/a",
+      "served_by": null
     }
-  }
+  },
+  "calendarUnavailable": true
 }
