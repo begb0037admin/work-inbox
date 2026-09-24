@@ -1,3 +1,9 @@
+# Handover -- 24 September 2026 (Codex) -- amber banner for connector failures
+
+Implemented the connector-status honesty fix from `CODEX_BRIEF.md`: `fetch_inbox.py` now writes per-domain connector statuses into `briefing.json`, and the dashboard shows an amber unavailable banner whenever an up-to-date run has failed domains. Older briefings use the time-bounded laptop status fallback for calendar/Teams; stale runs remain red and include the failed-domain note.
+
+Checks: `python -m py_compile fetch_inbox.py`, `node --check js/app.js`, and `git diff --check`. No deployment or push.
+
 # Handover -- 24 September 2026 ~20:20 (Drew) -- PR #41 LIVE: section counts = rendered cards; every Outlook Classic path removed; drafts publish OWA links
 
 - Verified live at 1440+1100 (51/51): section counts == rendered cards after drag/archive/delete (incl. CC-backed)/undo/reload/fold on all three boards; top-panel and #hash jump links unfold a folded tier then scroll/highlight (CC, tracker); no openmail:// anywhere; no page errors.
@@ -9781,7 +9787,6 @@ Commits pushed to main: `af12dff` (equal 3-col, July+August, AI summaries), `1da
 
 
 - **Phase 3.7b and Phase 3.8 are closed** — do not modify without Kevin explicitly opening a new approved phase
-
 
 
 
