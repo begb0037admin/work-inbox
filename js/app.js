@@ -1100,6 +1100,41 @@ function _parseRefreshedAt(str,refYear){
   return new Date(refYear,monIdx,parseInt(m[1]),parseInt(m[3]),parseInt(m[4]),0);
 }
 
+function _parseConnectorStatusTs(ts){
+  if(!ts) return null;
+  const raw=String(ts).trim();
+  const compact=raw.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
+  const parsed=compact
+    ? new Date(`${compact[1]}-${compact[2]}-${compact[3]}T${compact[4]}:${compact[5]}:${compact[6]}Z`)
+    : new Date(raw);
+  return isNaN(parsed.getTime())?null:parsed;
+}
+
+function _joinConnectorNames(names){
+  if(names.length<2) return names[0]||'';
+  if(names.length===2) return names.join(' and ');
+  return names.slice(0,-1).join(', ')+', and '+names[names.length-1];
+}
+
+function _failedConnectorDomains(data){
+  const labels={mail_inbox:'inbox mail',mail_sent:'sent mail',calendar:'calendar',teams:'Teams'};
+  const keys=Object.keys(labels);
+  if(Object.prototype.hasOwnProperty.call(data,'connector_status')){
+    const statuses=data.connector_status||{};
+    return keys.filter(key=>statuses[key]!=='ok'&&statuses[key]!=='n/a').map(key=>labels[key]);
+  }
+
+  const statusDoc=data._briefing_status;
+  const refreshed=_parseRefreshedAt(data.refreshed_at,new Date().getFullYear());
+  const domains=statusDoc&&statusDoc.lane_b_domains;
+  if(!refreshed||!domains) return [];
+  return ['calendar','teams'].filter(key=>{
+    const domain=domains[key];
+    const ts=domain&&_parseConnectorStatusTs(domain.ts);
+    return domain&&domain.status!=='ok'&&ts&&Math.abs(ts.getTime()-refreshed.getTime())<=2*60*60*1000;
+  }).map(key=>labels[key]);
+}
+
 function renderStaleBanner(data){
   let el=document.getElementById('staleBanner');
   if(!el){
@@ -1114,6 +1149,10 @@ function renderStaleBanner(data){
   const refreshed=_parseRefreshedAt(data.refreshed_at,now.getFullYear());
   const expected=_mostRecentExpectedRun(now);
   const ok = refreshed && expected && refreshed>=expected;
+  const failedNames=_failedConnectorDomains(data);
+  const failedNote=failedNames.length
+    ? '<div style="margin-top:4px;">&#9888; Mail/calendar unavailable this run &mdash; '+escapeHtml(_joinConnectorNames(failedNames))+" didn't load, so this briefing may be missing items.</div>"
+    : '';
   // Mail-fetch truncation-risk line (14 Sep 2026, Drew) -- surfaces
   // data.mail_truncation_risk (set by fetch_inbox.py/lane_b_call1.py when
   // the connector mail_inbox fetch's unread or read pass hit its own cap,
@@ -1128,22 +1167,28 @@ function renderStaleBanner(data){
       + 'so an older (but still in-window) email could be missing from this briefing. Check Outlook directly if you are expecting '
       + 'something specific.</div>'
     : '';
-  if(ok){
+  if(ok&&failedNames.length===0){
     el.style.background='#1e7e34';
     el.style.color='#fff';
     el.innerHTML='&#9679; Up to date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown')+truncNote;
     return;
   }
+  if(ok){
+    el.style.background='#b45309';
+    el.style.color='#fff';
+    el.innerHTML='&#9888; Mail/calendar unavailable this run &mdash; '+escapeHtml(_joinConnectorNames(failedNames))+" didn't load, so this briefing may be missing items. Last ran "+escapeHtml(data.refreshed_at||'unknown')+truncNote;
+    return;
+  }
   el.style.background='#a3271f';
   el.style.color='#fff';
   if(!refreshed){
-    el.innerHTML='&#9888; No refresh time available &mdash; run status unknown. Double-click "Trigger Laptop Refresh Now.bat" on the Desktop if this persists.'+truncNote;
+    el.innerHTML='&#9888; No refresh time available &mdash; run status unknown. Double-click "Trigger Laptop Refresh Now.bat" on the Desktop if this persists.'+failedNote+truncNote;
     return;
   }
   const hoursBehind=Math.round((now-refreshed)/3600000);
   el.innerHTML='&#9888; Data may be out of date &mdash; last ran '+escapeHtml(data.refreshed_at||'unknown')+
     ' ('+hoursBehind+'h ago). A refresh was expected by '+escapeHtml(expected.toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'}))+
-    '. Double-click "Trigger Laptop Refresh Now.bat" on the Desktop if this persists.'+truncNote;
+    '. Double-click "Trigger Laptop Refresh Now.bat" on the Desktop if this persists.'+failedNote+truncNote;
 }
 
 function renderBriefing(data,key){
@@ -1456,6 +1501,7 @@ function getGreeting(){
 }
 
 const BRIEFING_API='https://github-proxy.lelitte.co.uk/work-inbox/data/briefing.json';
+const BRIEFING_STATUS_API='https://raw.githubusercontent.com/begb0037admin/work-inbox/main/data/laptop_status/briefing_status.json';
 
 async function init(){
   const titleEl=document.getElementById('pageTitle');
@@ -1467,9 +1513,16 @@ async function init(){
   let data=null;
 
   try{
-    const res=await fetch(BRIEFING_API+'?t='+Date.now(),{cache:'no-store'});
+    const cacheBuster=Date.now();
+    const res=await fetch(BRIEFING_API+'?t='+cacheBuster,{cache:'no-store'});
     if(res.ok){
       data=await res.json();
+      if(!Object.prototype.hasOwnProperty.call(data,'connector_status')){
+        try{
+          const statusRes=await fetch(BRIEFING_STATUS_API+'?t='+cacheBuster,{cache:'no-store'});
+          if(statusRes.ok) data._briefing_status=await statusRes.json();
+        }catch(e){console.warn('Briefing status fetch failed:',e);}
+      }
       const key=data.date?data.date.replace(/[^a-zA-Z0-9]/g,'_'):'latest';
       const store=getStore(); store[key]=data; saveStore(store);
       localStorage.setItem(TODAY_KEY,key);

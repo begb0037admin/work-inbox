@@ -225,6 +225,15 @@ if TEAMS_CONNECTOR:
         f"data/lane_b/lane_b_normalised.json (max age {LANE_B_MAX_AGE_H}h, shared with calendar). "
         f"Raw digest only (v1) -- no AI triage/judgment on Teams content.")
 
+# Per-domain connector status is carried into briefing.json for the dashboard.
+# Keep the safe default for every non-connector or failed/unconfigured backend.
+CONNECTOR_STATUS = {
+    "mail_inbox": "n/a",
+    "mail_sent": "n/a",
+    "calendar": "n/a",
+    "teams": "n/a",
+}
+
 
 def _load_lane_b_calendar(_week_end, _lookback):
     """CAL_BACKEND=connector: map data/lane_b/lane_b_normalised.json (written by
@@ -241,6 +250,9 @@ def _load_lane_b_calendar(_week_end, _lookback):
         meta   = (doc.get("meta") or {})
         lane_b = (meta.get("lane_b") or {})
         cal_dom = ((lane_b.get("domains") or {}).get("calendar") or {})
+        CONNECTOR_STATUS["calendar"] = (cal_dom.get("status")
+                                         if isinstance(cal_dom.get("status"), str)
+                                         and cal_dom.get("status") else "n/a")
 
         # per-domain ts preferred (9 Sept 2026 fix -- see lane_b_call1.py's own
         # comment on why the shared lane_b.ts is no longer reliable once mail
@@ -301,6 +313,7 @@ def _load_lane_b_calendar(_week_end, _lookback):
               f"source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {cal_dom.get('tool_calls')})")
         return out
     except Exception as _lb_e:
+        CONNECTOR_STATUS["calendar"] = "n/a"
         print(f"WARNING: Lane B calendar load failed ({_lb_e}) -- calendar empty this run, "
               f"mail briefing continues")
         return []
@@ -325,6 +338,9 @@ def _load_lane_b_teams():
         meta   = (doc.get("meta") or {})
         lane_b = (meta.get("lane_b") or {})
         teams_dom = ((lane_b.get("domains") or {}).get("teams") or {})
+        CONNECTOR_STATUS["teams"] = (teams_dom.get("status")
+                                      if isinstance(teams_dom.get("status"), str)
+                                      and teams_dom.get("status") else "n/a")
 
         # per-domain ts preferred -- see _load_lane_b_calendar()'s matching comment.
         ts = teams_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
@@ -370,6 +386,7 @@ def _load_lane_b_teams():
               f"(source ts {ts or 'n/a'}, age {age_h:.1f}h, calls {teams_dom.get('tool_calls')})")
         return out
     except Exception as _lb_e:
+        CONNECTOR_STATUS["teams"] = "n/a"
         print(f"WARNING: Lane B Teams load failed ({_lb_e}) -- Teams section empty this run, "
               f"mail briefing continues")
         return []
@@ -412,6 +429,12 @@ def _load_lane_b_mail():
         domains = (lane_b.get("domains") or {})
         mail_inbox_dom = domains.get("mail_inbox") or {}
         mail_sent_dom  = domains.get("mail_sent") or {}
+        CONNECTOR_STATUS["mail_inbox"] = (mail_inbox_dom.get("status")
+                                           if isinstance(mail_inbox_dom.get("status"), str)
+                                           and mail_inbox_dom.get("status") else "n/a")
+        CONNECTOR_STATUS["mail_sent"] = (mail_sent_dom.get("status")
+                                          if isinstance(mail_sent_dom.get("status"), str)
+                                          and mail_sent_dom.get("status") else "n/a")
 
         # per-domain ts preferred -- see _load_lane_b_calendar()'s matching
         # comment. mail_inbox/mail_sent always run together in one
@@ -487,6 +510,8 @@ def _load_lane_b_mail():
                   "-- an older in-window message may be missing from this briefing")
         return {"inbox": inbox, "sent": sent, "truncation_risk": trunc}
     except Exception as _lb_e:
+        CONNECTOR_STATUS["mail_inbox"] = "n/a"
+        CONNECTOR_STATUS["mail_sent"] = "n/a"
         print(f"WARNING: Lane B mail load failed ({_lb_e}) -- mail empty this run, "
               f"briefing continues (calendar/Teams unaffected)")
         return dict(empty, truncation_risk=False)
@@ -4567,7 +4592,8 @@ briefing = {
     "prioritiesTomorrow": priorities_tomorrow,
     "prioritiesWeek":     priorities_week,
     "refreshed_at": datetime.now().strftime("%A %d %B · %H:%M"),
-    "mail_truncation_risk": MAIL_TRUNCATION_RISK
+    "mail_truncation_risk": MAIL_TRUNCATION_RISK,
+    "connector_status": CONNECTOR_STATUS
 }
 if teams_digest is not None:
     briefing["teams"] = teams_digest
