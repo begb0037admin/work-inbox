@@ -1383,6 +1383,35 @@ function _priInitSortables(){if(!window.Sortable)return;document.querySelectorAl
 
 function toggleSum(id,btn){const el=document.getElementById(id);const exp=el.classList.toggle('expanded');btn.textContent=exp?'Show less':'Show more';}
 
+function _calendarBucketsForDate(data,now){
+  const fields=['calToday','calTomorrow','calDay2','calDay3'];
+  const result={calToday:[],calTomorrow:[],calDay2:[],calDay3:[]};
+  const byDate={};
+  const pad=n=>String(n).padStart(2,'0');
+  const dateKey=value=>{
+    if(typeof value!=='string') return '';
+    const match=value.match(/^(\d{4}-\d{2}-\d{2})/);
+    return match?match[1]:'';
+  };
+  (Array.isArray(data.calFull)?data.calFull:[]).forEach(day=>{
+    if(!day||typeof day!=='object') return;
+    const key=dateKey(day.date);
+    if(!key||!Array.isArray(day.items)) return;
+    if(!byDate[key]) byDate[key]=[];
+    byDate[key]=byDate[key].concat(day.items);
+  });
+  const localKey=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const nextWorkday=d=>{
+    const n=new Date(d); n.setDate(n.getDate()+1);
+    while(n.getDay()===0||n.getDay()===6) n.setDate(n.getDate()+1);
+    return n;
+  };
+  const dates=[new Date(now)];
+  for(let i=1;i<4;i++) dates.push(nextWorkday(dates[i-1]));
+  dates.forEach((day,i)=>{result[fields[i]]=(byDate[localKey(day)]||[]).slice();});
+  return result;
+}
+
 function renderCalPanel(data){
   const el=document.getElementById('calPanel');
   if(!el) return;
@@ -1457,16 +1486,26 @@ function renderCalPanel(data){
   const day2Header=day2.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   const day3Header=day3.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
 
-  const mtgDates=[];
-  if(data.calToday&&data.calToday.length) mtgDates.push(new Date(todayYear,todayMonth,todayDate));
-  if(data.calTomorrow&&data.calTomorrow.length) mtgDates.push(tom);
-  if(data.calDay2&&data.calDay2.length) mtgDates.push(day2);
-  if(data.calDay3&&data.calDay3.length) mtgDates.push(day3);
+  let calToday=data.calToday||[], calTomorrow=data.calTomorrow||[],
+    calDay2=data.calDay2||[], calDay3=data.calDay3||[];
+  if(_connectorStatusInfo(data,'calendar').status==='carried_forward'){
+    const projected=_calendarBucketsForDate(data,now);
+    calToday=projected.calToday;
+    calTomorrow=projected.calTomorrow;
+    calDay2=projected.calDay2;
+    calDay3=projected.calDay3;
+  }
 
-  const daysRow=renderBlock(data.calToday,todayHeader,true,'calBodyToday')
-    +renderBlock(data.calTomorrow,tomHeader,false,'calBodyTom')
-    +renderBlock(data.calDay2,day2Header,false,'calBodyDay2')
-    +renderBlock(data.calDay3,day3Header,false,'calBodyDay3');
+  const mtgDates=[];
+  if(calToday.length) mtgDates.push(new Date(todayYear,todayMonth,todayDate));
+  if(calTomorrow.length) mtgDates.push(tom);
+  if(calDay2.length) mtgDates.push(day2);
+  if(calDay3.length) mtgDates.push(day3);
+
+  const daysRow=renderBlock(calToday,todayHeader,true,'calBodyToday')
+    +renderBlock(calTomorrow,tomHeader,false,'calBodyTom')
+    +renderBlock(calDay2,day2Header,false,'calBodyDay2')
+    +renderBlock(calDay3,day3Header,false,'calBodyDay3');
   const monthsRow=renderMiniCal(0,mtgDates)+renderMiniCal(1,mtgDates)+renderMiniCal(2,mtgDates)+renderMiniCal(3,mtgDates);
   const notice=_connectorFreshnessNote(data,'calendar')||_connectorUnavailableNote(data,'calendar');
   el.innerHTML=notice+`<div class="main-cal-panel"><div class="main-cal-days-row">${daysRow}</div><div class="main-cal-months-row">${monthsRow}</div></div>`;

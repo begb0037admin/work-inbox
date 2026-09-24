@@ -8,7 +8,7 @@ items.
 """
 
 from copy import deepcopy
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 import json
 import os
 import re
@@ -166,19 +166,45 @@ def _next_workday(day):
     return day
 
 
+def _calendar_date_key(value):
+    """Return an ISO calendar date, or None for an undated/invalid value."""
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00")).date().isoformat()
+    except ValueError:
+        return None
+
+
 def _reproject_calendar(data, now):
-    """Use calFull dates to put an older snapshot into today's four columns."""
+    """Rebuild relative calendar buckets from dated full-calendar days."""
+    fields = ("calToday", "calTomorrow", "calDay2", "calDay3")
+    for field in fields:
+        data[field] = []
+
+    run_date = now.astimezone().date() if now.tzinfo else now.date()
+    by_date = {}
     full = data.get("calFull") or []
-    by_date = {
-        str(day.get("date")): deepcopy(day.get("items") or [])
-        for day in full if isinstance(day, dict) and day.get("date")
-    }
-    if not by_date:
-        return
-    dates = [now.date()]
+    for day in full:
+        if not isinstance(day, dict):
+            continue
+        day_key = _calendar_date_key(day.get("date"))
+        if day_key and "isToday" in day:
+            day["isToday"] = day_key == run_date.isoformat()
+        items = day.get("items")
+        if not day_key or not isinstance(items, list):
+            continue
+        by_date.setdefault(day_key, []).extend(deepcopy(items))
+
+    dates = [run_date]
     for _ in range(3):
         dates.append(_next_workday(dates[-1]))
-    for field, day in zip(("calToday", "calTomorrow", "calDay2", "calDay3"), dates):
+    for field, day in zip(fields, dates):
         data[field] = by_date.get(day.isoformat(), [])
 
 

@@ -15,11 +15,12 @@ def status(as_of, name="ok"):
 class ConnectorCarryForwardTests(unittest.TestCase):
     def test_failed_domain_keeps_previous_data_as_one_snapshot(self):
         previous = {
-            "calToday": [{"time": "09:00", "title": "Daily catch-up"}],
-            "calTomorrow": [{"time": "11:00", "title": "Planning"}],
+            "calToday": [{"time": "09:00", "title": "Monday catch-up"}],
+            "calTomorrow": [{"time": "11:00", "title": "Old planning"}],
             "calDay2": [], "calDay3": [],
             "calFull": [
-                {"date": "2026-09-24", "items": [{"time": "09:00", "title": "Daily catch-up"}]},
+                {"date": "2026-09-21", "isToday": True, "items": [{"time": "09:00", "title": "Monday catch-up"}]},
+                {"date": "2026-09-24", "isToday": False, "items": [{"time": "09:00", "title": "Daily catch-up"}]},
                 {"date": "2026-09-25", "items": [{"time": "11:00", "title": "Planning"}]},
             ],
             "absences": ["A colleague - returns Friday"],
@@ -38,10 +39,35 @@ class ConnectorCarryForwardTests(unittest.TestCase):
         )
 
         self.assertEqual(carried, ["calendar"])
-        self.assertEqual(result["calToday"], previous["calToday"])
-        self.assertEqual(result["calTomorrow"], previous["calTomorrow"])
+        self.assertEqual(result["calToday"], [{"time": "09:00", "title": "Daily catch-up"}])
+        self.assertEqual(result["calTomorrow"], [{"time": "11:00", "title": "Planning"}])
+        self.assertEqual(result["calDay2"], [])
+        self.assertEqual(result["calDay3"], [])
+        self.assertNotIn("Monday catch-up", [item["title"] for item in result["calToday"]])
+        self.assertFalse(result["calFull"][0]["isToday"])
+        self.assertTrue(result["calFull"][1]["isToday"])
         self.assertEqual(result["absences"], previous["absences"])
         self.assertEqual(result["connector_status"]["calendar"]["status"], "carried_forward")
+
+    def test_missing_or_undated_full_days_clear_stored_relative_buckets(self):
+        previous = {
+            "calToday": [{"time": "09:00", "title": "Stale Monday"}],
+            "calTomorrow": [{"time": "11:00", "title": "Stale Tuesday"}],
+            "calDay2": [{"time": "12:00", "title": "Stale Wednesday"}],
+            "calDay3": [{"time": "13:00", "title": "Stale Thursday"}],
+            "calFull": [{"items": [{"time": "09:00", "title": "No date"}]}],
+            "connector_status": {"calendar": status(NOW - timedelta(days=1))},
+        }
+        current = {"calToday": [], "calTomorrow": [], "calDay2": [], "calDay3": [], "connector_status": {"calendar": "timeout"}}
+
+        result, _, carried = reconcile_domains(
+            current, previous, {}, {"calendar": "timeout"},
+            enabled_domains=["calendar"], now=NOW,
+        )
+
+        self.assertEqual(carried, ["calendar"])
+        for field in ("calToday", "calTomorrow", "calDay2", "calDay3"):
+            self.assertEqual(result[field], [])
 
     def test_data_older_than_seven_days_is_not_carried(self):
         previous = {

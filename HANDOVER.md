@@ -1,3 +1,10 @@
+# Handover -- 24 September 2026 (Codex) -- carried-forward calendar date projection
+
+- Fixed the carried-forward calendar bug in `connector_carry_forward.py`: relative `calToday`/`calTomorrow`/`calDay2`/`calDay3` buckets are now always cleared and rebuilt from dated `calFull` days relative to the current local run date, skipping weekends and excluding undated entries. Relative `calFull.isToday` flags are refreshed too.
+- Added the matching dashboard safety net in `js/app.js`: when calendar status is `carried_forward`, the four day panels are projected from dated `calFull` against the browser's current date while preserving the `Calendar from ...` freshness label.
+- Backed up the published briefing to `Archive/briefing_backup_20260924_221000_pre_carried_calendar_dates.json`, corrected the live snapshot's relative `isToday` marker to Thursday 24 September, and validated JSON. Published projection counts: today 6, tomorrow 11, day2 0, day3 0.
+- Regression coverage proves a Monday snapshot rendered on Thursday shows Thursday events, not Monday events, plus fail-closed handling for undated full-calendar data. Checks passed: 15 Python unit tests, root mail-key self-test, dashboard and section-count Node tests, JavaScript syntax, Python compilation, and `git diff --check`.
+
 # Handover -- 24 September 2026 (Codex) -- three-identity connector failover ring
 
 - Lane B now uses the ordered ring in [`lane_b_identities.json`](lane_b_identities.json): `edu` (`begb0037@ox.ac.uk`), `personal-uk` (`kevin@lelitte.co.uk`, `C:\WorkInboxAI\codex-laneb`), then `personal-com` (`kevin@lelitte.com`, `C:\WorkInboxAI\codex-lanec`). Mail inbox, mail sent, calendar, Teams, and the optional mail-link lookups all restart at ring position 1 for each call and each run.
