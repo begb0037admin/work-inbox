@@ -66,6 +66,8 @@ import urllib.request
 import urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Repo root too: lane_b_call1.py (the connector weblink resolver) lives there, not in tools/.
+sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from phase_failure_notify import notify_phase_failure
 
 GITHUB_API = "https://api.github.com"
