@@ -1,3 +1,9 @@
+# Handover -- 24 September 2026 (Codex) -- urgent card layout + Expand all hotfix
+
+Implemented the dashboard-only card layout hotfix from `CODEX_BRIEF.md`: priority card headers now keep title/meta separate from a fixed 3x2 action grid, expanded details occupy a full-width wrapping row, and the Command Centre control is a fixed-size second-row action with placeholders on cards that lack it. Section controls now recompute between `Expand all` and `Collapse all` from visible cards on every render and persist through `workInbox_expanded_v1`. No pipeline, data, mailbox or deployment action was taken. Checks: `node --check js/app.js` and `git diff --check`.
+
+---
+
 # Handover -- 24 September 2026 (Drew) -- dashboard: tracker-identical drag + 2x2 card actions + expand/collapse DEPLOYED LIVE, verified
 
 Kevin approved build + deploy (24 Sep, via Jacob). Dashboard only; no pipeline, mailbox, Graph, COM, IMAP or connector change. Codex (default account) built `04e6ec0` plus the rename-blur fix `1fd5574`; Drew vendored `js/vendor/Sortable.min.js` (1.15.6, sha256 `6dee1a4b…`, identical to command-centre's copy). The brief wrongly assumed it was already there, and the first browser test caught it (404, so drag was dead). Merged PR #37 (`dec6ac1`); wi.lelitte.co.uk served `app.js` byte-identical to main.
