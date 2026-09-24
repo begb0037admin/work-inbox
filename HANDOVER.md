@@ -1,3 +1,10 @@
+# Handover -- 24 September 2026 (Codex) -- Lane B inbox read cap 30 -> 100
+
+Raised `WI_LANE_B_MAIL_MAX_READ`'s default in `lane_b_call1.py` from 30 to 100. `mail_truncation_risk` had been true on every briefing since 15 Sep because the 30-item read pass bound, dropping older in-window read mail and showing the incomplete-fetch warning. 100 remains within the connector's observed 200-item page; the environment override is unchanged. Verified with `python -m py_compile lane_b_call1.py`. Revert by restoring the default to 30, or set `WI_LANE_B_MAIL_MAX_READ=30` in the wrapper environment.
+
+---
+
+
 # Handover -- 24 September 2026 ~19:30 (Drew) -- section Collapse/Expand toggle + CC label + responsive columns LIVE (PR #39, main `4ac97f1`)
 
 - Kevin's rule (24 Sep): ONE section toggle per section labelled Collapse/Expand that folds the whole section (state remembered); NO bulk card-drawer expand -- each card's own › opens its details. Verified live 1440+1100px from folded/open/drawer-open state: 88/88 checks across all three boards, no page errors.
