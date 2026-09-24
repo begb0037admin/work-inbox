@@ -1,3 +1,10 @@
+# Handover -- 24 September 2026 ~21:55 (Codex) -- per-domain connector carry-forward
+
+- Added `connector_carry_forward.py` and wired `fetch_inbox.py` so calendar, Teams, inbox mail, and sent mail are handled independently. A failed domain carries one complete last-good snapshot only when it is no more than 7 days old; older/missing snapshots are cleared and reported as unavailable. Calendar snapshots are reprojected from dated `calFull` into the current four rolling day columns. The local cache is `data/connector_last_good.json` (ignored by git) and is backed up to `Archive/` before replacement.
+- Dashboard labels carried-forward Calendar/Inbox/Teams data with its `as_of` timestamp, keeps the amber connector banner, and renders the Teams digest when available. Added Python carry-forward tests and a Node rendering check.
+- Restored `data/briefing.json` from commit `1fbf1ca6` (21 Sep 12:25:26 BST) after backing up the failed 24 Sep file to `Archive/briefing_backup_20260924_215418_203.json`. JSON validation passed: 39 full-week calendar events, 6 today, 11 tomorrow; Teams was empty in that last within-window good snapshot and is labelled accordingly. No push or deployment.
+- **Git handoff:** this linked worktree's shared Git directory is outside the writable workspace. Creating `codex/carry-forward-last-good-data`, staging, and committing all fail with permission denied on the shared `.git` refs/index lock. The worktree changes are intentionally left unstaged for commit from a Git-writable clone.
+
 # Handover -- 24 September 2026 ~21:45 (Drew) -- PR #43 LIVE: staleness banner follows the real schedule
 
 - The banner used `SCHEDULE_RUN_HOURS=[6,9,12,15,18]` with a 90-min grace, so it showed a false red every weekday evening ("expected by 18:00") and all weekend. Now it uses `[7,12,16]` with a 45-min grace, matching the laptop's real Work Inbox Bridge Briefing triggers (Mon-Fri, DaysOfWeek=62, per the coordinator's check of the laptop). Weekend days were already skipped.

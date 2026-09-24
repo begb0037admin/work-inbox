@@ -1116,12 +1116,41 @@ function _joinConnectorNames(names){
   return names.slice(0,-1).join(', ')+', and '+names[names.length-1];
 }
 
+function _connectorStatusInfo(data,key){
+  const raw=(data.connector_status||{})[key];
+  if(raw&&typeof raw==='object') return raw;
+  return {status:raw||'n/a'};
+}
+
+function _connectorFreshnessNote(data,key){
+  const info=_connectorStatusInfo(data,key);
+  if(info.status!=='carried_forward') return '';
+  let when='last good data';
+  if(info.as_of){
+    const d=new Date(info.as_of);
+    if(!Number.isNaN(d.getTime())) when=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  }
+  const labels={mail_inbox:'Inbox mail',mail_sent:'Sent mail',calendar:'Calendar',teams:'Teams'};
+  return '<div class="domain-freshness-note"><strong>'+escapeHtml(labels[key]||key)+' from '+escapeHtml(when)+' &mdash; not refreshed since</strong></div>';
+}
+
+function _connectorUnavailableNote(data,key){
+  const info=_connectorStatusInfo(data,key);
+  if(info.status!=='unavailable') return '';
+  const labels={mail_inbox:'Inbox mail',mail_sent:'Sent mail',calendar:'Calendar',teams:'Teams'};
+  const reason=info.reason==='last_good_data_older_than_7_days'?' (last good data is older than 7 days)':'';
+  return '<div class="domain-freshness-note"><strong>'+escapeHtml(labels[key]||key)+' unavailable'+reason+'.</strong></div>';
+}
+
 function _failedConnectorDomains(data){
   const labels={mail_inbox:'inbox mail',mail_sent:'sent mail',calendar:'calendar',teams:'Teams'};
   const keys=Object.keys(labels);
   if(Object.prototype.hasOwnProperty.call(data,'connector_status')){
     const statuses=data.connector_status||{};
-    return keys.filter(key=>statuses[key]!=='ok'&&statuses[key]!=='n/a').map(key=>labels[key]);
+    return keys.filter(key=>{
+      const status=statuses[key]&&typeof statuses[key]==='object'?statuses[key].status:statuses[key];
+      return status&&status!=='ok'&&status!=='n/a';
+    }).map(key=>labels[key]);
   }
 
   const statusDoc=data._briefing_status;
@@ -1151,7 +1180,7 @@ function renderStaleBanner(data){
   const ok = refreshed && expected && refreshed>=expected;
   const failedNames=_failedConnectorDomains(data);
   const failedNote=failedNames.length
-    ? '<div style="margin-top:4px;">&#9888; Mail/calendar unavailable this run &mdash; '+escapeHtml(_joinConnectorNames(failedNames))+" didn't load, so this briefing may be missing items.</div>"
+    ? '<div style="margin-top:4px;">&#9888; Connector data unavailable this run &mdash; '+escapeHtml(_joinConnectorNames(failedNames))+" didn't refresh; last-good data is shown where eligible.</div>"
     : '';
   // Mail-fetch truncation-risk line (14 Sep 2026, Drew) -- surfaces
   // data.mail_truncation_risk (set by fetch_inbox.py/lane_b_call1.py when
@@ -1176,7 +1205,7 @@ function renderStaleBanner(data){
   if(ok){
     el.style.background='#b45309';
     el.style.color='#fff';
-    el.innerHTML='&#9888; Mail/calendar unavailable this run &mdash; '+escapeHtml(_joinConnectorNames(failedNames))+" didn't load, so this briefing may be missing items. Last ran "+escapeHtml(data.refreshed_at||'unknown')+truncNote;
+    el.innerHTML='&#9888; Connector data unavailable this run &mdash; '+escapeHtml(_joinConnectorNames(failedNames))+" didn't refresh; last-good data is shown where eligible. Last ran "+escapeHtml(data.refreshed_at||'unknown')+truncNote;
     return;
   }
   el.style.background='#a3271f';
@@ -1191,6 +1220,17 @@ function renderStaleBanner(data){
     '. Double-click "Trigger Laptop Refresh Now.bat" on the Desktop if this persists.'+failedNote+truncNote;
 }
 
+function renderTeamsPanel(data){
+  const el=document.getElementById('teamsPanel');
+  if(!el) return;
+  const hasTeams=Object.prototype.hasOwnProperty.call(data,'teams')||_connectorStatusInfo(data,'teams').status!=='n/a';
+  if(!hasTeams){el.innerHTML='';return;}
+  const items=data.teams||[];
+  const notice=_connectorFreshnessNote(data,'teams')||_connectorUnavailableNote(data,'teams');
+  const rows=items.length?items.map(item=>'<div class="teams-item"><div class="teams-item-meta">'+escapeHtml(item.channel||'Teams')+' &middot; '+escapeHtml(item.sender||'')+' '+escapeHtml(item.time||'')+'</div><div>'+escapeHtml(item.preview||'')+'</div></div>').join(''):'<div class="teams-empty">No Teams messages in the available snapshot.</div>';
+  el.innerHTML='<div class="teams-panel">'+notice+'<div class="teams-panel-title">Teams</div>'+rows+'</div>';
+}
+
 function renderBriefing(data,key){
   if(_priDragging){_priDeferredRender=true;return;}
   _priSortables.forEach(s=>s.destroy());_priSortables=[];
@@ -1200,6 +1240,7 @@ function renderBriefing(data,key){
   document.getElementById('headerDate').textContent=data.date;
   renderStaleBanner(data);
   renderCalPanel(data);
+  renderTeamsPanel(data);
   setupCtxTicker(data.subtitle?(data.subtitle+(data.context?'. '+data.context:'')):data.context);
   const absEl=document.getElementById('absencesSidebar');
   if(absEl){
@@ -1218,7 +1259,8 @@ function renderBriefing(data,key){
   }
   const priSecs=applyPriOverrides(data), priTicks=getTicks();
   const priVisibleCount=sec=>priSecs[sec].filter(p=>_priCardVisible(p,priTicks,showingDoneItems)).length;
-  document.getElementById('inboxCol').innerHTML=`<div class="inbox-grid" id="inboxGrid">
+  const mailNotice=_connectorFreshnessNote(data,'mail_inbox')||_connectorUnavailableNote(data,'mail_inbox');
+  document.getElementById('inboxCol').innerHTML=mailNotice+`<div class="inbox-grid" id="inboxGrid">
     <div id="col-left">
       <div id="sec-urgent-wrap">
         ${_secHeadHtml('ur','dot-r','Urgent – action required today',priVisibleCount('ur'))}
@@ -1424,7 +1466,8 @@ function renderCalPanel(data){
     +renderBlock(data.calDay2,day2Header,false,'calBodyDay2')
     +renderBlock(data.calDay3,day3Header,false,'calBodyDay3');
   const monthsRow=renderMiniCal(0,mtgDates)+renderMiniCal(1,mtgDates)+renderMiniCal(2,mtgDates)+renderMiniCal(3,mtgDates);
-  el.innerHTML=`<div class="main-cal-panel"><div class="main-cal-days-row">${daysRow}</div><div class="main-cal-months-row">${monthsRow}</div></div>`;
+  const notice=_connectorFreshnessNote(data,'calendar')||_connectorUnavailableNote(data,'calendar');
+  el.innerHTML=notice+`<div class="main-cal-panel"><div class="main-cal-days-row">${daysRow}</div><div class="main-cal-months-row">${monthsRow}</div></div>`;
 }
 
 let _ctxSentences=[], _ctxIdx=0, _ctxTimer=null, _ctxPaused=false;

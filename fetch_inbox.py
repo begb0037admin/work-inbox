@@ -2,6 +2,13 @@ import json, os, base64, html, re, urllib.request, urllib.error, urllib.parse, s
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
+from connector_carry_forward import (
+    last_good_data,
+    load_cache as load_connector_cache,
+    reconcile_domains,
+    save_cache as save_connector_cache,
+)
+
 # win32com / pywintypes / anthropic are path-specific, not universal:
 #   - win32com + pywintypes: any Outlook COM work (MAIL_BACKEND=com, or the
 #     COM calendar pull). A COM-free host (the Oxford laptop running
@@ -233,6 +240,15 @@ CONNECTOR_STATUS = {
     "calendar": "n/a",
     "teams": "n/a",
 }
+CONNECTOR_AS_OF = {
+    "mail_inbox": None,
+    "mail_sent": None,
+    "calendar": None,
+    "teams": None,
+}
+CONNECTOR_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    "data", "connector_last_good.json")
+CONNECTOR_CACHE_ARCHIVE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Archive")
 
 
 def _load_lane_b_calendar(_week_end, _lookback):
@@ -252,13 +268,14 @@ def _load_lane_b_calendar(_week_end, _lookback):
         cal_dom = ((lane_b.get("domains") or {}).get("calendar") or {})
         CONNECTOR_STATUS["calendar"] = (cal_dom.get("status")
                                          if isinstance(cal_dom.get("status"), str)
-                                         and cal_dom.get("status") else "n/a")
+                                         and cal_dom.get("status") else "ok")
 
         # per-domain ts preferred (9 Sept 2026 fix -- see lane_b_call1.py's own
         # comment on why the shared lane_b.ts is no longer reliable once mail
         # runs as its own separate invocation touching the same file); falls
         # back to the shared value for an older file written before this fix.
         ts = cal_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
+        CONNECTOR_AS_OF["calendar"] = ts
         age_h = None
         if ts:
             try:
@@ -269,10 +286,12 @@ def _load_lane_b_calendar(_week_end, _lookback):
         if age_h is None:
             age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
         if age_h > LANE_B_MAX_AGE_H:
+            CONNECTOR_STATUS["calendar"] = "unavailable"
             print(f"WARNING: Lane B calendar file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
                   f"-- treating calendar as unavailable this run")
             return []
         if lane_b.get("halt") or cal_dom.get("status") == "halt":
+            CONNECTOR_STATUS["calendar"] = "unavailable"
             print("WARNING: Lane B calendar guard is HALT/tripped -- calendar empty this run")
             return []
         if cal_dom.get("status") not in ("ok", None):
@@ -340,10 +359,11 @@ def _load_lane_b_teams():
         teams_dom = ((lane_b.get("domains") or {}).get("teams") or {})
         CONNECTOR_STATUS["teams"] = (teams_dom.get("status")
                                       if isinstance(teams_dom.get("status"), str)
-                                      and teams_dom.get("status") else "n/a")
+                                      and teams_dom.get("status") else "ok")
 
         # per-domain ts preferred -- see _load_lane_b_calendar()'s matching comment.
         ts = teams_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
+        CONNECTOR_AS_OF["teams"] = ts
         age_h = None
         if ts:
             try:
@@ -354,6 +374,7 @@ def _load_lane_b_teams():
         if age_h is None:
             age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
         if age_h > LANE_B_MAX_AGE_H:
+            CONNECTOR_STATUS["teams"] = "unavailable"
             print(f"WARNING: Lane B Teams file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
                   f"-- treating Teams as unavailable this run")
             return []
@@ -364,6 +385,7 @@ def _load_lane_b_teams():
         # when only calendar fired this cycle (headless connector availability
         # is known to flip run-to-run, confirmed 1 Sept).
         if lane_b.get("halt") or teams_dom.get("status") == "halt":
+            CONNECTOR_STATUS["teams"] = "unavailable"
             print("WARNING: Lane B guard is HALT/tripped -- Teams section empty this run")
             return []
         if teams_dom.get("status") not in ("ok", None):
@@ -434,13 +456,17 @@ def _load_lane_b_mail():
                                            and mail_inbox_dom.get("status") else "n/a")
         CONNECTOR_STATUS["mail_sent"] = (mail_sent_dom.get("status")
                                           if isinstance(mail_sent_dom.get("status"), str)
-                                          and mail_sent_dom.get("status") else "n/a")
+                                          and mail_sent_dom.get("status") else "ok")
+        if CONNECTOR_STATUS["mail_inbox"] == "n/a":
+            CONNECTOR_STATUS["mail_inbox"] = "ok"
 
         # per-domain ts preferred -- see _load_lane_b_calendar()'s matching
         # comment. mail_inbox/mail_sent always run together in one
         # lane_b_call1.py invocation (--domain mail), so they share one ts;
         # either one (whichever is present) is authoritative for both.
         ts = mail_inbox_dom.get("ts") or mail_sent_dom.get("ts") or lane_b.get("ts") or meta.get("ts")
+        CONNECTOR_AS_OF["mail_inbox"] = ts
+        CONNECTOR_AS_OF["mail_sent"] = ts
         age_h = None
         if ts:
             try:
@@ -451,6 +477,8 @@ def _load_lane_b_mail():
         if age_h is None:
             age_h = (time.time() - os.path.getmtime(LANE_B_NORMALISED)) / 3600.0
         if age_h > LANE_B_MAX_AGE_H:
+            CONNECTOR_STATUS["mail_inbox"] = "unavailable"
+            CONNECTOR_STATUS["mail_sent"] = "unavailable"
             print(f"WARNING: Lane B mail file is {age_h:.1f}h old (> {LANE_B_MAX_AGE_H}h) "
                   f"-- treating mail as unavailable this run")
             return empty
@@ -2212,6 +2240,19 @@ now          = datetime.now()
 today_str    = now.strftime("%A") + " " + str(now.day) + " " + now.strftime("%B %Y")
 tomorrow_str = tomorrow.strftime("%A") + " " + str(tomorrow.day) + " " + tomorrow.strftime("%B %Y")
 existing_briefing = load_existing_briefing()
+connector_cache = load_connector_cache(CONNECTOR_CACHE_PATH)
+
+# Sent mail is not rendered as a standalone dashboard section, but it is an
+# input to the context/triage phases.  Reuse its complete last-good source
+# snapshot on a failed mail_sent fetch so the AI does not see a mixed fresh /
+# stale source for that domain.
+if MAIL_CONNECTOR and CONNECTOR_STATUS.get("mail_sent") != "ok":
+    _sent_last_good = last_good_data(
+        existing_briefing, connector_cache, "mail_sent", now=datetime.now(timezone.utc)
+    )
+    if _sent_last_good and (_sent_last_good.get("data") or {}).get("sent") is not None:
+        sent = list((_sent_last_good.get("data") or {}).get("sent") or [])
+        print("Phase 1 carry-forward input - reused last-good sent mail for this run")
 
 # Calendar day-view now covers 4 rolling working days (today, tomorrow, +2,
 # +3) instead of just today/tomorrow -- Kevin's explicit request, 10 Aug
@@ -4569,6 +4610,18 @@ if TEAMS_CONNECTOR:
 else:
     teams_digest = None
 
+# A missing/stale Lane B file can leave a connector loader at its safe default
+# of ``n/a``.  Once that backend is explicitly enabled, that is an unavailable
+# domain, not a successful empty fetch; the carry-forward layer must see it.
+for _domain, _enabled in (
+    ("calendar", CAL_CONNECTOR),
+    ("teams", TEAMS_CONNECTOR),
+    ("mail_inbox", MAIL_CONNECTOR),
+    ("mail_sent", MAIL_CONNECTOR),
+):
+    if _enabled and CONNECTOR_STATUS.get(_domain) in (None, "", "n/a"):
+        CONNECTOR_STATUS[_domain] = "unavailable"
+
 briefing = {
     "date":         today_str,
     "subtitle":     subtitle,
@@ -4610,6 +4663,41 @@ if BRIDGE_ALLOW_EMPTY_CALENDAR and calendar_summary_count(briefing) == 0:
                     "source): no meeting list or prep for today or this week." + _carried)
     briefing["context"] = ((context + " " + _bridge_note).strip() if context else _bridge_note)
     log("Phase 4 - bridge mode: no calendar summaries; set calendarUnavailable + noted it in context.")
+
+# Keep each failed connector domain whole.  This runs after all AI/card shaping
+# so a failed inbox cannot be partially replaced by the current run's empty
+# classification, and a failed calendar is reprojected from its full dated
+# snapshot into the current Today/Tomorrow/day+2/day+3 columns.
+_enabled_connector_domains = [
+    _d for _d, _enabled in (
+        ("calendar", CAL_CONNECTOR),
+        ("teams", TEAMS_CONNECTOR),
+        ("mail_inbox", MAIL_CONNECTOR),
+        ("mail_sent", MAIL_CONNECTOR),
+    ) if _enabled
+]
+if _enabled_connector_domains:
+    briefing, connector_cache, _carried_domains = reconcile_domains(
+        briefing,
+        existing_briefing,
+        connector_cache,
+        CONNECTOR_STATUS,
+        CONNECTOR_AS_OF,
+        enabled_domains=_enabled_connector_domains,
+        now=datetime.now(timezone.utc),
+        source_overrides={"mail_sent": {"sent": sent}} if MAIL_CONNECTOR else {},
+    )
+    for _domain in _carried_domains:
+        _as_of = (briefing.get("connector_status", {}).get(_domain) or {}).get("as_of", "unknown")
+        log(f"Connector carry-forward - {_domain} from {_as_of}")
+    try:
+        save_connector_cache(
+            CONNECTOR_CACHE_PATH,
+            connector_cache,
+            archive_dir=CONNECTOR_CACHE_ARCHIVE,
+        )
+    except Exception as _cache_error:
+        print(f"WARNING: could not persist connector last-good cache - {_cache_error}")
 
 # -- Phase 4 -- push to GitHub --
 log("Phase 4 - pushing briefing to GitHub...")
