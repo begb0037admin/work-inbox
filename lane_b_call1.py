@@ -418,15 +418,11 @@ def _prompt_for_identity(prompt: str, identity: dict) -> str:
     account = str(identity.get("m365_account") or "").strip()
     if not account:
         return prompt
-    # The connector account picker is model-mediated.  Keep this target and the
-    # execute-now instruction short and first: the previous long prefix/suffix
-    # made personal-com verify the mailbox but then claim the actual operation
-    # was not specified, producing zero data calls.
+    # The connector account picker is model-mediated. Keep the account target
+    # as a single short sentence; a second execute-now wrapper made the model
+    # verify the mailbox but sometimes stop before the actual read tool call.
     return (
-        f"Use only the Oxford Microsoft 365 account {account} (not Personal "
-        "kevin@lelitte.com). Do not ask which mailbox to use; select Oxford if the "
-        "connector asks. Execute the connector task now; do not merely acknowledge it.\n\n"
-        f"{prompt}"
+        f"Use only the Oxford Microsoft 365 mailbox {account}, not Personal.\n\n{prompt}"
     )
 
 
@@ -620,9 +616,9 @@ SAFETY_RULE = (
 
 def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
     return (
-        "Use only the Oxford Outlook calendar. List events between "
-        f"{win_start_iso} and {win_end_iso}, ordered by start time. Use the Outlook Calendar "
-        "connector now. Return each event subject, start, end, location, and attendees. "
+        "Use the Outlook Calendar connector now, read-only. List Oxford calendar events between "
+        f"{win_start_iso} and {win_end_iso}, ordered by start time. Return each event subject, "
+        "start, end, location, and attendees. "
         "Read-only: do not create, modify, move, delete, or respond to anything."
     )
 
@@ -698,9 +694,9 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
     # unread/read split a deterministic API-level operation instead of an
     # LLM judgement call.
     return (
-        "Use only the Oxford Outlook mailbox. List the 3 latest messages in the Inbox, "
+        "Use the Outlook Email connector now, read-only. List the 3 latest messages in the Oxford Inbox, "
         f"received since {since_iso}, newest first. Return each subject, sender, received "
-        "time, and read status. Use the Outlook Email connector now. Read-only: do not "
+        "time, and read status. Do not "
         "send, modify, move, delete, or mark anything."
     )
 
@@ -743,9 +739,9 @@ def build_mail_sent_prompt(since_iso: str) -> str:
     # them here is a prompt-level determinism fix, not a guard change; the
     # guard's own allowlist is untouched.
     return (
-        "Use only the Oxford Outlook mailbox. List the 3 latest messages in Sent Items, "
+        "Use the Outlook Email connector now, read-only. List the 3 latest messages in Oxford Sent Items, "
         f"sent since {since_iso}, newest first. Return each subject, recipients, and sent "
-        "time. Use the Outlook Email connector now. Read-only: do not send, modify, move, "
+        "time. Do not send, modify, move, "
         "delete, or mark anything."
     )
 

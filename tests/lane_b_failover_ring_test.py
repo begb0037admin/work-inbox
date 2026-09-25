@@ -148,13 +148,10 @@ class FailoverRingTests(unittest.TestCase):
 
         self.assertEqual(len(calls), 1)
         self.assertTrue(calls[0].startswith(
-            "Use only the Oxford Microsoft 365 account "
+            "Use only the Oxford Microsoft 365 mailbox "
             "kevin.lelitte@admin.ox.ac.uk"
         ))
-        self.assertIn("Do not ask which mailbox to use", calls[0])
-        self.assertIn("do not merely acknowledge it", calls[0])
-        self.assertIn("select Oxford if the connector asks", calls[0])
-        self.assertIn("not Personal kevin@lelitte.com", calls[0])
+        self.assertIn("not Personal", calls[0])
 
     def test_mail_and_calendar_prompts_share_explicit_oxford_target(self):
         identity = {
@@ -168,9 +165,8 @@ class FailoverRingTests(unittest.TestCase):
             lane.build_calendar_prompt("2026-09-25T00:00:00Z", "2026-10-02T00:00:00Z"),
         ):
             targeted = lane._prompt_for_identity(prompt, identity)
-            self.assertLess(targeted.index("Use only the Oxford Microsoft 365 account"), targeted.index("Use the Outlook"))
+            self.assertLess(targeted.index("Use only the Oxford Microsoft 365 mailbox"), targeted.index("Use the Outlook"))
             self.assertIn("kevin.lelitte@admin.ox.ac.uk", targeted)
-            self.assertIn("Execute the connector task now", targeted)
 
     def test_reported_wrong_account_is_a_mismatch(self):
         events = [{
