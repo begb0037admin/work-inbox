@@ -18,8 +18,8 @@ def event(page, result):
             "type": "mcp_tool_call",
             "status": "completed",
             "server": "codex_apps",
-            "tool": "microsoft_outlook_email.search_messages",
-            "arguments": {"from_index": (page - 1) * 2},
+            "tool": "microsoft_outlook_email.list_messages",
+            "arguments": {"folder_id": "drafts", "page": page},
             "result": {"structured_content": result},
         },
     }
@@ -50,11 +50,11 @@ class DraftDiffPaginationTests(unittest.TestCase):
     def test_extracts_payload_wrapped_events(self):
         wrapped = {"payload": event(1, {"results": [], "has_more": False})}
         calls = connector._lb.extract_tool_calls([wrapped])
-        self.assertEqual([call["tool"] for call in calls], ["microsoft_outlook_email.search_messages"])
+        self.assertEqual([call["tool"] for call in calls], ["microsoft_outlook_email.list_messages"])
 
     def test_accepts_camel_case_structured_content_events(self):
-        raw_event = event(1, {"results": [{"id": "camel"}], "has_more": False})
-        raw_event["item"]["result"] = {"structuredContent": {"results": [{"id": "camel"}], "has_more": False}}
+        raw_event = event(1, {"value": [{"id": "camel"}]})
+        raw_event["item"]["result"] = {"structuredContent": {"value": [{"id": "camel"}]}}
         with mock.patch.object(connector._lb, "run_codex_json", return_value=([raw_event], "raw")):
             rows = connector._list_folder_messages(
                 "Drafts", extra_filter=None, top=2, max_total=10,
@@ -64,8 +64,8 @@ class DraftDiffPaginationTests(unittest.TestCase):
 
     def test_collects_continuation_pages_and_deduplicates_boundary_ids(self):
         events = [
-            event(1, {"results": [{"id": "a"}, {"id": "b"}], "has_more": True, "next_from_index": 2}),
-            event(2, {"results": [{"id": "b"}, {"id": "c"}], "has_more": False}),
+            event(1, {"value": [{"id": "a"}, {"id": "b"}], "next_link": "page-2"}),
+            event(2, {"value": [{"id": "b"}, {"id": "c"}]}),
         ]
         with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
             rows = connector._list_folder_messages(
@@ -74,20 +74,20 @@ class DraftDiffPaginationTests(unittest.TestCase):
             )
         self.assertEqual([row["id"] for row in rows], ["a", "b", "c"])
 
-    def test_accepts_observed_next_call_when_page_omits_continuation_index(self):
+    def test_requires_continuation_before_another_page(self):
         events = [
-            event(1, {"results": [{"id": "a"}], "has_more": True}),
-            event(2, {"results": [{"id": "b"}], "has_more": False}),
+            event(1, {"value": [{"id": "a"}]}),
+            event(2, {"value": [{"id": "b"}]}),
         ]
         with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
-            rows = connector._list_folder_messages(
-                "Drafts", extra_filter=None, top=1, max_total=10,
-                tag="test", retries=1, log=lambda _: None,
-            )
-        self.assertEqual([row["id"] for row in rows], ["a", "b"])
+            with self.assertRaises(connector.ConnectorResultIncomplete):
+                connector._list_folder_messages(
+                    "Drafts", extra_filter=None, top=1, max_total=10,
+                    tag="test", retries=1, log=lambda _: None,
+                )
 
     def test_refuses_a_continuation_left_after_page_bound(self):
-        events = [event(1, {"results": [{"id": "a"}], "has_more": True, "next_from_index": 2})]
+        events = [event(1, {"value": [{"id": "a"}], "next_link": "page-2"})]
         with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
             with self.assertRaises(connector.ConnectorResultIncomplete):
                 connector._list_folder_messages(

@@ -31,16 +31,15 @@ guard_recontamination()'s own allowlist is untouched.
 WHAT THIS REPLACES (vs draft_diff_imap.py)
   COM/IMAP                          -> connector equivalent here
   --------------------------------------------------------------------------
-  Drafts folder                     -> search_messages with the connector's
-                                       supported `in:drafts` mailbox filter.
-  Sent Items folder                 -> search_messages with `in:sentitems`.
-                                       The current connector surface exposes
-                                       search_messages, not list_messages;
-                                       pagination remains bounded and the
-                                       safety guard remains read-only.
+  Drafts folder                     -> find_mail_folder + list_messages,
+                                       exactly the folder-scoped read path used
+                                       by the working Bridge Briefing task.
+  Sent Items folder                 -> find_mail_folder + list_messages,
+                                       with bounded continuation pages and the
+                                       same read-only safety guard.
   msg.ConversationID / Thread-Index -> NO EQUIVALENT AVAILABLE. Confirmed
                                        live 16 Sep 2026: this connector's
-                                       search_messages/fetch_message tools
+                                       list_messages/fetch_message tools
                                        return a fixed field set (subject,
                                        body, bodyPreview, toRecipients,
                                        ccRecipients, sender, receivedDateTime,
@@ -74,9 +73,9 @@ WHAT THIS REPLACES (vs draft_diff_imap.py)
                                        guesses, same discipline as both other
                                        backends.
   msg.Body                          -> body.content field (already the FULL
-                                       body, HTML or text) from search_messages
+                                       body, HTML or text) from list_messages
                                        directly -- confirmed live 25 Sep the
-                                       connector's search_messages response
+                                       connector's list_messages response
                                        already includes the full body, not a
                                        preview (same finding behind the
                                        mail_sent fix in lane_b_call1.py: the
@@ -218,29 +217,31 @@ def _body_text(body_field, fallback_preview: str = "") -> str:
 
 
 # ---------------------------------------------------------------------------
-#  Connector plumbing -- bounded mailbox-filtered search_messages pulls,
+#  Connector plumbing -- bounded folder-scoped list_messages pulls,
 #  guard-checked
 # ---------------------------------------------------------------------------
 def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) -> str:
-    # The current Outlook connector exposes search_messages rather than the
-    # older list_mail_folders/list_messages pair. These filters were verified
-    # live against the Oxford mailbox: in:drafts and in:sentitems.
-    mailbox_filter = "in:drafts" if display_name.casefold() == "drafts" else "in:sentitems"
-    query = f"{mailbox_filter} {extra_filter}" if extra_filter else mailbox_filter
+    # Keep this mechanically aligned with the working Bridge mail path:
+    # resolve the named folder once, then read it with list_messages. The
+    # connector's current personal-com session does not reliably expose the
+    # older search_messages surface used by the previous Draft Diff path.
+    filt = f' filter="{extra_filter}",' if extra_filter else ""
+    orderby = "sentDateTime desc" if display_name.casefold() == "sent items" else "receivedDateTime desc"
     return (
-        "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve "
-        f"messages from my \"{display_name}\" folder. Use only the paginated "
-        "search_messages calls described below; do not add any other tool call:\n"
-        f"1) Call search_messages with query=\"{query}\", size={top}, "
-        "from_index=0. If has_more is true, call search_messages again with the "
-        "same query and size, using the returned next_from_index. Continue for "
-        f"at most {MAX_PAGES} search_messages calls and stop when has_more is false. "
-        "If has_more remains after the page bound, return the last next_from_index "
-        "in the raw result so the caller can reject the incomplete pull.\n"
-        "Do NOT call list_mail_folders, list_messages, fetch_message, or "
-        "fetch_messages_batch -- search_messages already returns the full message "
-        "content needed, including the "
-        "body. "
+        "Use the Outlook Email connector now, read-only. Retrieve messages from "
+        f"my Oxford \"{display_name}\" folder. First call find_mail_folder once "
+        f"for display_name=\"{display_name}\"; then use only the paginated "
+        "list_messages calls described below, with no other tool call:\n"
+        f"1) Call list_messages scoped to that folder id,{filt} "
+        f"orderby=\"{orderby}\", top={top}. If the result contains a next_link, "
+        "@odata.nextLink, nextLink, skip_token, or skipToken, call list_messages "
+        "again for the next page using that continuation and the same folder and "
+        f"filter. Continue for at most {MAX_PAGES} list_messages page calls and "
+        "stop when no continuation is returned. If continuation remains after "
+        "the page bound, return it so the caller can reject the incomplete pull.\n"
+        "Do NOT call fetch_message, fetch_messages_batch, or search_messages -- "
+        "list_messages already returns the full message content needed, including "
+        "the body. "
         "For each message return: subject, to recipients, received/sent date-time, "
         "the message id, the web link, and the full body. "
         "Return ONLY the raw connector result(s) as JSON (the message objects and "
@@ -253,7 +254,7 @@ def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) 
 
 def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: int,
                            max_total: int, tag: str, retries: int, log=print) -> list[dict]:
-    """Bounded mailbox-filtered search_messages pagination, guard-checked, with the same
+    """Bounded folder-scoped list_messages pagination, guard-checked, with the same
     retry/backoff shape as lane_b_call1.fetch_mail_domain() (personal-account
     -only -- mail has no Edu connector, same precedent that function already
     established). Fails SOFT on anything except a genuine guard HALT: a
@@ -265,14 +266,12 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
     design, same as every other Lane B domain."""
     prompt = _build_folder_prompt(display_name, extra_filter, top)
     last_exc: Exception | None = None
-    unavailable_detail = "connector did not return a usable search_messages result"
+    unavailable_detail = "connector did not return a usable list_messages result"
     identities = _lb.available_identity_ring()
     if not identities:
         raise ConnectorResultUnavailable(f"{display_name}: no authenticated connector identity")
-    # Match lane_b_call1.fetch_domain() for Oxford mail: the checked-in ring is
-    # still edu -> personal-uk -> personal-com, but personal-com is the known
-    # working Outlook connector identity and therefore gets the first attempt.
-    # Keep the remaining entries in their configured order for failover.
+    # Match lane_b_call1.fetch_domain() for Oxford mail: personal-com first,
+    # then the configured edu -> personal-uk failover entries.
     identities = sorted(
         identities,
         key=lambda identity: 0 if identity.get("label") == "personal-com" else 1,
@@ -303,18 +302,18 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
             log(f"draft_diff_connector - [{call_tag}] {mismatch} -- trying the next identity")
             continue
         tool_calls = _lb.extract_tool_calls(events)
-        status, detail = _lb.guard_recontamination(tool_calls, "mail_search")
+        status, detail = _lb.guard_recontamination(tool_calls, "mail_sent")
         if status == "halt":
             raise _lb.ReContaminationDetected(f"[{call_tag}] {detail['unexpected']}")
         if status != "ok":
             unavailable_detail = str(detail)
-            log(f"draft_diff_connector - [{call_tag}] connector did not return search_messages "
+            log(f"draft_diff_connector - [{call_tag}] connector did not return list_messages "
                 f"-- trying the next identity")
             continue
         message_calls = [tc for tc in tool_calls
-                         if tc["tool"].split(".")[-1] == "search_messages"]
+                         if tc["tool"].split(".")[-1] == "list_messages"]
         if not message_calls:
-            unavailable_detail = f"{identity_label} returned no search_messages call"
+            unavailable_detail = f"{identity_label} returned no list_messages call"
             log(f"draft_diff_connector - [{call_tag}] {unavailable_detail} -- trying the next identity")
             continue
         if len(message_calls) > MAX_PAGES:
@@ -326,12 +325,11 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
         for page_index, call in enumerate(message_calls):
             res = call.get("result")
             if isinstance(res, dict):
-                next_link = (res.get("next_from_index") if res.get("has_more")
-                             else None)
-                if next_link is None and res.get("has_more"):
-                    next_link = res.get("nextFromIndex")
+                next_link = (res.get("next_link") or res.get("nextLink")
+                             or res.get("@odata.nextLink") or res.get("skip_token")
+                             or res.get("skipToken"))
                 page_rows = None
-                for key in ("results", "value", "messages", "items"):
+                for key in ("value", "messages", "items", "results"):
                     if isinstance(res.get(key), list):
                         page_rows = res[key]
                         break
@@ -347,28 +345,12 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
                 )
             collected.extend(page_rows)
             if page_index < len(message_calls) - 1 and not next_link:
-                # Some connector sessions omit next_from_index from a page
-                # result even though the model immediately issued the next
-                # search_messages call. Accept that shape only when the next
-                # call explicitly advances from_index beyond this page; if it
-                # does not, retain the fail-closed partial-pull guard.
-                current_from = (call.get("arguments") or {}).get("from_index")
-                next_args = message_calls[page_index + 1].get("arguments") or {}
-                observed_from = next_args.get("from_index")
-                try:
-                    current_from = int(current_from)
-                    observed_from = int(observed_from)
-                except (TypeError, ValueError):
-                    current_from = observed_from = None
-                if (current_from is None or observed_from is None
-                        or observed_from <= current_from):
-                    raise ConnectorResultIncomplete(
-                        f'{display_name}: page {page_index + 1} had no next_from_index before another page'
-                    )
-                next_link = observed_from
+                raise ConnectorResultIncomplete(
+                    f'{display_name}: page {page_index + 1} had no continuation before another page'
+                )
             if page_index == len(message_calls) - 1 and next_link:
                 raise ConnectorResultIncomplete(
-                    f'{display_name}: has_more remains after {len(message_calls)} page(s); refusing a partial pull'
+                    f'{display_name}: continuation remains after {len(message_calls)} page(s); refusing a partial pull'
                 )
 
         if len(collected) > max_total:
