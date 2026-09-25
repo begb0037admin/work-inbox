@@ -620,13 +620,11 @@ SAFETY_RULE = (
 
 def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
     return (
-        "Use the Microsoft Outlook Calendar connector now, read-only, to retrieve all "
-        f"calendar events between {win_start_iso} and {win_end_iso}, newest first. Include "
-        f"the default calendar and, if present, the calendar named \"{SHARED_CAL_NAME}\"; "
-        "expand recurring events into occurrences in this window. Return the raw event "
-        "objects only. Do not ask a question or acknowledge; execute the read now. Do not "
-        "create, update, cancel, delete, move, respond to, or otherwise modify an event, "
-        "and do not send any message or email."
+        "Use the Microsoft Outlook Calendar connector now, read-only. List all events "
+        f"between {win_start_iso} and {win_end_iso}, ordered by start time. Return the raw "
+        "event objects and expand recurring events in this window. Execute the read now; "
+        "do not ask or acknowledge. Do not create, update, cancel, delete, move, respond "
+        "to, or otherwise modify an event, and do not send any message or email."
     )
 
 
@@ -701,16 +699,13 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
     # unread/read split a deterministic API-level operation instead of an
     # LLM judgement call.
     return (
-        "Use the Microsoft Outlook Email connector now, read-only, to retrieve all Inbox "
-        f"messages received since {since_iso}, newest first. Find the Inbox, then make "
-        "separate list_messages calls for unread and read messages, with receivedDateTime "
-        f"descending and up to {MAIL_INBOX_MAX_UNREAD} unread plus {MAIL_INBOX_MAX_READ} "
-        "read results. If the connector paginates, continue until the requested window is "
-        "covered. Return raw message objects including subject, sender name and address, "
-        "received time, read status, attachments, importance, web link, and short body "
-        "preview. Do not ask a question or acknowledge; execute the read now. Do not use "
-        "search unless needed to find the Inbox. Never send, reply, move, delete, mark, "
-        "categorise, flag, or otherwise modify mail."
+        "Use the Microsoft Outlook Email connector now, read-only. In the Oxford Inbox, "
+        f"list messages received since {since_iso}, newest first, up to "
+        f"{MAIL_INBOX_MAX_UNREAD + MAIL_INBOX_MAX_READ} messages. Find the Inbox if needed "
+        "and continue pagination if the connector provides it. Return the raw message "
+        "objects with subject, sender, received time, read status, attachments, importance, "
+        "web link, and short body preview. Execute the read now; do not ask or acknowledge. "
+        "Never send, reply, move, delete, mark, categorise, flag, or otherwise modify mail."
     )
 
 
