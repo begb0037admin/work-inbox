@@ -620,11 +620,10 @@ SAFETY_RULE = (
 
 def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
     return (
-        "Use the Microsoft Outlook Calendar connector now, read-only. List all events "
-        f"between {win_start_iso} and {win_end_iso}, ordered by start time. Return the raw "
-        "event objects and expand recurring events in this window. Execute the read now; "
-        "do not ask or acknowledge. Do not create, update, cancel, delete, move, respond "
-        "to, or otherwise modify an event, and do not send any message or email."
+        "Use only the Oxford Outlook calendar. List events between "
+        f"{win_start_iso} and {win_end_iso}, ordered by start time. Use the Outlook Calendar "
+        "connector now. Return each event subject, start, end, location, and attendees. "
+        "Read-only: do not create, modify, move, delete, or respond to anything."
     )
 
 
@@ -699,13 +698,10 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
     # unread/read split a deterministic API-level operation instead of an
     # LLM judgement call.
     return (
-        "Use the Microsoft Outlook Email connector now, read-only. In the Oxford Inbox, "
-        f"list messages received since {since_iso}, newest first, up to "
-        f"{MAIL_INBOX_MAX_UNREAD + MAIL_INBOX_MAX_READ} messages. Find the Inbox if needed "
-        "and continue pagination if the connector provides it. Return the raw message "
-        "objects with subject, sender, received time, read status, attachments, importance, "
-        "web link, and short body preview. Execute the read now; do not ask or acknowledge. "
-        "Never send, reply, move, delete, mark, categorise, flag, or otherwise modify mail."
+        "Use only the Oxford Outlook mailbox. List the 3 latest messages in the Inbox, "
+        f"received since {since_iso}, newest first. Return each subject, sender, received "
+        "time, and read status. Use the Outlook Email connector now. Read-only: do not "
+        "send, modify, move, delete, or mark anything."
     )
 
 
@@ -747,14 +743,10 @@ def build_mail_sent_prompt(since_iso: str) -> str:
     # them here is a prompt-level determinism fix, not a guard change; the
     # guard's own allowlist is untouched.
     return (
-        "Use the Microsoft Outlook Email connector now, read-only, to retrieve all messages "
-        f"in Sent Items sent since {since_iso}, newest first. Find the Sent Items folder, "
-        f"then use list_messages on that folder with sentDateTime descending, up to {MAIL_SENT_MAX} "
-        "results; continue only if pagination is needed. Return raw message objects including "
-        "subject, recipients, sent time, web link, and short body preview. Do not ask a "
-        "question or acknowledge; execute the read now. Do not call search or fetch individual "
-        "messages unless required to complete this read. Never send, reply, move, delete, "
-        "mark, or otherwise modify mail."
+        "Use only the Oxford Outlook mailbox. List the 3 latest messages in Sent Items, "
+        f"sent since {since_iso}, newest first. Return each subject, recipients, and sent "
+        "time. Use the Outlook Email connector now. Read-only: do not send, modify, move, "
+        "delete, or mark anything."
     )
 
 
