@@ -347,9 +347,25 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
                 )
             collected.extend(page_rows)
             if page_index < len(message_calls) - 1 and not next_link:
-                raise ConnectorResultIncomplete(
-                    f'{display_name}: page {page_index + 1} had no next_from_index before another page'
-                )
+                # Some connector sessions omit next_from_index from a page
+                # result even though the model immediately issued the next
+                # search_messages call. Accept that shape only when the next
+                # call explicitly advances from_index beyond this page; if it
+                # does not, retain the fail-closed partial-pull guard.
+                current_from = (call.get("arguments") or {}).get("from_index")
+                next_args = message_calls[page_index + 1].get("arguments") or {}
+                observed_from = next_args.get("from_index")
+                try:
+                    current_from = int(current_from)
+                    observed_from = int(observed_from)
+                except (TypeError, ValueError):
+                    current_from = observed_from = None
+                if (current_from is None or observed_from is None
+                        or observed_from <= current_from):
+                    raise ConnectorResultIncomplete(
+                        f'{display_name}: page {page_index + 1} had no next_from_index before another page'
+                    )
+                next_link = observed_from
             if page_index == len(message_calls) - 1 and next_link:
                 raise ConnectorResultIncomplete(
                     f'{display_name}: has_more remains after {len(message_calls)} page(s); refusing a partial pull'

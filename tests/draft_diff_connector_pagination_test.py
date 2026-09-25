@@ -74,6 +74,18 @@ class DraftDiffPaginationTests(unittest.TestCase):
             )
         self.assertEqual([row["id"] for row in rows], ["a", "b", "c"])
 
+    def test_accepts_observed_next_call_when_page_omits_continuation_index(self):
+        events = [
+            event(1, {"results": [{"id": "a"}], "has_more": True}),
+            event(2, {"results": [{"id": "b"}], "has_more": False}),
+        ]
+        with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
+            rows = connector._list_folder_messages(
+                "Drafts", extra_filter=None, top=1, max_total=10,
+                tag="test", retries=1, log=lambda _: None,
+            )
+        self.assertEqual([row["id"] for row in rows], ["a", "b"])
+
     def test_refuses_a_continuation_left_after_page_bound(self):
         events = [event(1, {"results": [{"id": "a"}], "has_more": True, "next_from_index": 2})]
         with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
