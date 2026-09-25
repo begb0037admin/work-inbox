@@ -616,9 +616,9 @@ SAFETY_RULE = (
 
 def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
     return (
-        "Use the Outlook Calendar connector now, read-only. List Oxford calendar events between "
-        f"{win_start_iso} and {win_end_iso}, ordered by start time. Return each event subject, "
-        "start, end, location, and attendees. "
+        "Use the Outlook Calendar connector now, read-only. List the 3 next Oxford calendar "
+        f"events between {win_start_iso} and {win_end_iso}, ordered by start time. Return each "
+        "event subject, start, end, location, and attendees. "
         "Read-only: do not create, modify, move, delete, or respond to anything."
     )
 
