@@ -2,12 +2,12 @@
     "kind":  "draftdiff",
     "result":  "failed",
     "exit_code":  1,
-    "ts":  "2026-09-25T20:41:54+01:00",
+    "ts":  "2026-09-25T22:31:13+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "stats":  {
                   "mail_backend":  "connector",
-                  "run_time":  "2026-09-25T20:41:54.152358",
+                  "run_time":  "2026-09-25T22:31:13.681165",
                   "error":  "ConnectorResultUnavailable: Drafts: {\u0027seen\u0027: [], \u0027unexpected\u0027: []}"
               }
 }
