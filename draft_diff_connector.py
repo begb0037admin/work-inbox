@@ -269,6 +269,18 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
     identities = _lb.available_identity_ring()
     if not identities:
         raise ConnectorResultUnavailable(f"{display_name}: no authenticated connector identity")
+    # Match lane_b_call1.fetch_domain() for Oxford mail: the checked-in ring is
+    # still edu -> personal-uk -> personal-com, but personal-com is the known
+    # working Outlook connector identity and therefore gets the first attempt.
+    # Keep the remaining entries in their configured order for failover.
+    identities = sorted(
+        identities,
+        key=lambda identity: 0 if identity.get("label") == "personal-com" else 1,
+    )
+    _lb._identity_log(
+        "[identity ring] preferred personal-com for draft mail: "
+        + " -> ".join(i["label"] for i in identities)
+    )
     for n in range(1, retries + 1):
         identity = identities[(n - 1) % len(identities)]
         identity_label = str(identity.get("label") or "identity")

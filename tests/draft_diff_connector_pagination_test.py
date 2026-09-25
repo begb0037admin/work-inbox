@@ -26,6 +26,27 @@ def event(page, result):
 
 
 class DraftDiffPaginationTests(unittest.TestCase):
+    def test_mail_prefers_personal_com_like_bridge_ring(self):
+        identities = [
+            {"label": "edu", "CODEX_HOME": r"C:\edu", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
+            {"label": "personal-uk", "CODEX_HOME": r"C:\uk", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
+            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
+        ]
+        homes = []
+
+        def run(_prompt, **kwargs):
+            homes.append(kwargs["codex_home"])
+            return ([event(1, {"results": [{"id": "draft"}], "has_more": False})], "raw")
+
+        with mock.patch.object(connector._lb, "available_identity_ring", return_value=identities):
+            with mock.patch.object(connector._lb, "run_codex_json", side_effect=run):
+                rows = connector._list_folder_messages(
+                    "Drafts", extra_filter=None, top=2, max_total=10,
+                    tag="test", retries=1, log=lambda _: None,
+                )
+        self.assertEqual(homes, [r"C:\com"])
+        self.assertEqual([row["id"] for row in rows], ["draft"])
+
     def test_extracts_payload_wrapped_events(self):
         wrapped = {"payload": event(1, {"results": [], "has_more": False})}
         calls = connector._lb.extract_tool_calls([wrapped])
