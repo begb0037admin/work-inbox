@@ -1192,35 +1192,35 @@ def extract_tool_calls(events: list[dict]) -> list[dict]:
     item.result.content[0].text is just "Action completed." -> ignore.
     """
     found: list[dict] = []
+
+    def _walk(node):
+        if isinstance(node, dict):
+            # Codex CLI event streams have appeared as top-level events,
+            # payload-wrapped events, and nested response items. Walk all
+            # envelopes so the safety guard sees every completed MCP call.
+            if node.get("type") == "mcp_tool_call" and node.get("status") == "completed":
+                result_obj = node.get("result") or {}
+                structured_result = result_obj.get("structured_content")
+                if structured_result is None:
+                    # Accept the camelCase spelling emitted by newer MCP
+                    # event producers without loosening server/verb checks.
+                    structured_result = result_obj.get("structuredContent")
+                found.append({
+                    "server": node.get("server") or "",
+                    "tool": node.get("tool") or "",
+                    "arguments": node.get("arguments") or {},
+                    "result": structured_result,
+                    "error": node.get("error"),
+                    "raw": node,
+                })
+            for child in node.values():
+                _walk(child)
+        elif isinstance(node, list):
+            for child in node:
+                _walk(child)
+
     for ev in events:
-        if not isinstance(ev, dict):
-            continue
-        # Newer Codex JSON event streams wrap the actual event under
-        # `payload`; older streams emit the event object at the top level.
-        # Normalize that envelope before applying the existing strict
-        # completed-tool filter.
-        if isinstance(ev.get("payload"), dict) and ev["payload"].get("type"):
-            ev = ev["payload"]
-        if ev.get("type") not in ("item.completed", "item.updated"):
-            continue
-        item = ev.get("item") or {}
-        if item.get("type") != "mcp_tool_call" or item.get("status") != "completed":
-            continue
-        result_obj = item.get("result") or {}
-        structured_result = result_obj.get("structured_content")
-        if structured_result is None:
-            # Codex CLI/MCP event producers have used both snake_case and
-            # camelCase for this field. Accept either without loosening the
-            # tool/verb safety checks below.
-            structured_result = result_obj.get("structuredContent")
-        found.append({
-            "server": item.get("server") or "",
-            "tool": item.get("tool") or "",
-            "arguments": item.get("arguments") or {},
-            "result": structured_result,
-            "error": item.get("error"),
-            "raw": item,
-        })
+        _walk(ev)
 
     # de-dupe on (server, tool, args); keep the one that carries a result
     dedup: dict[tuple, dict] = {}
