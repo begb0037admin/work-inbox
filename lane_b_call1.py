@@ -389,19 +389,19 @@ def _prompt_for_identity(prompt: str, identity: dict) -> str:
     # The connector account picker is model-mediated.  Appending the target
     # after a long task prompt was not strong enough: the personal-com run
     # repeated the requested operation, then asked whether it should use the
-    # Personal or Oxford mailbox.  Put the selection first and make the
-    # no-clarification rule explicit.  This is shared by mail and calendar.
+    # Personal or Oxford mailbox.  Putting the target first fixed the question
+    # but made one probe stop after an acknowledgement without calling a tool,
+    # so the execution instruction must be explicit too.  This is shared by
+    # mail and calendar.
     return (
-        f"TARGET MICROSOFT 365 ACCOUNT (SELECT THIS MAILBOX NOW): {account}. "
-        "This is the Oxford mailbox. Use it for every Outlook mail, Outlook "
-        "calendar, and Microsoft Teams operation in this request. Do not use "
-        "any other connected account, including Personal (kevin@lelitte.com), "
-        "and do not ask me which mailbox to use: choose this Oxford account "
-        "yourself.\n\n"
+        f"Use only the Oxford Microsoft 365 account {account} (not Personal "
+        "kevin@lelitte.com) for the read-only Outlook operation below. Do not "
+        "ask which mailbox to use and do not merely acknowledge these instructions: "
+        "execute the connector task now.\n\n"
         f"{prompt}\n\n"
-        f"ACCOUNT CHECK: the requested operation is for the Oxford mailbox "
-        f"{account}, not any personal Outlook mailbox. If the connector offers "
-        "an account choice, select Oxford and continue without a clarification question."
+        f"The requested operation is for the Oxford mailbox {account}. If the "
+        "connector offers an account choice, select Oxford and continue with the "
+        "requested tool call; do not return an acknowledgement or a clarification question."
     )
 
 
