@@ -102,6 +102,43 @@ class DraftWeblinkTests(unittest.TestCase):
             else:
                 sys.modules["lane_b_call1"] = original_module
 
+    def test_batch_resolution_matches_reply_prefix_to_original_subject(self):
+        original_module = sys.modules.get("lane_b_call1")
+        original_load = publisher.load_weblink_cache
+        original_save = publisher.save_weblink_cache
+        try:
+            sys.modules["lane_b_call1"] = types.SimpleNamespace(
+                resolve_mail_weblinks_by_subjects=lambda subjects: [
+                    {
+                        "subject": "My Development Insight reports",
+                        "web_link": "https://outlook.office365.com/owa/?ItemID=reply-prefix",
+                    }
+                ]
+            )
+            cache = {}
+            publisher.load_weblink_cache = lambda: cache
+            publisher.save_weblink_cache = lambda value: cache.update(value)
+            entries = [
+                {
+                    "draft_id": "draft-re-prefix", "subject": "Re: My Development Insight reports",
+                    "received": "", "open_mode": "none",
+                },
+                {
+                    "draft_id": "draft-unmatched", "subject": "Unmatched subject",
+                    "received": "", "open_mode": "none",
+                },
+            ]
+            self.assertEqual(publisher.resolve_missing_weblinks(entries), 2)
+            self.assertEqual(entries[0]["open_mode"], "web")
+            self.assertIn("outlook.office365.com", entries[0]["web_link"])
+        finally:
+            publisher.load_weblink_cache = original_load
+            publisher.save_weblink_cache = original_save
+            if original_module is None:
+                sys.modules.pop("lane_b_call1", None)
+            else:
+                sys.modules["lane_b_call1"] = original_module
+
 
 if __name__ == "__main__":
     unittest.main()

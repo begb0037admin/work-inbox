@@ -201,13 +201,13 @@ def resolve_missing_weblinks(entries):
         for candidate in candidates:
             if not isinstance(candidate, dict):
                 continue
-            subject = " ".join(str(candidate.get("subject") or "").split()).casefold()
+            subject = _weblink_subject_key(candidate.get("subject"))
             url = valid_owa_weblink(candidate.get("web_link") or candidate.get("webLink"))
             if not subject or not url:
                 continue
             by_subject.setdefault(subject, set()).add(url)
         for entry, draft_id in unresolved:
-            subject = " ".join(str(entry.get("subject") or "").split()).casefold()
+            subject = _weblink_subject_key(entry.get("subject"))
             links = by_subject.get(subject, set())
             resolved = next(iter(links)) if len(links) == 1 else ""
             cache[draft_id] = {"web_link": resolved, "attempted_at": now.isoformat()}
@@ -235,6 +235,18 @@ def resolve_missing_weblinks(entries):
 
     save_weblink_cache(cache)
     return attempts
+
+
+def _weblink_subject_key(subject):
+    """Match reply/forward subject prefixes without weakening exact matching."""
+    value = " ".join(str(subject or "").split()).casefold()
+    while True:
+        for prefix in ("re:", "fw:", "fwd:"):
+            if value.startswith(prefix):
+                value = value[len(prefix):].lstrip()
+                break
+        else:
+            return value
 
 
 def gh_get(owner, repo, path, token):
