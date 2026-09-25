@@ -1,17 +1,16 @@
 {
     "kind":  "briefing",
-    "result":  "failed",
-    "exit_code":  1,
-    "ts":  "2026-09-25T19:38:25+01:00",
+    "result":  "ok",
+    "exit_code":  0,
+    "ts":  "2026-09-25T20:13:11+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
-    "lane_b_guard":  "transient",
-    "lane_b_guard_detail":  "connector unavailable this cycle; not actionable, no toast.",
+    "lane_b_guard":  "clean",
     "lane_b_domains":  {
                            "calendar":  {
-                                            "status":  "unavailable",
-                                            "count":  0,
-                                            "served_by":  null,
+                                            "status":  "ok",
+                                            "count":  3,
+                                            "served_by":  "personal-com",
                                             "primary_failover_identical":  false
                                         }
                        }
