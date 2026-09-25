@@ -1200,11 +1200,18 @@ def extract_tool_calls(events: list[dict]) -> list[dict]:
         item = ev.get("item") or {}
         if item.get("type") != "mcp_tool_call" or item.get("status") != "completed":
             continue
+        result_obj = item.get("result") or {}
+        structured_result = result_obj.get("structured_content")
+        if structured_result is None:
+            # Codex CLI/MCP event producers have used both snake_case and
+            # camelCase for this field. Accept either without loosening the
+            # tool/verb safety checks below.
+            structured_result = result_obj.get("structuredContent")
         found.append({
             "server": item.get("server") or "",
             "tool": item.get("tool") or "",
             "arguments": item.get("arguments") or {},
-            "result": (item.get("result") or {}).get("structured_content"),
+            "result": structured_result,
             "error": item.get("error"),
             "raw": item,
         })

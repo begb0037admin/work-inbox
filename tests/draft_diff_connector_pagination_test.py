@@ -26,6 +26,16 @@ def event(page, result):
 
 
 class DraftDiffPaginationTests(unittest.TestCase):
+    def test_accepts_camel_case_structured_content_events(self):
+        raw_event = event(1, {"results": [{"id": "camel"}], "has_more": False})
+        raw_event["item"]["result"] = {"structuredContent": {"results": [{"id": "camel"}], "has_more": False}}
+        with mock.patch.object(connector._lb, "run_codex_json", return_value=([raw_event], "raw")):
+            rows = connector._list_folder_messages(
+                "Drafts", extra_filter=None, top=2, max_total=10,
+                tag="test", retries=1, log=lambda _: None,
+            )
+        self.assertEqual([row["id"] for row in rows], ["camel"])
+
     def test_collects_continuation_pages_and_deduplicates_boundary_ids(self):
         events = [
             event(1, {"results": [{"id": "a"}, {"id": "b"}], "has_more": True, "next_from_index": 2}),
