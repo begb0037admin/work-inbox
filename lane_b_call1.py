@@ -1195,6 +1195,12 @@ def extract_tool_calls(events: list[dict]) -> list[dict]:
     for ev in events:
         if not isinstance(ev, dict):
             continue
+        # Newer Codex JSON event streams wrap the actual event under
+        # `payload`; older streams emit the event object at the top level.
+        # Normalize that envelope before applying the existing strict
+        # completed-tool filter.
+        if isinstance(ev.get("payload"), dict) and ev["payload"].get("type"):
+            ev = ev["payload"]
         if ev.get("type") not in ("item.completed", "item.updated"):
             continue
         item = ev.get("item") or {}

@@ -26,6 +26,11 @@ def event(page, result):
 
 
 class DraftDiffPaginationTests(unittest.TestCase):
+    def test_extracts_payload_wrapped_events(self):
+        wrapped = {"payload": event(1, {"results": [], "has_more": False})}
+        calls = connector._lb.extract_tool_calls([wrapped])
+        self.assertEqual([call["tool"] for call in calls], ["microsoft_outlook_email.search_messages"])
+
     def test_accepts_camel_case_structured_content_events(self):
         raw_event = event(1, {"results": [{"id": "camel"}], "has_more": False})
         raw_event["item"]["result"] = {"structuredContent": {"results": [{"id": "camel"}], "has_more": False}}
