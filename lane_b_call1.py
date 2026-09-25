@@ -284,8 +284,40 @@ class ConnectorCallFailure(RuntimeError):
 
 
 def _explicit_connector_failure_reason(raw: str, stderr: str, returncode: int) -> str | None:
-    """Classify explicit connector errors before a parseable exit-0 can look OK."""
-    text = f"{stderr or ''}\n{raw or ''}".lower()
+    """Classify explicit CLI/connector errors without scanning fetched content.
+
+    A successful mail transcript contains arbitrary message bodies.  Searching
+    the entire raw JSONL for phrases such as ``quota`` or ``try again at`` can
+    therefore turn an ordinary email into a false identity failure.  Only
+    stderr and structured error/failed events are error channels; plain raw
+    text is inspected only when it is not parseable JSONL (the legacy CLI-error
+    shape).
+    """
+    error_parts = [stderr or ""]
+    parsed_events = []
+    for line in (raw or "").splitlines():
+        try:
+            event = json.loads(line)
+        except (TypeError, json.JSONDecodeError):
+            continue
+        parsed_events.append(event)
+        event_type = str(event.get("type") or "").lower() if isinstance(event, dict) else ""
+        if event_type in {"error", "turn.failed", "turn.completed"} and isinstance(event, dict):
+            error = event.get("error")
+            if isinstance(error, dict):
+                error_parts.append(str(error.get("message") or error))
+            elif error:
+                error_parts.append(str(error))
+            if event.get("message"):
+                error_parts.append(str(event["message"]))
+        if isinstance(event, dict):
+            item = event.get("item")
+            if isinstance(item, dict) and item.get("error"):
+                error = item["error"]
+                error_parts.append(str(error.get("message") if isinstance(error, dict) else error))
+    if not parsed_events:
+        error_parts.append(raw or "")
+    text = "\n".join(error_parts).lower()
     if any(marker in text for marker in (
         "oauth_token_invalid_grant", "trigger_reauthentication", "invalid_grant",
         "reauthentication required", "authentication required", "unauthenticated",
@@ -386,22 +418,15 @@ def _prompt_for_identity(prompt: str, identity: dict) -> str:
     account = str(identity.get("m365_account") or "").strip()
     if not account:
         return prompt
-    # The connector account picker is model-mediated.  Appending the target
-    # after a long task prompt was not strong enough: the personal-com run
-    # repeated the requested operation, then asked whether it should use the
-    # Personal or Oxford mailbox.  Putting the target first fixed the question
-    # but made one probe stop after an acknowledgement without calling a tool,
-    # so the execution instruction must be explicit too.  This is shared by
-    # mail and calendar.
+    # The connector account picker is model-mediated.  Keep this target and the
+    # execute-now instruction short and first: the previous long prefix/suffix
+    # made personal-com verify the mailbox but then claim the actual operation
+    # was not specified, producing zero data calls.
     return (
         f"Use only the Oxford Microsoft 365 account {account} (not Personal "
-        "kevin@lelitte.com) for the read-only Outlook operation below. Do not "
-        "ask which mailbox to use and do not merely acknowledge these instructions: "
-        "execute the connector task now.\n\n"
-        f"{prompt}\n\n"
-        f"The requested operation is for the Oxford mailbox {account}. If the "
-        "connector offers an account choice, select Oxford and continue with the "
-        "requested tool call; do not return an acknowledgement or a clarification question."
+        "kevin@lelitte.com). Do not ask which mailbox to use; select Oxford if the "
+        "connector asks. Execute the connector task now; do not merely acknowledge it.\n\n"
+        f"{prompt}"
     )
 
 
@@ -595,16 +620,13 @@ SAFETY_RULE = (
 
 def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
     return (
-        "Using the Microsoft Outlook Calendar app connector, retrieve my calendar events "
-        f"between {win_start_iso} and {win_end_iso} (inclusive), ordered by start time. "
-        f"Include events from my default calendar and, if it exists, the calendar named "
-        f"\"{SHARED_CAL_NAME}\". Expand any recurring series into its concrete occurrences "
-        "within that window. "
-        "Return ONLY the raw connector result as a JSON array of the event objects, with no "
-        "summary, no interpretation, and no prose. "
-        "Do not use any other app or tool. Do not create, update, cancel, delete, move, "
-        "respond to, or add an attachment to any event. Do not send any message or email. "
-        f"{SAFETY_RULE}"
+        "Use the Microsoft Outlook Calendar connector now, read-only, to retrieve all "
+        f"calendar events between {win_start_iso} and {win_end_iso}, newest first. Include "
+        f"the default calendar and, if present, the calendar named \"{SHARED_CAL_NAME}\"; "
+        "expand recurring events into occurrences in this window. Return the raw event "
+        "objects only. Do not ask a question or acknowledge; execute the read now. Do not "
+        "create, update, cancel, delete, move, respond to, or otherwise modify an event, "
+        "and do not send any message or email."
     )
 
 
@@ -679,28 +701,16 @@ def build_mail_inbox_prompt(since_iso: str) -> str:
     # unread/read split a deterministic API-level operation instead of an
     # LLM judgement call.
     return (
-        "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve "
-        f"messages in my Inbox folder received since {since_iso} (inclusive) by making "
-        "list_messages calls against the Inbox folder ONLY (do not use search_messages "
-        "for this). You MUST make exactly two separate list_messages calls, in this "
-        "order, and MUST NOT combine them into one call or skip either one:\n"
-        "1) filter=\"isRead eq false\", orderby=\"receivedDateTime desc\", "
-        f"top={MAIL_INBOX_MAX_UNREAD} -- every result from this call is UNREAD.\n"
-        "2) filter=\"isRead eq true\", orderby=\"receivedDateTime desc\", "
-        f"top={MAIL_INBOX_MAX_READ} -- every result from this call is READ.\n"
-        f"Do not exceed {MAIL_INBOX_MAX_UNREAD} results from call 1 or {MAIL_INBOX_MAX_READ} "
-        "results from call 2. If the tool does not accept a filter/orderby argument in "
-        "this exact form, retry with the closest equivalent it does accept, but still "
-        "make two separate calls -- one scoped to unread mail, one to read mail -- never "
-        "a single unscoped fetch. "
-        "For each message return: subject, from display name, from email address, "
-        "received date/time, whether it has been read, whether it has attachments, "
-        "importance, the internet Message-ID header, the web link, and a short body preview. "
-        "Return ONLY the raw connector results as JSON (an array combining both calls' "
-        "message objects), with no summary, no interpretation, and no prose. "
-        "Do not use any other app or tool. Do not send, reply to, forward, move, delete, "
-        "mark as read, categorise, flag, or otherwise modify any message. "
-        f"{SAFETY_RULE}"
+        "Use the Microsoft Outlook Email connector now, read-only, to retrieve all Inbox "
+        f"messages received since {since_iso}, newest first. Find the Inbox, then make "
+        "separate list_messages calls for unread and read messages, with receivedDateTime "
+        f"descending and up to {MAIL_INBOX_MAX_UNREAD} unread plus {MAIL_INBOX_MAX_READ} "
+        "read results. If the connector paginates, continue until the requested window is "
+        "covered. Return raw message objects including subject, sender name and address, "
+        "received time, read status, attachments, importance, web link, and short body "
+        "preview. Do not ask a question or acknowledge; execute the read now. Do not use "
+        "search unless needed to find the Inbox. Never send, reply, move, delete, mark, "
+        "categorise, flag, or otherwise modify mail."
     )
 
 
@@ -742,29 +752,14 @@ def build_mail_sent_prompt(since_iso: str) -> str:
     # them here is a prompt-level determinism fix, not a guard change; the
     # guard's own allowlist is untouched.
     return (
-        "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve "
-        f"the messages in my Sent Items folder sent since {since_iso} (inclusive), newest "
-        "first. You MUST do this in exactly two tool calls, in this order, and MUST NOT "
-        "skip either one or add any other tool call:\n"
-        "1) Call list_mail_folders exactly once to find the folder whose display_name is "
-        "\"Sent Items\" (or the well-known Sent Items folder if display_name differs "
-        "slightly) and note its folder id.\n"
-        "2) Call list_messages exactly once, scoped to that folder id, with "
-        f"filter=\"sentDateTime ge {since_iso}\", orderby=\"sentDateTime desc\", "
-        f"top={MAIL_SENT_MAX}. If the tool does not accept filter/orderby/top in this "
-        "exact form, retry this SECOND call once with the closest equivalent it does "
-        "accept -- but still make only one list_mail_folders call and only one "
-        "list_messages call in total, never more.\n"
-        "Do NOT call fetch_message, fetch_messages_batch, or search_messages for this -- "
-        "list_messages already returns the full message content needed, including the "
-        "body, so none of those additional calls are necessary. "
-        "For each message return: subject, to recipients, sent date/time, the "
-        "internet Message-ID header, the web link, and a short body preview. "
-        "Return ONLY the raw connector result as JSON (an array of the message objects), "
-        "with no summary, no interpretation, and no prose. "
-        "Do not use any other app or tool. Do not send, reply to, forward, move, delete, "
-        "mark as read, categorise, flag, or otherwise modify any message. "
-        f"{SAFETY_RULE}"
+        "Use the Microsoft Outlook Email connector now, read-only, to retrieve all messages "
+        f"in Sent Items sent since {since_iso}, newest first. Find the Sent Items folder, "
+        f"then use list_messages on that folder with sentDateTime descending, up to {MAIL_SENT_MAX} "
+        "results; continue only if pagination is needed. Return raw message objects including "
+        "subject, recipients, sent time, web link, and short body preview. Do not ask a "
+        "question or acknowledge; execute the read now. Do not call search or fetch individual "
+        "messages unless required to complete this read. Never send, reply, move, delete, "
+        "mark, or otherwise modify mail."
     )
 
 

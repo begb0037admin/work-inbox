@@ -1,5 +1,12 @@
 # Handover -- 25 September 2026 (Codex) -- cross-dashboard read-only jump links
 
+# Handover -- 25 September 2026 (Codex) -- personal-com mail/calendar execution fix
+
+- Same-user reproduction under `AD-OAK\\begb0037` resolved the Round 2 contradiction: `C:\\WorkInboxAI\\codex-lanec` decoded in memory to `kevin@lelitte.com`; the 18:13 ring used that exact home for `personal-com`. The pipeline transcript confirmed Oxford with two `microsoft_outlook_email.get_profile` calls, then returned the verbatim acknowledgement `No specific read-only Outlook operation was included, so there’s nothing further to execute.` with zero `list_messages` calls and empty stderr. A concise manual-style prompt under the same task user successfully called `find_mail_folder` + `list_messages` and returned today’s Oxford mail.
+- Root cause had two parts: the long account-binding prefix/suffix plus rigid mail/calendar prose caused acknowledgement-only connector sessions; and `_explicit_connector_failure_reason()` scanned complete fetched JSONL, so an ordinary email body containing quota wording could be classified as a personal-com usage failure. This explains why the old evidence could blur identity outcomes without any `CODEX_HOME` leak.
+- Fix: concise account-first execution prompts for inbox, sent mail, and calendar; structured error-event/stderr parsing that never scans successful message bodies; regression coverage for the false-positive transcript and prompt contracts. Carry-forward behavior is untouched.
+- Local verification: Python compilation and 23 Python tests pass; Node tests are run separately before commit. Laptop diagnostic artefacts remain under the local untracked `data\\diag_personal_com` path only and are not committed or deployed.
+
 - Added Tracker icons from the approved map served by `https://tracker.lelitte.co.uk/api/links`; the existing 3×2 card grid has no empty slot because CC, email, and Edit occupy row 2, so linked cards use a third row only for the Tracker icon. Arrival unfolds the section, scrolls, and applies one tinted highlight; no mailbox or sync action is performed. Added `tests/dashboard_links_test.js`.
 # Handover -- 25 September 2026 (Codex) -- bind Lane B connector calls to Oxford mailbox
 
