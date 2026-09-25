@@ -168,7 +168,7 @@ class FailoverRingTests(unittest.TestCase):
             lane.build_calendar_prompt("2026-09-25T00:00:00Z", "2026-10-02T00:00:00Z"),
         ):
             targeted = lane._prompt_for_identity(prompt, identity)
-            self.assertLess(targeted.index("Use only the Oxford Microsoft 365 account"), targeted.index("Use the Microsoft"))
+            self.assertLess(targeted.index("Use only the Oxford Microsoft 365 account"), targeted.index("Use the Outlook"))
             self.assertIn("kevin.lelitte@admin.ox.ac.uk", targeted)
             self.assertIn("Execute the connector task now", targeted)
 
