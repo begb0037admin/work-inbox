@@ -132,14 +132,70 @@ def parse_cache_time(value):
         return None
 
 
-def resolve_missing_weblinks(entries):
-    """Fill missing links using one cached, read-only connector batch.
+def _lookup_text(value):
+    """Flatten common connector sender/id shapes to one comparable string."""
+    if isinstance(value, dict):
+        for key in ("address", "email", "emailAddress", "name", "value", "id"):
+            if key in value and value[key] not in (None, ""):
+                return _lookup_text(value[key])
+        return ""
+    return " ".join(str(value or "").split()).strip()
 
-    The connector resolver uses lane_b_call1's identity ring, Oxford-account
-    targeting, guard, timeout, and closed-stdin subprocess path. Keeping the
-    lookup as one batch is important here: the bridge wrapper has a finite
-    runtime, while a per-draft call would multiply the ring timeout by every
-    unresolved draft.
+
+def _sender_hint(record):
+    for key in ("sender_email", "sender_address", "from_email", "from_address", "sender", "from"):
+        value = _lookup_text(record.get(key))
+        if value:
+            # Prefer the address when a connector returns "Name <address>".
+            if "<" in value and ">" in value:
+                value = value[value.find("<") + 1:value.find(">")]
+            return value.casefold()
+    return ""
+
+
+def _conversation_hint(record):
+    for key in ("conversation_id", "conversationId", "thread_id", "threadId"):
+        value = _lookup_text(record.get(key))
+        if value:
+            return value.casefold()
+    return ""
+
+
+def _targeted_candidate_matches(entry, candidate):
+    """Return true only for an exact safe original candidate."""
+    if not isinstance(candidate, dict):
+        return False
+    if _weblink_subject_key(candidate.get("subject")) != _weblink_subject_key(entry.get("subject")):
+        return False
+
+    wanted_sender = _sender_hint(entry)
+    if wanted_sender:
+        candidate_sender = _sender_hint(candidate)
+        if not candidate_sender or candidate_sender != wanted_sender:
+            return False
+
+    wanted_conversation = _conversation_hint(entry)
+    if wanted_conversation:
+        candidate_conversation = _conversation_hint(candidate)
+        if not candidate_conversation or candidate_conversation != wanted_conversation:
+            return False
+    return bool(valid_owa_weblink(candidate.get("web_link") or candidate.get("webLink")))
+
+
+def _print_targeted_evidence(draft_id, reason, raw):
+    """Keep an auditable, verbatim connector transcript in the live log."""
+    print(f"[draft-weblink] draft_id={draft_id} reason={reason}", flush=True)
+    print(f"[draft-weblink] CONNECTOR_SEARCH_OUTPUT_BEGIN draft_id={draft_id}", flush=True)
+    print(raw.rstrip() if raw else "<empty connector transcript>", flush=True)
+    print(f"[draft-weblink] CONNECTOR_SEARCH_OUTPUT_END draft_id={draft_id}", flush=True)
+
+
+def resolve_missing_weblinks(entries):
+    """Fill missing links using cached results plus targeted live searches.
+
+    A successful URL remains cached. Negative results are cached as audit
+    evidence but are deliberately retried: an older/sent message can become
+    visible after connector pagination or mailbox indexing catches up.
     """
     cache = load_weblink_cache()
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -169,9 +225,6 @@ def resolve_missing_weblinks(entries):
             entry["web_link"] = cached_url
             entry["open_mode"] = "web"
             continue
-        attempted_at = parse_cache_time(cached.get("attempted_at"))
-        if attempted_at and now - attempted_at < WEBLINK_FAILURE_RETRY:
-            continue
         if len(unresolved) >= max_resolves:
             continue
         unresolved.append((entry, draft_id))
@@ -180,14 +233,55 @@ def resolve_missing_weblinks(entries):
         save_weblink_cache(cache)
         return 0
 
-    # Prefer the batch resolver added to lane_b_call1. The singular fallback
-    # keeps this publisher compatible with a mixed-version laptop during a
-    # rolling copy, and is also useful for a one-entry lookup.
     resolver_module = None
     try:
         import lane_b_call1 as resolver_module
     except Exception:
         resolver_module = None
+
+    targeted_resolver = getattr(resolver_module, "resolve_mail_weblink_for_draft", None)
+    if callable(targeted_resolver):
+        for entry, draft_id in unresolved:
+            attempts += 1
+            try:
+                result = targeted_resolver(entry)
+            except Exception as exc:  # noqa: BLE001 -- enrichment is fail-soft
+                result = {"web_link": "", "reason": f"resolver error: {type(exc).__name__}: {exc}", "raw": ""}
+            result = result if isinstance(result, dict) else {}
+            candidates = result.get("candidates") if isinstance(result.get("candidates"), list) else []
+            matches = [candidate for candidate in candidates if _targeted_candidate_matches(entry, candidate)]
+            valid_links = {valid_owa_weblink(candidate.get("web_link") or candidate.get("webLink")) for candidate in matches}
+            valid_links.discard("")
+            if len(valid_links) == 1 and len(matches) == 1:
+                resolved = next(iter(valid_links))
+                reason = "exact subject match" + (" + sender match" if _sender_hint(entry) else "")
+                entry["web_link"] = resolved
+                entry["open_mode"] = "web"
+            elif len(matches) > 1 or len(valid_links) > 1:
+                resolved = ""
+                reason = f"ambiguous: {len(matches)} exact candidate(s) after subject/sender/conversation checks"
+            elif candidates:
+                resolved = ""
+                reason = "no candidate passed exact subject/sender/conversation checks"
+            else:
+                resolved = ""
+                reason = result.get("reason") or "NO_MATCH: connector returned no candidates"
+            raw = result.get("raw") if isinstance(result.get("raw"), str) else ""
+            cache[draft_id] = {
+                "web_link": resolved,
+                "attempted_at": now.isoformat(),
+                "reason": reason,
+                "candidate_count": len(candidates),
+                "evidence": raw,
+            }
+            if not resolved:
+                _print_targeted_evidence(draft_id, reason, raw)
+        save_weblink_cache(cache)
+        return attempts
+
+    # Mixed-version fallback: retain the older exact-subject resolvers while a
+    # laptop is being copied. The live path above is the required per-draft
+    # targeted search; this branch is only compatibility support.
 
     batch_resolver = getattr(resolver_module, "resolve_mail_weblinks_by_subjects", None)
     if callable(batch_resolver) and len(unresolved) > 1:
@@ -373,7 +467,11 @@ def normalize_entry(e):
     # for it. corpus_provenance is where content_precedent actually lives
     # in the source shape -- passed through wholesale so the dashboard sees
     # the exact same structure Lauren wrote, no reshaping in this mirror.
-    for optional_field in ("confidence", "inline_flags", "received", "status", "draft_id", "corpus_provenance"):
+    for optional_field in (
+        "confidence", "inline_flags", "received", "status", "draft_id", "corpus_provenance",
+        "sender", "sender_email", "sender_address", "from", "from_email", "from_address",
+        "conversation_id", "conversationId", "thread_id", "threadId",
+    ):
         if optional_field in e:
             normalized[optional_field] = e[optional_field]
 

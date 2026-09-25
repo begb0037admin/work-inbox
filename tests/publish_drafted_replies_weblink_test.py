@@ -5,6 +5,8 @@ import os
 import sys
 import types
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 
 
 TOOLS = os.path.join(os.path.dirname(__file__), "..", "tools")
@@ -169,6 +171,85 @@ class DraftWeblinkTests(unittest.TestCase):
             self.assertEqual(publisher.resolve_missing_weblinks(entries), 2)
             self.assertEqual(entries[0]["web_link"], "https://outlook.office365.com/owa/?ItemID=exact")
             self.assertEqual(entries[1]["open_mode"], "none")
+        finally:
+            publisher.load_weblink_cache = original_load
+            publisher.save_weblink_cache = original_save
+            if original_module is None:
+                sys.modules.pop("lane_b_call1", None)
+            else:
+                sys.modules["lane_b_call1"] = original_module
+
+    def test_targeted_resolution_requires_exact_subject_sender_and_conversation(self):
+        original_module = sys.modules.get("lane_b_call1")
+        original_load = publisher.load_weblink_cache
+        original_save = publisher.save_weblink_cache
+        try:
+            sys.modules["lane_b_call1"] = types.SimpleNamespace(
+                resolve_mail_weblink_for_draft=lambda entry: {
+                    "candidates": [
+                        {
+                            "subject": "RE: Targeted subject",
+                            "sender_email": "sender@example.com",
+                            "conversation_id": "conv-1",
+                            "web_link": "https://outlook.office365.com/owa/?ItemID=targeted",
+                        },
+                        {
+                            "subject": "Targeted subject - unrelated",
+                            "sender_email": "sender@example.com",
+                            "conversation_id": "conv-1",
+                            "web_link": "https://outlook.office365.com/owa/?ItemID=wrong",
+                        },
+                    ],
+                    "reason": "connector rows returned",
+                    "raw": '{"value":[{"subject":"RE: Targeted subject"}]}',
+                }
+            )
+            cache = {}
+            publisher.load_weblink_cache = lambda: cache
+            publisher.save_weblink_cache = lambda value: cache.update(value)
+            entries = [{
+                "draft_id": "draft-targeted",
+                "subject": "FWD: Targeted subject",
+                "sender_email": "sender@example.com",
+                "conversation_id": "conv-1",
+                "open_mode": "none",
+            }]
+            with redirect_stdout(StringIO()):
+                self.assertEqual(publisher.resolve_missing_weblinks(entries), 1)
+            self.assertEqual(entries[0]["open_mode"], "web")
+            self.assertEqual(entries[0]["web_link"].split("=")[-1], "targeted")
+        finally:
+            publisher.load_weblink_cache = original_load
+            publisher.save_weblink_cache = original_save
+            if original_module is None:
+                sys.modules.pop("lane_b_call1", None)
+            else:
+                sys.modules["lane_b_call1"] = original_module
+
+    def test_targeted_resolution_leaves_ambiguous_original_unlinked_with_evidence(self):
+        original_module = sys.modules.get("lane_b_call1")
+        original_load = publisher.load_weblink_cache
+        original_save = publisher.save_weblink_cache
+        try:
+            sys.modules["lane_b_call1"] = types.SimpleNamespace(
+                resolve_mail_weblink_for_draft=lambda entry: {
+                    "candidates": [
+                        {"subject": "Same subject", "web_link": "https://outlook.office.com/owa/?ItemID=one"},
+                        {"subject": "RE: Same subject", "web_link": "https://outlook.office.com/owa/?ItemID=two"},
+                    ],
+                    "raw": "VERBATIM CONNECTOR ROWS",
+                }
+            )
+            cache = {}
+            publisher.load_weblink_cache = lambda: cache
+            publisher.save_weblink_cache = lambda value: cache.update(value)
+            entries = [{"draft_id": "draft-ambiguous-targeted", "subject": "FW: Same subject", "open_mode": "none"}]
+            output = StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(publisher.resolve_missing_weblinks(entries), 1)
+            self.assertEqual(entries[0]["open_mode"], "none")
+            self.assertIn("ambiguous:", cache["draft-ambiguous-targeted"]["reason"])
+            self.assertIn("VERBATIM CONNECTOR ROWS", output.getvalue())
         finally:
             publisher.load_weblink_cache = original_load
             publisher.save_weblink_cache = original_save

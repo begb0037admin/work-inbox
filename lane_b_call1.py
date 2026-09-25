@@ -263,7 +263,8 @@ TEAMS_ALLOW = {
 }
 
 EXPECTED_TOOL = {"calendar": "list_events", "teams": "list_chats", "mail": "list_messages",
-                 "mail_inbox": "list_messages", "mail_sent": "list_messages"}
+                 "mail_inbox": "list_messages", "mail_sent": "list_messages",
+                 "mail_search": "search_messages"}
 
 
 # --------------------------------------------------------------------------- #
@@ -1708,6 +1709,131 @@ def resolve_mail_weblinks_by_subjects(subjects: list[str]) -> list[dict]:
             })
     _log(f"[mail] webLink subject batch resolved {len(rows)} connector row(s) via {served_by}")
     return rows
+
+
+def _draft_subject_key(subject: str) -> str:
+    """Normalize reply/forward prefixes for the targeted lookup prompt."""
+    value = " ".join(str(subject or "").split()).casefold()
+    while True:
+        for prefix in ("re:", "fw:", "fwd:"):
+            if value.startswith(prefix):
+                value = value[len(prefix):].lstrip()
+                break
+        else:
+            return value
+
+
+def _draft_lookup_hint(draft: dict, *keys) -> str:
+    """Return the first scalar lookup hint carried by a draft record."""
+    for key in keys:
+        value = draft.get(key)
+        if isinstance(value, dict):
+            value = _first(value, "address", "emailAddress", "name", "value", default="")
+        if value not in (None, ""):
+            return str(value).strip()
+    return ""
+
+
+def resolve_mail_weblink_for_draft(draft: dict) -> dict:
+    """Run one targeted, read-only Oxford-mail search for a draft original.
+
+    The ordinary briefing pull intentionally sees only a bounded recent Inbox
+    window. Drafts are different: their original can be old, sent, archived,
+    or absent from Inbox altogether. This resolver therefore performs one
+    connector search per unresolved draft and returns both the parsed rows and
+    the raw connector transcript so an unresolved result can be audited.
+    """
+    draft = draft if isinstance(draft, dict) else {}
+    subject = str(draft.get("subject") or "").strip()
+    if not subject:
+        return {"web_link": "", "reason": "missing draft subject", "candidates": [], "raw": ""}
+
+    sender = _draft_lookup_hint(
+        draft, "sender_email", "sender_address", "from_email", "from_address",
+        "sender", "from",
+    )
+    conversation_id = _draft_lookup_hint(
+        draft, "conversation_id", "conversationId", "thread_id", "threadId",
+    )
+    # Keep the filter targeted but account for the reply/forward prefixes that
+    # are deliberately stripped by the publisher's exact-match check.
+    canonical = _draft_subject_key(subject)
+    subject_variants = []
+    for value in (subject, canonical, f"RE: {canonical}", f"FW: {canonical}", f"FWD: {canonical}"):
+        if value and value.casefold() not in {v.casefold() for v in subject_variants}:
+            subject_variants.append(value)
+    subject_json = json.dumps(subject_variants, ensure_ascii=False)
+    sender_clause = f" Sender hint: {json.dumps(sender, ensure_ascii=False)}." if sender else ""
+    conversation_clause = (
+        f" Conversation-id hint: {json.dumps(conversation_id, ensure_ascii=False)}."
+        if conversation_id else ""
+    )
+    prompt = (
+        "Using only the Oxford Microsoft 365 mailbox "
+        "kevin.lelitte@admin.ox.ac.uk, in READ-ONLY mode, perform a TARGETED "
+        "search for the original email behind this draft. Search across the "
+        "entire mailbox, including Inbox, Sent Items, Archive and any other "
+        "mail folders exposed by the connector, and include older mail; do "
+        "not restrict the search to the latest 52 Inbox rows or a recent-date "
+        "window. Search the exact subject values in this JSON array (the "
+        "publisher will strip leading RE:/FW:/FWD: and enforce the final exact "
+        "match): " + subject_json + "." + sender_clause + conversation_clause + " "
+        "Use list_messages with the narrowest exact subject/sender/conversation "
+        "filters supported by the connector, and request every matching row, "
+        "not a model-selected summary. Return only message metadata for each "
+        "row: subject, web_link, sender/from address and name, conversationId, "
+        "receivedDateTime, id, and folder/mailbox location. If no row matches, "
+        "return an empty value list and state NO_MATCH. Never guess or construct "
+        "a web link. Do not send, reply, forward, move, delete, draft, or "
+        "modify anything."
+    )
+    try:
+        objs, raw, served_by = _run_mail_lookup_ring(prompt, "mail-weblink-draft")
+    except codex_model_policy.ModelPolicyViolation as e:
+        _log(f"[mail] MODEL POLICY VIOLATION resolving draft original -- {e}")
+        return {"web_link": "", "reason": "model policy violation", "candidates": [], "raw": ""}
+    except Exception as e:  # noqa: BLE001 -- best-effort enrichment
+        _log(f"[mail] targeted draft-original search failed (non-fatal): {e}")
+        return {"web_link": "", "reason": f"connector error: {type(e).__name__}: {e}", "candidates": [], "raw": ""}
+
+    tool_calls = extract_tool_calls(objs)
+    status, detail = guard_recontamination(tool_calls, "mail")
+    if not served_by:
+        return {"web_link": "", "reason": "connector unavailable", "candidates": [], "raw": raw}
+    if status != "ok":
+        reason = "connector safety halt" if status == "halt" else "connector unavailable"
+        _log(f"[mail] targeted draft-original search skipped ({status}): {detail}")
+        return {"web_link": "", "reason": reason, "candidates": [], "raw": raw}
+
+    rows = []
+    for tc in tool_calls:
+        if tc["tool"].split(".")[-1] != "list_messages":
+            continue
+        result = tc.get("result") or {}
+        values = result.get("value") if isinstance(result, dict) else result
+        if not isinstance(values, list):
+            continue
+        for message in values:
+            if not isinstance(message, dict):
+                continue
+            rows.append({
+                "subject": message.get("subject") or "",
+                "web_link": message.get("web_link") or message.get("webLink") or "",
+                "sender": message.get("sender") or message.get("from") or "",
+                "sender_email": message.get("sender_email") or message.get("from_email") or "",
+                "conversation_id": message.get("conversationId") or message.get("conversation_id") or "",
+                "receivedDateTime": message.get("receivedDateTime") or message.get("received_date_time") or "",
+                "id": message.get("id") or "",
+                "folder": message.get("folder") or message.get("parentFolderId") or "",
+            })
+    _log(f"[mail] targeted draft-original search returned {len(rows)} row(s) via {served_by}")
+    return {
+        "web_link": "",
+        "reason": "connector rows returned" if rows else "NO_MATCH: connector returned no rows",
+        "candidates": rows,
+        "raw": raw,
+        "served_by": served_by,
+    }
 
 
 # --------------------------------------------------------------------------- #

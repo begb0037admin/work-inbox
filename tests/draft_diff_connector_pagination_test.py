@@ -18,8 +18,8 @@ def event(page, result):
             "type": "mcp_tool_call",
             "status": "completed",
             "server": "codex_apps",
-            "tool": "microsoft_outlook_email.list_messages",
-            "arguments": {"page": page},
+            "tool": "microsoft_outlook_email.search_messages",
+            "arguments": {"from_index": (page - 1) * 2},
             "result": {"structured_content": result},
         },
     }
@@ -28,8 +28,8 @@ def event(page, result):
 class DraftDiffPaginationTests(unittest.TestCase):
     def test_collects_continuation_pages_and_deduplicates_boundary_ids(self):
         events = [
-            event(1, {"value": [{"id": "a"}, {"id": "b"}], "next_link": "page-2"}),
-            event(2, {"value": [{"id": "b"}, {"id": "c"}]}),
+            event(1, {"results": [{"id": "a"}, {"id": "b"}], "has_more": True, "next_from_index": 2}),
+            event(2, {"results": [{"id": "b"}, {"id": "c"}], "has_more": False}),
         ]
         with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
             rows = connector._list_folder_messages(
@@ -39,7 +39,7 @@ class DraftDiffPaginationTests(unittest.TestCase):
         self.assertEqual([row["id"] for row in rows], ["a", "b", "c"])
 
     def test_refuses_a_continuation_left_after_page_bound(self):
-        events = [event(1, {"value": [{"id": "a"}], "next_link": "page-2"})]
+        events = [event(1, {"results": [{"id": "a"}], "has_more": True, "next_from_index": 2})]
         with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
             with self.assertRaises(connector.ConnectorResultIncomplete):
                 connector._list_folder_messages(
