@@ -197,19 +197,26 @@ def resolve_missing_weblinks(entries):
         except Exception:
             candidates = []
         candidates = candidates if isinstance(candidates, list) else []
+        by_exact_subject = {}
         by_subject = {}
         for candidate in candidates:
             if not isinstance(candidate, dict):
                 continue
+            exact_subject = _weblink_exact_subject_key(candidate.get("subject"))
             subject = _weblink_subject_key(candidate.get("subject"))
             url = valid_owa_weblink(candidate.get("web_link") or candidate.get("webLink"))
             if not subject or not url:
                 continue
+            by_exact_subject.setdefault(exact_subject, set()).add(url)
             by_subject.setdefault(subject, set()).add(url)
         for entry, draft_id in unresolved:
+            exact_subject = _weblink_exact_subject_key(entry.get("subject"))
             subject = _weblink_subject_key(entry.get("subject"))
+            exact_links = by_exact_subject.get(exact_subject, set())
             links = by_subject.get(subject, set())
-            resolved = next(iter(links)) if len(links) == 1 else ""
+            resolved = next(iter(exact_links)) if len(exact_links) == 1 else (
+                next(iter(links)) if len(links) == 1 else ""
+            )
             cache[draft_id] = {"web_link": resolved, "attempted_at": now.isoformat()}
             if resolved:
                 entry["web_link"] = resolved
@@ -247,6 +254,10 @@ def _weblink_subject_key(subject):
                 break
         else:
             return value
+
+
+def _weblink_exact_subject_key(subject):
+    return " ".join(str(subject or "").split())
 
 
 def gh_get(owner, repo, path, token):

@@ -110,7 +110,7 @@ class DraftWeblinkTests(unittest.TestCase):
             sys.modules["lane_b_call1"] = types.SimpleNamespace(
                 resolve_mail_weblinks_by_subjects=lambda subjects: [
                     {
-                        "subject": "My Development Insight reports",
+                        "subject": "RE: My Development Insight reports",
                         "web_link": "https://outlook.office365.com/owa/?ItemID=reply-prefix",
                     }
                 ]
@@ -131,6 +131,44 @@ class DraftWeblinkTests(unittest.TestCase):
             self.assertEqual(publisher.resolve_missing_weblinks(entries), 2)
             self.assertEqual(entries[0]["open_mode"], "web")
             self.assertIn("outlook.office365.com", entries[0]["web_link"])
+        finally:
+            publisher.load_weblink_cache = original_load
+            publisher.save_weblink_cache = original_save
+            if original_module is None:
+                sys.modules.pop("lane_b_call1", None)
+            else:
+                sys.modules["lane_b_call1"] = original_module
+
+    def test_batch_resolution_prefers_one_exact_subject_when_normalized_subject_is_ambiguous(self):
+        original_module = sys.modules.get("lane_b_call1")
+        original_load = publisher.load_weblink_cache
+        original_save = publisher.save_weblink_cache
+        try:
+            sys.modules["lane_b_call1"] = types.SimpleNamespace(
+                resolve_mail_weblinks_by_subjects=lambda subjects: [
+                    {
+                        "subject": "Re: My Development Insight reports",
+                        "web_link": "https://outlook.office365.com/owa/?ItemID=exact",
+                    },
+                    {
+                        "subject": "RE: My Development Insight reports",
+                        "web_link": "https://outlook.office365.com/owa/?ItemID=other-case",
+                    },
+                ]
+            )
+            cache = {}
+            publisher.load_weblink_cache = lambda: cache
+            publisher.save_weblink_cache = lambda value: cache.update(value)
+            entries = [{
+                "draft_id": "draft-exact", "subject": "Re: My Development Insight reports",
+                "received": "", "open_mode": "none",
+            }, {
+                "draft_id": "draft-ambiguous", "subject": "Fwd: My Development Insight reports",
+                "received": "", "open_mode": "none",
+            }]
+            self.assertEqual(publisher.resolve_missing_weblinks(entries), 2)
+            self.assertEqual(entries[0]["web_link"], "https://outlook.office365.com/owa/?ItemID=exact")
+            self.assertEqual(entries[1]["open_mode"], "none")
         finally:
             publisher.load_weblink_cache = original_load
             publisher.save_weblink_cache = original_save
