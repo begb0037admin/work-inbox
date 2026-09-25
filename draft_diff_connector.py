@@ -268,33 +268,40 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
     prompt = _build_folder_prompt(display_name, extra_filter, top)
     last_exc: Exception | None = None
     unavailable_detail = "connector did not return a usable list_messages result"
+    identities = _lb.available_identity_ring()
+    if not identities:
+        raise ConnectorResultUnavailable(f"{display_name}: no authenticated connector identity")
     for n in range(1, retries + 1):
+        identity = identities[(n - 1) % len(identities)]
+        identity_label = str(identity.get("label") or "identity")
+        call_tag = f"{tag}{n}-{identity_label}"
         try:
             events, raw = _lb.run_codex_json(
-                prompt, timeout_s=_lb.CALL1_TIMEOUT_S, tag=f"{tag}{n}",
-                codex_home=_lb.FAILOVER_CODEX_HOME, max_attempts=2, workload_class="high")
+                _lb._prompt_for_identity(prompt, identity),
+                timeout_s=_lb.CALL1_TIMEOUT_S, tag=call_tag,
+                codex_home=identity["CODEX_HOME"], max_attempts=1, workload_class="high")
         except _lb.ReContaminationDetected:
             raise  # non-retryable -- propagate to the caller uncaught, same as every Lane B domain
         except Exception as e:  # noqa: BLE001 -- codex_failed / RuntimeError / transient -- retry
             last_exc = e
-            log(f"draft_diff_connector - [{tag}{n}] attempt failed ({e}) -- "
-                f"{'retrying' if n < retries else 'giving up on this identity'}")
+            log(f"draft_diff_connector - [{call_tag}] attempt failed ({e}) -- "
+                f"{'trying the next identity' if n < retries else 'giving up'}")
             continue
         tool_calls = _lb.extract_tool_calls(events)
         status, detail = _lb.guard_recontamination(tool_calls, "mail_sent")
         if status == "halt":
-            raise _lb.ReContaminationDetected(f"[{tag}{n}] {detail['unexpected']}")
+            raise _lb.ReContaminationDetected(f"[{call_tag}] {detail['unexpected']}")
         if status != "ok":
             unavailable_detail = str(detail)
-            log(f"draft_diff_connector - [{tag}{n}] connector did not return list_messages "
-                f"-- treating as unavailable this cycle")
+            log(f"draft_diff_connector - [{call_tag}] connector did not return list_messages "
+                f"-- trying the next identity")
             continue
         message_calls = [tc for tc in tool_calls
                          if tc["tool"].split(".")[-1] == "list_messages"]
         if not message_calls:
-            raise ConnectorResultIncomplete(
-                f'{display_name}: expected at least one list_messages call, saw none'
-            )
+            unavailable_detail = f"{identity_label} returned no list_messages call"
+            log(f"draft_diff_connector - [{call_tag}] {unavailable_detail} -- trying the next identity")
+            continue
         if len(message_calls) > MAX_PAGES:
             raise ConnectorResultIncomplete(
                 f'{display_name}: connector used {len(message_calls)} pages; bound is {MAX_PAGES}'
@@ -347,7 +354,7 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
             if row_id:
                 seen_ids.add(row_id)
             deduped.append(row)
-        log(f"draft_diff_connector - [{tag}{n}] \"{display_name}\": "
+        log(f"draft_diff_connector - [{call_tag}] \"{display_name}\": "
             f"{len(deduped)} item(s) across {len(message_calls)} page(s)")
         return deduped
     if last_exc is not None:
