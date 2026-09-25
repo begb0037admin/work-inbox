@@ -1,6 +1,11 @@
 # Handover -- 25 September 2026 (Codex) -- cross-dashboard read-only jump links
 
 - Added Tracker icons from the approved map served by `https://tracker.lelitte.co.uk/api/links`; the existing 3×2 card grid has no empty slot because CC, email, and Edit occupy row 2, so linked cards use a third row only for the Tracker icon. Arrival unfolds the section, scrolls, and applies one tinted highlight; no mailbox or sync action is performed. Added `tests/dashboard_links_test.js`.
+# Handover -- 25 September 2026 (Codex) -- bind Lane B connector calls to Oxford mailbox
+
+- Root cause of the 25 September empty-mail/calendar runs: `personal-com` was authenticated and readable, but the identity wrapper appended the mailbox target after the long task prompt. The connector model acknowledged the requested `list_messages`/`list_events` operation and then asked “Which Outlook account should I use: Personal or Oxford?” instead of calling a tool. The runner therefore recorded no usable JSON and classified the attempt as a timeout/codex failure. The 16:00 scheduled run also proves the correct `C:\WorkInboxAI\codex-lanec` `CODEX_HOME`; this was not a profile-permission or wrong-user path failure. `personal-uk` was independently blocked by its revoked-token/quota condition and Edu by authentication.
+- Fixed `_prompt_for_identity()` in `lane_b_call1.py`: the exact `kevin.lelitte@admin.ox.ac.uk` Oxford mailbox is now the first instruction, Personal is explicitly excluded, and the model is told to select Oxford without asking a clarification question. The same wrapper covers inbox, sent mail, and calendar. Added regression coverage for all three prompt families and the ordering/wording of the account binding.
+- Pre-deploy checks passed: 19 Python unit tests, Python compilation, `node --check js/app.js`, dashboard carry-forward Node checks, section-count Node checks, and `git diff --check`. Laptop deployment/live verification remains the required next step for this change.
 
 # Handover -- 24 September 2026 (Codex) -- carried-forward calendar date projection
 
