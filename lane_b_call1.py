@@ -2227,8 +2227,26 @@ def _fetch_domain_one_identity(domain: str, prompt: str, *, window_days: int, ts
 
 
 def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries: int) -> dict:
-    """Run one domain through the configured identities, in ring order."""
+    """Run one domain through the configured identities.
+
+    The Oxford educational profile is deliberately parked for the connector
+    domains: it is still retained in the ring and remains a valid fallback
+    record, but its current session is known to invoke the local desktop
+    automation surface before the Outlook connector.  That trips the
+    re-contamination guard and prevents the known-good personal-com profile
+    from being tried.  Prefer personal-com for the connector domains that
+    must source the Oxford mailbox; retain the original order for Teams.
+    """
     identities = available_identity_ring()
+    if domain in {"calendar", "mail_inbox", "mail_sent"}:
+        identities = sorted(
+            identities,
+            key=lambda identity: 0 if identity.get("label") == "personal-com" else 1,
+        )
+        _identity_log(
+            f"[identity ring] preferred personal-com for {domain}: "
+            + " -> ".join(i["label"] for i in identities)
+        )
     attempts: list[dict] = []
     result: dict | None = None
     for index, identity in enumerate(identities):

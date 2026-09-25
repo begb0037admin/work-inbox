@@ -57,9 +57,9 @@ class FailoverRingTests(unittest.TestCase):
              mock.patch.object(lane, "_fetch_domain_one_identity", side_effect=fake_fetch):
             result = lane.fetch_domain("calendar", "prompt", window_days=7, ts="ts", retries=3)
 
-        self.assertEqual(calls, ["edu", "personal-uk", "personal-com"])
+        self.assertEqual(calls, ["personal-com"])
         self.assertEqual(result["served_by"], "personal-com")
-        self.assertEqual(result["identity_ring"], ["edu", "personal-uk", "personal-com"])
+        self.assertEqual(result["identity_ring"], ["personal-com", "edu", "personal-uk"])
 
     def test_falls_through_each_connector_failure_type(self):
         for reason in ("authentication", "usage_limit", "permission", "timeout"):
@@ -93,7 +93,7 @@ class FailoverRingTests(unittest.TestCase):
              mock.patch.object(lane, "_fetch_domain_one_identity", side_effect=fake_fetch):
             result = lane.fetch_domain("mail_inbox", "prompt", window_days=0, ts="ts", retries=3)
 
-        self.assertEqual(calls, ["edu", "personal-uk", "personal-com"])
+        self.assertEqual(calls, ["personal-com", "edu", "personal-uk"])
         self.assertEqual(result["status"], "unavailable")
         self.assertIsNone(result["served_by"])
 
@@ -112,7 +112,7 @@ class FailoverRingTests(unittest.TestCase):
             lane.fetch_domain("calendar", "prompt", window_days=7, ts="ts1", retries=3)
             lane.fetch_domain("calendar", "prompt", window_days=7, ts="ts2", retries=3)
 
-        self.assertEqual(calls, ["edu", "edu"])
+        self.assertEqual(calls, ["personal-com", "personal-com"])
 
     def test_missing_profile_is_logged_and_skipped(self):
         configured = [
