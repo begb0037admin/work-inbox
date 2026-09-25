@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-25T21:22:43.920152+00:00",
+  "generated": "2026-09-25T22:00:22.910889+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
@@ -43,7 +43,7 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079A4937640000",
-      "open_mode": "web",
+      "open_mode": "none",
       "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079A4937640000",
       "subject": "REF29 UDF",
       "sender_tier": "senior-management",
@@ -75,12 +75,11 @@
             "relevance_note": "Kevin created this exact REF29 UDF himself in UOXU 2 weeks before Simon's email (12 fields: REFQUALCON Yes/No + REF Panel A/B/C/D across 4 appointment slots), and worked through a display bug with Nathan Kirwan the next day. Confirms direct recent familiarity with the UDF's structure; does not confirm the specific CorePortal update-permission assumption Simon states."
           }
         ]
-      },
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeaSTdkAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000",
-      "open_mode": "web",
+      "open_mode": "none",
       "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079D7B8AC40000",
       "subject": "Re: My Development Insight reports",
       "sender_tier": "other",
@@ -119,12 +118,11 @@
             "relevance_note": "Access Group's Alan Quirke confirms Gender field added to UAT ('241 active Employees where their Gender is Unknown') and that Review Status column was still pending review in Live \u2014 real precedent for Q3 (Gender Analysis report data) and Q4 (Review Status status), but 8 months old, not confirmation of current state."
           }
         ]
-      },
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfD6dv6AAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998600000",
-      "open_mode": "web",
+      "open_mode": "none",
       "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A56998600000",
       "subject": "Multi Company Setup",
       "sender_tier": "other",
@@ -147,12 +145,11 @@
           "no-filler-closing"
         ],
         "content_precedent": []
-      },
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAelaZhgAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000751A5367B0000",
-      "open_mode": "web",
+      "open_mode": "none",
       "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF535000751A5367B0000",
       "subject": "Urgent request for an SQL report please to help identify balance code",
       "sender_tier": "other",
@@ -182,12 +179,11 @@
             "relevance_note": "Different report/topic (holiday pay compliance, not balance codes) so not a content answer to Anna's specific ask, but shows Kevin's standard process for a bespoke SQL/Insight report build request: review documentation, escalate to Access Group for a quote, follow up once heard back. Used as a process precedent, not invented feasibility/timeline."
           }
         ]
-      },
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwCN%2B5xoUtxaQ7clOANLv%2FU1AAeISDqnAACN%2B5xoUtxaQ7clOANLv%2FU1AAesu%2FlfAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000",
-      "open_mode": "web",
+      "open_mode": "none",
       "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007A38152580000",
       "subject": "DTP1092 College Staff into PXD - Testing",
       "sender_tier": "other",
@@ -223,8 +219,7 @@
             "relevance_note": "Kevin asked Crispin directly about DPIA completion status as a pre-condition for live data load, and (1 Apr thread) flagged that downstream systems (BizTalk, CUD, other identity/HR integrations) needed review to ensure the new non-payroll entity wasn't unintentionally picked up. No later corpus entry confirms either was resolved -- real open items, not just style color."
           }
         ]
-      },
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAejgVJYAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF53500079B73828F0000",
@@ -338,7 +333,7 @@
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186E90000",
-      "open_mode": "web",
+      "open_mode": "none",
       "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A98186E90000",
       "subject": "RE: Kevin Lelitte shared \"KPI presentation - July 2026\" with you",
       "sender_tier": "direct-report",
@@ -370,12 +365,11 @@
             "relevance_note": "Same sender (Michael O'Sullivan, direct-report) and same pattern \u2014 Michael flags what looks like a data/report anomaly, Kevin replies with a direct technical diagnosis ('As the error appears to be occurring at parameter level rather than within the SQL itself...') plus an offer to help, no hedging. Used as the tone/structure model here. Does not itself confirm anything about the KPI presentation's Incident Tasks figures \u2014 that content grounding comes from Lauren's own KPI Presentation domain ownership, not this corpus entry."
           }
         ]
-      },
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnIAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A8968C280000",
-      "open_mode": "web",
+      "open_mode": "none",
       "tick_id": "0000000060196AC9D4535F45A195B2716E93E76B07008DFB9C6852DC5A43B72538034BBFF53500077C29BF2500008DFB9C6852DC5A43B72538034BBFF5350007A8968C280000",
       "subject": "FW: Support Call# 11701239: NHS Pension tiers new pay ranges",
       "sender_tier": "direct-report",
@@ -409,8 +403,7 @@
             "relevance_note": "Not topically about NHS pensions \u2014 flagged honestly as a tone-only precedent. Shows Kevin's real terse one-line style when acknowledging/relaying payroll-adjacent administrative updates involving Michael ('Fyi- Sorry Michael, thought I copied you in. Best, Kevin'). Used for the short, no-filler acknowledgment register in this draft, not for any factual content."
           }
         ]
-      },
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jqnKAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
+      }
     },
     {
       "source_entry_id": "0000000060196AC9D4535F45A195B2716E93E76B0700FA1BE8B83D691D48B2219F82D0D3C4FB000000C7C97500008DFB9C6852DC5A43B72538034BBFF5350007B279901B0000",
