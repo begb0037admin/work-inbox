@@ -2,20 +2,20 @@
     "kind":  "briefing",
     "result":  "failed",
     "exit_code":  1,
-    "ts":  "2026-09-25T18:23:40+01:00",
+    "ts":  "2026-09-25T19:04:32+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "lane_b_guard":  "halted",
     "lane_b_guard_detail":  "task \u0027Work Inbox Bridge Briefing\u0027 disabled; calendar/Teams fell back to COM/off this cycle. See data\\lane_b\\ and data\\codex_runs\\GUARD_TRIPPED_* on the laptop.",
     "lane_b_domains":  {
                            "teams":  {
-                                         "status":  "halt",
+                                         "status":  "unavailable",
                                          "count":  0,
                                          "served_by":  null,
                                          "primary_failover_identical":  false
                                      },
                            "calendar":  {
-                                            "status":  "unavailable",
+                                            "status":  "halt",
                                             "count":  0,
                                             "served_by":  null,
                                             "primary_failover_identical":  false
