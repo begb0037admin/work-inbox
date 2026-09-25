@@ -1,3 +1,7 @@
+# Handover -- 25 September 2026 (Codex) -- cross-dashboard read-only jump links
+
+- Added Tracker icons from the approved map served by `https://tracker.lelitte.co.uk/api/links`; the existing 3×2 card grid has no empty slot because CC, email, and Edit occupy row 2, so linked cards use a third row only for the Tracker icon. Arrival unfolds the section, scrolls, and applies one tinted highlight; no mailbox or sync action is performed. Added `tests/dashboard_links_test.js`.
+
 # Handover -- 24 September 2026 (Codex) -- carried-forward calendar date projection
 
 - Fixed the carried-forward calendar bug in `connector_carry_forward.py`: relative `calToday`/`calTomorrow`/`calDay2`/`calDay3` buckets are now always cleared and rebuilt from dated `calFull` days relative to the current local run date, skipping weekends and excluding undated entries. Relative `calFull.isToday` flags are refreshed too.

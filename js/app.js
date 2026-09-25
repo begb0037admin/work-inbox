@@ -1295,6 +1295,7 @@ function renderBriefing(data,key){
   ['pt','ptom','ur','pw','nr','pfyi'].forEach(sec=>applySecCollapse(sec,!!getCollapsedSecs()[sec]));
   _priInitSortables();
   _runCardSearch();
+  decorateJumpLinks();
 }
 
 // Card search (Priorities board) — plain client-side substring filter across
@@ -1586,12 +1587,54 @@ function getGreeting(){
 
 const BRIEFING_API='https://github-proxy.lelitte.co.uk/work-inbox/data/briefing.json';
 const BRIEFING_STATUS_API='https://raw.githubusercontent.com/begb0037admin/work-inbox/main/data/laptop_status/briefing_status.json';
+const LINK_MAP_API='https://tracker.lelitte.co.uk/api/links';
+let wiLinkDocument={version:1,links:[]};
+async function loadDashboardLinks(){
+  try{
+    const response=await fetch(LINK_MAP_API+'?t='+Date.now(),{cache:'no-store'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const value=await response.json();
+    if(value&&Array.isArray(value.links))wiLinkDocument=value;
+  }catch(e){console.warn('Dashboard link map unavailable',e);}
+}
+function wiLinkDestinations(key){
+  const seen=new Set();
+  return (wiLinkDocument.links||[]).filter(link=>link.status==='active'&&(link.wiKeys||[]).indexOf(key)>=0).map(link=>{
+    const target=link.trackerId;if(seen.has(target))return null;seen.add(target);
+    return {url:'https://tracker.lelitte.co.uk/#'+encodeURIComponent(target),label:target};
+  }).filter(Boolean);
+}
+function wiCloseLinkPicker(){document.querySelectorAll('.dashboard-link-picker').forEach(picker=>picker.remove());}
+function wiOpenDashboardLinks(event,destinations){
+  event.stopPropagation();
+  if(destinations.length===1){window.open(destinations[0].url,'wi-tracker-task','noopener');return;}
+  wiCloseLinkPicker();
+  const picker=document.createElement('div');picker.className='dashboard-link-picker';picker.setAttribute('role','dialog');picker.setAttribute('aria-label','Choose Tracker link');
+  const heading=document.createElement('div');heading.className='dashboard-link-picker-title';heading.textContent='Choose Tracker';picker.append(heading);
+  destinations.forEach(destination=>{const button=document.createElement('button');button.type='button';button.textContent=destination.label;button.onclick=()=>{window.open(destination.url,'wi-tracker-task','noopener');wiCloseLinkPicker();};picker.append(button);});
+  document.body.append(picker);const rect=event.currentTarget.getBoundingClientRect();picker.style.left=Math.min(rect.left,window.innerWidth-picker.offsetWidth-12)+'px';picker.style.top=(rect.bottom+6)+'px';
+}
+function decorateJumpLinks(){
+  document.querySelectorAll('.card-ph[data-prikey]').forEach(card=>{
+    const grid=card.querySelector('.card-action-grid');if(!grid||grid.querySelector('[data-dashboard-link="tracker"]'))return;
+    const destinations=wiLinkDestinations(card.dataset.prikey);if(!destinations.length)return;
+    const button=document.createElement('button');button.type='button';button.className='card-icon dashboard-link-icon';button.dataset.dashboardLink='tracker';button.textContent='T';button.title='Open in Tracker';button.setAttribute('aria-label','Open in Tracker');button.onclick=event=>wiOpenDashboardLinks(event,destinations);grid.append(button);
+  });
+}
+function clearWiJumpState(){document.querySelectorAll('.card-ph').forEach(card=>{['wi-deep-linked-urgent','wi-deep-linked-needs','wi-deep-linked-today','wi-deep-linked-week','wi-deep-linked-parked'].forEach(name=>card.classList.remove(name));});}
+function goToWorkInboxCard(key){
+  const escaped=window.CSS&&CSS.escape?CSS.escape(key):key.replace(/[^a-zA-Z0-9_-]/g,'\\$&');
+  let card=document.querySelector('.card-ph[data-prikey="'+escaped+'"]');if(!card)return;
+  const sec=card.dataset.sec||'pfyi';const state=getCollapsedSecs();if(state[sec]){state[sec]=false;setCollapsedSecs(state);applySecCollapse(sec,false);}
+  clearWiJumpState();card.scrollIntoView({behavior:'smooth',block:'center'});card.classList.add('wi-deep-linked-'+({ur:'urgent',nr:'needs',pt:'today',ptom:'tomorrow',pw:'week',pfyi:'parked'}[sec]||'parked'));
+}
 
 async function init(){
   const titleEl=document.getElementById('pageTitle');
   if(titleEl) titleEl.textContent=getGreeting();
 
   await loadRemoteTicks();
+  await loadDashboardLinks();
   loadDraftedReplies();
 
   let data=null;
@@ -1640,6 +1683,7 @@ async function init(){
   }
 
   renderBriefing(data, currentKey);
+  if(location.hash.length>1){setTimeout(()=>goToWorkInboxCard(decodeURIComponent(location.hash.slice(1))),0);}
 }
 
 // Tabs -- added 10 Aug 2026 once Drafted Replies joined Calendar + Priorities
