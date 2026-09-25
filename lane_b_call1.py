@@ -422,7 +422,7 @@ def _prompt_for_identity(prompt: str, identity: dict) -> str:
     # as a single short sentence; a second execute-now wrapper made the model
     # verify the mailbox but sometimes stop before the actual read tool call.
     return (
-        f"Use only the Oxford Microsoft 365 mailbox {account}, not Personal.\n\n{prompt}"
+        f"Use only the Oxford Microsoft 365 mailbox {account}, not Personal. {prompt}"
     )
 
 
