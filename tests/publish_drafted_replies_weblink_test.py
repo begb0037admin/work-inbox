@@ -70,6 +70,38 @@ class DraftWeblinkTests(unittest.TestCase):
             else:
                 os.environ["WI_DRAFT_WEBLINK_MAX_RESOLVES"] = original_limit
 
+    def test_resolution_uses_one_batch_resolver_for_current_drafts(self):
+        calls = []
+        original_module = sys.modules.get("lane_b_call1")
+        original_load = publisher.load_weblink_cache
+        original_save = publisher.save_weblink_cache
+        try:
+            sys.modules["lane_b_call1"] = types.SimpleNamespace(
+                resolve_mail_weblinks_by_subjects=lambda subjects: calls.append(subjects) or [
+                    {"subject": subject, "web_link": "https://outlook.office365.com/owa/?ItemID=" + str(i)}
+                    for i, subject in enumerate(subjects)
+                ]
+            )
+            cache = {}
+            publisher.load_weblink_cache = lambda: cache
+            publisher.save_weblink_cache = lambda value: cache.update(value)
+            entries = [{
+                "draft_id": f"draft-{i}", "subject": f"Subject {i}",
+                "received": "", "open_mode": "none",
+            } for i in range(4)]
+            self.assertEqual(publisher.resolve_missing_weblinks(entries), 4)
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0], [f"Subject {i}" for i in range(4)])
+            self.assertTrue(all(entry["open_mode"] == "web" for entry in entries))
+            self.assertEqual(len(cache), 4)
+        finally:
+            publisher.load_weblink_cache = original_load
+            publisher.save_weblink_cache = original_save
+            if original_module is None:
+                sys.modules.pop("lane_b_call1", None)
+            else:
+                sys.modules["lane_b_call1"] = original_module
+
 
 if __name__ == "__main__":
     unittest.main()

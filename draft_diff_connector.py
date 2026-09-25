@@ -98,19 +98,14 @@ from datetime import datetime, timedelta, timezone
 
 import lane_b_call1 as _lb
 
-# DRAFTS_MAX / SENT_MAX -- added 16 Sep 2026 after a live probe against
-# Kevin's REAL Oxford mailbox (not the failover-identity test mailbox this
-# module was originally verified against): the Drafts folder genuinely has
-# more than 200 items -- the connector returned a pagination continuation
-# link, and _list_folder_messages() correctly refused the partial pull
-# (ConnectorResultIncomplete) rather than silently dropping data. Raising the
-# cap rather than implementing multi-call pagination -- pagination would
-# reintroduce the exact multi-call folder-hunting shape the 16 Sep mail_sent
-# rigid-prompt fix (lane_b_call1.build_mail_sent_prompt()) was built to
-# eliminate. If this cap is ever hit again, raise it further via the env var
-# rather than adding a second list_messages call.
-DRAFTS_MAX = int(os.environ.get("WI_DRAFTDIFF_DRAFTS_MAX", "1000"))
-SENT_MAX = int(os.environ.get("WI_DRAFTDIFF_SENT_MAX", "1000"))
+# The connector commonly returns a continuation link around 200 rows even
+# when a larger top value is requested. Collect a bounded number of pages and
+# refuse the pull if the connector still advertises another page after the
+# bound; never rewrite the ledger from a partial folder snapshot.
+DRAFTS_MAX = int(os.environ.get("WI_DRAFTDIFF_DRAFTS_MAX", "2000"))
+SENT_MAX = int(os.environ.get("WI_DRAFTDIFF_SENT_MAX", "2000"))
+PAGE_SIZE = max(1, int(os.environ.get("WI_DRAFTDIFF_PAGE_SIZE", "200")))
+MAX_PAGES = max(1, int(os.environ.get("WI_DRAFTDIFF_MAX_PAGES", "12")))
 
 # ---------------------------------------------------------------------------
 #  Conversation key (subject/topic only -- see module docstring)
@@ -226,29 +221,32 @@ def _body_text(body_field, fallback_preview: str = "") -> str:
 #  Connector plumbing -- one folder-scoped list_messages pull, guard-checked
 # ---------------------------------------------------------------------------
 def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) -> str:
-    # Same rigid 2-call shape as lane_b_call1.build_mail_sent_prompt()'s
-    # 16 Sep fix -- exactly one list_mail_folders call to resolve the folder
-    # id by display_name, exactly one list_messages call, no other tool.
+    # Resolve the folder once, then follow only list_messages continuation
+    # pages. The model must not re-resolve the folder for each page.
     filt = f" filter=\"{extra_filter}\"," if extra_filter else ""
     orderby = "sentDateTime desc" if display_name.casefold() == "sent items" else "receivedDateTime desc"
     return (
         "Using the Microsoft Outlook Email app connector, in READ-ONLY mode, retrieve "
-        f"messages from my \"{display_name}\" folder. You MUST do this in exactly two "
-        "tool calls, in this order, and MUST NOT skip either one or add any other tool "
-        "call:\n"
+        f"messages from my \"{display_name}\" folder. You MUST resolve the folder "
+        "once, then use only the paginated list_messages calls described below; do "
+        "not add any other tool call:\n"
         f"1) Call list_mail_folders exactly once to find the folder whose display_name "
         f"is \"{display_name}\" and note its folder id.\n"
-        f"2) Call list_messages exactly once, scoped to that folder id,{filt} "
-        f"orderby=\"{orderby}\", top={top}. If the tool does not accept "
-        "these exact arguments, use the closest equivalent arguments in this one "
-        "SECOND call -- do not issue any additional tool call.\n"
+        f"2) Call list_messages scoped to that folder id,{filt} "
+        f"orderby=\"{orderby}\", top={top}. If the result contains a next_link, "
+        "@odata.nextLink, nextLink, or skip token, call list_messages again for "
+        "the next page using that continuation value and the same folder/filter. "
+        f"Continue for at most {MAX_PAGES} list_messages page calls and stop when "
+        "no continuation is returned. Do not call list_mail_folders again. If the "
+        "continuation remains after the page bound, return the last continuation "
+        "in the raw result so the caller can reject the incomplete pull.\n"
         "Do NOT call fetch_message, fetch_messages_batch, or search_messages -- "
         "list_messages already returns the full message content needed, including the "
         "body. "
         "For each message return: subject, to recipients, received/sent date-time, "
         "the message id, the web link, and the full body. "
-        "Return ONLY the raw connector result as JSON (an array of the message "
-        "objects), with no summary, no interpretation, and no prose. "
+        "Return ONLY the raw connector result(s) as JSON (the message objects and "
+        "continuation metadata), with no summary, no interpretation, and no prose. "
         "Do not use any other app or tool. Do not send, reply to, forward, move, "
         "delete, mark as read, categorise, flag, or otherwise modify any message. "
         f"{_lb.SAFETY_RULE}"
@@ -256,8 +254,8 @@ def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) 
 
 
 def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: int,
-                           tag: str, retries: int, log=print) -> list[dict]:
-    """One folder-scoped list_messages pull, guard-checked, with the same
+                           max_total: int, tag: str, retries: int, log=print) -> list[dict]:
+    """Bounded folder-scoped list_messages pagination, guard-checked, with the same
     retry/backoff shape as lane_b_call1.fetch_mail_domain() (personal-account
     -only -- mail has no Edu connector, same precedent that function already
     established). Fails SOFT on anything except a genuine guard HALT: a
@@ -293,36 +291,65 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
             continue
         message_calls = [tc for tc in tool_calls
                          if tc["tool"].split(".")[-1] == "list_messages"]
-        if len(message_calls) != 1:
+        if not message_calls:
             raise ConnectorResultIncomplete(
-                f'{display_name}: expected exactly one list_messages call, saw {len(message_calls)}'
+                f'{display_name}: expected at least one list_messages call, saw none'
             )
-        res = message_calls[0].get("result")
-        if isinstance(res, dict):
-            next_link = res.get("next_link") or res.get("nextLink") or res.get("@odata.nextLink")
-            if next_link:
+        if len(message_calls) > MAX_PAGES:
+            raise ConnectorResultIncomplete(
+                f'{display_name}: connector used {len(message_calls)} pages; bound is {MAX_PAGES}'
+            )
+
+        collected = []
+        for page_index, call in enumerate(message_calls):
+            res = call.get("result")
+            if isinstance(res, dict):
+                next_link = (res.get("next_link") or res.get("nextLink")
+                             or res.get("@odata.nextLink") or res.get("skip_token")
+                             or res.get("skipToken"))
+                page_rows = None
+                for key in ("value", "messages", "items"):
+                    if isinstance(res.get(key), list):
+                        page_rows = res[key]
+                        break
+            elif isinstance(res, list):
+                next_link = None
+                page_rows = res
+            else:
+                next_link = None
+                page_rows = None
+            if page_rows is None:
                 raise ConnectorResultIncomplete(
-                    f'{display_name}: list_messages returned a continuation link; refusing a partial pull'
+                    f'{display_name}: page {page_index + 1} returned no message array'
                 )
-            collected = None
-            for key in ("value", "messages", "items"):
-                if isinstance(res.get(key), list):
-                    collected = res[key]
-                    break
-        elif isinstance(res, list):
-            collected = res
-        else:
-            collected = None
-        if collected is None:
+            collected.extend(page_rows)
+            if page_index < len(message_calls) - 1 and not next_link:
+                raise ConnectorResultIncomplete(
+                    f'{display_name}: page {page_index + 1} had no continuation before another page'
+                )
+            if page_index == len(message_calls) - 1 and next_link:
+                raise ConnectorResultIncomplete(
+                    f'{display_name}: continuation remains after {len(message_calls)} page(s); refusing a partial pull'
+                )
+
+        if len(collected) > max_total:
             raise ConnectorResultIncomplete(
-                f'{display_name}: list_messages returned no complete message array'
+                f'{display_name}: collected {len(collected)} items; bounded total is {max_total}'
             )
-        if len(collected) >= top:
-            raise ConnectorResultIncomplete(
-                f'{display_name}: list_messages reached top={top}; refusing a possibly truncated pull'
-            )
-        log(f"draft_diff_connector - [{tag}{n}] \"{display_name}\": {len(collected)} item(s)")
-        return collected
+        # A continuation page can repeat the boundary row. Deduplicate only
+        # by the stable connector id; rows without an id are retained.
+        deduped = []
+        seen_ids = set()
+        for row in collected:
+            row_id = row.get("id") if isinstance(row, dict) else None
+            if row_id and row_id in seen_ids:
+                continue
+            if row_id:
+                seen_ids.add(row_id)
+            deduped.append(row)
+        log(f"draft_diff_connector - [{tag}{n}] \"{display_name}\": "
+            f"{len(deduped)} item(s) across {len(message_calls)} page(s)")
+        return deduped
     if last_exc is not None:
         unavailable_detail = f"last error {last_exc!r}"
     log(f"draft_diff_connector - \"{display_name}\": no usable result after {retries} "
@@ -339,7 +366,8 @@ def snapshot_drafts_connector(log=print) -> dict:
     semantics as draft_final_diff_capture.snapshot_drafts() /
     draft_diff_imap.snapshot_drafts_imap()."""
     now_iso = datetime.now().isoformat()
-    messages = _list_folder_messages("Drafts", extra_filter=None, top=DRAFTS_MAX,
+    messages = _list_folder_messages("Drafts", extra_filter=None, top=PAGE_SIZE,
+                                      max_total=DRAFTS_MAX,
                                       tag="draftdiff_drafts#failover", retries=_lb.CALL1_RETRIES, log=log)
     snap: dict = {}
     ambiguous_keys = set()
@@ -405,7 +433,8 @@ class SentIndexConnector:
         self._by_key: dict[str, list[dict]] = {}
         floor = datetime.now(timezone.utc) - timedelta(hours=window_hours + 240)  # +10gd slack, mirrors draft_diff_imap's own
         extra_filter = f"sentDateTime ge {floor.strftime('%Y-%m-%dT%H:%M:%S')}Z"
-        messages = _list_folder_messages("Sent Items", extra_filter=extra_filter, top=SENT_MAX,
+        messages = _list_folder_messages("Sent Items", extra_filter=extra_filter, top=PAGE_SIZE,
+                                          max_total=SENT_MAX,
                                           tag="draftdiff_sent#failover", retries=_lb.CALL1_RETRIES, log=log)
         indexed = 0
         for m in messages:

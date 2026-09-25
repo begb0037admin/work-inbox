@@ -79,6 +79,7 @@ WEBLINK_CACHE_PATH = os.path.join(
     "data", "drafted_replies_weblinks.json",
 )
 WEBLINK_FAILURE_RETRY = datetime.timedelta(hours=24)
+DEFAULT_MAX_WEBLINK_RESOLVES = 25
 HTTP_TIMEOUT_S = max(5, int(os.environ.get("WI_PUBLISH_HTTP_TIMEOUT_S", "30")))
 
 
@@ -132,14 +133,24 @@ def parse_cache_time(value):
 
 
 def resolve_missing_weblinks(entries):
-    """Fill missing links using a small, cached, read-only connector budget."""
+    """Fill missing links using one cached, read-only connector batch.
+
+    The connector resolver uses lane_b_call1's identity ring, Oxford-account
+    targeting, guard, timeout, and closed-stdin subprocess path. Keeping the
+    lookup as one batch is important here: the bridge wrapper has a finite
+    runtime, while a per-draft call would multiply the ring timeout by every
+    unresolved draft.
+    """
     cache = load_weblink_cache()
     now = datetime.datetime.now(datetime.timezone.utc)
     try:
-        max_resolves = max(0, int(os.environ.get("WI_DRAFT_WEBLINK_MAX_RESOLVES", "3")))
+        max_resolves = max(0, int(os.environ.get(
+            "WI_DRAFT_WEBLINK_MAX_RESOLVES", str(DEFAULT_MAX_WEBLINK_RESOLVES))))
     except ValueError:
-        max_resolves = 3
+        max_resolves = DEFAULT_MAX_WEBLINK_RESOLVES
     attempts = 0
+
+    unresolved = []
 
     for entry in entries:
         existing = valid_owa_weblink(entry.get("web_link") or entry.get("display_url"))
@@ -161,14 +172,58 @@ def resolve_missing_weblinks(entries):
         attempted_at = parse_cache_time(cached.get("attempted_at"))
         if attempted_at and now - attempted_at < WEBLINK_FAILURE_RETRY:
             continue
-        if attempts >= max_resolves:
+        if len(unresolved) >= max_resolves:
             continue
+        unresolved.append((entry, draft_id))
 
+    if not unresolved:
+        save_weblink_cache(cache)
+        return 0
+
+    # Prefer the batch resolver added to lane_b_call1. The singular fallback
+    # keeps this publisher compatible with a mixed-version laptop during a
+    # rolling copy, and is also useful for a one-entry lookup.
+    resolver_module = None
+    try:
+        import lane_b_call1 as resolver_module
+    except Exception:
+        resolver_module = None
+
+    batch_resolver = getattr(resolver_module, "resolve_mail_weblinks_by_subjects", None)
+    if callable(batch_resolver) and len(unresolved) > 1:
+        attempts = len(unresolved)
+        try:
+            candidates = batch_resolver([entry.get("subject", "") for entry, _ in unresolved])
+        except Exception:
+            candidates = []
+        candidates = candidates if isinstance(candidates, list) else []
+        by_subject = {}
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            subject = " ".join(str(candidate.get("subject") or "").split()).casefold()
+            url = valid_owa_weblink(candidate.get("web_link") or candidate.get("webLink"))
+            if not subject or not url:
+                continue
+            by_subject.setdefault(subject, set()).add(url)
+        for entry, draft_id in unresolved:
+            subject = " ".join(str(entry.get("subject") or "").split()).casefold()
+            links = by_subject.get(subject, set())
+            resolved = next(iter(links)) if len(links) == 1 else ""
+            cache[draft_id] = {"web_link": resolved, "attempted_at": now.isoformat()}
+            if resolved:
+                entry["web_link"] = resolved
+                entry["open_mode"] = "web"
+        save_weblink_cache(cache)
+        return attempts
+
+    # Mixed-version/single-entry fallback: retain the established exact-subject
+    # resolver contract, including its own ring and safety checks.
+    for entry, draft_id in unresolved:
         attempts += 1
         resolved = ""
         try:
-            from lane_b_call1 import resolve_mail_weblink_by_subject
-            resolved = valid_owa_weblink(resolve_mail_weblink_by_subject(
+            resolved = valid_owa_weblink(resolver_module.resolve_mail_weblink_by_subject(
                 entry.get("subject", ""), entry.get("received", ""),
             ))
         except Exception:

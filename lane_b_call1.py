@@ -1647,6 +1647,91 @@ def resolve_mail_weblink_by_subject(subject: str, received_raw: str = "") -> str
     return wl
 
 
+def resolve_mail_weblinks_by_subjects(subjects: list[str]) -> list[dict]:
+    """Resolve several exact-subject OWA links in one guarded ring call.
+
+    This is the publisher-facing form of the singular resolver. It keeps the
+    same Oxford-account prompt, ordered identity ring, closed-stdin bounded
+    subprocess, and read-only tool guard, but avoids multiplying one connector
+    process per draft when the bridge publishes a batch of current drafts.
+    Returned rows are raw connector fields; callers must still validate URLs
+    and disambiguate duplicate subjects before publishing them.
+    """
+    requested = []
+    seen = set()
+    for subject in subjects or []:
+        value = str(subject or "").strip()
+        key = value.casefold()
+        if value and key not in seen:
+            requested.append(value)
+            seen.add(key)
+    if not requested:
+        return []
+
+    # Keep the prompt bounded even if a malformed source file contains an
+    # unexpectedly large draft list. The publisher applies its own per-run
+    # cap before calling us.
+    requested = requested[:50]
+    clauses = " or ".join(
+        "subject eq '" + value.replace("'", "''") + "'" for value in requested
+    )
+    prompt = (
+        "Using the Microsoft Outlook Email connector, in READ-ONLY mode: look up "
+        "messages whose subject is exactly one of the following values. Call "
+        "list_messages exactly once with this OData filter and return the raw "
+        "message rows: " + clauses + ". Use order by receivedDateTime desc and "
+        "top 100. Include subject, receivedDateTime, web_link, and id for every "
+        "row returned. Do not guess, construct, or rewrite links. If there are "
+        "no matches, return an empty result. Do not send, reply to, forward, "
+        "move, delete, draft, or modify anything -- this is a read-only lookup, "
+        "change nothing."
+    )
+    try:
+        objs, raw, served_by = _run_mail_lookup_ring(prompt, "mail-weblink-subject-batch")
+    except codex_model_policy.ModelPolicyViolation as e:
+        _log(f"[mail] MODEL POLICY VIOLATION resolving webLinks by subject batch -- {e}")
+        return []
+    except Exception as e:  # noqa: BLE001 -- best-effort enrichment
+        _log(f"[mail] webLink subject batch failed (non-fatal): {e}")
+        return []
+    if not served_by:
+        return []
+
+    try:
+        _ts = _utcstamp()
+        (LANE_B_DIR / f"{_ts}_call1_mail_bysubj_batch_{served_by}_a1.jsonl").write_text(
+            raw, encoding="utf-8"
+        )
+    except OSError:
+        pass
+
+    tool_calls = extract_tool_calls(objs)
+    status, detail = guard_recontamination(tool_calls, "mail")
+    if status != "ok":
+        _log(f"[mail] webLink subject batch skipped ({status}): {detail}")
+        return []
+
+    rows = []
+    for tc in tool_calls:
+        if tc["tool"].split(".")[-1] != "list_messages":
+            continue
+        result = tc.get("result") or {}
+        values = result.get("value") if isinstance(result, dict) else result
+        if not isinstance(values, list):
+            continue
+        for message in values:
+            if not isinstance(message, dict):
+                continue
+            rows.append({
+                "subject": message.get("subject") or "",
+                "receivedDateTime": message.get("receivedDateTime") or message.get("received_date_time") or "",
+                "web_link": message.get("web_link") or message.get("webLink") or "",
+                "id": message.get("id") or "",
+            })
+    _log(f"[mail] webLink subject batch resolved {len(rows)} connector row(s) via {served_by}")
+    return rows
+
+
 # --------------------------------------------------------------------------- #
 #  Map connector event/message objects -> normalise_pull raw shape
 # --------------------------------------------------------------------------- #

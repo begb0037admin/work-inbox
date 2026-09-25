@@ -621,7 +621,10 @@ if ($okDeps -and (Get-PipelineScript "$tb/publish_needs_reply.py" (Join-Path $to
 
 if ($okDeps -and (Get-PipelineScript "$tb/publish_drafted_replies.py" (Join-Path $tools 'publish_drafted_replies.py') '^def run\(token')) {
   Log "running: python -u tools\publish_drafted_replies.py"
-  $publisherRc = Invoke-PublisherWithTimeout (Join-Path $tools 'publish_drafted_replies.py') 'publish_drafted_replies.py' 180
+  # Drafted Replies performs one bounded connector subject batch through the
+  # Lane B identity ring. Keep the wrapper bound above the connector's own
+  # timeout so a slow but valid Oxford-account call is not killed early.
+  $publisherRc = Invoke-PublisherWithTimeout (Join-Path $tools 'publish_drafted_replies.py') 'publish_drafted_replies.py' 420
   Log "publish_drafted_replies.py exit $publisherRc"
 } else {
   Log "SKIP publish_drafted_replies.py (dependency/download issue) -- non-fatal"
