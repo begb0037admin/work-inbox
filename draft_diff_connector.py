@@ -285,6 +285,11 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
             log(f"draft_diff_connector - [{call_tag}] attempt failed ({e}) -- "
                 f"{'trying the next identity' if n < retries else 'giving up'}")
             continue
+        mismatch = _lb._account_mismatch_reason(events, identity.get("m365_account"))
+        if mismatch:
+            unavailable_detail = mismatch
+            log(f"draft_diff_connector - [{call_tag}] {mismatch} -- trying the next identity")
+            continue
         tool_calls = _lb.extract_tool_calls(events)
         status, detail = _lb.guard_recontamination(tool_calls, "mail_search")
         if status == "halt":

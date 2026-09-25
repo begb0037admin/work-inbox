@@ -84,6 +84,23 @@ Log "params: NoAI=$NoAI  Cadence=$Cadence  NoStatusPush=$NoStatusPush"
 Log "staging dir (local only): $stage"
 Set-Location $root
 
+# --- Lane B identity ring -- match the working Bridge Briefing wrapper ---
+# Scheduled-task processes inherit the complete ambient user/system environment.
+# Clear the superseded single-profile overrides before lane_b_call1.py is
+# imported, so this task always resolves the checked-in ring in order:
+# edu -> personal-uk -> personal-com, with the Oxford mailbox target supplied
+# by each ring entry. The per-call code still sets CODEX_HOME explicitly for
+# the selected identity; this clear prevents the legacy environment from
+# influencing module-level defaults, policy, or a mixed-version helper.
+Remove-Item Env:\CODEX_HOME -ErrorAction SilentlyContinue
+Remove-Item Env:\WI_LANE_B_CODEX_HOME -ErrorAction SilentlyContinue
+Remove-Item Env:\WI_LANE_B_CODEX_HOME_FAILOVER -ErrorAction SilentlyContinue
+$env:WI_LANE_B_IDENTITIES_CONFIG = Join-Path $root 'lane_b_identities.json'
+$connectorBudgetSeconds = 1200
+$env:WI_LANE_B_RUN_BUDGET_S = [string]$connectorBudgetSeconds
+$env:WI_LANE_B_RUN_DEADLINE_EPOCH = [string]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() + $connectorBudgetSeconds)
+Log "Lane B: cleared ambient CODEX_HOME/WI_LANE_B_CODEX_HOME(_FAILOVER); using $env:WI_LANE_B_IDENTITIES_CONFIG with a ${connectorBudgetSeconds}s run budget"
+
 # --- isolated Claude Code config: kevin@ (only needed when the enrichment runs) ---
 $kevinCfg = 'C:\WorkInboxAI\kevin'
 if (-not $NoAI) {
@@ -105,6 +122,7 @@ $need = @{
   'style_corpus_common.py'      = "$base/tools/style_corpus_common.py"
   'draft_diff_connector.py'     = "$base/draft_diff_connector.py"
   'lane_b_call1.py'             = "$base/lane_b_call1.py"
+  'lane_b_identities.json'      = "$base/lane_b_identities.json"
   'normalise_pull.py'           = "$base/normalise_pull.py"
   'codex_model_policy.py'       = "$base/codex_model_policy.py"
 }
