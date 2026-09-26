@@ -223,18 +223,18 @@ def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) 
     # resolve the named folder once, then read it with list_messages. The
     # connector's current personal-com session does not reliably expose the
     # older search_messages surface used by the previous Draft Diff path.
-    filt = f' filter="{extra_filter}",' if extra_filter else ""
-    orderby = "sentDateTime desc" if display_name.casefold() == "sent items" else "receivedDateTime desc"
+    filt = f'filter="{extra_filter}"; ' if extra_filter else ""
+    order_by = "sentDateTime desc" if display_name.casefold() == "sent items" else "receivedDateTime desc"
     return (
         "Use the Outlook Email connector now, read-only. List messages in my "
-        f"Oxford {display_name} folder, newest first. First call "
+        f"Oxford {display_name} folder, newest first. First call only "
         "list_mail_folders once and choose the exact folder whose display name "
-        f"is {display_name}; then call list_messages for that folder id "
-        f"{filt} orderby=\"{orderby}\", top={top}. "
-        "If a next_link, @odata.nextLink, nextLink, skip_token, or skipToken "
-        "is returned, continue with list_messages for the next page, using the "
-        f"same folder and filter, for at most {MAX_PAGES} pages. Stop when no "
-        "continuation is returned. Do not call fetch_message, "
+        f"is {display_name}; then call only list_messages for that folder id "
+        f"with {filt}order_by=\"{order_by}\", top={top}, skip=0. "
+        "For each further page increment skip by the page size and repeat the "
+        f"same folder, filter, order_by, and top arguments, for at most {MAX_PAGES} "
+        "pages. Stop when a page has fewer than top rows or the result explicitly "
+        "says there is no continuation. Do not call fetch_message, "
         "fetch_messages_batch, or search_messages: list_messages includes the "
         "full body. Return only the raw message rows and paging metadata, with "
         "no summary or prose. Do not send, reply, forward, move, delete, mark "
@@ -427,7 +427,7 @@ def snapshot_drafts_connector(log=print) -> dict:
     draft_diff_imap.snapshot_drafts_imap()."""
     now_iso = datetime.now().isoformat()
     floor = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
-    extra_filter = f"received>={floor.strftime('%Y-%m-%d')}"
+    extra_filter = f"receivedDateTime ge {floor.strftime('%Y-%m-%d')}T00:00:00Z"
     messages = _list_folder_messages("Drafts", extra_filter=extra_filter, top=PAGE_SIZE,
                                       max_total=DRAFTS_MAX,
                                       tag="draftdiff_drafts#failover", retries=_lb.CALL1_RETRIES, log=log)
@@ -497,7 +497,7 @@ class SentIndexConnector:
         # The connector exposes a bounded date filter for folder reads. Keep
         # the mailbox pull at a clear 14-day window while retaining the
         # narrower 72-hour correlation window below.
-        extra_filter = f"received>={floor.strftime('%Y-%m-%d')}"
+        extra_filter = f"sentDateTime ge {floor.strftime('%Y-%m-%d')}T00:00:00Z"
         messages = _list_folder_messages("Sent Items", extra_filter=extra_filter, top=PAGE_SIZE,
                                           max_total=SENT_MAX,
                                           tag="draftdiff_sent#failover", retries=_lb.CALL1_RETRIES, log=log)

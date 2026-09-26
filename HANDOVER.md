@@ -1,3 +1,10 @@
+# Handover -- 26 September 2026 (Codex) -- Drafts connector prompt-contract fix
+
+- Same-user evidence: `Work Inbox Laptop Draft Diff` ran as `AD-OAK\\begb0037` and all three identities failed before any Outlook MCP tool event, ending with the verbatim `ConnectorResultUnavailable: Drafts: last error ConnectorCallFailure('[draftdiff_drafts#failover3-personal-com] connector reported codex_exit (exit 1)')`. A prior same-identity codex-lanec transcript successfully read 132 Drafts rows with `list_mail_folders`, then `list_messages` using `top=50` and `skip=50/100`.
+- Root cause fixed in the working tree: Draft Diff generated a Drafts/Sent request with the non-connector filter form `received>=YYYY-MM-DD`, the sort spelling `orderby`, and continuation prose that omitted the proven numeric `skip` contract. The prompt now emits valid `receivedDateTime/sentDateTime ge ...T00:00:00Z`, `order_by`, `top`, and `skip` instructions; a regression test covers that exact contract. The Sent date field is corrected to `sentDateTime` as part of the same fix.
+- Verification so far: 39 Python tests passed across the five Python suites, three JavaScript checks passed, and the changed files pass `git diff --check`. The Oxford task remains Disabled while deployment is prepared. No `auth.json` was read or modified.
+- **Exact next action:** commit and push this fix to `origin/main`, back up and deploy the changed connector/test-support files to Oxford, hash-verify and compile remotely, then enable/start the task and poll for `LastTaskResult=0`, the GitHub `laptop draftdiff run-status (ok...)` commit, and plausible count-only output.
+
 # Handover -- 26 September 2026 (Codex) -- final retry-4 checkpoint
 
 - Final retry 4 was deployed from `b278132`, started at 11:10, and failed closed at 11:13 after all three configured identities attempted the Drafts connector call. Verbatim terminal error: `ConnectorResultUnavailable: Drafts: last error ConnectorCallFailure('[draftdiff_drafts#failover3-personal-com] connector reported codex_exit (exit 1)')`.

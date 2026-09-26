@@ -78,6 +78,19 @@ class DraftDiffPaginationTests(unittest.TestCase):
         self.assertIn("list_messages", prompt)
         self.assertNotIn("find_mail_folder", prompt)
 
+    def test_prompt_uses_connector_filter_sort_and_numeric_paging_contract(self):
+        prompt = connector._build_folder_prompt(
+            "Drafts",
+            extra_filter="receivedDateTime ge 2026-09-12T00:00:00Z",
+            top=50,
+        )
+        self.assertIn('filter="receivedDateTime ge 2026-09-12T00:00:00Z"', prompt)
+        self.assertIn('order_by="receivedDateTime desc"', prompt)
+        self.assertIn("top=50, skip=0", prompt)
+        self.assertIn("increment skip by the page size", prompt)
+        self.assertNotIn('received>=', prompt)
+        self.assertNotIn('orderby=', prompt)
+
     def test_uses_lane_b_configured_ring_helper(self):
         identities = [
             {"label": "edu", "CODEX_HOME": r"C:\edu", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
