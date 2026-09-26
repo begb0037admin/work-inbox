@@ -2,12 +2,12 @@
     "kind":  "draftdiff",
     "result":  "failed",
     "exit_code":  1,
-    "ts":  "2026-09-26T09:47:18+01:00",
+    "ts":  "2026-09-26T10:52:13+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "stats":  {
                   "mail_backend":  "connector",
-                  "run_time":  "2026-09-26T09:47:17.859249",
-                  "error":  "ConnectorResultUnavailable: Sent Items: last error ConnectorCallFailure(\u0027[draftdiff_sent#failover1-personal-com] codex exec produced no usable JSON output after 1 attempt(s) (CODEX_HOME=C:\\\\WorkInboxAI\\\\codex-lanec)\u0027)"
+                  "run_time":  "2026-09-26T10:52:12.930189",
+                  "error":  "ConnectorResultUnavailable: Drafts: last error ConnectorCallFailure(\u0027[draftdiff_drafts#failover3-personal-com] codex exec produced no usable JSON output after 1 attempt(s) (CODEX_HOME=C:\\\\WorkInboxAI\\\\codex-lanec)\u0027)"
               }
 }
