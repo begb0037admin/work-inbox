@@ -253,6 +253,37 @@ def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) 
     )
 
 
+def _next_page_advances(previous_args: dict, next_args: dict) -> bool:
+    """Accept an observed next-page call when the result omits its token.
+
+    The Outlook connector has returned multiple list_messages calls where page
+    one omitted continuation metadata even though the next call explicitly
+    advanced the page.  Accept only a demonstrably different/advanced paging
+    argument; identical calls remain fail-closed.
+    """
+    previous_args = previous_args or {}
+    next_args = next_args or {}
+    numeric_keys = ("from_index", "fromIndex", "skip", "offset")
+    token_keys = ("skip_token", "skipToken", "continuation", "continuation_token", "continuationToken")
+    for key in numeric_keys:
+        previous = previous_args.get(key)
+        observed = next_args.get(key)
+        if previous is None or observed is None:
+            continue
+        try:
+            if int(observed) > int(previous):
+                return True
+        except (TypeError, ValueError):
+            if str(observed) != str(previous):
+                return True
+    for key in token_keys:
+        previous = previous_args.get(key)
+        observed = next_args.get(key)
+        if observed is not None and str(observed) != str(previous):
+            return True
+    return False
+
+
 def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: int,
                            max_total: int, tag: str, retries: int, log=print) -> list[dict]:
     """Bounded folder-scoped list_messages pagination, guard-checked, with the same
@@ -346,9 +377,14 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
                 )
             collected.extend(page_rows)
             if page_index < len(message_calls) - 1 and not next_link:
-                raise ConnectorResultIncomplete(
-                    f'{display_name}: page {page_index + 1} had no continuation before another page'
-                )
+                if not _next_page_advances(
+                    call.get("arguments") or {},
+                    message_calls[page_index + 1].get("arguments") or {},
+                ):
+                    raise ConnectorResultIncomplete(
+                        f'{display_name}: page {page_index + 1} had no continuation before another page'
+                    )
+                next_link = True
             if page_index == len(message_calls) - 1 and next_link:
                 raise ConnectorResultIncomplete(
                     f'{display_name}: continuation remains after {len(message_calls)} page(s); refusing a partial pull'

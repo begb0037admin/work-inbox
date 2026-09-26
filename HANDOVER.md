@@ -1,3 +1,10 @@
+# Handover -- 26 September 2026 (Codex) -- cycle 2: accept advanced list_messages pages
+
+- The first live deployment of `e84051c` proved the original connector-path fix: Drafts completed through the Oxford-targeted `personal-com` identity and returned 132 items across 3 pages.
+- That run then failed closed on Sent Items because page 1 had no continuation metadata even though the next recorded `list_messages` call advanced the pagination arguments. This was a separate parser issue, not an authentication failure.
+- `draft_diff_connector.py` now accepts a missing continuation only when the next call demonstrably advances `from_index`/`fromIndex`/`skip`/`offset` or a continuation token; repeated or non-advancing calls remain rejected. The regression suite passes (34 tests).
+- Exact next action: commit and push this cycle-2 parser fix, back up and deploy it to the Oxford laptop, start `Work Inbox Laptop Draft Diff`, and poll for `LastTaskResult 0` plus the GitHub `laptop draftdiff run-status (ok...)` commit.
+
 # Handover -- 26 September 2026 (Codex) -- Draft Diff aligned to the working Bridge connector path
 
 - Root cause fixed in code: Draft Diff's folder prompt diverged from the working Bridge mail path by requiring `find_mail_folder`; the proven Oxford connector path uses `list_mail_folders` followed by `list_messages`. The Draft Diff connector also duplicated Lane B's personal-com-first ordering instead of calling the shared Lane B ordered identity helper, and its wrapper omitted the Bridge's explicit empty Claude fallback / non-parallel settings.
