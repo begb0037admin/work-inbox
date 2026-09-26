@@ -95,24 +95,24 @@ class DraftDiffPaginationTests(unittest.TestCase):
 
     def test_uses_lane_b_configured_ring_helper(self):
         identities = [
+            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
             {"label": "edu", "CODEX_HOME": r"C:\edu", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
             {"label": "personal-uk", "CODEX_HOME": r"C:\uk", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
-            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
         ]
-        with mock.patch.object(connector._lb, "available_identity_ring", return_value=identities) as helper:
+        with mock.patch.object(connector._lb, "ordered_identity_ring", return_value=identities) as helper:
             with mock.patch.object(connector._lb, "run_codex_json", return_value=([], "raw")):
                 with self.assertRaises(connector.ConnectorResultUnavailable):
                     connector._list_folder_messages(
                         "Drafts", extra_filter=None, top=2, max_total=10,
                         tag="test", retries=1, log=lambda _: None,
                     )
-        helper.assert_called_once_with()
+        helper.assert_called_once_with("mail_sent")
 
     def test_mail_preserves_bridge_ring_order(self):
         identities = [
+            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
             {"label": "edu", "CODEX_HOME": r"C:\edu", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
             {"label": "personal-uk", "CODEX_HOME": r"C:\uk", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
-            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
         ]
         homes = []
 
@@ -122,7 +122,7 @@ class DraftDiffPaginationTests(unittest.TestCase):
 
         with mock.patch.object(
             connector._lb,
-            "available_identity_ring",
+            "ordered_identity_ring",
             return_value=identities,
         ):
             with mock.patch.object(connector._lb, "run_codex_json", side_effect=run):
@@ -130,7 +130,7 @@ class DraftDiffPaginationTests(unittest.TestCase):
                     "Drafts", extra_filter=None, top=2, max_total=10,
                     tag="test", retries=1, log=lambda _: None,
                 )
-        self.assertEqual(homes, [r"C:\edu"])
+        self.assertEqual(homes, [r"C:\com"])
         self.assertEqual([row["id"] for row in rows], ["draft"])
 
     def test_extracts_payload_wrapped_events(self):
@@ -218,9 +218,9 @@ class DraftDiffPaginationTests(unittest.TestCase):
 
     def test_explicit_empty_connector_result_fails_over_to_next_ring_identity(self):
         identities = [
+            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
             {"label": "edu", "CODEX_HOME": r"C:\edu", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
             {"label": "personal-uk", "CODEX_HOME": r"C:\uk", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
-            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
         ]
         homes = []
 
@@ -230,13 +230,13 @@ class DraftDiffPaginationTests(unittest.TestCase):
                 raise RuntimeError("TRIGGER_REAUTHENTICATION oauth_token_invalid_grant")
             return ([event(1, {"value": [{"id": "after-failover"}]})], "ok")
 
-        with mock.patch.object(connector._lb, "available_identity_ring", return_value=identities), \
+        with mock.patch.object(connector._lb, "ordered_identity_ring", return_value=identities), \
              mock.patch.object(connector._lb, "run_codex_json", side_effect=run):
             rows = connector._list_folder_messages(
                 "Drafts", extra_filter=None, top=2, max_total=10,
                 tag="test", retries=3, log=lambda _: None,
             )
-        self.assertEqual(homes, [r"C:\edu", r"C:\uk"])
+        self.assertEqual(homes, [r"C:\com", r"C:\edu"])
         self.assertEqual([row["id"] for row in rows], ["after-failover"])
 
 

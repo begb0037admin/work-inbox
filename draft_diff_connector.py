@@ -299,11 +299,12 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
     prompt = _build_folder_prompt(display_name, extra_filter, top)
     last_exc: Exception | None = None
     unavailable_detail = "connector did not return a usable list_messages result"
-    # Draft Diff follows the Bridge Briefing's checked-in Lane B ring order:
-    # edu -> personal-uk -> personal-com. Do not create a second identity
-    # policy here; available_identity_ring() supplies the same configured
-    # entries and profile filtering, while this path preserves their order.
-    identities = _lb.available_identity_ring()
+    # Draft Diff follows the Bridge Briefing's checked-in mail ring order:
+    # personal-com -> edu -> personal-uk. Do not create a second identity
+    # policy here; ordered_identity_ring() supplies the same configured
+    # entries, profile filtering, and proven mail preference. In particular,
+    # do not put the reauthentication-prone edu profile first.
+    identities = _lb.ordered_identity_ring("mail_sent")
     if not identities:
         raise ConnectorResultUnavailable(f"{display_name}: no authenticated connector identity")
     for n in range(1, retries + 1):
