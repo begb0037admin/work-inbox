@@ -100,7 +100,7 @@ import lane_b_call1 as _lb
 # bound; never rewrite the ledger from a partial folder snapshot.
 DRAFTS_MAX = int(os.environ.get("WI_DRAFTDIFF_DRAFTS_MAX", "2000"))
 SENT_MAX = int(os.environ.get("WI_DRAFTDIFF_SENT_MAX", "2000"))
-PAGE_SIZE = max(1, int(os.environ.get("WI_DRAFTDIFF_PAGE_SIZE", "200")))
+PAGE_SIZE = max(1, int(os.environ.get("WI_DRAFTDIFF_PAGE_SIZE", "50")))
 MAX_PAGES = max(1, int(os.environ.get("WI_DRAFTDIFF_MAX_PAGES", "12")))
 LOOKBACK_DAYS = max(1, int(os.environ.get("WI_DRAFTDIFF_LOOKBACK_DAYS", "14")))
 
@@ -226,27 +226,19 @@ def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) 
     filt = f' filter="{extra_filter}",' if extra_filter else ""
     orderby = "sentDateTime desc" if display_name.casefold() == "sent items" else "receivedDateTime desc"
     return (
-        "Use the Outlook Email connector now, read-only. Retrieve messages from "
-        f"my Oxford \"{display_name}\" folder. First call list_mail_folders once "
-        f"and select the exact folder whose display name is \"{display_name}\"; "
-        "then use only the paginated "
-        "list_messages calls described below, with no other tool call:\n"
-        f"1) Call list_messages scoped to that folder id,{filt} "
-        f"orderby=\"{orderby}\", top={top}. If the result contains a next_link, "
-        "@odata.nextLink, nextLink, skip_token, or skipToken, call list_messages "
-        "again for the next page using that continuation and the same folder and "
-        f"filter. Continue for at most {MAX_PAGES} list_messages page calls and "
-        "stop when no continuation is returned. If continuation remains after "
-        "the page bound, return it so the caller can reject the incomplete pull.\n"
-        "Do NOT call fetch_message, fetch_messages_batch, or search_messages -- "
-        "list_messages already returns the full message content needed, including "
-        "the body. "
-        "For each message return: subject, to recipients, received/sent date-time, "
-        "the message id, the web link, and the full body. "
-        "Return ONLY the raw connector result(s) as JSON (the message objects and "
-        "continuation metadata), with no summary, no interpretation, and no prose. "
-        "Do not use any other app or tool. Do not send, reply to, forward, move, "
-        "delete, mark as read, categorise, flag, or otherwise modify any message. "
+        "Use the Outlook Email connector now, read-only. List messages in my "
+        f"Oxford {display_name} folder, newest first. First call "
+        "list_mail_folders once and choose the exact folder whose display name "
+        f"is {display_name}; then call list_messages for that folder id "
+        f"{filt} orderby=\"{orderby}\", top={top}. "
+        "If a next_link, @odata.nextLink, nextLink, skip_token, or skipToken "
+        "is returned, continue with list_messages for the next page, using the "
+        f"same folder and filter, for at most {MAX_PAGES} pages. Stop when no "
+        "continuation is returned. Do not call fetch_message, "
+        "fetch_messages_batch, or search_messages: list_messages includes the "
+        "full body. Return only the raw message rows and paging metadata, with "
+        "no summary or prose. Do not send, reply, forward, move, delete, mark "
+        "as read, categorise, flag, or otherwise modify any message. "
         f"{_lb.SAFETY_RULE}"
     )
 
@@ -426,7 +418,9 @@ def snapshot_drafts_connector(log=print) -> dict:
     semantics as draft_final_diff_capture.snapshot_drafts() /
     draft_diff_imap.snapshot_drafts_imap()."""
     now_iso = datetime.now().isoformat()
-    messages = _list_folder_messages("Drafts", extra_filter=None, top=PAGE_SIZE,
+    floor = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    extra_filter = f"received>={floor.strftime('%Y-%m-%d')}"
+    messages = _list_folder_messages("Drafts", extra_filter=extra_filter, top=PAGE_SIZE,
                                       max_total=DRAFTS_MAX,
                                       tag="draftdiff_drafts#failover", retries=_lb.CALL1_RETRIES, log=log)
     snap: dict = {}
