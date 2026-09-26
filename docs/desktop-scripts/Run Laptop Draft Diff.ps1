@@ -139,6 +139,8 @@ foreach ($name in $need.Keys) {
 $env:MAIL_BACKEND      = 'connector'
 $env:PYTHONUTF8        = '1'
 $env:ANTHROPIC_API_KEY = ''            # force subscription billing (belt-and-braces; the subprocess also strips it)
+$env:WI_CLAUDE_CONFIG_DIR_FALLBACK = '' # exact Bridge setting: no alternate Claude account on the laptop
+$env:WI_MAIL_PARALLEL  = ''             # exact Bridge setting: real run, never a parallel capture
 if ($NoAI) {
   $aiArgs = @('--no-ai')
   $env:AI_BACKEND = 'api'              # irrelevant with --no-ai; keep explicit

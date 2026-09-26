@@ -26,6 +26,32 @@ def event(page, result):
 
 
 class DraftDiffPaginationTests(unittest.TestCase):
+    def test_prompt_matches_bridge_folder_path_and_oxford_target(self):
+        prompt = connector._build_folder_prompt("Drafts", extra_filter=None, top=1000)
+        targeted = connector._lb._prompt_for_identity(
+            prompt,
+            {"m365_account": "kevin.lelitte@admin.ox.ac.uk"},
+        )
+        self.assertIn("Use only the Oxford Microsoft 365 mailbox kevin.lelitte@admin.ox.ac.uk", targeted)
+        self.assertIn("list_mail_folders once", prompt)
+        self.assertIn("list_messages", prompt)
+        self.assertNotIn("find_mail_folder", prompt)
+
+    def test_uses_lane_b_ordered_ring_helper(self):
+        identities = [
+            {"label": "edu", "CODEX_HOME": r"C:\edu", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
+            {"label": "personal-uk", "CODEX_HOME": r"C:\uk", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
+            {"label": "personal-com", "CODEX_HOME": r"C:\com", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
+        ]
+        with mock.patch.object(connector._lb, "ordered_identity_ring", return_value=identities) as helper:
+            with mock.patch.object(connector._lb, "run_codex_json", return_value=([], "raw")):
+                with self.assertRaises(connector.ConnectorResultUnavailable):
+                    connector._list_folder_messages(
+                        "Drafts", extra_filter=None, top=2, max_total=10,
+                        tag="test", retries=1, log=lambda _: None,
+                    )
+        helper.assert_called_once_with("mail_sent")
+
     def test_mail_prefers_personal_com_like_bridge_ring(self):
         identities = [
             {"label": "edu", "CODEX_HOME": r"C:\edu", "m365_account": "kevin.lelitte@admin.ox.ac.uk"},
@@ -38,7 +64,11 @@ class DraftDiffPaginationTests(unittest.TestCase):
             homes.append(kwargs["codex_home"])
             return ([event(1, {"results": [{"id": "draft"}], "has_more": False})], "raw")
 
-        with mock.patch.object(connector._lb, "available_identity_ring", return_value=identities):
+        with mock.patch.object(
+            connector._lb,
+            "ordered_identity_ring",
+            return_value=[identities[2], identities[0], identities[1]],
+        ):
             with mock.patch.object(connector._lb, "run_codex_json", side_effect=run):
                 rows = connector._list_folder_messages(
                     "Drafts", extra_filter=None, top=2, max_total=10,

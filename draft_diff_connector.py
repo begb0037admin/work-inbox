@@ -229,8 +229,9 @@ def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) 
     orderby = "sentDateTime desc" if display_name.casefold() == "sent items" else "receivedDateTime desc"
     return (
         "Use the Outlook Email connector now, read-only. Retrieve messages from "
-        f"my Oxford \"{display_name}\" folder. First call find_mail_folder once "
-        f"for display_name=\"{display_name}\"; then use only the paginated "
+        f"my Oxford \"{display_name}\" folder. First call list_mail_folders once "
+        f"and select the exact folder whose display name is \"{display_name}\"; "
+        "then use only the paginated "
         "list_messages calls described below, with no other tool call:\n"
         f"1) Call list_messages scoped to that folder id,{filt} "
         f"orderby=\"{orderby}\", top={top}. If the result contains a next_link, "
@@ -267,27 +268,27 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
     prompt = _build_folder_prompt(display_name, extra_filter, top)
     last_exc: Exception | None = None
     unavailable_detail = "connector did not return a usable list_messages result"
-    identities = _lb.available_identity_ring()
+    identities = _lb.ordered_identity_ring("mail_sent")
     if not identities:
         raise ConnectorResultUnavailable(f"{display_name}: no authenticated connector identity")
-    # Match lane_b_call1.fetch_domain() for Oxford mail: personal-com first,
-    # then the configured edu -> personal-uk failover entries.
-    identities = sorted(
-        identities,
-        key=lambda identity: 0 if identity.get("label") == "personal-com" else 1,
-    )
-    _lb._identity_log(
-        "[identity ring] preferred personal-com for draft mail: "
-        + " -> ".join(i["label"] for i in identities)
-    )
     for n in range(1, retries + 1):
-        identity = identities[(n - 1) % len(identities)]
+        identity_index = n - 1
+        identity = identities[identity_index % len(identities)]
         identity_label = str(identity.get("label") or "identity")
         call_tag = f"{tag}{n}-{identity_label}"
+        remaining = _lb._remaining_run_budget_s()
+        if remaining is not None and remaining <= 0:
+            unavailable_detail = "shared Lane B run budget exhausted"
+            log(f"draft_diff_connector - [{call_tag}] {unavailable_detail}")
+            break
+        timeout_s = (_lb.PRIMARY_TIMEOUT_S_BY_DOMAIN.get("mail_sent", _lb.PRIMARY_TIMEOUT_S)
+                     if identity_index == 0 else _lb.CALL1_TIMEOUT_S)
+        if remaining is not None:
+            timeout_s = min(timeout_s, max(1, remaining))
         try:
             events, raw = _lb.run_codex_json(
                 _lb._prompt_for_identity(prompt, identity),
-                timeout_s=_lb.CALL1_TIMEOUT_S, tag=call_tag,
+                timeout_s=timeout_s, tag=call_tag,
                 codex_home=identity["CODEX_HOME"], max_attempts=1, workload_class="high")
         except _lb.ReContaminationDetected:
             raise  # non-retryable -- propagate to the caller uncaught, same as every Lane B domain

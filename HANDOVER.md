@@ -1,3 +1,10 @@
+# Handover -- 26 September 2026 (Codex) -- Draft Diff aligned to the working Bridge connector path
+
+- Root cause fixed in code: Draft Diff's folder prompt diverged from the working Bridge mail path by requiring `find_mail_folder`; the proven Oxford connector path uses `list_mail_folders` followed by `list_messages`. The Draft Diff connector also duplicated Lane B's personal-com-first ordering instead of calling the shared Lane B ordered identity helper, and its wrapper omitted the Bridge's explicit empty Claude fallback / non-parallel settings.
+- The live scheduled-task comparison was read-only: both tasks run as `begb0037` with `InteractiveToken`/Limited, both have blank Task Scheduler working directories, and both wrappers `Set-Location` to `C:\Users\begb0037.AD-OAK\work-inbox`. The Draft Diff wrapper now clears ambient `CODEX_HOME`, `WI_LANE_B_CODEX_HOME`, and `WI_LANE_B_CODEX_HOME_FAILOVER`, uses the checked-in ring, and the connector prompt is account-targeted by Lane B to `kevin.lelitte@admin.ox.ac.uk`.
+- Local verification passed: 8 Draft Diff connector tests, 11 Lane B failover-ring tests, Python compilation, and `git diff --check`. No `auth.json` was read or modified.
+- **Exact next action:** commit and push this fix to `origin/main`; back up the live Oxford files, deploy the pushed wrapper/connector/Lane B files, start `Work Inbox Laptop Draft Diff`, and poll until `LastTaskResult=0` plus a GitHub `chore: laptop draftdiff run-status (ok...)` commit are both observed.
+
 # Handover -- 25 September 2026 (Codex) -- cross-dashboard read-only jump links
 
 # Handover -- 25 September 2026 (Codex) -- targeted draft originals and laptop diff compatibility

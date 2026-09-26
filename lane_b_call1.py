@@ -415,6 +415,28 @@ def available_identity_ring() -> list[dict]:
     return available
 
 
+def ordered_identity_ring(domain: str) -> list[dict]:
+    """Return the same usable, domain-ordered ring used by fetch_domain().
+
+    Mail/calendar connector domains prefer the known-good personal-com
+    connector identity, then retain the checked-in edu -> personal-uk order
+    for failover.  Keeping this in Lane B makes folder-specific consumers
+    (such as Draft Diff) use the exact same ring rather than copying a
+    potentially drifting sort or CODEX_HOME policy.
+    """
+    identities = available_identity_ring()
+    if domain in {"calendar", "mail_inbox", "mail_sent"}:
+        identities = sorted(
+            identities,
+            key=lambda identity: 0 if identity.get("label") == "personal-com" else 1,
+        )
+        _identity_log(
+            f"[identity ring] preferred personal-com for {domain}: "
+            + " -> ".join(i["label"] for i in identities)
+        )
+    return identities
+
+
 def _prompt_for_identity(prompt: str, identity: dict) -> str:
     account = str(identity.get("m365_account") or "").strip()
     if not account:
@@ -2359,16 +2381,7 @@ def fetch_domain(domain: str, prompt: str, *, window_days: int, ts: str, retries
     from being tried.  Prefer personal-com for the connector domains that
     must source the Oxford mailbox; retain the original order for Teams.
     """
-    identities = available_identity_ring()
-    if domain in {"calendar", "mail_inbox", "mail_sent"}:
-        identities = sorted(
-            identities,
-            key=lambda identity: 0 if identity.get("label") == "personal-com" else 1,
-        )
-        _identity_log(
-            f"[identity ring] preferred personal-com for {domain}: "
-            + " -> ".join(i["label"] for i in identities)
-        )
+    identities = ordered_identity_ring(domain)
     attempts: list[dict] = []
     result: dict | None = None
     for index, identity in enumerate(identities):
