@@ -258,7 +258,15 @@ def _next_page_advances(previous_args: dict, next_args: dict) -> bool:
     for key in numeric_keys:
         previous = previous_args.get(key)
         observed = next_args.get(key)
-        if previous is None or observed is None:
+        if observed is None:
+            continue
+        if previous is None:
+            try:
+                if int(observed) > 0:
+                    return True
+            except (TypeError, ValueError):
+                if str(observed):
+                    return True
             continue
         try:
             if int(observed) > int(previous):

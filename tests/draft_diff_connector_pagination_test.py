@@ -53,6 +53,20 @@ class DraftDiffPaginationTests(unittest.TestCase):
             )
         self.assertEqual([row["id"] for row in rows], ["a", "b"])
 
+    def test_accepts_first_explicit_offset_when_page_one_omits_offset(self):
+        events = [
+            event(1, {"value": [{"id": "a"}]}),
+            event(2, {"value": [{"id": "b"}]}),
+        ]
+        events[0]["item"]["arguments"] = {"folder_id": "drafts"}
+        events[1]["item"]["arguments"] = {"folder_id": "drafts", "skip": 200}
+        with mock.patch.object(connector._lb, "run_codex_json", return_value=(events, "raw")):
+            rows = connector._list_folder_messages(
+                "Drafts", extra_filter=None, top=200, max_total=500,
+                tag="test", retries=1, log=lambda _: None,
+            )
+        self.assertEqual([row["id"] for row in rows], ["a", "b"])
+
     def test_prompt_matches_bridge_folder_path_and_oxford_target(self):
         prompt = connector._build_folder_prompt("Drafts", extra_filter=None, top=1000)
         targeted = connector._lb._prompt_for_identity(
