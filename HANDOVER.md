@@ -1,3 +1,11 @@
+# Handover -- 26 September 2026 (Codex) -- final retry-4 checkpoint
+
+- Final retry 4 was deployed from `b278132`, started at 11:10, and failed closed at 11:13 after all three configured identities attempted the Drafts connector call. Verbatim terminal error: `ConnectorResultUnavailable: Drafts: last error ConnectorCallFailure('[draftdiff_drafts#failover3-personal-com] connector reported codex_exit (exit 1)')`.
+- Oxford task evidence: `Work Inbox Laptop Draft Diff` is Disabled (`State=1`), `LastTaskResult=1`, and no wrapper/Python process remains. The scheduled action still points to `Run Laptop Draft Diff.ps1 -Cadence Bridge`. The required predeploy archive is `C:\Users\begb0037.AD-OAK\work-inbox\Archive\predeploy-draftdiff-rebuild\`; deployed hashes and remote `py_compile` passed.
+- GitHub evidence: `ecb96a5` is `chore: laptop draftdiff run-status (failed, exit 1) 2026-09-26 11:13`. The count-only status payload records `mail_backend: connector`, `result: failed`, `exit_code: 1`, and the connector error above; it contains no email body. No successful output/count payload was produced because the connector never returned usable Drafts JSON.
+- Final local verification: 38 tests passed, Python compilation passed, `git diff --check` passed, and the active Draft Diff path has no COM/IMAP dependency. No `auth.json` was read or modified.
+- **Exact next action:** investigate the headless M365 connector failure (`codex` exit 1/no usable JSON across `edu -> personal-uk -> personal-com`) using the working Bridge Briefing path, then run a new supervised Draft Diff cycle only after that connector issue is resolved. Keep this task Disabled until that external connector condition changes; do not reintroduce COM, IMAP, Graph, or touch the crest.
+
 # Handover -- 26 September 2026 (Codex) -- connector-only Draft Diff rebuild
 
 - The retired Outlook COM/IMAP Draft Diff path is removed from the active entry point. `tools/draft_final_diff_capture.py` now requires `MAIL_BACKEND=connector`; the connector reads Drafts and Sent Items through Lane B's M365 tool path, with no `win32com`, COM, Graph, or IMAP dependency. The old `Outlook.Application.GetNamespace` failure is therefore no longer reachable.
