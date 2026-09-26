@@ -236,8 +236,10 @@ def _build_folder_prompt(display_name: str, extra_filter: str | None, top: int) 
         "pages. Stop when a page has fewer than top rows or the result explicitly "
         "says there is no continuation. Do not call fetch_message, "
         "fetch_messages_batch, or search_messages: list_messages includes the "
-        "full body. Return only the raw message rows and paging metadata, with "
-        "no summary or prose. Do not send, reply, forward, move, delete, mark "
+        "full body. After the final list_messages call, return exactly {}. The "
+        "caller consumes the tool events directly: never copy, summarize, or "
+        "quote any message rows or bodies in the response. Do not send, reply, "
+        "forward, move, delete, mark "
         "as read, categorise, flag, or otherwise modify any message. "
         f"{_lb.SAFETY_RULE}"
     )

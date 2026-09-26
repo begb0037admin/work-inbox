@@ -88,6 +88,8 @@ class DraftDiffPaginationTests(unittest.TestCase):
         self.assertIn('order_by="receivedDateTime desc"', prompt)
         self.assertIn("top=50, skip=0", prompt)
         self.assertIn("increment skip by the page size", prompt)
+        self.assertIn("return exactly {}", prompt)
+        self.assertIn("caller consumes the tool events directly", prompt)
         self.assertNotIn('received>=', prompt)
         self.assertNotIn('orderby=', prompt)
 
