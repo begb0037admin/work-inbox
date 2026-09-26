@@ -10,20 +10,18 @@ Design proposed and confirmed with Kevin, 10 Aug 2026 (see agent-commons
 issue #3 comments for the full feasibility investigation this is built on).
 
 MECHANISM -- periodic snapshot + correlate, not an event-driven listener:
-  Outlook has no draft/sent diffing primitive and EntryID is NOT a safe
-  correlation key (sending a draft mints a new MAPI entry). ConversationID
-  IS reliable -- confirmed live against real Drafts (103 items) and Sent
-  (1585 items): present on 40/40 sampled items in both folders. Each run of
-  this script:
-    1. Snapshots the current Drafts folder (Class == olMail only -- Drafts
-       also holds meeting-related non-mail items, same as Sent Items).
+  The M365 connector has no draft/sent diffing primitive and its message id is
+  not a safe correlation key (sending a draft creates a distinct Sent item).
+  The connector also does not expose ConversationID, Thread-Index, or raw
+  internet-message headers. Each run therefore:
+    1. Snapshots the current Drafts folder with bounded connector pagination,
+       filtering meeting items and normalising the subject/topic key.
     2. Diffs against the previous run's local ledger to find drafts that
        have vanished (sent or discarded) since last seen.
-    3. For each vanished draft, searches Sent Items for a mail item sharing
-       the same ConversationID, sent within a bounded window after the
-       draft's last-seen time (default 72h) -- if found, that's the
-       draft/final pair; if not, the draft was discarded, not sent, and is
-       dropped (not a diff-pair candidate).
+    3. Reads Sent Items through the same connector path, bounded to the last
+       14 days. A vanished draft is paired only when the normalised topic and
+       exactly one recipient-email overlap match within the 72-hour window;
+       absent or ambiguous matches are dropped, never guessed.
     4. Applies the SAME redaction discipline as sent_corpus_pull.py to BOTH
        sides of the pair -- if EITHER draft or final text matches a
        sensitive category, the WHOLE PAIR is excluded, not just one side.
@@ -58,10 +56,10 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from style_corpus_common import is_sensitive, recipient_tier, OL_MAIL_CLASS, REDACTION_PATTERNS
+from style_corpus_common import is_sensitive, recipient_tier
 
 DEFAULT_LEDGER_PATH = r"C:\Users\admin\Documents\CorpusStaging\draft_watch\ledger.json"
 DEFAULT_OUT_DIR = r"C:\Users\admin\Documents\CorpusStaging\draft_watch"
@@ -269,60 +267,8 @@ def classify_edit_claude_code(draft_text, final_text, cfg_dir, timeout_s=90.0, l
 
 
 # ---------------------------------------------------------------------------
-# Outlook COM snapshot + correlation
+# Connector snapshot + correlation
 # ---------------------------------------------------------------------------
-
-def snapshot_drafts(drafts_folder):
-    """Returns {conversation_id: {conversation_topic, subject, to, body, last_seen}}
-    for current Drafts items. Class-filtered to real mail only (Drafts also
-    holds meeting-related non-mail items, same as Sent Items)."""
-    snapshot = {}
-    now_iso = datetime.now().isoformat()
-    for msg in drafts_folder.Items:
-        try:
-            if msg.Class != OL_MAIL_CLASS:
-                continue
-            conv_id = msg.ConversationID
-            if not conv_id:
-                continue  # no reliable correlation key -- can't track this one
-            snapshot[conv_id] = {
-                "conversation_topic": msg.ConversationTopic or "",
-                "subject": msg.Subject or "",
-                "to": msg.To or "",
-                "body": msg.Body or "",
-                "last_seen": now_iso,
-            }
-        except Exception:
-            continue
-    return snapshot
-
-
-def find_sent_match(sent_folder, conversation_id, after_dt, window_hours):
-    """Search Sent Items for a mail item with the same ConversationID, sent
-    within [after_dt, after_dt + window_hours]. Returns the closest match by
-    time, or None. Does NOT fall back to any looser match -- ambiguous or
-    absent correlation means the pair is dropped, not guessed."""
-    window_end = after_dt + timedelta(hours=window_hours)
-    candidates = []
-    for msg in sent_folder.Items:
-        try:
-            if msg.Class != OL_MAIL_CLASS:
-                continue
-            if msg.ConversationID != conversation_id:
-                continue
-            sent_on = msg.SentOn
-            # Normalize COM datetime -> python datetime for comparison
-            sent_dt = datetime(sent_on.year, sent_on.month, sent_on.day,
-                                sent_on.hour, sent_on.minute, sent_on.second)
-            if after_dt <= sent_dt <= window_end:
-                candidates.append((sent_dt, msg))
-        except Exception:
-            continue
-    if not candidates:
-        return None
-    candidates.sort(key=lambda c: c[0])
-    return candidates[0][1]  # earliest match after the draft was last seen
-
 
 # ---------------------------------------------------------------------------
 # Main run
@@ -334,40 +280,23 @@ MAX_CLASSIFICATION_RETRIES = 3  # give a transient API failure a few runs to
 
 def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
         max_classifications_per_run=25, mail_backend=None):
-    # MAIL_BACKEND mirrors fetch_inbox.py: "com" (default) is the Outlook COM
-    # path, unchanged and byte-identical; "imap" reads Drafts + Sent Items over
-    # IMAP+OAuth2 (draft_diff_imap.py) and never imports win32com; "connector"
-    # (added 16 Sep 2026) reads Drafts + Sent Items over the same ChatGPT M365
-    # connector already proven for mail_inbox/mail_sent/calendar
-    # (draft_diff_connector.py) -- never imports win32com or imap_mail.
-    backend = (mail_backend or os.environ.get("MAIL_BACKEND", "com")).strip().lower()
+    # Draft Diff is connector-only. Outlook Classic/COM and IMAP are retired
+    # for this path; keeping the connector as the default also prevents a
+    # scheduler misconfiguration from silently reviving either backend.
+    backend = (mail_backend or os.environ.get("MAIL_BACKEND", "connector")).strip().lower()
+    if backend != "connector":
+        raise ValueError(
+            f"Draft Diff requires MAIL_BACKEND=connector; received {backend!r}"
+        )
 
     previous_ledger = load_ledger(ledger_path)
 
-    sent_folder = None   # COM path only
-    sent_index = None    # IMAP and connector paths
-
-    if backend == "imap":
-        import draft_diff_imap
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
-              f"MAIL_BACKEND=imap: reading Drafts + Sent over IMAP (no Outlook COM)")
-        current_snapshot = draft_diff_imap.snapshot_drafts_imap(log=print)
-        sent_index = draft_diff_imap.SentIndex(window_hours, log=print)
-    elif backend == "connector":
-        import draft_diff_connector
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
-              f"MAIL_BACKEND=connector: reading Drafts + Sent over the M365 connector "
-              f"(no Outlook COM, no IMAP)")
-        current_snapshot = draft_diff_connector.snapshot_drafts_connector(log=print)
-        sent_index = draft_diff_connector.SentIndexConnector(window_hours, log=print)
-    else:
-        import win32com.client.dynamic
-
-        outlook = win32com.client.dynamic.Dispatch("Outlook.Application")
-        mapi = outlook.GetNamespace("MAPI")
-        drafts_folder = mapi.GetDefaultFolder(16)  # olFolderDrafts
-        sent_folder = mapi.GetDefaultFolder(5)     # olFolderSentMail
-        current_snapshot = snapshot_drafts(drafts_folder)
+    sent_index = None
+    import draft_diff_connector
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
+          "MAIL_BACKEND=connector: reading Drafts + Sent over the M365 connector")
+    current_snapshot = draft_diff_connector.snapshot_drafts_connector(log=print)
+    sent_index = draft_diff_connector.SentIndexConnector(window_hours, log=print)
 
     vanished_keys = set(previous_ledger.keys()) - set(current_snapshot.keys())
 
@@ -396,26 +325,7 @@ def run(ledger_path, out_dir, window_hours=72, use_ai=True, stats_only=False,
             last_seen_dt = datetime.fromisoformat(draft["last_seen"])
         except Exception:
             continue
-        if backend == "imap":
-            final = sent_index.find(conv_id, last_seen_dt)
-        elif backend == "connector":
-            final = sent_index.find(conv_id, last_seen_dt, draft.get("to_addrs"))
-        else:
-            final_msg = find_sent_match(sent_folder, conv_id, last_seen_dt, window_hours)
-            if final_msg is None:
-                final = None
-            else:
-                try:
-                    final = {
-                        "subject": final_msg.Subject or "",
-                        "body": final_msg.Body or "",
-                        "to": final_msg.To or "",
-                        "entry_id": final_msg.EntryID,
-                        "message_id": "",
-                        "sent": str(final_msg.SentOn),
-                    }
-                except Exception:
-                    continue
+        final = sent_index.find(conv_id, last_seen_dt, draft.get("to_addrs"))
         if final is None:
             abandoned_count += 1
             continue
@@ -636,11 +546,8 @@ if __name__ == "__main__":
     parser.add_argument("--no-ai", action="store_true", help="Skip edit_type/note classification (diagnostic only)")
     parser.add_argument("--stats-only", action="store_true", help="No writes, no AI calls, aggregate counts only")
     parser.add_argument(
-        "--mail-backend", default=None, choices=["com", "imap", "connector"],
-        help="Override the MAIL_BACKEND env var. 'com' (default) = Outlook COM, unchanged. "
-             "'imap' = read Drafts + Sent Items over IMAP+OAuth2 (draft_diff_imap.py), no win32com. "
-             "'connector' = read Drafts + Sent Items over the M365 connector "
-             "(draft_diff_connector.py), no win32com, no IMAP.",
+        "--mail-backend", default=None, choices=["connector"],
+        help="Use the M365 connector backend; it is the only supported Draft Diff backend.",
     )
     parser.add_argument(
         "--stats-out", default=None,
@@ -656,7 +563,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Unattended (Task Scheduler) safety: any unhandled exception here (e.g.
-    # Outlook COM not reachable, disk full) must exit non-zero so the .bat
+    # Connector unavailable, disk full, or another runtime failure) must exit non-zero so the wrapper
     # wrapper's own exit-code handling and Task Scheduler's failure/restart
     # settings actually see it as a failure, not a silent no-op success.
     def _write_stats_out(obj):
@@ -684,7 +591,7 @@ if __name__ == "__main__":
         _write_stats_out({
             "result": "failed",
             "error": f"{type(e).__name__}: {e}",
-            "mail_backend": (args.mail_backend or os.environ.get("MAIL_BACKEND", "com")),
+            "mail_backend": (args.mail_backend or os.environ.get("MAIL_BACKEND", "connector")),
             "run_time": datetime.now().isoformat(),
         })
         print(f"FATAL: draft_final_diff_capture.py run failed - {type(e).__name__}: {e}")

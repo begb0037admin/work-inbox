@@ -21,12 +21,9 @@ terminate on `list_messages`, same as the real mail_sent domain) -- zero
 lines of lane_b_call1.py were changed to add this capability, and
 guard_recontamination()'s own allowlist is untouched.
 
-  MAIL_BACKEND=com (default)   -> draft_final_diff_capture.py stays on Outlook
-                                  COM, unchanged, this module never loads.
-  MAIL_BACKEND=imap            -> draft_diff_imap.py (unchanged, still present
-                                  as a rollback on any machine that keeps it).
-  MAIL_BACKEND=connector       -> this module. Never imports win32com or
-                                  imap_mail.
+  MAIL_BACKEND=connector       -> this module. This is the only supported
+                                  Draft Diff backend; it never imports COM,
+                                  win32com, IMAP, or imap_mail.
 
 WHAT THIS REPLACES (vs draft_diff_imap.py)
   COM/IMAP                          -> connector equivalent here
@@ -105,6 +102,7 @@ DRAFTS_MAX = int(os.environ.get("WI_DRAFTDIFF_DRAFTS_MAX", "2000"))
 SENT_MAX = int(os.environ.get("WI_DRAFTDIFF_SENT_MAX", "2000"))
 PAGE_SIZE = max(1, int(os.environ.get("WI_DRAFTDIFF_PAGE_SIZE", "200")))
 MAX_PAGES = max(1, int(os.environ.get("WI_DRAFTDIFF_MAX_PAGES", "12")))
+LOOKBACK_DAYS = max(1, int(os.environ.get("WI_DRAFTDIFF_LOOKBACK_DAYS", "14")))
 
 # ---------------------------------------------------------------------------
 #  Conversation key (subject/topic only -- see module docstring)
@@ -299,7 +297,11 @@ def _list_folder_messages(display_name: str, *, extra_filter: str | None, top: i
     prompt = _build_folder_prompt(display_name, extra_filter, top)
     last_exc: Exception | None = None
     unavailable_detail = "connector did not return a usable list_messages result"
-    identities = _lb.ordered_identity_ring("mail_sent")
+    # Draft Diff follows the Bridge Briefing's checked-in Lane B ring order:
+    # edu -> personal-uk -> personal-com. Do not create a second identity
+    # policy here; available_identity_ring() supplies the same configured
+    # entries and profile filtering, while this path preserves their order.
+    identities = _lb.available_identity_ring()
     if not identities:
         raise ConnectorResultUnavailable(f"{display_name}: no authenticated connector identity")
     for n in range(1, retries + 1):
@@ -489,10 +491,10 @@ class SentIndexConnector:
         self.window_hours = window_hours
         self._log = log
         self._by_key: dict[str, list[dict]] = {}
-        floor = datetime.now(timezone.utc) - timedelta(hours=window_hours + 240)  # +10gd slack, mirrors draft_diff_imap's own
-        # search_messages supports date filters on `received`; Sent Items
-        # results carry the sent timestamp too, and the extra 240-hour slack
-        # keeps this equivalent to the previous rolling window.
+        floor = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+        # The connector exposes a bounded date filter for folder reads. Keep
+        # the mailbox pull at a clear 14-day window while retaining the
+        # narrower 72-hour correlation window below.
         extra_filter = f"received>={floor.strftime('%Y-%m-%d')}"
         messages = _list_folder_messages("Sent Items", extra_filter=extra_filter, top=PAGE_SIZE,
                                           max_total=SENT_MAX,
@@ -528,7 +530,8 @@ class SentIndexConnector:
             })
             indexed += 1
         log(f"draft_diff_connector - Sent index: {indexed} mail item(s), {len(self._by_key)} "
-            f"distinct conversation key(s) ({datetime.now().isoformat()})")
+            f"distinct conversation key(s), lookback={LOOKBACK_DAYS}d "
+            f"({datetime.now().isoformat()})")
 
     def find(self, conv_key: str, after_dt: datetime, draft_to_addrs: set | None = None) -> dict | None:
         """Mirror find_sent_match()/SentIndex.find(): the earliest Sent item
