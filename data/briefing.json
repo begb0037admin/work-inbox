@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 29 September 2026",
   "subtitle": "2 unread messages - Outlook-only refresh",
-  "context": "Outlook has 2 unread messages from the last seven days, including 0 marked high importance. Review Extended demo: for additional technical questions from Lindsey Hale. Review Extended demo: for additional technical questions from Lindsey Hale. Outlook shows 3 timed meeting(s) today: FA Team Daily Catchup, Multiverse apprenticeship: Flying Start, 38-day balance rollout walk-through. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
+  "context": "Outlook has 2 unread messages from the last seven days, including 0 marked high importance. Review Extended demo: for additional technical questions from Lindsey Hale. Review Extended demo: for additional technical questions from Lindsey Hale. Outlook shows 3 timed meeting(s) today: FA Team Daily Catchup, Multiverse apprenticeship: Flying Start, 38-day balance rollout walk-through. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
   "urgent": [],
   "needs": [
     {
@@ -696,23 +696,23 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Tuesday 29 September · 12:06",
+  "refreshed_at": "Tuesday 29 September · 16:08",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
-      "status": "ok",
+      "status": "carried_forward",
       "served_by": "personal-com",
       "as_of": "2026-09-29T11:01:13+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-09-29T11:01:13+00:00"
+      "as_of": "2026-09-29T15:01:19+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-09-29T11:00:11+00:00"
+      "as_of": "2026-09-29T15:00:10+00:00"
     },
     "teams": {
       "status": "n/a",
