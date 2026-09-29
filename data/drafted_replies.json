@@ -1,8 +1,29 @@
 {
-  "generated": "2026-09-25T22:07:22.660064+00:00",
+  "generated": "2026-09-29T11:10:11.699319+00:00",
   "source": "agent-commons/pending-email-drafts/drafts.json (mirrored, agent-commons stays private)",
   "source_missing": false,
   "entries": [
+    {
+      "source_entry_id": "",
+      "open_mode": "none",
+      "tick_id": "lauren-draft-20-20260928",
+      "subject": "M365 Plugins \u2014 Teams and SharePoint access still denied",
+      "sender_tier": "other",
+      "draft_text": "Hi Isabelle,\n\nThis is still happening for me. I can access email and calendar, but Teams and SharePoint still return access_denied. When I try to connect, the Oxford SSO page says ChatGPT needs administrator approval, so this looks to be an outstanding tenant/app-consent issue rather than the desktop install.\n\nPlease can you escalate this with the central team and ask them to confirm what approval or policy change is needed to reinstate Teams and SharePoint access? The M365 plugins are still enabled, but without those two services the connector is only partially usable.",
+      "drafted_at": "2026-09-28T00:00:00+01:00",
+      "confidence": {
+        "level": "medium",
+        "reason": "The access symptoms and SSO wording are directly visible in Kevin's supplied screenshots. The diagnosis is deliberately framed as 'looks to be' because the screenshots establish an admin-approval block but do not identify the exact tenant policy or approval owner."
+      },
+      "inline_flags": [
+        "Exact next action: Kevin reviews this Teams draft, then posts it in the existing thread if content is accurate. Do not send automatically.",
+        "Do not state a specific central-team ticket number, cause, or restoration date: none is shown in the supplied evidence.",
+        "If Isabelle confirms a required approval or policy, capture that response before attempting another connector sign-in."
+      ],
+      "received": "28 Sep 2026 (Kevin chat-paste request; most recent visible thread update dated 25 Sep 2026)",
+      "status": "pending",
+      "draft_id": "lauren-draft-20-20260928"
+    },
     {
       "source_entry_id": "",
       "open_mode": "web",
