@@ -1,13 +1,24 @@
 {
     "kind":  "draftdiff",
-    "result":  "failed",
-    "exit_code":  1,
-    "ts":  "2026-09-29T12:31:29+01:00",
+    "result":  "ok",
+    "exit_code":  0,
+    "ts":  "2026-09-29T16:32:42+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "stats":  {
                   "mail_backend":  "connector",
-                  "run_time":  "2026-09-29T12:31:29.368305",
-                  "error":  "ReContaminationDetected: [draftdiff_drafts#failover1-personal-com] [\"plugin_management.search_plugins (off-scope connector namespace \u0027plugin_management\u0027)\"]"
+                  "ai_backend":  "claude_code",
+                  "drafts_tracked_now":  0,
+                  "drafts_vanished_since_last_run":  9,
+                  "abandoned_or_discarded":  9,
+                  "draft_final_pairs_found":  0,
+                  "pairs_excluded_by_redaction":  0,
+                  "pairs_classified_this_run":  0,
+                  "pairs_permanently_failed":  0,
+                  "backlog_size_after_this_run":  0,
+                  "ai_unavailable_this_run":  false,
+                  "total_diffs_accumulated":  0,
+                  "window_hours":  72,
+                  "run_time":  "2026-09-29T16:32:42.061420"
               }
 }
