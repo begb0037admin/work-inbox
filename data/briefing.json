@@ -1,7 +1,7 @@
 {
-  "date": "Wednesday 30 September 2026",
+  "date": "Thursday 1 October 2026",
   "subtitle": "0 unread messages - Outlook-only refresh",
-  "context": "Outlook has 0 unread messages from the last seven days, including 0 marked high importance. Outlook shows 3 timed meeting(s) today: FA Team Daily Catchup, HR Systems Managers Meeting, Busy. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
+  "context": "Outlook has 0 unread messages from the last seven days, including 0 marked high importance. Outlook shows 6 timed meeting(s) today: FA Team Daily Catchup, RiskEx: SHSMS Supplier Demo, Extended demo: for any additional technical questions. Outlook shows 4 timed meeting(s) tomorrow: FA Team Daily Catchup, Vatix: SHSMS Supplier Demo, Roadmap review. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
   "urgent": [],
   "needs": [
     {
@@ -193,6 +193,21 @@
   ],
   "fyi": [
     {
+      "title": "v4 is coming — More expressiveness, more control",
+      "sub": "From <strong>ElevenReader</strong>. We&#x27;re gradually rolling out our most expressive voice model plus new controls for how your voices sound ͏  ͏  ͏  ͏  ͏  ͏",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "v4 is coming — More expressiveness, more control",
+      "from": "ElevenReader",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfIIHV9AAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfIIHV9AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "30 Sep",
+      "received_raw": "2026-09-30T15:19:43Z",
+      "kevin_is_primary_recipient": true,
+      "messageCount": 1
+    },
+    {
       "title": "Support Call# 11713630: Name change to Cross-RDM Professional Services",
       "sub": "From <strong>HR Systems Support</strong>. Hi Kevin\r\n\r\nI’ve raised this as a task, but just wanted to flag it with you as well.\r\n\r\nRDM Strategic changed names earl",
       "badge": "FYI",
@@ -204,21 +219,6 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfIIHV6AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "received": "30 Sep",
       "received_raw": "2026-09-30T14:19:48Z",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 1
-    },
-    {
-      "title": "Accepted: FA Resourcing: Requirements and Funding",
-      "sub": "From <strong>Marie Cooksey</strong>.",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "Accepted: FA Resourcing: Requirements and Funding",
-      "from": "Marie Cooksey",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfIIHV5AAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfIIHV5AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "30 Sep",
-      "received_raw": "2026-09-30T13:31:20Z",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
     }
@@ -234,16 +234,52 @@
     },
     {
       "time": "10:00",
-      "title": "HR Systems Managers Meeting",
+      "title": "RiskEx - SHSMS Supplier Demo",
+      "sub": "Lindsey Hale"
+    },
+    {
+      "time": "12:00",
+      "title": "Extended demo - for any additional technical questions",
+      "sub": "Lindsey Hale"
+    },
+    {
+      "time": "13:00",
+      "title": "Keep free",
       "sub": "Kevin Lelitte"
     },
     {
-      "time": "11:00",
+      "time": "14:00",
+      "title": "Asta Siautiaite - PDR Review 2026",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "16:00",
       "title": "Busy",
       "sub": "Kevin Lelitte"
     }
   ],
-  "calTomorrow": [],
+  "calTomorrow": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Vatix - SHSMS Supplier Demo",
+      "sub": "Lindsey Hale"
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey"
+    },
+    {
+      "time": "12:00",
+      "title": "Extended demo - for additional technical questions",
+      "sub": "Lindsey Hale"
+    }
+  ],
   "calDay2": [],
   "calDay3": [],
   "calFull": [
@@ -262,6 +298,12 @@
     {
       "date": "2026-09-30",
       "label": "Wednesday 30 Sep",
+      "items": [],
+      "isToday": false
+    },
+    {
+      "date": "2026-10-01",
+      "label": "Thursday 1 Oct",
       "items": [
         {
           "time": "09:30",
@@ -270,11 +312,26 @@
         },
         {
           "time": "10:00",
-          "title": "HR Systems Managers Meeting",
+          "title": "RiskEx - SHSMS Supplier Demo",
+          "sub": "Lindsey Hale"
+        },
+        {
+          "time": "12:00",
+          "title": "Extended demo - for any additional technical questions",
+          "sub": "Lindsey Hale"
+        },
+        {
+          "time": "13:00",
+          "title": "Keep free",
           "sub": "Kevin Lelitte"
         },
         {
-          "time": "11:00",
+          "time": "14:00",
+          "title": "Asta Siautiaite - PDR Review 2026",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "16:00",
           "title": "Busy",
           "sub": "Kevin Lelitte"
         }
@@ -282,15 +339,30 @@
       "isToday": true
     },
     {
-      "date": "2026-10-01",
-      "label": "Thursday 1 Oct",
-      "items": [],
-      "isToday": false
-    },
-    {
       "date": "2026-10-02",
       "label": "Friday 2 Oct",
-      "items": [],
+      "items": [
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "Vatix - SHSMS Supplier Demo",
+          "sub": "Lindsey Hale"
+        },
+        {
+          "time": "10:00",
+          "title": "Roadmap review",
+          "sub": "Marie Cooksey"
+        },
+        {
+          "time": "12:00",
+          "title": "Extended demo - for additional technical questions",
+          "sub": "Lindsey Hale"
+        }
+      ],
       "isToday": false
     }
   ],
@@ -700,158 +772,28 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Wednesday 30 September · 16:07",
+  "refreshed_at": "Thursday 01 October · 07:06",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-09-30T15:01:14+00:00"
+      "as_of": "2026-10-01T06:02:17+00:00"
     },
     "mail_sent": {
-      "status": "carried_forward",
+      "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-09-30T11:01:19+00:00"
+      "as_of": "2026-10-01T06:02:17+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-09-30T15:00:09+00:00"
+      "as_of": "2026-10-01T06:00:12+00:00"
     },
     "teams": {
       "status": "n/a",
       "served_by": null
     }
   },
-  "calendarUnavailable": true,
-  "sent": [
-    {
-      "subject": "Busy",
-      "to": "Simon Burford, Marie Cooksey",
-      "sent": "",
-      "body_preview": "Ultrasound guided injections - hospital appt",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfDbA-GAAA="
-    },
-    {
-      "subject": "Re: Contract templates",
-      "to": "Michelle Williams",
-      "sent": "",
-      "body_preview": "Hi Michelle,\r\n\r\nI've attached the fixed contract template with the remaining links from page 14 onwa [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfDbA-HAAA="
-    },
-    {
-      "subject": "Kevin - PDR Review",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "Hi Simon,\r\nSorry for the delay - I’ve attached my PRD form for you to review ahead of our meeting on [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfDbA-IAAA="
-    },
-    {
-      "subject": "Re: Support Call# 11700438: Interface Staging: req=hris/oucsreg/departments ref=79811 status=FAILURE",
-      "to": "Emma Fitz-Gibbon",
-      "sent": "",
-      "body_preview": "Hi Emma,\r\n\r\nPlease raised a new task for this, I'll take this forward once received.\r\n\r\nBest,\r\nKevin [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW5AAA="
-    },
-    {
-      "subject": "Re: Support Call# 11713147: FOI/202609/1014 - Recruitment records 2021-2023",
-      "to": "Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Marie,\r\nGood catch. Unfortunately, the HR Reporting output is too large to work within the date r [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW4AAA="
-    },
-    {
-      "subject": "Canceled: Multiverse: Launch Meeting DF(HE)SEP26 - Placeholder",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_bAAA="
-    },
-    {
-      "subject": "FW: Multiverse: Launch Meeting DF(HE)SEP26 with Olivia Sullivan",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "Hi Simon,\r\nI’m putting this in the calendar as it’s the only space I can find. Please let me know if [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_aAAA="
-    },
-    {
-      "subject": "Accepted: Multiverse: Launch Meeting DF(HE)SEP26 with Olivia Sullivan",
-      "to": "Olivia Sullivan",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_ZAAA="
-    },
-    {
-      "subject": "Multiverse: Launch Meeting DF(HE)SEP26 - Placeholder",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_YAAA="
-    },
-    {
-      "subject": "Re: Bi-monthly CDR/PD working group",
-      "to": "Lindsey Spriggs",
-      "sent": "",
-      "body_preview": "Hi Lindsey,\r\nYes, thank you!\r\nI agree with stepping out of the regular meeting cycle for now. Please [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_XAAA="
-    },
-    {
-      "subject": "Kishor Kale SAR – PeopleXD records for REF Officer 188064",
-      "to": "Marco Sanna",
-      "sent": "",
-      "body_preview": "Hi Marco,\r\nPlease find below the PeopleXD records and search report for Kishor Kale’s application fo [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_WAAA="
-    },
-    {
-      "subject": "Kevin Lelitte shared the folder \"SAR_Kishor_Kale_REF_Officer_188064_2026-09-29\" with you",
-      "to": "Kevin Lelitte",
-      "sent": "",
-      "body_preview": "Kevin Lelitte invited you to edit a folder\r\n\r\nHere's the folder that Kevin Lelitte shared with you. [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_VAAA="
-    },
-    {
-      "subject": "Accepted: Multiverse apprenticeship: Module 1: Foundations Of Data Analyst: Kickoff",
-      "to": "invites@multiverse.io",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_UAAA="
-    },
-    {
-      "subject": "Re: Support Call# 11700438: Interface Staging: req=hris/oucsreg/departments ref=79811 status=FAILURE",
-      "to": "Emma Fitz-Gibbon",
-      "sent": "",
-      "body_preview": "Hi Emma,\r\n\r\nPlease raised a new task for this, I'll take this forward once received.\r\n\r\nBest,\r\nKevin [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW5AAA="
-    },
-    {
-      "subject": "Re: Support Call# 11713147: FOI/202609/1014 - Recruitment records 2021-2023",
-      "to": "Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Marie,\r\nGood catch. Unfortunately, the HR Reporting output is too large to work within the date r [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW4AAA="
-    },
-    {
-      "subject": "Canceled: Multiverse: Launch Meeting DF(HE)SEP26 - Placeholder",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_bAAA="
-    }
-  ]
+  "calendarUnavailable": true
 }
