@@ -1,7 +1,7 @@
 {
   "date": "Thursday 1 October 2026",
   "subtitle": "0 unread messages - Outlook-only refresh",
-  "context": "Outlook has 0 unread messages from the last seven days, including 0 marked high importance. Outlook shows 6 timed meeting(s) today: FA Team Daily Catchup, RiskEx: SHSMS Supplier Demo, Extended demo: for any additional technical questions. Outlook shows 4 timed meeting(s) tomorrow: FA Team Daily Catchup, Vatix: SHSMS Supplier Demo, Roadmap review. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
+  "context": "Outlook has 0 unread messages from the last seven days, including 0 marked high importance. Outlook shows 6 timed meeting(s) today: FA Team Daily Catchup, RiskEx: SHSMS Supplier Demo, Extended demo: for any additional technical questions. Outlook shows 4 timed meeting(s) tomorrow: FA Team Daily Catchup, Vatix: SHSMS Supplier Demo, Roadmap review. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
   "urgent": [],
   "needs": [
     {
@@ -193,22 +193,37 @@
   ],
   "fyi": [
     {
-      "title": "v4 is coming — More expressiveness, more control",
-      "sub": "From <strong>ElevenReader</strong>. We&#x27;re gradually rolling out our most expressive voice model plus new controls for how your voices sound ͏  ͏  ͏  ͏  ͏  ͏",
+      "title": "SHSMS - RiskEx Implementation and Technical Q&A Recording",
+      "sub": "From <strong>Strategic H and S Modular System</strong>. Dear all,\r\nThank you to everyone who was able to attend the RiskEx implementation and technical Q&amp;A session today.\r\nIf y",
       "badge": "FYI",
       "badgeType": "gray",
-      "subject": "v4 is coming — More expressiveness, more control",
-      "from": "ElevenReader",
+      "subject": "SHSMS - RiskEx Implementation and Technical Q&A Recording",
+      "from": "Strategic H and S Modular System",
       "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfIIHV9AAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfIIHV9AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "30 Sep",
-      "received_raw": "2026-09-30T15:19:43Z",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfIIHWHAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfIIHWHAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "1 Oct",
+      "received_raw": "2026-10-01T13:50:09Z",
+      "kevin_is_primary_recipient": true,
+      "messageCount": 1
+    },
+    {
+      "title": "Extended demo - for additional technical questions",
+      "sub": "From <strong>Lindsey Hale</strong>. This session is now confirmed.\r\n\r\nThis time is to explore technical questions or areas requiring more detailed discussio",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Extended demo - for additional technical questions",
+      "from": "Lindsey Hale",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfIIHWFAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfIIHWFAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "1 Oct",
+      "received_raw": "2026-10-01T12:55:23Z",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
     }
   ],
-  "fyiRawCount": 1,
+  "fyiRawCount": 2,
   "suppressedCount": 1,
   "low": [],
   "calToday": [
@@ -223,48 +238,12 @@
       "sub": "Lindsey Hale"
     },
     {
-      "time": "12:00",
-      "title": "Extended demo - for any additional technical questions",
-      "sub": "Lindsey Hale"
-    },
-    {
-      "time": "13:00",
-      "title": "Keep free",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "14:00",
-      "title": "Asta Siautiaite - PDR Review 2026",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "16:00",
-      "title": "Busy",
+      "time": "10:00",
+      "title": "38 day balance for departments",
       "sub": "Kevin Lelitte"
     }
   ],
-  "calTomorrow": [
-    {
-      "time": "09:30",
-      "title": "FA Team Daily Catchup",
-      "sub": "Kevin Lelitte"
-    },
-    {
-      "time": "10:00",
-      "title": "Vatix - SHSMS Supplier Demo",
-      "sub": "Lindsey Hale"
-    },
-    {
-      "time": "10:00",
-      "title": "Roadmap review",
-      "sub": "Marie Cooksey"
-    },
-    {
-      "time": "12:00",
-      "title": "Extended demo - for additional technical questions",
-      "sub": "Lindsey Hale"
-    }
-  ],
+  "calTomorrow": [],
   "calDay2": [],
   "calDay3": [],
   "calFull": [
@@ -301,23 +280,8 @@
           "sub": "Lindsey Hale"
         },
         {
-          "time": "12:00",
-          "title": "Extended demo - for any additional technical questions",
-          "sub": "Lindsey Hale"
-        },
-        {
-          "time": "13:00",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:00",
-          "title": "Asta Siautiaite - PDR Review 2026",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
+          "time": "10:00",
+          "title": "38 day balance for departments",
           "sub": "Kevin Lelitte"
         }
       ],
@@ -326,28 +290,7 @@
     {
       "date": "2026-10-02",
       "label": "Friday 2 Oct",
-      "items": [
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "10:00",
-          "title": "Vatix - SHSMS Supplier Demo",
-          "sub": "Lindsey Hale"
-        },
-        {
-          "time": "10:00",
-          "title": "Roadmap review",
-          "sub": "Marie Cooksey"
-        },
-        {
-          "time": "12:00",
-          "title": "Extended demo - for additional technical questions",
-          "sub": "Lindsey Hale"
-        }
-      ],
+      "items": [],
       "isToday": false
     }
   ],
@@ -757,574 +700,28 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Thursday 01 October · 12:09",
+  "refreshed_at": "Thursday 01 October · 16:06",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-01T11:03:48+00:00"
+      "as_of": "2026-10-01T15:02:04+00:00"
     },
     "mail_sent": {
-      "status": "carried_forward",
+      "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-01T06:02:17+00:00"
+      "as_of": "2026-10-01T15:02:04+00:00"
     },
     "calendar": {
-      "status": "carried_forward",
+      "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-01T06:00:12+00:00"
+      "as_of": "2026-10-01T15:00:07+00:00"
     },
     "teams": {
       "status": "n/a",
       "served_by": null
     }
   },
-  "calendarUnavailable": true,
-  "sent": [
-    {
-      "subject": "Accepted: Multiverse apprenticeship:  Flying Start",
-      "to": "invites@multiverse.io",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc2AAA="
-    },
-    {
-      "subject": "Fw: My Development Insight reports",
-      "to": "Asta Palmer",
-      "sent": "",
-      "body_preview": "Hi Asta,\r\n\r\nPlease can I ask you to have a look at this, as you have been doing some work on updatin [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc3AAA="
-    },
-    {
-      "subject": "My Development Insight reports",
-      "to": "Asta Palmer",
-      "sent": "",
-      "body_preview": "Hi Asta,\r\n\r\nThanks. I agree that we need the background and confirm an OSM Change is required before [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc4AAA="
-    },
-    {
-      "subject": "Accepted: Multiverse apprenticeship:  Flying Start",
-      "to": "invites@multiverse.io",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc2AAA="
-    },
-    {
-      "subject": "Fw: My Development Insight reports",
-      "to": "Asta Palmer",
-      "sent": "",
-      "body_preview": "Hi Asta,\r\n\r\nPlease can I ask you to have a look at this, as you have been doing some work on updatin [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc3AAA="
-    },
-    {
-      "subject": "My Development Insight reports",
-      "to": "Asta Palmer",
-      "sent": "",
-      "body_preview": "Hi Asta,\r\n\r\nThanks. I agree that we need the background and confirm an OSM Change is required before [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc4AAA="
-    },
-    {
-      "subject": "Re: Multiverse apprenticeship application",
-      "to": "Anna Carlisle",
-      "sent": "",
-      "body_preview": "Hi Anna,\r\nI’m sorry I missed our call today. I was held up in an appointment and unfortunately didn’ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc5AAA="
-    },
-    {
-      "subject": "Tentative: Ant's A/L",
-      "to": "Anthony Kong",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18OAAA="
-    },
-    {
-      "subject": "Accepted: NEW - Cross-Team Process Improvement Working Group – 1st Meeting",
-      "to": "Otter Ho",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18PAAA="
-    },
-    {
-      "subject": "Re: University of Oxford - Call Summary/SOW Review",
-      "to": "Scott Baker, James Salas Guillen, Christopher Sanders",
-      "sent": "",
-      "body_preview": "Hi Scott,\r\nI wanted to follow up on the Teams integration ahead of a decision we need to make this w [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18QAAA="
-    },
-    {
-      "subject": "Re: Additional Clinical Pay Uplift 2026",
-      "to": "Athena Artuso",
-      "sent": "",
-      "body_preview": "Hi Athena,\r\nI've made Michael aware of the request. Please feel free to contact him directly to disc [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18RAAA="
-    },
-    {
-      "subject": "Accepted: Catch up - Access Evo",
-      "to": "Umpleby, Richard",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18SAAA="
-    },
-    {
-      "subject": "James - H&S Handover",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18TAAA="
-    },
-    {
-      "subject": "Accepted: Multiverse apprenticeship:  Flying Start",
-      "to": "invites@multiverse.io",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc2AAA="
-    },
-    {
-      "subject": "Fw: My Development Insight reports",
-      "to": "Asta Palmer",
-      "sent": "",
-      "body_preview": "Hi Asta,\r\n\r\nPlease can I ask you to have a look at this, as you have been doing some work on updatin [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc3AAA="
-    },
-    {
-      "subject": "My Development Insight reports",
-      "to": "Asta Palmer",
-      "sent": "",
-      "body_preview": "Hi Asta,\r\n\r\nThanks. I agree that we need the background and confirm an OSM Change is required before [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc4AAA="
-    },
-    {
-      "subject": "Re: Multiverse apprenticeship application",
-      "to": "Anna Carlisle",
-      "sent": "",
-      "body_preview": "Hi Anna,\r\nI’m sorry I missed our call today. I was held up in an appointment and unfortunately didn’ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfD6gc5AAA="
-    },
-    {
-      "subject": "Tentative: Ant's A/L",
-      "to": "Anthony Kong",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18OAAA="
-    },
-    {
-      "subject": "Accepted: NEW - Cross-Team Process Improvement Working Group – 1st Meeting",
-      "to": "Otter Ho",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18PAAA="
-    },
-    {
-      "subject": "Re: University of Oxford - Call Summary/SOW Review",
-      "to": "Scott Baker, James Salas Guillen, Christopher Sanders",
-      "sent": "",
-      "body_preview": "Hi Scott,\r\nI wanted to follow up on the Teams integration ahead of a decision we need to make this w [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18QAAA="
-    },
-    {
-      "subject": "Re: Additional Clinical Pay Uplift 2026",
-      "to": "Athena Artuso",
-      "sent": "",
-      "body_preview": "Hi Athena,\r\nI've made Michael aware of the request. Please feel free to contact him directly to disc [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18RAAA="
-    },
-    {
-      "subject": "Accepted: Catch up - Access Evo",
-      "to": "Umpleby, Richard",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18SAAA="
-    },
-    {
-      "subject": "James - H&S Handover",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18TAAA="
-    },
-    {
-      "subject": "James - H&S Handover",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18UAAA="
-    },
-    {
-      "subject": "38-day balance rollout walk-through",
-      "to": "Michael O'Sullivan",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18VAAA="
-    },
-    {
-      "subject": "Re: Non-clinical pay uplift timelines",
-      "to": "Jasmin Khokhra",
-      "sent": "",
-      "body_preview": "Hi Jasmin,\r\nApologies for the delay. I wanted to flag that the Payroll position is clear that Novemb [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18WAAA="
-    },
-    {
-      "subject": "Accepted: Cross-Team Process Improvement Working Group",
-      "to": "Otter Ho",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18XAAA="
-    },
-    {
-      "subject": "Re: Contract templates",
-      "to": "Michelle Williams",
-      "sent": "",
-      "body_preview": "Hi Michelle,\r\nYes, of course. I’m not familiar with the process, so could you show me what you do on [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18YAAA="
-    },
-    {
-      "subject": "Re: Non-clinical pay uplift timelines",
-      "to": "Athena Artuso, Tracy Roberts",
-      "sent": "",
-      "body_preview": "Hi Athena,\r\nYes, my assumption is that implementation in January means everything is in UOXP by 25 J [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18ZAAA="
-    },
-    {
-      "subject": "Re: Non-clinical pay uplift timelines",
-      "to": "Michael O'Sullivan",
-      "sent": "",
-      "body_preview": "Hi Michael,\r\nPlease can you refer to the email trail below and update the planner with the realistic [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18aAAA="
-    },
-    {
-      "subject": "Re: 38 day balance for departments - Chemistry list attached",
-      "to": "Julie Hickman, Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Julie,\r\n\r\nThanks for the update.\r\n\r\nI’m happy with the proposed sequence and we’ll begin the Work [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfGv18bAAA="
-    },
-    {
-      "subject": "Asta Siautiaite - PDR Review 2026",
-      "to": "Asta Siautilaite",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams Ne [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_EAAA="
-    },
-    {
-      "subject": "James - H&S Handover",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_FAAA="
-    },
-    {
-      "subject": "SHSMS Supplier Demo",
-      "to": "Lindsey Hale",
-      "sent": "",
-      "body_preview": "Hi Lindsay,\r\nPlease can you include me in the supplier demos? Helen sent me the invite for the Vatix [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_GAAA="
-    },
-    {
-      "subject": "Re: Support Call# 11713147: FOI/202609/1014 - Recruitment records 2021-2023",
-      "to": "Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Marie,\r\nI expect to complete this today and send it to you for review before it is submitted.\r\nBe [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_HAAA="
-    },
-    {
-      "subject": "James Salas Guillen - PDR Review 2026",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "James Salas Guillen 1-1 Session\r\n\r\n\r\n_______________________________________________________________ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_IAAA="
-    },
-    {
-      "subject": "Accepted: RiskEx - SHSMS Supplier Demo",
-      "to": "Lindsey Hale",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_JAAA="
-    },
-    {
-      "subject": "Accepted: Extended demo - for any additional technical questions",
-      "to": "Lindsey Hale",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_KAAA="
-    },
-    {
-      "subject": "Accepted: Ideagen - SHSMS Supplier Demo",
-      "to": "Lindsey Hale",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_LAAA="
-    },
-    {
-      "subject": "Accepted: Vatix - SHSMS Supplier Demo",
-      "to": "Lindsey Hale",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_MAAA="
-    },
-    {
-      "subject": "Accepted: Vatix Sandbox Scoping and Discovery placeholder",
-      "to": "Helen Harbour",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_NAAA="
-    },
-    {
-      "subject": "Accepted: Extended demo - for additional technical questions",
-      "to": "Lindsey Hale",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_OAAA="
-    },
-    {
-      "subject": "Accepted: Extended demo - for additional technical questions",
-      "to": "Lindsey Hale",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_PAAA="
-    },
-    {
-      "subject": "Re: Support Call# 11713147: FOI/202609/1014 - Recruitment records 2021-2023",
-      "to": "Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Marie,\r\nI've attached the PeopleXD search report and supporting documents for the Jason Arday par [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_QAAA="
-    },
-    {
-      "subject": "Re: Support Call# 11713147: FOI/202609/1014 - Recruitment records 2021-2023",
-      "to": "Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Marie,\r\nThanks for checking. I included the supporting documents so you could review the evidence [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_RAAA="
-    },
-    {
-      "subject": "Accepted: Multiverse apprenticeship: Starting with Your BI Tool: Supported Independent Learning (Optional)",
-      "to": "invites@multiverse.io",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_SAAA="
-    },
-    {
-      "subject": "Accepted: Multiverse apprenticeship: Module 1: Foundations Of a Data Analyst: Unit 1 Workshop",
-      "to": "invites@multiverse.io",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_TAAA="
-    },
-    {
-      "subject": "Accepted: Multiverse apprenticeship: Module 1: Foundations Of Data Analyst: Kickoff",
-      "to": "invites@multiverse.io",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_UAAA="
-    },
-    {
-      "subject": "Kevin Lelitte shared the folder \"SAR_Kishor_Kale_REF_Officer_188064_2026-09-29\" with you",
-      "to": "Kevin Lelitte",
-      "sent": "",
-      "body_preview": "Kevin Lelitte invited you to edit a folder\r\n\r\nHere's the folder that Kevin Lelitte shared with you. [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_VAAA="
-    },
-    {
-      "subject": "Kishor Kale SAR – PeopleXD records for REF Officer 188064",
-      "to": "Marco Sanna",
-      "sent": "",
-      "body_preview": "Hi Marco,\r\nPlease find below the PeopleXD records and search report for Kishor Kale’s application fo [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_WAAA="
-    },
-    {
-      "subject": "Re: Bi-monthly CDR/PD working group",
-      "to": "Lindsey Spriggs",
-      "sent": "",
-      "body_preview": "Hi Lindsey,\r\nYes, thank you!\r\nI agree with stepping out of the regular meeting cycle for now. Please [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_XAAA="
-    },
-    {
-      "subject": "Multiverse: Launch Meeting DF(HE)SEP26 - Placeholder",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_YAAA="
-    },
-    {
-      "subject": "Accepted: Multiverse: Launch Meeting DF(HE)SEP26 with Olivia Sullivan",
-      "to": "Olivia Sullivan",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_ZAAA="
-    },
-    {
-      "subject": "FW: Multiverse: Launch Meeting DF(HE)SEP26 with Olivia Sullivan",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "Hi Simon,\r\nI’m putting this in the calendar as it’s the only space I can find. Please let me know if [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_aAAA="
-    },
-    {
-      "subject": "Canceled: Multiverse: Launch Meeting DF(HE)SEP26 - Placeholder",
-      "to": "Simon Burford",
-      "sent": "",
-      "body_preview": "",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfHap_bAAA="
-    },
-    {
-      "subject": "Re: Support Call# 11713147: FOI/202609/1014 - Recruitment records 2021-2023",
-      "to": "Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Marie,\r\nGood catch. Unfortunately, the HR Reporting output is too large to work within the date r [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW4AAA="
-    },
-    {
-      "subject": "Re: Support Call# 11700438: Interface Staging: req=hris/oucsreg/departments ref=79811 status=FAILURE",
-      "to": "Emma Fitz-Gibbon",
-      "sent": "",
-      "body_preview": "Hi Emma,\r\n\r\nPlease raised a new task for this, I'll take this forward once received.\r\n\r\nBest,\r\nKevin [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW5AAA="
-    },
-    {
-      "subject": "Re: Support Call# 11713147: FOI/202609/1014 - Recruitment records 2021-2023",
-      "to": "Marie Cooksey",
-      "sent": "",
-      "body_preview": "Hi Marie,\r\nAccess Group has provided the extract covering the final-stage interview counts between 2 [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW6AAA="
-    },
-    {
-      "subject": "FA Resourcing: Requirements and Funding",
-      "to": "Marie Cooksey, Simon Burford",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW7AAA="
-    },
-    {
-      "subject": "James Salas Guillen 1-1 Session",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "James Salas Guillen 1-1 Session\r\n\r\n\r\n_______________________________________________________________ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW8AAA="
-    },
-    {
-      "subject": "James - H&S Handover",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW9AAA="
-    },
-    {
-      "subject": "James Salas Guillen 1-1 Session",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "James Salas Guillen 1-1 Session\r\n\r\n\r\n_______________________________________________________________ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW_AAA="
-    },
-    {
-      "subject": "James Salas Guillen 1-1 Session",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "James Salas Guillen 1-1 Session\r\n\r\n\r\n_______________________________________________________________ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW-AAA="
-    },
-    {
-      "subject": "James Salas Guillen 1-1 Session",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "James Salas Guillen 1-1 Session\r\n\r\n\r\n_______________________________________________________________ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW-AAA="
-    },
-    {
-      "subject": "James Salas Guillen 1-1 Session",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "James Salas Guillen 1-1 Session\r\n\r\n\r\n_______________________________________________________________ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW_AAA="
-    },
-    {
-      "subject": "James - H&S Handover",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW9AAA="
-    },
-    {
-      "subject": "James Salas Guillen 1-1 Session",
-      "to": "James Salas Guillen",
-      "sent": "",
-      "body_preview": "James Salas Guillen 1-1 Session\r\n\r\n\r\n_______________________________________________________________ [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW8AAA="
-    },
-    {
-      "subject": "FA Resourcing: Requirements and Funding",
-      "to": "Marie Cooksey, Simon Burford",
-      "sent": "",
-      "body_preview": "________________________________________________________________________________\r\nMicrosoft Teams me [truncated]",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l3AACN_5xoUtxaQ7clOANLv-U1AAfIIGW7AAA="
-    }
-  ]
+  "calendarUnavailable": true
 }
