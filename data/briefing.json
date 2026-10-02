@@ -1,7 +1,7 @@
 {
-  "date": "Thursday 1 October 2026",
-  "subtitle": "0 unread messages - Outlook-only refresh",
-  "context": "Outlook has 0 unread messages from the last seven days, including 0 marked high importance. Outlook shows 6 timed meeting(s) today: FA Team Daily Catchup, RiskEx: SHSMS Supplier Demo, Extended demo: for any additional technical questions. Outlook shows 4 timed meeting(s) tomorrow: FA Team Daily Catchup, Vatix: SHSMS Supplier Demo, Roadmap review. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
+  "date": "Friday 2 October 2026",
+  "subtitle": "3 unread messages - Outlook-only refresh",
+  "context": "Outlook has 3 unread messages from the last seven days, including 0 marked high importance. Review SHSMS: RiskEx Implementation and Technical Q&A Recording from Strategic H and S Modular System. Review Extended demo: for additional technical questions from Lindsey Hale. Review Support Call# 11713818: Leave and Absence Rollover TUPE staff from Michael O'Sullivan. Outlook shows 11 timed meeting(s) today: FA Team Daily Catchup, Vatix: SHSMS Supplier Demo, 38 day balance for departments. Outlook shows 8 timed meeting(s) tomorrow: FA Team Daily Catchup, H&S Roadmap, Busy. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
   "urgent": [],
   "needs": [
     {
@@ -234,18 +234,176 @@
     },
     {
       "time": "10:00",
-      "title": "RiskEx - SHSMS Supplier Demo",
+      "title": "Vatix - SHSMS Supplier Demo",
       "sub": "Lindsey Hale"
     },
     {
       "time": "10:00",
       "title": "38 day balance for departments",
       "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey"
+    },
+    {
+      "time": "12:00",
+      "title": "Extended demo - for additional technical questions",
+      "sub": "Lindsey Hale"
+    },
+    {
+      "time": "12:00",
+      "title": "James Salas Guillen - PDR Review 2026",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "13:00",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:00",
+      "title": "Ideagen - SHSMS Supplier Demo",
+      "sub": "Lindsey Hale"
+    },
+    {
+      "time": "14:30",
+      "title": "Roadmap meeting - later catch up.",
+      "sub": "Simon Burford"
+    },
+    {
+      "time": "16:00",
+      "title": "Extended demo - for additional technical questions",
+      "sub": "Lindsey Hale"
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
     }
   ],
-  "calTomorrow": [],
-  "calDay2": [],
-  "calDay3": [],
+  "calTomorrow": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "H&S Roadmap",
+      "sub": "Christopher Sanders"
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "11:30",
+      "title": "University of Oxford - Cority Deliverables",
+      "sub": "Scott Baker"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "13:30",
+      "title": "FA Resourcing: Requirements and Funding",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:00",
+      "title": "Asta Siautiaite - PDR Review 2026",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "15:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
+  "calDay2": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Azure Integration Platform Sprint Review",
+      "sub": "Erika Braverman"
+    },
+    {
+      "time": "11:00",
+      "title": "Sickness Absence Survey working group",
+      "sub": "Simon Burford"
+    },
+    {
+      "time": "12:00",
+      "title": "James Salas Guillen 1-1 Session",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "13:30",
+      "title": "James - H&S Handover",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
+  "calDay3": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Multiverse: Launch Meeting DF(HE)SEP26 with Olivia Sullivan",
+      "sub": "Olivia Sullivan"
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:00",
+      "title": "Catch up - Access Evo",
+      "sub": "Umpleby, Richard"
+    },
+    {
+      "time": "14:00",
+      "title": "HR Systems team meeting",
+      "sub": "Michelle Williams"
+    },
+    {
+      "time": "15:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
   "calFull": [
     {
       "date": "2026-09-28",
@@ -268,6 +426,12 @@
     {
       "date": "2026-10-01",
       "label": "Thursday 1 Oct",
+      "items": [],
+      "isToday": false
+    },
+    {
+      "date": "2026-10-02",
+      "label": "Friday 2 Oct",
       "items": [
         {
           "time": "09:30",
@@ -276,22 +440,56 @@
         },
         {
           "time": "10:00",
-          "title": "RiskEx - SHSMS Supplier Demo",
+          "title": "Vatix - SHSMS Supplier Demo",
           "sub": "Lindsey Hale"
         },
         {
           "time": "10:00",
           "title": "38 day balance for departments",
           "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "Roadmap review",
+          "sub": "Marie Cooksey"
+        },
+        {
+          "time": "12:00",
+          "title": "Extended demo - for additional technical questions",
+          "sub": "Lindsey Hale"
+        },
+        {
+          "time": "12:00",
+          "title": "James Salas Guillen - PDR Review 2026",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "13:00",
+          "title": "Keep free",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:00",
+          "title": "Ideagen - SHSMS Supplier Demo",
+          "sub": "Lindsey Hale"
+        },
+        {
+          "time": "14:30",
+          "title": "Roadmap meeting - later catch up.",
+          "sub": "Simon Burford"
+        },
+        {
+          "time": "16:00",
+          "title": "Extended demo - for additional technical questions",
+          "sub": "Lindsey Hale"
+        },
+        {
+          "time": "16:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
         }
       ],
       "isToday": true
-    },
-    {
-      "date": "2026-10-02",
-      "label": "Friday 2 Oct",
-      "items": [],
-      "isToday": false
     }
   ],
   "absences": [],
@@ -700,23 +898,23 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Thursday 01 October · 16:06",
+  "refreshed_at": "Friday 02 October · 07:05",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-01T15:02:04+00:00"
+      "as_of": "2026-10-02T06:01:18+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-01T15:02:04+00:00"
+      "as_of": "2026-10-02T06:01:18+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-01T15:00:07+00:00"
+      "as_of": "2026-10-02T06:00:06+00:00"
     },
     "teams": {
       "status": "n/a",
