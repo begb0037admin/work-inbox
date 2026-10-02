@@ -2,15 +2,15 @@
     "kind":  "draftdiff",
     "result":  "ok",
     "exit_code":  0,
-    "ts":  "2026-10-02T12:33:51+01:00",
+    "ts":  "2026-10-02T16:33:04+01:00",
     "host":  "101L-DE013193",
     "user":  "AD-OAK\\begb0037",
     "stats":  {
                   "mail_backend":  "connector",
                   "ai_backend":  "claude_code",
-                  "drafts_tracked_now":  12,
-                  "drafts_vanished_since_last_run":  0,
-                  "abandoned_or_discarded":  0,
+                  "drafts_tracked_now":  0,
+                  "drafts_vanished_since_last_run":  12,
+                  "abandoned_or_discarded":  12,
                   "draft_final_pairs_found":  0,
                   "pairs_excluded_by_redaction":  0,
                   "pairs_classified_this_run":  0,
@@ -19,6 +19,6 @@
                   "ai_unavailable_this_run":  false,
                   "total_diffs_accumulated":  0,
                   "window_hours":  72,
-                  "run_time":  "2026-10-02T12:33:51.452935"
+                  "run_time":  "2026-10-02T16:33:04.472496"
               }
 }
