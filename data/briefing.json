@@ -1,7 +1,7 @@
 {
-  "date": "Monday 5 October 2026",
-  "subtitle": "0 unread messages - Outlook-only refresh",
-  "context": "Outlook has 0 unread messages from the last seven days, including 0 marked high importance. Outlook shows 3 timed meeting(s) today: FA Team Daily Catchup, H&S Roadmap, Busy. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
+  "date": "Tuesday 6 October 2026",
+  "subtitle": "1 unread messages - Outlook-only refresh",
+  "context": "Outlook has 1 unread messages from the last seven days, including 0 marked high importance. Review University Bulletin: 5 October 2026 from Internal Communications. Outlook shows 3 timed meeting(s) today: FA Team Daily Catchup, Azure Integration Platform Sprint Review, Sickness Absence Survey working group. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
   "urgent": [],
   "needs": [
     {
@@ -193,38 +193,23 @@
   ],
   "fyi": [
     {
-      "title": "RE: 38 day balance for departments - Chemistry list attached",
-      "sub": "From <strong>Julie Hickman</strong>. Sorry I was trying to send this quickly to get onto Support.\r\n\r\nJust to clarify, I met with both Jenna and her team as w",
+      "title": "Re: Support Call# 11700438: Interface Staging: req=hris/oucsreg/departments ref=79811 status=FAILURE",
+      "sub": "From <strong>Guy Williams</strong>. ref progid_165 job mentioned in email 25 September 2026 10:56. This looks local / on-premise issue (with STGLIVE&#x27;s sched",
       "badge": "FYI",
       "badgeType": "gray",
-      "subject": "RE: 38 day balance for departments - Chemistry list attached",
-      "from": "Julie Hickman",
+      "subject": "Re: Support Call# 11700438: Interface Staging: req=hris/oucsreg/departments ref=79811 status=FAILURE",
+      "from": "Guy Williams",
       "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfJ-jiGAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfJ%2FjiGAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfJ-jiOAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfJ%2FjiOAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "received": "5 Oct",
-      "received_raw": "2026-10-05T10:07:34Z",
-      "kevin_is_primary_recipient": true,
-      "messageCount": 2
-    },
-    {
-      "title": "People News - October 2026",
-      "sub": "From <strong>People Communications</strong>. University of Oxford - People Department        View this email online\r\n\r\n\r\n5 October 2026 - Issue 16\r\nWelcome from Dr M",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "People News - October 2026",
-      "from": "People Communications",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfJ-jiFAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfJ%2FjiFAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "5 Oct",
-      "received_raw": "2026-10-05T09:22:00Z",
+      "received_raw": "2026-10-05T15:05:17Z",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
     }
   ],
-  "fyiRawCount": 3,
-  "suppressedCount": 0,
+  "fyiRawCount": 1,
+  "suppressedCount": 2,
   "low": [],
   "calToday": [
     {
@@ -234,13 +219,13 @@
     },
     {
       "time": "10:00",
-      "title": "H&S Roadmap",
-      "sub": "Christopher Sanders"
+      "title": "Azure Integration Platform Sprint Review",
+      "sub": "Erika Braverman"
     },
     {
-      "time": "10:45",
-      "title": "Urgent Help Desk Meeting",
-      "sub": "Marie Cooksey"
+      "time": "11:00",
+      "title": "Sickness Absence Survey working group",
+      "sub": "Simon Burford"
     }
   ],
   "calTomorrow": [],
@@ -250,6 +235,12 @@
     {
       "date": "2026-10-05",
       "label": "Monday 5 Oct",
+      "items": [],
+      "isToday": false
+    },
+    {
+      "date": "2026-10-06",
+      "label": "Tuesday 6 Oct",
       "items": [
         {
           "time": "09:30",
@@ -258,22 +249,16 @@
         },
         {
           "time": "10:00",
-          "title": "H&S Roadmap",
-          "sub": "Christopher Sanders"
+          "title": "Azure Integration Platform Sprint Review",
+          "sub": "Erika Braverman"
         },
         {
-          "time": "10:45",
-          "title": "Urgent Help Desk Meeting",
-          "sub": "Marie Cooksey"
+          "time": "11:00",
+          "title": "Sickness Absence Survey working group",
+          "sub": "Simon Burford"
         }
       ],
       "isToday": true
-    },
-    {
-      "date": "2026-10-06",
-      "label": "Tuesday 6 Oct",
-      "items": [],
-      "isToday": false
     },
     {
       "date": "2026-10-07",
@@ -700,23 +685,23 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Monday 05 October · 12:05",
+  "refreshed_at": "Tuesday 06 October · 07:07",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-05T11:01:02+00:00"
+      "as_of": "2026-10-06T06:01:40+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-05T11:01:02+00:00"
+      "as_of": "2026-10-06T06:01:40+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-05T11:00:08+00:00"
+      "as_of": "2026-10-06T06:00:07+00:00"
     },
     "teams": {
       "status": "n/a",
