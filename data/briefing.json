@@ -1,7 +1,7 @@
 {
   "date": "Tuesday 6 October 2026",
   "subtitle": "1 unread messages - Outlook-only refresh",
-  "context": "Outlook has 1 unread messages from the last seven days, including 0 marked high importance. Review University Bulletin: 5 October 2026 from Internal Communications. Outlook shows 3 timed meeting(s) today: FA Team Daily Catchup, Azure Integration Platform Sprint Review, Sickness Absence Survey working group. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
+  "context": "Outlook has 1 unread messages from the last seven days, including 0 marked high importance. Review University Bulletin: 5 October 2026 from Internal Communications. Outlook shows 3 timed meeting(s) today: FA Team Daily Catchup, Azure Integration Platform Sprint Review, Sickness Absence Survey working group. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week.",
   "urgent": [],
   "needs": [
     {
@@ -194,31 +194,31 @@
   "fyi": [
     {
       "title": "Re: Support Call# 11700438: Interface Staging: req=hris/oucsreg/departments ref=79811 status=FAILURE",
-      "sub": "From <strong>Guy Williams</strong>. re osm 11700438 - finally(?) found a cause/explanation. Hopefully a DBA can tweak config...\nI used `sys.dba_source` to c",
+      "sub": "From <strong>Guy Williams</strong>. All, hopefully below summary makes things clear re the 3 issues we have. Have created OSM tasks.\n\nOSM incidents - summar",
       "badge": "FYI",
       "badgeType": "gray",
       "subject": "Re: Support Call# 11700438: Interface Staging: req=hris/oucsreg/departments ref=79811 status=FAILURE",
       "from": "Guy Williams",
       "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMG0FsAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMG0FsAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMG0FxAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMG0FxAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "received": "6 Oct",
-      "received_raw": "2026-10-06T10:38:28Z",
+      "received_raw": "2026-10-06T13:43:59Z",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
     },
     {
-      "title": "Kevin Lelitte shared \"PeopleXD FOI Search Report Jason Arday\" with you",
-      "sub": "From <strong>Kevin Lelitte</strong>. Kevin Lelitte invited you to edit a file\r\n\r\nHi Nina,\r\nPlease find attached the information held by HR Systems in respons",
+      "title": "Fw: Vatix Demonstration clarifications",
+      "sub": "From <strong>Helen Harbour</strong>. Good afternoon,\r\n\r\nPlease find below the link to the Trust website that Vatix referred to in the Implementation and Tech",
       "badge": "FYI",
       "badgeType": "gray",
-      "subject": "Kevin Lelitte shared \"PeopleXD FOI Search Report Jason Arday\" with you",
-      "from": "Kevin Lelitte",
+      "subject": "Fw: Vatix Demonstration clarifications",
+      "from": "Helen Harbour",
       "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMG0FqAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMG0FqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMG0FwAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMG0FwAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "received": "6 Oct",
-      "received_raw": "2026-10-06T09:42:27Z",
+      "received_raw": "2026-10-06T13:16:44Z",
       "kevin_is_primary_recipient": true,
       "messageCount": 1
     }
@@ -700,23 +700,23 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Tuesday 06 October · 12:06",
+  "refreshed_at": "Tuesday 06 October · 16:06",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-06T11:01:42+00:00"
+      "as_of": "2026-10-06T15:01:51+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-06T11:01:42+00:00"
+      "as_of": "2026-10-06T15:01:51+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-06T11:00:10+00:00"
+      "as_of": "2026-10-06T15:00:07+00:00"
     },
     "teams": {
       "status": "n/a",
