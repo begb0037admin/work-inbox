@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 7 October 2026",
   "subtitle": "1 unread messages - Outlook-only refresh",
-  "context": "Outlook has 1 unread messages from the last seven days, including 0 marked high importance. Review Introducing ElevenAgents Architect from ElevenLabs Team. Outlook shows 2 timed meeting(s) today: FA Team Daily Catchup, Busy. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
+  "context": "Outlook has 1 unread messages from the last seven days, including 0 marked high importance. Review Introducing ElevenAgents Architect from ElevenLabs Team. Outlook shows 2 timed meeting(s) today: FA Team Daily Catchup, Busy. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
   "urgent": [],
   "needs": [
     {
@@ -236,10 +236,97 @@
       "time": "11:00",
       "title": "Busy",
       "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:00",
+      "title": "Catch up - Access Evo",
+      "sub": "Umpleby, Richard"
+    },
+    {
+      "time": "14:00",
+      "title": "HR Systems team meeting",
+      "sub": "Michelle Williams"
+    },
+    {
+      "time": "15:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
     }
   ],
-  "calTomorrow": [],
-  "calDay2": [],
+  "calTomorrow": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "James - H&S Handover",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "15:00",
+      "title": "SHSMS Demonstration Moderation Meeting (DTP1334 Strategic Health & Safety Modular system) - Placeholder",
+      "sub": "Helen Harbour"
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
+  "calDay2": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "10:00",
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey"
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:00",
+      "title": "Asta Siautiaite - 1-1 Session",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte"
+    },
+    {
+      "time": "14:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte"
+    }
+  ],
   "calDay3": [],
   "calFull": [
     {
@@ -272,6 +359,26 @@
           "time": "11:00",
           "title": "Busy",
           "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "12:30",
+          "title": "Keep free",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:00",
+          "title": "Catch up - Access Evo",
+          "sub": "Umpleby, Richard"
+        },
+        {
+          "time": "14:00",
+          "title": "HR Systems team meeting",
+          "sub": "Michelle Williams"
+        },
+        {
+          "time": "15:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
         }
       ],
       "isToday": true
@@ -279,13 +386,80 @@
     {
       "date": "2026-10-08",
       "label": "Thursday 8 Oct",
-      "items": [],
+      "items": [
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "James - H&S Handover",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "11:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "12:30",
+          "title": "Keep free",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:30",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "15:00",
+          "title": "SHSMS Demonstration Moderation Meeting (DTP1334 Strategic Health & Safety Modular system) - Placeholder",
+          "sub": "Helen Harbour"
+        },
+        {
+          "time": "16:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        }
+      ],
       "isToday": false
     },
     {
       "date": "2026-10-09",
       "label": "Friday 9 Oct",
-      "items": [],
+      "items": [
+        {
+          "time": "09:30",
+          "title": "FA Team Daily Catchup",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "10:00",
+          "title": "Roadmap review",
+          "sub": "Marie Cooksey"
+        },
+        {
+          "time": "11:00",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "12:00",
+          "title": "Asta Siautiaite - 1-1 Session",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "12:30",
+          "title": "Keep free",
+          "sub": "Kevin Lelitte"
+        },
+        {
+          "time": "14:30",
+          "title": "Busy",
+          "sub": "Kevin Lelitte"
+        }
+      ],
       "isToday": false
     }
   ],
@@ -474,7 +648,8 @@
         "[13 Aug 2026] Tracy Roberts has added payroll processing stats and monthly implementation details to the uplift timeline discussion. (email: Tracy Roberts - RE: Timeline for implementation of uplift)",
         "[18 Aug 2026] Michael O'Sullivan has provided detailed analysis of uplift timeline and resource implications for FA team, recommending October implementation. (email: Michael O'Sullivan - RE: Timeline for implementation of uplift)",
         "[19 Aug 2026] Michael O'Sullivan has provided detailed information on the Balance Period End Matrix process for annual leave year-end configuration for Company 1. (email: Michael O'Sullivan - RE: Balance Period End Matrix)",
-        "[19 Aug 2026] Michael O'Sullivan provided an update on PeopleXD platform maintenance scheduled for Friday 28 August between 8-10pm that may impact services. (email: Michael O'Sullivan - FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance)"
+        "[19 Aug 2026] Michael O'Sullivan provided an update on PeopleXD platform maintenance scheduled for Friday 28 August between 8-10pm that may impact services. (email: Michael O'Sullivan - FW: [MLB People ] - Platform Maintenance 28th August  - New Maintenance)",
+        "[07 Oct 2026] Athena Artuso has confirmed a second clinical pay uplift for Junior Doctors (A63/E63 grades) backdated to 01 April 2026, requiring new grade-stage configurations (stages 3-5 split into substages) to be tested before upload files can be provided; implementation targeted for January 2027, with Michael O'Sullivan to lead FA configuration work and Susan Pratt to prepare files."
       ],
       "source": "Inbox - Jessica Oldershaw, 2026-08-12 16:41",
       "dateType": "orange",
@@ -498,24 +673,6 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09vAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     },
     {
-      "id": "t2608181201061",
-      "text": "Resolve GLAM rostering requirements - Botanic Gardens and Ashmolean Security",
-      "description": "Kevin has flagged an email from Anna Carter-Windle regarding GLAM's rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security. This requires follow-up action to clarify requirements and next steps with the team.",
-      "actions": [
-        "[18 Aug 2026] Auto-created from inbox triage (email: Kevin Lelitte - Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement ).",
-        "[18 Aug 2026] Kevin bumped the original email from Anna Carter-Windle (28 May) regarding GLAM rostering requirements for Botanic Gardens Ticket Office and Ashmolean Security; still requires follow-up. (email: Kevin Lelitte - Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement )",
-        "[19 Aug 2026] Kevin bumped this email on 18 Aug, indicating it remains an open action requiring follow-up. (email: Michael O'Sullivan - RE: Volunteering Leave)",
-        "[19 Aug 2026] Kevin bumped the GLAM rostering requirements email for Botanic Gardens and Ashmolean Security, signalling need for follow-up. (email: Kevin (sent to: Kevin Lelitte) - Fw: GLAM- Botanic Gardens Ticket Office and Ashmolean Security- Rostering requirement )",
-        "[08 Sep 2026] Kevin forwarded GLAM Ashmolean Visitor Experience incident 11688462 (leave and absence module issues) to Julie for escalation and follow-up. (email: Kevin (sent to: Julie Hickman <julie.hickman@admin.ox.ac.uk>) - GLAM – Ashmolean Visitor Experience / Incident 11688462)",
-        "[10 Sep 2026] Kevin asked Julie Hickman to clarify with GLAM whether original Ashmolean Visitor Experience issues (incident 11688462) remain outstanding, as the work has since split into separate WFM/FA strands; Kevin suggested closing the incident if resolved and raising any remaining issues as new, clearly scoped items."
-      ],
-      "source": "Inbox - Kevin Lelitte, 2026-08-18 10:23",
-      "dateType": "orange",
-      "web_link": "",
-      "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09tAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
-    },
-    {
       "id": "t2608181201062",
       "text": "Follow up on EcoOnline supplier engagement",
       "description": "Kevin has bumped an email from Joanne Grant at EcoOnline regarding University engagement. This appears to require a response or action from Kevin to progress the relationship or proposal discussion.",
@@ -529,20 +686,6 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09sAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
-    },
-    {
-      "id": "t2608181501150",
-      "text": "Create user guidance for staff on grades 39Q, 30S, 38S, 36S leave entitlements",
-      "description": "Julie Hickman has requested help creating user guidance for staff on leave entitlement calculations for new grades (39Q, 30S, 38S, 36S) following a meeting with Maths and Chemistry departments. This is part of the 38-day balance implementation.",
-      "actions": [
-        "[18 Aug 2026] Auto-created from inbox triage (email: Julie Hickman - User guidance for staff on grades 39Q, 30S, 38S and 36S - leave entitlement calculations).",
-        "[18 Aug 2026] Julie Hickman has scheduled a Teams meeting for planning departments' move to 38-day balance scheme. (email: Julie Hickman - Planning for depts move to 38 day balance )"
-      ],
-      "source": "Inbox - Julie Hickman, 2026-08-17 13:09",
-      "dateType": "orange",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeqtbfIAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "display_url": "",
-      "webLink": ""
     },
     {
       "id": "t2608191801190",
@@ -660,60 +803,25 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwCN%2B5xoUtxaQ7clOANLv%2FU1AAd8Kb8pAACN%2B5xoUtxaQ7clOANLv%2FU1AAe6IISjAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": ""
-    },
-    {
-      "id": "t2609141647411",
-      "text": "Submit Expression of Interest for 2nd Cohort AI/Data apprenticeships (Multiverse)",
-      "description": "Charlie Richards-Gladstone (Multiverse) flagged that the cohort deadline for Expression of Interest forms is this Wednesday 16 September and Kevin's EOI submission is the only outstanding item blocking the cohort approval. Deadline is imminent and must be submitted to meet the Wednesday cutoff.",
-      "actions": [
-        "[14 Sep 2026] Auto-created from inbox triage (email: Kevin (sent to: Julie Hickman) - Re: 38 day balance for departments update and decisions needed).",
-        "[15 Sep 2026] Kevin must prioritize Multiverse EOI submission - Charlie flagged deadline is Wednesday 16 September with Kevin's form the only outstanding item. (email: Kevin (sent to: Julie Hickman) - GLAM – Ashmolean Visitor Experience / Incident 11688462)",
-        "[15 Sep 2026] Kevin confirmed to Simon and Marie that Multiverse platform complete; only Kevin's EOI form outstanding. (email: Kevin (sent to: Simon Burford, Marie Cooksey) - Re: 2nd Cohort of AI and Data Apprenticeships with Multiverse: Application Deadline Extension)",
-        "[15 Sep 2026] Simon Burford sent signed EOI form; Marie has forwarded to Jonathan Roger for second signature — form nearly ready for submission. (email: Simon Burford - RE: 2nd Cohort of AI and Data Apprenticeships with Multiverse: Application Deadline Extension)",
-        "[18 Sep 2026] Jonathan Roger confirms he has signed the Multiverse EOI approval form as second signatory. (email: Jonathan Roger - RE: 2nd Cohort of AI and Data Apprenticeships with Multiverse: Application Deadline Extension)",
-        "[25 Sep 2026] Kevin expressed interest in Multiverse Level 4 Data Fellowship and discussed meeting availability with Anna Carlisle. (email: Kevin (sent to: Anna Carlisle) - Re: Multiverse apprenticeship application)"
-      ],
-      "source": "Inbox - Kevin (sent to: Julie Hickman), ",
-      "dateType": "orange",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe8y99VAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe96mRIAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
-    },
-    {
-      "id": "t2609141649162",
-      "text": "Confirm and finalize FA works data file upload by 18 September",
-      "description": "Nathan Kirwan has completed UDF template structure matching and data item alignment; Kevin confirmed structure is correct and has answered technical questions (appointment vs person-level UDFs, null-value handling, UTF-8 encoding). Final task is to confirm submission approach and ensure upload by Thursday 17 September ahead of Friday 18 September deadline.",
-      "actions": [
-        "[15 Sep 2026] Nathan Kirwan confirms he has UDF template with data items matched to structure, ready for 18 September deadline. (email: Kevin (sent to: Julie Hickman) - RE: 38 day balance for departments update and decisions needed)",
-        "[15 Sep 2026] Nathan Kirwan re-confirms FA works deadline of Friday 18 September and confirms team is on track for delivery. (email: Kevin (sent to: Nathan Kirwan) - Re: Notice of FA works required later in the year 18th of September)",
-        "[15 Sep 2026] Kevin guided Nathan on UDF structure: keep Contract ID column; confirmed current UDF template download needed. (email: Kevin (sent to: Nathan Kirwan) - Re: Notice of FA works required later in the year 18th of September)",
-        "[15 Sep 2026] Nathan Kirwan confirms UDF template structure is matched with data items; asks Kevin to confirm attachment approach. (email: Kevin (sent to: Simon Burford, Marie Cooksey) - Busy)",
-        "[18 Sep 2026] Nathan Kirwan confirms UAT spot-checks complete with no errors found; file ready for production upload. (email: Nathan Kirwan - RE: Support Call# 11712394: URGENT - REF29 UDF Upload to UOXP by Friday 18th September)"
-      ],
-      "source": "Inbox - Kevin (sent to: Marie Cooksey, Simon Burford), ",
-      "dateType": "orange",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6xYVYAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "display_url": "",
-      "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Wednesday 07 October · 12:04",
+  "refreshed_at": "Wednesday 07 October · 16:05",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
-      "status": "ok",
+      "status": "carried_forward",
       "served_by": "personal-com",
       "as_of": "2026-10-07T11:00:42+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-07T11:00:42+00:00"
+      "as_of": "2026-10-07T15:00:49+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-07T11:00:06+00:00"
+      "as_of": "2026-10-07T15:00:11+00:00"
     },
     "teams": {
       "status": "n/a",
