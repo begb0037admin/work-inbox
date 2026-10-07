@@ -863,6 +863,16 @@ function priZoneDrop(e,sec){
 // signal built for them here and are deliberately left untouched.
 var WI_PW_STALE_DAYS=21;
 var WI_MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+// Live CC lookup for the "pw" staleness badge, 7 Oct 2026 (quiet-badge
+// mirror-lag fix). command-centre/data/tasks.json is canonical; this
+// mirror's own prioritiesWeek[] entries only refresh when the pipeline
+// next runs, so a task updated in CC between pipeline runs can show a
+// false stale badge here (its actions[] in the mirror is behind CC's).
+// Populated by loadCcTicker() below, keyed by task id. Left untouched
+// (not cleared) on a failed/slow fetch so a last-known-good live read
+// is still preferred over falling back to the stale mirror; only an
+// id that was never seen falls back to the mirrored item's own data.
+var _ccTaskById={};
 function _priLastActivityTs(p){
   var best=0,earliest=Infinity,genuine=0;
   if(p.dateAdded){var dv=new Date(p.dateAdded+'T12:00:00').getTime();if(!isNaN(dv)&&dv>best)best=dv;}
@@ -899,7 +909,16 @@ function _priLastActivityTs(p){
 }
 function _priStaleDays(p,sec){
   if(sec!=='pw')return null; // scoped to "Priorities This Week" only, see comment above
-  var ts=_priLastActivityTs(p);
+  // Prefer the live CC task (see _ccTaskById above) over the mirrored copy
+  // when we have one; otherwise fall back to the item's own mirrored
+  // actions[]/dateAdded/lastUpdated, same as before this fix. A live task
+  // marked done in CC never shows a stale badge, regardless of what the
+  // (possibly behind-the-times) mirror still says -- found by Codex review
+  // 7 Oct 2026: the original version fell through to the mirror here,
+  // which could still produce a false badge for a task CC already closed.
+  var live=p.id?_ccTaskById[p.id]:null;
+  if(live&&live.done)return null;
+  var ts=live?ccLastActivityTs(live):_priLastActivityTs(p);
   if(!ts)return null;
   var days=Math.floor((Date.now()-ts)/(24*3600*1000));
   return days>=WI_PW_STALE_DAYS?days:null;
@@ -1048,6 +1067,18 @@ function _priUpdateZoneChrome(sec){
 // underlying data (workInbox_customPri_v1 + the section override) by the
 // time this runs; this only needs to add the ONE new card's markup to the
 // target zone's DOM, same principle as the rest of this rework.
+// Re-render just the "pw" zone's cards after loadCcTicker() lands, so a
+// live-CC-driven staleness change (badge appearing/clearing) shows up
+// without a full renderBriefing(). Mirrors the other targeted-zone-patch
+// helpers above/below it rather than the full-destroy-and-rebuild path.
+function _priRerenderPwZone(){
+  const zone=document.querySelector('.pri-drop-zone[data-sec="pw"]');
+  if(!zone)return;
+  const priorities=applyPriOverrides(window._wipData||{}).pw||[];
+  zone.innerHTML=renderPriorityCards(priorities,window._wipKey,'pw');
+  _priUpdateZoneChrome('pw');
+  if(typeof _runCardSearch==='function')_runCardSearch();
+}
 function _priInsertCardIntoBoard(item,cls,sec){
   const zone=document.querySelector(`.pri-drop-zone[data-sec="${sec}"]`);
   if(!zone)return;
@@ -1755,6 +1786,12 @@ async function loadCcTicker(){
     if(!res.ok) throw new Error('fetch failed');
     const d=await res.json();
     const tasks=Array.isArray(d)?d:(d.tasks||[]);
+    // Live-CC lookup for the "pw" quiet-badge fix (see _ccTaskById / _priStaleDays
+    // above) -- only rebuilt on a successful fetch+parse, so a failed poll keeps
+    // the last-known-good map rather than reverting every pw card to the mirror.
+    const _nextCcById={};
+    tasks.forEach(function(t){if(t&&t.id)_nextCcById[t.id]=t;});
+    _ccTaskById=_nextCcById;
     const openTasks=tasks.filter(t=>!t.done);
     const now=new Date(); now.setHours(0,0,0,0);
     // ========================================================================
@@ -1786,6 +1823,10 @@ async function loadCcTicker(){
     setEl('cc-oldest',oldest?oldest+'d':'—');
     setEl('cc-avg',avg?avg+'d':'—');
     setEl('cc-twoweeks',twoWeeks||'—');
+    // Re-render "pw" cards now that live CC data has landed -- picks up any
+    // badge change (e.g. a false QUIET badge clearing) without waiting for
+    // the next full renderBriefing(). See _priStaleDays/_ccTaskById above.
+    _priRerenderPwZone();
   }catch(e){
     console.warn('CC ticker fetch failed',e);
   }

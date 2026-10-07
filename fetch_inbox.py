@@ -1307,11 +1307,19 @@ def preserve_existing_calendar_summaries(existing, key, items):
     return preserved
 
 def calendar_summary_count(briefing_doc):
+    # 7 Oct 2026 fix: this used to require a "summary" key, which only the
+    # COM-path AI summariser (Phase 3.8) ever adds. Lane B/connector calendar
+    # items carry title/time/sub instead and have no "summary" key at all, so
+    # a genuinely populated connector-sourced calendar read as count==0 here
+    # -- which, combined with WI_BRIDGE_ALLOW_EMPTY_CALENDAR below, set a
+    # false calendarUnavailable flag and a false "bridge mode" note even
+    # though real meetings were present. Count by title/time presence
+    # instead, so either source (COM-summarised or connector-raw) counts.
     return sum(
         1
         for key in ("calToday", "calTomorrow", "calDay2", "calDay3")
         for item in briefing_doc.get(key, [])
-        if item.get("summary")
+        if item.get("summary") or item.get("title") or item.get("time")
     )
 
 def weak_calendar_summary_count(briefing_doc):
