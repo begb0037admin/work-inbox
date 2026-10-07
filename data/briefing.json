@@ -1,7 +1,7 @@
 {
   "date": "Wednesday 7 October 2026",
   "subtitle": "1 unread messages - Outlook-only refresh",
-  "context": "Outlook has 1 unread messages from the last seven days, including 0 marked high importance. Review Introducing ElevenAgents Architect from ElevenLabs Team. Outlook shows 2 timed meeting(s) today: FA Team Daily Catchup, Busy. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
+  "context": "Outlook has 1 unread messages from the last seven days, including 0 marked high importance. Review Introducing ElevenAgents Architect from ElevenLabs Team. Outlook shows 2 timed meeting(s) today: FA Team Daily Catchup, Busy. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
   "urgent": [],
   "needs": [
     {
@@ -191,36 +191,38 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeyeZAeAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "fyi": [],
-  "fyiRawCount": 0,
+  "fyi": [
+    {
+      "title": "Re: Multiverse apprenticeship application",
+      "sub": "From <strong>Anna Carlisle</strong>. Hi Kevin - sure - I’m free at 9:30?\r\n\r\n\r\nAnna Carlisle\r\nOnboarding Partner\r\n07483 433 659\r\nanna.carlisle@multiverse.io\r\n",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "Re: Multiverse apprenticeship application",
+      "from": "Anna Carlisle",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMqlClAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMqlClAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "7 Oct",
+      "received_raw": "2026-10-07T08:14:14Z",
+      "kevin_is_primary_recipient": true,
+      "messageCount": 1
+    }
+  ],
+  "fyiRawCount": 1,
   "suppressedCount": 1,
   "low": [
     {
-      "title": "Re: Declined: Multiverse: Launch Meeting DF(HE)SEP26 with Olivia Sullivan",
-      "sub": "From <strong>Calendly</strong>. Hi!\r\n\r\nThis is a non-monitored inbox, so we at Calendly won&#x27;t see your message. Calendly is a scheduling tool that anyon",
+      "title": "Kevin, week 2. All set to see your future career rocket? 🚀",
+      "sub": "From <strong>Multiverse</strong>. Kevin,\r\n\r\nWell done for completing the first few weeks of your programme. We really hope you&#x27;ve enjoyed it so far, and a",
       "badge": "",
       "badgeType": "gray",
-      "subject": "Re: Declined: Multiverse: Launch Meeting DF(HE)SEP26 with Olivia Sullivan",
-      "from": "Calendly",
+      "subject": "Kevin, week 2. All set to see your future career rocket? 🚀",
+      "from": "Multiverse",
       "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMG0F2AAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMG0F2AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "6 Oct",
-      "received_raw": "2026-10-06T20:37:39Z",
-      "kevin_is_primary_recipient": true
-    },
-    {
-      "title": "Introducing ElevenAgents Architect",
-      "sub": "From <strong>ElevenLabs Team</strong>. The built-in expert for building and improving agents in natural language ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏  ͏",
-      "badge": "",
-      "badgeType": "gray",
-      "subject": "Introducing ElevenAgents Architect",
-      "from": "ElevenLabs Team",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMG0F0AAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMG0F0AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "6 Oct",
-      "received_raw": "2026-10-06T18:31:34Z",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfMqlCnAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfMqlCnAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "7 Oct",
+      "received_raw": "2026-10-07T11:00:52Z",
       "kevin_is_primary_recipient": true
     }
   ],
@@ -695,23 +697,23 @@
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe%2FcHOCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem"
     }
   ],
-  "refreshed_at": "Wednesday 07 October · 07:05",
+  "refreshed_at": "Wednesday 07 October · 12:04",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-07T06:01:26+00:00"
+      "as_of": "2026-10-07T11:00:42+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-07T06:01:26+00:00"
+      "as_of": "2026-10-07T11:00:42+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-07T06:00:11+00:00"
+      "as_of": "2026-10-07T11:00:06+00:00"
     },
     "teams": {
       "status": "n/a",
