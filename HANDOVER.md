@@ -1,3 +1,9 @@
+# Handover -- 8 October 2026 (Codex/Drew) -- Hope Claude Code OAuth recovery (in progress)
+
+- Read-only SSH verification against `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` returned `loggedIn: true`, `authMethod: claude.ai`, and `email: kevin@lelitte.co.uk`; the Hope directory is misbound. `C:\WorkInboxAI\kevin` was not accessed or changed.
+- Started `claude auth login --email hope@lelitte.co.uk --claudeai` with `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` in one persistent SSH TTY. The CLI generated a browser authorization URL and is waiting at `Paste code here if prompted >`. The one-time URL/code is intentionally not recorded here.
+- **Exact next action:** when Kevin returns the authorization code from Claude’s approval page after using an incognito browser signed into `hope@lelitte.co.uk`, enter it into the still-open SSH TTY (tool session 29086). Then run `claude auth status` with `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` and confirm the JSON `email` is `hope@lelitte.co.uk`. If the TTY has ended, start a fresh Hope-targeted login and repeat the browser step. Do not touch `C:\WorkInboxAI\kevin`.
+- No pipeline run or code change was made. The authentication repair remains pending the browser authorization code.
 # Handover -- 27 September 2026 (Drew, Codex-implemented) -- public-repo content-exposure remediation
 
 Follow-up fix to a prior finding that raw HR/TUPE/sickness/occupational-health email content, Excellence Award evidence pulls, and two live-dashboard entries (a subject line naming Kevin's medical procedure, and a full verbatim Cority Applicant Data Import email thread) were committed into this public repo's `data/` directory and served live via GitHub Pages. HEAD at start of this fix: `d1a8c15`.
