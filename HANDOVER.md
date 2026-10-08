@@ -10,7 +10,19 @@ Verified via a real `claude -p` call (not just `auth status`, to force a genuine
 
 **Not yet confirmed:** a live scheduled pipeline run actually using the fixed hope@ credential and producing a real Command Centre task update end-to-end -- the auth layer is proven, but Phase 3.5's downstream behaviour on a real run hasn't been watched since this fix.
 
-# Handover -- 8 October 2026 (Codex/Drew) -- Hope Claude Code OAuth recovery (in progress, superseded by the entry above)
+# Handover -- 8 October 2026 (Codex/Drew review) -- Phase 3.5 task matching + tier promotion (live run pending)
+
+**Branch:** `drew/wi-phase35-triage-fix`, based on `origin/main`. No main-branch changes.
+
+**Root causes confirmed from the 8 Oct 16:05 live artifacts:** the Sophie Levy email `Re: University of Oxford - Call Summary/SOW Review` was in Phase 3.5's sent candidates, but the model linked it to `t1781099896490` (the Scoping Session task) rather than `t2608251201190` (the PeopleXD Quality handover). Existing-task context omitted actions and gave only 300 description characters; the matching rule did not prioritise unique PO/project identifiers or say how to handle derived subjects and competing Sophie tasks. This was a wrong-task match, not candidate exclusion. Separately, Phase 3.6 appended task actions but never changed an existing task's tier. `_SYS_TRIAGE` only returned tiers for new tasks, and its deadline-only rule made time-sensitive tasks default to `week` unless an explicit deadline was present. `categorise()` under `WI_TRIAGE_V2` deliberately keeps its strict Cc/FYI/strong-ask gates; these did not explain the sent Sophie miss.
+
+**Fix implemented in `fetch_inbox.py`:** send fuller existing-task context to both the combined and standalone triage prompts (description, emailRef, recent actions, current tier, done flag); expand email body previews from 150 to 500 characters; tell triage to tolerate derived/follow-up subjects, rank exact PO/case/project identifiers above person/topic overlap, and omit ambiguous competing matches. Task updates now include a proposed tier derived from the action's timing, and Phase 3.6 applies promotions from `week` to `tomorrow`/`today` or `tomorrow` to `today`; it never demotes a task. The 8 Oct 16:05 data proves the Sophie sent email was within the `sent[:30]` input, so that cap was not the cause and was left unchanged.
+
+**Pre-live verification:** `python -m py_compile fetch_inbox.py` passed; `git diff --check` passed. The 8 Oct 17:11 log (read from the laptop) showed `inbox 7 sent 12`, Phase 3.5 `new:0 ... updates:1`, Phase 3.6 applied one update, and Phase 4 pushed successfully. Before testing this branch, the scheduled wrapper must fetch `fetch_inbox.py` from this feature branch instead of `main`; the exact change will be backed up and restored immediately after the run.
+
+**Exact next action:** commit and push this branch checkpoint, temporarily point the laptop wrapper's script download base at this branch, trigger `Work Inbox Bridge Briefing`, inspect the resulting UTF-16BE log and live `briefing.json`, then restore the wrapper to `main`, record the result, and open a draft PR.
+
+# Handover -- 8 October 2026 (Codex/Drew) -- Hope Claude Code OAuth recovery (in progress)
 
 - Read-only SSH verification against `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` returned `loggedIn: true`, `authMethod: claude.ai`, and `email: kevin@lelitte.co.uk`; the Hope directory is misbound. `C:\WorkInboxAI\kevin` was not accessed or changed.
 - Started `claude auth login --email hope@lelitte.co.uk --claudeai` with `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` in one persistent SSH TTY. The CLI generated a browser authorization URL and is waiting at `Paste code here if prompted >`. The one-time URL/code is intentionally not recorded here.
