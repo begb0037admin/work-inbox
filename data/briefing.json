@@ -5,24 +5,6 @@
   "urgent": [],
   "needs": [
     {
-      "title": "RE: Notes from the EVO meeting",
-      "sub": "From <strong>Emma Eley</strong>. Hi Simon,\r\n\r\nThanks for putting this detailed set of notes together. It’s quite comprehensive so I don’t have much to ad",
-      "badge": "Reply within 48hrs",
-      "badgeType": "yellow",
-      "subject": "RE: Notes from the EVO meeting",
-      "from": "Emma Eley",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfNQdPgAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfNQdPgAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Oct",
-      "received_raw": "2026-10-08T15:27:28Z",
-      "kevin_is_primary_recipient": true,
-      "ai_summary": "Emma Eley thanks Simon for the detailed EVO meeting notes and adds a handful of points; Kevin should read them, as he has already replied to the thread.",
-      "needs_reply": false,
-      "no_action_needed": false,
-      "messageCount": 2
-    },
-    {
       "title": "RE: OSM: No incoming emails will be processed this weekend",
       "sub": "From <strong>Louise Piper</strong>. Good Morning,\r\n\r\n \r\n\r\nTo all OSM users. For information, no action required\r\n\r\n \r\n\r\nThe OSM email listener has been re-e",
       "badge": "Reply within 48hrs",
@@ -223,10 +205,28 @@
       "received": "8 Oct",
       "received_raw": "2026-10-08T16:23:32Z",
       "kevin_is_primary_recipient": true,
-      "ai_summary": "Soundtrap's October newsletter promotes Video Scoring lessons, Stem Splitter and Studio updates; nothing for Kevin to do.",
+      "ai_summary": "Soundtrap's October newsletter from Erik promotes a Video Scoring unit and Stem Splitter updates; marketing only, nothing for Kevin to do.",
       "needs_reply": false,
       "no_action_needed": true,
-      "messageCount": 2
+      "messageCount": 1
+    },
+    {
+      "title": "RE: Notes from the EVO meeting",
+      "sub": "From <strong>Emma Eley</strong>. Hi Simon,\r\n\r\nThanks for putting this detailed set of notes together. It’s quite comprehensive so I don’t have much to ad",
+      "badge": "FYI",
+      "badgeType": "gray",
+      "subject": "RE: Notes from the EVO meeting",
+      "from": "Emma Eley",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfNQdPgAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfNQdPgAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "8 Oct",
+      "received_raw": "2026-10-08T15:27:28Z",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Emma Eley thanks Simon for the detailed EVO meeting notes and adds a handful of points; Kevin has already replied to Emma, Simon and Marie.",
+      "needs_reply": false,
+      "no_action_needed": true,
+      "messageCount": 1
     }
   ],
   "fyiRawCount": 2,
@@ -344,9 +344,64 @@
       "title": "University of Oxford - JobPosition BR Optimisation",
       "sub": "Scott Baker",
       "summary": "No previous notes. Scott Baker is Cority's technical contact, and you chased him and Sophie Levy on 8 Oct about the options from the Call Summary/SOW Review, so ask for an update and stay clear on the JobPosition BR Optimisation scope."
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte",
+      "summary": "Protected time; keep free."
+    },
+    {
+      "time": "15:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time; no prep needed."
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time; no prep needed."
     }
   ],
-  "calDay3": [],
+  "calDay3": [
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte",
+      "summary": "Daily sync. Check outstanding PDR forms, including Asta's, and the sickness absence data actions."
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time; no prep needed."
+    },
+    {
+      "time": "11:30",
+      "title": "PXD application process for RoD and PMP exercises",
+      "sub": "Jessica Oldershaw",
+      "summary": "Jessica Oldershaw's session on the PXD application process for RoD and PMP exercises; you told her to pick a slot from your calendar. The attached notes look like personal appointment details, so disregard them and prepare from the earlier RoD and PMP thread."
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte",
+      "summary": "Protected time; keep free."
+    },
+    {
+      "time": "14:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time; no prep needed."
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time; no prep needed."
+    }
+  ],
   "calFull": [
     {
       "date": "2026-10-05",
@@ -475,7 +530,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6xYVQAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "The GLAM rostering resolution meeting (Kevin, Simon, Marie, Michelle, possibly Julie) is still to be set up. Julie confirmed Tracy and Mel are handling incident 11688462, and Kevin is checking WFM team capacity for rostering support calls."
+      "ai_summary": "Resolution meeting for SBS, PEDS and GLAM rostering is still not set up. Julie Hickman says Tracy and Mel are handling incident 11688462, and Kevin is checking WFM capacity; next, schedule the meeting with Simon, Marie and Michelle."
     }
   ],
   "prioritiesWeek": [
@@ -509,7 +564,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jxSCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Kevin sent the revised specification for the three Holiday Records reports (case 69001638) to Access Group on 24 Sep. Next: confirm the consultant's delivery schedule and Asta's involvement, and watch the flex-point expiry (about 29 Sep, with grace period)."
+      "ai_summary": "Access Group case 69001638 is approved and in delivery planning. Kevin sent the revised spec to Alan Quirke and Conor O'Shea and coordinated with Kathryn Fairhurst Jones; next, confirm consultant scheduling and flex point use."
     },
     {
       "id": "task-1787072363309",
@@ -541,7 +596,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotMAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "The August org structure update is still open, with a B8 finance code decision pending (reactivate or use a fresh code). Next: settle B8 with Anthony Kong and Anna Gilbert and close out the Trinity Term non-college changes."
+      "ai_summary": "Org structure update is ongoing, and the B8 finance code decision (reactivate vs fresh code) is still pending after Anna Gilbert and Anthony Kong's input. Next: settle B8 and the three proposed management units with Simon Burford."
     },
     {
       "id": "t2608111331410",
@@ -569,7 +624,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6H%2F92AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "The remaining blocker is the applicant data upload report, which needs quotation-mark handling and column-ordering fixes. James was due to document the manual processes before the 29 Sep handover; confirm that happened and set a go-live date."
+      "ai_summary": "Cority Applicant Data Import: the merge process works, but the upload report still needs quotation-mark handling and column-ordering fixes. James was due to document the manual processes before the 29 Sep handover; confirm that and the go-live fix."
     },
     {
       "id": "task-1785704715215",
@@ -589,7 +644,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAede4rEAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Kevin confirmed with Asta Palmer on 25 Sep that an OSM Change is needed for the Development Insight reports. Next: raise the change with background information and update Julie Hickman."
+      "ai_summary": "Kevin confirmed with Asta Palmer on 25 Sep that an OSM Change is needed for the Development Insight reports. Next: raise the OSM Change and update Julie Hickman."
     },
     {
       "id": "t2608121801280",
@@ -631,7 +686,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHQAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Kevin told Julie Hickman on 8 Oct that all Chemistry 38-day balance workgroup updates are complete. Next: check with Julie on GLAM participation and the other departments' timelines, then close the task if nothing is outstanding."
+      "ai_summary": "Chemistry 38-day balance workgroup updates were confirmed complete to Julie Hickman on 8 Oct. Next: agree next steps and the GLAM decision with Julie."
     },
     {
       "id": "t2608121801281",
@@ -652,7 +707,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAepmwIfAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Athena Artuso confirmed a second Junior Doctor uplift (A63/E63, backdated to 1 Apr 2026), targeted for Jan 2027. Michael O'Sullivan leads the FA configuration and Susan Pratt prepares the files; confirm HR Systems readiness and test dependencies."
+      "ai_summary": "Athena Artuso confirmed a second Junior Doctor clinical uplift (A63/E63) backdated to 1 April 2026, targeted for January 2027. Next: have Michael O'Sullivan test the new stage configurations before Susan Pratt prepares the upload files."
     },
     {
       "id": "t2608181201060",
@@ -668,7 +723,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09vAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "This is still outstanding: Simon Burford's request to confirm ER pension rates for the Financial Statements, bumped on 18 and 19 Aug. Next: confirm the rates or chase Simon for the current deadline."
+      "ai_summary": "Employer pension rates for the Financial Statements are still outstanding; Kevin has bumped Simon Burford's 28 May email twice (18 and 19 Aug). Next: confirm the rates or chase Simon."
     },
     {
       "id": "t2608181201062",
@@ -684,7 +739,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09sAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Joanne Grant's EcoOnline engagement email (originally 28 May) has been bumped but not answered. Next: send a response, and link it to the Iris/ECO Online funding position."
+      "ai_summary": "Joanne Grant's EcoOnline email from 28 May is still unanswered and was bumped on 18-19 Aug. Next: reply to progress the engagement."
     },
     {
       "id": "t2608191801190",
@@ -704,7 +759,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6ICD6AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Kevin sent Simon Burford the effort estimate for identifying internal candidates in the application form on 9 Sep. Next: await Simon's decision, then close or rescope."
+      "ai_summary": "Kevin sent Simon Burford the effort estimate for identifying internal candidates on the application form on 9 Sep. Next: confirm Simon is satisfied and close the task."
     },
     {
       "id": "t2608211201050",
@@ -719,7 +774,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeuly9VAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Reopened on 27 Sep: the data review, FA capacity and second-batch file work for the Sarah Rowles sickness absence dataset are unresolved. Next: review OUTPUT_SicknessDataChecks_20260811.xlsx findings and agree follow-ups with Sarah."
+      "ai_summary": "Reopened 27 Sep: the data review, FA capacity and second-batch file work on Sarah Rowles's sickness absence dataset are unresolved. Next: review the DWHS completeness findings with Sarah."
     },
     {
       "id": "task-1787645383808",
@@ -751,7 +806,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAeyeYwqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Kevin has sent PDR invites to Asta Siautilaite and James Salas Guillen, and his own form went to Simon on 25 Sep. Next: confirm Asta Palmer's completed form arrived; the end-September target has passed."
+      "ai_summary": "PDR invites for Asta Siautilaite and James Salas Guillen went out on 8 Oct, and Kevin's own form is with Simon Burford. Next: confirm Asta's completed PDR form arrived; the end of September target has passed."
     },
     {
       "id": "task-1787652746063",
@@ -771,7 +826,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAexPHkmAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Kevin has spoken to Michael O'Sullivan about capacity but no per-department FA validation effort figure is recorded. Next: agree the figure, since Marie and Ant's BA estimate and David White's funding ask depend on it."
+      "ai_summary": "Kevin has discussed capacity with Michael but the per-department FA validation effort figure is still unconfirmed. This blocks Marie's BA-effort estimate and David White's funding ask; next, agree the figure with Michael."
     },
     {
       "id": "task-1787652746064",
@@ -790,7 +845,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAexPMLpAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Ownership was corrected on 30 Sep: the second batch was Mel and Tracy's work, now handed to Simon, not Michael's. Next: tell Simon directly and confirm the Smith's School and Geography data is covered."
+      "ai_summary": "Ownership corrected on 30 Sep: Mel and Tracy handled the second batch and handed it to Simon. Next: tell Simon directly and confirm Smith's School and Geography data is covered."
     },
     {
       "id": "t2608251201190",
@@ -808,26 +863,26 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwCN%2B5xoUtxaQ7clOANLv%2FU1AAd8Kb8pAACN%2B5xoUtxaQ7clOANLv%2FU1AAe6IISjAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Sophie Levy says the Quality project (PO E22033553) is fully staffed and moving from sales to professional services. Next: confirm HR Systems dependencies and handover; Kevin chased Sophie and Scott Baker on 8 Oct for the SOW Review options."
+      "ai_summary": "Sophie Levy confirmed the Cority Quality project (PO E22033553) is fully staffed. Kevin chased her on 8 Oct about the SOW options; next, wait for her reply and identify HR Systems dependencies."
     }
   ],
-  "refreshed_at": "Thursday 08 October · 18:53",
+  "refreshed_at": "Thursday 08 October · 19:15",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-08T17:49:44+00:00"
+      "as_of": "2026-10-08T18:11:29+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-08T17:49:44+00:00"
+      "as_of": "2026-10-08T18:11:29+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-08T17:49:12+00:00"
+      "as_of": "2026-10-08T18:10:26+00:00"
     },
     "teams": {
       "status": "n/a",
