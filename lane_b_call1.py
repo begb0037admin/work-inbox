@@ -637,11 +637,25 @@ SAFETY_RULE = (
 )
 
 
+# 7 Oct 2026 fix (Jacob): this prompt used to say "List the 3 next Oxford
+# calendar events" -- a flat cap of 3 regardless of the window width. With
+# --window-days defaulting to 7, any day that alone had 3+ events (e.g.
+# today's 3: an all-day absence entry plus 2 meetings) silently starved out
+# every later day in the window -- the dashboard's work-inbox Calendar tab
+# showed "No meetings" for 8/9/12 Oct even when real meetings existed there,
+# because the connector call itself never returned them, not a downstream
+# rendering bug. Same cap-shape issue the mail prompts already solved with
+# an explicit top= (MAIL_INBOX_MAX_UNREAD/MAIL_SENT_MAX above) -- applying
+# the same pattern here instead of an unbounded ask.
+CALENDAR_MAX = int(os.environ.get("WI_LANE_B_CALENDAR_MAX", "50"))
+
+
 def build_calendar_prompt(win_start_iso: str, win_end_iso: str) -> str:
     return (
-        "Use the Outlook Calendar connector now, read-only. List the 3 next Oxford calendar "
-        f"events between {win_start_iso} and {win_end_iso}, ordered by start time. Return each "
-        "event subject, start, end, location, and attendees. "
+        f"Use the Outlook Calendar connector now, read-only. List ALL Oxford calendar "
+        f"events between {win_start_iso} and {win_end_iso} (up to {CALENDAR_MAX}), ordered "
+        "by start time -- not just the next few, every event across the whole window. "
+        "Return each event subject, start, end, location, and attendees. "
         "Read-only: do not create, modify, move, delete, or respond to anything."
     )
 
