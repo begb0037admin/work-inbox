@@ -792,6 +792,7 @@ _SYS_TRIAGE = (
     "A reply may use a derived or follow-up subject that differs from the original email subject. Match on the underlying work, not exact subject wording. "
     "Give exact case, PO, project, or other unique identifiers the most weight; then use the combination of named people, organisation, and topic. "
     "A shared person alone is not enough. When two tasks are otherwise similarly plausible but one is parked and the other is active (today, tomorrow, or week), prefer the active task unless the email explicitly resumes the parked work. "
+    "An existing recent_action that mentions this same email on another task is evidence of the communication, not proof it was assigned correctly; use the task descriptions and status to correct a prior misassignment. "
     "If two or more tasks remain similarly plausible after using all available context and that parked-versus-active tie-breaker, do NOT guess: omit the update. "
     "If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
     "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
