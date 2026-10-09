@@ -1,4 +1,16 @@
-# Handover -- 8 October 2026 (Jacob) -- Hope Claude Code OAuth recovery, CLOSED
+# Handover -- 9 October 2026 (Jacob) -- Phase 3.5 matching + tier promotion, PR #45 live-tested and merged
+
+Three real, live-triggered pipeline runs against the `drew/wi-phase35-triage-fix` branch (wrapper temporarily re-pointed via its `raw.githubusercontent.com` base URL, backed up and restored byte-for-byte after every run, SHA-256 verified each time -- never left pointing at the branch).
+
+**Test 1 -- GLAM rostering task (t2608181201061):** Kevin sent a real reply to a genuinely stalled thread (open since 28 May, bumped multiple times). Phase 3.5 correctly matched it to the task on the first live attempt -- a real, concrete proof the general matching improvements work, not a fabricated test. Task turned out to be tier `parked` (moved there in an earlier, unrelated commit `8553981`), so it was outside the tier-promotion logic's scope (`week`/`tomorrow` only) -- not a flaw in the fix, just the wrong task to prove promotion with.
+
+**Test 2 + 3 -- ER pension rates task (t2608181201060):** Kevin sent a real reply to Simon Burford, exact same subject as the task's own `emailRef` (not even a derived subject -- the strongest possible signal). Triggered two further live runs; both times Phase 3.5 did not link it to this task, while correctly matching a *different*, genuine email each time (a Multiverse/Anna Carlisle exchange, matched twice independently). So Phase 3.5 itself is demonstrably working, just not on this specific pair. At least 4 other open tasks separately reference Simon Burford, so real candidate ambiguity exists in principle, but an exact-emailRef-subject match should be strong enough to cut through that -- the precise cause of this specific miss is not fully diagnosed. Diagnosing further would need temporary debug logging of what Phase 3.5 actually sends/receives, which is a real pipeline change requiring Kevin's sign-off -- not done here.
+
+**Tier promotion:** code path implemented and reasoned through (see PR #45's diff), but no live run during this session's testing produced a task_update where the AI proposed a tier higher than the task's current one -- so the promotion branch itself still has not been exercised by real data. Not disproven, just unproven.
+
+**Decision:** Kevin reviewed the above and said merge as-is. Real, demonstrated improvement (2-for-3 genuine live matches across 3 runs, including fixing the exact kind of case that started this investigation) with one known, reproducible gap (the Simon/pension pairing) and one still-unexercised capability (tier promotion) explicitly flagged rather than claimed as proven.
+
+
 
 Supersedes the "in progress" entry immediately below from the same day. The stale `claude auth login --email hope@lelitte.co.uk` SSH TTY referenced there had already ended by the time this was picked back up -- not reused.
 
@@ -10,7 +22,21 @@ Verified via a real `claude -p` call (not just `auth status`, to force a genuine
 
 **Not yet confirmed:** a live scheduled pipeline run actually using the fixed hope@ credential and producing a real Command Centre task update end-to-end -- the auth layer is proven, but Phase 3.5's downstream behaviour on a real run hasn't been watched since this fix.
 
-# Handover -- 8 October 2026 (Codex/Drew) -- Hope Claude Code OAuth recovery (in progress, superseded by the entry above)
+# Handover -- 8 October 2026 (Codex/Drew) -- Phase 3.5 matching + tier promotion
+
+**Branch:** `drew/wi-phase35-triage-fix`, based on `origin/main`. Changes are pushed to the feature branch; no main-branch changes. Draft PR is the remaining coordinator action.
+
+**Findings:** the 5 Oct Sophie message was present in the real sent candidate set at index 8, inside `sent[:30]`; candidate exclusion and the cap are not the cause. Earlier live artifacts show it was attached to parked task `t1781099896490`, while `t2608251201190` (PeopleXD Quality handover) remains at its last 30 Aug action. Full Outlook body for the 5 Oct message asks for a separate Teams licence quote/options and explains that Teams links affect the decision to proceed with an integration. The parked Scoping Session task's existing actions explicitly cover the SOW, consultant discussions, and Teams/Outlook integration; this makes that task a plausible match and conflicts with the supplied claim that the email belongs to the Quality handover. Do not hard-code a reassignment until Kevin confirms which task owns this integration work. The final live run's single applied update was unrelated SHSMS work; the ledger suppresses duplicate application of already-recorded mail, so the final run does not establish a fresh Sophie assignment decision.
+
+Separately, confirmed tier root cause: Phase 3.6 previously appended actions to existing tasks but never applied a tier from `task_updates`; `_SYS_TRIAGE` only requested tiers for new tasks. `categorise()`'s V2 Cc, FYI, and explicit-ask gates determine which received emails reach triage and are deliberate policy, not the cause of the sent Sophie case. The briefing's current `needs` entries are largely carried-forward mail, which is why old dates remain visible there.
+
+**Fix in `fetch_inbox.py`:** enrich both combined and standalone triage prompts with task description, emailRef, recent actions, tier, and done status; increase email preview context from 150 to 500 characters; explain derived subjects, unique identifiers, and ambiguous/parked task handling. Task updates now request an urgency tier, and Phase 3.6 promotes an existing task from week to tomorrow/today or tomorrow to today, without demoting it. The prompt enhancements did not move the Sophie message to `t2608251201190` in live artifacts; this remains unresolved pending task ownership clarification.
+
+**Final live verification (8 Oct, scheduled task `Work Inbox Bridge Briefing`):** feature-branch source marker confirmed on laptop; task completed `Ready`, result `0`. Log: Phase 3.5 `new:0, updates:1`; Phase 3.6 applied one update and no new task; Phase 4 pushed briefing commit `8372f8e`; `fetch_inbox.py exit 0`; publisher exit `0`. The single applied update was SHSMS and tier `week`, so no real promotion example was exercised. Live Command Centre tiers after the run: today 2, tomorrow 1, week 35, parked 15. Live briefing: urgent 0, needs 13, FYI 1, low 0; 12 of 13 needs entries are dated in August and carried forward, and only 2 are marked `needs_reply=true`. The wrapper was restored byte-for-byte (SHA-256 `81482EAC5EF8921E4B9E159840A46A2B43ECCA27EF4C8190E25CFD62A5331C3D`), with its base URL back on `main`; scheduled task is Ready/result 0. The requested BigEndianUnicode log read was attempted; the log has mixed encoding, so key lines were verified by UTF-8 decoding with NUL removal.
+
+**Exact next action:** Jacob/Kevin to confirm whether the 5 Oct Teams licence/SOW message belongs to the parked Scoping Session task or the active PeopleXD Quality handover. Keep the draft PR unmerged until that mapping is resolved and a real update validates the target behavior. The tier-promotion code is implemented; capture a real time-sensitive task update before claiming that promotion path is live-verified.
+
+# Handover -- 8 October 2026 (Codex/Drew) -- Hope Claude Code OAuth recovery (in progress)
 
 - Read-only SSH verification against `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` returned `loggedIn: true`, `authMethod: claude.ai`, and `email: kevin@lelitte.co.uk`; the Hope directory is misbound. `C:\WorkInboxAI\kevin` was not accessed or changed.
 - Started `claude auth login --email hope@lelitte.co.uk --claudeai` with `CLAUDE_CONFIG_DIR=C:\WorkInboxAI\hope` in one persistent SSH TTY. The CLI generated a browser authorization URL and is waiting at `Paste code here if prompted >`. The one-time URL/code is intentionally not recorded here.

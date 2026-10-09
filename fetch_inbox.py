@@ -788,14 +788,20 @@ _SYS_TRIAGE = (
     "When you are unsure whether a new task is warranted, do NOT create it - the email stays visible to Kevin in his work inbox regardless. A missed task is recoverable; inbox-to-task noise is the problem being solved here.\n"
     "If an email concerns work that any existing task already covers - even partially, even if you would mention that task in your description - it belongs in task_updates with that task's id, NEVER in new_tasks.\n"
     "2. task_updates - emails that are progress, replies or new information on an EXISTING task. Max 20. "
-    "A task_update must clearly concern that specific task - same case number, same named project, or same people AND topic. "
+    "A task_update must clearly concern that specific task. Use the task's full description, emailRef, and recent actions as context. "
+    "A reply may use a derived or follow-up subject that differs from the original email subject. Match on the underlying work, not exact subject wording. "
+    "Give exact case, PO, project, or other unique identifiers the most weight; then use the combination of named people, organisation, and topic. "
+    "A shared person alone is not enough. When two tasks are otherwise similarly plausible but one is parked and the other is active (today, tomorrow, or week), prefer the active task unless the email explicitly resumes the parked work. "
+    "An existing recent_action that mentions this same email on another task is evidence of the communication, not proof it was assigned correctly; use the task descriptions and status to correct a prior misassignment. "
+    "If two or more tasks remain similarly plausible after using all available context and that parked-versus-active tie-breaker, do NOT guess: omit the update. "
     "If no existing task is a clear match, do NOT force one: either propose it under new_tasks or omit it entirely.\n"
     "Return ONLY a valid JSON object - no preamble, no markdown, no code fences. Plain ASCII punctuation only.\n"
     "{\n"
     '  "new_tasks": [{"email_n": <n>, "title": "<short imperative task title>", "tier": "today|tomorrow|week", "description": "<2-3 sentences: what the work is and why, drawn from the email>"}],\n'
-    '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>"}]\n'
+    '  "task_updates": [{"email_n": <n>, "task_id": "<existing task id>", "note": "<one sentence: what this email adds to the task>", "tier": "today|tomorrow|week"}]\n'
     "}\n"
-    'Rules: tier "today" only if the deadline is today or overdue; "tomorrow" if it must happen the next working day; otherwise "week". '
+    'For both new_tasks and task_updates, set tier from the action Kevin now needs to take: "today" for an explicitly urgent action due today or overdue, "tomorrow" if it must happen the next working day, otherwise "week". '
+    "Do not treat an email's arrival date as a deadline. For task_updates, use the email and the existing task context; a routine status update does not make a task urgent. "
     "Never invent case numbers or names. Automated notifications, newsletters, calendar "
     "accept/decline messages and out-of-office replies are never tasks. "
     "Use direction=sent emails to log Kevin's own actions on existing tasks as task_updates "
@@ -1088,7 +1094,10 @@ def _cc_run_combined():
     _tl = cc_content if isinstance(cc_content, list) else cc_content.get("tasks", [])
     _tsum = [
         {"id": t.get("id", ""), "title": t.get("title", ""),
-         "description": (t.get("description") or "")[:300], "emailRef": t.get("emailRef", "")}
+         "description": (t.get("description") or "")[:700],
+         "emailRef": (t.get("emailRef") or "")[:300],
+         "recent_actions": [(a or "")[:240] for a in (t.get("actions") or [])[-4:]],
+         "tier": t.get("tier", "week"), "done": bool(t.get("done", False))}
         for t in _tl
     ]
     _ec = []
@@ -1098,7 +1107,7 @@ def _cc_run_combined():
                 "subject":      m.get("subject", ""),
                 "from":         m.get("from", ""),
                 "received":     (m.get("received", "") or "")[:16],
-                "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
+                "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:500],
                 "entry_id":     m.get("entry_id", ""),
                 "kevin_is_primary_recipient": m.get("kevin_is_primary_recipient", True),
                 "is_meeting_invite": _is_meeting_invite(m),
@@ -1108,7 +1117,7 @@ def _cc_run_combined():
             "subject":      s.get("subject", ""),
             "from":         "Kevin (sent to: " + (s.get("to") or "") + ")",
             "received":     (s.get("sent", "") or "")[:16],
-            "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
+            "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:500],
             "entry_id":     s.get("entry_id", ""),
             "direction":    "sent",
             "kevin_is_primary_recipient": True,
@@ -1159,7 +1168,7 @@ def _cc_run_combined():
         f"=== 2. email_summary_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_EMAIL_SUMMARY}{_q}\n{p2_user}\n"
         f'Output shape: {{"<id>": {{"summary": "...", "needs_reply": true/false, "no_action_needed": true/false}}, ...}} keyed by the "id" field above\n\n'
         f"=== 3. task_triage_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_TRIAGE}{_q}\n{p3_user}\n"
-        f'Output shape: {{"new_tasks": [{{"email_n": <n>, "title": "...", "tier": "today|tomorrow|week", "description": "..."}}], "task_updates": [{{"email_n": <n>, "task_id": "...", "note": "..."}}]}}\n\n'
+        f'Output shape: {{"new_tasks": [{{"email_n": <n>, "title": "...", "tier": "today|tomorrow|week", "description": "..."}}], "task_updates": [{{"email_n": <n>, "task_id": "...", "note": "...", "tier": "today|tomorrow|week"}}]}}\n\n'
         f"=== 4. task_summary_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_TASK_SUMMARY}{_q}\n{p4_user}\n"
         f'Output shape: {{"<task id>": "<summary>", ...}}\n\n'
         f"=== 5. calendar_prep_phase ===\nSystem instructions (verbatim):\n{_q}{_SYS_CAL}{_q}\n{p5_user}\n"
@@ -3671,8 +3680,11 @@ try:
         task_summaries.append({
             "id":          t.get("id", ""),
             "title":       t.get("title", ""),
-            "description": (t.get("description") or "")[:300],
-            "emailRef":    t.get("emailRef", "")
+            "description": (t.get("description") or "")[:700],
+            "emailRef":    (t.get("emailRef") or "")[:300],
+            "recent_actions": [(a or "")[:240] for a in (t.get("actions") or [])[-4:]],
+            "tier":        t.get("tier", "week"),
+            "done":        bool(t.get("done", False))
         })
     if not task_summaries:
         raise Exception("Command Centre tasks unavailable - skipping triage")
@@ -3684,7 +3696,7 @@ try:
                 "subject":      m.get("subject", ""),
                 "from":         m.get("from", ""),
                 "received":     (m.get("received", "") or "")[:16],
-                "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:150],
+                "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (m.get("body_preview") or ""))[:500],
                 "entry_id":     m.get("entry_id", ""),
                 "message_id":   m.get("message_id", ""),
                 "web_link":     m.get("web_link", ""),  # _owa_link() fallback removed 8 Sep 2026 -- see standing rule
@@ -3697,7 +3709,7 @@ try:
             "subject":      s.get("subject", ""),
             "from":         "Kevin (sent to: " + (s.get("to") or "") + ")",
             "received":     (s.get("sent", "") or "")[:16],
-            "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:150],
+            "body_preview": re.sub(r"<\?\s*https?://\S+>?", "[link]", (s.get("body_preview") or ""))[:500],
             "entry_id":     s.get("entry_id", ""),
             "message_id":   s.get("message_id", ""),
             "web_link":     s.get("web_link", ""),  # _owa_link() fallback removed 8 Sep 2026 -- see standing rule
@@ -3782,6 +3794,7 @@ try:
             "task_id":       tid,
             "task_title":    task_by_id[tid]["title"],
             "note":          tu.get("note", ""),
+            "tier":          tu.get("tier") if tu.get("tier") in ("today", "tomorrow", "week") else "",
             "email_subject": src["subject"],
             "email_from":    src["from"],
             "received":      src["received"],
@@ -3886,6 +3899,8 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
 
         stamp   = datetime.now().strftime("%d %b %Y")
         applied = 0
+        tier_promotions = 0
+        _tier_rank = {"today": 0, "tomorrow": 1, "week": 2}
         task_list = tasks_doc if isinstance(tasks_doc, list) else tasks_doc.get("tasks", [])
         for task in task_list:
             for upd in suggestions["task_updates"]:
@@ -3916,6 +3931,15 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
                     # update, independent of entry_id/message_id.
                     if upd.get("web_link"):
                         task["webLink"] = upd["web_link"]
+                    proposed_tier = upd.get("tier")
+                    current_tier = task.get("tier", "week")
+                    # Updates may surface a genuinely time-sensitive action on
+                    # a task that was previously in This Week. Promote only;
+                    # never let a routine or later-dated update demote a task.
+                    if (proposed_tier in _tier_rank and current_tier in _tier_rank
+                            and _tier_rank[proposed_tier] < _tier_rank[current_tier]):
+                        task["tier"] = proposed_tier
+                        tier_promotions += 1
                     applied += 1
                     break
 
@@ -4014,6 +4038,8 @@ if PUSH_ENABLED and (suggestions["task_updates"] or suggestions["new_tasks"]):
             bits = []
             if applied:
                 bits.append(f"apply {applied} task update(s)")
+            if tier_promotions:
+                bits.append(f"promote {tier_promotions} task tier(s)")
             if promoted:
                 bits.append(f"add {promoted} new task(s)")
             _gh_put(cc_tasks_url, gh_headers,
