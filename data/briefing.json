@@ -1,9 +1,26 @@
 {
-  "date": "Thursday 8 October 2026",
-  "subtitle": "0 unread messages - Outlook-only refresh",
-  "context": "Outlook has 0 unread messages from the last seven days, including 0 marked high importance. There are no timed meetings in Outlook today. There are no timed meetings in Outlook tomorrow. AI enrichment is temporarily unavailable, so email cards and calendar data have been refreshed directly from Outlook without generated interpretation. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Calendar unavailable this run (bridge mode - the laptop has no calendar source): no meeting list or prep for today or this week. Colleague absences below are carried forward from the last full briefing.",
+  "date": "Friday 9 October 2026",
+  "subtitle": "Quiet Friday, with Monday's H&S Roadmap ahead",
+  "context": "Friday 9 October 2026: the data gives no exact return dates for any absent colleague, so I can't state any. Asta Palmer is on leave, and the 30 Sep FA Team Catch-up kept her tickets in the main RSM queue. Her completed PDR form had still not reached Kevin (task-1787645383808), and Kevin sent the Asta Siautilaite PDR Review 2026 invite on 8 Oct. Michael O'Sullivan's reply on the Access Group case number for Support Call 11700438 is the open dependency on the departments interface failure. Marie Cooksey has not yet answered Kevin's follow-up on FOI/202609/1014 (Recruitment records 2021-2023). Ben Kirby of Cambridge Spark, whose reply about the AIWS January cohort Insight Sessions arrived on 8 Oct, is unread but not yet 48 hours old. The most time-critical item is Monday 12 October 2026: the H&S Roadmap with Christopher Sanders at 10:00 and Scott Baker's JobPosition BR Optimisation session at 11:30. Open Ben Kirby's unread Cambridge Spark email first, then prepare for the H&S Roadmap and the DTP1334 SHSMS follow-ups.",
   "urgent": [],
   "needs": [
+    {
+      "title": "RE: Notes from the EVO meeting",
+      "sub": "From <strong>Emma Eley</strong>. Hi Simon,\r\n\r\nThanks for putting this detailed set of notes together. It’s quite comprehensive so I don’t have much to ad",
+      "badge": "Reply within 48hrs",
+      "badgeType": "yellow",
+      "subject": "RE: Notes from the EVO meeting",
+      "from": "Emma Eley",
+      "entry_id": "",
+      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfNQdPgAAA=",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfNQdPgAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "received": "8 Oct",
+      "received_raw": "2026-10-08T15:27:28Z",
+      "kevin_is_primary_recipient": true,
+      "ai_summary": "Emma Eley thanks Simon for the detailed EVO meeting notes and adds a handful of points of her own, which Kevin should read; Kevin has already replied on the thread.",
+      "needs_reply": false,
+      "no_action_needed": false
+    },
     {
       "title": "RE: OSM: No incoming emails will be processed this weekend",
       "sub": "From <strong>Louise Piper</strong>. Good Morning,\r\n\r\n \r\n\r\nTo all OSM users. For information, no action required\r\n\r\n \r\n\r\nThe OSM email listener has been re-e",
@@ -205,31 +222,13 @@
       "received": "8 Oct",
       "received_raw": "2026-10-08T16:23:32Z",
       "kevin_is_primary_recipient": true,
-      "ai_summary": "Soundtrap's October newsletter from Erik promotes a Video Scoring unit and Stem Splitter updates; marketing only, nothing for Kevin to do.",
-      "needs_reply": false,
-      "no_action_needed": true,
-      "messageCount": 1
-    },
-    {
-      "title": "RE: Notes from the EVO meeting",
-      "sub": "From <strong>Emma Eley</strong>. Hi Simon,\r\n\r\nThanks for putting this detailed set of notes together. It’s quite comprehensive so I don’t have much to ad",
-      "badge": "FYI",
-      "badgeType": "gray",
-      "subject": "RE: Notes from the EVO meeting",
-      "from": "Emma Eley",
-      "entry_id": "",
-      "message_id": "AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk_drBwD6G_i4PWkdSLIhn4LQ08T7AAAAx8l1AACN_5xoUtxaQ7clOANLv-U1AAfNQdPgAAA=",
-      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAfNQdPgAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "received": "8 Oct",
-      "received_raw": "2026-10-08T15:27:28Z",
-      "kevin_is_primary_recipient": true,
-      "ai_summary": "Emma Eley thanks Simon for the detailed EVO meeting notes and adds a handful of points; Kevin has already replied to Emma, Simon and Marie.",
+      "ai_summary": "Soundtrap's October newsletter promotes Video Scoring lessons, Stem Splitter and Studio updates; it is marketing and needs nothing from Kevin.",
       "needs_reply": false,
       "no_action_needed": true,
       "messageCount": 1
     }
   ],
-  "fyiRawCount": 2,
+  "fyiRawCount": 1,
   "suppressedCount": 1,
   "low": [],
   "calToday": [
@@ -237,49 +236,37 @@
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Check where Marie's FA resourcing plan stands, since the business case goes to APC in November (1 FA plus a data role for PFST). Also raise Asta Palmer's leave and queue handling, and confirm Asta's PDR form has reached you."
+      "summary": "Daily FA catch-up. Open items: confirm Asta Palmer's PDR form has arrived, and remind the team that Asta's tickets stay in the main RSM queue. Also check where the FA resourcing and apprenticeship follow-ups stand."
     },
     {
       "time": "10:00",
-      "title": "SHSMS evaluation – outstanding score sheet(s)",
-      "sub": "Kevin Lelitte",
-      "summary": "Chase any outstanding score sheets from Christopher Sanders and James Salas Guillen ahead of the 12pm deadline. Last scoring put Vattix well ahead (10 on structure and risk assessment) with RiskX lowest, so agree your final scores before the 15:00 moderation."
+      "title": "Roadmap review",
+      "sub": "Marie Cooksey",
+      "summary": "Marie's roadmap review. Last time: Odyssey ticket 50929404 was open for 229 days and needs reclassifying from incident. Cority support is stuck because Sophie (sales) is unresponsive, and an internal pre-meeting is needed before any escalation to Paul. Expect the Oct-Dec BAU spike plus the H&S modular project load."
     },
     {
       "time": "11:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Placeholder busy slot; use it to prepare for the 15:00 SHSMS moderation or clear inbox items."
+      "summary": "Blocked time at 11:00 with no agenda. Use it for the SHSMS (DTP1334) follow-ups or the chasers to Marie on FOI/202609/1014."
     },
     {
-      "time": "12:00",
+      "time": "12:30",
       "title": "Keep free",
       "sub": "Kevin Lelitte",
-      "summary": "Protected break; keep it free."
-    },
-    {
-      "time": "13:00",
-      "title": "James - H&S Handover",
-      "sub": "Kevin Lelitte",
-      "summary": "Cover the weekly manual tasks with James: Monday Cority client merging, Wednesday reactivation of 3 Cardinus users, and the Friday applicant data job. Remind him to send correspondence from within OSM tasks (Add > Email) and to leave the task number in the subject. Agree the first-line review in January."
+      "summary": "Protected lunch slot; keep it free."
     },
     {
       "time": "14:30",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time with no agenda; use it to catch up on replies such as Support Call 11700438 and Ben Kirby."
-    },
-    {
-      "time": "15:00",
-      "title": "SHSMS Demonstration Moderation Meeting (DTP1334 Strategic Health & Safety Modular system) - Placeholder",
-      "sub": "Helen Harbour",
-      "summary": "Helen Harbour's moderation meeting reviews significant variances in demo scores. Bring the reconciled scores from Christopher, James and you: Vattix leads on structure, risk assessment and workflows, while RiskX scored low (3) on role-group support. Be ready to defend any variances and confirm all score sheets are in."
+      "summary": "Blocked time at 14:30 with no agenda; use it to clear Friday loose ends before the weekend."
     },
     {
       "time": "16:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time with no agenda; use it to clear actions from the SHSMS moderation meeting."
+      "summary": "Blocked time at 16:00 with no agenda; a good point to tidy the task list ahead of Monday."
     }
   ],
   "calTomorrow": [
@@ -287,37 +274,43 @@
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Check the Friday priorities with the team, including Asta's PDR form and the Chemistry 38-day balance completion. Flag items to raise with Marie at the 10:00 Roadmap review."
+      "summary": "Monday FA catch-up. Check who is covering Asta Palmer's queue and whether James Salas Guillen's H&S handover points are landing. Keep the 9 Oct Access Group case number request to Michael O'Sullivan (Support Call 11700438) on the list."
     },
     {
       "time": "10:00",
-      "title": "Roadmap review",
-      "sub": "Marie Cooksey",
-      "summary": "Last time the queue was at 5 tickets and the Odyssey ticket 50929404 (open 229 days) needed reclassifying from incident. Cority remains James's biggest time sink: Sophie (sales) is unresponsive and there is no account manager, so agree a clear issues list and desired outcomes before any escalation to Paul. Mention that you chased Sophie Levy and Scott Baker on 8 Oct about the SOW Review."
+      "title": "H&S Roadmap",
+      "sub": "Christopher Sanders",
+      "summary": "Christopher Sanders' regular H&S Roadmap catch-up covers open support tickets and the H&S roadmap. Be ready on the DTP1334 SHSMS evaluation score sheets and James's handover, and on the IRIS Changes plan."
     },
     {
       "time": "11:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time with no agenda; use it to follow up on Roadmap review actions."
+      "summary": "Blocked time at 11:00 with no agenda; use it to write up actions from the H&S Roadmap."
+    },
+    {
+      "time": "11:30",
+      "title": "University of Oxford - JobPosition BR Optimisation",
+      "sub": "Scott Baker",
+      "summary": "Scott Baker's session on JobPosition BR Optimisation, which links to Kevin's unanswered chase of Sophie Levy about the SOW review options. Raise the lack of an update and push for a clear owner and timeline."
     },
     {
       "time": "12:30",
       "title": "Keep free",
       "sub": "Kevin Lelitte",
-      "summary": "Protected break; keep it free."
+      "summary": "Protected lunch slot; keep it free."
     },
     {
-      "time": "14:30",
+      "time": "15:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time with no agenda; use it for correspondence."
+      "summary": "Blocked time at 15:00 with no agenda."
     },
     {
       "time": "16:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time with no agenda; use it to wrap up the week's actions."
+      "summary": "Blocked time at 16:00 with no agenda."
     }
   ],
   "calDay2": [
@@ -325,81 +318,105 @@
       "time": "09:30",
       "title": "FA Team Daily Catchup",
       "sub": "Kevin Lelitte",
-      "summary": "Standing team catch-up; use it to confirm open tickets and who owns each action over the weekend."
-    },
-    {
-      "time": "10:00",
-      "title": "H&S Roadmap",
-      "sub": "Christopher Sanders",
-      "summary": "No previous notes. Christopher Sanders runs the H&S Roadmap; expect DTP1334 SHSMS outcomes from the moderation meeting and the IRIS Changes implementation on 15 Oct to come up."
+      "summary": "Tuesday FA catch-up. Look for updates on the PDR forms and any new tickets in the main RSM queue."
     },
     {
       "time": "11:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time with no agenda."
-    },
-    {
-      "time": "11:30",
-      "title": "University of Oxford - JobPosition BR Optimisation",
-      "sub": "Scott Baker",
-      "summary": "No previous notes. Scott Baker is Cority's technical contact, and you chased him and Sophie Levy on 8 Oct about the options from the Call Summary/SOW Review, so ask for an update and stay clear on the JobPosition BR Optimisation scope."
-    },
-    {
-      "time": "12:30",
-      "title": "Keep free",
-      "sub": "Kevin Lelitte",
-      "summary": "Protected time; keep free."
-    },
-    {
-      "time": "15:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte",
-      "summary": "Blocked time; no prep needed."
-    },
-    {
-      "time": "16:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte",
-      "summary": "Blocked time; no prep needed."
-    }
-  ],
-  "calDay3": [
-    {
-      "time": "09:30",
-      "title": "FA Team Daily Catchup",
-      "sub": "Kevin Lelitte",
-      "summary": "Daily sync. Check outstanding PDR forms, including Asta's, and the sickness absence data actions."
-    },
-    {
-      "time": "11:00",
-      "title": "Busy",
-      "sub": "Kevin Lelitte",
-      "summary": "Blocked time; no prep needed."
+      "summary": "Blocked time at 11:00 with no agenda."
     },
     {
       "time": "11:30",
       "title": "PXD application process for RoD and PMP exercises",
       "sub": "Jessica Oldershaw",
-      "summary": "Jessica Oldershaw's session on the PXD application process for RoD and PMP exercises; you told her to pick a slot from your calendar. The attached notes look like personal appointment details, so disregard them and prepare from the earlier RoD and PMP thread."
+      "summary": "Jessica Oldershaw's session on the PXD application process for RoD and PMP exercises. Kevin told her to pick a slot in his calendar, so confirm what she needs from PXD. The attached notes are unrelated to this meeting, so treat them as having no prep value."
     },
     {
       "time": "12:30",
       "title": "Keep free",
       "sub": "Kevin Lelitte",
-      "summary": "Protected time; keep free."
+      "summary": "Protected lunch slot; keep it free."
     },
     {
       "time": "14:30",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time; no prep needed."
+      "summary": "Blocked time at 14:30 with no agenda."
     },
     {
       "time": "16:00",
       "title": "Busy",
       "sub": "Kevin Lelitte",
-      "summary": "Blocked time; no prep needed."
+      "summary": "Blocked time at 16:00 with no agenda."
+    }
+  ],
+  "calDay3": [
+    {
+      "time": "09:00",
+      "title": "[Placeholder] SHSMS - Ideagen Sandbox Orientation Session",
+      "sub": "Lindsey Hale",
+      "summary": "Placeholder SHSMS Ideagen sandbox orientation (Lindsey Hale). The earlier scoring had Vattix leading on UC1 (10), UC2 (10), UC3 (7) and UC4 (7), with Ideagen at 7, 7, 5 and 5 and RiskX lowest on UC2 and UC3. Have your score sheet ready and be clear on the Ideagen UX concerns."
+    },
+    {
+      "time": "09:30",
+      "title": "FA Team Daily Catchup",
+      "sub": "Kevin Lelitte",
+      "summary": "Wednesday FA catch-up. Look for updates on the PDR forms and the DTP1334 SHSMS follow-ups."
+    },
+    {
+      "time": "10:00",
+      "title": "[Placeholder] SHSMS - Ideagen Sandbox Orientation Session",
+      "sub": "Lindsey Hale",
+      "summary": "Second Ideagen sandbox placeholder session, overlapping the managers meeting. Decide which one to attend, and rely on the same scoring notes: Ideagen is technically strong but has unintuitive navigation."
+    },
+    {
+      "time": "10:00",
+      "title": "HR Systems Managers Meeting",
+      "sub": "Kevin Lelitte",
+      "summary": "HR Systems Managers Meeting, which Kevin organises and which overlaps the Ideagen placeholder. Bring the FA resourcing status and the open Cority, Odyssey and DTP1334 items."
+    },
+    {
+      "time": "11:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time at 11:00 with no agenda."
+    },
+    {
+      "time": "11:30",
+      "title": "Review new fortnightly patch release notes",
+      "sub": "Michael O'Sullivan",
+      "summary": "Michael O'Sullivan's review of the new fortnightly patch release notes. Check for impacts on WFM, leave approval and the open configuration changes, and ask Michael about the Access Group case for Support Call 11700438."
+    },
+    {
+      "time": "12:30",
+      "title": "Keep free",
+      "sub": "Kevin Lelitte",
+      "summary": "Protected lunch slot; keep it free."
+    },
+    {
+      "time": "14:00",
+      "title": "HR Systems team meeting",
+      "sub": "Michelle Williams",
+      "summary": "HR Systems team meeting led by Michelle Williams. Bring the key FA updates: resourcing, GLAM rostering, 38-day balance rollout and Cority."
+    },
+    {
+      "time": "14:30",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time at 14:30 with no agenda."
+    },
+    {
+      "time": "15:00",
+      "title": "Simon / Kevin 121s",
+      "sub": "Simon Burford",
+      "summary": "Regular 1-1 with Simon Burford. Cover your PDR form and the FA team PDR bookings, the FA validation effort sizing with Michael, and the Multiverse and apprenticeship position. The attached notes are unrelated, so ignore them."
+    },
+    {
+      "time": "16:00",
+      "title": "Busy",
+      "sub": "Kevin Lelitte",
+      "summary": "Blocked time at 16:00 with no agenda."
     }
   ],
   "calFull": [
@@ -424,49 +441,8 @@
     {
       "date": "2026-10-08",
       "label": "Thursday 8 Oct",
-      "items": [
-        {
-          "time": "09:30",
-          "title": "FA Team Daily Catchup",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "10:00",
-          "title": "SHSMS evaluation – outstanding score sheet(s)",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "11:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "12:00",
-          "title": "Keep free",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "13:00",
-          "title": "James - H&S Handover",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "14:30",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        },
-        {
-          "time": "15:00",
-          "title": "SHSMS Demonstration Moderation Meeting (DTP1334 Strategic Health & Safety Modular system) - Placeholder",
-          "sub": "Helen Harbour"
-        },
-        {
-          "time": "16:00",
-          "title": "Busy",
-          "sub": "Kevin Lelitte"
-        }
-      ],
-      "isToday": true
+      "items": [],
+      "isToday": false
     },
     {
       "date": "2026-10-09",
@@ -503,7 +479,7 @@
           "sub": "Kevin Lelitte"
         }
       ],
-      "isToday": false
+      "isToday": true
     }
   ],
   "absences": [
@@ -530,7 +506,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6xYVQAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Resolution meeting for SBS, PEDS and GLAM rostering is still not set up. Julie Hickman says Tracy and Mel are handling incident 11688462, and Kevin is checking WFM capacity; next, schedule the meeting with Simon, Marie and Michelle."
+      "ai_summary": "GLAM Ashmolean Visitor Experience incident 11688462 is with Tracy and Mel in IT Services, and Kevin said on 25 Sep he would check WFM capacity for rostering support. The resolution meeting with Simon, Marie and Michelle is still not set up, so SBS, PEDS and GLAM remain outstanding."
     }
   ],
   "prioritiesWeek": [
@@ -564,7 +540,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe0jxSCAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Access Group case 69001638 is approved and in delivery planning. Kevin sent the revised spec to Alan Quirke and Conor O'Shea and coordinated with Kathryn Fairhurst Jones; next, confirm consultant scheduling and flex point use."
+      "ai_summary": "The Holiday Records reports (case 69001638, 2,800 flex points) are approved. Kevin sent the revised specification to Access Group on 24 Sep. Next: confirm the schedule with Access Group, since the 18 Sep kickoff has passed."
     },
     {
       "id": "task-1787072363309",
@@ -596,7 +572,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5EotMAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Org structure update is ongoing, and the B8 finance code decision (reactivate vs fresh code) is still pending after Anna Gilbert and Anthony Kong's input. Next: settle B8 and the three proposed management units with Simon Burford."
+      "ai_summary": "The August 2026 org structure update is still waiting on a decision about the B8 finance code, reactivation or a fresh code, following Sally Vine's Trinity Term findings. Next: settle that with Anna Gilbert and Simon Burford and confirm the final changes."
     },
     {
       "id": "t2608111331410",
@@ -624,7 +600,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6H%2F92AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Cority Applicant Data Import: the merge process works, but the upload report still needs quotation-mark handling and column-ordering fixes. James was due to document the manual processes before the 29 Sep handover; confirm that and the go-live fix."
+      "ai_summary": "The Cority applicant data import is blocked by the upload report, which still needs quotation-mark handling and column ordering. James documented the manual merge process before the 29 Sep handover. Next: confirm the report goes live."
     },
     {
       "id": "task-1785704715215",
@@ -644,7 +620,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAede4rEAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Kevin confirmed with Asta Palmer on 25 Sep that an OSM Change is needed for the Development Insight reports. Next: raise the OSM Change and update Julie Hickman."
+      "ai_summary": "Kevin confirmed with Asta Palmer on 25 Sep that an OSM Change is needed for the Development Insight reports. Next: get the background information and agree the outstanding actions with Julie Hickman."
     },
     {
       "id": "t2608121801280",
@@ -686,7 +662,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAe5PtHQAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Chemistry 38-day balance workgroup updates were confirmed complete to Julie Hickman on 8 Oct. Next: agree next steps and the GLAM decision with Julie."
+      "ai_summary": "Kevin confirmed on 8 Oct that the Chemistry 38-day balance workgroup updates are complete. Next: check the timeline for the remaining departments such as GLAM and Maths, then close or update this task."
     },
     {
       "id": "t2608121801281",
@@ -707,7 +683,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAepmwIfAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Athena Artuso confirmed a second Junior Doctor clinical uplift (A63/E63) backdated to 1 April 2026, targeted for January 2027. Next: have Michael O'Sullivan test the new stage configurations before Susan Pratt prepares the upload files."
+      "ai_summary": "Athena Artuso confirmed on 7 Oct a second clinical pay uplift for Junior Doctors (A63/E63), backdated to 1 April 2026, with implementation targeted for January 2027. Michael O'Sullivan leads the FA configuration and Susan Pratt prepares the files. Next: confirm HR Systems readiness and the dependencies."
     },
     {
       "id": "t2608181201060",
@@ -723,7 +699,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09vAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Employer pension rates for the Financial Statements are still outstanding; Kevin has bumped Simon Burford's 28 May email twice (18 and 19 Aug). Next: confirm the rates or chase Simon."
+      "ai_summary": "Simon Burford's request to confirm ER pension rates for the Financial Statements has been outstanding since 28 May, and Kevin bumped it on 18-19 Aug. Next: confirm the rates or chase the owner."
     },
     {
       "id": "t2608181201062",
@@ -739,7 +715,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAesu09sAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Joanne Grant's EcoOnline email from 28 May is still unanswered and was bumped on 18-19 Aug. Next: reply to progress the engagement."
+      "ai_summary": "Joanne Grant's EcoOnline engagement email (28 May) has been bumped but not answered. Next: reply or decide on the supplier engagement, linked to Iris/ECO Online funding."
     },
     {
       "id": "t2608191801190",
@@ -759,7 +735,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAe6ICD6AAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Kevin sent Simon Burford the effort estimate for identifying internal candidates on the application form on 9 Sep. Next: confirm Simon is satisfied and close the task."
+      "ai_summary": "Kevin gave Simon Burford the effort estimate for identifying internal candidates in the application form on 9 Sep. Next: confirm Simon accepted it, then close the task."
     },
     {
       "id": "t2608211201050",
@@ -774,7 +750,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAeuly9VAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "Reopened 27 Sep: the data review, FA capacity and second-batch file work on Sarah Rowles's sickness absence dataset are unresolved. Next: review the DWHS completeness findings with Sarah."
+      "ai_summary": "This task was reopened on 27 Sep because the data review, FA capacity and second-batch file work are still unresolved. Next: review the DWHS sickness data checks with Sarah Rowles."
     },
     {
       "id": "task-1787645383808",
@@ -806,7 +782,7 @@
       "web_link": "",
       "display_url": "",
       "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAeyeYwqAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
-      "ai_summary": "PDR invites for Asta Siautilaite and James Salas Guillen went out on 8 Oct, and Kevin's own form is with Simon Burford. Next: confirm Asta's completed PDR form arrived; the end of September target has passed."
+      "ai_summary": "Kevin's own PDR form went to Simon Burford on 25 Sep, and he sent the Asta Siautilaite and James Salas Guillen PDR invites this week. Next: confirm Asta Palmer's completed form has arrived. The end-September deadline has passed."
     },
     {
       "id": "task-1787652746063",
@@ -826,7 +802,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l3AACN%2B5xoUtxaQ7clOANLv%2FU1AAexPHkmAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Kevin has discussed capacity with Michael but the per-department FA validation effort figure is still unconfirmed. This blocks Marie's BA-effort estimate and David White's funding ask; next, agree the figure with Michael."
+      "ai_summary": "Kevin and Michael still need to agree an approximate FA validation effort per department. Marie and Ant's BA-effort estimate and David White's funding ask both wait on it. Next: agree the figures with Michael."
     },
     {
       "id": "task-1787652746064",
@@ -845,7 +821,7 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwD6G%2Bi4PWkdSLIhn4LQ08T7AAAAx8l1AACN%2B5xoUtxaQ7clOANLv%2FU1AAexPMLpAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Ownership corrected on 30 Sep: Mel and Tracy handled the second batch and handed it to Simon. Next: tell Simon directly and confirm Smith's School and Geography data is covered."
+      "ai_summary": "The 30 Sep catch-up found the second batch was Mel and Tracy's and has gone to Simon. Next: tell Simon directly and confirm Smith's School and Geography are covered in that handover."
     },
     {
       "id": "t2608251201190",
@@ -863,26 +839,26 @@
       "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADRkYzlmMjkxLTIyY2QtNDZlZS04ZmYzLTE2ZTUzZGM0YzhmNwBGAAAAAABgGWrJ1FNfRaGVsnFuk%2BdrBwCN%2B5xoUtxaQ7clOANLv%2FU1AAd8Kb8pAACN%2B5xoUtxaQ7clOANLv%2FU1AAe6IISjAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
       "display_url": "",
       "webLink": "",
-      "ai_summary": "Sophie Levy confirmed the Cority Quality project (PO E22033553) is fully staffed. Kevin chased her on 8 Oct about the SOW options; next, wait for her reply and identify HR Systems dependencies."
+      "ai_summary": "Sophie Levy confirmed the Quality project (PO E22033553) is fully staffed. Kevin's chase of Sophie and Scott Baker on the SOW review options is still unanswered. Next: follow up on the handover and any HR Systems dependencies."
     }
   ],
-  "refreshed_at": "Thursday 08 October · 19:15",
+  "refreshed_at": "Friday 09 October · 07:05",
   "mail_truncation_risk": false,
   "connector_status": {
     "mail_inbox": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-08T18:11:29+00:00"
+      "as_of": "2026-10-09T06:01:25+00:00"
     },
     "mail_sent": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-08T18:11:29+00:00"
+      "as_of": "2026-10-09T06:01:25+00:00"
     },
     "calendar": {
       "status": "ok",
       "served_by": "personal-com",
-      "as_of": "2026-10-08T18:10:26+00:00"
+      "as_of": "2026-10-09T06:00:10+00:00"
     },
     "teams": {
       "status": "n/a",
