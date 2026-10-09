@@ -1,4 +1,16 @@
-# Handover -- 8 October 2026 (Jacob) -- Hope Claude Code OAuth recovery, CLOSED
+# Handover -- 9 October 2026 (Jacob) -- Phase 3.5 matching + tier promotion, PR #45 live-tested and merged
+
+Three real, live-triggered pipeline runs against the `drew/wi-phase35-triage-fix` branch (wrapper temporarily re-pointed via its `raw.githubusercontent.com` base URL, backed up and restored byte-for-byte after every run, SHA-256 verified each time -- never left pointing at the branch).
+
+**Test 1 -- GLAM rostering task (t2608181201061):** Kevin sent a real reply to a genuinely stalled thread (open since 28 May, bumped multiple times). Phase 3.5 correctly matched it to the task on the first live attempt -- a real, concrete proof the general matching improvements work, not a fabricated test. Task turned out to be tier `parked` (moved there in an earlier, unrelated commit `8553981`), so it was outside the tier-promotion logic's scope (`week`/`tomorrow` only) -- not a flaw in the fix, just the wrong task to prove promotion with.
+
+**Test 2 + 3 -- ER pension rates task (t2608181201060):** Kevin sent a real reply to Simon Burford, exact same subject as the task's own `emailRef` (not even a derived subject -- the strongest possible signal). Triggered two further live runs; both times Phase 3.5 did not link it to this task, while correctly matching a *different*, genuine email each time (a Multiverse/Anna Carlisle exchange, matched twice independently). So Phase 3.5 itself is demonstrably working, just not on this specific pair. At least 4 other open tasks separately reference Simon Burford, so real candidate ambiguity exists in principle, but an exact-emailRef-subject match should be strong enough to cut through that -- the precise cause of this specific miss is not fully diagnosed. Diagnosing further would need temporary debug logging of what Phase 3.5 actually sends/receives, which is a real pipeline change requiring Kevin's sign-off -- not done here.
+
+**Tier promotion:** code path implemented and reasoned through (see PR #45's diff), but no live run during this session's testing produced a task_update where the AI proposed a tier higher than the task's current one -- so the promotion branch itself still has not been exercised by real data. Not disproven, just unproven.
+
+**Decision:** Kevin reviewed the above and said merge as-is. Real, demonstrated improvement (2-for-3 genuine live matches across 3 runs, including fixing the exact kind of case that started this investigation) with one known, reproducible gap (the Simon/pension pairing) and one still-unexercised capability (tier promotion) explicitly flagged rather than claimed as proven.
+
+
 
 Supersedes the "in progress" entry immediately below from the same day. The stale `claude auth login --email hope@lelitte.co.uk` SSH TTY referenced there had already ended by the time this was picked back up -- not reused.
 
